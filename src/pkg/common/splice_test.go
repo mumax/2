@@ -16,14 +16,14 @@ import (
 )
 
 
-func init(){
+func init() {
 	UseAllDevices()
 }
 
 
-func TestDevices(t *testing.T){
+func TestDevices(t *testing.T) {
 	devices := getDevices()
-	for i,d := range devices{
+	for i, d := range devices {
 		fmt.Println("Device ", i)
 		fmt.Println(cuda.GetDeviceProperties(d))
 		fmt.Println()
@@ -32,6 +32,8 @@ func TestDevices(t *testing.T){
 }
 
 func TestSpliceAlloc(t *testing.T) {
-	NewSplice(1*1024*1024*1024)
-	//s.Free()
+	for i := 0; i < 100; i++ {
+		s := NewSplice(1 * 1024 * 1024 * 1024)
+		s.Free()
+	}
 }

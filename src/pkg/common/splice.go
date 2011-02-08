@@ -19,8 +19,8 @@ import (
 // A Slice resides on a single GPU. Multiple
 // slices are combined into a splice.
 type slice struct {
-	*cuda.Float32Array     // Access to the array on the GPU.
-	deviceId           int // Identifies which GPU the array resides on.
+	array    *cuda.Float32Array // Access to the array on the GPU.
+	deviceId int                // Identifies which GPU the array resides on.
 }
 
 
@@ -37,18 +37,25 @@ func (s *slice) Init(deviceId int, length int64) {
 	Assert(deviceId < cuda.GetDeviceCount())
 
 	// Switch device context if necessary
-	prevDevice := cuda.GetDevice()
+	AssureDevice(deviceId)
+
+	s.deviceId = deviceId
+	s.array = cuda.NewFloat32Array(length)
+
+}
+
+func AssureDevice(deviceId int) (prevDevice int) {
+	prevDevice = cuda.GetDevice()
 	if prevDevice != deviceId {
 		cuda.SetDevice(deviceId)
 	}
+	return
+}
 
-	s.deviceId = deviceId
-	s.Float32Array = cuda.NewFloat32Array(length)
-
-	// Switch back to previous device context if neccesary
-	if prevDevice != deviceId {
-		cuda.SetDevice(prevDevice)
-	}
+func (s *slice) Free() {
+	// Switch device context if necessary
+	AssureDevice(s.deviceId)
+	s.array.Free()
 }
 
 
