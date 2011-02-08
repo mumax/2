@@ -32,7 +32,7 @@ func TestDevices(t *testing.T) {
 }
 
 func TestSpliceAlloc(t *testing.T) {
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		s := NewSplice(1 * 1024 * 1024 * 1024)
 		s.Free()
 	}

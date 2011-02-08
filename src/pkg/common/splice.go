@@ -6,6 +6,8 @@
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 // This files implements distributed memory over multiple GPUs
+// When working with multiple GPUs, there is no notion of "current" device,
+// hence these functions are allowed to change CUDAs current device (as returned by cuda.GetDevice())
 // Author: Arne Vansteenkiste
 
 package common
