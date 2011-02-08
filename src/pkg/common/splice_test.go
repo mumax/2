@@ -11,6 +11,8 @@ package common
 
 import (
 	"testing"
+	"fmt"
+	"cuda"
 )
 
 
@@ -18,7 +20,18 @@ func init(){
 	UseAllDevices()
 }
 
+
+func TestDevices(t *testing.T){
+	devices := getDevices()
+	for i,d := range devices{
+		fmt.Println("Device ", i)
+		fmt.Println(cuda.GetDeviceProperties(d))
+		fmt.Println()
+		fmt.Println()
+	}
+}
+
 func TestSpliceAlloc(t *testing.T) {
-	s := NewSplice(2*1024*1024*1024)
-	s.Free()
+	NewSplice(1*1024*1024*1024)
+	//s.Free()
 }
