@@ -23,6 +23,7 @@ import (
 type slice struct {
 	array    *cuda.Float32Array // Access to the array on the GPU.
 	deviceId int                // Identifies which GPU the array resides on.
+	stream cuda.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
 
@@ -42,6 +43,7 @@ func (s *slice) Init(deviceId int, length int) {
 	AssureDevice(deviceId)
 
 	s.deviceId = deviceId
+	s.stream = cuda.StreamCreate()
 	s.array = cuda.NewFloat32Array(length)
 
 }
@@ -58,6 +60,7 @@ func (s *slice) Free() {
 	// Switch device context if necessary
 	AssureDevice(s.deviceId)
 	s.array.Free()
+	(&(s.stream)).Destroy()
 	s.deviceId = -1 // make sure it doesn't get used anymore
 }
 
@@ -129,25 +132,33 @@ func (s *Splice) CopyToHost(h []float32){
 }
 
 // d = s
-func (s *Splice) CopyToDevice(d Splice){
-	Assert(d.Len() == s.Len()) // in principle redundant
-	start := 0
-	for i:= range s.slice{
-		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToDevice(d.slice[i].array, s.slice[i].array)
-		start+=length
-	}
-}
+//func (s *Splice) CopyToDevice(d Splice){
+//	Assert(d.Len() == s.Len()) // in principle redundant
+//	start := 0
+//	for i:= range s.slice{
+//		length := s.slice[i].array.Len()
+//		cuda.CopyDeviceToDevice(d.slice[i].array, s.slice[i].array)
+//		start+=length
+//	}
+//}
 
 
-// s = d
+// Copy: s = d.
+// The overall operation is synchronous but the underlying 
+// copies on the separate devices overlap, effectively boosting
+// the bandwidth by N for N devices.
 func (s *Splice) CopyFromDevice(d Splice){
 	Assert(d.Len() == s.Len()) // in principle redundant
 	start := 0
+	// Overlapping copies run concurrently on the individual devices
 	for i:= range s.slice{
 		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToDevice(s.slice[i].array, d.slice[i].array)
+		cuda.CopyDeviceToDeviceAsync(s.slice[i].array, d.slice[i].array, s.slice[i].stream)
 		start+=length
+	}
+	// Synchronize with all copies
+	for _, sl := range s.slice{
+		sl.stream.Synchronize()
 	}
 }
 
