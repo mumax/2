@@ -87,7 +87,7 @@ func (s *Splice) Init(length int64) {
 	}
 }
 
-
+// Frees the underlying storage
 func (s *Splice) Free() {
 	for _, slice := range s.slice {
 		slice.Free()

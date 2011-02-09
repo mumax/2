@@ -50,6 +50,22 @@ func UseAllDevices() {
 }
 
 
+// Use GPU list suitable for debugging:
+// if only 1 is present: use it twice to
+// test "multi"-GPU code. The distribution over
+// two separate arrays on the same device is a bit
+// silly, but good for debugging.
+func UseDebugDevices() {
+	N := cuda.GetDeviceCount()
+	for i := 0; i < N; i++ {
+		_useDevice = append(_useDevice, i)
+	}
+	if N == 1{
+		_useDevice = append(_useDevice, 0) // Use the same device twice.
+	}
+}
+
+
 // Error message
 const (
 	MSG_BADDEVICEID       = "Invalid device ID: "

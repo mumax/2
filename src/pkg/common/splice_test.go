@@ -17,10 +17,11 @@ import (
 
 
 func init() {
-	UseAllDevices()
+	UseDebugDevices()
 }
 
 
+// Test if getDevices() works
 func TestDevices(t *testing.T) {
 	devices := getDevices()
 	for i, d := range devices {
@@ -31,9 +32,15 @@ func TestDevices(t *testing.T) {
 	}
 }
 
+// Test splice alloc/free
 func TestSpliceAlloc(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		s := NewSplice(1 * 1024 * 1024 * 1024)
 		s.Free()
 	}
+}
+
+
+func TestSpliceCopy(t *testing.T){
+
 }
