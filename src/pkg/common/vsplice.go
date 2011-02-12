@@ -17,6 +17,7 @@
 package common
 
 import (
+	"cuda"
 )
 
 
@@ -29,18 +30,23 @@ type VSplice struct {
 func (v *VSplice) Init(components, length int) {
 	v.List.Init(components * length)
 
-	//devices := getDevices()
-	//compSliceLen := distribute(length, devices) // length of slices in one component
+	devices := getDevices()
+	Ndev := len(devices)
+	compSliceLen := distribute(length, devices) // length of slices in one component
 
 	v.Comp = make([]Splice, components)
-	for i,c := range v.Comp{
-		c.length = length
-		start := i * length
-		stop := (i+1) * length
-		c.slice = make([]slice, components)
-		for j := range c.slice{
-			cs := &(c.slice[j])
+	c := v.Comp
+	for i := range v.Comp{
+		c[i].length = length
+		c[i].slice = make([]slice, Ndev)
+		for j := range c[i].slice{
+			cs := &(c[i].slice[j])
+			start := i * compSliceLen[j]
+			stop := (i+1) * compSliceLen[j]
 			cs.array.InitSlice(&(v.List.slice[j].array),start, stop)
+			cs.deviceId = devices[j]
+			AssureDevice(cs.deviceId)
+			cs.stream = cuda.StreamCreate()
 		}
 	}
 }
@@ -55,5 +61,7 @@ func NewVSplice(components, length int) *VSplice{
 
 func (v *VSplice) Free(){
 	v.List.Free()
+	//TODO(a) Destroy streams.
+	// nil pointers, zero lengths, just to be sture
 	v.Comp = nil
 }

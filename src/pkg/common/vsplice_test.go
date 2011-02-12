@@ -11,6 +11,7 @@ package common
 
 import (
 	"testing"
+	"fmt"
 )
 
 
@@ -27,6 +28,37 @@ func TestVSpliceAlloc(t *testing.T) {
 		s.Free()
 	}
 }
+
+
+func TestVSpliceComponent(t *testing.T){
+	N := 100//BIG/4
+	a := make([]float32, 3*N)
+	for i := 0; i<N; i++{
+		a[i] = 1
+	}
+	for i := N; i<2*N; i++{
+		a[i] = 2
+	}
+	for i := 2*N; i<3*N; i++{
+		a[i] = 3
+	}
+
+	A := NewVSplice(3, N)
+	defer A.Free()
+	A.List.CopyFromHost(a)
+	
+	b := make([][]float32, 3)
+	for i := range b{
+		fmt.Println(A.Comp[i].String())
+		b[i] = make([]float32, N)
+		A.Comp[i].CopyToHost(b[i])
+		for j := range b[i]{
+			if b[i][j] != float32(i+1){t.Error("Expected ", i+1, "got", b[i][j])}
+		}
+	}
+	
+}
+
 //
 //
 //func TestVSpliceCopy(t *testing.T) {

@@ -14,6 +14,7 @@ package common
 
 import (
 	"cuda"
+	"fmt"
 )
 
 
@@ -26,6 +27,12 @@ type slice struct {
 	stream   cuda.Stream       // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
+
+func (s *slice) String() string{
+	return "slice{" + 
+	"array=" + fmt.Sprint(&(s.array)) + 
+	"}"
+}
 
 // Allocates and initiates a new slice. See slice.Init().
 func NewSlice(deviceId int, length int) *slice {
@@ -71,6 +78,15 @@ type Splice struct {
 	length int	// Total number of float32s in the splice
 }
 
+func (s *Splice) String() string{
+	str := "Splice{" + 
+	"len=" + fmt.Sprint(s.length)
+	for i := range s.slice{
+		str += " " + s.slice[i].String()
+	}
+	str += "}"
+	return str
+}
 
 // See Splice.Init()
 func NewSplice(length int) Splice {
@@ -120,6 +136,7 @@ func (s *Splice) Free() {
 }
 
 
+// TODO(a) Could be overlapping
 // s = h
 func (s *Splice) CopyFromHost(h []float32) {
 	Assert(len(h) == s.Len()) // in principle redundant
@@ -131,6 +148,7 @@ func (s *Splice) CopyFromHost(h []float32) {
 	}
 }
 
+// TODO(a) Could be overlapping
 // h = s
 func (s *Splice) CopyToHost(h []float32) {
 	Assert(len(h) == s.Len()) // in principle redundant
