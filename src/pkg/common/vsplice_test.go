@@ -10,23 +10,23 @@
 package common
 
 import (
-	//"testing"
+	"testing"
 )
 
 
 
 // Test vsplice alloc/free
-//func TestVSpliceAlloc(t *testing.T) {
-//	N := BIG / 4
-//	// Test repeated alloc + free
-//	for i := 0; i < 50; i++ {
-//		s := NewVSplice(3, N)
-//		if s.List.Len() != 3*N {
-//			t.Fail()
-//		}
-//		s.Free()
-//	}
-//}
+func TestVSpliceAlloc(t *testing.T) {
+	N := BIG / 4
+	// Test repeated alloc + free
+	for i := 0; i < 20; i++ {
+		s := NewVSplice(3, N)
+		if s.List.Len() != 3*N {
+			t.Fail()
+		}
+		s.Free()
+	}
+}
 //
 //
 //func TestVSpliceCopy(t *testing.T) {
