@@ -28,9 +28,13 @@ type VSplice struct {
 
 
 func (v *VSplice) Init(components, length int) {
+	
+
+
 	v.List.Init(components * length)
 	v.Comp = make([]Splice, components)
-	//for _,c := range v.Comp{
-	//	v.
-	//}
+	for _,c := range v.Comp{
+		c.length = length
+		c.slice = make([]slice, length)
+	}
 }

@@ -31,6 +31,7 @@ func getDevices() []int {
 
 // Sets a list of devices to use.
 func UseDevice(devices []int) {
+	Assert(_useDevice == nil)
 	N := cuda.GetDeviceCount()
 	for _, n := range devices {
 		if n >= N {
@@ -43,6 +44,7 @@ func UseDevice(devices []int) {
 
 // Uses all available GPUs
 func UseAllDevices() {
+	Assert(_useDevice == nil)
 	N := cuda.GetDeviceCount()
 	for i := 0; i < N; i++ {
 		_useDevice = append(_useDevice, i)
@@ -56,6 +58,7 @@ func UseAllDevices() {
 // two separate arrays on the same device is a bit
 // silly, but good for debugging.
 func UseDebugDevices() {
+	Assert(_useDevice == nil)
 	N := cuda.GetDeviceCount()
 	for i := 0; i < N; i++ {
 		_useDevice = append(_useDevice, i)
