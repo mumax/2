@@ -11,6 +11,13 @@ import(
 	"log"
 )
 
+// global logger
+var _logger Logger
+
 type Logger struct{
-	out log.Logger
+	screen, file log.Logger
+}
+
+func Debug(msg ...interface{}){
+
 }
