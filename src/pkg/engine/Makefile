@@ -8,7 +8,6 @@ GOFILES=\
 	universe.go\
 	units.go\
 	field.go\
-	logger.go\
 	ioformat.go\
 	stephandler.go\
 

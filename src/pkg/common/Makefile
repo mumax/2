@@ -7,6 +7,7 @@ GOFILES=\
 	doc.go\
 	assert.go\
 	error.go\
+	logger.go\
 	math.go\
 	strconv.go\
 	misc.go\

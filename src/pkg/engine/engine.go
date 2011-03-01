@@ -7,3 +7,12 @@
 
 package engine
 
+// This file implements the simulation engine. The engine stores the
+// entire simulation state and provides methods to run the simulation.
+// An engine is typically steered by a driver, like a python program or
+// command line interface.
+
+type Engine struct{
+	universe Universe
+	logger Logger
+}
