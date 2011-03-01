@@ -4,9 +4,13 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/engine
 
 GOFILES=\
-	field.go\
+	engine.go\
 	universe.go\
 	units.go\
+	field.go\
+	logger.go\
+	ioformat.go\
+	stephandler.go\
 
 CGOFILES=\
 
