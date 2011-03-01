@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package common
+package engine
 
 // This file implements a "Universe" in which time, space and physical quantities are defined.
 //
