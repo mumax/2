@@ -37,6 +37,9 @@ func InitLogger(logfile string) {
 // INTERNAL Initiates the logger and sets a log file.
 func (l *Logger) Init(logfile string) {
 	l.Screen = log.New(os.Stderr, "", 0)
+	l.ShowDebug = true
+	l.ShowWarn = true
+	l.ShowPrint = true
 	if logfile != "" {
 		out := FOpen(logfile)
 		l.File = log.New(out, "", log.Ltime|log.Lmicroseconds)

@@ -2,6 +2,12 @@ all:
 	make -C common
 	make -C engine
 
+.PHONY: main
+main:
+	make clean
+	make all
+	make -C main
+
 test:	install
 	make test -C common
 	make test -C engine
@@ -18,3 +24,4 @@ install:
 clean:
 	make clean -C common
 	make clean -C engine
+	make clean -C main

@@ -7,6 +7,21 @@
 
 package main
 
-func main() {
+import(
+	. "mumax/common"
+	"flag"
+)
 
+const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Engine (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
+
+var (
+	logfile      *string   = flag.String("log", "mumax.log", "Specify the log file.")
+)
+
+func main() {
+	flag.Parse()
+	InitLogger(*logfile)	
+	Println(WELCOME)
+	Println("Finished.")
 }
+
