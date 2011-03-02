@@ -24,7 +24,7 @@ func (refsh *Refsh) parseArgs(fname string, argv []string) []reflect.Value {
 	nargs := function.NumIn()
 
 	if nargs != len(argv) {
-		panic(InputErr(fmt.Sprintf(MSG_ARG_MISMATCH, fname, argv, nargs)))
+		panic(InputErr(fmt.Sprintf(MSG_ARG_MISMATCH, fname, nargs, len(argv))))
 	}
 
 	args := make([]reflect.Value, nargs)

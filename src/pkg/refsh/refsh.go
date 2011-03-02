@@ -133,7 +133,7 @@ func (refsh *Refsh) Call(fname string, argv []string) (returnvalue []interface{}
 
 	function := refsh.resolve(fname)
 	if function == nil {
-		err:= InputErr(fmt.Sprint(MSG_NO_SUCH_COMMAND, fname, refsh.funcnames))
+		err:= InputErr(fmt.Sprintf(MSG_NO_SUCH_COMMAND, fname, refsh.funcnames))
 		panic(err)
 	} else {
 		args := refsh.parseArgs(fname, argv)

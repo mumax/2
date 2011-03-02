@@ -6,10 +6,12 @@ GOFILES=\
 GC+=\
 	-I../common/_obj\
 	-I../engine/_obj\
+	-I../refsh/_obj\
 	
 LD+=\
 	-L../common/_obj\
 	-L../engine/_obj\
+	-L../refsh/_obj\
 	
 
 main: $(GOFILES)

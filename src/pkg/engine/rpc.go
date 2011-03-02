@@ -5,4 +5,14 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+package engine
 
+// Interface for RPCs which provide access to the MuMax Engine.
+
+import(
+	"io"
+)
+
+type RPC interface{
+	ReadFrom(in io.Reader) //Read commands from the reader and execute them.
+}

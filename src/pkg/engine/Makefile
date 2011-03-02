@@ -10,10 +10,16 @@ GOFILES=\
 	field.go\
 	ioformat.go\
 	stephandler.go\
+	engine_api.go\
+	rpc.go\
+	rpc_refsh.go\
 
 CGOFILES=\
 
-GC+=-I../common/_obj
+GC+=\
+	-I../common/_obj\
+	-I../refsh/_obj\
+
 #CGO_CFLAGS+=-I/usr/local/cuda/include/
 #CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -lcudart
 

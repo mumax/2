@@ -7,15 +7,29 @@
 
 package engine
 
-// This file implements the publicly exported API of the mumax engine.
-// These methods are accessible to the outside world via RPC, reflection, etc...
-// Author: Arne Vansteenkiste
+// This file implements an RPC front-end for the MuMax Engine.
+// The front-end accecpts text commands with the syntax:
+// 		command arg0 arg1 ...
+//
 
-// EngineAPI and Engine are the same data structure, 
-// but EngineAPI exports only the publicly available functions.
-// These are callable by the RPC.
-type EngineAPI Engine
+import(
+	"mumax/refsh"
+	"io"
+)
 
-func (api *EngineAPI) SetGridSize(Nx, Ny, Nz int) {
+type RefshRPC struct{
+	engine *EngineAPI
+	shell *refsh.Refsh
+}
 
+func NewRefshRPC(e *Engine) *RefshRPC{
+	rpc := new(RefshRPC)	
+	rpc.engine = (*EngineAPI)(e)
+	rpc.shell = refsh.New()
+	rpc.shell.AddAllMethods(rpc.engine)
+	return rpc
+}
+
+func(rpc *RefshRPC) ReadFrom(in io.Reader){
+	rpc.shell.Exec(in)
 }
