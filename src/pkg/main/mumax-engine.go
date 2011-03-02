@@ -20,10 +20,21 @@ var (
 )
 
 func main() {
+	initialize()
+	defer cleanup()
+
+	
+}
+
+
+func initialize(){
 	flag.Parse()
 	InitLogger(*logfile)
 	Println(WELCOME)
 	Debug("Go version:", runtime.Version())
+}
 
+
+func cleanup(){
 	Println("Finished.")
 }
