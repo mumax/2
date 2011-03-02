@@ -109,13 +109,13 @@ const prompt = ">> "
 // but print a message and continue
 func (refsh *Refsh) Interactive() {
 	in := os.Stdin
-	refsh.Print(prompt)
+	fmt.Print(prompt)
 	line, eof := ReadNonemptyLine(in)
 	for !eof {
 		cmd := line[0]
 		args := line[1:]
 		refsh.Call(cmd, args)
-		refsh.Print(prompt)
+		fmt.Print(prompt)
 		line, eof = ReadNonemptyLine(in)
 	}
 }
@@ -154,41 +154,6 @@ type Refsh struct {
 	help         map[string]string // help strings corresponding to funcnames
 	CrashOnError bool              // crash the program on a syntax error or just report it (e.g. for interactive mode)
 	CallCount    int               //counts number of commands executed
-	Output       Printer           //Used to print output, may be nil
-}
-
-
-type Printer interface {
-	Print(msg ...interface{})
-	Println(msg ...interface{})
-	Errorln(msg ...interface{})
-}
-
-
-func (refsh *Refsh) Print(msg ...interface{}) {
-	if refsh.Output != nil {
-		refsh.Output.Print(msg...)
-	} else {
-		fmt.Print(msg...)
-	}
-}
-
-
-func (refsh *Refsh) Println(msg ...interface{}) {
-	if refsh.Output != nil {
-		refsh.Output.Println(msg...)
-	} else {
-		fmt.Println(msg...)
-	}
-}
-
-
-func (refsh *Refsh) Errorln(msg ...interface{}) {
-	if refsh.Output != nil {
-		refsh.Output.Errorln(msg...)
-	} else {
-		fmt.Fprintln(os.Stderr, msg...)
-	}
 }
 
 
