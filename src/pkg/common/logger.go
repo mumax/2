@@ -19,6 +19,7 @@ import(
 // INTERNAL global logger
 var logger Logger
 
+// INTERNAL 
 type Logger struct{
 	ShowDebug bool // Include debug messages in stderr output?
 	ShowWarn bool // Include warnings in stderr output?
@@ -27,11 +28,12 @@ type Logger struct{
 	File *log.Logger // Logs to a log file, usually prints all output (including debug)
 }
 
+// Initiates the logger and sets the log file.
 func InitLogger(logfile string){
 	logger.Init(logfile)
 }
 
-// Initiates the logger and sets a log file.
+// INTERNAL Initiates the logger and sets a log file.
 func(l *Logger) Init(logfile string){
 	l.Screen = log.New(os.Stderr, "", 0)
 	out := FOpen(logfile)

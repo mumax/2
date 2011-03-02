@@ -37,8 +37,6 @@ type Universe struct {
 
 	// Fields
 	fields []*Field
-
-	*Logger
 }
 
 

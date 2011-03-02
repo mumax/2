@@ -7,11 +7,14 @@
 
 package engine
 
-// This file implements the simulation engine. The engine stores the
-// entire simulation state and provides methods to run the simulation.
-// An engine is typically steered by a driver, like a python program or
-// command line interface.
+// This file implements the publicly exported API of the mumax engine.
+// These methods are accessible to the outside world via RPC, reflection, etc...
+// Author: Arne Vansteenkiste
 
-type Engine struct{
-	universe Universe
+type EngineAPI struct{
+	engine Engine
+}
+
+func(api *EngineAPI) SetGridSize(Nx, Ny, Nz int){
+
 }
