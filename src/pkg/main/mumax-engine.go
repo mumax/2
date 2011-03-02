@@ -7,21 +7,23 @@
 
 package main
 
-import(
+import (
 	. "mumax/common"
 	"flag"
+	"runtime"
 )
 
 const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Engine (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
 
 var (
-	logfile      *string   = flag.String("log", "mumax.log", "Specify the log file.")
+	logfile *string = flag.String("log", "mumax.log", "Specify the log file.")
 )
 
 func main() {
 	flag.Parse()
-	InitLogger(*logfile)	
+	InitLogger(*logfile)
 	Println(WELCOME)
+	Debug("Go version:", runtime.Version())
+
 	Println("Finished.")
 }
-
