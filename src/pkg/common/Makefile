@@ -9,6 +9,7 @@ GOFILES=\
 	error.go\
 	logger.go\
 	math.go\
+	io.go\
 	strconv.go\
 	misc.go\
 	gpus.go\

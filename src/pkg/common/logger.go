@@ -9,15 +9,37 @@ package common
 
 import(
 	"log"
+	"os"
 )
 
-// global logger
-var _logger Logger
+// INTERNAL global logger
+var logger Logger
 
 type Logger struct{
-	screen, file log.Logger
+	ShowDebug bool
+	ShowWarn bool
+	ShowPrint bool
+	Screen *log.Logger // Logs to the screen (stderr), usually prints only limited output
+	File *log.Logger // Logs to a log file, usually prints all output (including debug)
+}
+
+func(l *Logger) Init(logfile string){
+	l.Screen = log.New(os.Stderr, "", log.Ltime | log.Lmicroseconds)
+	//out = 
+	//l.File = log.New(out, "", log.Ltime | log.Lmicroseconds)
 }
 
 func Debug(msg ...interface{}){
+	if logger.ShowDebug{
+		logger.Screen.Println(msg...)
+	}
+	if logger.File != nil{logger.File.Println(msg...)}
+}
+
+func Warn(msg ...interface{}){
+
+}
+
+func Println(msg ...interface{}){
 
 }
