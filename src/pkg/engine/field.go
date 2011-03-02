@@ -90,20 +90,20 @@ func (f *Field) Name() string {
 
 // Number of components of the field values.
 // 1 = scalar, 3 = vector, etc.
-func (f *Field) NComp() int{
+func (f *Field) NComp() int {
 	return len(f.multiplier)
 }
 
-func (f *Field) IsSpaceDependent() bool{
+func (f *Field) IsSpaceDependent() bool {
 	return !f.array.IsNil()
 }
 
 
-func (f *Field) String() string{
+func (f *Field) String() string {
 	str := f.Name() + "(" + fmt.Sprint(f.NComp()) + "-vector "
-	if f.IsSpaceDependent(){
+	if f.IsSpaceDependent() {
 		str += "field"
-	}else{
+	} else {
 		str += "value"
 	}
 	str += ")"

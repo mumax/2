@@ -11,10 +11,10 @@ package engine
 // These methods are accessible to the outside world via RPC, reflection, etc...
 // Author: Arne Vansteenkiste
 
-type EngineAPI struct{
+type EngineAPI struct {
 	engine Engine
 }
 
-func(api *EngineAPI) SetGridSize(Nx, Ny, Nz int){
+func (api *EngineAPI) SetGridSize(Nx, Ny, Nz int) {
 
 }

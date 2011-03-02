@@ -51,7 +51,7 @@ func (t *Array) Free() {
 	t.length = 0
 }
 
-func (a *Array) IsNil() bool{
+func (a *Array) IsNil() bool {
 	return a.splice.IsNil()
 }
 

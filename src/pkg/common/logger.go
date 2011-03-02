@@ -11,7 +11,7 @@ package common
 // The screen output can be filtered/disabled, while all output always goes to the log file.
 // Author: Arne Vansteenkiste
 
-import(
+import (
 	"log"
 	"os"
 )
@@ -20,30 +20,33 @@ import(
 var logger Logger
 
 // INTERNAL 
-type Logger struct{
-	ShowDebug bool // Include debug messages in stderr output?
-	ShowWarn bool // Include warnings in stderr output?
-	ShowPrint bool// Include normal output in stderr output?
-	Screen *log.Logger // Logs to the screen (stderr), usually prints only limited output
-	File *log.Logger // Logs to a log file, usually prints all output (including debug)
+type Logger struct {
+	ShowDebug bool        // Include debug messages in stderr output?
+	ShowWarn  bool        // Include warnings in stderr output?
+	ShowPrint bool        // Include normal output in stderr output?
+	Screen    *log.Logger // Logs to the screen (stderr), usually prints only limited output
+	File      *log.Logger // Logs to a log file, usually prints all output (including debug)
 }
 
 // Initiates the logger and sets the log file.
-func InitLogger(logfile string){
+// logfile == "" disables logging to file.
+func InitLogger(logfile string) {
 	logger.Init(logfile)
 }
 
 // INTERNAL Initiates the logger and sets a log file.
-func(l *Logger) Init(logfile string){
+func (l *Logger) Init(logfile string) {
 	l.Screen = log.New(os.Stderr, "", 0)
-	out := FOpen(logfile)
-	l.File = log.New(out, "", log.Ltime | log.Lmicroseconds)
-	Debug("Opened log file:", logfile)
+	if logfile != "" {
+		out := FOpen(logfile)
+		l.File = log.New(out, "", log.Ltime|log.Lmicroseconds)
+		Debug("Opened log file:", logfile)
+	}
 }
 
 // Log a debug message.
-func Debug(msg ...interface{}){
-	if logger.ShowDebug{
+func Debug(msg ...interface{}) {
+	if logger.ShowDebug {
 		logger.Screen.Println(msg...)
 	}
 	LogFile(msg...)
@@ -52,22 +55,24 @@ func Debug(msg ...interface{}){
 const MSG_WARNING = "Warning:"
 
 // Log a warning.
-func Warning(msg ...interface{}){
-	if logger.ShowWarn{
+func Warning(msg ...interface{}) {
+	if logger.ShowWarn {
 		logger.Screen.Println(msg...)
 	}
 	LogFile(msg...)
 }
 
 // Log normal output.
-func Println(msg ...interface{}){
-	if logger.ShowPrint{
+func Println(msg ...interface{}) {
+	if logger.ShowPrint {
 		logger.Screen.Println(msg...)
 	}
 	LogFile(msg...)
 }
 
 // Log to the log file only.
-func LogFile(msg ...interface{}){
-	if logger.File != nil{logger.File.Println(msg...)}
+func LogFile(msg ...interface{}) {
+	if logger.File != nil {
+		logger.File.Println(msg...)
+	}
 }

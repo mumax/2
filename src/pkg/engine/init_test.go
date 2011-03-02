@@ -19,4 +19,3 @@ import (
 func init() {
 	UseDebugDevices()
 }
-

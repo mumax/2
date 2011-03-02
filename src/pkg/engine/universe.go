@@ -24,10 +24,10 @@ import (
 //
 type Universe struct {
 	// Space
-	_size3D    [3]int // INTERNAL
-	size3D     []int  // Discretization grid size
-	_periodic  [3]int // INTERNAL
-	periodic   []int  // Periodicity in each direction. 0 = no periodicity, >0 = repeat 2*N+1 times in that direction.
+	_size3D         [3]int // INTERNAL
+	size3D          []int  // Discretization grid size
+	_periodic       [3]int // INTERNAL
+	periodic        []int  // Periodicity in each direction. 0 = no periodicity, >0 = repeat 2*N+1 times in that direction.
 	hasVolumeNodes  bool
 	hasSurfaceNodes bool
 
@@ -52,43 +52,42 @@ func (u *Universe) Init(size3D, periodic []int) {
 }
 
 
-func (u *Universe) HasVolumeNodes() bool{
+func (u *Universe) HasVolumeNodes() bool {
 	return u.hasVolumeNodes
 }
 
-func (u *Universe) HasSurfaceNodes() bool{
+func (u *Universe) HasSurfaceNodes() bool {
 	return u.hasSurfaceNodes
 }
 
-func (u *Universe) Size3D() []int{
+func (u *Universe) Size3D() []int {
 	return u.size3D
 }
 
-func (u *Universe) AddField(name string, nComp int){
+func (u *Universe) AddField(name string, nComp int) {
 	u.addFieldOrValue(name, nComp, u.Size3D())
 }
 
-func (u *Universe) AddValue(name string, nComp int){
+func (u *Universe) AddValue(name string, nComp int) {
 	u.addFieldOrValue(name, nComp, nil)
 }
 
 // INTERNAL
-func (u *Universe) addFieldOrValue(name string, nComp int, size3D []int){
+func (u *Universe) addFieldOrValue(name string, nComp int, size3D []int) {
 	field := newField(name, nComp, size3D)
 	u.fields = append(u.fields, field)
 }
 
-func (u *Universe) String() string{
-	str := "Universe " + fmt.Sprintf("%p\n", u) + 
-		"\tsize:         " + fmt.Sprintln(u.size3D) + 
-		"\tperiodic:     " + fmt.Sprintln(u.periodic) + 
-		"\tvolume nodes :" + fmt.Sprintln(u.HasVolumeNodes()) + 
-		"\tsurface nodes:" + fmt.Sprintln(u.HasSurfaceNodes())  +
+func (u *Universe) String() string {
+	str := "Universe " + fmt.Sprintf("%p\n", u) +
+		"\tsize:         " + fmt.Sprintln(u.size3D) +
+		"\tperiodic:     " + fmt.Sprintln(u.periodic) +
+		"\tvolume nodes :" + fmt.Sprintln(u.HasVolumeNodes()) +
+		"\tsurface nodes:" + fmt.Sprintln(u.HasSurfaceNodes()) +
 		"\tfields:       \n"
 
-	for i:= range u.fields{
-		str += "\t             " + fmt.Sprintln(u.fields[i]) 
+	for i := range u.fields {
+		str += "\t             " + fmt.Sprintln(u.fields[i])
 	}
 	return str
 }
-
