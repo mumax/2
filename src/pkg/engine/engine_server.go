@@ -7,14 +7,12 @@
 
 package engine
 
-// This file implements the publicly exported API of the mumax engine.
-// These methods are accessible to the outside world via RPC.
+// This file implements the simulation engine server. The engine stores the
+// entire simulation state and provides RPC methods to run the simulation.
+// An engine server serves an engine client, which in turn exposes the client API
+// to a driver program written in a scripting language.
 // Author: Arne Vansteenkiste
 
-// engine.API and engine.Server are the same data structure, 
-// but API exports only the publicly available functions.
-type API Server
-
-func (eng *API) SetGridSize(Nx, Ny, Nz int) {
-
+type Server struct {
+	universe Universe
 }

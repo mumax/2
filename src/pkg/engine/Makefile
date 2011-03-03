@@ -11,6 +11,9 @@ GOFILES=\
 	ioformat.go\
 	stephandler.go\
 	engine_api.go\
+	engine_server.go\
+	engine_client.go\
+	engine_rpc.go\
 	rpc.go\
 	rpc_refsh.go\
 

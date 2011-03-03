@@ -12,24 +12,24 @@ package engine
 // 		command arg0 arg1 ...
 //
 
-import(
-	"mumax/refsh"
-	"io"
-)
-
-type RefshRPC struct{
-	engine *EngineAPI
-	shell *refsh.Refsh
-}
-
-func NewRefshRPC(e *Engine) *RefshRPC{
-	rpc := new(RefshRPC)	
-	rpc.engine = (*EngineAPI)(e)
-	rpc.shell = refsh.New()
-	rpc.shell.AddAllMethods(rpc.engine)
-	return rpc
-}
-
-func(rpc *RefshRPC) ReadFrom(in io.Reader){
-	rpc.shell.Exec(in)
-}
+//import(
+//	"mumax/refsh"
+//	"io"
+//)
+//
+//type RefshRPC struct{
+//	engine *EngineAPI
+//	shell *refsh.Refsh
+//}
+//
+//func NewRefshRPC(e *Engine) *RefshRPC{
+//	rpc := new(RefshRPC)	
+//	rpc.engine = (*EngineAPI)(e)
+//	rpc.shell = refsh.New()
+//	rpc.shell.AddAllMethods(rpc.engine)
+//	return rpc
+//}
+//
+//func(rpc *RefshRPC) ReadFrom(in io.Reader){
+//	rpc.shell.Exec(in)
+//}

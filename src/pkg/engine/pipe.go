@@ -7,14 +7,21 @@
 
 package engine
 
-// This file implements the publicly exported API of the mumax engine.
-// These methods are accessible to the outside world via RPC.
+// This file implements a 2-way pipe similar to io.Pipe(),
+// but each end can read AND write.
+// It can be used to connect an server and client engine.RPC.
 // Author: Arne Vansteenkiste
 
-// engine.API and engine.Server are the same data structure, 
-// but API exports only the publicly available functions.
-type API Server
+import(
+	"io"
+)
 
-func (eng *API) SetGridSize(Nx, Ny, Nz int) {
+type PipeReadWriter struct{
+	Reader *io.PipeReader
+	Writer *io.PipeWriter
+}
 
+func Pipe2() (end1, end2 PipeReadWriter){
+	end1.Reader, end2.Writer = io.Pipe()
+	end2.Reader, end1.Writer = io.Pipe()
 }
