@@ -67,10 +67,11 @@ func (rpc *RPC) ServeConn(conn io.ReadWriteCloser) {
 }
 
 
-func(rpc *RPC) Call(method string, args []interface{}) []interface{}{
+func (rpc *RPC) Call(method string, args []interface{}) []interface{} {
 	// here be dragons
 
-	panic("TODO")
+	println("TODO")
+	return []interface{}{}
 }
 
 // INTERNAL
