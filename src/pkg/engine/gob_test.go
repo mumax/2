@@ -14,6 +14,7 @@ import (
 	"testing"
 	"gob"
 	"io"
+	"rand"
 )
 
 
@@ -26,6 +27,11 @@ func BenchmarkGobTransmission(b *testing.B) {
 
 	N := 32 * 1024 * 1024
 	in := make([]float32, N)
+
+	// feeding gob random data instead of zeros really slows it down!
+	for i:= range in{
+		in[i] = rand.Float32()
+	}
 	out := make([]float32, N)
 
 	// warm-up gob
