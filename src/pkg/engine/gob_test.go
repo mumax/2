@@ -14,6 +14,7 @@ import (
 	"testing"
 	"gob"
 	"io"
+	"bufio"
 	"rand"
 )
 
@@ -23,7 +24,8 @@ func BenchmarkGobTransmission(b *testing.B) {
 	b.StopTimer()
 	r, w := io.Pipe()
 	dec := gob.NewDecoder(r)
-	enc := gob.NewEncoder(w)
+	bufw := bufio.NewWriter(w)
+	enc := gob.NewEncoder(bufw)
 
 	N := 32 * 1024 * 1024
 	in := make([]float32, N)
@@ -42,6 +44,7 @@ func BenchmarkGobTransmission(b *testing.B) {
 	go func() {
 		for i := 0; i < b.N; i++ {
 			enc.Encode(in)
+			bufw.Flush()
 		}
 	}()
 	b.StartTimer()
