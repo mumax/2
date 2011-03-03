@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package common
 
 // This file implements a 2-way pipe similar to io.Pipe(),
 // but each end can read AND write. I.e. each end implements
@@ -23,6 +23,7 @@ import (
 func Pipe2() (end1, end2 PipeReadWriter) {
 	end1.Reader, end2.Writer = io.Pipe()
 	end2.Reader, end1.Writer = io.Pipe()
+	return
 }
 
 // INTERNAL
@@ -32,19 +33,19 @@ type PipeReadWriter struct {
 }
 
 // Implements io.Reader
-func(p *PipeReadWriter) Read(p []byte) (n int, err os.Error){
-
+func(p *PipeReadWriter) Read(b []byte) (n int, err os.Error){
+	return p.Reader.Read(b)
 }
 
 // Implements io.Writer
-func(p *PipeReadWriter) Write(p []byte) (n int, err os.Error){
-
+func(p *PipeReadWriter) Write(b []byte) (n int, err os.Error){
+	return p.Writer.Write(b)
 }
 
 
 // Implements io.Closer
 func(p *PipeReadWriter) Close() (err os.Error){
-	err = p.end1.Close()
-	err = ErrCat(p.end2.Close()) // Combine the two errors into one.
+	err = p.Reader.Close()
+	err = ErrCat(err, p.Writer.Close()) // Combine the two errors into one.
 	return
 }
