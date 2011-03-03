@@ -12,7 +12,10 @@ package engine
 // but allows the Server to call the Client and vice-versa over a single
 // connection.  Hence, there is no distinction between an rpc server and
 // client. Both are represented by engine.RPC.
-// Furthermore, this RPC is tweaked to handle large float32 arrays efficiently.
+// The usage is somewhat simpeler than Go's rpc package:
+// ...
+//
+// TODO(a): Furthermore, this RPC is tweaked to handle large float32 arrays efficiently.
 //
 // Author: Arne Vansteenkiste
 
@@ -61,7 +64,13 @@ func (rpc *RPC) ServeConn(conn io.ReadWriteCloser) {
 			err = rpc.encoder.Encode(&rpc.resp)
 		}
 	}
+}
 
+
+func(rpc *RPC) Call(method string, args []interface{}) []interface{}{
+	// here be dragons
+
+	panic("TODO")
 }
 
 // INTERNAL

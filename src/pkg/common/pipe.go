@@ -20,7 +20,9 @@ import (
 )
 
 // Returns a 2-way pipe. Each end implements io.ReadWriteCloser.
-func Pipe2() (end1, end2 PipeReadWriter) {
+func Pipe2() (end1, end2 *PipeReadWriter) {
+	end1 = new(PipeReadWriter)
+	end2 = new(PipeReadWriter)
 	end1.Reader, end2.Writer = io.Pipe()
 	end2.Reader, end1.Writer = io.Pipe()
 	return
