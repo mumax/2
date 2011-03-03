@@ -17,7 +17,7 @@ import (
 )
 
 
-// benchmark transmission of a large float32 array
+// benchmark transmission of a large float32 array through a gob encoder/decoder pair.
 func BenchmarkGobTransmission(b *testing.B) {
 	b.StopTimer()
 	r, w := io.Pipe()
@@ -43,6 +43,29 @@ func BenchmarkGobTransmission(b *testing.B) {
 		dec.Decode(&out)
 	}
 }
+
+// benchmark transmission of an array through a reader/writer pair for reference
+func BenchmarkPipeTransmission(b *testing.B) {
+	b.StopTimer()
+	r, w := io.Pipe()
+
+	N := 32 * 1024 * 1024 * 4
+	in := make([]byte, N)
+	out := make([]byte, N)
+
+
+	b.SetBytes(int64(N))
+	go func() {
+		for i := 0; i < b.N; i++ {
+			w.Write(in)
+		}
+	}()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		r.Read(out)
+	}
+}
+
 
 // benchmark copy of a large float32 array for reference
 func BenchmarkCopyTransmission(b *testing.B) {
