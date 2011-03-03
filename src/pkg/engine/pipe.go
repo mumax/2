@@ -12,16 +12,16 @@ package engine
 // It can be used to connect an server and client engine.RPC.
 // Author: Arne Vansteenkiste
 
-import(
+import (
 	"io"
 )
 
-type PipeReadWriter struct{
+type PipeReadWriter struct {
 	Reader *io.PipeReader
 	Writer *io.PipeWriter
 }
 
-func Pipe2() (end1, end2 PipeReadWriter){
+func Pipe2() (end1, end2 PipeReadWriter) {
 	end1.Reader, end2.Writer = io.Pipe()
 	end2.Reader, end1.Writer = io.Pipe()
 }
