@@ -29,9 +29,10 @@ func Pipe2() (end1, end2 *PipeReadWriter) {
 }
 
 // INTERNAL
+// 2-way pipe
 type PipeReadWriter struct {
-	Reader *io.PipeReader
-	Writer *io.PipeWriter
+	Reader io.ReadCloser
+	Writer io.WriteCloser
 }
 
 // Implements io.Reader

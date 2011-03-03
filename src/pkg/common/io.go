@@ -23,7 +23,7 @@ import (
 func FOpen(filename string) *os.File {
 	perm := Permission(Parent(filename))
 	perm &= MASK_NO_EXEC
-	file, err := os.Open(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, perm)
+	file, err := os.Create(filename)
 	if err != nil {
 		panic(IOErr(err.String()))
 	}
