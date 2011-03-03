@@ -32,7 +32,7 @@ func TestRPC(t *testing.T) {
 
 	server.Register(new(Tester))
 
-	end1, end2 := Pipe()
+	end1, end2 := Pipe2()
 	go server.ServeConn(reader)
 
 	client.Call("SetValue", []interface{}{42})

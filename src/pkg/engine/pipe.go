@@ -9,7 +9,7 @@ package engine
 
 // This file implements a 2-way pipe similar to io.Pipe(),
 // but each end can read AND write.
-// It can be used to connect an server and client engine.RPC.
+// It can be used, e.g.,  to connect an server and client engine.RPC.
 // Author: Arne Vansteenkiste
 
 import (
@@ -25,3 +25,4 @@ func Pipe2() (end1, end2 PipeReadWriter) {
 	end1.Reader, end2.Writer = io.Pipe()
 	end2.Reader, end1.Writer = io.Pipe()
 }
+
