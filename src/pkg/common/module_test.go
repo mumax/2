@@ -33,11 +33,11 @@ func TestModule(test *testing.T) {
 	c.Call()
 
 	host := dev.LocalCopy()
-	for _,h := range host.List{
-		if h !=	42 {
-		fmt.Println(host.Array)
-		test.Fail()
-		break
+	for _, h := range host.List {
+		if h != 42 {
+			fmt.Println(host.Array)
+			test.Fail()
+			break
 		}
 	}
 }

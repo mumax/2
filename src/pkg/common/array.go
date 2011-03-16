@@ -25,8 +25,10 @@ type Array struct {
 }
 
 
+// Initializes the array to hold a field with the number of components and given size.
 func (t *Array) Init(components int, size3D []int) {
 	Assert(len(size3D) == 3)
+	Assert(t.splice.IsNil()) // should not be initialized already
 	t.length = Prod(size3D)
 	t.splice.Init(components, t.length)
 	t._size[0] = components
@@ -38,6 +40,7 @@ func (t *Array) Init(components int, size3D []int) {
 }
 
 
+// Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
 	t.Init(components, size3D)
@@ -45,6 +48,7 @@ func NewArray(components int, size3D []int) *Array {
 }
 
 
+// Frees the underlying storage and sets the size to zero.
 func (t *Array) Free() {
 	t.splice.Free()
 	for i := range t._size {
@@ -84,20 +88,23 @@ func (dst *Array) CopyFromDevice(src *Array) {
 }
 
 
+// Copy from host array to device array.
 func (dst *Array) CopyFromHost(src *HostArray) {
 	(&(dst.splice)).CopyFromHost(src.Comp)
 }
 
+// Copy from device array to host array.
 func (dst *HostArray) CopyFromDevice(src *Array) {
 	(&(src.splice)).CopyToHost(dst.Comp)
 }
 
 
 // DEBUG: Make a freshly allocated copy on the host.
-func (src *Array) LocalCopy() *HostArray{
+func (src *Array) LocalCopy() *HostArray {
 	host := NewHostArray(src.NComp(), src.Size3D())
 	host.CopyFromDevice(src)
 	return host
 }
 
+// Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
