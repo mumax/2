@@ -70,7 +70,7 @@ func offset(ptr uintptr, bytes int) uintptr {
 
 
 func (s *slice) free() {
-	//assureContext(s.ctx) // seems not necessary.
+	assureContextId(s.devId) // necessary in a multi-GPU context
 	s.array.Free()
 	s.stream.Destroy()
 	s.devId = -1 // invalid id to make sure it's not used
