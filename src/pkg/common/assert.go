@@ -5,7 +5,8 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// This file implements assertions
+// This file implements assertions.
+// Author: Arne Vansteenkiste
 
 package common
 
@@ -13,12 +14,17 @@ import (
 	"fmt"
 )
 
+
+const MSG_ASSERTIONFAILED = "Assertion failed."
+
+
 // Panics if test is false
 func Assert(test bool) {
 	if !test {
-		panic(Bug("Assertion failed."))
+		panic(Bug(MSG_ASSERTIONFAILED))
 	}
 }
+
 
 // Panics if test is false, printing the message.
 func AssertMsg(test bool, msg ...interface{}) {
@@ -27,15 +33,16 @@ func AssertMsg(test bool, msg ...interface{}) {
 	}
 }
 
+
 // Panics if the slice are not equal.
 // Used to check for equal tensor sizes.
 func AssertEqual(a, b []int) {
 	if len(a) != len(b) {
-		panic(Bug("Assertion failed."))
+		panic(Bug(MSG_ASSERTIONFAILED))
 	}
 	for i, a_i := range a {
 		if a_i != b[i] {
-			panic(Bug("Assertion failed."))
+			panic(Bug(MSG_ASSERTIONFAILED))
 		}
 	}
 }

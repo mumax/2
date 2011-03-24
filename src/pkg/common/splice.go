@@ -1,0 +1,90 @@
+//  This file is part of MuMax, a high-perfomrance micromagnetic simulator.
+//  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
+//  Use of this source code is governed by the GNU General Public License version 3
+//  (as published by the Free Software Foundation) that can be found in the license.txt file.
+//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  copyright notices and prominently state that you modified it, giving a relevant date.
+
+// This files implements distributed memory over multiple GPUs
+// Author: Arne Vansteenkiste
+
+package common
+
+import (
+	"cuda"
+)
+
+// TODO:
+// central definition of all GPUs that are allowed to be used
+// 
+
+// Slices are the building blocks of Splices.
+// A Slice resides on a single GPU. Multiple
+// slices are combined into a splice.
+type Slice struct {
+	*cuda.Float32Array     // Access to the array on the GPU.
+	deviceId           int // Identifies which GPU the array resides on.
+}
+
+
+// Allocates and initiates a new Slice. See Slice.Init().
+func NewSlice(deviceId, length int) *Slice{
+	s := new(Slice)
+	s.Init(deviceId, length)
+	return s
+}
+
+
+// Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
+func (s *Slice) Init(deviceId, length int){
+	Assert(deviceId < cuda.GetDeviceCount())
+
+	// Switch device context if necessary
+	prevDevice := cuda.GetDevice()
+	if prevDevice != deviceId{
+		cuda.SetDevice(deviceId)
+	}
+
+	s.deviceId = deviceId
+	s.Float32Array = cuda.NewFloat32Array(length)
+
+	// Switch back to previous device context if neccesary
+	if prevDevice != deviceId{
+		cuda.SetDevice(prevDevice)
+	}
+}
+
+
+// A Splice represents distributed GPU memory in a transparent way.
+type Splice struct{
+	slice []Slice
+}
+
+
+
+// See Splice.Init()
+func NewSplice(length int) Splice{
+	var s Splice
+	s.Init(length)
+	return s
+}
+
+
+// Initiates the Splice to represent "length" float32s,
+// automatically distributed over all available GPUs.
+func (s *Splice) Init(length int){
+	N := cuda.GetDeviceCount()
+	Assert(length % N == 0)
+	s.slice = make([]Slice, N)
+	for i:=range s.slice{
+		s.slice[i].Init(i, length/N)
+	}
+}
+
+func (s *Splice) Free(){
+	for _, slice := range s.slice{
+		slice.Free()
+	}
+}
+
+type VSplice []Splice
