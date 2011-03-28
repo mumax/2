@@ -6,6 +6,7 @@ TARG=mumax/common
 GOFILES=\
 	assert.go\
 	error.go\
+	gpus.go\
 	splice.go\
 
 CGOFILES=\

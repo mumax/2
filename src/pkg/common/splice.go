@@ -14,34 +14,31 @@ import (
 	"cuda"
 )
 
-// TODO:
-// central definition of all GPUs that are allowed to be used
-// 
 
 // Slices are the building blocks of Splices.
 // A Slice resides on a single GPU. Multiple
 // slices are combined into a splice.
-type Slice struct {
+type slice struct {
 	*cuda.Float32Array     // Access to the array on the GPU.
 	deviceId           int // Identifies which GPU the array resides on.
 }
 
 
-// Allocates and initiates a new Slice. See Slice.Init().
-func NewSlice(deviceId, length int) *Slice{
-	s := new(Slice)
+// Allocates and initiates a new slice. See slice.Init().
+func NewSlice(deviceId, length int) *slice {
+	s := new(slice)
 	s.Init(deviceId, length)
 	return s
 }
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *Slice) Init(deviceId, length int){
+func (s *slice) Init(deviceId, length int) {
 	Assert(deviceId < cuda.GetDeviceCount())
 
 	// Switch device context if necessary
 	prevDevice := cuda.GetDevice()
-	if prevDevice != deviceId{
+	if prevDevice != deviceId {
 		cuda.SetDevice(deviceId)
 	}
 
@@ -49,21 +46,20 @@ func (s *Slice) Init(deviceId, length int){
 	s.Float32Array = cuda.NewFloat32Array(length)
 
 	// Switch back to previous device context if neccesary
-	if prevDevice != deviceId{
+	if prevDevice != deviceId {
 		cuda.SetDevice(prevDevice)
 	}
 }
 
 
 // A Splice represents distributed GPU memory in a transparent way.
-type Splice struct{
-	slice []Slice
+type Splice struct {
+	slice []slice
 }
 
 
-
 // See Splice.Init()
-func NewSplice(length int) Splice{
+func NewSplice(length int) Splice {
 	var s Splice
 	s.Init(length)
 	return s
@@ -72,19 +68,25 @@ func NewSplice(length int) Splice{
 
 // Initiates the Splice to represent "length" float32s,
 // automatically distributed over all available GPUs.
-func (s *Splice) Init(length int){
-	N := cuda.GetDeviceCount()
-	Assert(length % N == 0)
-	s.slice = make([]Slice, N)
-	for i:=range s.slice{
-		s.slice[i].Init(i, length/N)
+func (s *Splice) Init(length int) {
+	devices := getDevices()
+	N := len(devices)
+	Assert(length%N == 0)
+	s.slice = make([]slice, N)
+	for i := range devices {
+		s.slice[i].Init(devices[i], length/N)
 	}
 }
 
-func (s *Splice) Free(){
-	for _, slice := range s.slice{
+
+func (s *Splice) Free() {
+	for _, slice := range s.slice {
 		slice.Free()
 	}
 }
 
-type VSplice []Splice
+
+type VSplice struct {
+	Comp []Splice
+	List Splice
+}

@@ -14,6 +14,11 @@ import (
 )
 
 
-func TestSpliceAlloc(t *testing.T){
-	NewSplice(1024)
+func init(){
+	UseAllDevices()
+}
+
+func TestSpliceAlloc(t *testing.T) {
+	s := NewSplice(2*1024*1024*1024)
+	s.Free()
 }
