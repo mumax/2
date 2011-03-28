@@ -70,7 +70,7 @@ func NewSplice(length int64) Splice {
 // automatically distributed over all available GPUs.
 func (s *Splice) Init(length int64) {
 	devices := getDevices()
-	N := len(devices)
+	N := int64(len(devices))
 	Assert(length%N == 0)
 	s.slice = make([]slice, N)
 	for i := range devices {
