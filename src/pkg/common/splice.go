@@ -25,7 +25,7 @@ type slice struct {
 
 
 // Allocates and initiates a new slice. See slice.Init().
-func NewSlice(deviceId, length int) *slice {
+func NewSlice(deviceId int, length int64) *slice {
 	s := new(slice)
 	s.Init(deviceId, length)
 	return s
@@ -33,7 +33,7 @@ func NewSlice(deviceId, length int) *slice {
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *slice) Init(deviceId, length int) {
+func (s *slice) Init(deviceId int, length int64) {
 	Assert(deviceId < cuda.GetDeviceCount())
 
 	// Switch device context if necessary
@@ -59,7 +59,7 @@ type Splice struct {
 
 
 // See Splice.Init()
-func NewSplice(length int) Splice {
+func NewSplice(length int64) Splice {
 	var s Splice
 	s.Init(length)
 	return s
@@ -68,7 +68,7 @@ func NewSplice(length int) Splice {
 
 // Initiates the Splice to represent "length" float32s,
 // automatically distributed over all available GPUs.
-func (s *Splice) Init(length int) {
+func (s *Splice) Init(length int64) {
 	devices := getDevices()
 	N := len(devices)
 	Assert(length%N == 0)
