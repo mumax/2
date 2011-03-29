@@ -19,6 +19,6 @@ func init(){
 }
 
 func TestSpliceAlloc(t *testing.T) {
-	s := NewSplice(2*1024*1024*1024)
+	s := NewSplice(1*1024*1024)
 	s.Free()
 }
