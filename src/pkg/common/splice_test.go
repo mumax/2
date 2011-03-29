@@ -20,6 +20,7 @@ func init() {
 	UseDebugDevices()
 }
 
+const BIG = 256 * 1024 * 1024
 
 // Test if getDevices() works
 func TestDevices(t *testing.T) {
@@ -34,7 +35,7 @@ func TestDevices(t *testing.T) {
 
 // Test splice alloc/free
 func TestSpliceAlloc(t *testing.T) {
-	N := 256 * 1024 * 1024
+	N := BIG
 	// Test repeated alloc + free
 	for i := 0; i < 50; i++ {
 		s := NewSplice(N)
@@ -52,7 +53,9 @@ func TestSpliceCopy(t *testing.T){
 	}
 	b := make([]float32, N)
 	A := NewSplice(N)
+	defer A.Free()
 	B := NewSplice(N)
+	defer B.Free()
 
 	A.CopyFromHost(a)
 	B.CopyFromDevice(A)
@@ -60,5 +63,22 @@ func TestSpliceCopy(t *testing.T){
 
 	for i:= range b{
 		if b[i] != float32(i){t.Fail()}
+	}
+}
+
+
+
+func BenchmarkSpliceCopy(b *testing.B){
+	b.StopTimer()
+	N := BIG/2
+	b.SetBytes(int64(N) * 4)
+	A := NewSplice(N)
+	defer A.Free()
+	B := NewSplice(N)
+	defer B.Free()
+	
+	b.StartTimer()
+	for i:=0; i<b.N; i++{
+		B.CopyFromDevice(A)
 	}
 }

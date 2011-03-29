@@ -106,6 +106,7 @@ func (s *Splice) Free() {
 }
 
 
+// s = h
 func (s *Splice) CopyFromHost(h []float32){
 	Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
@@ -116,6 +117,7 @@ func (s *Splice) CopyFromHost(h []float32){
 	}
 }
 
+// h = s
 func (s *Splice) CopyToHost(h []float32){
 	Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
@@ -126,23 +128,25 @@ func (s *Splice) CopyToHost(h []float32){
 	}
 }
 
-func (s *Splice) CopyToDevice(h Splice){
-	Assert(h.Len() == s.Len()) // in principle redundant
+// d = s
+func (s *Splice) CopyToDevice(d Splice){
+	Assert(d.Len() == s.Len()) // in principle redundant
 	start := 0
 	for i:= range s.slice{
 		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToDevice(h.slice[i].array, s.slice[i].array)
+		cuda.CopyDeviceToDevice(d.slice[i].array, s.slice[i].array)
 		start+=length
 	}
 }
 
 
-func (s *Splice) CopyFromDevice(h Splice){
-	Assert(h.Len() == s.Len()) // in principle redundant
+// s = d
+func (s *Splice) CopyFromDevice(d Splice){
+	Assert(d.Len() == s.Len()) // in principle redundant
 	start := 0
 	for i:= range s.slice{
 		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToDevice(s.slice[i].array, h.slice[i].array)
+		cuda.CopyDeviceToDevice(s.slice[i].array, d.slice[i].array)
 		start+=length
 	}
 }
