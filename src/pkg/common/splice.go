@@ -6,6 +6,8 @@
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 // This files implements distributed memory over multiple GPUs
+// When working with multiple GPUs, there is no notion of "current" device,
+// hence these functions are allowed to change CUDAs current device (as returned by cuda.GetDevice())
 // Author: Arne Vansteenkiste
 
 package common
@@ -19,8 +21,8 @@ import (
 // A Slice resides on a single GPU. Multiple
 // slices are combined into a splice.
 type slice struct {
-	*cuda.Float32Array     // Access to the array on the GPU.
-	deviceId           int // Identifies which GPU the array resides on.
+	array    *cuda.Float32Array // Access to the array on the GPU.
+	deviceId int                // Identifies which GPU the array resides on.
 }
 
 
@@ -37,18 +39,25 @@ func (s *slice) Init(deviceId int, length int64) {
 	Assert(deviceId < cuda.GetDeviceCount())
 
 	// Switch device context if necessary
-	prevDevice := cuda.GetDevice()
+	AssureDevice(deviceId)
+
+	s.deviceId = deviceId
+	s.array = cuda.NewFloat32Array(length)
+
+}
+
+func AssureDevice(deviceId int) (prevDevice int) {
+	prevDevice = cuda.GetDevice()
 	if prevDevice != deviceId {
 		cuda.SetDevice(deviceId)
 	}
+	return
+}
 
-	s.deviceId = deviceId
-	s.Float32Array = cuda.NewFloat32Array(length)
-
-	// Switch back to previous device context if neccesary
-	if prevDevice != deviceId {
-		cuda.SetDevice(prevDevice)
-	}
+func (s *slice) Free() {
+	// Switch device context if necessary
+	AssureDevice(s.deviceId)
+	s.array.Free()
 }
 
 
@@ -78,7 +87,7 @@ func (s *Splice) Init(length int64) {
 	}
 }
 
-
+// Frees the underlying storage
 func (s *Splice) Free() {
 	for _, slice := range s.slice {
 		slice.Free()
