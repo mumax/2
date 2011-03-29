@@ -137,15 +137,15 @@ func (s *Splice) CopyToDevice(h Splice){
 }
 
 
-//func (s *Splice) CopyFromDevice(h Splice){
-//	Assert(h.Len() == s.Len()) // in principle redundant
-//	start := 0
-//	for i:= range s.slice{
-//		length := s.slice[i].array.Len()
-//		cuda.CopyDeviceToDevice(s.slice[i].array, h.slice[i].array)
-//		start+=length
-//	}
-//}
+func (s *Splice) CopyFromDevice(h Splice){
+	Assert(h.Len() == s.Len()) // in principle redundant
+	start := 0
+	for i:= range s.slice{
+		length := s.slice[i].array.Len()
+		cuda.CopyDeviceToDevice(s.slice[i].array, h.slice[i].array)
+		start+=length
+	}
+}
 
 
 

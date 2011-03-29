@@ -55,7 +55,7 @@ func TestSpliceCopy(t *testing.T){
 	B := NewSplice(N)
 
 	A.CopyFromHost(a)
-	A.CopyToDevice(B)
+	B.CopyFromDevice(A)
 	B.CopyToHost(b)
 
 	for i:= range b{
