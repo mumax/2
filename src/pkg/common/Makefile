@@ -8,6 +8,7 @@ GOFILES=\
 	error.go\
 	gpus.go\
 	splice.go\
+	vsplice.go\
 
 CGOFILES=\
 
