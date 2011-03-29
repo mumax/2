@@ -34,13 +34,31 @@ func TestDevices(t *testing.T) {
 
 // Test splice alloc/free
 func TestSpliceAlloc(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		s := NewSplice(256 * 1024 * 1024)
+	N := 256 * 1024 * 1024
+	// Test repeated alloc + free
+	for i := 0; i < 50; i++ {
+		s := NewSplice(N)
+		if s.Len() != N {t.Fail()}
 		s.Free()
 	}
 }
 
 
 func TestSpliceCopy(t *testing.T){
+	N := 1024
+	a := make([]float32, N)
+	for i:= range a{
+		a[i] = float32(i)
+	}
+	b := make([]float32, N)
+	A := NewSplice(N)
+	B := NewSplice(N)
 
+	A.CopyFromHost(a)
+	A.CopyToDevice(B)
+	B.CopyToHost(b)
+
+	for i:= range b{
+		if b[i] != float32(i){t.Fail()}
+	}
 }

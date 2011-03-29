@@ -27,7 +27,7 @@ type slice struct {
 
 
 // Allocates and initiates a new slice. See slice.Init().
-func NewSlice(deviceId int, length int64) *slice {
+func NewSlice(deviceId int, length int) *slice {
 	s := new(slice)
 	s.Init(deviceId, length)
 	return s
@@ -35,8 +35,8 @@ func NewSlice(deviceId int, length int64) *slice {
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *slice) Init(deviceId int, length int64) {
-	Assert(deviceId < cuda.GetDeviceCount())
+func (s *slice) Init(deviceId int, length int) {
+	Assert(deviceId >= 0 && deviceId < cuda.GetDeviceCount())
 
 	// Switch device context if necessary
 	AssureDevice(deviceId)
@@ -58,17 +58,21 @@ func (s *slice) Free() {
 	// Switch device context if necessary
 	AssureDevice(s.deviceId)
 	s.array.Free()
+	s.deviceId = -1 // make sure it doesn't get used anymore
 }
+
+
 
 
 // A Splice represents distributed GPU memory in a transparent way.
 type Splice struct {
 	slice []slice
+	length int
 }
 
 
 // See Splice.Init()
-func NewSplice(length int64) Splice {
+func NewSplice(length int) Splice {
 	var s Splice
 	s.Init(length)
 	return s
@@ -77,15 +81,22 @@ func NewSplice(length int64) Splice {
 
 // Initiates the Splice to represent "length" float32s,
 // automatically distributed over all available GPUs.
-func (s *Splice) Init(length int64) {
+func (s *Splice) Init(length int) {
 	devices := getDevices()
-	N := int64(len(devices))
+	N := len(devices)
 	Assert(length%N == 0)
 	s.slice = make([]slice, N)
 	for i := range devices {
 		s.slice[i].Init(devices[i], length/N)
 	}
+	s.length = length
 }
+
+
+func (s *Splice) Len() int{
+	return s.length
+}
+
 
 // Frees the underlying storage
 func (s *Splice) Free() {
@@ -93,6 +104,49 @@ func (s *Splice) Free() {
 		slice.Free()
 	}
 }
+
+
+func (s *Splice) CopyFromHost(h []float32){
+	Assert(len(h) == s.Len()) // in principle redundant
+	start := 0
+	for i:= range s.slice{
+		length := s.slice[i].array.Len()
+		cuda.CopyFloat32ArrayToDevice(s.slice[i].array, h[start:start+length])
+		start+=length
+	}
+}
+
+func (s *Splice) CopyToHost(h []float32){
+	Assert(len(h) == s.Len()) // in principle redundant
+	start := 0
+	for i:= range s.slice{
+		length := s.slice[i].array.Len()
+		cuda.CopyDeviceToFloat32Array(h[start:start+length], s.slice[i].array)
+		start+=length
+	}
+}
+
+func (s *Splice) CopyToDevice(h Splice){
+	Assert(h.Len() == s.Len()) // in principle redundant
+	start := 0
+	for i:= range s.slice{
+		length := s.slice[i].array.Len()
+		cuda.CopyDeviceToDevice(h.slice[i].array, s.slice[i].array)
+		start+=length
+	}
+}
+
+
+//func (s *Splice) CopyFromDevice(h Splice){
+//	Assert(h.Len() == s.Len()) // in principle redundant
+//	start := 0
+//	for i:= range s.slice{
+//		length := s.slice[i].array.Len()
+//		cuda.CopyDeviceToDevice(s.slice[i].array, h.slice[i].array)
+//		start+=length
+//	}
+//}
+
 
 
 type VSplice struct {
