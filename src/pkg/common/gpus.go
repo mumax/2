@@ -60,7 +60,7 @@ func UseDebugDevices() {
 	for i := 0; i < N; i++ {
 		_useDevice = append(_useDevice, i)
 	}
-	if N == 1{
+	if N == 1 {
 		_useDevice = append(_useDevice, 0) // Use the same device twice.
 	}
 }

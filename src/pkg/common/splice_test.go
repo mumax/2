@@ -39,16 +39,18 @@ func TestSpliceAlloc(t *testing.T) {
 	// Test repeated alloc + free
 	for i := 0; i < 50; i++ {
 		s := NewSplice(N)
-		if s.Len() != N {t.Fail()}
+		if s.Len() != N {
+			t.Fail()
+		}
 		s.Free()
 	}
 }
 
 
-func TestSpliceCopy(t *testing.T){
+func TestSpliceCopy(t *testing.T) {
 	N := 1024
 	a := make([]float32, N)
-	for i:= range a{
+	for i := range a {
 		a[i] = float32(i)
 	}
 	b := make([]float32, N)
@@ -61,24 +63,25 @@ func TestSpliceCopy(t *testing.T){
 	B.CopyFromDevice(A)
 	B.CopyToHost(b)
 
-	for i:= range b{
-		if b[i] != float32(i){t.Fail()}
+	for i := range b {
+		if b[i] != float32(i) {
+			t.Fail()
+		}
 	}
 }
 
 
-
-func BenchmarkSpliceCopy(b *testing.B){
+func BenchmarkSpliceCopy(b *testing.B) {
 	b.StopTimer()
-	N := BIG/2
+	N := BIG / 2
 	b.SetBytes(int64(N) * 4)
 	A := NewSplice(N)
 	defer A.Free()
 	B := NewSplice(N)
 	defer B.Free()
-	
+
 	b.StartTimer()
-	for i:=0; i<b.N; i++{
+	for i := 0; i < b.N; i++ {
 		B.CopyFromDevice(A)
 	}
 }

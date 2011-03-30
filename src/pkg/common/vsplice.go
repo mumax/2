@@ -17,17 +17,17 @@
 package common
 
 import (
-	//"cuda"
+//"cuda"
 )
 
 
 type VSplice struct {
 	Comp []Splice // List of components, e.g. vector or tensor components
-	List Splice// All elements as a single, contiguous list.
+	List Splice   // All elements as a single, contiguous list.
 }
 
 
-func (v *VSplice) Init(components, length int){
+func (v *VSplice) Init(components, length int) {
 	v.List.Init(components * length)
 	v.Comp = make([]Splice, components)
 	//for _,c := range v.Comp{

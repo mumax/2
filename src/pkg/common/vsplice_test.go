@@ -19,23 +19,24 @@ func init() {
 }
 
 
-
 // Test vsplice alloc/free
 func TestVSpliceAlloc(t *testing.T) {
-	N := BIG/4
+	N := BIG / 4
 	// Test repeated alloc + free
 	for i := 0; i < 50; i++ {
 		s := NewVSplice(3, N)
-		if s.List.Len() != 3*N {t.Fail()}
+		if s.List.Len() != 3*N {
+			t.Fail()
+		}
 		s.Free()
 	}
 }
 
 
-func TestVSpliceCopy(t *testing.T){
+func TestVSpliceCopy(t *testing.T) {
 	N := 1024
 	a := make([]float32, 3*N)
-	for i:= range a{
+	for i := range a {
 		a[i] = float32(i)
 	}
 	b := make([]float32, 3*N)
@@ -48,24 +49,25 @@ func TestVSpliceCopy(t *testing.T){
 	B.CopyFromDevice(A)
 	B.CopyToHost(b)
 
-	for i:= range b{
-		if b[i] != float32(i){t.Fail()}
+	for i := range b {
+		if b[i] != float32(i) {
+			t.Fail()
+		}
 	}
 }
 
 
-
-func BenchmarkVSpliceCopy(b *testing.B){
+func BenchmarkVSpliceCopy(b *testing.B) {
 	b.StopTimer()
-	N := BIG/8
-	b.SetBytes(3*int64(N) * 4)
+	N := BIG / 8
+	b.SetBytes(3 * int64(N) * 4)
 	A := NewVSplice(3, N)
 	defer A.Free()
-	B := NewVSplice(3*N)
+	B := NewVSplice(3 * N)
 	defer B.Free()
-	
+
 	b.StartTimer()
-	for i:=0; i<b.N; i++{
+	for i := 0; i < b.N; i++ {
 		B.CopyFromDevice(A)
 	}
 }
