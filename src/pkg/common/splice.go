@@ -21,7 +21,7 @@ import (
 // A Slice resides on a single GPU. Multiple
 // slices are combined into a splice.
 type slice struct {
-	array    *cuda.Float32Array // Access to the array on the GPU.
+	array    cuda.Float32Array // Access to the array on the GPU.
 	deviceId int                // Identifies which GPU the array resides on.
 	stream cuda.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
@@ -44,7 +44,7 @@ func (s *slice) Init(deviceId int, length int) {
 
 	s.deviceId = deviceId
 	s.stream = cuda.StreamCreate()
-	s.array = cuda.NewFloat32Array(length)
+	(&(s.array)).Init(length)
 
 }
 
@@ -103,8 +103,8 @@ func (s *Splice) Len() int{
 
 // Frees the underlying storage
 func (s *Splice) Free() {
-	for _, slice := range s.slice {
-		slice.Free()
+	for i := range s.slice {
+		(&(s.slice[i])).Free()
 	}
 }
 
@@ -115,7 +115,7 @@ func (s *Splice) CopyFromHost(h []float32){
 	start := 0
 	for i:= range s.slice{
 		length := s.slice[i].array.Len()
-		cuda.CopyFloat32ArrayToDevice(s.slice[i].array, h[start:start+length])
+		cuda.CopyFloat32ArrayToDevice(&(s.slice[i].array), h[start:start+length])
 		start+=length
 	}
 }
@@ -126,7 +126,7 @@ func (s *Splice) CopyToHost(h []float32){
 	start := 0
 	for i:= range s.slice{
 		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToFloat32Array(h[start:start+length], s.slice[i].array)
+		cuda.CopyDeviceToFloat32Array(h[start:start+length], &(s.slice[i].array))
 		start+=length
 	}
 }
@@ -153,12 +153,12 @@ func (s *Splice) CopyFromDevice(d Splice){
 	// Overlapping copies run concurrently on the individual devices
 	for i:= range s.slice{
 		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToDeviceAsync(s.slice[i].array, d.slice[i].array, s.slice[i].stream)
+		cuda.CopyDeviceToDeviceAsync(&(s.slice[i].array), &(d.slice[i].array), s.slice[i].stream)
 		start+=length
 	}
 	// Synchronize with all copies
-	for _, sl := range s.slice{
-		sl.stream.Synchronize()
+	for i := range s.slice{
+		s.slice[i].stream.Synchronize()
 	}
 }
 
