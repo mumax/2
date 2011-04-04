@@ -7,6 +7,7 @@ GOFILES=\
 	assert.go\
 	error.go\
 	math.go\
+	strconv.go\
 	misc.go\
 	tensor/gpus.go\
 	tensor/splice.go\
