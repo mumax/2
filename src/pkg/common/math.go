@@ -73,4 +73,3 @@ func Prod(a []int) int {
 	}
 	return p
 }
-

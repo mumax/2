@@ -22,6 +22,3 @@ func TestTensorAlloc(t *testing.T) {
 		t.Free()
 	}
 }
-
-
-

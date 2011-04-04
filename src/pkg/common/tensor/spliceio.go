@@ -59,5 +59,3 @@ func (v *vSplice) Println() (n int, error os.Error) {
 //func (v *VSplice) WriteTo(w io.Writer) (n int64, err os.Error){
 //
 //}
-
-

@@ -48,10 +48,10 @@ func (t *DevTensor) Free() {
 }
 
 
-func (dst *DevTensor) CopyFromDevice(src *DevTensor){
+func (dst *DevTensor) CopyFromDevice(src *DevTensor) {
 	// test for equal size
-	for i,d := range dst._size{
-		if d != src._size[i]{
+	for i, d := range dst._size {
+		if d != src._size[i] {
 			panic(MSG_TENSOR_SIZE_MISMATCH)
 		}
 	}
@@ -59,8 +59,4 @@ func (dst *DevTensor) CopyFromDevice(src *DevTensor){
 }
 
 
-
-
 const MSG_TENSOR_SIZE_MISMATCH = "tensor size mismatch"
-
-
