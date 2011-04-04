@@ -122,7 +122,7 @@ func(src *VSplice) CopyToHost(dst [][]float32){
 	Assert(src.NComp() == len(dst))
 	for i:= range dst{
 		Assert(src.Comp[i].length == len(dst[i])) // TODO(a): redundant
-		src.Comp[i].CopyFromHost(dst[i])
+		src.Comp[i].CopyToHost(dst[i])
 	}
 }
 

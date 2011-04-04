@@ -9,6 +9,7 @@ GOFILES=\
 	gpus.go\
 	splice.go\
 	vsplice.go\
+	spliceio.go\
 
 CGOFILES=\
 

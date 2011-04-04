@@ -58,7 +58,7 @@ func TestVSpliceComponent(t *testing.T) {
 
 
 func TestVSpliceCopy(t *testing.T) {
-	N := BIG / 8
+	N := 10//BIG / 8
 	a := make([][]float32, 3)
 	b := make([][]float32, 3)
 	for i := range a {
@@ -72,9 +72,12 @@ func TestVSpliceCopy(t *testing.T) {
 	A := NewVSplice(3, N)
 	defer A.Free()
 
+
 	for i := range a {
 		A.Comp[i].CopyFromHost(a[i])
 	}
+
+	//A.Println()
 
 	B := NewVSplice(3, N)
 	defer B.Free()
@@ -83,9 +86,12 @@ func TestVSpliceCopy(t *testing.T) {
 	for i := range a {
 		B.Comp[i].CopyFromDevice(A.Comp[i])
 	}
-	//B.CopyFromDevice(A)
+	//B.Println()
+	B.CopyFromDevice(A)
+	//B.Println()
 
 	B.CopyToHost(b)
+	//fmt.Println(b)
 
 	for i := range b {
 		for j := range b[i] {
