@@ -6,6 +6,8 @@ TARG=mumax/common
 GOFILES=\
 	assert.go\
 	error.go\
+	math.go\
+	misc.go\
 	tensor/gpus.go\
 	tensor/splice.go\
 	tensor/vsplice.go\

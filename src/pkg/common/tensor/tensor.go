@@ -63,10 +63,4 @@ func (dst *DevTensor) CopyFromDevice(src *DevTensor){
 
 const MSG_TENSOR_SIZE_MISMATCH = "tensor size mismatch"
 
-func Prod(a []int) int {
-	p := 1
-	for _, x := range a {
-		p *= x
-	}
-	return p
-}
+
