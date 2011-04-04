@@ -98,7 +98,6 @@ func TestVSpliceCopy(t *testing.T) {
 			}
 		}
 	}
-
 }
 
 

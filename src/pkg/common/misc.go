@@ -9,6 +9,7 @@ package common
 
 import (
 	"path"
+	"os"
 )
 
 
@@ -18,3 +19,17 @@ func ReplaceExt(filename, newext string) string {
 	return filename[:len(filename)-len(extension)] + newext
 }
 
+
+// Combines two Errors into one.
+// If a and b are nil, the returned error is nil.
+// If either is not nil, it is returned.
+// If both are not nil, the first one is returned.
+func ErrCat(a, b os.Error) os.Error {
+	if a != nil {
+		return a
+	}
+	if b != nil {
+		return b
+	}
+	return nil
+}
