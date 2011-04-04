@@ -9,11 +9,11 @@ GOFILES=\
 	math.go\
 	strconv.go\
 	misc.go\
-	tensor/gpus.go\
+	gpus.go\
+	tensor.go\
 	tensor/splice.go\
 	tensor/vsplice.go\
 	tensor/spliceio.go\
-	tensor/tensor.go\
 	doc.go\
 
 CGOFILES=\
