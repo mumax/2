@@ -58,7 +58,7 @@ func TestVSpliceComponent(t *testing.T) {
 
 
 func TestVSpliceCopy(t *testing.T) {
-	N := 10//BIG / 8
+	N := BIG / 8
 	a := make([][]float32, 3)
 	b := make([][]float32, 3)
 	for i := range a {

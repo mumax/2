@@ -10,6 +10,8 @@ GOFILES=\
 	splice.go\
 	vsplice.go\
 	spliceio.go\
+	tensor.go\
+	doc.go\
 
 CGOFILES=\
 
