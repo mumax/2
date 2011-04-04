@@ -28,4 +28,3 @@
 // The "internal" (0,1,2) dimensions correspond to the "user" dimensions (Z,Y,X)!
 // Z is typically the smallest dimension like the thickness.
 package common
-

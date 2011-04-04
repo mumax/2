@@ -72,7 +72,6 @@ func TestVSpliceCopy(t *testing.T) {
 	A := NewVSplice(3, N)
 	defer A.Free()
 
-
 	for i := range a {
 		A.Comp[i].CopyFromHost(a[i])
 	}
@@ -81,7 +80,6 @@ func TestVSpliceCopy(t *testing.T) {
 
 	B := NewVSplice(3, N)
 	defer B.Free()
-
 
 	for i := range a {
 		B.Comp[i].CopyFromDevice(A.Comp[i])
@@ -96,7 +94,7 @@ func TestVSpliceCopy(t *testing.T) {
 	for i := range b {
 		for j := range b[i] {
 			if b[i][j] != a[i][j] {
-				t.Fail()//("Expected ", a[i][j], "got", b[i][j])
+				t.Fail() //("Expected ", a[i][j], "got", b[i][j])
 			}
 		}
 	}

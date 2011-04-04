@@ -70,9 +70,9 @@ func (v *VSplice) Free() {
 	v.list.Free()
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
-	for i := range v.Comp{
+	for i := range v.Comp {
 		slice := v.Comp[i].slice
-		for j := range slice{
+		for j := range slice {
 			// The slice must not be freed because the underlying list has already been freed.
 			slice[j].deviceId = -1
 			slice[j].stream.Destroy()
@@ -89,13 +89,13 @@ func (v *VSplice) Free() {
 
 
 // Number of components.
-func (v *VSplice) NComp() int{
+func (v *VSplice) NComp() int {
 	return len(v.Comp)
 }
 
 
 // returns {NComp(), Len()/NComp()}
-func (v *VSplice) Size() [2]int{
+func (v *VSplice) Size() [2]int {
 	return [2]int{len(v.Comp), v.Comp[0].length}
 }
 
@@ -109,21 +109,19 @@ func (dst *VSplice) CopyFromDevice(src *VSplice) {
 //}
 
 
-func(dst *VSplice) CopyFromHost(src [][]float32){
+func (dst *VSplice) CopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
-	for i:= range src{
+	for i := range src {
 		Assert(dst.Comp[i].length == len(src[i])) // TODO(a): redundant
 		dst.Comp[i].CopyFromHost(src[i])
 	}
 }
 
 
-func(src *VSplice) CopyToHost(dst [][]float32){
+func (src *VSplice) CopyToHost(dst [][]float32) {
 	Assert(src.NComp() == len(dst))
-	for i:= range dst{
+	for i := range dst {
 		Assert(src.Comp[i].length == len(dst[i])) // TODO(a): redundant
 		src.Comp[i].CopyToHost(dst[i])
 	}
 }
-
-

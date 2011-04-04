@@ -14,13 +14,11 @@ import (
 )
 
 
-
 func TestTensorAlloc(t *testing.T) {
-	N := BIG/4
+	N := BIG / 4
 	size := []int{1, 1, N}
-	for i:=0; i<50; i++{
+	for i := 0; i < 50; i++ {
 		t := NewTensor(3, size)
 		t.Free()
 	}
 }
-
