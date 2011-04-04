@@ -103,7 +103,7 @@ func (s *splice) String() string {
 }
 
 // See Splice.Init()
-func NewSplice(length int) splice {
+func newSplice(length int) splice {
 	var s splice
 	s.init(length)
 	return s

@@ -19,7 +19,7 @@ func TestVSpliceAlloc(t *testing.T) {
 	N := BIG / 4
 	// Test repeated alloc + free
 	for i := 0; i < 20; i++ {
-		s := NewVSplice(3, N)
+		s := newVSplice(3, N)
 		if s.list.Len() != 3*N {
 			t.Fail()
 		}
@@ -40,7 +40,7 @@ func TestVSpliceComponent(t *testing.T) {
 		}
 	}
 
-	A := NewVSplice(3, N)
+	A := newVSplice(3, N)
 	defer A.Free()
 
 	A.CopyFromHost(a)
@@ -69,7 +69,7 @@ func TestVSpliceCopy(t *testing.T) {
 		}
 	}
 
-	A := NewVSplice(3, N)
+	A := newVSplice(3, N)
 	defer A.Free()
 
 	for i := range a {
@@ -78,7 +78,7 @@ func TestVSpliceCopy(t *testing.T) {
 
 	//A.Println()
 
-	B := NewVSplice(3, N)
+	B := newVSplice(3, N)
 	defer B.Free()
 
 	for i := range a {
@@ -106,9 +106,9 @@ func BenchmarkVSpliceCopy(b *testing.B) {
 	b.StopTimer()
 	N := BIG / 8
 	b.SetBytes(3 * int64(N) * 4)
-	A := NewVSplice(3, N)
+	A := newVSplice(3, N)
 	defer A.Free()
-	B := NewVSplice(3, N)
+	B := newVSplice(3, N)
 	defer B.Free()
 
 	b.StartTimer()

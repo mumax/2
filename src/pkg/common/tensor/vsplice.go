@@ -57,7 +57,7 @@ func (v *vSplice) Init(components, length int) {
 
 // Allocates a new Vector Splice.
 // See Init()
-func NewVSplice(components, length int) *vSplice {
+func newVSplice(components, length int) *vSplice {
 	v := new(vSplice)
 	v.Init(components, length)
 	return v
