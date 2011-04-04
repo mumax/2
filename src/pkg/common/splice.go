@@ -28,10 +28,10 @@ type slice struct {
 }
 
 
-func (s *slice) String() string{
-	return "slice{" + 
-	"array=" + fmt.Sprint(&(s.array)) + 
-	"}"
+func (s *slice) String() string {
+	return "slice{" +
+		"array=" + fmt.Sprint(&(s.array)) +
+		"}"
 }
 
 // Allocates and initiates a new slice. See slice.Init().
@@ -56,7 +56,7 @@ func (s *slice) Init(deviceId int, length int) {
 }
 
 
-func (b *slice) InitSlice(a *slice, start, stop int){
+func (b *slice) InitSlice(a *slice, start, stop int) {
 	if b.array.Pointer() != uintptr(0) {
 		panic("cuda slice already initialized")
 	}
@@ -88,13 +88,13 @@ func (s *slice) Free() {
 // A Splice represents distributed GPU memory in a transparent way.
 type Splice struct {
 	slice  []slice // Arrays on different GPUs, each holding a part of the data
-	length int	// Total number of float32s in the splice
+	length int     // Total number of float32s in the splice
 }
 
-func (s *Splice) String() string{
-	str := "Splice{" + 
-	"len=" + fmt.Sprint(s.length)
-	for i := range s.slice{
+func (s *Splice) String() string {
+	str := "Splice{" +
+		"len=" + fmt.Sprint(s.length)
+	for i := range s.slice {
 		str += " " + s.slice[i].String()
 	}
 	str += "}"
@@ -123,14 +123,14 @@ func (s *Splice) Init(length int) {
 
 
 // TODO(a) Slicer
-func distribute(length int, devices []int) (slicelen []int){
+func distribute(length int, devices []int) (slicelen []int) {
 	N := len(devices)
 	slicelen = make([]int, N)
 
 	// For now: equal slicing
 	Assert(length%N == 0)
-	for i := range slicelen{
-		slicelen[i] = length/N
+	for i := range slicelen {
+		slicelen[i] = length / N
 	}
 	return
 }

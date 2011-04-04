@@ -16,8 +16,7 @@
 
 package common
 
-import (
-)
+import ()
 
 // Layout example for a (3,4) vsplice on 2 GPUs:
 // GPU0: X0 X1  Y0 Y1 Z0 Z1
@@ -34,31 +33,31 @@ func (v *VSplice) Init(components, length int) {
 
 	devices := getDevices()
 	Ndev := len(devices)
-	compSliceLen := distribute(length, devices) 
+	compSliceLen := distribute(length, devices)
 
 	v.Comp = make([]Splice, components)
 	c := v.Comp
-	for i := range v.Comp{
+	for i := range v.Comp {
 		c[i].length = length
 		c[i].slice = make([]slice, Ndev)
-		for j := range c[i].slice{
+		for j := range c[i].slice {
 			cs := &(c[i].slice[j])
 			start := i * compSliceLen[j]
-			stop := (i+1) * compSliceLen[j]
-			cs.InitSlice(&(v.list.slice[j]),start, stop)
+			stop := (i + 1) * compSliceLen[j]
+			cs.InitSlice(&(v.list.slice[j]), start, stop)
 		}
 	}
 }
 
 
-func NewVSplice(components, length int) *VSplice{
+func NewVSplice(components, length int) *VSplice {
 	v := new(VSplice)
 	v.Init(components, length)
 	return v
 }
 
 
-func (v *VSplice) Free(){
+func (v *VSplice) Free() {
 	v.list.Free()
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
@@ -66,7 +65,7 @@ func (v *VSplice) Free(){
 }
 
 
-func (dst *VSplice) CopyFromDevice(src *VSplice){
+func (dst *VSplice) CopyFromDevice(src *VSplice) {
 	dst.list.CopyFromDevice(src.list)
 }
 

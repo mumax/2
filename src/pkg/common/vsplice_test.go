@@ -14,7 +14,6 @@ import (
 )
 
 
-
 // Test vsplice alloc/free
 func TestVSpliceAlloc(t *testing.T) {
 	N := BIG / 4
@@ -29,51 +28,52 @@ func TestVSpliceAlloc(t *testing.T) {
 }
 
 
-func TestVSpliceComponent(t *testing.T){
-	N := 100//BIG/4
+func TestVSpliceComponent(t *testing.T) {
+	N := 100 //BIG/4
 	a := make([][]float32, 3)
 	b := make([][]float32, 3)
-	for i := range a{
+	for i := range a {
 		a[i] = make([]float32, N)
 		b[i] = make([]float32, N)
-		for j:= range a[i]{
+		for j := range a[i] {
 			a[i][j] = float32(i + 1)
 		}
 	}
 
 	A := NewVSplice(3, N)
 	defer A.Free()
-	
-	for i := range a{
+
+	for i := range a {
 		A.Comp[i].CopyFromHost(a[i])
 	}
-	for i := range b{
+	for i := range b {
 		A.Comp[i].CopyToHost(b[i])
-		for j := range b[i]{
-			if b[i][j] != float32(i+1){t.Error("Expected ", i+1, "got", b[i][j])}
+		for j := range b[i] {
+			if b[i][j] != float32(i+1) {
+				t.Error("Expected ", i+1, "got", b[i][j])
+			}
 		}
 	}
-	
+
 }
 
 
-
 func TestVSpliceCopy(t *testing.T) {
-	N := BIG/8
+	N := BIG / 8
 	a := make([][]float32, 3)
 	b := make([][]float32, 3)
-	for i := range a{
+	for i := range a {
 		a[i] = make([]float32, N)
 		b[i] = make([]float32, N)
-		for j:= range a[i]{
-			a[i][j] = float32(i + 1) + 0.001*float32(j)
+		for j := range a[i] {
+			a[i][j] = float32(i+1) + 0.001*float32(j)
 		}
 	}
 
 	A := NewVSplice(3, N)
 	defer A.Free()
-	
-	for i := range a{
+
+	for i := range a {
 		A.Comp[i].CopyFromHost(a[i])
 	}
 
@@ -82,10 +82,12 @@ func TestVSpliceCopy(t *testing.T) {
 
 	B.CopyFromDevice(A)
 
-	for i := range b{
+	for i := range b {
 		A.Comp[i].CopyToHost(b[i])
-		for j := range b[i]{
-			if b[i][j] != a[i][j]{t.Error("Expected ", a[i][j], "got", b[i][j])}
+		for j := range b[i] {
+			if b[i][j] != a[i][j] {
+				t.Error("Expected ", a[i][j], "got", b[i][j])
+			}
 		}
 	}
 
