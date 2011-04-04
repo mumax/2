@@ -6,11 +6,11 @@ TARG=mumax/common
 GOFILES=\
 	assert.go\
 	error.go\
-	gpus.go\
-	splice.go\
-	vsplice.go\
-	spliceio.go\
-	tensor.go\
+	tensor/gpus.go\
+	tensor/splice.go\
+	tensor/vsplice.go\
+	tensor/spliceio.go\
+	tensor/tensor.go\
 	doc.go\
 
 CGOFILES=\
