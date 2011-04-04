@@ -11,7 +11,6 @@ package common
 
 import (
 	"testing"
-	"fmt"
 )
 
 
@@ -22,7 +21,7 @@ func TestVSpliceAlloc(t *testing.T) {
 	// Test repeated alloc + free
 	for i := 0; i < 20; i++ {
 		s := NewVSplice(3, N)
-		if s.List.Len() != 3*N {
+		if s.list.Len() != 3*N {
 			t.Fail()
 		}
 		s.Free()
@@ -32,25 +31,23 @@ func TestVSpliceAlloc(t *testing.T) {
 
 func TestVSpliceComponent(t *testing.T){
 	N := 100//BIG/4
-	a := make([]float32, 3*N)
-	for i := 0; i<N; i++{
-		a[i] = 1
-	}
-	for i := N; i<2*N; i++{
-		a[i] = 2
-	}
-	for i := 2*N; i<3*N; i++{
-		a[i] = 3
+	a := make([][]float32, 3)
+	b := make([][]float32, 3)
+	for i := range a{
+		a[i] = make([]float32, N)
+		b[i] = make([]float32, N)
+		for j:= range a[i]{
+			a[i][j] = float32(i + 1)
+		}
 	}
 
 	A := NewVSplice(3, N)
 	defer A.Free()
-	A.List.CopyFromHost(a)
 	
-	b := make([][]float32, 3)
+	for i := range a{
+		A.Comp[i].CopyFromHost(a[i])
+	}
 	for i := range b{
-		fmt.Println(A.Comp[i].String())
-		b[i] = make([]float32, N)
 		A.Comp[i].CopyToHost(b[i])
 		for j := range b[i]{
 			if b[i][j] != float32(i+1){t.Error("Expected ", i+1, "got", b[i][j])}
@@ -59,43 +56,53 @@ func TestVSpliceComponent(t *testing.T){
 	
 }
 
-//
-//
-//func TestVSpliceCopy(t *testing.T) {
-//	N := 1024
-//	a := make([]float32, 3*N)
-//	for i := range a {
-//		a[i] = float32(i)
-//	}
-//	b := make([]float32, 3*N)
-//	A := NewVSplice(3, N)
-//	defer A.Free()
-//	B := NewVSplice(3, N)
-//	defer B.Free()
-//
-//	A.CopyFromHost(a)
-//	B.CopyFromDevice(A)
-//	B.CopyToHost(b)
-//
-//	for i := range b {
-//		if b[i] != float32(i) {
-//			t.Fail()
-//		}
-//	}
-//}
-//
-//
-//func BenchmarkVSpliceCopy(b *testing.B) {
-//	b.StopTimer()
-//	N := BIG / 8
-//	b.SetBytes(3 * int64(N) * 4)
-//	A := NewVSplice(3, N)
-//	defer A.Free()
-//	B := NewVSplice(3 * N)
-//	defer B.Free()
-//
-//	b.StartTimer()
-//	for i := 0; i < b.N; i++ {
-//		B.CopyFromDevice(A)
-//	}
-//}
+
+
+func TestVSpliceCopy(t *testing.T) {
+	N := BIG/8
+	a := make([][]float32, 3)
+	b := make([][]float32, 3)
+	for i := range a{
+		a[i] = make([]float32, N)
+		b[i] = make([]float32, N)
+		for j:= range a[i]{
+			a[i][j] = float32(i + 1) + 0.001*float32(j)
+		}
+	}
+
+	A := NewVSplice(3, N)
+	defer A.Free()
+	
+	for i := range a{
+		A.Comp[i].CopyFromHost(a[i])
+	}
+
+	B := NewVSplice(3, N)
+	defer B.Free()
+
+	B.CopyFromDevice(A)
+
+	for i := range b{
+		A.Comp[i].CopyToHost(b[i])
+		for j := range b[i]{
+			if b[i][j] != a[i][j]{t.Error("Expected ", a[i][j], "got", b[i][j])}
+		}
+	}
+
+}
+
+
+func BenchmarkVSpliceCopy(b *testing.B) {
+	b.StopTimer()
+	N := BIG / 8
+	b.SetBytes(3 * int64(N) * 4)
+	A := NewVSplice(3, N)
+	defer A.Free()
+	B := NewVSplice(3, N)
+	defer B.Free()
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		B.CopyFromDevice(A)
+	}
+}

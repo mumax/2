@@ -17,22 +17,24 @@
 package common
 
 import (
-	"cuda"
 )
 
-
+// Layout example for a (3,4) vsplice on 2 GPUs:
+// GPU0: X0 X1  Y0 Y1 Z0 Z1
+// GPU1: X2 X3  Y2 Y3 Z2 Z3
+//
 type VSplice struct {
 	Comp []Splice // List of components, e.g. vector or tensor components
-	List Splice   // All elements as a single, contiguous list.
+	list Splice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
 }
 
 
 func (v *VSplice) Init(components, length int) {
-	v.List.Init(components * length)
+	v.list.Init(components * length)
 
 	devices := getDevices()
 	Ndev := len(devices)
-	compSliceLen := distribute(length, devices) // length of slices in one component
+	compSliceLen := distribute(length, devices) 
 
 	v.Comp = make([]Splice, components)
 	c := v.Comp
@@ -43,10 +45,7 @@ func (v *VSplice) Init(components, length int) {
 			cs := &(c[i].slice[j])
 			start := i * compSliceLen[j]
 			stop := (i+1) * compSliceLen[j]
-			cs.array.InitSlice(&(v.List.slice[j].array),start, stop)
-			cs.deviceId = devices[j]
-			AssureDevice(cs.deviceId)
-			cs.stream = cuda.StreamCreate()
+			cs.InitSlice(&(v.list.slice[j]),start, stop)
 		}
 	}
 }
@@ -60,8 +59,17 @@ func NewVSplice(components, length int) *VSplice{
 
 
 func (v *VSplice) Free(){
-	v.List.Free()
+	v.list.Free()
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
 	v.Comp = nil
 }
+
+
+func (dst *VSplice) CopyFromDevice(src *VSplice){
+	dst.list.CopyFromDevice(src.list)
+}
+
+//func (src *VSplice) CopyToDevice(dst *VSplice){
+//	src.list.CopyToDevice(dst.list)
+//}

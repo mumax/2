@@ -60,6 +60,7 @@ func (b *slice) InitSlice(a *slice, start, stop int){
 	if b.array.Pointer() != uintptr(0) {
 		panic("cuda slice already initialized")
 	}
+	AssureDevice(a.deviceId)
 	b.array.InitSlice(&(a.array), start, stop)
 	b.deviceId = a.deviceId
 	b.stream = cuda.StreamCreate()
