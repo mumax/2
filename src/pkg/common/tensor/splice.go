@@ -35,19 +35,19 @@ func (s *slice) String() string {
 }
 
 // Allocates and initiates a new slice. See slice.Init().
-func NewSlice(deviceId int, length int) *slice {
+func newSlice(deviceId int, length int) *slice {
 	s := new(slice)
-	s.Init(deviceId, length)
+	s.init(deviceId, length)
 	return s
 }
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *slice) Init(deviceId int, length int) {
+func (s *slice) init(deviceId int, length int) {
 	Assert(deviceId >= 0 && deviceId < cuda.GetDeviceCount())
 
 	// Switch device context if necessary
-	AssureDevice(deviceId)
+	assureDevice(deviceId)
 
 	s.deviceId = deviceId
 	s.stream = cuda.StreamCreate()
@@ -56,19 +56,20 @@ func (s *slice) Init(deviceId int, length int) {
 }
 
 
-func (b *slice) InitSlice(a *slice, start, stop int) {
+func (b *slice) initSlice(a *slice, start, stop int) {
 	if b.array.Pointer() != uintptr(0) {
 		panic("cuda slice already initialized")
 	}
-	AssureDevice(a.deviceId)
+	assureDevice(a.deviceId)
 	b.array.InitSlice(&(a.array), start, stop)
 	b.deviceId = a.deviceId
 	b.stream = cuda.StreamCreate()
 }
 
 
-//
-func AssureDevice(deviceId int) (prevDevice int) {
+// Make sure the current CUDA device is deviceId.
+// Returns the previous device ID.
+func assureDevice(deviceId int) (prevDevice int) {
 	prevDevice = cuda.GetDevice()
 	if prevDevice != deviceId {
 		cuda.SetDevice(deviceId)
@@ -76,9 +77,9 @@ func AssureDevice(deviceId int) (prevDevice int) {
 	return
 }
 
-func (s *slice) Free() {
+func (s *slice) free() {
 	// Switch device context if necessary
-	AssureDevice(s.deviceId)
+	assureDevice(s.deviceId)
 	s.array.Free()
 	(&(s.stream)).Destroy()
 	s.deviceId = -1 // make sure it doesn't get used anymore
@@ -86,13 +87,13 @@ func (s *slice) Free() {
 
 
 // A Splice represents distributed GPU memory in a transparent way.
-type Splice struct {
+type splice struct {
 	slice  []slice // Arrays on different GPUs, each holding a part of the data
 	length int     // Total number of float32s in the splice
 }
 
-func (s *Splice) String() string {
-	str := "Splice{" +
+func (s *splice) String() string {
+	str := "splice{" +
 		"len=" + fmt.Sprint(s.length)
 	for i := range s.slice {
 		str += " " + s.slice[i].String()
@@ -102,21 +103,21 @@ func (s *Splice) String() string {
 }
 
 // See Splice.Init()
-func NewSplice(length int) Splice {
-	var s Splice
-	s.Init(length)
+func NewSplice(length int) splice {
+	var s splice
+	s.init(length)
 	return s
 }
 
 
-// Initiates the Splice to represent "length" float32s,
+// Initiates the splice to represent "length" float32s,
 // automatically distributed over all available GPUs.
-func (s *Splice) Init(length int) {
+func (s *splice) init(length int) {
 	devices := getDevices()
 	s.slice = make([]slice, len(devices))
 	slicelen := distribute(length, devices)
 	for i := range devices {
-		s.slice[i].Init(devices[i], slicelen[i])
+		s.slice[i].init(devices[i], slicelen[i])
 	}
 	s.length = length
 }
@@ -136,22 +137,22 @@ func distribute(length int, devices []int) (slicelen []int) {
 }
 
 
-func (s *Splice) Len() int {
+func (s *splice) Len() int {
 	return s.length
 }
 
 
 // Frees the underlying storage
-func (s *Splice) Free() {
+func (s *splice) Free() {
 	for i := range s.slice {
-		(&(s.slice[i])).Free()
+		(&(s.slice[i])).free()
 	}
 }
 
 
 // TODO(a) Could be overlapping
 // s = h
-func (s *Splice) CopyFromHost(h []float32) {
+func (s *splice) CopyFromHost(h []float32) {
 	Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
 	for i := range s.slice {
@@ -163,7 +164,7 @@ func (s *Splice) CopyFromHost(h []float32) {
 
 // TODO(a) Could be overlapping
 // h = s
-func (s *Splice) CopyToHost(h []float32) {
+func (s *splice) CopyToHost(h []float32) {
 	Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
 	for i := range s.slice {
@@ -189,7 +190,7 @@ func (s *Splice) CopyToHost(h []float32) {
 // The overall operation is synchronous but the underlying 
 // copies on the separate devices overlap, effectively boosting
 // the bandwidth by N for N devices.
-func (s *Splice) CopyFromDevice(d Splice) {
+func (s *splice) CopyFromDevice(d splice) {
 	Assert(d.Len() == s.Len()) // in principle redundant
 	start := 0
 	// Overlapping copies run concurrently on the individual devices

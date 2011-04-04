@@ -23,22 +23,22 @@ const IO_BUF_LEN = 4096
 //
 //}
 
-func (s *Splice) Fprint(w io.Writer) (n int, error os.Error) {
+func (s *splice) Fprint(w io.Writer) (n int, error os.Error) {
 	buffer := make([]float32, s.Len())
 	s.CopyToHost(buffer)
 	return fmt.Fprint(w, buffer)
 }
 
-func (s *Splice) Print() (n int, error os.Error) {
+func (s *splice) Print() (n int, error os.Error) {
 	return s.Fprint(os.Stdout)
 }
 
-func (s *Splice) Println() (n int, error os.Error) {
+func (s *splice) Println() (n int, error os.Error) {
 	defer fmt.Println()
 	return s.Fprint(os.Stdout)
 }
 
-func (v *VSplice) Fprint(w io.Writer) (n int, error os.Error) {
+func (v *vSplice) Fprint(w io.Writer) (n int, error os.Error) {
 	for i := range v.Comp {
 		ni, erri := v.Comp[i].Fprint(w)
 		n += ni
@@ -47,11 +47,11 @@ func (v *VSplice) Fprint(w io.Writer) (n int, error os.Error) {
 	return
 }
 
-func (s *VSplice) Print() (n int, error os.Error) {
+func (s *vSplice) Print() (n int, error os.Error) {
 	return s.Fprint(os.Stdout)
 }
 
-func (v *VSplice) Println() (n int, error os.Error) {
+func (v *vSplice) Println() (n int, error os.Error) {
 	defer fmt.Println()
 	return v.Fprint(os.Stdout)
 }

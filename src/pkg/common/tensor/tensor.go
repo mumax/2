@@ -11,7 +11,7 @@ import ()
 
 
 type DevTensor struct {
-	splice VSplice // Underlying multi-GPU storage
+	splice vSplice // Underlying multi-GPU storage
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}
 	size4D []int   // {components, size0, size1, size2}
 	size3D []int   // {size0, size1, size2}

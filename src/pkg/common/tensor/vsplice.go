@@ -22,9 +22,9 @@ import ()
 // GPU0: X0 X1  Y0 Y1 Z0 Z1
 // GPU1: X2 X3  Y2 Y3 Z2 Z3
 //
-type VSplice struct {
-	Comp []Splice // List of components, e.g. vector or tensor components
-	list Splice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
+type vSplice struct {
+	Comp []splice // List of components, e.g. vector or tensor components
+	list splice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
 }
 
 
@@ -32,15 +32,15 @@ type VSplice struct {
 // E.g.: Init(3, 1000) gives an array of 1000 3-vectors
 // E.g.: Init(1, 1000) gives an array of 1000 scalars
 // E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
-func (v *VSplice) Init(components, length int) {
+func (v *vSplice) Init(components, length int) {
 	Assert(components > 0)
-	v.list.Init(components * length)
+	v.list.init(components * length)
 
 	devices := getDevices()
 	Ndev := len(devices)
 	compSliceLen := distribute(length, devices)
 
-	v.Comp = make([]Splice, components)
+	v.Comp = make([]splice, components)
 	c := v.Comp
 	for i := range v.Comp {
 		c[i].length = length
@@ -49,7 +49,7 @@ func (v *VSplice) Init(components, length int) {
 			cs := &(c[i].slice[j])
 			start := i * compSliceLen[j]
 			stop := (i + 1) * compSliceLen[j]
-			cs.InitSlice(&(v.list.slice[j]), start, stop)
+			cs.initSlice(&(v.list.slice[j]), start, stop)
 		}
 	}
 }
@@ -57,8 +57,8 @@ func (v *VSplice) Init(components, length int) {
 
 // Allocates a new Vector Splice.
 // See Init()
-func NewVSplice(components, length int) *VSplice {
-	v := new(VSplice)
+func NewVSplice(components, length int) *vSplice {
+	v := new(vSplice)
 	v.Init(components, length)
 	return v
 }
@@ -66,7 +66,7 @@ func NewVSplice(components, length int) *VSplice {
 
 // Frees the Vector Splice.
 // This makes the Component Splices unusable.
-func (v *VSplice) Free() {
+func (v *vSplice) Free() {
 	v.list.Free()
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
@@ -83,24 +83,24 @@ func (v *VSplice) Free() {
 
 
 // Total number of float32 elements.
-//func (v *VSplice) Len() int {
+//func (v *vSplice) Len() int {
 //	return v.list.length
 //}
 
 
 // Number of components.
-func (v *VSplice) NComp() int {
+func (v *vSplice) NComp() int {
 	return len(v.Comp)
 }
 
 
 // returns {NComp(), Len()/NComp()}
-func (v *VSplice) Size() [2]int {
+func (v *vSplice) Size() [2]int {
 	return [2]int{len(v.Comp), v.Comp[0].length}
 }
 
 
-func (dst *VSplice) CopyFromDevice(src *VSplice) {
+func (dst *vSplice) CopyFromDevice(src *vSplice) {
 	dst.list.CopyFromDevice(src.list)
 }
 
@@ -109,7 +109,7 @@ func (dst *VSplice) CopyFromDevice(src *VSplice) {
 //}
 
 
-func (dst *VSplice) CopyFromHost(src [][]float32) {
+func (dst *vSplice) CopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	for i := range src {
 		Assert(dst.Comp[i].length == len(src[i])) // TODO(a): redundant
@@ -118,7 +118,7 @@ func (dst *VSplice) CopyFromHost(src [][]float32) {
 }
 
 
-func (src *VSplice) CopyToHost(dst [][]float32) {
+func (src *vSplice) CopyToHost(dst [][]float32) {
 	Assert(src.NComp() == len(dst))
 	for i := range dst {
 		Assert(src.Comp[i].length == len(dst[i])) // TODO(a): redundant
