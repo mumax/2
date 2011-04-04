@@ -19,6 +19,7 @@ type Tensor struct{
 	length int
 }
 
+
 func (t *Tensor) Init(components int, size3D []int){
 	Assert(len(size3D) == 3)
 	t.length = Prod(size3D)
@@ -30,6 +31,24 @@ func (t *Tensor) Init(components int, size3D []int){
 	t.size4D = t._size[:]	
 	t.size3D = t._size[1:]	
 }
+
+
+
+func NewTensor(components int, size3D []int) *Tensor{
+	t := new(Tensor)
+	t.Init(components, size3D)
+	return t
+}
+
+
+func (t *Tensor) Free(){
+	t.splice.Free()
+	for i:= range t._size{
+		t._size[i] = 0
+	}
+	t.length = 0
+}
+
 
 func Prod (a []int) int{
 	p := 1
