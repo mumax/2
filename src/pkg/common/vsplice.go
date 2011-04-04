@@ -28,7 +28,12 @@ type VSplice struct {
 }
 
 
+// Initializes a Vector Splice to hold length * components float32s.
+// E.g.: Init(3, 1000) gives an array of 1000 3-vectors
+// E.g.: Init(1, 1000) gives an array of 1000 scalars
+// E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
 func (v *VSplice) Init(components, length int) {
+	Assert(components > 0)
 	v.list.Init(components * length)
 
 	devices := getDevices()
@@ -50,6 +55,8 @@ func (v *VSplice) Init(components, length int) {
 }
 
 
+// Allocates a new Vector Splice.
+// See Init()
 func NewVSplice(components, length int) *VSplice {
 	v := new(VSplice)
 	v.Init(components, length)
@@ -57,11 +64,39 @@ func NewVSplice(components, length int) *VSplice {
 }
 
 
+// Frees the Vector Splice.
+// This makes the Component Splices unusable.
 func (v *VSplice) Free() {
 	v.list.Free()
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
+	for i := range v.Comp{
+		slice := v.Comp[i].slice
+		for j := range slice{
+			// The slice must not be freed because the underlying list has already been freed.
+			slice[j].deviceId = -1
+			slice[j].stream.Destroy()
+		}
+	}
 	v.Comp = nil
+}
+
+
+// Total number of float32 elements.
+//func (v *VSplice) Len() int {
+//	return v.list.length
+//}
+
+
+// Number of components.
+func (v *VSplice) NComp() int{
+	return len(v.Comp)
+}
+
+
+// returns {NComp(), Len()/NComp()}
+func (v *VSplice) Size() [2]int{
+	return [2]int{len(v.Comp), v.Comp[0].length}
 }
 
 
@@ -72,3 +107,23 @@ func (dst *VSplice) CopyFromDevice(src *VSplice) {
 //func (src *VSplice) CopyToDevice(dst *VSplice){
 //	src.list.CopyToDevice(dst.list)
 //}
+
+
+func(dst *VSplice) CopyFromHost(src [][]float32){
+	Assert(dst.NComp() == len(src))
+	for i:= range src{
+		Assert(dst.Comp[i].length == len(src[i])) // TODO(a): redundant
+		dst.Comp[i].CopyFromHost(src[i])
+	}
+}
+
+
+func(src *VSplice) CopyToHost(dst [][]float32){
+	Assert(src.NComp() == len(dst))
+	for i:= range dst{
+		Assert(src.Comp[i].length == len(dst[i])) // TODO(a): redundant
+		src.Comp[i].CopyFromHost(dst[i])
+	}
+}
+
+
