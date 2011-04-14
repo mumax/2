@@ -16,6 +16,7 @@ GOFILES=\
 	array/vsplice.go\
 	array/spliceio.go\
 	field.go\
+	universe.go\
 
 CGOFILES=\
 

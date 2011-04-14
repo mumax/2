@@ -9,6 +9,7 @@ package common
 
 // This file implements "Fields". Fields are physical quantities represented by
 // either scalar, vector or tensor fields in time and space.
+// Author: Arne Vansteenkiste.
 
 import ()
 
@@ -24,7 +25,7 @@ import ()
 // then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
 //
 type Field struct {
-	array       Array
+	array       Array // contains the size
 	_multiplier [FIELD_MAX_COMP]float32
 	multiplier  []float32
 	name        string
@@ -54,8 +55,10 @@ func NewVectorField(name string, size3D []int) *Field{
 	return NewField(name, 3, size3D)
 }
 
+// Initiates a field with nComp components and array size size3D.
+// When size3D == nil, the field is space-independent (homogeneous).
 func (f *Field) Init(name string, nComp int, size3D []int) {
-	Assert(nComp > 0)
+	Assert(nComp > 0 && nComp <= FIELD_MAX_COMP)
 	Assert(size3D == nil || len(size3D) == 3)
 
 	f.array.Free()

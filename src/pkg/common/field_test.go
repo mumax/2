@@ -14,8 +14,8 @@ import (
 )
 
 func TestFieldAlloc(t *testing.T) {
-	size3D := []int{4, 16, 32}
-	for i := 0; i < 100; i++ {
+	size3D := []int{32, 1024, 1024}
+	for i := 0; i < 20; i++ {
 		alpha := NewScalar("alpha")
 		m := NewVectorField("m", size3D)
 		h := NewField("h", 3, size3D)
