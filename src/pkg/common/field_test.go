@@ -13,12 +13,15 @@ import (
 	"testing"
 )
 
-
-func TestArrayAlloc(t *testing.T) {
-	N := BIG / 4
-	size := []int{1, 1, N}
-	for i := 0; i < 50; i++ {
-		t := NewArray(3, size)
-		t.Free()
-	}
+func TestFieldAlloc(t *testing.T){
+//	size3D := []int{4, 16, 32}
+//	for i:=0; i<100; i++{
+//		alpha := NewScalar("alpha")
+//		m := NewVectorField("m", size3D)
+//		h := NewField("h", 3, size3D)
+//		alpha.SetField(alpha.Name(), 1, size3D)
+//		alpha.Free()
+//		m.Free()
+//		h.Free()
+//	}
 }
