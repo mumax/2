@@ -5,9 +5,9 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// Author: Arne Vansteenkiste
-
 package common
+
+// Author: Arne Vansteenkiste
 
 import (
 	"testing"

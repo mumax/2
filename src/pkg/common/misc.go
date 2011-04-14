@@ -7,6 +7,9 @@
 
 package common
 
+// This file implements miscellaneous common functions.
+// Author: Arne Vansteenkiste
+
 import (
 	"path"
 	"os"

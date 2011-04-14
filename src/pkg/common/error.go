@@ -5,13 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+package common
+
 // This file implements mumax error types.
 // InputErr: illegal input, e.g. in the input file.
 // IOErr: I/O error, e.g. file not found
 // Bug: this is not the user's fault. A crash report should be generated.
 // Author: Arne Vansteenkiste
-
-package common
 
 import (
 	"os"

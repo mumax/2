@@ -5,10 +5,10 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+package common
+
 // This file implements GPU selection for multi-device operation.
 // Author: Arne Vansteenkiste
-
-package common
 
 import (
 	"fmt"

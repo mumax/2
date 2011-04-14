@@ -4,6 +4,7 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/common
 
 GOFILES=\
+	doc.go\
 	assert.go\
 	error.go\
 	math.go\
@@ -11,10 +12,10 @@ GOFILES=\
 	misc.go\
 	gpus.go\
 	array.go\
-	tensor/splice.go\
-	tensor/vsplice.go\
-	tensor/spliceio.go\
-	doc.go\
+	array/splice.go\
+	array/vsplice.go\
+	array/spliceio.go\
+	field.go\
 
 CGOFILES=\
 

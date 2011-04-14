@@ -7,9 +7,13 @@
 
 package common
 
+// This file implents 3-dimensional arrays of N-vectors on the GPU
+// Author: Arne Vansteenkiste
+
 import ()
 
 
+// A MuMax Array represents a 3-dimensional array of N-vectors.
 type Array struct {
 	splice vSplice // Underlying multi-GPU storage
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}

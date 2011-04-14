@@ -7,6 +7,9 @@
 
 package common
 
+// This file implements some common mathematical functions.
+// Author: Arne Vansteenkiste.
+
 import (
 	"math"
 )

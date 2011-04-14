@@ -5,9 +5,6 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// This files provides the package documentation
-// Author: Arne Vansteenkiste
-
 // 3D Array indexing
 //
 // Internal dimensions are labeled (0,1,2), 0 being the outermost dimension, 2 the innermost.
@@ -28,3 +25,6 @@
 // The "internal" (0,1,2) dimensions correspond to the "user" dimensions (Z,Y,X)!
 // Z is typically the smallest dimension like the thickness.
 package common
+
+// This files provides the package documentation
+// Author: Arne Vansteenkiste

@@ -8,6 +8,7 @@
 package common
 
 // This file implements safe wrappers for strconv that panic on illegal input.
+// Author: Arne Vansteenkiste
 
 import (
 	"strconv"
