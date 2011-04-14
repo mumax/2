@@ -24,12 +24,63 @@ import ()
 // then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
 //
 type Field struct {
-	Array
+	array       Array
 	_multiplier [FIELD_MAX_COMP]float32
 	multiplier  []float32
 	name        string
 }
 
+
+func NewField(name string, nComp int, size3D []int) *Field{
+	f := new(Field)
+	f.Init(name, nComp, size3D)
+	return f
+}
+
+
+func NewScalar(name string) *Field{
+	return NewField(name, 1, nil)
+}
+
+func NewVector(name string) *Field{
+	return NewField(name, 3, nil)
+}
+
+func NewScalarField(name string, size3D []int) *Field{
+	return NewField(name, 1, size3D)
+}
+
+func NewVectorField(name string, size3D []int) *Field{
+	return NewField(name, 3, size3D)
+}
+
+func (f *Field) Init(name string, nComp int, size3D []int) {
+	Assert(nComp > 0)
+	Assert(size3D == nil || len(size3D) == 3)
+
+	f.array.Free()
+	if size3D != nil {
+		f.array.Init(nComp, size3D)
+	}
+
+	for i := range f._multiplier {
+		f._multiplier[i] = 1
+	}
+	f.multiplier = f._multiplier[:nComp]
+
+	f.name = name
+}
+
+
+func (f *Field) Free(){
+	f.array.Free()
+	f.multiplier = nil
+	f.name = ""
+}
+
+func (f *Field) Name()string{
+	return f.name
+}
 
 // Maximum number of components of a Field.
 // 1 = scalar, 3 = vector, 6 = symmetric tensor, 9 = general tensor.
