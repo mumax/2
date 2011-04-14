@@ -10,7 +10,7 @@ package common
 import ()
 
 
-type DevTensor struct {
+type Array struct {
 	splice vSplice // Underlying multi-GPU storage
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}
 	size4D []int   // {components, size0, size1, size2}
@@ -19,7 +19,7 @@ type DevTensor struct {
 }
 
 
-func (t *DevTensor) Init(components int, size3D []int) {
+func (t *Array) Init(components int, size3D []int) {
 	Assert(len(size3D) == 3)
 	t.length = Prod(size3D)
 	t.splice.Init(components, t.length)
@@ -32,14 +32,14 @@ func (t *DevTensor) Init(components int, size3D []int) {
 }
 
 
-func NewDevTensor(components int, size3D []int) *DevTensor {
-	t := new(DevTensor)
+func NewArray(components int, size3D []int) *Array {
+	t := new(Array)
 	t.Init(components, size3D)
 	return t
 }
 
 
-func (t *DevTensor) Free() {
+func (t *Array) Free() {
 	t.splice.Free()
 	for i := range t._size {
 		t._size[i] = 0
@@ -48,15 +48,15 @@ func (t *DevTensor) Free() {
 }
 
 
-func (dst *DevTensor) CopyFromDevice(src *DevTensor) {
+func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size
 	for i, d := range dst._size {
 		if d != src._size[i] {
-			panic(MSG_TENSOR_SIZE_MISMATCH)
+			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
 	(&(dst.splice)).CopyFromDevice(&(src.splice))
 }
 
 
-const MSG_TENSOR_SIZE_MISMATCH = "tensor size mismatch"
+const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"

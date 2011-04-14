@@ -10,7 +10,7 @@ GOFILES=\
 	strconv.go\
 	misc.go\
 	gpus.go\
-	tensor.go\
+	array.go\
 	tensor/splice.go\
 	tensor/vsplice.go\
 	tensor/spliceio.go\
