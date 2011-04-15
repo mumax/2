@@ -16,9 +16,9 @@ import (
 func TestFieldAlloc(t *testing.T) {
 	size3D := []int{32, 1024, 1024}
 	for i := 0; i < 20; i++ {
-		alpha := NewScalar("alpha")
-		m := NewVectorField("m", size3D)
-		h := NewField("h", 3, size3D)
+		alpha := newScalar("alpha")
+		m := newVectorField("m", size3D)
+		h := newField("h", 3, size3D)
 		h.Init(h.Name(), 1, size3D)
 		alpha.Free()
 		m.Free()

@@ -32,5 +32,4 @@ const (
 )
 
 // Derived internal units
-const(
-)
+const ()

@@ -17,14 +17,37 @@ package common
 // Author: Arne Vansteenkiste.
 
 import (
-//. "mumax/common"
+	. "mumax/common"
 )
 
 type Universe struct {
-	_size3D [3]int // INTERNAL
-	size3D  []int  // Discretization grid size
+	// Space
+	_size3D    [3]int // INTERNAL
+	size3D     []int  // Discretization grid size
+	_periodic  [3]int // INTERNAL
+	periodic   []int  // Periodicity in each direction. 0 = no periodicity, >0 = repeat 2*N+1 times in that direction.
+	hasVolume  bool
+	hasSurface bool
 
+	// Time
 	timeId int     // Integer representation of time ("number of time steps taken")
 	time   float64 // Time in internal units
 
+	// Fields
+	fields []*Field
 }
+
+
+func (u *Universe) Init(size3D, periodic []int) {
+	Assert(len(size3D) == 3)
+	Assert(len(periodic) == 3)
+	u.size3D = u._size3D[:]
+	u.periodic = u._periodic[:]
+	copy(u.size3D, size3D)
+	copy(u.periodic, periodic)
+	u.hasVolume = true
+	u.hasVolume = false
+}
+
+
+//func (u *Universe)

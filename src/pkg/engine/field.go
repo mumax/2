@@ -34,27 +34,27 @@ type Field struct {
 }
 
 
-func NewField(name string, nComp int, size3D []int) *Field {
+func newField(name string, nComp int, size3D []int) *Field {
 	f := new(Field)
 	f.Init(name, nComp, size3D)
 	return f
 }
 
 
-func NewScalar(name string) *Field {
-	return NewField(name, 1, nil)
+func newScalar(name string) *Field {
+	return newField(name, 1, nil)
 }
 
-func NewVector(name string) *Field {
-	return NewField(name, 3, nil)
+func newVector(name string) *Field {
+	return newField(name, 3, nil)
 }
 
-func NewScalarField(name string, size3D []int) *Field {
-	return NewField(name, 1, size3D)
+func newScalarField(name string, size3D []int) *Field {
+	return newField(name, 1, size3D)
 }
 
-func NewVectorField(name string, size3D []int) *Field {
-	return NewField(name, 3, size3D)
+func newVectorField(name string, size3D []int) *Field {
+	return newField(name, 3, size3D)
 }
 
 // Initiates a field with nComp components and array size size3D.
