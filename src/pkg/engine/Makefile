@@ -1,20 +1,12 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=mumax/common
+TARG=mumax/engine
 
 GOFILES=\
-	doc.go\
-	assert.go\
-	error.go\
-	math.go\
-	strconv.go\
-	misc.go\
-	gpus.go\
-	array.go\
-	array/splice.go\
-	array/vsplice.go\
-	array/spliceio.go\
+	field.go\
+	universe.go\
+	units.go\
 
 CGOFILES=\
 

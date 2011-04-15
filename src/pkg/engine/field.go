@@ -11,7 +11,9 @@ package common
 // either scalar, vector or tensor fields in time and space.
 // Author: Arne Vansteenkiste.
 
-import ()
+import (
+	. "mumax/common"
+)
 
 // Conceptually, each field is represented by A(r) * m(t), a pointwise multiplication
 // of an N-vector function of space A(r) by an N-vector function of time m(t).

@@ -16,7 +16,9 @@ package common
 //
 // Author: Arne Vansteenkiste.
 
-import ()
+import (
+	//. "mumax/common"
+)
 
 type Universe struct{
 	_size3D [3]int // INTERNAL
