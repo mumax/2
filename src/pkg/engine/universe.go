@@ -7,12 +7,7 @@
 
 package common
 
-// This file implements a "Universe". 
-// A universe defines time, space (size of discretization grid)
-// and a number of physical fields that are defined on the grid.
-// 
-// E.g.: a Universe may have size 1 x 64 x 64 and contain a magnetization,
-// field and energy density, each of that size.
+// This file implements a "Universe" in which time, space and physical quantities are defined.
 //
 // Author: Arne Vansteenkiste.
 
@@ -21,6 +16,12 @@ import (
 	"fmt"
 )
 
+// A universe defines time, space (size of discretization grid)
+// and a number of physical fields that are defined on the grid.
+// 
+// E.g.: a Universe may have size 1 x 64 x 64 and contain a magnetization,
+// field and energy density, each of that size.
+//
 type Universe struct {
 	// Space
 	_size3D    [3]int // INTERNAL
