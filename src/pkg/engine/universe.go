@@ -17,17 +17,14 @@ package common
 // Author: Arne Vansteenkiste.
 
 import (
-	//. "mumax/common"
+//. "mumax/common"
 )
 
-type Universe struct{
+type Universe struct {
 	_size3D [3]int // INTERNAL
-	size3D []int // Discretization grid size
+	size3D  []int  // Discretization grid size
 
-	timeId int // Integer representation of time ("number of time steps taken")
-	time float64 // Time in internal units
+	timeId int     // Integer representation of time ("number of time steps taken")
+	time   float64 // Time in internal units
 
-	Units
-
-	
 }

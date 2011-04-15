@@ -34,26 +34,26 @@ type Field struct {
 }
 
 
-func NewField(name string, nComp int, size3D []int) *Field{
+func NewField(name string, nComp int, size3D []int) *Field {
 	f := new(Field)
 	f.Init(name, nComp, size3D)
 	return f
 }
 
 
-func NewScalar(name string) *Field{
+func NewScalar(name string) *Field {
 	return NewField(name, 1, nil)
 }
 
-func NewVector(name string) *Field{
+func NewVector(name string) *Field {
 	return NewField(name, 3, nil)
 }
 
-func NewScalarField(name string, size3D []int) *Field{
+func NewScalarField(name string, size3D []int) *Field {
 	return NewField(name, 1, size3D)
 }
 
-func NewVectorField(name string, size3D []int) *Field{
+func NewVectorField(name string, size3D []int) *Field {
 	return NewField(name, 3, size3D)
 }
 
@@ -77,13 +77,13 @@ func (f *Field) Init(name string, nComp int, size3D []int) {
 }
 
 
-func (f *Field) Free(){
+func (f *Field) Free() {
 	f.array.Free()
 	f.multiplier = nil
 	f.name = ""
 }
 
-func (f *Field) Name()string{
+func (f *Field) Name() string {
 	return f.name
 }
 
