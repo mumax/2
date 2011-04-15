@@ -18,6 +18,8 @@ GOFILES=\
 
 CGOFILES=\
 
+#GC+=\
+#LD+=\
 #CGO_CFLAGS+=-I/usr/local/cuda/include/
 #CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -lcudart
 
