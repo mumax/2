@@ -13,6 +13,7 @@ package common
 
 import (
 	. "mumax/common"
+	"fmt"
 )
 
 // Conceptually, each field is represented by A(r) * m(t), a pointwise multiplication
@@ -21,7 +22,7 @@ import (
 //
 // When the array is nil/NULL, the field is independent of space. The array is then
 // interpreted as 1(r), the unit field. In this way, quantities that are constant
-// over space (homogeneous) can be represented.
+// over space (homogeneous) can be efficiently represented. These are also called values.
 //
 // When the array has only one component and the multiplier has N components,
 // then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
@@ -85,6 +86,28 @@ func (f *Field) Free() {
 
 func (f *Field) Name() string {
 	return f.name
+}
+
+// Number of components of the field values.
+// 1 = scalar, 3 = vector, etc.
+func (f *Field) NComp() int{
+	return len(f.multiplier)
+}
+
+func (f *Field) IsSpaceDependent() bool{
+	return !f.array.IsNil()
+}
+
+
+func (f *Field) String() string{
+	str := f.Name() + "(" + fmt.Sprint(f.NComp()) + "-vector "
+	if f.IsSpaceDependent(){
+		str += "field"
+	}else{
+		str += "value"
+	}
+	str += ")"
+	return str
 }
 
 // Maximum number of components of a Field.

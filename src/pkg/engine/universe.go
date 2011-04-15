@@ -18,6 +18,7 @@ package common
 
 import (
 	. "mumax/common"
+	"fmt"
 )
 
 type Universe struct {
@@ -26,8 +27,8 @@ type Universe struct {
 	size3D     []int  // Discretization grid size
 	_periodic  [3]int // INTERNAL
 	periodic   []int  // Periodicity in each direction. 0 = no periodicity, >0 = repeat 2*N+1 times in that direction.
-	hasVolume  bool
-	hasSurface bool
+	hasVolumeNodes  bool
+	hasSurfaceNodes bool
 
 	// Time
 	timeId int     // Integer representation of time ("number of time steps taken")
@@ -45,9 +46,48 @@ func (u *Universe) Init(size3D, periodic []int) {
 	u.periodic = u._periodic[:]
 	copy(u.size3D, size3D)
 	copy(u.periodic, periodic)
-	u.hasVolume = true
-	u.hasVolume = false
+	u.hasVolumeNodes = true
+	u.hasSurfaceNodes = false
 }
 
 
-//func (u *Universe)
+func (u *Universe) HasVolumeNodes() bool{
+	return u.hasVolumeNodes
+}
+
+func (u *Universe) HasSurfaceNodes() bool{
+	return u.hasSurfaceNodes
+}
+
+func (u *Universe) Size3D() []int{
+	return u.size3D
+}
+
+func (u *Universe) AddField(name string, nComp int){
+	u.addFieldOrValue(name, nComp, u.Size3D())
+}
+
+func (u *Universe) AddValue(name string, nComp int){
+	u.addFieldOrValue(name, nComp, nil)
+}
+
+// INTERNAL
+func (u *Universe) addFieldOrValue(name string, nComp int, size3D []int){
+	field := newField(name, nComp, size3D)
+	u.fields = append(u.fields, field)
+}
+
+func (u *Universe) String() string{
+	str := "Universe " + fmt.Sprintf("%p\n", u) + 
+		"\tsize:         " + fmt.Sprintln(u.size3D) + 
+		"\tperiodic:     " + fmt.Sprintln(u.periodic) + 
+		"\tvolume nodes :" + fmt.Sprintln(u.HasVolumeNodes()) + 
+		"\tsurface nodes:" + fmt.Sprintln(u.HasSurfaceNodes())  +
+		"\tfields:       \n"
+
+	for i:= range u.fields{
+		str += "\t             " + fmt.Sprintln(u.fields[i]) 
+	}
+	return str
+}
+

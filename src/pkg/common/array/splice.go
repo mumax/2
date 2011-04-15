@@ -150,6 +150,11 @@ func (s *splice) Free() {
 }
 
 
+func (s *splice) IsNil() bool{
+	if s.slice == nil{return true}
+	return s.slice[0].array.IsNil()
+}
+
 // TODO(a) Could be overlapping
 // s = h
 func (s *splice) CopyFromHost(h []float32) {

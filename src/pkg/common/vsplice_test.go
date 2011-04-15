@@ -24,6 +24,7 @@ func TestVSpliceAlloc(t *testing.T) {
 			t.Fail()
 		}
 		s.Free()
+		if !s.IsNil(){t.Fail()}
 	}
 }
 

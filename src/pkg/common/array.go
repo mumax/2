@@ -51,6 +51,9 @@ func (t *Array) Free() {
 	t.length = 0
 }
 
+func (a *Array) IsNil() bool{
+	return a.splice.IsNil()
+}
 
 func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size

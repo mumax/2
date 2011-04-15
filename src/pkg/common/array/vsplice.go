@@ -82,6 +82,10 @@ func (v *vSplice) Free() {
 }
 
 
+func (v *vSplice) IsNil() bool{
+	return v.list.IsNil()
+}
+
 // Total number of float32 elements.
 //func (v *vSplice) Len() int {
 //	return v.list.length
