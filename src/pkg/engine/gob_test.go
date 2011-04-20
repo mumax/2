@@ -17,7 +17,8 @@ import (
 )
 
 
-func BenchmarkGob(b *testing.B) {
+// benchmark transmission of a large float32 array
+func BenchmarkGobTransmission(b *testing.B) {
 	b.StopTimer()
 	r, w := io.Pipe()
 	dec := gob.NewDecoder(r)
@@ -41,7 +42,21 @@ func BenchmarkGob(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dec.Decode(&out)
 	}
+}
 
+// benchmark copy of a large float32 array for reference
+func BenchmarkCopyTransmission(b *testing.B) {
+	b.StopTimer()
+
+	N := 32 * 1024 * 1024
+	in := make([]float32, N)
+	out := make([]float32, N)
+
+	b.SetBytes(int64(4 * N))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		copy(out, in)
+	}
 }
 
 func TestGob(t *testing.T) {
