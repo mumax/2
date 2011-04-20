@@ -7,4 +7,20 @@
 
 package blob
 
+import(
+	"io"
+)
+
+
+type Encoder struct{
+	writer io.Writer
+}
+
+
+func NewEncoder(w io.Writer) *Encoder{
+	e := new(Encoder)
+	e.writer = w
+	return e
+}
+
 
