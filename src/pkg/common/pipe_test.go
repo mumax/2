@@ -18,12 +18,14 @@ func TestPipe2(t *testing.T) {
 	end1, end2 := Pipe2()
 	in := []byte{1, 2, 3, 4}
 	out := []byte{0, 0, 0, 0}
-	
+
 	go end1.Write(in)
 	end2.Read(out)
 
-	for i:= range out{
-		if out[i] != byte(i)+1 {t.Fail()}
+	for i := range out {
+		if out[i] != byte(i)+1 {
+			t.Fail()
+		}
 	}
 
 	end1.Close()

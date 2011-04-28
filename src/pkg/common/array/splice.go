@@ -13,7 +13,7 @@
 package common
 
 import (
-	"cuda"
+	cu "cuda/driver"
 	"fmt"
 )
 
@@ -22,17 +22,15 @@ import (
 // A Slice resides on a single GPU. Multiple
 // slices are combined into a splice.
 type slice struct {
-	array    cuda.Float32Array // Access to the array on the GPU.
-	deviceId int               // Identifies which GPU the array resides on.
-	stream   cuda.Stream       // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
+	array  cu.DevicePtr // Access to the array on the GPU.
+	length int          // Number of floats
+	ctx    cu.Context
+	stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
 
-func (s *slice) String() string {
-	return "slice{" +
-		"array=" + fmt.Sprint(&(s.array)) +
-		"}"
-}
+//func (s *slice) String() string {
+//}
 
 // Allocates and initiates a new slice. See slice.Init().
 func newSlice(deviceId int, length int) *slice {
@@ -44,13 +42,13 @@ func newSlice(deviceId int, length int) *slice {
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
 func (s *slice) init(deviceId int, length int) {
-	Assert(deviceId >= 0 && deviceId < cuda.GetDeviceCount())
+	Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
 
 	// Switch device context if necessary
 	assureDevice(deviceId)
 
 	s.deviceId = deviceId
-	s.stream = cuda.StreamCreate()
+	s.stream = cu.StreamCreate()
 	(&(s.array)).Init(length)
 
 }
@@ -63,16 +61,16 @@ func (b *slice) initSlice(a *slice, start, stop int) {
 	assureDevice(a.deviceId)
 	b.array.InitSlice(&(a.array), start, stop)
 	b.deviceId = a.deviceId
-	b.stream = cuda.StreamCreate()
+	b.stream = cu.StreamCreate()
 }
 
 
 // Make sure the current CUDA device is deviceId.
 // Returns the previous device ID.
 func assureDevice(deviceId int) (prevDevice int) {
-	prevDevice = cuda.GetDevice()
+	prevDevice = cu.GetDevice()
 	if prevDevice != deviceId {
-		cuda.SetDevice(deviceId)
+		cu.SetDevice(deviceId)
 	}
 	return
 }
@@ -150,8 +148,10 @@ func (s *splice) Free() {
 }
 
 
-func (s *splice) IsNil() bool{
-	if s.slice == nil{return true}
+func (s *splice) IsNil() bool {
+	if s.slice == nil {
+		return true
+	}
 	return s.slice[0].array.IsNil()
 }
 
@@ -162,7 +162,7 @@ func (s *splice) CopyFromHost(h []float32) {
 	start := 0
 	for i := range s.slice {
 		length := s.slice[i].array.Len()
-		cuda.CopyFloat32ArrayToDevice(&(s.slice[i].array), h[start:start+length])
+		cu.CopyFloat32ArrayToDevice(&(s.slice[i].array), h[start:start+length])
 		start += length
 	}
 }
@@ -174,7 +174,7 @@ func (s *splice) CopyToHost(h []float32) {
 	start := 0
 	for i := range s.slice {
 		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToFloat32Array(h[start:start+length], &(s.slice[i].array))
+		cu.CopyDeviceToFloat32Array(h[start:start+length], &(s.slice[i].array))
 		start += length
 	}
 }

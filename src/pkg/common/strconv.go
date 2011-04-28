@@ -71,4 +71,3 @@ func Atof64(str string) float64 {
 	}
 	return i
 }
-

@@ -36,18 +36,18 @@ type PipeReadWriter struct {
 }
 
 // Implements io.Reader
-func(p *PipeReadWriter) Read(b []byte) (n int, err os.Error){
+func (p *PipeReadWriter) Read(b []byte) (n int, err os.Error) {
 	return p.Reader.Read(b)
 }
 
 // Implements io.Writer
-func(p *PipeReadWriter) Write(b []byte) (n int, err os.Error){
+func (p *PipeReadWriter) Write(b []byte) (n int, err os.Error) {
 	return p.Writer.Write(b)
 }
 
 
 // Implements io.Closer
-func(p *PipeReadWriter) Close() (err os.Error){
+func (p *PipeReadWriter) Close() (err os.Error) {
 	err = p.Reader.Close()
 	err = ErrCat(err, p.Writer.Close()) // Combine the two errors into one.
 	return

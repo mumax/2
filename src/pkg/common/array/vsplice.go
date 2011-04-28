@@ -82,7 +82,7 @@ func (v *vSplice) Free() {
 }
 
 
-func (v *vSplice) IsNil() bool{
+func (v *vSplice) IsNil() bool {
 	return v.list.IsNil()
 }
 
