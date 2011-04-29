@@ -28,6 +28,7 @@ var _currentCtx cu.Context
 
 // Sets a list of devices to use.
 func InitMultiGPU(devices []int, flags uint) {
+	Debug("InitMultiGPU ",devices, flags )
 	Assert(_useDevice == nil)
 	N := cu.DeviceGetCount()
 	for _, n := range devices {

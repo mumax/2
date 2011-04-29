@@ -12,11 +12,12 @@ package common
 import (
 	"testing"
 	"fmt"
-	//cu "cuda/driver"
+	cu "cuda/driver"
 )
 
 
 func init() {
+	cu.Init()
 	InitDebugGPUs()
 }
 
