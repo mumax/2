@@ -13,6 +13,7 @@ GOFILES=\
 	pipe.go\
 	strconv.go\
 	misc.go\
+	sizes.go\
 	gpus.go\
 	array.go\
 	array/splice.go\

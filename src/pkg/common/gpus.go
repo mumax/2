@@ -82,6 +82,10 @@ func assureContext(ctx cu.Context) {
 	}
 }
 
+// Returns the current context
+func getContext() cu.Context{
+	return _currentCtx
+}
 
 // Returns the list of usable devices. 
 func getDevices() []int {

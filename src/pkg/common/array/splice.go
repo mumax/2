@@ -45,22 +45,24 @@ func (s *slice) init(deviceId int, length int) {
 	Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
 
 	// Switch device context if necessary
-	assureDevice(deviceId)
+	assureContext(getDeviceContext(deviceId))
 
-	s.deviceId = deviceId
+	s.ctx = getContext()
 	s.stream = cu.StreamCreate()
-	(&(s.array)).Init(length)
-
+	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(length))
+	s.length = length
 }
 
 
+// Takes a sub-slice.
 func (b *slice) initSlice(a *slice, start, stop int) {
-	if b.array.Pointer() != uintptr(0) {
+	if b.array != cu.DevicePtr(uintptr(0)) {
 		panic("cuda slice already initialized")
 	}
-	assureDevice(a.deviceId)
-	b.array.InitSlice(&(a.array), start, stop)
-	b.deviceId = a.deviceId
+	assureContext(a.ctx)
+	b.array = a.array.Offset(start*SIZEOF_FLOAT)
+	b.length = stop-start
+	b.ctx = a.ctx
 	b.stream = cu.StreamCreate()
 }
 
