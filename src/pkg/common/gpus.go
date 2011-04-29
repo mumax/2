@@ -47,7 +47,7 @@ func InitMultiGPU(devices []int, flags uint) {
 
 
 // Uses all available GPUs
-func InitAllGPU(flags uint) {
+func InitAllGPUs(flags uint) {
 	var use []int
 	N := cu.DeviceGetCount()
 	for i := 0; i < N; i++ {
@@ -62,7 +62,7 @@ func InitAllGPU(flags uint) {
 // test "multi"-GPU code. The distribution over
 // two separate arrays on the same device is a bit
 // silly, but good for debugging.
-func InitDebugGPU() {
+func InitDebugGPUs() {
 	var use []int
 	N := cu.DeviceGetCount()
 	for i := 0; i < N; i++ {

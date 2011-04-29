@@ -12,12 +12,12 @@ package common
 import (
 	"testing"
 	"fmt"
-	"cuda"
+	//cu "cuda/driver"
 )
 
 
 func init() {
-	UseDebugDevices()
+	InitDebugGPUs()
 }
 
 const BIG = 256 * 1024 * 1024
@@ -25,11 +25,11 @@ const BIG = 256 * 1024 * 1024
 // Test if getDevices() works
 func TestDevices(t *testing.T) {
 	devices := getDevices()
-	for i, d := range devices {
+	for i, _ := range devices {
 		fmt.Println("Device ", i)
-		fmt.Println(cuda.GetDeviceProperties(d))
-		fmt.Println()
-		fmt.Println()
+		//fmt.Println(cuda.GetDeviceProperties(d))
+		//fmt.Println()
+		//fmt.Println()
 	}
 }
 
