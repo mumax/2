@@ -14,7 +14,7 @@ package common
 
 import (
 	cu "cuda/driver"
-	"fmt"
+	//"fmt"
 )
 
 
@@ -60,29 +60,32 @@ func (b *slice) initSlice(a *slice, start, stop int) {
 		panic("cuda slice already initialized")
 	}
 	assureContext(a.ctx)
-	b.array = a.array.Offset(start*SIZEOF_FLOAT)
+	b.array = cu.DevicePtr(offset(uintptr(a.array), start*SIZEOF_FLOAT))
 	b.length = stop-start
 	b.ctx = a.ctx
 	b.stream = cu.StreamCreate()
 }
 
+func offset(ptr uintptr, bytes int)uintptr{
+	return ptr+uintptr(bytes)
+}
 
 // Make sure the current CUDA device is deviceId.
 // Returns the previous device ID.
-func assureDevice(deviceId int) (prevDevice int) {
-	prevDevice = cu.GetDevice()
-	if prevDevice != deviceId {
-		cu.SetDevice(deviceId)
-	}
-	return
-}
+//func assureDevice(deviceId int) (prevDevice int) {
+//	prevDevice = cu.GetDevice()
+//	if prevDevice != deviceId {
+//		cu.SetDevice(deviceId)
+//	}
+//	return
+//}
 
 func (s *slice) free() {
 	// Switch device context if necessary
-	assureDevice(s.deviceId)
+	assureContext(s.ctx)
 	s.array.Free()
-	(&(s.stream)).Destroy()
-	s.deviceId = -1 // make sure it doesn't get used anymore
+	s.stream.Destroy()
+	s.ctx = cu.Context(0)
 }
 
 
@@ -92,15 +95,15 @@ type splice struct {
 	length int     // Total number of float32s in the splice
 }
 
-func (s *splice) String() string {
-	str := "splice{" +
-		"len=" + fmt.Sprint(s.length)
-	for i := range s.slice {
-		str += " " + s.slice[i].String()
-	}
-	str += "}"
-	return str
-}
+//func (s *splice) String() string {
+//	str := "splice{" +
+//		"len=" + fmt.Sprint(s.length)
+//	for i := range s.slice {
+//		str += " " + s.slice[i].String()
+//	}
+//	str += "}"
+//	return str
+//}
 
 // See Splice.Init()
 func newSplice(length int) splice {
@@ -154,44 +157,32 @@ func (s *splice) IsNil() bool {
 	if s.slice == nil {
 		return true
 	}
-	return s.slice[0].array.IsNil()
+	return s.slice[0].array == cu.DevicePtr(0)
 }
 
+// s = h.
 // TODO(a) Could be overlapping
-// s = h
 func (s *splice) CopyFromHost(h []float32) {
 	Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
 	for i := range s.slice {
-		length := s.slice[i].array.Len()
-		cu.CopyFloat32ArrayToDevice(&(s.slice[i].array), h[start:start+length])
+		length := s.slice[i].length
+		cu.MemcpyHtoD(cu.DevicePtr(s.slice[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 		start += length
 	}
 }
 
+// h = s.
 // TODO(a) Could be overlapping
-// h = s
 func (s *splice) CopyToHost(h []float32) {
 	Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
 	for i := range s.slice {
-		length := s.slice[i].array.Len()
-		cu.CopyDeviceToFloat32Array(h[start:start+length], &(s.slice[i].array))
+		length := s.slice[i].length
+		cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s.slice[i].array), SIZEOF_FLOAT*int64(length))
 		start += length
 	}
 }
-
-// d = s
-//func (s *Splice) CopyToDevice(d Splice){
-//	Assert(d.Len() == s.Len()) // in principle redundant
-//	start := 0
-//	for i:= range s.slice{
-//		length := s.slice[i].array.Len()
-//		cuda.CopyDeviceToDevice(d.slice[i].array, s.slice[i].array)
-//		start+=length
-//	}
-//}
-
 
 // Copy: s = d.
 // The overall operation is synchronous but the underlying 
@@ -200,10 +191,11 @@ func (s *splice) CopyToHost(h []float32) {
 func (s *splice) CopyFromDevice(d splice) {
 	Assert(d.Len() == s.Len()) // in principle redundant
 	start := 0
-	// Overlapping copies run concurrently on the individual devices
+	// copies run concurrently on the individual devices
 	for i := range s.slice {
-		length := s.slice[i].array.Len()
-		cuda.CopyDeviceToDeviceAsync(&(s.slice[i].array), &(d.slice[i].array), s.slice[i].stream)
+		length := s.slice[i].length // in principle redundant
+		Assert(length == d.slice[i].length)
+		cu.MemcpyAsync(cu.DevicePtr(s.slice[i].array), cu.DevicePtr(d.slice[i].array), SIZEOF_FLOAT*int64(length), s.slice[i].stream)
 		start += length
 	}
 	// Synchronize with all copies
