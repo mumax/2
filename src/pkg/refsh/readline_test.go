@@ -13,7 +13,7 @@ import (
 )
 
 func TestTokenizer(test *testing.T) {
-	in, err := os.Open("test.in", os.O_RDONLY, 0666)
+	in, err := os.Open("test.in")
 	if err != nil {
 		test.Fail()
 		return

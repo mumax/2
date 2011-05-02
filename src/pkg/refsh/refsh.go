@@ -36,20 +36,20 @@ const (
 	MSG_ALREADY_DEFINED = "refsh: %s already defined"
 	MSG_NO_SUCH_METHOD  = "refsh: no such method: %s"
 	MSG_NO_SUCH_COMMAND = "refsh: no such command: %s. options: %v"
-	MSG_CANT_PARSE = "refsh: do not know how to parse %s"
-	MSG_ARG_MISMATCH = "refsh: %v needs %v arguments, but %v provided"
+	MSG_CANT_PARSE      = "refsh: do not know how to parse %s"
+	MSG_ARG_MISMATCH    = "refsh: %v needs %v arguments, but %v provided"
 )
 
 // Adds a function to the list of known commands.
 // example: refsh.Add("exit", Exit)
 func (r *Refsh) AddFunc(funcname string, function interface{}) {
-	f := reflect.NewValue(function)
+	f := reflect.ValueOf(function)
 
 	if r.resolve(funcname) != nil {
 		panic(Bug(fmt.Sprintf(MSG_ALREADY_DEFINED, funcname)))
 	}
 	r.funcnames = append(r.funcnames, funcname)
-	r.funcs = append(r.funcs, (*FuncWrapper)(f.(*reflect.FuncValue)))
+	r.funcs = append(r.funcs, (FuncWrapper)(f))
 }
 
 
@@ -61,24 +61,24 @@ func (r *Refsh) AddMethod(funcname string, reciever interface{}, methodname stri
 		panic(Bug(fmt.Sprintf(MSG_ALREADY_DEFINED, funcname)))
 	}
 
-	typ := reflect.Typeof(reciever)
-	var f *reflect.FuncValue
+	typ := reflect.TypeOf(reciever)
+	var f reflect.Value
 	for i := 0; i < typ.NumMethod(); i++ {
 		if typ.Method(i).Name == methodname {
 			f = typ.Method(i).Func
 		}
 	}
-	if f == nil {
+	if !f.IsValid() {
 		panic(Bug(fmt.Sprintf(MSG_NO_SUCH_METHOD, methodname)))
 	}
 	r.funcnames = append(r.funcnames, funcname)
-	r.funcs = append(r.funcs, &MethodWrapper{reflect.NewValue(reciever), f})
+	r.funcs = append(r.funcs, &MethodWrapper{reflect.ValueOf(reciever), f})
 }
 
 // Adds all the public Methods of the reciever,
 // giving them a lower-case command name
 func (r *Refsh) AddAllMethods(reciever interface{}) {
-	typ := reflect.Typeof(reciever)
+	typ := reflect.TypeOf(reciever)
 	for i := 0; i < typ.NumMethod(); i++ {
 		name := typ.Method(i).Name
 		if unicode.IsUpper(int(name[0])) {
@@ -133,7 +133,7 @@ func (refsh *Refsh) Call(fname string, argv []string) (returnvalue []interface{}
 
 	function := refsh.resolve(fname)
 	if function == nil {
-		err:= InputErr(fmt.Sprintf(MSG_NO_SUCH_COMMAND, fname, refsh.funcnames))
+		err := InputErr(fmt.Sprintf(MSG_NO_SUCH_COMMAND, fname, refsh.funcnames))
 		panic(err)
 	} else {
 		args := refsh.parseArgs(fname, argv)

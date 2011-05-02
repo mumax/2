@@ -43,19 +43,18 @@ func parseArg(arg string, argtype reflect.Type) reflect.Value {
 	default:
 		panic(Bug(fmt.Sprint(MSG_CANT_PARSE, argtype)))
 	case "int":
-		return reflect.NewValue(Atoi(arg))
+		return reflect.ValueOf(Atoi(arg))
 	case "int64":
-		return reflect.NewValue(Atoi64(arg))
+		return reflect.ValueOf(Atoi64(arg))
 	case "float32":
-		return reflect.NewValue(Atof32(arg))
+		return reflect.ValueOf(Atof32(arg))
 	case "float64":
-		return reflect.NewValue(Atof64(arg))
+		return reflect.ValueOf(Atof64(arg))
 	case "bool":
-		return reflect.NewValue(Atob(arg))
+		return reflect.ValueOf(Atob(arg))
 	case "string":
-		return reflect.NewValue(arg)
+		return reflect.ValueOf(arg)
 	}
 	panic("Bug")
-	return reflect.NewValue(666) // is never reached.
+	return reflect.ValueOf(666) // is never reached.
 }
-
