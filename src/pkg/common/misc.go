@@ -30,6 +30,7 @@ func GetExecDir() string{
 	return Parent(dir)
 }
 
+
 // Combines two Errors into one.
 // If a and b are nil, the returned error is nil.
 // If either is not nil, it is returned.

@@ -14,8 +14,10 @@ package engine
 
 import (
 	. "mumax/common"
+	cu "cuda/driver"
 )
 
 func init() {
-	UseDebugDevices()
+	cu.Init()
+	InitDebugGPUs()
 }
