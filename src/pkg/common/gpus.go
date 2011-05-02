@@ -31,12 +31,14 @@ func InitMultiGPU(devices []int, flags uint) {
 	Debug("InitMultiGPU ", devices, flags)
 	Assert(len(devices) > 0)
 	Assert(_useDevice == nil)
+
 	N := cu.DeviceGetCount()
 	for _, n := range devices {
 		if n >= N || n < 0 {
 			panic(InputErr(MSG_BADDEVICEID + fmt.Sprint(n)))
 		}
 	}
+
 	_useDevice = make([]int, len(devices))
 	copy(_useDevice, devices)
 
@@ -45,19 +47,45 @@ func InitMultiGPU(devices []int, flags uint) {
 	for i := range _deviceCtxs {
 		_deviceCtxs[i] = cu.CtxCreate(flags, cu.DeviceGet(_useDevice[i]))
 	}
-	// enable peer access
-	for i := range _deviceCtxs {
-		for j:= range _deviceCtxs{
-		dev := cu.DeviceGet(_useDevice[i])
-		Debug("Device ", dev, " UNIFIED_ADDRESSING: ", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
-		Debug()
-		Debug("CanAccessPeer ", i, j, cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])))	
+
+	// enable peer access if more than 1 GPU is specified
+	// do not try to enable for one GPU so that device with CC < 2.0
+	// can still be used in a single-GPU setup
+	// also do not enable if GPU 0 is used twice for debug purposes
+	if len(_useDevice) > 1 && !allZero(_useDevice) {
+		Debug("Enabling device peer-to-peer access")
+		for i := range _deviceCtxs {
+			dev := cu.DeviceGet(_useDevice[i])
+			if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
+				panic(ERR_UNIFIED_ADDR)
+			}
+			for j := range _deviceCtxs {
+				if !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
+					panic(ERR_UNIFIED_ADDR)
+				}
+			}
+			_deviceCtxs[i].SetCurrent()
+			_deviceCtxs[i].EnablePeerAccess()
 		}
-	//	_deviceCtxs[i].SetCurrent()
-	//	_deviceCtxs[i].EnablePeerAccess()
 	}
+	// set a current context
 	_deviceCtxs[0].SetCurrent()
 	_currentCtx = _deviceCtxs[0]
+}
+
+
+// Error message
+const ERR_UNIFIED_ADDR = "A GPU does not support unified addressing and can not be used in a multi-GPU setup."
+
+
+// INTERNAL: true if all elements are 0.
+func allZero(a []int) bool {
+	for _, n := range a {
+		if n != 0 {
+			return false
+		}
+	}
+	return true
 }
 
 
