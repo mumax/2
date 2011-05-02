@@ -45,6 +45,18 @@ func InitMultiGPU(devices []int, flags uint) {
 	for i := range _deviceCtxs {
 		_deviceCtxs[i] = cu.CtxCreate(flags, cu.DeviceGet(_useDevice[i]))
 	}
+	// enable peer access
+	for i := range _deviceCtxs {
+		for j:= range _deviceCtxs{
+		dev := cu.DeviceGet(_useDevice[i])
+		Debug("Device ", dev, " UNIFIED_ADDRESSING: ", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
+		Debug()
+		Debug("CanAccessPeer ", i, j, cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])))	
+		}
+	//	_deviceCtxs[i].SetCurrent()
+	//	_deviceCtxs[i].EnablePeerAccess()
+	}
+	_deviceCtxs[0].SetCurrent()
 	_currentCtx = _deviceCtxs[0]
 }
 
