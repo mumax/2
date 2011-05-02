@@ -57,6 +57,7 @@ func InitMultiGPU(devices []int, flags uint) {
 		for i := range _deviceCtxs {
 			dev := cu.DeviceGet(_useDevice[i])
 			if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
+				Debug("Device ", i, "UNIFIED_ADDRESSING ", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
 				panic(ERR_UNIFIED_ADDR)
 			}
 			for j := range _deviceCtxs {
