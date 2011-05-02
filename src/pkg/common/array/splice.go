@@ -187,7 +187,7 @@ func (s *splice) CopyFromDevice(d splice) {
 	for i := range s.slice {
 		length := s.slice[i].length // in principle redundant
 		Assert(length == d.slice[i].length)
-		cu.MemcpyAsync(cu.DevicePtr(s.slice[i].array), cu.DevicePtr(d.slice[i].array), SIZEOF_FLOAT*int64(length), s.slice[i].stream)
+		cu.MemcpyDtoDAsync(cu.DevicePtr(s.slice[i].array), cu.DevicePtr(d.slice[i].array), SIZEOF_FLOAT*int64(length), s.slice[i].stream)
 		start += length
 	}
 	// Synchronize with all copies
