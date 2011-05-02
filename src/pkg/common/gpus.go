@@ -62,12 +62,15 @@ func InitMultiGPU(devices []int, flags uint) {
 			}
 			for j := range _deviceCtxs {
 				Debug("CanAccessPeer", i, j, ":", cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])))
-				if i!=j && !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
-					panic(ERR_UNIFIED_ADDR)
+				if i != j {
+					if !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
+						panic(ERR_UNIFIED_ADDR)
+					}
+					// enable access between context i and j
+					_deviceCtxs[i].SetCurrent()
+					_deviceCtxs[j].EnablePeerAccess()
 				}
 			}
-			_deviceCtxs[i].SetCurrent()
-			_deviceCtxs[i].EnablePeerAccess()
 		}
 	}
 	// set a current context
