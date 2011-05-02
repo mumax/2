@@ -114,6 +114,9 @@ func (s *splice) init(length int) {
 }
 
 
+// Distributes elements over the available GPUs.
+// length: number of elements to distribute.
+// slicelen[i]: number of elements for device i.
 // TODO(a) Slicer
 func distribute(length int, devices []int) (slicelen []int) {
 	N := len(devices)
@@ -128,6 +131,7 @@ func distribute(length int, devices []int) (slicelen []int) {
 }
 
 
+// Total number of float32 elements.
 func (s *splice) Len() int {
 	return s.length
 }

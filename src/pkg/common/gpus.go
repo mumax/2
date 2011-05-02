@@ -73,7 +73,7 @@ func InitMultiGPU(devices []int, flags uint) {
 			}
 		}
 	}
-	// set a current context
+	// set the current context
 	_deviceCtxs[0].SetCurrent()
 	_currentCtx = _deviceCtxs[0]
 }
@@ -150,6 +150,12 @@ func getDevices() []int {
 		panic(Bug(MSG_DEVICEUNINITIATED))
 	}
 	return _useDevice
+}
+
+
+// Returns the number of used GPUs.
+func DeviceCount() int{
+	return len(_useDevice)
 }
 
 
