@@ -19,6 +19,7 @@ GOFILES=\
 	array/splice.go\
 	array/vsplice.go\
 	array/spliceio.go\
+	module.go\
 
 CGOFILES=\
 

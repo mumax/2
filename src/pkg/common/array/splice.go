@@ -24,7 +24,7 @@ import (
 type slice struct {
 	array  cu.DevicePtr // Access to the array on the GPU.
 	length int          // Number of floats
-	ctx    cu.Context   // CUDA context of this slice's allocation
+	devId    int   // index of CUDA context of this slice's allocation
 	stream cu.Stream    // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
@@ -44,7 +44,7 @@ func (s *slice) init(deviceId int, length int) {
 	// Switch device context if necessary
 	assureContext(getDeviceContext(deviceId))
 
-	s.ctx = getContext()
+	s.devId = deviceId
 	s.stream = cu.StreamCreate()
 	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(length))
 	s.length = length
@@ -56,10 +56,10 @@ func (b *slice) initSlice(a *slice, start, stop int) {
 	if b.array != cu.DevicePtr(uintptr(0)) {
 		panic("cuda slice already initialized")
 	}
-	assureContext(a.ctx)
+	assureContextId(a.devId)
 	b.array = cu.DevicePtr(offset(uintptr(a.array), start*SIZEOF_FLOAT))
 	b.length = stop - start
-	b.ctx = a.ctx
+	b.devId = a.devId
 	b.stream = cu.StreamCreate()
 }
 
@@ -73,7 +73,7 @@ func (s *slice) free() {
 	//assureContext(s.ctx) // seems not necessary.
 	s.array.Free()
 	s.stream.Destroy()
-	s.ctx = cu.Context(0)
+	s.devId = -1 // invalid id to make sure it's not used
 }
 
 

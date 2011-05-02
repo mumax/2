@@ -17,7 +17,7 @@
 package common
 
 import (
-	cu "cuda/driver"
+	//cu "cuda/driver"
 )
 
 // Layout example for a (3,4) vsplice on 2 GPUs:
@@ -76,7 +76,7 @@ func (v *vSplice) Free() {
 		slice := v.Comp[i].slice
 		for j := range slice {
 			// The slice must not be freed because the underlying list has already been freed.
-			slice[j].ctx = cu.Context(0)
+			slice[j].devId = -1 // invalid id 
 			slice[j].stream.Destroy()
 		}
 	}

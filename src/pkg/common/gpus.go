@@ -130,6 +130,15 @@ func assureContext(ctx cu.Context) {
 	}
 }
 
+// Assures Context ctx[id] is currently active. Switches contexts only when necessary.
+func assureContextId(deviceId int){
+	ctx := _deviceCtxs[deviceId]
+	if _currentCtx != ctx {
+		ctx.SetCurrent()
+		_currentCtx = ctx
+	}
+}
+
 // Returns the current context
 func getContext() cu.Context {
 	return _currentCtx
