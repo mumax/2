@@ -10,10 +10,9 @@ package common
 // This file provides sizes of C data types.
 // Author: Arne Vansteenkiste
 
-import (
-)
+import ()
 
 // C data type size in bytes.
-const(
+const (
 	SIZEOF_FLOAT = 4
 )

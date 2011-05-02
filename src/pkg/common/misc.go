@@ -36,5 +36,3 @@ func ErrCat(a, b os.Error) os.Error {
 	}
 	return nil
 }
-
-

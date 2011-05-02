@@ -18,7 +18,7 @@ import (
 
 // Sets up a default logger that prints to screen but not file.
 // Use InitLogger(file) to override.
-func init(){
+func init() {
 	InitLogger("")
 }
 
