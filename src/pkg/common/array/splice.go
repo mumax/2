@@ -7,7 +7,7 @@
 
 // This files implements distributed memory over multiple GPUs
 // When working with multiple GPUs, there is no notion of "current" device,
-// hence these functions are allowed to change CUDAs current device (as returned by cuda.GetDevice())
+// hence these functions are allowed to change CUDA's current device (as returned by cuda.GetDevice())
 // Author: Arne Vansteenkiste
 
 package common
@@ -28,9 +28,6 @@ type slice struct {
 	stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
-
-//func (s *slice) String() string {
-//}
 
 // Allocates and initiates a new slice. See slice.Init().
 func newSlice(deviceId int, length int) *slice {
@@ -61,28 +58,19 @@ func (b *slice) initSlice(a *slice, start, stop int) {
 	}
 	assureContext(a.ctx)
 	b.array = cu.DevicePtr(offset(uintptr(a.array), start*SIZEOF_FLOAT))
-	b.length = stop-start
+	b.length = stop - start
 	b.ctx = a.ctx
 	b.stream = cu.StreamCreate()
 }
 
-func offset(ptr uintptr, bytes int)uintptr{
-	return ptr+uintptr(bytes)
+// Pointer arithmetic.
+func offset(ptr uintptr, bytes int) uintptr {
+	return ptr + uintptr(bytes)
 }
 
-// Make sure the current CUDA device is deviceId.
-// Returns the previous device ID.
-//func assureDevice(deviceId int) (prevDevice int) {
-//	prevDevice = cu.GetDevice()
-//	if prevDevice != deviceId {
-//		cu.SetDevice(deviceId)
-//	}
-//	return
-//}
 
 func (s *slice) free() {
-	// Switch device context if necessary
-	assureContext(s.ctx)
+	//assureContext(s.ctx) // seems not necessary.
 	s.array.Free()
 	s.stream.Destroy()
 	s.ctx = cu.Context(0)
