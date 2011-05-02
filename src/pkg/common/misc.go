@@ -23,6 +23,13 @@ func ReplaceExt(filename, newext string) string {
 }
 
 
+// Gets the directory where the executable is located.
+func GetExecDir() string{
+	dir, err := os.Readlink("/proc/self/exe")
+	CheckErr(err, ERR_IO)
+	return Parent(dir)
+}
+
 // Combines two Errors into one.
 // If a and b are nil, the returned error is nil.
 // If either is not nil, it is returned.

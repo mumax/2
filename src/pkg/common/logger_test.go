@@ -18,4 +18,5 @@ func TestLogger(t *testing.T) {
 	Println("Normal log message")
 	Warning("Warning log message")
 	Debug("Debug log message")
+	Debug("Executable directory: ", GetExecDir())
 }
