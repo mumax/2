@@ -33,7 +33,7 @@ type MethodWrapper struct {
 
 // Implements Caller
 func (m *MethodWrapper) Call(args []reflect.Value) []reflect.Value {
-	methargs := make([]reflect.Value, len(args)+1) // todo: buffer in method struct
+	methargs := make([]reflect.Value, len(args)+1) // TODO(a): buffer in method struct
 	methargs[0] = m.reciever
 	for i, arg := range args {
 		methargs[i+1] = arg
