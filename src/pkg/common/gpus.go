@@ -56,12 +56,12 @@ func InitMultiGPU(devices []int, flags uint) {
 		Debug("Enabling device peer-to-peer access")
 		for i := range _deviceCtxs {
 			dev := cu.DeviceGet(_useDevice[i])
-			Debug("Device ", i, "UNIFIED_ADDRESSING:", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
+			//Debug("Device ", i, "UNIFIED_ADDRESSING:", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
 			if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
 				panic(ERR_UNIFIED_ADDR)
 			}
 			for j := range _deviceCtxs {
-				Debug("CanAccessPeer", i, j, ":", cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])))
+				//Debug("CanAccessPeer", i, j, ":", cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])))
 				if i != j {
 					if !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
 						panic(ERR_UNIFIED_ADDR)
