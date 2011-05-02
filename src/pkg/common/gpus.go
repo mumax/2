@@ -61,7 +61,7 @@ func InitMultiGPU(devices []int, flags uint) {
 				panic(ERR_UNIFIED_ADDR)
 			}
 			for j := range _deviceCtxs {
-				if !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
+				if i!=j && !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
 					panic(ERR_UNIFIED_ADDR)
 				}
 			}
