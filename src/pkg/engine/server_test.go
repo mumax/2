@@ -1,4 +1,4 @@
-//  This file is part of MuMax, a high-performance micromagnetic simulator.
+//  This file is part of MuMax, a high-perfomrance micromagnetic simulator.
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
@@ -7,12 +7,19 @@
 
 package engine
 
-// This file implements the simulation engine server. The engine stores the
-// entire simulation state and provides RPC methods to run the simulation.
-// An engine server serves an engine client, which in turn exposes the client API
-// to a driver program written in a scripting language.
 // Author: Arne Vansteenkiste
 
-type Server struct {
-	Universe
+import (
+	"testing"
+	"fmt"
+)
+
+func TestServer(t *testing.T) {
+	var s Server
+	s.Init([]int{4, 16, 32}, []int{0, 0, 0}, true, false)
+	s.AddField("m", 3)
+	s.AddValue("alpha", 1)
+	fmt.Println(&s)
+
+
 }

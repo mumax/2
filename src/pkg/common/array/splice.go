@@ -24,8 +24,8 @@ import (
 type slice struct {
 	array  cu.DevicePtr // Access to the array on the GPU.
 	length int          // Number of floats
-	ctx    cu.Context
-	stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
+	ctx    cu.Context   // CUDA context of this slice's allocation
+	stream cu.Stream    // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
 

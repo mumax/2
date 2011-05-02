@@ -9,15 +9,15 @@ package engine
 
 // Author: Arne Vansteenkiste
 
-import (
-	"testing"
-	"fmt"
-)
-
-func TestUniverse(t *testing.T) {
-	var u Universe
-	u.Init([]int{4, 16, 32}, []int{0, 0, 0})
-	u.AddField("m", 3)
-	u.AddValue("alpha", 1)
-	fmt.Println(&u)
-}
+//import (
+//	"testing"
+//	"fmt"
+//)
+//
+//func TestUniverse(t *testing.T) {
+//	var u Universe
+//	u.Init([]int{4, 16, 32}, []int{0, 0, 0}, true, false)
+//	u.AddField("m", 3)
+//	u.AddValue("alpha", 1)
+//	fmt.Println(&u)
+//}

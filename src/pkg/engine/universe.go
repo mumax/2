@@ -37,25 +37,37 @@ type Universe struct {
 
 	// Fields
 	fields []*Field
+
+	_initiated bool // already initiated?
 }
 
 
-func (u *Universe) Init(size3D, periodic []int) {
+func (u *Universe) Init(size3D, periodic []int, volumeNodes, surfaceNodes bool) {
+	if u._initiated{
+		panic(InputErr(UNIVERSE_ALREADY_INITIATED))
+	}
 	Assert(len(size3D) == 3)
 	Assert(len(periodic) == 3)
 	u.size3D = u._size3D[:]
 	u.periodic = u._periodic[:]
 	copy(u.size3D, size3D)
 	copy(u.periodic, periodic)
-	u.hasVolumeNodes = true
-	u.hasSurfaceNodes = false
+	u.hasVolumeNodes = volumeNodes
+	u.hasSurfaceNodes = surfaceNodes
+	u._initiated = true
 }
 
 
+// Error message.
+const UNIVERSE_ALREADY_INITIATED = "Universe already initiated"
+
+
+// Returns whether the universe holds volume nodes.
 func (u *Universe) HasVolumeNodes() bool {
 	return u.hasVolumeNodes
 }
 
+// Returns whether the universe holds surface nodes.
 func (u *Universe) HasSurfaceNodes() bool {
 	return u.hasSurfaceNodes
 }

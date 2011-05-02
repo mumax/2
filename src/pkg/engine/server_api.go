@@ -11,10 +11,10 @@ package engine
 // These methods are accessible to the outside world via RPC.
 // Author: Arne Vansteenkiste
 
-// engine.API and engine.Server are the same data structure, 
+// engine.API and engine.Client are the same data structure, 
 // but API exports only the publicly available functions.
-type API Server
+type API Client
 
-func (eng *API) SetGridSize(Nx, Ny, Nz int) {
-
-}
+//func (eng *API) SetGridSize(Nx, Ny, Nz int) {
+//	(*Client)(eng).Init([]int{Nz, Ny, Nx}, []int{0, 0, 0}, true, false)
+//}
