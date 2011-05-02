@@ -16,6 +16,12 @@ import (
 	"os"
 )
 
+// Sets up a default logger that prints to screen but not file.
+// Use InitLogger(file) to override.
+func init(){
+	InitLogger("")
+}
+
 // INTERNAL global logger
 var logger Logger
 

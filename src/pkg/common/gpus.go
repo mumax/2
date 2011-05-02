@@ -29,6 +29,7 @@ var _currentCtx cu.Context
 // Sets a list of devices to use.
 func InitMultiGPU(devices []int, flags uint) {
 	Debug("InitMultiGPU ",devices, flags )
+	Assert(len(devices)>0)
 	Assert(_useDevice == nil)
 	N := cu.DeviceGetCount()
 	for _, n := range devices {
@@ -36,10 +37,12 @@ func InitMultiGPU(devices []int, flags uint) {
 			panic(InputErr(MSG_BADDEVICEID + fmt.Sprint(n)))
 		}
 	}
+	_useDevice = make([]int, len(devices))
 	copy(_useDevice, devices)
 
 	// setup contexts
-	_deviceCtxs = make([]cu.Context, len(devices))
+	_deviceCtxs = make([]cu.Context, len(_useDevice))
+	fmt.Println("_useDevice: ", _useDevice, " deviceCtxs: ", _deviceCtxs)
 	for i := range _deviceCtxs {
 		_deviceCtxs[i] = cu.CtxCreate(flags, cu.DeviceGet(_useDevice[i]))
 	}
