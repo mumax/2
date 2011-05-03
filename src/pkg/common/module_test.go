@@ -15,16 +15,15 @@ import (
 
 
 func TestModule(test *testing.T) {
-	m :=	ModuleLoad(GetExecDir() + "testmodule.ptx")
+	m := ModuleLoad(GetExecDir() + "testmodule.ptx")
 	c := m.MakeClosure("testMemset", 3)
 
 	dev := NewArray(1, []int{4, 4, 4})
 
-	for i := range c.DeviceClosure{
+	for i := range c.DeviceClosure {
 		c.DeviceClosure[i].SetArg(0, float32(42))
 		c.DeviceClosure[i].SetArg(1, dev.DevicePtr(i))
 		c.DeviceClosure[i].SetArg(2, dev.splice.list.slice[i].Len())
 	}
 
-		
 }

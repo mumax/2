@@ -10,15 +10,14 @@ package common
 // This file implents 3-dimensional arrays of N-vectors on the host.
 // Author: Arne Vansteenkiste
 
-import (
-)
+import ()
 
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 type HostArray struct {
-	List []float32 // Underlying storage
+	List  []float32 // Underlying storage
 	Array [][][][]float32
-	Comp [][]float32
+	Comp  [][]float32
 }
 
 
@@ -34,5 +33,3 @@ func NewHostArray(components int, size3D []int) *HostArray {
 	t.Init(components, size3D)
 	return t
 }
-
-

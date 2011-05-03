@@ -24,7 +24,7 @@ import (
 type slice struct {
 	array  cu.DevicePtr // Access to the array on the GPU.
 	length int          // Number of floats
-	devId    int   // index of CUDA context of this slice's allocation
+	devId  int          // index of CUDA context of this slice's allocation
 	stream cu.Stream    // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
@@ -77,7 +77,7 @@ func (s *slice) free() {
 }
 
 
-func (s *slice) Len() int{
+func (s *slice) Len() int {
 	return s.length
 }
 

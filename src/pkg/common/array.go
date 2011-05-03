@@ -55,7 +55,7 @@ func (t *Array) Free() {
 
 
 // Address of part of the array on device deviceId
-func (a *Array) DevicePtr(deviceId int) cu.DevicePtr{
+func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
 	return a.splice.list.slice[deviceId].array
 }
 

@@ -17,7 +17,7 @@
 package common
 
 import (
-	//cu "cuda/driver"
+//cu "cuda/driver"
 )
 
 // Layout example for a (3,4) vsplice on 2 GPUs:
