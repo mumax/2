@@ -27,7 +27,7 @@ func TestModule(test *testing.T) {
 		c.DeviceClosure[i].SetArg(1, dev.DevicePtr(i))
 		c.DeviceClosure[i].SetArg(2, dev.splice.list.slice[i].Len())
 		c.DeviceClosure[i].BlockDim[0] = 128
-		c.DeviceClosure[i].GridDim[0] = DivUp(Prod(size), 128)
+		c.DeviceClosure[i].GridDim[0] = DivUp(Prod(size)/DeviceCount(), 128)
 	}
 
 	c.Call()
