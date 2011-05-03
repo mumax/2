@@ -117,6 +117,7 @@ func (dst *vSplice) CopyFromDevice(src *vSplice) {
 
 func (dst *vSplice) CopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
+	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
 		Assert(dst.Comp[i].length == len(src[i])) // TODO(a): redundant
 		dst.Comp[i].CopyFromHost(src[i])

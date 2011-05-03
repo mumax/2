@@ -74,4 +74,12 @@ func (dst *Array) CopyFromDevice(src *Array) {
 }
 
 
+func (dst *Array) CopyFromHost(src *HostArray) {
+	(&(dst.splice)).CopyFromHost(src.Comp)
+}
+
+func (dst *HostArray) CopyFromDevice(src *Array) {
+	(&(src.splice)).CopyToHost(dst.Comp)
+}
+
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"

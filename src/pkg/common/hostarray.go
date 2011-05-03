@@ -16,24 +16,16 @@ import (
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 type HostArray struct {
-	list []float32 // Underlying storage
-	array [][][][]float32
-	_size  [4]int  // INTERNAL {components, size0, size1, size2}
-	size4D []int   // {components, size0, size1, size2}
-	size3D []int   // {size0, size1, size2}
+	List []float32 // Underlying storage
+	Array [][][][]float32
+	Comp [][]float32
 }
 
 
 func (t *HostArray) Init(components int, size3D []int) {
 	Assert(len(size3D) == 3)
-
-	t._size[0] = components
-	for i := range size3D {
-		t._size[i+1] = size3D[i]
-	}
-	t.size4D = t._size[:]
-	t.size3D = t._size[1:]
-	t.list, t.array = Array4D(t._size[0], t._size[1], t._size[2], t._size[3])
+	t.List, t.Array = Array4D(components, size3D[0], size3D[1], size3D[2])
+	t.Comp = Slice2D(t.List, []int{components, Prod(size3D)})
 }
 
 
