@@ -12,7 +12,7 @@ extern "C" {
 #define threadindex ( ( blockIdx.y*gridDim.x + blockIdx.x ) * blockDim.x + threadIdx.x )
 
 /// Sets the first N elements of array to value.
-__global__ void testMemset(float* array, float value, int N){
+__global__ void testMemset(float value, float* array, int N){
 	int i = threadindex;
 	if(i < N){
 		array[i] = value;

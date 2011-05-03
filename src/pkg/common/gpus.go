@@ -131,7 +131,7 @@ func assureContext(ctx cu.Context) {
 }
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
-func assureContextId(deviceId int){
+func assureContextId(deviceId int) {
 	ctx := _deviceCtxs[deviceId]
 	if _currentCtx != ctx {
 		ctx.SetCurrent()
@@ -154,7 +154,7 @@ func getDevices() []int {
 
 
 // Returns the number of used GPUs.
-func DeviceCount() int{
+func DeviceCount() int {
 	return len(_useDevice)
 }
 

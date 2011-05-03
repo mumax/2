@@ -77,6 +77,11 @@ func (s *slice) free() {
 }
 
 
+func (s *slice) Len() int{
+	return s.length
+}
+
+
 // A Splice represents distributed GPU memory in a transparent way.
 type splice struct {
 	slice  []slice // Arrays on different GPUs, each holding a part of the data

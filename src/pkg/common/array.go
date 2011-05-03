@@ -10,7 +10,9 @@ package common
 // This file implents 3-dimensional arrays of N-vectors on the GPU
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	cu "cuda/driver"
+)
 
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
@@ -49,6 +51,12 @@ func (t *Array) Free() {
 		t._size[i] = 0
 	}
 	t.length = 0
+}
+
+
+// Address of part of the array on device deviceId
+func (a *Array) DevicePtr(deviceId int) cu.DevicePtr{
+	return a.splice.list.slice[deviceId].array
 }
 
 func (a *Array) IsNil() bool {

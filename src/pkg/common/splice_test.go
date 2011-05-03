@@ -24,13 +24,13 @@ const BIG = 32 * 1024 * 1024
 
 // Test if getDevices() works
 func TestDevices(t *testing.T) {
-//	devices := getDevices()
-//	for i, _ := range devices {
-//		//fmt.Println("Device ", i)
-//		//fmt.Println(cuda.GetDeviceProperties(d))
-//		//fmt.Println()
-//		//fmt.Println()
-//	}
+	//	devices := getDevices()
+	//	for i, _ := range devices {
+	//		//fmt.Println("Device ", i)
+	//		//fmt.Println(cuda.GetDeviceProperties(d))
+	//		//fmt.Println()
+	//		//fmt.Println()
+	//	}
 }
 
 // Test splice alloc/free
