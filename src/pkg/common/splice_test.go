@@ -21,7 +21,7 @@ func init() {
 	InitDebugGPUs()
 }
 
-const BIG = 256 * 1024 * 1024
+const BIG = 32 * 1024 * 1024
 
 // Test if getDevices() works
 func TestDevices(t *testing.T) {
