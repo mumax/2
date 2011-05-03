@@ -1,32 +1,32 @@
-.PHONY: main
-main:
+.PHONY: all
+all:
 	make clean
 	make pkgs
-	make -C main
+	#make -C main
 
 pkgs:
 	make -C common
-	make -C refsh
-	make -C engine
+	#make -C refsh
+	#make -C engine
 
 test:	install
 	make test -C common
-	make test -C refsh
-	make test -C engine
+	#make test -C refsh
+	#make test -C engine
 
 bench:	install
 	make bench -C common
-	make bench -C refsh
-	make bench -C engine
+	#make bench -C refsh
+	#make bench -C engine
 
 install:
 	make install -C common
-	make install -C refsh
-	make install -C engine
+	#make install -C refsh
+	#make install -C engine
 
 .PHONY: clean
 clean:
 	make clean -C common
-	make clean -C refsh
-	make clean -C engine
-	make clean -C main
+	#make clean -C refsh
+	#make clean -C engine
+	#make clean -C main
