@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# File to be located in .git/hooks/pre-commit.
-#
 # An example hook script to verify what is about to be committed.
 # Called by git-commit with no arguments.  The hook should
 # exit with non-zero status after issuing an appropriate message if
@@ -9,4 +7,15 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-make test
+rm test.log -r
+if (make test 2>> test.log >> test.log); then
+	echo PASS
+	exit 0;
+else
+	cat test.log;
+	echo
+	echo Commit aborted due to failed tests
+	echo
+	exit 2;
+fi;
+
