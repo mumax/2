@@ -16,9 +16,11 @@ GOFILES=\
 	sizes.go\
 	gpus.go\
 	array.go\
+	hostarray.go\
 	array/splice.go\
 	array/vsplice.go\
 	array/spliceio.go\
+	array/arrayslice.go\
 	module.go\
 
 CGOFILES=\
