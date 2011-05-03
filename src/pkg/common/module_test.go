@@ -11,6 +11,7 @@ package common
 
 import (
 	"testing"
+	"fmt"
 )
 
 
@@ -18,12 +19,25 @@ func TestModule(test *testing.T) {
 	m := ModuleLoad(GetExecDir() + "testmodule.ptx")
 	c := m.MakeClosure("testMemset", 3)
 
-	dev := NewArray(1, []int{4, 4, 4})
+	size := []int{4, 8, 128}
+	dev := NewArray(1, size)
 
 	for i := range c.DeviceClosure {
 		c.DeviceClosure[i].SetArg(0, float32(42))
 		c.DeviceClosure[i].SetArg(1, dev.DevicePtr(i))
 		c.DeviceClosure[i].SetArg(2, dev.splice.list.slice[i].Len())
+		c.DeviceClosure[i].BlockDim[0] = 128
+		c.DeviceClosure[i].GridDim[0] = DivUp(Prod(size), 128)
 	}
 
+	c.Call()
+
+	host := dev.LocalCopy()
+	for _,h := range host.List{
+		if h !=	42 {
+		fmt.Println(host.Array)
+		test.Fail()
+		break
+		}
+	}
 }

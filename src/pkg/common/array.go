@@ -54,15 +54,25 @@ func (t *Array) Free() {
 }
 
 
-// Address of part of the array on device deviceId
+// Address of part of the array on device deviceId.
 func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
 	return a.splice.list.slice[deviceId].array
 }
 
+// True if unallocated/freed.
 func (a *Array) IsNil() bool {
 	return a.splice.IsNil()
 }
 
+// Number of components (1: scalar, 3: vector, ...).
+func (a *Array) NComp() int {
+	return a._size[0]
+}
+
+// Size of the vector field
+func (a *Array) Size3D() []int {
+	return a.size3D
+}
 func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size
 	for i, d := range dst._size {
@@ -80,6 +90,14 @@ func (dst *Array) CopyFromHost(src *HostArray) {
 
 func (dst *HostArray) CopyFromDevice(src *Array) {
 	(&(src.splice)).CopyToHost(dst.Comp)
+}
+
+
+// DEBUG: Make a freshly allocated copy on the host.
+func (src *Array) LocalCopy() *HostArray{
+	host := NewHostArray(src.NComp(), src.Size3D())
+	host.CopyFromDevice(src)
+	return host
 }
 
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"

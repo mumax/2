@@ -15,14 +15,9 @@ import (
 )
 
 
-// Size, in bytes, of a C single-precision float
-const SIZEOF_CFLOAT = 4
-
-
-// Go equivalent of &array[index] (for a float array).
-func ArrayOffset(array uintptr, index int) uintptr {
-	return uintptr(array + uintptr(SIZEOF_CFLOAT*index))
-
+// Integer division rounded up
+func DivUp(x, y int) int {
+	return ((x - 1) / y) + 1
 }
 
 
