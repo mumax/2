@@ -14,9 +14,9 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	InitLogger("test.log")
-	Println("Normal log message")
-	Warning("Warning log message")
-	Debug("Debug log message")
-	Debug("Executable directory: ", GetExecDir())
+//	InitLogger("test.log")
+//	Println("Normal log message")
+//	Warning("Warning log message")
+//	Debug("Debug log message")
+//	Debug("Executable directory: ", GetExecDir())
 }
