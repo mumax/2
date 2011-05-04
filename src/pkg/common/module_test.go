@@ -41,3 +41,8 @@ func TestModule(test *testing.T) {
 		}
 	}
 }
+
+
+func TestPTXParse(test *testing.T) {
+	fmt.Println(parsePTXArgTypes(GetExecDir() + "testmodule.ptx"))
+}

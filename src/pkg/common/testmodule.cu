@@ -19,6 +19,11 @@ __global__ void testMemset(float value, float* array, int N){
 	}
 }
 
+/// DEBUG: used to find out the type names from PTX assembly.
+__global__ void testTypes(int INT, long long int INT64, float FLOAT, double DOUBLE, float* FLOATPTR, void* VOIDPTR){
+
+}
+
 
 #ifdef __cplusplus
 }

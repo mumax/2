@@ -4,7 +4,7 @@
 	// nvopencc 4.0 built on 2011-03-20
 
 	//-----------------------------------------------------------
-	// Compiling /tmp/tmpxft_00007aef_00000000-9_testmodule.cpp3.i (/tmp/ccBI#.2LU4Sa)
+	// Compiling /tmp/tmpxft_00002799_00000000-9_testmodule.cpp3.i (/tmp/ccBI#.atykPu)
 	//-----------------------------------------------------------
 
 	//-----------------------------------------------------------
@@ -17,7 +17,7 @@
 	//-----------------------------------------------------------
 
 	.file	1	"<command-line>"
-	.file	2	"/tmp/tmpxft_00007aef_00000000-8_testmodule.cudafe2.gpu"
+	.file	2	"/tmp/tmpxft_00002799_00000000-8_testmodule.cudafe2.gpu"
 	.file	3	"/usr/lib/x86_64-linux-gnu/gcc/x86_64-linux-gnu/4.4.5/include/stddef.h"
 	.file	4	"/usr/local/cuda/bin/../include/crt/device_runtime.h"
 	.file	5	"/usr/local/cuda/bin/../include/host_defines.h"
@@ -82,4 +82,19 @@ $Lt_0_1026:
 	exit;
 $LDWend_testMemset:
 	} // testMemset
+
+	.entry testTypes (
+		.param .s32 __cudaparm_testTypes_INT,
+		.param .s64 __cudaparm_testTypes_INT64,
+		.param .f32 __cudaparm_testTypes_FLOAT,
+		.param .f64 __cudaparm_testTypes_DOUBLE,
+		.param .u64 __cudaparm_testTypes_FLOATPTR,
+		.param .u64 __cudaparm_testTypes_VOIDPTR)
+	{
+	.loc	16	23	0
+$LDWbegin_testTypes:
+	.loc	16	25	0
+	exit;
+$LDWend_testTypes:
+	} // testTypes
 
