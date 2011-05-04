@@ -7,7 +7,7 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-rm test.log -r
+rm test.log -rf
 if (make test 2>> test.log >> test.log); then
 	echo PASS
 	exit 0;
