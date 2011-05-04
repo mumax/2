@@ -5,6 +5,9 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+// This files provides the package documentation
+// Author: Arne Vansteenkiste
+
 // Package with GPU primitives like array allocation, copying, ...
 //
 // 3D Array indexing.
@@ -32,5 +35,3 @@
 // In the J-direction.
 package gpu
 
-// This files provides the package documentation
-// Author: Arne Vansteenkiste
