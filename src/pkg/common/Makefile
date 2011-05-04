@@ -22,6 +22,7 @@ GOFILES=\
 	array/spliceio.go\
 	array/arrayslice.go\
 	module.go\
+	ptxparser.go\
 
 CGOFILES=\
 

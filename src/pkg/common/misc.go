@@ -1,5 +1,5 @@
 //  This file is part of MuMax, a high-performance micromagnetic simulator.
-//  Copyright 2010  Arne Vansteenkiste
+//  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
@@ -18,11 +18,8 @@ import (
 
 // Go equivalent of &array[index] (for a float array).
 func ArrayOffset(array uintptr, index int) uintptr {
-	return uintptr(array + uintptr(SIZEOF_CFLOAT*index))
+	return uintptr(array + uintptr(SIZEOF_FLOAT*index))
 }
-
-// Size, in bytes, of a C single-precision float
-const SIZEOF_CFLOAT = 4
 
 
 // Replaces the extension of filename by a new one.

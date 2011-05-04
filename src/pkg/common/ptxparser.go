@@ -7,16 +7,15 @@
 
 package common
 
+// This file implements parsing of PTX assembly files to extract the function argument types.
 // Author: Arne Vansteenkiste
 
 import (
-	"testing"
 )
 
-func TestLogger(t *testing.T) {
-	//	InitLogger("test.log")
-	//	Println("Normal log message")
-	//	Warning("Warning log message")
-	//	Debug("Debug log message")
-	//	Debug("Executable directory: ", GetExecDir())
-}
+type Kind int
+
+// Argument type of PTX function
+const(
+	invalid Kind = iota
+)	

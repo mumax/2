@@ -7,7 +7,7 @@
 
 package common
 
-// This file implents 3-dimensional arrays of N-vectors on the host.
+// This file implements 3-dimensional arrays of N-vectors on the host.
 // Author: Arne Vansteenkiste
 
 import ()

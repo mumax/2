@@ -7,23 +7,27 @@
 
 // 3D Array indexing
 //
-// Internal dimensions are labeled (0,1,2), 0 being the outermost dimension, 2 the innermost.
-// A typical loop thus reads:
+// Internal dimensions are labeled (I,J,K), I being the outermost dimension, K the innermost.
+// A typical loop reads:
 //	for i:=0; i<N0; i++{
 //		for j:=0; j<N1; j++{
 //			for k:=0; k<N2; k++{
-//
+//				...
 //			}
 //		}
 //	}
 //
-// 0 may be a small dimension, but 2 must preferentially be large and alignable in CUDA memory.
+// I may be a small dimension, but K must preferentially be large and align-able in CUDA memory.
 //
 // The underlying contiguous storage is indexed as:
 // 	index := i*N1*N2 + j*N2 + k
 //
-// The "internal" (0,1,2) dimensions correspond to the "user" dimensions (Z,Y,X)!
+// The "internal" (I,J,K) dimensions correspond to the "user" dimensions (Z,Y,X)!
 // Z is typically the smallest dimension like the thickness.
+//
+// Slicing the geometry over multiple GPUs
+//
+// In the J-direction.
 package common
 
 // This files provides the package documentation
