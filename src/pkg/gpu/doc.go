@@ -5,7 +5,9 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// 3D Array indexing
+// Package with GPU primitives like array allocation, copying, ...
+//
+// 3D Array indexing.
 //
 // Internal dimensions are labeled (I,J,K), I being the outermost dimension, K the innermost.
 // A typical loop reads:
