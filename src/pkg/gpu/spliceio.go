@@ -8,9 +8,10 @@
 // This files implements splice I/O
 // Author: Arne Vansteenkiste
 
-package common
+package gpu
 
 import (
+	. "mumax/common"
 	"io"
 	"os"
 	"fmt"

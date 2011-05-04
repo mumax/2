@@ -28,7 +28,7 @@
 // Slicing the geometry over multiple GPUs
 //
 // In the J-direction.
-package common
+package gpu
 
 // This files provides the package documentation
 // Author: Arne Vansteenkiste

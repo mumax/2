@@ -14,10 +14,11 @@
 //
 // Author: Arne Vansteenkiste
 
-package common
+package gpu
 
 import (
-//cu "cuda/driver"
+	. "mumax/common"
+	//cu "cuda/driver"
 )
 
 // Layout example for a (3,4) vsplice on 2 GPUs:

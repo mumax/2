@@ -1,23 +1,27 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=mumax/common
+TARG=mumax/gpu
 
 GOFILES=\
-	assert.go\
-	error.go\
-	logger.go\
-	math.go\
-	io.go\
-	pipe.go\
-	strconv.go\
-	misc.go\
-	sizes.go\
+	doc.go\
+	gpus.go\
+	array.go\
+	hostarray.go\
+	splice.go\
+	vsplice.go\
+	spliceio.go\
+	arrayslice.go\
+	module.go\
+	module_ptxparse.go\
 
 CGOFILES=\
 
-#GC+=\
+GC+=\
+	-I../common/_obj\
+
 #LD+=\
+
 #CGO_CFLAGS+=-I/usr/local/cuda/include/
 #CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -lcudart
 

@@ -5,12 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package common
+package gpu
 
 // This file implements parsing of PTX assembly files to extract the function argument types.
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	"io/ioutil"
 	"strings"
 	//"fmt"

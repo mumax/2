@@ -10,9 +10,10 @@
 // hence these functions are allowed to change CUDA's current device (as returned by cuda.GetDevice())
 // Author: Arne Vansteenkiste
 
-package common
+package gpu
 
 import (
+	. "mumax/common"
 	cu "cuda/driver"
 	//"fmt"
 )
