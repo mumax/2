@@ -8,6 +8,7 @@ GOFILES=\
 	gpus.go\
 	array.go\
 	hostarray.go\
+	slice.go\
 	splice.go\
 	vsplice.go\
 	spliceio.go\

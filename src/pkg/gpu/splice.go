@@ -15,72 +15,7 @@ package gpu
 import (
 	. "mumax/common"
 	cu "cuda/driver"
-	//"fmt"
 )
-
-
-// Slices are the building blocks of Splices.
-// A Slice resides on a single GPU. Multiple
-// slices are combined into a splice.
-type slice struct {
-	array  cu.DevicePtr // Access to the array on the GPU.
-	length int          // Number of floats
-	devId  int          // index of CUDA context of this slice's allocation
-	stream cu.Stream    // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
-}
-
-
-// Allocates and initiates a new slice. See slice.Init().
-func newSlice(deviceId int, length int) *slice {
-	s := new(slice)
-	s.init(deviceId, length)
-	return s
-}
-
-
-// Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *slice) init(deviceId int, length int) {
-	Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
-
-	// Switch device context if necessary
-	assureContext(getDeviceContext(deviceId))
-
-	s.devId = deviceId
-	s.stream = cu.StreamCreate()
-	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(length))
-	s.length = length
-}
-
-
-// Takes a sub-slice.
-func (b *slice) initSlice(a *slice, start, stop int) {
-	if b.array != cu.DevicePtr(uintptr(0)) {
-		panic("cuda slice already initialized")
-	}
-	assureContextId(a.devId)
-	b.array = cu.DevicePtr(offset(uintptr(a.array), start*SIZEOF_FLOAT))
-	b.length = stop - start
-	b.devId = a.devId
-	b.stream = cu.StreamCreate()
-}
-
-// Pointer arithmetic.
-func offset(ptr uintptr, bytes int) uintptr {
-	return ptr + uintptr(bytes)
-}
-
-
-func (s *slice) free() {
-	assureContextId(s.devId) // necessary in a multi-GPU context
-	s.array.Free()
-	s.stream.Destroy()
-	s.devId = -1 // invalid id to make sure it's not used
-}
-
-
-func (s *slice) Len() int {
-	return s.length
-}
 
 
 // A Splice represents distributed GPU memory in a transparent way.
