@@ -113,7 +113,10 @@ func (src *Array) LocalCopy() *HostArray {
 func (a *Array) Zero(){
     slices := a.splice.list.slice
 	for i:=range slices{
-		cu.MemsetD32(slices[i].array, 0, int64(slices[i].length))
+		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
+	}
+	for i:=range slices{
+		slices[i].stream.Synchronize()
 	}
 }
 
