@@ -5,3 +5,8 @@ ptxfiles=\
 #	nvcc -ptx testmodule.cu
 
 all: ptxfiles
+
+.PHONY: clean
+clean:
+	rm -f *.ptx
+
