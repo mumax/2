@@ -7,7 +7,7 @@
 
 package gpu
 
-// This file implents 3-dimensional arrays of N-vectors on the GPU
+// This file implements 3-dimensional arrays of N-vectors on the GPU
 // Author: Arne Vansteenkiste
 
 import (
