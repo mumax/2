@@ -39,6 +39,7 @@ func (t *Array) Init(components int, size3D []int) {
 	}
 	t.size4D = t._size[:]
 	t.size3D = t._size[1:]
+	t.Zero()
 }
 
 
@@ -106,6 +107,14 @@ func (src *Array) LocalCopy() *HostArray {
 	host := NewHostArray(src.NComp(), src.Size3D())
 	host.CopyFromDevice(src)
 	return host
+}
+
+
+func (a *Array) Zero(){
+    slices := a.splice.list.slice
+	for i:=range slices{
+		cu.MemsetD32(slices[i].array, 0, int64(slices[i].length))
+	}
 }
 
 // Error message.

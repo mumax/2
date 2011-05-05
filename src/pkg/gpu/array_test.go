@@ -25,6 +25,28 @@ func TestArrayAlloc(t *testing.T) {
 }
 
 
+// Should init to zeros
+func TestArrayInit(test *testing.T) {
+	size := []int{4, 8, 16}
+	host1  := NewHostArray(3, size)
+	dev1 := NewArray(3, size)
+
+	l1 := host1.List
+	for i := range l1 {
+		l1[i] = float32(i)
+	}
+
+	host1.CopyFromDevice(dev1)
+
+	l2 := host1.List
+	for i := range l1 {
+		if l2[i] != 0{
+			test.Fail()
+		}
+	}
+}
+
+
 func TestArrayCopy(test *testing.T) {
 	size := []int{4, 8, 16}
 	host1, host2 := NewHostArray(3, size), NewHostArray(3, size)
