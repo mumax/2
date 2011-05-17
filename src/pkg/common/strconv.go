@@ -17,12 +17,6 @@ import (
 
 // Safe strconv.Atof32
 func Atof32(s string) float32 {
-	//if str == "inf" || str == "Inf"{
-	//	return float32(math.Inf(1))
-	//}
-	//if str == "-inf" || str == "-Inf"{
-	//	return float32(math.Inf(-1))
-	//}
 	f, err := strconv.Atof32(s)
 	if err != nil {
 		panic(InputErr(err.String()))
@@ -59,12 +53,6 @@ func Atoi64(str string) int64 {
 
 // Safe strconv.Atof64
 func Atof64(str string) float64 {
-	//if str == "inf" || str == "Inf"{
-	//	return math.Inf(1)
-	//}
-	//if str == "-inf" || str == "-Inf"{
-	//	return math.Inf(-1)
-	//}
 	i, err := strconv.Atof64(str)
 	if err != nil {
 		panic(InputErr(err.String()))
