@@ -69,22 +69,33 @@ func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
 	c.DevClosure[deviceId].SetArg(argIdx, arg)
 }
 
+
+// Asynchronous call. 
+// Executes the closure with its currently set arguments
+// and does not wait for the result.
 func (c *Closure) Go() {
 	for _, dc := range c.DevClosure {
 		dc.Go()
 	}
 }
 
+
+// Blocks until the previous Go() call has been completed.
 func (c *Closure) Synchronize() {
 	for _, dc := range c.DevClosure {
 		dc.Synchronize()
 	}
 }
 
+
+// Synchronous call. 
+// Executes the closure with its currently set arguments
+// and waits for the result.
 func (c *Closure) Call() {
 	c.Go()
 	c.Synchronize()
 }
+
 
 func (c *Closure) Configure1D(Nidx int) {
 	// fixes argument Nidx, distributing N over the GPUs
