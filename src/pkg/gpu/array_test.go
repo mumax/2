@@ -32,7 +32,9 @@ func TestArrayInit(test *testing.T) {
 	size := []int{4, 8, 16}
 	host1 := host.NewArray(3, size)
 	dev1 := NewArray(3, size)
-	if dev1.Len() != 3*Prod(size){test.Fail()}
+	if dev1.Len() != 3*Prod(size) {
+		test.Fail()
+	}
 
 	l1 := host1.List
 	for i := range l1 {

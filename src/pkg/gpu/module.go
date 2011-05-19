@@ -13,6 +13,7 @@ package gpu
 import (
 	. "mumax/common"
 	cu "cuda/driver"
+	"fmt"
 )
 
 
@@ -32,7 +33,7 @@ func Global(modname, funcname string) Closure {
 	for i := range c.DevClosure {
 		c.DevClosure[i] = cu.Close(function, len(argTypes))
 	}
-	c.ArgCount = len(argTypes)
+	c.ArgType = argTypes
 	return c
 }
 
@@ -40,21 +41,27 @@ func Global(modname, funcname string) Closure {
 // Multi-GPU analog of cuda/driver/Closure.
 type Closure struct {
 	DevClosure []cu.Closure // INTERNAL: separate closures for each GPU
-	ArgCount      int          // INTERNAL: number of function arguments
+	ArgType    []int        // INTERNAL: types of the arguments (see ptxparse)
 }
 
 
 // Sets the same argument for all GPUs.
 func (c *Closure) SetArg(argIdx int, arg interface{}) {
-	Assert(argIdx < c.ArgCount)
+	Assert(argIdx < len(c.ArgType))
+	argType := c.ArgType[argIdx]
 	for _, dc := range c.DevClosure {
-		dc.SetArg(argIdx, arg)
+		switch argType {
+		default:
+			panic(Bug(fmt.Sprintf("can not handle argument type: %v", argType)))
+		case s32:
+			dc.Seti(argIdx, arg.(int))
+		}
 	}
 }
 
 // Sets the same arguments for all GPUs.
 func (c *Closure) SetArgs(args ...interface{}) {
-	Assert(len(args) <= c.ArgCount)
+	Assert(len(args) <= len(c.ArgType))
 	for i, arg := range args {
 		for _, dc := range c.DevClosure {
 			dc.SetArg(i, arg)
@@ -64,7 +71,7 @@ func (c *Closure) SetArgs(args ...interface{}) {
 
 // Sets an argument for a specific GPU.
 func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
-	Assert(argIdx < c.ArgCount)
+	Assert(argIdx < len(c.ArgType))
 	Assert(deviceId < DeviceCount())
 	c.DevClosure[deviceId].SetArg(argIdx, arg)
 }

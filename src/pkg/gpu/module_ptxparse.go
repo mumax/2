@@ -57,12 +57,12 @@ func parsePTXArgTypes(fname string) map[string][]int {
 // Enumerates PTX argument types.
 const (
 	invalid = iota
-	s32
-	s64
-	f32
-	f64
-	u32
-	u64
+	s32     // int32
+	s64     // int64
+	f32     // float32
+	f64     // float64
+	u32     // 32-bit pointer (not used?)
+	u64     // 64-bit pointer
 )
 
 // String to PTX argument type number.
