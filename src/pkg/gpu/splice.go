@@ -48,7 +48,7 @@ func distribute(length int, devices []int) (slicelen []int) {
 	N := len(devices)
 	slicelen = make([]int, N)
 
-	// For now: equal slicing
+	// equal slicing
 	Assert(length%N == 0)
 	for i := range slicelen {
 		slicelen[i] = length / N
@@ -60,7 +60,7 @@ func distribute(length int, devices []int) (slicelen []int) {
 // Total number of float32 elements.
 func (s splice) Len() int {
 	l := 0
-	for i := range s{
+	for i := range s {
 		l += s[i].length
 	}
 	return l

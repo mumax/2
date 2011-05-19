@@ -18,7 +18,7 @@ package gpu
 
 import (
 	. "mumax/common"
-	//cu "cuda/driver"
+	cu "cuda/driver"
 )
 
 // Layout example for a (3,4) vsplice on 2 GPUs:
@@ -26,8 +26,8 @@ import (
 // GPU1: X2 X3  Y2 Y3 Z2 Z3
 //
 type vSplice struct {
-	Comp []splice // List of components, e.g. vector or tensor components
-	list splice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
+	Comp [][]slice // List of components, e.g. vector or tensor components
+	list []slice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
 }
 
 
@@ -38,18 +38,17 @@ type vSplice struct {
 func (v *vSplice) Init(components, length int) {
 	Assert(components > 0)
 
-		devices := getDevices()
+	devices := getDevices()
 	v.list = splice(make([]slice, len(devices)))
 	slicelen := distribute(components*length, devices)
 	for i := range devices {
 		v.list[i].init(devices[i], slicelen[i])
 	}
 
-
 	Ndev := len(devices)
 	compSliceLen := distribute(length, devices)
 
-	v.Comp = make([]splice, components)
+	v.Comp = make([][]slice, components)
 	//c := v.Comp
 	for i := range v.Comp {
 		//c[i].length = length
@@ -76,7 +75,11 @@ func newVSplice(components, length int) *vSplice {
 // Frees the Vector Splice.
 // This makes the Component Splices unusable.
 func (v *vSplice) Free() {
-	v.list.Free()
+	//v.list.Free()
+	for i := range v.list {
+		(&(v.list[i])).free()
+	}
+
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
 	for i := range v.Comp {
@@ -92,7 +95,7 @@ func (v *vSplice) Free() {
 
 
 func (v *vSplice) IsNil() bool {
-	return v.list.IsNil()
+	return v.list == nil
 }
 
 // Total number of float32 elements.
@@ -109,12 +112,28 @@ func (v *vSplice) NComp() int {
 
 // returns {NComp(), Len()/NComp()}
 func (v *vSplice) Size() [2]int {
-	return [2]int{len(v.Comp), v.Comp[0].Len()}
+	return [2]int{len(v.Comp), len(v.Comp[0])}
 }
 
 
 func (dst *vSplice) CopyFromDevice(src *vSplice) {
-	dst.list.CopyFromDevice(src.list)
+	//dst.list.CopyFromDevice(src.list)
+	d := dst.list
+	s := src.list
+	Assert(len(d) == len(s)) // in principle redundant
+	start := 0
+	// copies run concurrently on the individual devices
+	for i := range s {
+		length := s[i].length // in principle redundant
+		Assert(length == d[i].length)
+		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+		start += length
+	}
+	// Synchronize with all copies
+	for i := range s {
+		s[i].stream.Synchronize()
+	}
+
 }
 
 //func (src *VSplice) CopyToDevice(dst *VSplice){
@@ -126,8 +145,21 @@ func (dst *vSplice) CopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
-		Assert(dst.Comp[i].Len() == len(src[i])) // TODO(a): redundant
-		dst.Comp[i].CopyFromHost(src[i])
+		Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
+		//dst.Comp[i].CopyFromHost(src[i])
+
+		h := src[i]
+		s := dst.Comp[i]
+Assert(len(h) == len(s)) // in principle redundant
+	start := 0
+	for i := range s {
+		length := s[i].length
+		cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
+		start += length
+	}
+
+
+
 	}
 }
 
