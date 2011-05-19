@@ -29,7 +29,7 @@ func TestArrayAlloc(t *testing.T) {
 // Should init to zeros
 func TestArrayInit(test *testing.T) {
 	size := []int{4, 8, 16}
-	host1  := host.NewArray(3, size)
+	host1 := host.NewArray(3, size)
 	dev1 := NewArray(3, size)
 
 	l1 := host1.List
@@ -42,7 +42,7 @@ func TestArrayInit(test *testing.T) {
 
 	l2 := host1.List
 	for i := range l1 {
-		if l2[i] != 0{
+		if l2[i] != 0 {
 			test.Fail()
 		}
 	}

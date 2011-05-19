@@ -14,7 +14,6 @@ import (
 	. "mumax/common"
 	"io/ioutil"
 	"strings"
-	//"fmt"
 )
 
 
@@ -37,7 +36,6 @@ func parsePTXArgTypes(fname string) map[string][]int {
 	CheckErr(err, ERR_IO)
 	words := strings.Split(string(content), " ", -1)
 	for i, word := range words {
-		//fmt.Println(i, word)
 		if strings.HasSuffix(word, ".param") {
 			typ := words[i+1][1:len(words[i+1])]     // e.g. ".s32"
 			name := words[i+2]                       // e.g. "__cudaparm_funcName_ArgName"

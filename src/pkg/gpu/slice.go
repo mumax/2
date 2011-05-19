@@ -80,5 +80,3 @@ func (s *slice) free() {
 func (s *slice) Len() int {
 	return s.length
 }
-
-

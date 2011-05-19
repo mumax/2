@@ -104,7 +104,6 @@ func (src *Array) CopyToHost(dst *host.Array) {
 }
 
 
-
 // DEBUG: Make a freshly allocated copy on the host.
 func (src *Array) LocalCopy() *host.Array {
 	dst := host.NewArray(src.NComp(), src.Size3D())
@@ -113,13 +112,13 @@ func (src *Array) LocalCopy() *host.Array {
 }
 
 
-func (a *Array) Zero(){
-    slices := a.splice.list.slice
-	for i:=range slices{
+func (a *Array) Zero() {
+	slices := a.splice.list.slice
+	for i := range slices {
 		assureContextId(slices[i].devId)
 		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
 	}
-	for i:=range slices{
+	for i := range slices {
 		slices[i].stream.Synchronize()
 	}
 }

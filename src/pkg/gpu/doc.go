@@ -34,4 +34,3 @@
 //
 // In the J-direction.
 package gpu
-

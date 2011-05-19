@@ -13,36 +13,63 @@ package gpu
 import (
 	. "mumax/common"
 	cu "cuda/driver"
+	"strings"
+	"fmt"
 )
 
 
-// Multi-GPU analog of cuda/driver/Module.
-type Module struct {
-	DevMod []cu.Module // separate modules for each GPU
+// INTERNAL
+var _modules map[string]cu.Module
+
+// INTERNAL
+var _functions map[string]cu.Function
+
+func init(){
+	_modules = make(map[string]cu.Module)
+	_functions = make(map[string]cu.Function)
 }
 
 // Loads a .ptx module for all GPUs.
-func ModuleLoad(fname string) Module {
+func ModuleLoad(fname string) {
 	Debug("Loading module: ", fname)
-	var mod Module
-	mod.DevMod = make([]cu.Module, DeviceCount())
-	for i := range mod.DevMod {
-		mod.DevMod[i] = cu.ModuleLoad(fname)
+	Assert(strings.HasSuffix(fname, ".ptx"))
+	
+	// load the module into _modules
+	name := fname[:len(fname)-len(".ptx")] // module name without .ptx
+	_, ok := _modules[name]
+	if ok {
+		panic(Bug(fmt.Sprintf(ERR_MODULE_LOADED, fname)))
 	}
-	return mod
+	module := cu.ModuleLoad(fname)
+	_modules[name] = module
+
+	// load all functions into _functions
+	funcArgs := parsePTXArgTypes(fname)
+	for funcName := range funcArgs {
+		_, ok := _functions[funcName]
+		if ok {
+			panic(Bug(fmt.Sprintf(ERR_FUNC_REDEFINED, funcName, fname)))
+		}
+		_functions[funcName] = module.GetFunction(funcName)
+	}
 }
 
+// Error message
+const(
+	 ERR_MODULE_LOADED = "module already loaded: %s"
+	 ERR_FUNC_REDEFINED = "function already defined: %s (%s)"
+)
 
 // Makes a new closure (function+arguments) from code in the module.
-func (m *Module) MakeClosure(funcName string, argCount int) Closure {
-	var c Closure
-	c.DeviceClosure = make([]cu.Closure, DeviceCount())
-	for i := range c.DeviceClosure {
-		c.DeviceClosure[i] = cu.Close(m.DevMod[i].GetFunction(funcName), (argCount))
-	}
-	c.ArgCount = argCount
-	return c
-}
+//func (m *Module) MakeClosure(funcName string, argCount int) Closure {
+//	var c Closure
+//	c.DeviceClosure = make([]cu.Closure, DeviceCount())
+//	for i := range c.DeviceClosure {
+//		c.DeviceClosure[i] = cu.Close(m.DevMod[i].GetFunction(funcName), (argCount))
+//	}
+//	c.ArgCount = argCount
+//	return c
+//}
 
 
 // Multi-GPU analog of cuda/driver/Closure.
