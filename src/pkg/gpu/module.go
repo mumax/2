@@ -97,6 +97,6 @@ func (c *Closure) Call() {
 }
 
 
-func (c *Closure) Configure1D(Nidx int) {
-	// fixes argument Nidx, distributing N over the GPUs
+func (c *Closure) Configure1D(argName string, N int) {
+
 }

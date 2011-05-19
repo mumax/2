@@ -72,6 +72,11 @@ func (a *Array) IsNil() bool {
 	return a.splice.IsNil()
 }
 
+// Total number of elements
+func (a *Array) Len() int {
+	return a.length
+}
+
 // Number of components (1: scalar, 3: vector, ...).
 func (a *Array) NComp() int {
 	return a._size[0]
