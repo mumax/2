@@ -37,22 +37,28 @@ type vSplice struct {
 // E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
 func (v *vSplice) Init(components, length int) {
 	Assert(components > 0)
-	v.list.init(components * length)
 
-	devices := getDevices()
+		devices := getDevices()
+	v.list = splice(make([]slice, len(devices)))
+	slicelen := distribute(components*length, devices)
+	for i := range devices {
+		v.list[i].init(devices[i], slicelen[i])
+	}
+
+
 	Ndev := len(devices)
 	compSliceLen := distribute(length, devices)
 
 	v.Comp = make([]splice, components)
-	c := v.Comp
+	//c := v.Comp
 	for i := range v.Comp {
 		//c[i].length = length
-		c[i].slice = make([]slice, Ndev)
-		for j := range c[i].slice {
-			cs := &(c[i].slice[j])
+		v.Comp[i] = splice(make([]slice, Ndev))
+		for j := range v.Comp[i] {
+			cs := &(v.Comp[i][j])
 			start := i * compSliceLen[j]
 			stop := (i + 1) * compSliceLen[j]
-			cs.initSlice(&(v.list.slice[j]), start, stop)
+			cs.initSlice(&(v.list[j]), start, stop)
 		}
 	}
 }
@@ -74,7 +80,7 @@ func (v *vSplice) Free() {
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sture
 	for i := range v.Comp {
-		slice := v.Comp[i].slice
+		slice := v.Comp[i]
 		for j := range slice {
 			// The slice must not be freed because the underlying list has already been freed.
 			slice[j].devId = -1 // invalid id 

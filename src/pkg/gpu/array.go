@@ -65,7 +65,7 @@ func (t *Array) Free() {
 
 // Address of part of the array on device deviceId.
 func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
-	return a.splice.list.slice[deviceId].array
+	return a.splice.list[deviceId].array
 }
 
 // True if unallocated/freed.
@@ -119,7 +119,7 @@ func (src *Array) LocalCopy() *host.Array {
 
 
 func (a *Array) Zero() {
-	slices := a.splice.list.slice
+	slices := a.splice.list
 	for i := range slices {
 		assureContextId(slices[i].devId)
 		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)

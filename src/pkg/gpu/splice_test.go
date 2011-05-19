@@ -34,54 +34,54 @@ func TestDevices(t *testing.T) {
 }
 
 // Test splice alloc/free
-func TestSpliceAlloc(t *testing.T) {
-	N := BIG
-	// Test repeated alloc + free
-	for i := 0; i < 50; i++ {
-		s := newSplice(N)
-		if s.Len() != N {
-			t.Fail()
-		}
-		s.Free()
-	}
-}
+//func TestSpliceAlloc(t *testing.T) {
+//	N := BIG
+//	// Test repeated alloc + free
+//	for i := 0; i < 50; i++ {
+//		s := newSplice(N)
+//		if s.Len() != N {
+//			t.Fail()
+//		}
+//		s.Free()
+//	}
+//}
 
 
-func TestSpliceCopy(t *testing.T) {
-	N := 1024
-	a := make([]float32, N)
-	for i := range a {
-		a[i] = float32(i)
-	}
-	b := make([]float32, N)
-	A := newSplice(N)
-	defer A.Free()
-	B := newSplice(N)
-	defer B.Free()
-
-	A.CopyFromHost(a)
-	B.CopyFromDevice(A)
-	B.CopyToHost(b)
-
-	for i := range b {
-		if b[i] != float32(i) {
-			t.Fail()
-		}
-	}
-}
-
-
-func BenchmarkSpliceCopy(b *testing.B) {
-	b.StopTimer()
-	N := BIG / 2
-	b.SetBytes(int64(N) * 4)
-	A := newSplice(N)
-	defer A.Free()
-	B := newSplice(N)
-	defer B.Free()
-
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		B.CopyFromDevice(A)
-	}
-}
+//func TestSpliceCopy(t *testing.T) {
+//	N := 1024
+//	a := make([]float32, N)
+//	for i := range a {
+//		a[i] = float32(i)
+//	}
+//	b := make([]float32, N)
+//	A := newSplice(N)
+//	defer A.Free()
+//	B := newSplice(N)
+//	defer B.Free()
+//
+//	A.CopyFromHost(a)
+//	B.CopyFromDevice(A)
+//	B.CopyToHost(b)
+//
+//	for i := range b {
+//		if b[i] != float32(i) {
+//			t.Fail()
+//		}
+//	}
+//}
+//
+//
+//func BenchmarkSpliceCopy(b *testing.B) {
+//	b.StopTimer()
+//	N := BIG / 2
+//	b.SetBytes(int64(N) * 4)
+//	A := newSplice(N)
+//	defer A.Free()
+//	B := newSplice(N)
+//	defer B.Free()
+//
+//	b.StartTimer()
+//	for i := 0; i < b.N; i++ {
+//		B.CopyFromDevice(A)
+//	}
+//}
