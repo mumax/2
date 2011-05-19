@@ -18,15 +18,15 @@ import (
 
 // Multi-GPU analog of cuda/driver/Module.
 type Module struct {
-	DeviceModule []cu.Module // separate modules for each GPU
+	DevMod []cu.Module // separate modules for each GPU
 }
 
 // Loads a .ptx module for all GPUs.
 func ModuleLoad(fname string) Module {
 	var mod Module
-	mod.DeviceModule = make([]cu.Module, DeviceCount())
-	for i := range mod.DeviceModule {
-		mod.DeviceModule[i] = cu.ModuleLoad(fname)
+	mod.DevMod = make([]cu.Module, DeviceCount())
+	for i := range mod.DevMod {
+		mod.DevMod[i] = cu.ModuleLoad(fname)
 	}
 	Debug("Loaded module: ", fname)
 	return mod
@@ -38,7 +38,7 @@ func (m *Module) MakeClosure(funcName string, argCount int) Closure {
 	var c Closure
 	c.DeviceClosure = make([]cu.Closure, DeviceCount())
 	for i := range c.DeviceClosure {
-		c.DeviceClosure[i] = cu.Close(m.DeviceModule[i].GetFunction(funcName), (argCount))
+		c.DeviceClosure[i] = cu.Close(m.DevMod[i].GetFunction(funcName), (argCount))
 	}
 	c.ArgCount = argCount
 	return c

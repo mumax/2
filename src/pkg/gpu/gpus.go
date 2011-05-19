@@ -17,13 +17,13 @@ import (
 )
 
 
-// INTERNAL: List of GPU ids to use for multi-GPU operation.
+// INTERNAL: List of GPU ids to use for multi-GPU operation. E.g.: {0,1,2,3}
 var _useDevice []int = nil
 
-// INTERNAL: List of contexts for each used device.
+// INTERNAL: List of contexts for each used device. _deviceCtxs[i] is valid for GPU number _useDevice[i].
 var _deviceCtxs []cu.Context
 
-// INTERNAL: The current CUDA context
+// INTERNAL: The currently active CUDA context (element of _deviceCtxs)
 var _currentCtx cu.Context
 
 
@@ -31,8 +31,9 @@ var _currentCtx cu.Context
 func InitMultiGPU(devices []int, flags uint) {
 	Debug("InitMultiGPU ", devices, flags)
 	Assert(len(devices) > 0)
-	Assert(_useDevice == nil)
+	Assert(_useDevice == nil) // should not yet be initialized
 
+	// check if device ID's are valid GPU numbers
 	N := cu.DeviceGetCount()
 	for _, n := range devices {
 		if n >= N || n < 0 {
@@ -74,6 +75,7 @@ func InitMultiGPU(devices []int, flags uint) {
 			}
 		}
 	}
+
 	// set the current context
 	_deviceCtxs[0].SetCurrent()
 	_currentCtx = _deviceCtxs[0]
@@ -95,7 +97,7 @@ func allZero(a []int) bool {
 }
 
 
-// Uses all available GPUs
+// Like InitMultiGPU(), but uses all available GPUs.
 func InitAllGPUs(flags uint) {
 	var use []int
 	N := cu.DeviceGetCount()
