@@ -46,7 +46,7 @@ func (v *vSplice) Init(components, length int) {
 	v.Comp = make([]splice, components)
 	c := v.Comp
 	for i := range v.Comp {
-		c[i].length = length
+		//c[i].length = length
 		c[i].slice = make([]slice, Ndev)
 		for j := range c[i].slice {
 			cs := &(c[i].slice[j])
@@ -103,7 +103,7 @@ func (v *vSplice) NComp() int {
 
 // returns {NComp(), Len()/NComp()}
 func (v *vSplice) Size() [2]int {
-	return [2]int{len(v.Comp), v.Comp[0].length}
+	return [2]int{len(v.Comp), v.Comp[0].Len()}
 }
 
 
@@ -120,7 +120,7 @@ func (dst *vSplice) CopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
-		Assert(dst.Comp[i].length == len(src[i])) // TODO(a): redundant
+		Assert(dst.Comp[i].Len() == len(src[i])) // TODO(a): redundant
 		dst.Comp[i].CopyFromHost(src[i])
 	}
 }
@@ -129,7 +129,7 @@ func (dst *vSplice) CopyFromHost(src [][]float32) {
 func (src *vSplice) CopyToHost(dst [][]float32) {
 	Assert(src.NComp() == len(dst))
 	for i := range dst {
-		Assert(src.Comp[i].length == len(dst[i])) // TODO(a): redundant
+		Assert(src.Comp[i].Len() == len(dst[i])) // TODO(a): redundant
 		src.Comp[i].CopyToHost(dst[i])
 	}
 }

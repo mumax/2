@@ -21,18 +21,9 @@ import (
 // A Splice represents distributed GPU memory in a transparent way.
 type splice struct {
 	slice  []slice // Arrays on different GPUs, each holding a part of the data
-	length int     // Total number of float32s in the splice
+	//length int     // Total number of float32s in the splice
 }
 
-//func (s *splice) String() string {
-//	str := "splice{" +
-//		"len=" + fmt.Sprint(s.length)
-//	for i := range s.slice {
-//		str += " " + s.slice[i].String()
-//	}
-//	str += "}"
-//	return str
-//}
 
 // See Splice.Init()
 func newSplice(length int) splice {
@@ -51,14 +42,13 @@ func (s *splice) init(length int) {
 	for i := range devices {
 		s.slice[i].init(devices[i], slicelen[i])
 	}
-	s.length = length
+	//s.length = length
 }
 
 
 // Distributes elements over the available GPUs.
 // length: number of elements to distribute.
 // slicelen[i]: number of elements for device i.
-// TODO(a) Slicer
 func distribute(length int, devices []int) (slicelen []int) {
 	N := len(devices)
 	slicelen = make([]int, N)
@@ -74,7 +64,11 @@ func distribute(length int, devices []int) (slicelen []int) {
 
 // Total number of float32 elements.
 func (s *splice) Len() int {
-	return s.length
+	l := 0
+	for i := range s.slice{
+		l += s.slice[i].length
+	}
+	return l
 }
 
 
