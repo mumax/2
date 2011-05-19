@@ -31,24 +31,24 @@ func TestDuplicateFunc(test *testing.T) {
 }
 
 
-func TestModule(test *testing.T) {
-	size := []int{4, 8, 128}
-	dev := NewArray(1, size)
-
-	c := Global("testmodule", "testMemset")
-	c.Configure1D("N", dev.Len())
-	//c.SetArgs(42, dev)
-	//c.Call()
-
-	host := dev.LocalCopy()
-	for _, h := range host.List {
-		if h != 42 {
-			//fmt.Println(host.Array)
-			test.Fail()
-			break
-		}
-	}
-}
+//func TestModule(test *testing.T) {
+//	size := []int{4, 8, 128}
+//	dev := NewArray(1, size)
+//
+//	c := Global("testmodule", "testMemset")
+//	c.Configure1D("N", dev.Len())
+//	//c.SetArgs(42, dev)
+//	//c.Call()
+//
+//	host := dev.LocalCopy()
+//	for _, h := range host.List {
+//		if h != 42 {
+//			//fmt.Println(host.Array)
+//			test.Fail()
+//			break
+//		}
+//	}
+//}
 
 
 func TestPTXParse(test *testing.T) {

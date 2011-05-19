@@ -33,7 +33,7 @@ func TestArrayInit(test *testing.T) {
 	host1 := host.NewArray(3, size)
 	dev1 := NewArray(3, size)
 	if dev1.Len() != 3*Prod(size) {
-		test.Fail()
+		test.Fatal("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
 	}
 
 	l1 := host1.List

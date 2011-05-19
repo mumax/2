@@ -24,7 +24,7 @@ type Array struct {
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}
 	size4D []int   // {components, size0, size1, size2}
 	size3D []int   // {size0, size1, size2}
-	length int
+	//length int
 }
 
 
@@ -32,8 +32,9 @@ type Array struct {
 func (t *Array) Init(components int, size3D []int) {
 	Assert(len(size3D) == 3)
 	Assert(t.splice.IsNil()) // should not be initialized already
-	t.length = Prod(size3D)
-	t.splice.Init(components, t.length)
+	//t.length = Prod(size3D)
+	length := Prod(size3D)
+	t.splice.Init(components, length)
 	t._size[0] = components
 	for i := range size3D {
 		t._size[i+1] = size3D[i]
@@ -58,7 +59,7 @@ func (t *Array) Free() {
 	for i := range t._size {
 		t._size[i] = 0
 	}
-	t.length = 0
+	//t.length = 0
 }
 
 
@@ -74,7 +75,7 @@ func (a *Array) IsNil() bool {
 
 // Total number of elements
 func (a *Array) Len() int {
-	return a.length
+	return a._size[0] * a._size[1] * a._size[2] * a._size[3]
 }
 
 // Number of components (1: scalar, 3: vector, ...).
