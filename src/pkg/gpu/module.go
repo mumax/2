@@ -16,6 +16,11 @@ import (
 )
 
 
+// Loads a __global__ CUDA function from a .ptx file.
+// E.g.:
+//	function := Global("testmodule", "testMemset")
+// loads the function testMemset() form testmodule.ptx, where
+// testmodule.ptx is searched for automatically.
 func Global(modname, funcname string) Closure {
 	AssureModule(modname)
 	module := _modules[modname]
@@ -23,29 +28,18 @@ func Global(modname, funcname string) Closure {
 	Assert(function == _functions[funcname])
 	argTypes := _funcArgs[funcname]
 	var c Closure
-	c.DeviceClosure = make([]cu.Closure, DeviceCount())
-	for i := range c.DeviceClosure {
-		c.DeviceClosure[i] = cu.Close(function, len(argTypes))
+	c.DevClosure = make([]cu.Closure, DeviceCount())
+	for i := range c.DevClosure {
+		c.DevClosure[i] = cu.Close(function, len(argTypes))
 	}
 	c.ArgCount = len(argTypes)
 	return c
 }
 
-// Makes a new closure (function+arguments) from code in the module.
-//func (m *Module) MakeClosure(funcName string, argCount int) Closure {
-//	var c Closure
-//	c.DeviceClosure = make([]cu.Closure, DeviceCount())
-//	for i := range c.DeviceClosure {
-//		c.DeviceClosure[i] = cu.Close(m.DevMod[i].GetFunction(funcName), (argCount))
-//	}
-//	c.ArgCount = argCount
-//	return c
-//}
-
 
 // Multi-GPU analog of cuda/driver/Closure.
 type Closure struct {
-	DeviceClosure []cu.Closure // INTERNAL: separate closures for each GPU
+	DevClosure []cu.Closure // INTERNAL: separate closures for each GPU
 	ArgCount      int          // INTERNAL: number of function arguments
 }
 
@@ -53,7 +47,7 @@ type Closure struct {
 // Sets the same argument for all GPUs.
 func (c *Closure) SetArg(argIdx int, arg interface{}) {
 	Assert(argIdx < c.ArgCount)
-	for _, dc := range c.DeviceClosure {
+	for _, dc := range c.DevClosure {
 		dc.SetArg(argIdx, arg)
 	}
 }
@@ -62,7 +56,7 @@ func (c *Closure) SetArg(argIdx int, arg interface{}) {
 func (c *Closure) SetArgs(args ...interface{}) {
 	Assert(len(args) <= c.ArgCount)
 	for i, arg := range args {
-		for _, dc := range c.DeviceClosure {
+		for _, dc := range c.DevClosure {
 			dc.SetArg(i, arg)
 		}
 	}
@@ -72,17 +66,17 @@ func (c *Closure) SetArgs(args ...interface{}) {
 func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
 	Assert(argIdx < c.ArgCount)
 	Assert(deviceId < DeviceCount())
-	c.DeviceClosure[deviceId].SetArg(argIdx, arg)
+	c.DevClosure[deviceId].SetArg(argIdx, arg)
 }
 
 func (c *Closure) Go() {
-	for _, dc := range c.DeviceClosure {
+	for _, dc := range c.DevClosure {
 		dc.Go()
 	}
 }
 
 func (c *Closure) Synchronize() {
-	for _, dc := range c.DeviceClosure {
+	for _, dc := range c.DevClosure {
 		dc.Synchronize()
 	}
 }
@@ -92,6 +86,6 @@ func (c *Closure) Call() {
 	c.Synchronize()
 }
 
-func (c *Closure) Configure1D(Nidx, N int) {
+func (c *Closure) Configure1D(Nidx int) {
 	// fixes argument Nidx, distributing N over the GPUs
 }
