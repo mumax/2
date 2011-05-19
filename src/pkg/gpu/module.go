@@ -23,12 +23,12 @@ type Module struct {
 
 // Loads a .ptx module for all GPUs.
 func ModuleLoad(fname string) Module {
+	Debug("Loading module: ", fname)
 	var mod Module
 	mod.DevMod = make([]cu.Module, DeviceCount())
 	for i := range mod.DevMod {
 		mod.DevMod[i] = cu.ModuleLoad(fname)
 	}
-	Debug("Loaded module: ", fname)
 	return mod
 }
 
