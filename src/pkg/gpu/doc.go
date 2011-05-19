@@ -8,7 +8,7 @@
 // This files provides the package documentation
 // Author: Arne Vansteenkiste
 
-// Package with GPU primitives like array allocation, copying, ...
+// Package with multi-GPU primitives like array allocation, copying, ...
 //
 // 3D Array indexing.
 //
