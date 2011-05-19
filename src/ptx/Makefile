@@ -1,10 +1,10 @@
 ptxfiles=\
-	#testmodule.ptx\
+	memory.ptx\
 
-#testmodule.ptx: testmodule.cu
-#	nvcc -ptx testmodule.cu
+all: $(ptxfiles)
 
-all: ptxfiles
+memory.ptx: memory.cu
+	nvcc -ptx memory.cu
 
 .PHONY: clean
 clean:
