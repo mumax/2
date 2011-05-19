@@ -11,7 +11,7 @@
 package gpu
 
 import (
-	. "mumax/common"
+	//. "mumax/common"
 	"io"
 	"os"
 	"fmt"
@@ -39,23 +39,23 @@ func (s *splice) Println() (n int, error os.Error) {
 	return s.Fprint(os.Stdout)
 }
 
-func (v *vSplice) Fprint(w io.Writer) (n int, error os.Error) {
-	for i := range v.Comp {
-		ni, erri := v.Comp[i].Fprint(w)
-		n += ni
-		error = ErrCat(error, erri)
-	}
-	return
-}
+//func (v *vSplice) Fprint(w io.Writer) (n int, error os.Error) {
+//	for i := range v.Comp {
+//		ni, erri := v.Comp[i].Fprint(w)
+//		n += ni
+//		error = ErrCat(error, erri)
+//	}
+//	return
+//}
 
-func (s *vSplice) Print() (n int, error os.Error) {
-	return s.Fprint(os.Stdout)
-}
+//func (s *vSplice) Print() (n int, error os.Error) {
+//	return s.Fprint(os.Stdout)
+//}
 
-func (v *vSplice) Println() (n int, error os.Error) {
-	defer fmt.Println()
-	return v.Fprint(os.Stdout)
-}
+//func (v *vSplice) Println() (n int, error os.Error) {
+//	defer fmt.Println()
+//	return v.Fprint(os.Stdout)
+//}
 
 //func (v *VSplice) WriteTo(w io.Writer) (n int64, err os.Error){
 //

@@ -145,20 +145,18 @@ func (dst *vSplice) CopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
-		Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
+		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
 		//dst.Comp[i].CopyFromHost(src[i])
 
 		h := src[i]
 		s := dst.Comp[i]
-Assert(len(h) == len(s)) // in principle redundant
-	start := 0
-	for i := range s {
-		length := s[i].length
-		cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
-		start += length
-	}
-
-
+		//Assert(len(h) == len(s)) // in principle redundant
+		start := 0
+		for i := range s {
+			length := s[i].length
+			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
+			start += length
+		}
 
 	}
 }
@@ -167,7 +165,19 @@ Assert(len(h) == len(s)) // in principle redundant
 func (src *vSplice) CopyToHost(dst [][]float32) {
 	Assert(src.NComp() == len(dst))
 	for i := range dst {
-		Assert(src.Comp[i].Len() == len(dst[i])) // TODO(a): redundant
-		src.Comp[i].CopyToHost(dst[i])
+		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
+		//src.Comp[i].CopyToHost(dst[i])
+
+	h := dst[i]
+	s := src.Comp[i]
+	//Assert(len(h) == len(s)) // in principle redundant
+	start := 0
+	for i := range s {
+		length := s[i].length
+		cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
+		start += length
+	}
+
+
 	}
 }
