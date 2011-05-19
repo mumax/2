@@ -11,6 +11,7 @@ package gpu
 
 import (
 	"testing"
+	"mumax/host"
 )
 
 
@@ -28,7 +29,7 @@ func TestArrayAlloc(t *testing.T) {
 // Should init to zeros
 func TestArrayInit(test *testing.T) {
 	size := []int{4, 8, 16}
-	host1  := NewHostArray(3, size)
+	host1  := host.NewArray(3, size)
 	dev1 := NewArray(3, size)
 
 	l1 := host1.List
@@ -36,7 +37,8 @@ func TestArrayInit(test *testing.T) {
 		l1[i] = float32(i)
 	}
 
-	host1.CopyFromDevice(dev1)
+	dev1.CopyToHost(host1)
+	//host1.CopyFromDevice(dev1)
 
 	l2 := host1.List
 	for i := range l1 {
@@ -49,7 +51,7 @@ func TestArrayInit(test *testing.T) {
 
 func TestArrayCopy(test *testing.T) {
 	size := []int{4, 8, 16}
-	host1, host2 := NewHostArray(3, size), NewHostArray(3, size)
+	host1, host2 := host.NewArray(3, size), host.NewArray(3, size)
 	dev1, dev2 := NewArray(3, size), NewArray(3, size)
 
 	l1 := host1.List
@@ -59,7 +61,8 @@ func TestArrayCopy(test *testing.T) {
 
 	dev1.CopyFromHost(host1)
 	dev2.CopyFromDevice(dev1)
-	host2.CopyFromDevice(dev2)
+	dev2.CopyToHost(host2)
+	//host2.CopyFromDevice(dev2)
 
 	l2 := host1.List
 	for i := range l1 {

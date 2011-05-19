@@ -4,6 +4,8 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/host
 
 GOFILES=\
+	array.go\
+	arrayslice.go\
 	doc.go\
 
 CGOFILES=\

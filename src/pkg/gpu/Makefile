@@ -7,12 +7,10 @@ GOFILES=\
 	doc.go\
 	gpus.go\
 	array.go\
-	hostarray.go\
 	slice.go\
 	splice.go\
 	vsplice.go\
 	spliceio.go\
-	arrayslice.go\
 	module.go\
 	module_ptxparse.go\
 
@@ -20,6 +18,7 @@ CGOFILES=\
 
 GC+=\
 	-I../common/_obj\
+	-I../host/_obj\
 
 #LD+=\
 

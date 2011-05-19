@@ -12,6 +12,7 @@ package gpu
 
 import (
 	. "mumax/common"
+	"mumax/host"
 	cu "cuda/driver"
 )
 
@@ -92,21 +93,23 @@ func (dst *Array) CopyFromDevice(src *Array) {
 
 
 // Copy from host array to device array.
-func (dst *Array) CopyFromHost(src *HostArray) {
+func (dst *Array) CopyFromHost(src *host.Array) {
 	(&(dst.splice)).CopyFromHost(src.Comp)
 }
 
+
 // Copy from device array to host array.
-func (dst *HostArray) CopyFromDevice(src *Array) {
+func (src *Array) CopyToHost(dst *host.Array) {
 	(&(src.splice)).CopyToHost(dst.Comp)
 }
 
 
+
 // DEBUG: Make a freshly allocated copy on the host.
-func (src *Array) LocalCopy() *HostArray {
-	host := NewHostArray(src.NComp(), src.Size3D())
-	host.CopyFromDevice(src)
-	return host
+func (src *Array) LocalCopy() *host.Array {
+	dst := host.NewArray(src.NComp(), src.Size3D())
+	src.CopyToHost(dst)
+	return dst
 }
 
 

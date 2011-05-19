@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package gpu
+package host
 
 // This file implements 3-dimensional arrays of N-vectors on the host.
 // Author: Arne Vansteenkiste
@@ -16,22 +16,22 @@ import (
 
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
-type HostArray struct {
+type Array struct {
 	List  []float32 // Underlying storage
 	Array [][][][]float32
 	Comp  [][]float32
 }
 
 
-func (t *HostArray) Init(components int, size3D []int) {
+func (t *Array) Init(components int, size3D []int) {
 	Assert(len(size3D) == 3)
 	t.List, t.Array = Array4D(components, size3D[0], size3D[1], size3D[2])
 	t.Comp = Slice2D(t.List, []int{components, Prod(size3D)})
 }
 
 
-func NewHostArray(components int, size3D []int) *HostArray {
-	t := new(HostArray)
+func NewArray(components int, size3D []int) *Array {
+	t := new(Array)
 	t.Init(components, size3D)
 	return t
 }
