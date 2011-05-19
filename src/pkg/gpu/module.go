@@ -13,69 +13,10 @@ package gpu
 import (
 	. "mumax/common"
 	cu "cuda/driver"
-	"strings"
-	"fmt"
 )
 
 
-// INTERNAL
-var(
- _modules map[string]cu.Module // maps a module name (file name without .ptx) on the module
- _functions map[string]cu.Function // maps a function name on the function
- _funcArgs map[string][]int // maps a function name on a list with the argument types
-)
-
-func init(){
-	_modules = make(map[string]cu.Module)
-	_functions = make(map[string]cu.Function)
-	_funcArgs = make(map[string][]int)
-}
-
-// Loads a .ptx module for all GPUs.
-func LoadModule(fname string) {
-	Debug("Loading module: ", fname)
-	Assert(strings.HasSuffix(fname, ".ptx"))
-	
-	// load the module into _modules
-	name := fname[:len(fname)-len(".ptx")] // module name without .ptx
-	_, ok := _modules[name]
-	if ok {
-		panic(Bug(fmt.Sprintf(ERR_MODULE_LOADED, fname)))
-	}
-	module := cu.ModuleLoad(fname)
-	_modules[name] = module
-
-	// load all functions into _functions
-	funcArgs := parsePTXArgTypes(fname)
-	for funcName := range funcArgs {
-		_, ok := _functions[funcName]
-		if ok {
-			panic(Bug(fmt.Sprintf(ERR_FUNC_REDEFINED, funcName, fname)))
-		}
-		_functions[funcName] = module.GetFunction(funcName)
-		_funcArgs[funcName] = funcArgs[funcName]
-	}
-}
-
-// Loads the .ptx module only when it has not yet been loaded before.
-func AssureModule(modname string){
-	_, ok := _modules[modname]
-	if !ok {
-		LoadModule(FindModule(modname))
-	}
-}
-
-
-
-// Error message
-const(
-	 ERR_MODULE_LOADED = "module already loaded: %s"
-	 ERR_FUNC_REDEFINED = "function already defined: %s (%s)"
-)
-
-
-
-func Global(modname, funcname string) Closure{
+func Global(modname, funcname string) Closure {
 	AssureModule(modname)
 	module := _modules[modname]
 	function := module.GetFunction(funcname) // take from module to prevent accidental wrong module name
