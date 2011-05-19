@@ -20,7 +20,7 @@ import (
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	splice vSplice // Underlying multi-GPU storage
+	splice vSplice // Underlying multi-GPU storage TODO(a): remove "splice", embed vSplice, then get rid of vSplice
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}
 	size4D []int   // {components, size0, size1, size2}
 	size3D []int   // {size0, size1, size2}
