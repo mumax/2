@@ -16,18 +16,18 @@ import (
 )
 
 func TestDuplicateFunc(test *testing.T) {
-	// test fails if there is no error
+	// test fails if there is no panic
 	defer func(){
 		err := recover()
 		if err == nil{
 			test.Fail()
 		}else{
-			Println(err)
+			Log(err)
 		}
 	}()
 
-	ModuleLoad(GetExecDir() + "testmodule.ptx")
-	ModuleLoad(GetExecDir() + "testmodule2.ptx") // bad, contains duplicate function
+	LoadModule(GetExecDir() + "testmodule.ptx")
+	LoadModule(GetExecDir() + "testmodule2.ptx") // bad, contains duplicate function
 }
 
 

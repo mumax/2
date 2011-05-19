@@ -13,6 +13,7 @@ GOFILES=\
 	spliceio.go\
 	module.go\
 	module_ptxparse.go\
+	module_find.go\
 
 CGOFILES=\
 

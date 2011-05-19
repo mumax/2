@@ -16,11 +16,14 @@ import (
 	"os"
 )
 
-// Sets up a default logger that prints to screen but not file.
+// Sets up a default logger.
 // Use InitLogger(file) to override.
 func init() {
-	InitLogger("")
+	InitLogger(DEFAULT_LOG_FILE)
 }
+
+// Default log file.
+const DEFAULT_LOG_FILE = "mumax.log"
 
 // INTERNAL global logger
 var logger Logger
@@ -64,7 +67,7 @@ func Debug(msg ...interface{}) {
 const MSG_WARNING = "Warning:"
 
 // Log a warning.
-func Warning(msg ...interface{}) {
+func Warn(msg ...interface{}) {
 	if logger.ShowWarn {
 		logger.Screen.Println(msg...)
 	}
@@ -72,7 +75,7 @@ func Warning(msg ...interface{}) {
 }
 
 // Log normal output.
-func Println(msg ...interface{}) {
+func Log(msg ...interface{}) {
 	if logger.ShowPrint {
 		logger.Screen.Println(msg...)
 	}

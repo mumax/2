@@ -19,18 +19,20 @@ import (
 
 
 // INTERNAL
-var _modules map[string]cu.Module
-
-// INTERNAL
-var _functions map[string]cu.Function
+var(
+ _modules map[string]cu.Module // maps a module name (file name without .ptx) on the module
+ _functions map[string]cu.Function // maps a function name on the function
+ _funcArgs map[string][]int // maps a function name on a list with the argument types
+)
 
 func init(){
 	_modules = make(map[string]cu.Module)
 	_functions = make(map[string]cu.Function)
+	_funcArgs = make(map[string][]int)
 }
 
 // Loads a .ptx module for all GPUs.
-func ModuleLoad(fname string) {
+func LoadModule(fname string) {
 	Debug("Loading module: ", fname)
 	Assert(strings.HasSuffix(fname, ".ptx"))
 	
@@ -51,14 +53,42 @@ func ModuleLoad(fname string) {
 			panic(Bug(fmt.Sprintf(ERR_FUNC_REDEFINED, funcName, fname)))
 		}
 		_functions[funcName] = module.GetFunction(funcName)
+		_funcArgs[funcName] = funcArgs[funcName]
 	}
 }
+
+// Loads the .ptx module only when it has not yet been loaded before.
+func AssureModule(modname string){
+	_, ok := _modules[modname]
+	if !ok {
+		LoadModule(FindModule(modname))
+	}
+}
+
+
 
 // Error message
 const(
 	 ERR_MODULE_LOADED = "module already loaded: %s"
 	 ERR_FUNC_REDEFINED = "function already defined: %s (%s)"
 )
+
+
+
+func Global(modname, funcname string) Closure{
+	AssureModule(modname)
+	module := _modules[modname]
+	function := module.GetFunction(funcname) // take from module to prevent accidental wrong module name
+	Assert(function == _functions[funcname])
+	argTypes := _funcArgs[funcname]
+	var c Closure
+	c.DeviceClosure = make([]cu.Closure, DeviceCount())
+	for i := range c.DeviceClosure {
+		c.DeviceClosure[i] = cu.Close(function, len(argTypes))
+	}
+	c.ArgCount = len(argTypes)
+	return c
+}
 
 // Makes a new closure (function+arguments) from code in the module.
 //func (m *Module) MakeClosure(funcName string, argCount int) Closure {
