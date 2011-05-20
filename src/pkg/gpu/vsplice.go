@@ -21,9 +21,6 @@ import (
 	cu "cuda/driver"
 )
 
-// Layout example for a (3,4) vsplice on 2 GPUs:
-// GPU0: X0 X1  Y0 Y1 Z0 Z1
-// GPU1: X2 X3  Y2 Y3 Z2 Z3
 //
 
 

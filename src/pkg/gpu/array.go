@@ -7,7 +7,7 @@
 
 package gpu
 
-// This file implements 3-dimensional arrays of N-vectors on the GPU
+// This file implements 3-dimensional arrays of N-vectors distributed over multiple GPUs.
 // Author: Arne Vansteenkiste
 
 import (
@@ -18,6 +18,10 @@ import (
 
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
+//
+// Layout example for a (3,4) vsplice on 2 GPUs:
+// 	GPU0: X0 X1  Y0 Y1 Z0 Z1
+// 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
 	Comp [][]slice // List of components, e.g. vector or tensor components
@@ -30,11 +34,43 @@ type Array struct {
 
 // Initializes the array to hold a field with the number of components and given size.
 func (t *Array) InitArray(components int, size3D []int) {
+	Assert(components > 0)
 	Assert(len(size3D) == 3)
-	//Assert(t.splice.IsNil()) // should not be initialized already
-	//t.length = Prod(size3D)
 	length := Prod(size3D)
-	t.InitVSplice(components, length)
+
+
+
+
+	//t.InitVSplice(components, length)
+
+
+	devices := getDevices()
+	t.list = splice(make([]slice, len(devices)))
+	slicelen := distribute(components*length, devices)
+	for i := range devices {
+		t.list[i].init(devices[i], slicelen[i])
+	}
+
+	Ndev := len(devices)
+	compSliceLen := distribute(length, devices)
+
+	t.Comp = make([][]slice, components)
+	//c := v.Comp
+	for i := range t.Comp {
+		//c[i].length = length
+		t.Comp[i] = splice(make([]slice, Ndev))
+		for j := range t.Comp[i] {
+			cs := &(t.Comp[i][j])
+			start := i * compSliceLen[j]
+			stop := (i + 1) * compSliceLen[j]
+			cs.initSlice(&(t.list[j]), start, stop)
+		}
+	}
+
+
+
+
+
 	t._size[0] = components
 	for i := range size3D {
 		t._size[i+1] = size3D[i]
