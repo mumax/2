@@ -168,6 +168,22 @@ func getDeviceContext(deviceId int) cu.Context {
 }
 
 
+// Distributes elements over the available GPUs.
+// length: number of elements to distribute.
+// slicelen[i]: number of elements for device i.
+func distribute(length int, devices []int) (slicelen []int) {
+	N := len(devices)
+	slicelen = make([]int, N)
+
+	// equal slicing
+	Assert(length%N == 0)
+	for i := range slicelen {
+		slicelen[i] = length / N
+	}
+	return
+}
+
+
 // Error message
 const (
 	MSG_BADDEVICEID       = "Invalid device ID: "

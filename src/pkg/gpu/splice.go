@@ -22,49 +22,18 @@ import (
 type splice []slice // Arrays on different GPUs, each holding a part of the data
 
 
-// See Splice.Init()
-//func newSplice(length int) splice {
-//	devices := getDevices()
-//	var s splice  = splice(make([]slice, len(devices)))
-//	slicelen := distribute(length, devices)
-//	for i := range devices {
-//		s[i].init(devices[i], slicelen[i])
-//	}
-//	return s
-//}
 
 
-// Initiates the splice to represent "length" float32s,
-// automatically distributed over all available GPUs.
-//func (s *splice) init(length int) {
-//	//s.length = length
-//}
-
-
-// Distributes elements over the available GPUs.
-// length: number of elements to distribute.
-// slicelen[i]: number of elements for device i.
-func distribute(length int, devices []int) (slicelen []int) {
-	N := len(devices)
-	slicelen = make([]int, N)
-
-	// equal slicing
-	Assert(length%N == 0)
-	for i := range slicelen {
-		slicelen[i] = length / N
-	}
-	return
-}
 
 
 // Total number of float32 elements.
-func (s splice) Len() int {
-	l := 0
-	for i := range s {
-		l += s[i].length
-	}
-	return l
-}
+//func (s splice) Len() int {
+//	l := 0
+//	for i := range s {
+//		l += s[i].length
+//	}
+//	return l
+//}
 
 
 // Frees the underlying storage
@@ -85,7 +54,7 @@ func (s splice) IsNil() bool {
 // s = h.
 // TODO(a) Could be overlapping
 func (s splice) CopyFromHost(h []float32) {
-	Assert(len(h) == s.Len()) // in principle redundant
+	//Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
 	for i := range s {
 		length := s[i].length
@@ -97,7 +66,7 @@ func (s splice) CopyFromHost(h []float32) {
 // h = s.
 // TODO(a) Could be overlapping
 func (s splice) CopyToHost(h []float32) {
-	Assert(len(h) == s.Len()) // in principle redundant
+	//Assert(len(h) == s.Len()) // in principle redundant
 	start := 0
 	for i := range s {
 		length := s[i].length
@@ -111,7 +80,7 @@ func (s splice) CopyToHost(h []float32) {
 // copies on the separate devices overlap, effectively boosting
 // the bandwidth by N for N devices.
 func (s splice) CopyFromDevice(d splice) {
-	Assert(d.Len() == s.Len()) // in principle redundant
+	//Assert(d.Len() == s.Len()) // in principle redundant
 	start := 0
 	// copies run concurrently on the individual devices
 	for i := range s {
