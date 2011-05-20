@@ -25,17 +25,13 @@ import (
 // GPU0: X0 X1  Y0 Y1 Z0 Z1
 // GPU1: X2 X3  Y2 Y3 Z2 Z3
 //
-type vSplice struct {
-	Comp [][]slice // List of components, e.g. vector or tensor components
-	list []slice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
-}
 
 
 // Initializes a Vector Splice to hold length * components float32s.
 // E.g.: Init(3, 1000) gives an array of 1000 3-vectors
 // E.g.: Init(1, 1000) gives an array of 1000 scalars
 // E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
-func (v *vSplice) InitVSplice(components, length int) {
+func (v *Array) InitVSplice(components, length int) {
 	Assert(components > 0)
 
 	devices := getDevices()
@@ -65,16 +61,16 @@ func (v *vSplice) InitVSplice(components, length int) {
 
 // Allocates a new Vector Splice.
 // See Init()
-func newVSplice(components, length int) *vSplice {
-	v := new(vSplice)
-	v.InitVSplice(components, length)
-	return v
-}
+//func newVSplice(components, length int) *vSplice {
+//	v := new(vSplice)
+//	v.InitVSplice(components, length)
+//	return v
+//}
 
 
 // Frees the Vector Splice.
 // This makes the Component Splices unusable.
-func (v *vSplice) FreeVSplice() {
+func (v *Array) FreeVSplice() {
 	//v.list.Free()
 	for i := range v.list {
 		(&(v.list[i])).free()
@@ -94,9 +90,9 @@ func (v *vSplice) FreeVSplice() {
 }
 
 
-func (v *vSplice) IsNil() bool {
-	return v.list == nil
-}
+//func (v *Array) IsNil() bool {
+//	return v.list == nil
+//}
 
 // Total number of float32 elements.
 //func (v *vSplice) Len() int {
@@ -105,18 +101,18 @@ func (v *vSplice) IsNil() bool {
 
 
 // Number of components.
-func (v *vSplice) NComp() int {
-	return len(v.Comp)
-}
+//func (v *vSplice) NComp() int {
+//	return len(v.Comp)
+//}
 
 
 // returns {NComp(), Len()/NComp()}
-func (v *vSplice) Size() [2]int {
-	return [2]int{len(v.Comp), len(v.Comp[0])}
-}
+//func (v *vSplice) Size() [2]int {
+//	return [2]int{len(v.Comp), len(v.Comp[0])}
+//}
 
 
-func (dst *vSplice) VSpliceCopyFromDevice(src *vSplice) {
+func (dst *Array) VSpliceCopyFromDevice(src *Array) {
 	//dst.list.CopyFromDevice(src.list)
 	d := dst.list
 	s := src.list
@@ -141,7 +137,7 @@ func (dst *vSplice) VSpliceCopyFromDevice(src *vSplice) {
 //}
 
 
-func (dst *vSplice) VSpliceCopyFromHost(src [][]float32) {
+func (dst *Array) VSpliceCopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
@@ -162,7 +158,7 @@ func (dst *vSplice) VSpliceCopyFromHost(src [][]float32) {
 }
 
 
-func (src *vSplice) VSpliceCopyToHost(dst [][]float32) {
+func (src *Array) VSpliceCopyToHost(dst [][]float32) {
 	Assert(src.NComp() == len(dst))
 	for i := range dst {
 		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant

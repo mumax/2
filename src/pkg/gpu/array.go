@@ -20,7 +20,8 @@ import (
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	vSplice // Underlying multi-GPU storage 
+	Comp [][]slice // List of components, e.g. vector or tensor components
+	list []slice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}
 	size4D []int   // {components, size0, size1, size2}
 	size3D []int   // {size0, size1, size2}
@@ -93,7 +94,7 @@ func (dst *Array) CopyFromDevice(src *Array) {
 			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
-	dst.VSpliceCopyFromDevice(&(src.vSplice))
+	dst.VSpliceCopyFromDevice(src)
 }
 
 
