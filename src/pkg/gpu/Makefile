@@ -9,7 +9,6 @@ GOFILES=\
 	array.go\
 	slice.go\
 	splice.go\
-	vsplice.go\
 	spliceio.go\
 	module.go\
 	module_load.go\
