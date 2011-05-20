@@ -21,26 +21,6 @@ import (
 	cu "cuda/driver"
 )
 
-//func (dst *Array) VSpliceCopyFromDevice(src *Array) {
-//	//dst.list.CopyFromDevice(src.list)
-//	d := dst.list
-//	s := src.list
-//	Assert(len(d) == len(s)) // in principle redundant
-//	start := 0
-//	// copies run concurrently on the individual devices
-//	for i := range s {
-//		length := s[i].length // in principle redundant
-//		Assert(length == d[i].length)
-//		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
-//		start += length
-//	}
-//	// Synchronize with all copies
-//	for i := range s {
-//		s[i].stream.Synchronize()
-//	}
-//
-//}
-
 func (dst *Array) VSpliceCopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
@@ -57,7 +37,6 @@ func (dst *Array) VSpliceCopyFromHost(src [][]float32) {
 			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 			start += length
 		}
-
 	}
 }
 

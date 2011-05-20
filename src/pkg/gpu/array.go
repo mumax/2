@@ -178,8 +178,30 @@ func (dst *Array) CopyFromDevice(src *Array) {
 
 
 // Copy from host array to device array.
-func (dst *Array) CopyFromHost(src *host.Array) {
-	dst.VSpliceCopyFromHost(src.Comp)
+func (dst *Array) CopyFromHost(srca *host.Array) {
+	//dst.VSpliceCopyFromHost(src.Comp)
+	src := srca.Comp
+
+
+	Assert(dst.NComp() == len(src))
+	// we have to work component-wise because of the data layout on the devices
+	for i := range src {
+		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
+		//dst.Comp[i].CopyFromHost(src[i])
+
+		h := src[i]
+		s := dst.Comp[i]
+		//Assert(len(h) == len(s)) // in principle redundant
+		start := 0
+		for i := range s {
+			length := s[i].length
+			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
+			start += length
+		}
+	}
+
+
+
 }
 
 
