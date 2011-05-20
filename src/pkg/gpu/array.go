@@ -155,7 +155,25 @@ func (dst *Array) CopyFromDevice(src *Array) {
 			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
-	dst.VSpliceCopyFromDevice(src)
+	//dst.VSpliceCopyFromDevice(src)
+
+	d := dst.list
+	s := src.list
+	Assert(len(d) == len(s)) // in principle redundant
+	start := 0
+	// copies run concurrently on the individual devices
+	for i := range s {
+		length := s[i].length // in principle redundant
+		Assert(length == d[i].length)
+		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+		start += length
+	}
+	// Synchronize with all copies
+	for i := range s {
+		s[i].stream.Synchronize()
+	}
+
+
 }
 
 

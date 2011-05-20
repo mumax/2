@@ -21,76 +21,25 @@ import (
 	cu "cuda/driver"
 )
 
-
-
-// Frees the Vector Splice.
-// This makes the Component Splices unusable.
-func (v *Array) FreeVSplice() {
-	//v.list.Free()
-	for i := range v.list {
-		(&(v.list[i])).free()
-	}
-
-	//TODO(a) Destroy streams.
-	// nil pointers, zero lengths, just to be sture
-	for i := range v.Comp {
-		slice := v.Comp[i]
-		for j := range slice {
-			// The slice must not be freed because the underlying list has already been freed.
-			slice[j].devId = -1 // invalid id 
-			slice[j].stream.Destroy()
-		}
-	}
-	v.Comp = nil
-}
-
-
-//func (v *Array) IsNil() bool {
-//	return v.list == nil
+//func (dst *Array) VSpliceCopyFromDevice(src *Array) {
+//	//dst.list.CopyFromDevice(src.list)
+//	d := dst.list
+//	s := src.list
+//	Assert(len(d) == len(s)) // in principle redundant
+//	start := 0
+//	// copies run concurrently on the individual devices
+//	for i := range s {
+//		length := s[i].length // in principle redundant
+//		Assert(length == d[i].length)
+//		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+//		start += length
+//	}
+//	// Synchronize with all copies
+//	for i := range s {
+//		s[i].stream.Synchronize()
+//	}
+//
 //}
-
-// Total number of float32 elements.
-//func (v *vSplice) Len() int {
-//	return v.list.length
-//}
-
-
-// Number of components.
-//func (v *vSplice) NComp() int {
-//	return len(v.Comp)
-//}
-
-
-// returns {NComp(), Len()/NComp()}
-//func (v *vSplice) Size() [2]int {
-//	return [2]int{len(v.Comp), len(v.Comp[0])}
-//}
-
-
-func (dst *Array) VSpliceCopyFromDevice(src *Array) {
-	//dst.list.CopyFromDevice(src.list)
-	d := dst.list
-	s := src.list
-	Assert(len(d) == len(s)) // in principle redundant
-	start := 0
-	// copies run concurrently on the individual devices
-	for i := range s {
-		length := s[i].length // in principle redundant
-		Assert(length == d[i].length)
-		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
-		start += length
-	}
-	// Synchronize with all copies
-	for i := range s {
-		s[i].stream.Synchronize()
-	}
-
-}
-
-//func (src *VSplice) CopyToDevice(dst *VSplice){
-//	src.list.CopyToDevice(dst.list)
-//}
-
 
 func (dst *Array) VSpliceCopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
