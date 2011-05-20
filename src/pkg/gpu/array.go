@@ -20,21 +20,20 @@ import (
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	splice vSplice // Underlying multi-GPU storage TODO(a): remove "splice", embed vSplice, then get rid of vSplice
+	vSplice // Underlying multi-GPU storage 
 	_size  [4]int  // INTERNAL {components, size0, size1, size2}
 	size4D []int   // {components, size0, size1, size2}
 	size3D []int   // {size0, size1, size2}
-	//length int
 }
 
 
 // Initializes the array to hold a field with the number of components and given size.
-func (t *Array) Init(components int, size3D []int) {
+func (t *Array) InitArray(components int, size3D []int) {
 	Assert(len(size3D) == 3)
-	Assert(t.splice.IsNil()) // should not be initialized already
+	//Assert(t.splice.IsNil()) // should not be initialized already
 	//t.length = Prod(size3D)
 	length := Prod(size3D)
-	t.splice.Init(components, length)
+	t.InitVSplice(components, length)
 	t._size[0] = components
 	for i := range size3D {
 		t._size[i+1] = size3D[i]
@@ -48,14 +47,14 @@ func (t *Array) Init(components int, size3D []int) {
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
-	t.Init(components, size3D)
+	t.InitArray(components, size3D)
 	return t
 }
 
 
 // Frees the underlying storage and sets the size to zero.
 func (t *Array) Free() {
-	t.splice.Free()
+	t.FreeVSplice()
 	for i := range t._size {
 		t._size[i] = 0
 	}
@@ -65,13 +64,13 @@ func (t *Array) Free() {
 
 // Address of part of the array on device deviceId.
 func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
-	return a.splice.list[deviceId].array
+	return a.list[deviceId].array
 }
 
 // True if unallocated/freed.
-func (a *Array) IsNil() bool {
-	return a.splice.IsNil()
-}
+//func (a *Array) IsNil() bool {
+//	return a.splice.IsNil()
+//}
 
 // Total number of elements
 func (a *Array) Len() int {
@@ -94,19 +93,19 @@ func (dst *Array) CopyFromDevice(src *Array) {
 			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
-	(&(dst.splice)).CopyFromDevice(&(src.splice))
+	dst.VSpliceCopyFromDevice(&(src.vSplice))
 }
 
 
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(src *host.Array) {
-	(&(dst.splice)).CopyFromHost(src.Comp)
+	dst.VSpliceCopyFromHost(src.Comp)
 }
 
 
 // Copy from device array to host array.
 func (src *Array) CopyToHost(dst *host.Array) {
-	(&(src.splice)).CopyToHost(dst.Comp)
+	src.VSpliceCopyToHost(dst.Comp)
 }
 
 
@@ -119,7 +118,7 @@ func (src *Array) LocalCopy() *host.Array {
 
 
 func (a *Array) Zero() {
-	slices := a.splice.list
+	slices := a.list
 	for i := range slices {
 		assureContextId(slices[i].devId)
 		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)

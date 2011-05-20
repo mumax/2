@@ -35,7 +35,7 @@ type vSplice struct {
 // E.g.: Init(3, 1000) gives an array of 1000 3-vectors
 // E.g.: Init(1, 1000) gives an array of 1000 scalars
 // E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
-func (v *vSplice) Init(components, length int) {
+func (v *vSplice) InitVSplice(components, length int) {
 	Assert(components > 0)
 
 	devices := getDevices()
@@ -67,14 +67,14 @@ func (v *vSplice) Init(components, length int) {
 // See Init()
 func newVSplice(components, length int) *vSplice {
 	v := new(vSplice)
-	v.Init(components, length)
+	v.InitVSplice(components, length)
 	return v
 }
 
 
 // Frees the Vector Splice.
 // This makes the Component Splices unusable.
-func (v *vSplice) Free() {
+func (v *vSplice) FreeVSplice() {
 	//v.list.Free()
 	for i := range v.list {
 		(&(v.list[i])).free()
@@ -116,7 +116,7 @@ func (v *vSplice) Size() [2]int {
 }
 
 
-func (dst *vSplice) CopyFromDevice(src *vSplice) {
+func (dst *vSplice) VSpliceCopyFromDevice(src *vSplice) {
 	//dst.list.CopyFromDevice(src.list)
 	d := dst.list
 	s := src.list
@@ -141,7 +141,7 @@ func (dst *vSplice) CopyFromDevice(src *vSplice) {
 //}
 
 
-func (dst *vSplice) CopyFromHost(src [][]float32) {
+func (dst *vSplice) VSpliceCopyFromHost(src [][]float32) {
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
@@ -162,7 +162,7 @@ func (dst *vSplice) CopyFromHost(src [][]float32) {
 }
 
 
-func (src *vSplice) CopyToHost(dst [][]float32) {
+func (src *vSplice) VSpliceCopyToHost(dst [][]float32) {
 	Assert(src.NComp() == len(dst))
 	for i := range dst {
 		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant

@@ -10,25 +10,24 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-	"testing"
 )
 
 
 // Test vsplice alloc/free
-func TestVSpliceAlloc(t *testing.T) {
-	N := BIG / 4
-	// Test repeated alloc + free
-	for i := 0; i < 20; i++ {
-		s := newVSplice(3, N)
-		//if s.list.Len() != 3*N {
-		//	t.Fail()
-		//}
-		s.Free()
-//		if !s.IsNil() {
-//			t.Fail()
-//		}
-	}
-}
+//func TestVSpliceAlloc(t *testing.T) {
+//	N := BIG / 4
+//	// Test repeated alloc + free
+//	for i := 0; i < 20; i++ {
+//		s := newVSplice(3, N)
+//		//if s.list.Len() != 3*N {
+//		//	t.Fail()
+//		//}
+//		s.Free()
+////		if !s.IsNil() {
+////			t.Fail()
+////		}
+//	}
+//}
 
 
 //func TestVSpliceComponent(t *testing.T) {
@@ -103,18 +102,18 @@ func TestVSpliceAlloc(t *testing.T) {
 //	}
 //}
 
-
-func BenchmarkVSpliceCopy(b *testing.B) {
-	b.StopTimer()
-	N := BIG / 8
-	b.SetBytes(3 * int64(N) * 4)
-	A := newVSplice(3, N)
-	defer A.Free()
-	B := newVSplice(3, N)
-	defer B.Free()
-
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		B.CopyFromDevice(A)
-	}
-}
+//
+//func BenchmarkVSpliceCopy(b *testing.B) {
+//	b.StopTimer()
+//	N := BIG / 8
+//	b.SetBytes(3 * int64(N) * 4)
+//	A := newVSplice(3, N)
+//	defer A.Free()
+//	B := newVSplice(3, N)
+//	defer B.Free()
+//
+//	b.StartTimer()
+//	for i := 0; i < b.N; i++ {
+//		B.CopyFromDevice(A)
+//	}
+//}
