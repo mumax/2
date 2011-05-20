@@ -21,48 +21,6 @@ import (
 	cu "cuda/driver"
 )
 
-//
-
-
-// Initializes a Vector Splice to hold length * components float32s.
-// E.g.: Init(3, 1000) gives an array of 1000 3-vectors
-// E.g.: Init(1, 1000) gives an array of 1000 scalars
-// E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
-func (v *Array) InitVSplice(components, length int) {
-	Assert(components > 0)
-
-	devices := getDevices()
-	v.list = splice(make([]slice, len(devices)))
-	slicelen := distribute(components*length, devices)
-	for i := range devices {
-		v.list[i].init(devices[i], slicelen[i])
-	}
-
-	Ndev := len(devices)
-	compSliceLen := distribute(length, devices)
-
-	v.Comp = make([][]slice, components)
-	//c := v.Comp
-	for i := range v.Comp {
-		//c[i].length = length
-		v.Comp[i] = splice(make([]slice, Ndev))
-		for j := range v.Comp[i] {
-			cs := &(v.Comp[i][j])
-			start := i * compSliceLen[j]
-			stop := (i + 1) * compSliceLen[j]
-			cs.initSlice(&(v.list[j]), start, stop)
-		}
-	}
-}
-
-
-// Allocates a new Vector Splice.
-// See Init()
-//func newVSplice(components, length int) *vSplice {
-//	v := new(vSplice)
-//	v.InitVSplice(components, length)
-//	return v
-//}
 
 
 // Frees the Vector Splice.

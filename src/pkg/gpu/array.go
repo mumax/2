@@ -33,6 +33,9 @@ type Array struct {
 
 
 // Initializes the array to hold a field with the number of components and given size.
+// E.g.: Init(3, 1000) gives an array of 1000 3-vectors
+// E.g.: Init(1, 1000) gives an array of 1000 scalars
+// E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
 func (t *Array) InitArray(components int, size3D []int) {
 	Assert(components > 0)
 	Assert(len(size3D) == 3)
@@ -90,12 +93,34 @@ func NewArray(components int, size3D []int) *Array {
 
 
 // Frees the underlying storage and sets the size to zero.
-func (t *Array) Free() {
-	t.FreeVSplice()
-	for i := range t._size {
-		t._size[i] = 0
+func (v *Array) Free() {
+	//t.FreeVSplice()
+
+
+
+
+	for i := range v.list {
+		(&(v.list[i])).free()
 	}
-	//t.length = 0
+
+	//TODO(a) Destroy streams.
+	// nil pointers, zero lengths, just to be sture
+	for i := range v.Comp {
+		slice := v.Comp[i]
+		for j := range slice {
+			// The slice must not be freed because the underlying list has already been freed.
+			slice[j].devId = -1 // invalid id 
+			slice[j].stream.Destroy()
+		}
+	}
+	v.Comp = nil
+
+
+
+
+	for i := range v._size {
+		v._size[i] = 0
+	}
 }
 
 
