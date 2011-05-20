@@ -43,7 +43,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 	length := Prod(size3D)
 
 	devices := getDevices()
-	t.list = splice(make([]slice, len(devices)))
+	t.list = make([]slice, len(devices))
 	slicelen := distribute(components*length, devices)
 	for i := range devices {
 		t.list[i].init(devices[i], slicelen[i])
@@ -54,7 +54,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 
 	t.Comp = make([][]slice, components)
 	for i := range t.Comp {
-		t.Comp[i] = splice(make([]slice, Ndev))
+		t.Comp[i] = make([]slice, Ndev)
 		for j := range t.Comp[i] {
 			cs := &(t.Comp[i][j])
 			start := i * compSliceLen[j]

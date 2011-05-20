@@ -8,7 +8,6 @@ GOFILES=\
 	gpus.go\
 	array.go\
 	slice.go\
-	splice.go\
 	module.go\
 	module_load.go\
 	module_ptxparse.go\
