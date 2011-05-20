@@ -25,10 +25,11 @@ import (
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
 	Comp [][]slice // List of components, e.g. vector or tensor components
-	list []slice   // All elements as a single, contiguous list. The memory layout is not simple enough for a host array to be directly copied to it.
-	_size  [4]int  // INTERNAL {components, size0, size1, size2}
-	size4D []int   // {components, size0, size1, size2}
-	size3D []int   // {size0, size1, size2}
+	list []slice   // All elements as a single, contiguous list. 
+	// The memory layout is not simple enough for a host array to be directly copied to it.
+	_size  [4]int // INTERNAL {components, size0, size1, size2}
+	size4D []int  // {components, size0, size1, size2}
+	size3D []int  // {size0, size1, size2}
 }
 
 
@@ -41,12 +42,6 @@ func (t *Array) InitArray(components int, size3D []int) {
 	Assert(len(size3D) == 3)
 	length := Prod(size3D)
 
-
-
-
-	//t.InitVSplice(components, length)
-
-
 	devices := getDevices()
 	t.list = splice(make([]slice, len(devices)))
 	slicelen := distribute(components*length, devices)
@@ -58,9 +53,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 	compSliceLen := distribute(length, devices)
 
 	t.Comp = make([][]slice, components)
-	//c := v.Comp
 	for i := range t.Comp {
-		//c[i].length = length
 		t.Comp[i] = splice(make([]slice, Ndev))
 		for j := range t.Comp[i] {
 			cs := &(t.Comp[i][j])
@@ -69,10 +62,6 @@ func (t *Array) InitArray(components int, size3D []int) {
 			cs.initSlice(&(t.list[j]), start, stop)
 		}
 	}
-
-
-
-
 
 	t._size[0] = components
 	for i := range size3D {
@@ -94,17 +83,12 @@ func NewArray(components int, size3D []int) *Array {
 
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
-	//t.FreeVSplice()
-
-
-
-
 	for i := range v.list {
 		(&(v.list[i])).free()
 	}
 
 	//TODO(a) Destroy streams.
-	// nil pointers, zero lengths, just to be sture
+	// nil pointers, zero lengths, just to be sure
 	for i := range v.Comp {
 		slice := v.Comp[i]
 		for j := range slice {
@@ -114,9 +98,6 @@ func (v *Array) Free() {
 		}
 	}
 	v.Comp = nil
-
-
-
 
 	for i := range v._size {
 		v._size[i] = 0
@@ -155,8 +136,6 @@ func (dst *Array) CopyFromDevice(src *Array) {
 			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
-	//dst.VSpliceCopyFromDevice(src)
-
 	d := dst.list
 	s := src.list
 	Assert(len(d) == len(s)) // in principle redundant
@@ -173,15 +152,12 @@ func (dst *Array) CopyFromDevice(src *Array) {
 		s[i].stream.Synchronize()
 	}
 
-
 }
 
 
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(srca *host.Array) {
-	//dst.VSpliceCopyFromHost(src.Comp)
 	src := srca.Comp
-
 
 	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
@@ -199,37 +175,29 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 			start += length
 		}
 	}
-
-
-
 }
 
 
 // Copy from device array to host array.
 func (src *Array) CopyToHost(dsta *host.Array) {
-	//src.VSpliceCopyToHost(dst.Comp)
 	dst := dsta.Comp
-
-
 
 	Assert(src.NComp() == len(dst))
 	for i := range dst {
 		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
 		//src.Comp[i].CopyToHost(dst[i])
 
-	h := dst[i]
-	s := src.Comp[i]
-	//Assert(len(h) == len(s)) // in principle redundant
-	start := 0
-	for i := range s {
-		length := s[i].length
-		cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
-		start += length
+		h := dst[i]
+		s := src.Comp[i]
+		//Assert(len(h) == len(s)) // in principle redundant
+		start := 0
+		for i := range s {
+			length := s[i].length
+			cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
+			start += length
+		}
+
 	}
-
-
-	}
-
 
 }
 
