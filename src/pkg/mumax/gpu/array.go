@@ -24,7 +24,7 @@ import (
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	Comp [][]slice // List of components, e.g. vector or tensor components
+	comp [][]slice // List of components, e.g. vector or tensor components
 	list []slice   // All elements as a single, contiguous list. 
 	// The memory layout is not simple enough for a host array to be directly copied to it.
 	_size  [4]int // INTERNAL {components, size0, size1, size2}
@@ -52,11 +52,11 @@ func (t *Array) InitArray(components int, size3D []int) {
 	Ndev := len(devices)
 	compSliceLen := distribute(length, devices)
 
-	t.Comp = make([][]slice, components)
-	for i := range t.Comp {
-		t.Comp[i] = make([]slice, Ndev)
-		for j := range t.Comp[i] {
-			cs := &(t.Comp[i][j])
+	t.comp = make([][]slice, components)
+	for i := range t.comp {
+		t.comp[i] = make([]slice, Ndev)
+		for j := range t.comp[i] {
+			cs := &(t.comp[i][j])
 			start := i * compSliceLen[j]
 			stop := (i + 1) * compSliceLen[j]
 			cs.initSlice(&(t.list[j]), start, stop)
@@ -89,15 +89,15 @@ func (v *Array) Free() {
 
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sure
-	for i := range v.Comp {
-		slice := v.Comp[i]
+	for i := range v.comp {
+		slice := v.comp[i]
 		for j := range slice {
 			// The slice must not be freed because the underlying list has already been freed.
 			slice[j].devId = -1 // invalid id 
 			slice[j].stream.Destroy()
 		}
 	}
-	v.Comp = nil
+	v.comp = nil
 
 	for i := range v._size {
 		v._size[i] = 0
@@ -166,7 +166,7 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 		//dst.Comp[i].CopyFromHost(src[i])
 
 		h := src[i]
-		s := dst.Comp[i]
+		s := dst.comp[i]
 		//Assert(len(h) == len(s)) // in principle redundant
 		start := 0
 		for i := range s {
@@ -188,7 +188,7 @@ func (src *Array) CopyToHost(dsta *host.Array) {
 		//src.Comp[i].CopyToHost(dst[i])
 
 		h := dst[i]
-		s := src.Comp[i]
+		s := src.comp[i]
 		//Assert(len(h) == len(s)) // in principle redundant
 		start := 0
 		for i := range s {
