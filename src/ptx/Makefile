@@ -3,10 +3,16 @@ ptxfiles=\
 
 all: $(ptxfiles)
 
-memory.ptx: memory.cu
-	nvcc -ptx memory.cu
+$(ptxfiles):
+	 nvcc -ptx $(@:.ptx=.cu)
 
 .PHONY: clean
 clean:
 	rm -f *.ptx
+
+.PHONY: test
+test:
+
+.PHONY: bench
+test:
 

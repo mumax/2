@@ -1,6 +1,5 @@
 pkgs=\
-	ptx\
-	pkg\
+	driver\
 
 
 .PHONY: all $(pkgs)
@@ -10,13 +9,18 @@ $(pkgs):
 	$(MAKE) --directory=$@ $(TARGET)
 
 
+.PHONY: install
+install:
+	$(MAKE) TARGET=install
+
+
 .PHONY: test
-test:
+test: install
 	$(MAKE) TARGET=test
 
 
 .PHONY: bench
-bench: 
+bench: install
 	$(MAKE) TARGET=bench
 
 

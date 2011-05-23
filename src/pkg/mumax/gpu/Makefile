@@ -16,6 +16,7 @@ GOFILES=\
 CGOFILES=\
 
 GC+=\
+	-I../../cuda/driver/_obj\
 	-I../common/_obj\
 	-I../host/_obj\
 

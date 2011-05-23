@@ -1,42 +1,32 @@
-.PHONY: all
-all:
-	make clean
-	make pkgs
-	#make -C main
+pkgs=\
+	cuda\
+	mumax\
 
-pkgs:
-	make -C common
-	make -C host
-	make -C gpu
-	#make -C refsh
-	#make -C engine
+mumax: cuda
 
-test:	install
-	make test -C common
-	make test -C gpu
-	#make test -C host
-	#make test -C refsh
-	#make test -C engine
+.PHONY: all $(pkgs)
+all: $(pkgs)
 
-bench:	install
-	make bench -C common
-	make bench -C host
-	make bench -C gpu
-	#make bench -C refsh
-	#make bench -C engine
+$(pkgs):
+	$(MAKE) --directory=$@ $(TARGET)
 
+
+.PHONY: install
 install:
-	make install -C common
-	make install -C host
-	make install -C gpu
-	#make install -C refsh
-	#make install -C engine
+	$(MAKE) TARGET=install
+
+
+.PHONY: test
+test: install
+	$(MAKE) TARGET=test
+
+
+.PHONY: bench
+bench: install
+	$(MAKE) TARGET=bench
+
 
 .PHONY: clean
 clean:
-	make clean -C common
-	make clean -C host
-	make clean -C gpu
-	#make clean -C refsh
-	#make clean -C engine
-	#make clean -C main
+	$(MAKE) TARGET=clean
+
