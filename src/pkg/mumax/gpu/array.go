@@ -24,12 +24,16 @@ import (
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	comp [][]slice // List of components, e.g. vector or tensor components
+	comp [][]slice // List of components, e.g. vector or tensor components TODO: rm
 	list []slice   // All elements as a single, contiguous list. 
 	// The memory layout is not simple enough for a host array to be directly copied to it.
 	_size  [4]int // INTERNAL {components, size0, size1, size2}
 	size4D []int  // {components, size0, size1, size2}
 	size3D []int  // {size0, size1, size2}
+
+
+	Comp []Array
+	Dev []Array
 }
 
 
@@ -70,6 +74,23 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.size4D = t._size[:]
 	t.size3D = t._size[1:]
 	t.Zero()
+
+	// initialize component arrays
+	t.Comp = make([]Array, components)
+	for c := range t.Comp{
+		t.Comp[c].comp = [][]slice{t.comp[c]}
+		t.Comp[c].list = t.comp[c]
+		t.Comp[c]._size[0] = 1
+		for i:=1; i<len(t._size); i++{t.Comp[c]._size[i] = t._size[i]}
+		t.Comp[c].size4D = t.Comp[c]._size[:]
+		t.Comp[c].size3D = t.Comp[c]._size[1:]
+	}
+
+	//// initialize device slices
+	//t.Dev = make([]Array, len(t.list))
+	//for d := range t.Dev{
+	//	
+	//}
 }
 
 
