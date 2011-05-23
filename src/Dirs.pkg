@@ -9,7 +9,7 @@
 all: $(dirs)
 
 $(dirs):
-	$(MAKE) --directory=$@ $(TARGET)
+	$(MAKE) --no-print-directory --directory=$@ $(TARGET)
 
 
 .PHONY: install
