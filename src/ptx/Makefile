@@ -10,6 +10,9 @@ $(ptxfiles):
 clean:
 	rm -f *.ptx
 
+.PHONY: install
+test:
+
 .PHONY: test
 test:
 

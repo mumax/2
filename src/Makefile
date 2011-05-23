@@ -1,26 +1,5 @@
-pkgs=\
+dirs=\
 	ptx\
 	pkg\
 
-
-.PHONY: all $(pkgs)
-all: $(pkgs)
-
-$(pkgs):
-	$(MAKE) --directory=$@ $(TARGET)
-
-
-.PHONY: test
-test:
-	$(MAKE) TARGET=test
-
-
-.PHONY: bench
-bench: 
-	$(MAKE) TARGET=bench
-
-
-.PHONY: clean
-clean:
-	$(MAKE) TARGET=clean
-
+include Dirs.pkg
