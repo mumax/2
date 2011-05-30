@@ -60,10 +60,10 @@ func LoadModule(fname string) {
 }
 
 // Loads the .ptx module only when it has not yet been loaded before.
-func AssureModule(modname string) {
+func assureModule(modname string) {
 	_, ok := _modules[modname]
 	if !ok {
-		LoadModule(FindModule(modname))
+		LoadModule(findModule(modname))
 	}
 }
 

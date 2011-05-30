@@ -23,7 +23,7 @@ import (
 // loads the function testMemset() form testmodule.ptx, where
 // testmodule.ptx is searched for automatically.
 func Global(modname, funcname string) Closure {
-	AssureModule(modname)
+	assureModule(modname)
 	module := _modules[modname]
 	function := module.GetFunction(funcname) // take from module to prevent accidental wrong module name
 	Assert(function == _functions[funcname])

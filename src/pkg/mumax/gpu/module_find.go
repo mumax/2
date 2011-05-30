@@ -23,7 +23,7 @@ var _lookPath string
 
 
 // Finds the full path of a module specified by name, using _lookPath.
-func FindModule(modname string) (filename string) {
+func findModule(modname string) (filename string) {
 	fname := modname + ".ptx"
 	filename = _lookPath + fname
 	return

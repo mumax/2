@@ -5,31 +5,23 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-/// This file implements various functions used for debugging.
+package gpu
 
-#include "macros.h"
+// Author: Arne Vansteenkiste
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+import (
+	//. "mumax/common"
+	//"mumax/host"
+	"testing"
+)
 
+func TestIndex(test *testing.T){
 
-//
-__global__ void SetIndex(float* part, int P, int N0, int N1, int N2){
-
-  int k = blockIdx.y * blockDim.y + threadIdx.y;
-  int j = blockIdx.x * blockDim.x + threadIdx.x;
-  if (j < N1 && k < N2){
-
-	j += P * N1;
-	for(int i=0; i<N0; i++){
-  		int I = i*N1*N2 + j*N2 + k; // linear array index
-			part[I] = I;
-		}
-	}
+	size := []int{4, 8, 16}
+	a := NewArray(1, size)
+	
+	set := Global("debug", "SetIndex")
+	set.Configure3D(a.Size3D())
+	set.Call(a)
 }
 
-
-#ifdef __cplusplus
-}
-#endif
