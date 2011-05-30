@@ -27,11 +27,11 @@ type Array struct {
 	comp [][]slice // List of components, e.g. vector or tensor components TODO: rm
 	list []slice   // All elements as a single, contiguous list. 
 	// The memory layout is not simple enough for a host array to be directly copied to it.
-	_size  [4]int // INTERNAL {components, size0, size1, size2}
-	size4D []int  // {components, size0, size1, size2}
-	size3D []int  // {size0, size1, size2}
+	_size     [4]int // INTERNAL {components, size0, size1, size2}
+	size4D    []int  // {components, size0, size1, size2}
+	size3D    []int  // {size0, size1, size2}
 	_partSize [3]int
-	partSize []int
+	partSize  []int
 
 	Comp []Array
 }
@@ -49,12 +49,12 @@ func (t *Array) InitArray(components int, size3D []int) {
 	devices := getDevices()
 	Ndev := len(devices)
 	t.list = make([]slice, len(devices))
-	slicelen := components*length / Ndev
+	slicelen := components * length / Ndev
 	for i := range devices {
 		t.list[i].init(devices[i], slicelen)
 	}
 
-	Assert(size3D[1] % Ndev == 0)
+	Assert(size3D[1]%Ndev == 0)
 	compSliceLen := length / Ndev
 
 	t.comp = make([][]slice, components)
@@ -83,11 +83,13 @@ func (t *Array) InitArray(components int, size3D []int) {
 
 	// initialize component arrays
 	t.Comp = make([]Array, components)
-	for c := range t.Comp{
+	for c := range t.Comp {
 		t.Comp[c].comp = [][]slice{t.comp[c]}
 		t.Comp[c].list = t.comp[c]
 		t.Comp[c]._size[0] = 1
-		for i:=1; i<len(t._size); i++{t.Comp[c]._size[i] = t._size[i]}
+		for i := 1; i < len(t._size); i++ {
+			t.Comp[c]._size[i] = t._size[i]
+		}
 		t.Comp[c].size4D = t.Comp[c]._size[:]
 		t.Comp[c].size3D = t.Comp[c]._size[1:]
 	}

@@ -11,10 +11,10 @@
 package gpu
 
 import (
-	//. "mumax/common"
-	//"io"
-	//"os"
-	//"fmt"
+//. "mumax/common"
+//"io"
+//"os"
+//"fmt"
 )
 
 

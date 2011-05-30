@@ -31,25 +31,25 @@ func StreamCreate() Stream {
 
 
 // Destroys the multi-GPU stream.
-func(s Stream) Destroy(){
-	for i := range s{
+func (s Stream) Destroy() {
+	for i := range s {
 		cu.StreamDestroy(&s[i])
 	}
 }
 
 
 // Synchronizes with all underlying GPU-streams
-func(s Stream) Synchronize(){
-	for i := range s{
+func (s Stream) Synchronize() {
+	for i := range s {
 		s[i].Synchronize()
 	}
 }
 
 
 // Returns true if all underlying GPU streams have completed.
-func (s Stream) Query() (ready bool){
-	for i := range s{
-		if s[i].Query() != cu.SUCCESS{
+func (s Stream) Query() (ready bool) {
+	for i := range s {
+		if s[i].Query() != cu.SUCCESS {
 			return false
 		}
 	}

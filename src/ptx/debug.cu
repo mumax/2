@@ -15,13 +15,13 @@ extern "C" {
 
 
 //
-__global__ void SetIndex(float* part, int P, int N0, int N1, int N2){
+__global__ void SetIndex(float* part, int PART, int N0, int N1, int N2){
 
   int k = blockIdx.y * blockDim.y + threadIdx.y;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   if (j < N1 && k < N2){
 
-	j += P * N1;
+	j += PART * N1;
 	for(int i=0; i<N0; i++){
   		int I = i*N1*N2 + j*N2 + k; // linear array index
 			part[I] = I;

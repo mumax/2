@@ -16,6 +16,8 @@ import (
 	"strings"
 )
 
+type argInfo struct{Type int
+	 Name string}
 
 // Parses the PTX file and returns a map with the argument types for each function.
 // E.g.:
@@ -23,7 +25,7 @@ import (
 // gives:
 // 	{"myFunc":[]int{1, 2, 6}}
 // Where 1 represents int, 2 float, 6 pointer.
-func parsePTXArgTypes(fname string) map[string][]int {
+func parsePTXArgTypes(fname string) map[string][]argInfo {
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -31,7 +33,7 @@ func parsePTXArgTypes(fname string) map[string][]int {
 		}
 	}()
 
-	types := make(map[string][]int)
+	types := make(map[string][]argInfo)
 	content, err := ioutil.ReadFile(fname)
 	CheckErr(err, ERR_IO)
 	words := strings.Split(string(content), " ", -1)
@@ -46,7 +48,7 @@ func parsePTXArgTypes(fname string) map[string][]int {
 			if !ok {
 				panic(Bug("PTX type " + typ))
 			}
-			types[funcname] = append(types[funcname], typeId)
+			types[funcname] = append(types[funcname], argInfo{typeId, ""})
 		}
 	}
 

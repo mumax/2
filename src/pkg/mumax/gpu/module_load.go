@@ -23,13 +23,13 @@ import (
 var (
 	_modules   map[string]cu.Module   // maps a module name (file name without .ptx) on the module
 	_functions map[string]cu.Function // maps a function name on the function
-	_funcArgs  map[string][]int       // maps a function name on a list with the argument types
+	_funcArgs  map[string][]argInfo       // maps a function name on a list with the argument types and names.
 )
 
 func init() {
 	_modules = make(map[string]cu.Module)
 	_functions = make(map[string]cu.Function)
-	_funcArgs = make(map[string][]int)
+	_funcArgs = make(map[string][]argInfo)
 }
 
 // Loads a .ptx module for all GPUs.

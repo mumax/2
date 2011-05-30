@@ -15,13 +15,12 @@ import (
 	"testing"
 )
 
-func TestIndex(test *testing.T){
+func TestIndex(test *testing.T) {
 
 	size := []int{4, 8, 16}
 	a := NewArray(1, size)
-	
+
 	set := Global("debug", "SetIndex")
 	set.Configure3D(a.Size3D())
 	set.Call(a)
 }
-
