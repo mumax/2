@@ -6,8 +6,11 @@ godirs=\
 	cuda\
 	cuda/driver\
 
-all:
+all: doxygen
 # $(godirs)
+
+doxygen:
+	doxygen Doxyfile
 
 .PHONY: $(godirs)
 $(godirs):
