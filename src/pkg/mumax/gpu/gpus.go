@@ -168,20 +168,30 @@ func getDeviceContext(deviceId int) cu.Context {
 }
 
 
+// Divides the size of a multi-GPU array into single-GPU parts.
+// Slices along the J direction (Y in user space).
+//func partition(fullSize []int) []int{
+//	if _useDevice == nil {
+//		panic(Bug(MSG_DEVICEUNINITIATED))
+//	}
+//	Assert(fullSize[1] % DeviceCount() == 0)
+//	
+//}
+
 // Distributes elements over the available GPUs.
 // length: number of elements to distribute.
 // slicelen[i]: number of elements for device i.
-func distribute(length int, devices []int) (slicelen []int) {
-	N := len(devices)
-	slicelen = make([]int, N)
-
-	// equal slicing
-	Assert(length%N == 0)
-	for i := range slicelen {
-		slicelen[i] = length / N
-	}
-	return
-}
+//func distribute(length int, devices []int) (slicelen []int) {
+//	N := len(devices)
+//	slicelen = make([]int, N)
+//
+//	// equal slicing
+//	Assert(length%N == 0)
+//	for i := range slicelen {
+//		slicelen[i] = length / N
+//	}
+//	return
+//}
 
 
 // Error message

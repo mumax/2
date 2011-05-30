@@ -30,10 +30,10 @@ type Array struct {
 	_size  [4]int // INTERNAL {components, size0, size1, size2}
 	size4D []int  // {components, size0, size1, size2}
 	size3D []int  // {size0, size1, size2}
-
+	_partSize [3]int
+	partSize []int
 
 	Comp []Array
-	Dev []Array
 }
 
 
@@ -47,22 +47,23 @@ func (t *Array) InitArray(components int, size3D []int) {
 	length := Prod(size3D)
 
 	devices := getDevices()
+	Ndev := len(devices)
 	t.list = make([]slice, len(devices))
-	slicelen := distribute(components*length, devices)
+	slicelen := components*length / Ndev
 	for i := range devices {
-		t.list[i].init(devices[i], slicelen[i])
+		t.list[i].init(devices[i], slicelen)
 	}
 
-	Ndev := len(devices)
-	compSliceLen := distribute(length, devices)
+	Assert(size3D[1] % Ndev == 0)
+	compSliceLen := length / Ndev
 
 	t.comp = make([][]slice, components)
 	for i := range t.comp {
 		t.comp[i] = make([]slice, Ndev)
 		for j := range t.comp[i] {
 			cs := &(t.comp[i][j])
-			start := i * compSliceLen[j]
-			stop := (i + 1) * compSliceLen[j]
+			start := i * compSliceLen
+			stop := (i + 1) * compSliceLen
 			cs.initSlice(&(t.list[j]), start, stop)
 		}
 	}
@@ -73,6 +74,11 @@ func (t *Array) InitArray(components int, size3D []int) {
 	}
 	t.size4D = t._size[:]
 	t.size3D = t._size[1:]
+	// Slice along the J-direction
+	t._partSize[0] = t.size3D[0]
+	t._partSize[1] = t.size3D[1] / Ndev
+	t._partSize[2] = t.size3D[2]
+
 	t.Zero()
 
 	// initialize component arrays
@@ -85,12 +91,6 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.Comp[c].size4D = t.Comp[c]._size[:]
 		t.Comp[c].size3D = t.Comp[c]._size[1:]
 	}
-
-	//// initialize device slices
-	//t.Dev = make([]Array, len(t.list))
-	//for d := range t.Dev{
-	//	
-	//}
 }
 
 
