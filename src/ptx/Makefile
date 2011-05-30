@@ -11,11 +11,11 @@ clean:
 	rm -f *.ptx
 
 .PHONY: install
-test:
+install:
 
 .PHONY: test
 test:
 
 .PHONY: bench
-test:
+bench:
 
