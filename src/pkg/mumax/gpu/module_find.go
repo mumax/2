@@ -15,8 +15,9 @@ import (
 )
 
 func init() {
-	_lookPath = GetExecDir() + "../../../ptx/"
+	_lookPath = GetExecDir() 
 }
+
 
 // INTERNAL: where to look for .ptx files.
 var _lookPath string

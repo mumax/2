@@ -53,13 +53,13 @@ func (c *Closure) SetConfig(blockDim, gridDim []int) {
 
 
 // Error message.
-const UNKNOWN_ARG_TYPE = "Can not handle argument type %v"
+const UNKNOWN_ARG_TYPE = "Can not handle argument type %v %v"
 
 // Sets an argument.
 func (c *Closure) SetArg(argIndex int, value interface{}) {
 	switch value.(type) {
 	default:
-		panic(fmt.Sprintf(UNKNOWN_ARG_TYPE, reflect.TypeOf(value).Kind()))
+		panic(fmt.Sprintf(UNKNOWN_ARG_TYPE, value, reflect.TypeOf(value).Kind()))
 	case int:
 		c.Seti(argIndex, value.(int))
 	case float32:

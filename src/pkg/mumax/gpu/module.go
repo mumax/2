@@ -72,7 +72,8 @@ type Closure struct {
 func (c *Closure) SetArg(argIdx int, arg interface{}) {
 	Assert(argIdx < len(c.ArgType))
 
-	if arr, ok := arg.(Array); ok { // handle gpu.Array as a special case
+	//Debug("SetArg", argIdx, arg)
+	if arr, ok := arg.(*Array); ok { // handle gpu.Array as a special case
 		Assert(c.ArgType[argIdx] == u64)
 		for i, dc := range c.DevClosure {
 			dc.SetDevicePtr(argIdx, arr.DevicePtr(i))
@@ -82,9 +83,11 @@ func (c *Closure) SetArg(argIdx int, arg interface{}) {
 		for _, dc := range c.DevClosure {
 			switch argType {
 			default:
-				panic(Bug(fmt.Sprintf("can not handle argument type: %v", argType)))
+				panic(Bug(fmt.Sprintf("* Can not handle argument type: %v", argType)))
 			case s32:
 				dc.Seti(argIdx, arg.(int))
+			//case u64:
+				//dc.SetDevicePtr(argIdx, (arg.(*Array)).DevicePtr(i))
 			}
 		}
 	}
@@ -92,11 +95,9 @@ func (c *Closure) SetArg(argIdx int, arg interface{}) {
 
 // Sets the same arguments for all GPUs.
 func (c *Closure) SetArgs(args ...interface{}) {
-	Assert(len(args) <= len(c.ArgType))
+	//Assert(len(args) <= len(c.ArgType))
 	for i, arg := range args {
-		for _, dc := range c.DevClosure {
-			dc.SetArg(i, arg)
-		}
+		c.SetArg(i, arg)
 	}
 }
 
