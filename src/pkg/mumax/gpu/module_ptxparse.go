@@ -25,6 +25,8 @@ type argInfo struct{Type int
 // gives:
 // 	{"myFunc":[]int{1, 2, 6}}
 // Where 1 represents int, 2 float, 6 pointer.
+// TODO: this parser works well for nvcc-generated PTX code but is very fragile
+// with respect to free-form syntax. Whitespace changes can make it crash.
 func parsePTXArgTypes(fname string) map[string][]argInfo {
 	defer func() {
 		err := recover()
@@ -44,11 +46,13 @@ func parsePTXArgTypes(fname string) map[string][]argInfo {
 			funcArgName := name[len("__cudaparm_"):] // e.g. "funcName_ArgName"
 			cut := strings.Index(funcArgName, "_")
 			funcname := funcArgName[:cut]
+			cut2 := strings.Index(funcArgName, "\n") -1
+			argname := funcArgName[cut+1:cut2]
 			typeId, ok := ptxTypeId[typ]
 			if !ok {
 				panic(Bug("PTX type " + typ))
 			}
-			types[funcname] = append(types[funcname], argInfo{typeId, ""})
+			types[funcname] = append(types[funcname], argInfo{typeId, argname})
 		}
 	}
 
