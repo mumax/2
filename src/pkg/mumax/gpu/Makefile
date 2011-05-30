@@ -8,6 +8,7 @@ GOFILES=\
 	gpus.go\
 	array.go\
 	slice.go\
+	stream.go\
 	module.go\
 	module_load.go\
 	module_ptxparse.go\
@@ -19,11 +20,6 @@ GC+=\
 	-I../../cuda/driver/_obj\
 	-I../common/_obj\
 	-I../host/_obj\
-
-#LD+=\
-
-#CGO_CFLAGS+=-I/usr/local/cuda/include/
-#CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -lcudart
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	
