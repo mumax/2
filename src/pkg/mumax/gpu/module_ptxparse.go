@@ -16,8 +16,10 @@ import (
 	"strings"
 )
 
-type argInfo struct{Type int
-	 Name string}
+type argInfo struct {
+	Type int
+	Name string
+}
 
 // Parses the PTX file and returns a map with the argument types for each function.
 // E.g.:
@@ -46,8 +48,8 @@ func parsePTXArgTypes(fname string) map[string][]argInfo {
 			funcArgName := name[len("__cudaparm_"):] // e.g. "funcName_ArgName"
 			cut := strings.Index(funcArgName, "_")
 			funcname := funcArgName[:cut]
-			cut2 := strings.Index(funcArgName, "\n") -1
-			argname := funcArgName[cut+1:cut2]
+			cut2 := strings.Index(funcArgName, "\n") - 1
+			argname := funcArgName[cut+1 : cut2]
 			typeId, ok := ptxTypeId[typ]
 			if !ok {
 				panic(Bug("PTX type " + typ))

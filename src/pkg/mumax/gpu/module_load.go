@@ -23,7 +23,7 @@ import (
 var (
 	_modules   map[string]cu.Module   // maps a module name (file name without .ptx) on the module
 	_functions map[string]cu.Function // maps a function name on the function
-	_funcArgs  map[string][]argInfo       // maps a function name on a list with the argument types and names.
+	_funcArgs  map[string][]argInfo   // maps a function name on a list with the argument types and names.
 )
 
 func init() {

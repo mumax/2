@@ -27,17 +27,34 @@ func Global(modname, funcname string) Closure {
 	module := _modules[modname]
 	function := module.GetFunction(funcname) // take from module to prevent accidental wrong module name
 	Assert(function == _functions[funcname])
-	argTypes := _funcArgs[funcname]
+	argInfo := _funcArgs[funcname]
 	var c Closure
 	c.DevClosure = make([]cu.Closure, DeviceCount())
 	for i := range c.DevClosure {
-		c.DevClosure[i] = cu.Close(function, len(argTypes))
+		c.DevClosure[i] = cu.Close(function, len(argInfo))
 	}
-	c.ArgType = make([]int, len(argTypes))
-	for i := range argTypes{
-	c.ArgType[i] = argTypes[i].Type
-}
-		
+	// Extract argument types and names from the PTX file
+	c.ArgType = make([]int, len(argInfo))
+	c.ArgPART = -1
+	c.ArgN = -1
+	for i := range argInfo {
+		c.ArgType[i] = argInfo[i].Type
+		if argInfo[i].Name == "PART" {
+			c.ArgPART = i
+		}
+		if argInfo[i].Name == "N" {
+			c.ArgN = i
+		}
+		if argInfo[i].Name == "N0" {
+			c.ArgN = i
+		}
+		if argInfo[i].Name == "N1" {
+			Assert(i == c.ArgN+1)
+		} // N1 must follow N0
+		if argInfo[i].Name == "N2" {
+			Assert(i == c.ArgN+2)
+		} // N2 must follow N1
+	}
 	return c
 }
 
@@ -46,21 +63,29 @@ func Global(modname, funcname string) Closure {
 type Closure struct {
 	DevClosure []cu.Closure // INTERNAL: separate closures for each GPU
 	ArgType    []int        // INTERNAL: types of the arguments (see ptxparse)
-	ArgPART    int	    // INTERNAL: index of automatically set argument "PART"
-	ArgN	   int        // INTERNAL: index of automatically set argument "N" (for 1D) or "N0" (for 3D, then "N1", "N2" should immediately follow)
+	ArgPART    int          // INTERNAL: index of automatically set argument "PART"
+	ArgN       int          // INTERNAL: index of automatically set argument "N" (for 1D) or "N0" (for 3D, then "N1", "N2" should immediately follow)
 }
 
 
 // Sets the same argument for all GPUs.
 func (c *Closure) SetArg(argIdx int, arg interface{}) {
 	Assert(argIdx < len(c.ArgType))
-	argType := c.ArgType[argIdx]
-	for _, dc := range c.DevClosure {
-		switch argType {
-		default:
-			panic(Bug(fmt.Sprintf("can not handle argument type: %v", argType)))
-		case s32:
-			dc.Seti(argIdx, arg.(int))
+
+	if arr, ok := arg.(Array); ok { // handle gpu.Array as a special case
+		Assert(c.ArgType[argIdx] == u64)
+		for i, dc := range c.DevClosure {
+			dc.SetDevicePtr(argIdx, arr.DevicePtr(i))
+		}
+	} else {
+		argType := c.ArgType[argIdx]
+		for _, dc := range c.DevClosure {
+			switch argType {
+			default:
+				panic(Bug(fmt.Sprintf("can not handle argument type: %v", argType)))
+			case s32:
+				dc.Seti(argIdx, arg.(int))
+			}
 		}
 	}
 }
@@ -115,7 +140,6 @@ func (c *Closure) Configure1D(N int) {
 }
 
 
-
 func (c *Closure) Configure3D(fullSize []int) {
-	
+
 }
