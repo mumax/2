@@ -1,4 +1,3 @@
-.SILENT:
 
 godirs=\
 	mumax\
@@ -7,12 +6,13 @@ godirs=\
 	cuda\
 	cuda/driver\
 
-all: $(godirs)
+all:
+# $(godirs)
 
 .PHONY: $(godirs)
 $(godirs):
 	mkdir -p html/$@
-	ln -sf $(shell readlink -f ../src/pkg/)/$@ $(GOROOT)/src/pkg/$@
+	#ln -sf $(shell readlink -f ../src/pkg/)/$@ $(GOROOT)/src/pkg/$@
 	godoc -path=. -html $@ > html/$@/index.html
 
 cu:
