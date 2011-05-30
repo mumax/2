@@ -1,10 +1,12 @@
 ptxfiles=\
 	memory.ptx\
 
+NVCC=nvcc
+
 all: $(ptxfiles)
 
-$(ptxfiles):
-	 nvcc -ptx $(@:.ptx=.cu)
+$(ptxfiles): %.ptx: %.cu
+	 $(NVCC) -ptx $(@:.ptx=.cu)
 
 .PHONY: clean
 clean:
