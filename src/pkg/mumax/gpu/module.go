@@ -142,6 +142,7 @@ func (c *Closure) Call() {
 func (c *Closure) Configure(gridDim, blockDim []int){
 	// check validity of blockDim, gridDim
 	good := true
+	// > check against device restrictions
 	threads := 1
 	for i := range maxBlockDim{
 		if blockDim[i]	> maxBlockDim[i] || blockDim[i] < 1 {good = false}
@@ -150,7 +151,13 @@ func (c *Closure) Configure(gridDim, blockDim []int){
 	}
 	if threads > maxThreadsPerBlock {good = false}
 	if ! good{
-		panic(Bug("Invalid launch configuration: " + fmt.Sprint(gridDim) + fmt.Sprint(blockDim)))
+		panic(Bug("Invalid launch configuration: " + fmt.Sprint(gridDim, blockDim)))
+	}
+
+	// > check against function-specific restrictions.
+	funcMaxTPB := c.MaxThreadsPerBlock()
+	if threads > funcMaxTPB{
+		panic(Bug(fmt.Sprint("Too many threads per block for function: ", threads, ">", funcMaxTPB)))
 	}
 
 	for _,dc := range c.DevClosure{
@@ -159,12 +166,49 @@ func (c *Closure) Configure(gridDim, blockDim []int){
 	c.Configured = true
 }
 
+// The maximum number of threads per block (per device) for this specific function.
+// Depending on the resources used by the function, it may be less than the maximum
+// imposed by the device.
+func(c *Closure) MaxThreadsPerBlock() int{
+	return c.DevClosure[0].Func.GetAttribute(cu.FUNC_A_MAX_THREADS_PER_BLOCK)
+}
 
 func (c *Closure) Configure1D(N int) {
-	
+	// configure the kernel launch for N elements
+	// with the largest possible number of threads per block
+	Assert(N % DeviceCount() == 0)
+	Ndev := N / DeviceCount() // number of elements per device
+
+	threads := c.MaxThreadsPerBlock()	
+	grid := DivUp(Ndev, threads)
+	c.Configure([]int{grid, 1, 1},[]int{threads, 1, 1})
+
+	// set the special variables N and PART for each device
+	for i := range c.DevClosure{
+		c.DevClosure[i].Seti(c.ArgN, Ndev)
+		c.DevClosure[i].Seti(c.ArgPART, i)
+	}
 }
 
 
-func (c *Closure) Configure3D(fullSize []int) {
+// Default matrix tile in floats (16x16)
+const DEFAULT_TILE=16
 
+func (c *Closure) Configure2D(size3D []int) {
+	Assert(size3D[1] % DeviceCount() == 0)
+	N0 := size3D[0]
+	N1 := size3D[1] / DeviceCount()
+	N2 := size3D[2]
+
+	threads := []int{DEFAULT_TILE, DEFAULT_TILE, 1}
+	blocks := []int{DivUp(N1,DEFAULT_TILE), DivUp(N2,DEFAULT_TILE), 1}
+	c.Configure(blocks, threads)
+	
+	// set the special variables N and PART for each device
+	for i := range c.DevClosure{
+		c.DevClosure[i].Seti(c.ArgPART, i)
+		c.DevClosure[i].Seti(c.ArgN, N0)
+		c.DevClosure[i].Seti(c.ArgN+1, N1)
+		c.DevClosure[i].Seti(c.ArgN+2, N2)
+	}
 }

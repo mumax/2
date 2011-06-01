@@ -18,8 +18,6 @@ import (
 // Represents a CUDA CUmodule, a reference to executable device code.
 type Module uintptr
 
-// Represents a CUDA CUfunction, a reference to a function within a module.
-type Function uintptr
 
 // Loads a compute module from file
 func ModuleLoad(fname string) Module {

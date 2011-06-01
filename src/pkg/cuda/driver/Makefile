@@ -13,6 +13,7 @@ CGOFILES=\
 	memory.go\
 	memset.go\
 	module.go\
+	function.go\
 	execution.go\
 	peer.go\
 

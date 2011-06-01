@@ -90,12 +90,12 @@ func (dev Device) GetAttribute(attrib DeviceAttribute) int {
 }
 
 // Gets the name of the device.
-func DeviceGetName(dev Device) string{
+func DeviceGetName(dev Device) string {
 	size := 256
 	buf := make([]byte, size)
 	cstr := C.CString(string(buf))
 	err := Result(C.cuDeviceGetName(cstr, C.int(size), C.CUdevice(dev)))
-	if err != SUCCESS{
+	if err != SUCCESS {
 		panic(err)
 	}
 	return C.GoString(cstr)
@@ -103,7 +103,7 @@ func DeviceGetName(dev Device) string{
 
 
 // Gets the name of the device.
-func(dev Device) GetName() string{
+func (dev Device) GetName() string {
 	return DeviceGetName(dev)
 }
 
