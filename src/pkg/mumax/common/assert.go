@@ -22,7 +22,7 @@ const MSG_ASSERTIONFAILED = "Assertion failed: %v line %v"
 // Panics if test is false
 func Assert(test bool) {
 	if !test {
-		_,file,line,_ := runtime.Caller(1)	
+		_, file, line, _ := runtime.Caller(1)
 		panic(Bug(fmt.Sprintf(MSG_ASSERTIONFAILED, file, line)))
 	}
 }

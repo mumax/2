@@ -27,7 +27,7 @@ func FuncGetAttribute(attrib FunctionAttribute, function Function) int {
 	return int(attr)
 }
 
-func(f Function) GetAttribute(attrib FunctionAttribute) int{
+func (f Function) GetAttribute(attrib FunctionAttribute) int {
 	return FuncGetAttribute(attrib, f)
 }
 

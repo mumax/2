@@ -31,7 +31,7 @@ func BenchmarkGobTransmission(b *testing.B) {
 	in := make([]float32, N)
 
 	// feeding gob random data instead of zeros really slows it down!
-	for i:= range in{
+	for i := range in {
 		in[i] = rand.Float32()
 	}
 	out := make([]float32, N)
@@ -61,7 +61,6 @@ func BenchmarkPipeTransmission(b *testing.B) {
 	N := 32 * 1024 * 1024 * 4
 	in := make([]byte, N)
 	out := make([]byte, N)
-
 
 	b.SetBytes(int64(N))
 	go func() {

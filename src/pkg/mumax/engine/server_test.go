@@ -21,5 +21,4 @@ func TestServer(t *testing.T) {
 	s.AddValue("alpha", 1)
 	fmt.Println(&s)
 
-
 }

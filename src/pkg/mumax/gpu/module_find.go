@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	_lookPath = GetExecDir() 
+	_lookPath = GetExecDir()
 }
 
 

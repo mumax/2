@@ -17,8 +17,10 @@ import (
 
 func TestIndex1D(test *testing.T) {
 	// fail test on panic, do not crash
-	defer func(){
-		if err := recover(); err != nil{ test.Error(err) }
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
 	}()
 
 	size := []int{8, 16, 32}
@@ -31,15 +33,19 @@ func TestIndex1D(test *testing.T) {
 	set.Call()
 
 	A := a.LocalCopy().List
-	for i:=range A{
-		if A[i] != float32(i){test.Fail()}
+	for i := range A {
+		if A[i] != float32(i) {
+			test.Fail()
+		}
 	}
 }
 
 func TestIndex3D(test *testing.T) {
 	// fail test on panic, do not crash
-	defer func(){
-		if err := recover(); err != nil{ test.Error(err) }
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
 	}()
 
 	size := []int{8, 16, 64}
@@ -51,9 +57,10 @@ func TestIndex3D(test *testing.T) {
 	set.SetArgs(a)
 	set.Call()
 
-
 	A := a.LocalCopy().List
-	for i:=range A{
-		if A[i] != float32(i){test.Fail()}
+	for i := range A {
+		if A[i] != float32(i) {
+			test.Fail()
+		}
 	}
 }

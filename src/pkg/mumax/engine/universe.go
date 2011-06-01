@@ -43,7 +43,7 @@ type Universe struct {
 
 
 func (u *Universe) Init(size3D, periodic []int, volumeNodes, surfaceNodes bool) {
-	if u._initiated{
+	if u._initiated {
 		panic(InputErr(UNIVERSE_ALREADY_INITIATED))
 	}
 	Assert(len(size3D) == 3)

@@ -10,4 +10,3 @@
 
 // Package with host counterparts for the GPU package.
 package host
-

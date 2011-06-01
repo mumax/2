@@ -65,7 +65,7 @@ type Closure struct {
 	ArgType    []int        // INTERNAL: types of the arguments (see ptxparse)
 	ArgPART    int          // INTERNAL: index of automatically set argument "PART"
 	ArgN       int          // INTERNAL: index of automatically set argument "N" (for 1D) or "N0" (for 3D, then "N1", "N2" should immediately follow)
-	Configured bool			// INTERNAL: false if no Configure*() has yet been called.
+	Configured bool         // INTERNAL: false if no Configure*() has yet been called.
 }
 
 
@@ -87,7 +87,7 @@ func (c *Closure) SetArg(argIdx int, arg interface{}) {
 				panic(Bug(fmt.Sprintf("* Can not handle argument type: %v", argType)))
 			case s32:
 				dc.Seti(argIdx, arg.(int))
-			//case u64:
+				//case u64:
 				//dc.SetDevicePtr(argIdx, (arg.(*Array)).DevicePtr(i))
 			}
 		}
@@ -114,7 +114,7 @@ func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
 // Executes the closure with its currently set arguments
 // and does not wait for the result.
 func (c *Closure) Go() {
-	if !c.Configured{
+	if !c.Configured {
 		panic(Bug("mumax/gpu: kernel not configured"))
 	}
 	for _, dc := range c.DevClosure {
@@ -139,28 +139,34 @@ func (c *Closure) Call() {
 	c.Synchronize()
 }
 
-func (c *Closure) Configure(gridDim, blockDim []int){
+func (c *Closure) Configure(gridDim, blockDim []int) {
 	// check validity of blockDim, gridDim
 	good := true
 	// > check against device restrictions
 	threads := 1
-	for i := range maxBlockDim{
-		if blockDim[i]	> maxBlockDim[i] || blockDim[i] < 1 {good = false}
+	for i := range maxBlockDim {
+		if blockDim[i] > maxBlockDim[i] || blockDim[i] < 1 {
+			good = false
+		}
 		threads *= blockDim[i]
-		if gridDim[i]	> maxGridDim[i] || gridDim[i] < 1 {good = false}
+		if gridDim[i] > maxGridDim[i] || gridDim[i] < 1 {
+			good = false
+		}
 	}
-	if threads > maxThreadsPerBlock {good = false}
-	if ! good{
+	if threads > maxThreadsPerBlock {
+		good = false
+	}
+	if !good {
 		panic(Bug("Invalid launch configuration: " + fmt.Sprint(gridDim, blockDim)))
 	}
 
 	// > check against function-specific restrictions.
 	funcMaxTPB := c.MaxThreadsPerBlock()
-	if threads > funcMaxTPB{
+	if threads > funcMaxTPB {
 		panic(Bug(fmt.Sprint("Too many threads per block for function: ", threads, ">", funcMaxTPB)))
 	}
 
-	for i := range c.DevClosure{
+	for i := range c.DevClosure {
 		Debug("setconfig", gridDim, blockDim)
 		c.DevClosure[i].SetConfig(gridDim, blockDim)
 	}
@@ -170,23 +176,23 @@ func (c *Closure) Configure(gridDim, blockDim []int){
 // The maximum number of threads per block (per device) for this specific function.
 // Depending on the resources used by the function, it may be less than the maximum
 // imposed by the device.
-func(c *Closure) MaxThreadsPerBlock() int{
+func (c *Closure) MaxThreadsPerBlock() int {
 	return c.DevClosure[0].Func.GetAttribute(cu.FUNC_A_MAX_THREADS_PER_BLOCK)
 }
 
 func (c *Closure) Configure1D(N int) {
 	// configure the kernel launch for N elements
 	// with the largest possible number of threads per block
-	Assert(N % DeviceCount() == 0)
+	Assert(N%DeviceCount() == 0)
 	Ndev := N / DeviceCount() // number of elements per device
 
-	threads := c.MaxThreadsPerBlock()	
+	threads := c.MaxThreadsPerBlock()
 	grid := DivUp(Ndev, threads)
-	c.Configure([]int{grid, 1, 1},[]int{threads, 1, 1})
+	c.Configure([]int{grid, 1, 1}, []int{threads, 1, 1})
 	//TODO: allow 2D config for very large N
 
 	// set the special variables N and PART for each device
-	for i := range c.DevClosure{
+	for i := range c.DevClosure {
 		c.DevClosure[i].Seti(c.ArgN, Ndev)
 		c.DevClosure[i].Seti(c.ArgPART, i)
 	}
@@ -194,20 +200,20 @@ func (c *Closure) Configure1D(N int) {
 
 
 // Default matrix tile in floats (16x16)
-const DEFAULT_TILE=16
+const DEFAULT_TILE = 16
 
 func (c *Closure) Configure2D(size3D []int) {
-	Assert(size3D[1] % DeviceCount() == 0)
+	Assert(size3D[1]%DeviceCount() == 0)
 	N0 := size3D[0]
 	N1 := size3D[1] / DeviceCount()
 	N2 := size3D[2]
 
 	threads := []int{DEFAULT_TILE, DEFAULT_TILE, 1}
-	blocks := []int{DivUp(N1,DEFAULT_TILE), DivUp(N2,DEFAULT_TILE), 1}
+	blocks := []int{DivUp(N1, DEFAULT_TILE), DivUp(N2, DEFAULT_TILE), 1}
 	c.Configure(blocks, threads)
-	
+
 	// set the special variables N and PART for each device
-	for i := range c.DevClosure{
+	for i := range c.DevClosure {
 		c.DevClosure[i].Seti(c.ArgPART, i)
 		c.DevClosure[i].Seti(c.ArgN, N0)
 		c.DevClosure[i].Seti(c.ArgN+1, N1)
