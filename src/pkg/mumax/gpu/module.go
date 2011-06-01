@@ -61,7 +61,7 @@ func Global(modname, funcname string) Closure {
 
 // Multi-GPU analog of cuda/driver/Closure.
 type Closure struct {
-	DevClosure []cu.Closure // INTERNAL: separate closures for each GPU
+	DevClosure []cu.Closure // INTERNAL: separate closures for each GPU. WARNING: loop over i, not values!
 	ArgType    []int        // INTERNAL: types of the arguments (see ptxparse)
 	ArgPART    int          // INTERNAL: index of automatically set argument "PART"
 	ArgN       int          // INTERNAL: index of automatically set argument "N" (for 1D) or "N0" (for 3D, then "N1", "N2" should immediately follow)
@@ -160,8 +160,9 @@ func (c *Closure) Configure(gridDim, blockDim []int){
 		panic(Bug(fmt.Sprint("Too many threads per block for function: ", threads, ">", funcMaxTPB)))
 	}
 
-	for _,dc := range c.DevClosure{
-		dc.SetConfig(blockDim, gridDim)
+	for i := range c.DevClosure{
+		Debug("setconfig", gridDim, blockDim)
+		c.DevClosure[i].SetConfig(gridDim, blockDim)
 	}
 	c.Configured = true
 }
