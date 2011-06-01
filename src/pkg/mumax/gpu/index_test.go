@@ -42,8 +42,9 @@ func TestIndex3D(test *testing.T) {
 		if err := recover(); err != nil{ test.Error(err) }
 	}()
 
-	size := []int{4, 8, 16}
+	size := []int{8, 16, 64}
 	a := NewArray(1, size)
+	defer a.Free()
 
 	set := Global("debug", "SetIndex3D")
 	set.Configure2D(a.Size3D())
@@ -51,5 +52,8 @@ func TestIndex3D(test *testing.T) {
 	set.Call()
 
 
-	//fmt.Println(a.LocalCopy())
+	A := a.LocalCopy().List
+	for i:=range A{
+		if A[i] != float32(i){test.Fail()}
+	}
 }
