@@ -12,6 +12,7 @@ import "C"
 
 import (
 	"unsafe"
+	"fmt"
 )
 
 // Launches a CUDA kernel on the device.
@@ -40,12 +41,12 @@ import (
 //
 func LaunchKernel(f Function, gridDimX, gridDimY, gridDimZ int, blockDimX, blockDimY, blockDimZ int, sharedMemBytes int, stream Stream, kernelParams []uintptr) {
 
-	// debug: print all arguments
-	//	argvals := make([]int, len(kernelParams))
-	//	for i := range kernelParams{
-	//		argvals[i] = *(*int)(unsafe.Pointer(kernelParams[i]))
-	//	}
-	//	fmt.Println("LaunchKernel: ", "func: ", f, "gridDim: ", gridDimX, gridDimY, gridDimZ, "blockDim: ", blockDimX, blockDimY, blockDimZ, "shmem: ", sharedMemBytes, "stream: ", stream, "argptrs: ", kernelParams, "argvals:"   , argvals )
+	 //debug: print all arguments
+		argvals := make([]int, len(kernelParams))
+		for i := range kernelParams{
+			argvals[i] = *(*int)(unsafe.Pointer(kernelParams[i]))
+		}
+		fmt.Println("LaunchKernel: ", "func: ", f, "gridDim: ", gridDimX, gridDimY, gridDimZ, "blockDim: ", blockDimX, blockDimY, blockDimZ, "shmem: ", sharedMemBytes, "stream: ", stream, "argptrs: ", kernelParams, "argvals:"   , argvals )
 
 	err := Result(C.cuLaunchKernel(C.CUfunction(unsafe.Pointer(f)), C.uint(gridDimX), C.uint(gridDimY), C.uint(gridDimZ), C.uint(blockDimX), C.uint(blockDimY), C.uint(blockDimZ), C.uint(sharedMemBytes), C.CUstream(unsafe.Pointer(stream)), (*unsafe.Pointer)(unsafe.Pointer(&kernelParams[0])), (*unsafe.Pointer)(unsafe.Pointer(uintptr(0)))))
 	if err != SUCCESS {

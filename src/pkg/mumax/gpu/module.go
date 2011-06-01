@@ -182,6 +182,7 @@ func (c *Closure) Configure1D(N int) {
 	threads := c.MaxThreadsPerBlock()	
 	grid := DivUp(Ndev, threads)
 	c.Configure([]int{grid, 1, 1},[]int{threads, 1, 1})
+	//TODO: allow 2D config for very large N
 
 	// set the special variables N and PART for each device
 	for i := range c.DevClosure{

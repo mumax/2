@@ -16,9 +16,9 @@ extern "C" {
 /// @debug sets array[i] to i.
 __global__ void SetIndex1D(float* part, int PART, int N){
 
-  int i = threadindex;
+  int i = ( ( blockIdx.y*gridDim.x + blockIdx.x ) * blockDim.x + threadIdx.x );
   if (i < N){
-	part[i] = PART * N + i;
+	part[i] = i;
   }
 }
 
