@@ -44,7 +44,7 @@ func Close(f Function, argCount int) (c Closure) {
 }
 
 // Sets the kernel launch configuration.
-func (c *Closure) SetConfig(blockDim, gridDim []int) {
+func (c *Closure) SetConfig(gridDim, blockDim[]int) {
 	for i := range c.BlockDim {
 		c.BlockDim[i] = blockDim[i]
 		c.GridDim[i] = gridDim[i]
