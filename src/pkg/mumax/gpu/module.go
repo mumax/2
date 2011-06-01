@@ -65,6 +65,7 @@ type Closure struct {
 	ArgType    []int        // INTERNAL: types of the arguments (see ptxparse)
 	ArgPART    int          // INTERNAL: index of automatically set argument "PART"
 	ArgN       int          // INTERNAL: index of automatically set argument "N" (for 1D) or "N0" (for 3D, then "N1", "N2" should immediately follow)
+	Configured bool			// INTERNAL: false if no Configure*() has yet been called.
 }
 
 
@@ -113,6 +114,9 @@ func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
 // Executes the closure with its currently set arguments
 // and does not wait for the result.
 func (c *Closure) Go() {
+	if !c.Configured{
+		panic(Bug("mumax/gpu: kernel not configured"))
+	}
 	for _, dc := range c.DevClosure {
 		dc.Go()
 	}
@@ -135,11 +139,24 @@ func (c *Closure) Call() {
 	c.Synchronize()
 }
 
-func (c *Closure) Configure(blockDim, gridDim []int){
-	// TODO: check config here
+func (c *Closure) Configure(gridDim, blockDim []int){
+	// check validity of blockDim, gridDim
+	good := true
+	threads := 1
+	for i := range maxBlockDim{
+		if blockDim[i]	> maxBlockDim[i] || blockDim[i] < 1 {good = false}
+		threads *= blockDim[i]
+		if gridDim[i]	> maxGridDim[i] || gridDim[i] < 1 {good = false}
+	}
+	if threads > maxThreadsPerBlock {good = false}
+	if ! good{
+		panic(Bug("Invalid launch configuration: " + fmt.Sprint(gridDim) + fmt.Sprint(blockDim)))
+	}
+
 	for _,dc := range c.DevClosure{
 		dc.SetConfig(blockDim, gridDim)
 	}
+	c.Configured = true
 }
 
 

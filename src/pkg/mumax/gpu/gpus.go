@@ -58,6 +58,17 @@ func InitMultiGPU(devices []int, flags uint) {
 		Log("device", i,"( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem() / (1024*1024), "MiB")
 	}
 
+	// set up device properties
+	dev := cu.DeviceGet(_useDevice[0])
+	maxThreadsPerBlock = dev.GetAttribute(cu.A_MAX_THREADS_PER_BLOCK)
+	maxBlockDim[0] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_X)
+	maxBlockDim[1] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_Y)
+	maxBlockDim[2] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_Z)
+	maxGridDim[0] = dev.GetAttribute(cu.A_MAX_GRID_DIM_X)
+	maxGridDim[1] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Y)
+	maxGridDim[2] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Z)
+	Debug("Max", maxThreadsPerBlock, "threads per block, max", maxGridDim, "x", maxBlockDim, "threads per GPU")
+
 	// setup contexts
 	_deviceCtxs = make([]cu.Context, len(_useDevice))
 	for i := range _deviceCtxs {
