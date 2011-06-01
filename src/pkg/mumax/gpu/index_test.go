@@ -13,6 +13,7 @@ import (
 	//. "mumax/common"
 	//"mumax/host"
 	"testing"
+	"fmt"
 )
 
 func TestIndex1D(test *testing.T) {
@@ -21,13 +22,15 @@ func TestIndex1D(test *testing.T) {
 		if err := recover(); err != nil{ test.Error(err) }
 	}()
 
-	size := []int{4, 8, 16}
+	size := []int{1, 4, 16}
 	a := NewArray(1, size)
 
 	set := Global("debug", "SetIndex1D")
 	set.Configure1D(a.Len())
 	set.SetArgs(a)
 	set.Call()
+
+	fmt.Println(a.LocalCopy())
 }
 
 func TestIndex3D(test *testing.T) {
@@ -43,4 +46,7 @@ func TestIndex3D(test *testing.T) {
 	set.Configure2D(a.Size3D())
 	set.SetArgs(a)
 	set.Call()
+
+
+	//fmt.Println(a.LocalCopy())
 }

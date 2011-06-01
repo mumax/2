@@ -12,16 +12,18 @@ package common
 
 import (
 	"fmt"
+	"runtime"
 )
 
 
-const MSG_ASSERTIONFAILED = "Assertion failed."
+const MSG_ASSERTIONFAILED = "Assertion failed: %v line %v"
 
 
 // Panics if test is false
 func Assert(test bool) {
 	if !test {
-		panic(Bug(MSG_ASSERTIONFAILED))
+		_,file,line,_ := runtime.Caller(1)	
+		panic(Bug(fmt.Sprintf(MSG_ASSERTIONFAILED, file, line)))
 	}
 }
 
