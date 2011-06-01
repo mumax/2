@@ -26,6 +26,12 @@ var _deviceCtxs []cu.Context
 // INTERNAL: The currently active CUDA context (element of _deviceCtxs)
 var _currentCtx cu.Context
 
+// INTERNAL: Device properties
+var(
+	maxThreadsPerBlock int
+	maxBlockDim [3]int
+	maxGridDim [3]int
+)
 
 // Sets a list of devices to use.
 func InitMultiGPU(devices []int, flags uint) {
@@ -41,8 +47,16 @@ func InitMultiGPU(devices []int, flags uint) {
 		}
 	}
 
+	// set up list with used device IDs
 	_useDevice = make([]int, len(devices))
 	copy(_useDevice, devices)
+
+
+	// output device info
+	for i := range _useDevice{
+		dev := cu.DeviceGet(_useDevice[i])
+		Log("device", i,"( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem() / (1024*1024), "MiB")
+	}
 
 	// setup contexts
 	_deviceCtxs = make([]cu.Context, len(_useDevice))
