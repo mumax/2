@@ -135,9 +135,16 @@ func (c *Closure) Call() {
 	c.Synchronize()
 }
 
+func (c *Closure) Configure(blockDim, gridDim []int){
+	// TODO: check config here
+	for _,dc := range c.DevClosure{
+		dc.SetConfig(blockDim, gridDim)
+	}
+}
+
 
 func (c *Closure) Configure1D(N int) {
-
+	
 }
 
 
