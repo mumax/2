@@ -21,7 +21,7 @@ func TestRefsh(test *testing.T) {
 
 	refsh.CrashOnError = false
 	//refsh.Interactive()
-	
+
 
 }
 
@@ -41,6 +41,6 @@ func Hello() {
 	fmt.Println("Hello world!")
 }
 
-func Echo(i int) int{
+func Echo(i int) int {
 	return i
 }

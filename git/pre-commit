@@ -7,6 +7,10 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
+# Nicely format all go source files
+gofmt -w src/pkg/*/*.go src/pkg/*/*/*.go
+
+# Run all unit tests
 rm test.log -rf
 if (make test 2>> test.log >> test.log); then
 	echo PASS
