@@ -13,6 +13,7 @@ import (
 	//. "mumax/common"
 	//"mumax/host"
 	"testing"
+	"fmt"
 )
 
 func TestIndex1D(test *testing.T) {
@@ -38,6 +39,10 @@ func TestIndex1D(test *testing.T) {
 			test.Fail()
 		}
 	}
+
+	if test.Failed(){
+		fmt.Println(A)
+	}
 }
 
 func TestIndex3D(test *testing.T) {
@@ -57,10 +62,18 @@ func TestIndex3D(test *testing.T) {
 	set.SetArgs(a)
 	set.Call()
 
-	A := a.LocalCopy().List
+	A := a.LocalCopy().Array[0]
 	for i := range A {
-		if A[i] != float32(i) {
+	for j := range A[i] {
+	for k := range A[i][j] {
+		if A[i][j][k] != float32(i*1000 + j + k/1000) {
 			test.Fail()
 		}
+	}
+	}
+}
+
+	if test.Failed(){
+		fmt.Println(A)
 	}
 }

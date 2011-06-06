@@ -143,9 +143,9 @@ func InitDebugGPUs() {
 	for i := 0; i < N; i++ {
 		use = append(use, i)
 	}
-	//if N == 1 {
-	//	use = append(use, 0) // Use the same device twice.
-	//}
+	if N == 1 {
+		use = append(use, 0) // Use the same device twice.
+	}
 	InitMultiGPU(use, 0)
 }
 

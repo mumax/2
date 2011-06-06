@@ -16,9 +16,9 @@ extern "C" {
 /// @debug sets array[i] to i.
 __global__ void SetIndex1D(float* part, int PART, int N){
 
-  int i = ( ( blockIdx.y*gridDim.x + blockIdx.x ) * blockDim.x + threadIdx.x );
+  int i = threadindex;
   if (i < N){
-	part[i] = i;
+	part[i] = i + PART*N;
   }
 }
 
@@ -30,11 +30,10 @@ __global__ void SetIndex3D(float* part, int PART, int N0, int N1, int N2){
   int k = blockIdx.y * blockDim.y + threadIdx.y;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   if (j < N1 && k < N2){
-
-	j += PART * N1;
 	for(int i=0; i<N0; i++){
   		int I = i*N1*N2 + j*N2 + k; // linear array index
-			part[I] = I;
+			j += PART * N1;
+			part[I] = i*1000 + j + k/1000;
 		}
 	}
 }
