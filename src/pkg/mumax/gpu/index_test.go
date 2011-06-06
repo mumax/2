@@ -40,7 +40,7 @@ func TestIndex1D(test *testing.T) {
 		}
 	}
 
-	if test.Failed(){
+	if test.Failed() {
 		fmt.Println(A)
 	}
 }
@@ -64,16 +64,16 @@ func TestIndex3D(test *testing.T) {
 
 	A := a.LocalCopy().Array[0]
 	for i := range A {
-	for j := range A[i] {
-	for k := range A[i][j] {
-		if A[i][j][k] != float32(i*1000 + j + k/1000) {
-			test.Fail()
+		for j := range A[i] {
+			for k := range A[i][j] {
+				if A[i][j][k] != float32(i*1000+j+k/1000) {
+					test.Fail()
+				}
+			}
 		}
 	}
-	}
-}
 
-	if test.Failed(){
+	if test.Failed() {
 		fmt.Println(A)
 	}
 }
