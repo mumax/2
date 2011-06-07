@@ -1,7 +1,8 @@
 dirs=\
 	common\
+	host\
 	gpu\
 
-gpu: common
+gpu: common host
 
 include ../../Dirs.pkg
