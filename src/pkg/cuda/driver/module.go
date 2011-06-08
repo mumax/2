@@ -21,6 +21,7 @@ type Module uintptr
 
 // Loads a compute module from file
 func ModuleLoad(fname string) Module {
+	//fmt.Fprintln(os.Stderr, "driver.ModuleLoad", fname)
 	var mod C.CUmodule
 	err := Result(C.cuModuleLoad(&mod, C.CString(fname)))
 	if err != SUCCESS {

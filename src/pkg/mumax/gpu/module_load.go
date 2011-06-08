@@ -33,22 +33,22 @@ func init() {
 }
 
 // Loads a .ptx module for all GPUs.
-func LoadModule(fname string) {
-	Debug("Loading module: ", fname)
-	Assert(strings.HasSuffix(fname, ".ptx"))
+func LoadModule(filename string) {
+	Debug("Loading module: ", filename)
+	Assert(strings.HasSuffix(filename, ".ptx"))
 
 	// load the module into _modules
-	fname = path.Base(fname)
+	fname := path.Base(filename)
 	name := fname[:len(fname)-len(".ptx")] // module name without .ptx
 	_, ok := _modules[name]
 	if ok {
 		panic(Bug(fmt.Sprintf(ERR_MODULE_LOADED, fname)))
 	}
-	module := cu.ModuleLoad(fname)
+	module := cu.ModuleLoad(filename)
 	_modules[name] = module
 
 	// load all functions into _functions
-	funcArgs := parsePTXArgTypes(fname)
+	funcArgs := parsePTXArgTypes(filename)
 	for funcName := range funcArgs {
 		_, ok := _functions[funcName]
 		if ok {
