@@ -16,4 +16,3 @@ import (
 
 func TestArray(t *testing.T) {
 }
-

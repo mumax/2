@@ -4,6 +4,7 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/client
 
 GOFILES=\
+	client.go\
 	main.go\
 
 CGOFILES=\

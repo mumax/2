@@ -15,4 +15,3 @@ import (
 func main() {
 	apigen.Main()
 }
-

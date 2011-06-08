@@ -5,14 +5,16 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+// This package implements automated mumax API generation.
+// Based on the exported methods of a desired type, an API
+// library in any of the supported programming languages is
+// automatically generated.
+
 package apigen
 
-import (
-	"fmt"
-)
+import ()
 
 
 func Main() {
-	fmt.Println("Hello apigen")
-}
 
+}

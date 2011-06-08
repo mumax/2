@@ -20,13 +20,13 @@ func Main() {
 }
 
 
-func initialize(){
+func initialize() {
 	InitLogger("mumax-client.log")
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
 }
 
 
-func cleanup(){
+func cleanup() {
 	Log("Finished.")
 }

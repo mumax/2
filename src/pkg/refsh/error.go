@@ -13,8 +13,7 @@ package refsh
 // Bug: this is not the user's fault. A crash report should be generated.
 // Author: Arne Vansteenkiste
 
-import (
-)
+import ()
 
 // We define different error types so a recover() after
 // panic() can determine (with a type assertion)
@@ -32,7 +31,7 @@ func (e InputErr) String() string {
 }
 
 // Dummy method to identify the type.
-func (e InputErr) InputErr(){
+func (e InputErr) InputErr() {
 }
 
 
@@ -45,7 +44,7 @@ func (e IOErr) String() string {
 }
 
 // Dummy method to identify the type.
-func (e IOErr) IOErr(){
+func (e IOErr) IOErr() {
 }
 
 
@@ -58,6 +57,5 @@ func (e Bug) String() string {
 }
 
 // Dummy method to identify the type.
-func (e Bug) Bug(){
+func (e Bug) Bug() {
 }
-

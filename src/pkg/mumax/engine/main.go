@@ -16,33 +16,33 @@ import (
 const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Engine (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
 
 var (
-	logFile *string = flag.String("log", "mumax.log", "Specify the log file.")
-	rpcType *string = flag.String("rpc", "shell", "Specify RPC protocol: shell, (go, json)")
-	interactive *bool = flag.Bool("i", true, "interactive mode")
+	logFile     *string = flag.String("log", "mumax.log", "Specify the log file.")
+	rpcType     *string = flag.String("rpc", "shell", "Specify RPC protocol: shell, (go, json)")
+	interactive *bool   = flag.Bool("i", true, "interactive mode")
 )
 
 func Main() {
 	initialize()
 	defer cleanup()
 
-//	var eng engine.Engine
-//	rpc := chooseRPC(*rpcType, &eng)
-//
-//	if *interactive{
-//		runInteractive(rpc)
-//	}else{
-//		rpc.ReadFrom(os.Stdin)
-//	}
+	//	var eng engine.Engine
+	//	rpc := chooseRPC(*rpcType, &eng)
+	//
+	//	if *interactive{
+	//		runInteractive(rpc)
+	//	}else{
+	//		rpc.ReadFrom(os.Stdin)
+	//	}
 }
 
 
-func initialize(){
+func initialize() {
 	flag.Parse()
 	InitLogger("mumax-engine.log")
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
 }
 
-func cleanup(){
+func cleanup() {
 	Log("Finished.")
 }

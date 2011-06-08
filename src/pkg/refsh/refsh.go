@@ -162,4 +162,3 @@ func NewRefsh() *Refsh {
 	//refsh.AddMethod("include", refsh, "Include")
 	return refsh
 }
-
