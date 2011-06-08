@@ -21,4 +21,3 @@ func init() {
 	InitDebugGPUs()
 	SetPTXLookPath("../../../ptx")
 }
-

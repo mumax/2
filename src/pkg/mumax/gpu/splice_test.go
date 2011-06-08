@@ -14,7 +14,6 @@ import (
 )
 
 
-
 // Test if getDevices() works
 func TestDevices(t *testing.T) {
 	//	devices := getDevices()
