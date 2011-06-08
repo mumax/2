@@ -11,16 +11,9 @@ package gpu
 
 import (
 	"testing"
-	cu "cuda/driver"
 )
 
 
-func init() {
-	cu.Init()
-	InitDebugGPUs()
-}
-
-const BIG = 32 * 1024 * 1024
 
 // Test if getDevices() works
 func TestDevices(t *testing.T) {

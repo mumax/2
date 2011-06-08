@@ -12,11 +12,8 @@ package gpu
 
 import (
 	. "mumax/common"
+	"path"
 )
-
-func init() {
-	_lookPath = GetExecDir()
-}
 
 
 // INTERNAL: where to look for .ptx files.
@@ -28,5 +25,14 @@ func findModule(modname string) (filename string) {
 	fname := modname + ".ptx"
 	filename = _lookPath + fname
 	return
+}
 
+// Sets the PTX lookup path, relative to the location of the executable.
+func SetPTXLookPath(ptxpath string){
+	if _lookPath != ""{
+		panic(Bug("gpus: PTX lookpath already set: " + _lookPath))
+	}
+	_lookPath = path.Clean(GetExecDir() + ptxpath)
+	_lookPath += "/"
+	Debug("PTX lookup path:", _lookPath)
 }
