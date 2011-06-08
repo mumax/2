@@ -53,7 +53,7 @@ func TestIndex3D(test *testing.T) {
 		}
 	}()
 
-	size := []int{8, 16, 64}
+	size := []int{1, 4, 5}
 	a := NewArray(1, size)
 	defer a.Free()
 
@@ -66,14 +66,14 @@ func TestIndex3D(test *testing.T) {
 	for i := range A {
 		for j := range A[i] {
 			for k := range A[i][j] {
-				if A[i][j][k] != float32(i) {
+				if A[i][j][k] != float32(i+j+k) {
 					test.Fail()
 				}
 			}
 		}
 	}
 
-	//if test.Failed() {
-	fmt.Println(A)
-	//}
+	if test.Failed() {
+		fmt.Println(A)
+	}
 }

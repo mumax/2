@@ -29,11 +29,11 @@ __global__ void SetIndex3D(float* part, int PART, int N0, int N1, int N2){
 
   int k = blockIdx.y * blockDim.y + threadIdx.y;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
-  float j2 = j + PART * N1;
+  float j2 = j + PART * N1; // j-index in the big array
   if (j < N1 && k < N2){
 	for(int i=0; i<N0; i++){
   		int I = i*N1*N2 + j*N2 + k; // linear array index
-			part[I] = i;//i+j2+k;
+			part[I] = i+j2+k;
 		}
 	}
 }

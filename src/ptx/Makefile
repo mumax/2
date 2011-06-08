@@ -7,6 +7,7 @@ NVCC=nvcc
 all: $(ptxfiles)
 
 $(ptxfiles): %.ptx: %.cu
+	rm -f $@
 	 $(NVCC) -ptx $(@:.ptx=.cu)
 
 .PHONY: clean
