@@ -21,7 +21,7 @@ LD+=\
 
 all: $(executables)
 
-$(executables):	%: %.go
+$(executables):	%:	%.go
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
 

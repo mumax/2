@@ -4,7 +4,9 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/apigen
 
 GOFILES=\
-		main.go
+	main.go\
+	lang.go\
+	python.go\
 
 CGOFILES=\
 

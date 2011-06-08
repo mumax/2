@@ -13,14 +13,39 @@
 package apigen
 
 import (
-	//. "mumax/common"	
+	. "mumax/common"
 	"mumax/client"
 	"refsh"
+	"reflect"
 )
 
+// the package name
+const pkg = "mumax2"
 
 func Main() {
 	c := new(client.Client)
 	r := refsh.New()
 	r.AddAllMethods(c)
+
+	langs := []Lang{&Python{}}
+	for _, lang := range langs {
+		file := pkg + "." + lang.FileExt()
+		out := FOpen(file)
+		lang.WriteHeader(out)
+
+		for i := range r.Funcnames {
+			lang.WriteFunc(out, r.Funcnames[i], ArgTypes(r.Funcs[i]))
+		}
+
+		out.Close()
+	}
+}
+
+// Fetches argument types from refsh.
+func ArgTypes(c refsh.Caller) []reflect.Type {
+	types := make([]reflect.Type, c.NumIn())
+	for i := range types {
+		types[i] = c.In(i)
+	}
+	return types
 }

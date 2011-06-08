@@ -16,15 +16,6 @@ import (
 	"os"
 )
 
-// Sets up a default logger.
-// Use InitLogger(file) to override.
-func init() {
-	InitLogger(DEFAULT_LOG_FILE)
-}
-
-// Default log file.
-const DEFAULT_LOG_FILE = "mumax.log"
-
 // INTERNAL global logger
 var logger Logger
 
