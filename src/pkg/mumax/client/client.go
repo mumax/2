@@ -14,6 +14,12 @@ type Client struct {
 }
 
 
+// For testing purposes.
 func (c *Client) Version() int {
 	return 2
+
+}
+// For testing purposes.
+func (c *Client) Echo(i int) int {
+	return i
 }

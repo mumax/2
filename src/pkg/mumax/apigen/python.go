@@ -21,17 +21,28 @@ func (p *Python) FileExt() string {
 	return "py"
 }
 
+func (p *Python) Comment() string {
+	return "#"
+}
+
 func (p *Python) WriteHeader(out io.Writer) {
+		fmt.Fprintln(out, p.Comment(), DONTEDIT)
 }
 
 
 func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type) {
+	fmt.Fprintln(out)
 	fmt.Fprint(out, "def ", name, "(")
+
+	args := ""
 	for i := range argTypes {
 		if i != 0 {
-			fmt.Print(out, ",")
+			args += ", "
 		}
-		fmt.Print(out, "arg", i+1)
+		args += "arg" + fmt.Sprint(i+1)
 	}
-	fmt.Fprintln(out, "):")
+	fmt.Fprintln(out, args, "):")
+	if len(args) != 0 {args = args + ","}
+	fmt.Fprintln(out, "\tprint", name, ",", args, "\"\\n\"")
+	fmt.Fprintln(out, "\tstdout.flush()")
 }

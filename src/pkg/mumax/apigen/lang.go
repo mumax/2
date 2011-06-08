@@ -16,6 +16,7 @@ import (
 // Represents a programming language.
 type Lang interface {
 	FileExt() string                                               // Extension of source files
-	WriteHeader(out io.Writer)                                     // Write the header of the source file.
-	WriteFunc(out io.Writer, name string, argTypes []reflect.Type) // Write a function wrapper to the source file.
+	Comment() string                                               // Comment token like # or //
+	WriteHeader(out io.Writer)                                     // Write the header of the source file
+	WriteFunc(out io.Writer, name string, argTypes []reflect.Type) // Write a function wrapper to the source file
 }
