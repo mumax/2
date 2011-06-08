@@ -1,7 +1,7 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=mumax/refsh
+TARG=refsh
 
 GOFILES=\
 	caller.go\
@@ -14,9 +14,6 @@ GOFILES=\
 	error.go\
 
 CGOFILES=\
-
-GC+=\
-	-I ../common/_obj\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	

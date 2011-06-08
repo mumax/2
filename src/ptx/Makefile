@@ -18,7 +18,7 @@ clean:
 install:
 
 .PHONY: test
-test:
+test: all
 
 .PHONY: bench
 bench:

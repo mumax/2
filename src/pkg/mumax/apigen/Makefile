@@ -10,6 +10,8 @@ CGOFILES=\
 
 GC+=\
 	-I../common/_obj\
+	-I../client/_obj\
+	-I../../refsh/_obj\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	

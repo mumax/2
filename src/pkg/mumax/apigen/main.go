@@ -12,9 +12,15 @@
 
 package apigen
 
-import ()
+import (
+	//. "mumax/common"	
+	"mumax/client"
+	"refsh"
+)
 
 
 func Main() {
-
+	c := new(client.Client)
+	r := refsh.New()
+	r.AddAllMethods(c)
 }

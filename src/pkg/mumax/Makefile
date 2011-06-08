@@ -14,7 +14,7 @@ gpu: common host
 
 client: common gpu host
 
-apigen: client
+apigen: common client
 
 main: client apigen
 
