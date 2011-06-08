@@ -5,15 +5,12 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package main
+package engine
 
 import (
 	. "mumax/common"
-	"mumax/engine"
 	"flag"
 	"runtime"
-	"os"
-	"fmt"
 )
 
 const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Engine (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
@@ -24,56 +21,28 @@ var (
 	interactive *bool = flag.Bool("i", true, "interactive mode")
 )
 
-func main() {
+func Main() {
 	initialize()
 	defer cleanup()
 
-	var eng engine.Engine
-	rpc := chooseRPC(*rpcType, &eng)
-
-	if *interactive{
-		runInteractive(rpc)
-	}else{
-		rpc.ReadFrom(os.Stdin)
-	}
+//	var eng engine.Engine
+//	rpc := chooseRPC(*rpcType, &eng)
+//
+//	if *interactive{
+//		runInteractive(rpc)
+//	}else{
+//		rpc.ReadFrom(os.Stdin)
+//	}
 }
 
 
 func initialize(){
 	flag.Parse()
-	InitLogger(*logFile)
-	Println(WELCOME)
+	InitLogger("mumax-engine.log")
+	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
 }
 
-const(
-	UNKNOWN_RPC = "unknown RPC: -rpc=%v"
-)
-
-func chooseRPC(rpcType string, eng *engine.Engine) engine.RPC{
-	switch rpcType{
-	default: panic(InputErr(fmt.Sprintf(UNKNOWN_RPC, rpcType)))
-	case "shell": return engine.NewRefshRPC(eng)
-	}
-	panic(Bug("Bug"))
-	return nil
-}
-
-const PROMPT = "mumax> "
-
-func runInteractive(rpc engine.RPC){
-	var err interface{}	= "dummy"
-	for err != nil{	
-		func(){
-			defer func(){
-				err = recover()
-				if err != nil {fmt.Fprintln(os.Stderr, err)}
-			}()
-		rpc.ReadFrom(os.Stdin)
-		}()
-	}
-}
-
 func cleanup(){
-	Println("Finished.")
+	Log("Finished.")
 }

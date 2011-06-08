@@ -2,6 +2,7 @@ dirs=\
 	cuda\
 	mumax\
 
+include ../Dirs.pkg
+
 mumax: cuda
 
-include ../Dirs.pkg

@@ -1,10 +1,10 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=mumax/client
+TARG=mumax/apigen
 
 GOFILES=\
-	main.go\
+		main.go
 
 CGOFILES=\
 
