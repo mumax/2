@@ -12,12 +12,11 @@ import (
 
 // INTERNAL
 // Resolves a function name
-// TODO overloading, abbreviations, ...
 func (r *Refsh) resolve(funcname string) Caller {
 	funcname = strings.ToLower(funcname) // be case-insensitive
-	for i := range r.funcnames {
-		if r.funcnames[i] == funcname {
-			return r.funcs[i]
+	for i := range r.Funcnames {
+		if r.Funcnames[i] == funcname {
+			return r.Funcs[i]
 		}
 	}
 	return nil

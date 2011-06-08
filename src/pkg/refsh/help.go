@@ -13,13 +13,13 @@ package refsh
 
 func (r *Refsh) AddMethodHelp(funcname string, reciever interface{}, methodname string, help string) {
 	r.AddMethod(funcname, reciever, methodname)
-	r.help[funcname] = help
+	r.Help[funcname] = help
 }
 
 // like AddFunc but with a Help string
 func (r *Refsh) AddFuncHelp(funcname string, reciever interface{}, help string) {
 	r.AddFunc(funcname, reciever)
-	r.help[funcname] = help
+	r.Help[funcname] = help
 }
 
 // TODO(a):

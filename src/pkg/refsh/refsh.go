@@ -16,7 +16,6 @@
 package refsh
 
 import (
-	. "mumax/common"
 	"reflect"
 	"os"
 	"io"
@@ -48,8 +47,8 @@ func (r *Refsh) AddFunc(funcname string, function interface{}) {
 	if r.resolve(funcname) != nil {
 		panic(Bug(fmt.Sprintf(MSG_ALREADY_DEFINED, funcname)))
 	}
-	r.funcnames = append(r.funcnames, funcname)
-	r.funcs = append(r.funcs, (FuncWrapper)(f))
+	r.Funcnames = append(r.Funcnames, funcname)
+	r.Funcs = append(r.Funcs, (FuncWrapper)(f))
 }
 
 
@@ -71,9 +70,10 @@ func (r *Refsh) AddMethod(funcname string, reciever interface{}, methodname stri
 	if !f.IsValid() {
 		panic(Bug(fmt.Sprintf(MSG_NO_SUCH_METHOD, methodname)))
 	}
-	r.funcnames = append(r.funcnames, funcname)
-	r.funcs = append(r.funcs, &MethodWrapper{reflect.ValueOf(reciever), f})
+	r.Funcnames = append(r.Funcnames, funcname)
+	r.Funcs = append(r.Funcs, &MethodWrapper{reflect.ValueOf(reciever), f})
 }
+
 
 // Adds all the public Methods of the reciever,
 // giving them a lower-case command name
@@ -121,11 +121,6 @@ func (refsh *Refsh) Interactive() {
 }
 
 
-func exit() {
-	os.Exit(0)
-}
-
-
 // Calls a function. Function name and arguments are passed as strings.
 // The function name should first have been added by refsh.Add();
 func (refsh *Refsh) Call(fname string, argv []string) (returnvalue []interface{}) {
@@ -133,7 +128,7 @@ func (refsh *Refsh) Call(fname string, argv []string) (returnvalue []interface{}
 
 	function := refsh.resolve(fname)
 	if function == nil {
-		err := InputErr(fmt.Sprintf(MSG_NO_SUCH_COMMAND, fname, refsh.funcnames))
+		err := InputErr(fmt.Sprintf(MSG_NO_SUCH_COMMAND, fname, refsh.Funcnames))
 		panic(err)
 	} else {
 		args := refsh.parseArgs(fname, argv)
@@ -149,9 +144,9 @@ func (refsh *Refsh) Call(fname string, argv []string) (returnvalue []interface{}
 }
 
 type Refsh struct {
-	funcnames    []string          // known function or method names (we do not use a map to not exclude the possibility of overloading)
-	funcs        []Caller          // functions/methods corresponding to funcnames
-	help         map[string]string // help strings corresponding to funcnames
+	Funcnames    []string          // known function or method names (we do not use a map to not exclude the possibility of overloading)
+	Funcs        []Caller          // functions/methods corresponding to funcnames
+	Help         map[string]string // help strings corresponding to funcnames
 	CrashOnError bool              // crash the program on a syntax error or just report it (e.g. for interactive mode)
 	CallCount    int               //counts number of commands executed
 }
@@ -160,20 +155,11 @@ type Refsh struct {
 func NewRefsh() *Refsh {
 	refsh := new(Refsh)
 	CAPACITY := 10 // Initial function name capacity, but can grow
-	refsh.funcnames = make([]string, CAPACITY)[0:0]
-	refsh.funcs = make([]Caller, CAPACITY)[0:0]
+	refsh.Funcnames = make([]string, CAPACITY)[0:0]
+	refsh.Funcs = make([]Caller, CAPACITY)[0:0]
 	refsh.CrashOnError = true
 	// built-in functions
 	//refsh.AddMethod("include", refsh, "Include")
 	return refsh
 }
 
-
-// executes the file
-//func (refsh *Refsh) Include(file string) {
-//	in, err := os.Open(file, os.O_RDONLY, 0666)
-//	if err != nil {
-//		panic(err)
-//	}
-//	refsh.Exec(in)
-//}

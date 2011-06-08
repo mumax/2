@@ -11,9 +11,9 @@ package refsh
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	"reflect"
 	"fmt"
+	"strconv"
 )
 
 
@@ -57,4 +57,50 @@ func parseArg(arg string, argtype reflect.Type) reflect.Value {
 	}
 	panic("Bug")
 	return reflect.ValueOf(666) // is never reached.
+}
+
+
+// Safe strconv.Atof32
+func Atof32(s string) float32 {
+	f, err := strconv.Atof32(s)
+	if err != nil {
+		panic(InputErr(err.String()))
+	}
+	return f
+}
+
+// Safe strconv.Atoi
+func Atoi(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		panic(InputErr(err.String()))
+	}
+	return i
+}
+
+// Safe strconv.Atob
+func Atob(str string) bool {
+	b, err := strconv.Atob(str)
+	if err != nil {
+		panic(InputErr(err.String()))
+	}
+	return b
+}
+
+// Safe strconv.Atoi64
+func Atoi64(str string) int64 {
+	i, err := strconv.Atoi64(str)
+	if err != nil {
+		panic(InputErr(err.String()))
+	}
+	return i
+}
+
+// Safe strconv.Atof64
+func Atof64(str string) float64 {
+	i, err := strconv.Atof64(str)
+	if err != nil {
+		panic(InputErr(err.String()))
+	}
+	return i
 }
