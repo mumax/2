@@ -11,15 +11,12 @@ GOFILES=\
 	readline.go\
 	refsh.go\
 	resolve.go\
+	error.go\
 
 CGOFILES=\
 
 GC+=\
 	-I ../common/_obj\
-
-#LD+=\
-#CGO_CFLAGS+=-I/usr/local/cuda/include/
-#CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -lcudart
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	
