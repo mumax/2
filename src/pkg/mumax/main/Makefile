@@ -26,3 +26,13 @@ $(executables):	%: %.go
 .PHONY:	clean
 clean:
 	rm -f  $(executables) *.a *.$O $(CLEANFILES)
+
+.PHONY: install
+install:
+
+.PHONY: test
+test:
+	
+.PHONY: bench
+bench:
+
