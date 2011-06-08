@@ -26,7 +26,7 @@ func (p *Python) Comment() string {
 }
 
 func (p *Python) WriteHeader(out io.Writer) {
-		fmt.Fprintln(out, p.Comment(), DONTEDIT)
+	fmt.Fprintln(out, p.Comment(), DONTEDIT)
 }
 
 
@@ -42,7 +42,9 @@ func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type) 
 		args += "arg" + fmt.Sprint(i+1)
 	}
 	fmt.Fprintln(out, args, "):")
-	if len(args) != 0 {args = args + ","}
+	if len(args) != 0 {
+		args = args + ","
+	}
 	fmt.Fprintln(out, "\tprint", name, ",", args, "\"\\n\"")
 	fmt.Fprintln(out, "\tstdout.flush()")
 }

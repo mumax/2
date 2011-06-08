@@ -34,6 +34,8 @@ install:
 
 .PHONY: test
 test:
+	python mumax2.py
+
 	
 .PHONY: bench
 bench:
