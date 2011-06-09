@@ -20,7 +20,7 @@ func TestIPC(test *testing.T) {
 	}()
 
 	recv := &St{1}
-	var c ipc
+	var c interpreter
 	c.init(recv)
 	retval := c.call("Get", []string{})[0]
 	if retval.(int) != 1 {

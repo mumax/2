@@ -18,14 +18,14 @@ import (
 )
 
 
-// an ipc takes care of inter-procedural communication.
-type ipc struct {
+// an interpreter takes care of inter-procedural communication.
+type interpreter struct {
 	method map[string]reflect.Value // list of methods that can be called.
 }
 
 
-// add all exported methods of receiver to the ipc's map
-func (c *ipc) init(receiver_ interface{}) {
+// add all exported methods of receiver to the interpreter's map
+func (c *interpreter) init(receiver_ interface{}) {
 	c.method = make(map[string]reflect.Value)
 	receiver := reflect.ValueOf(receiver_)
 	typ := reflect.TypeOf(receiver_)
@@ -38,7 +38,7 @@ func (c *ipc) init(receiver_ interface{}) {
 }
 
 // calls the method determined by the funcName with given arguments and returns the return value
-func (c *ipc) call(funcName string, args []string) []interface{} {
+func (c *interpreter) call(funcName string, args []string) []interface{} {
 	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
@@ -98,9 +98,9 @@ func parseArg(arg string, argtype reflect.Type) reflect.Value {
 
 // error message
 const (
-	msg_already_defined = "client ipc: %s already defined"
-	msg_no_such_method  = "client ipc: no such method: %s"
-	msg_no_such_command = "client ipc: no such command: %s. options: %v"
-	msg_cant_parse      = "client ipc: do not know how to parse %s"
-	msg_arg_mismatch    = "client ipc: %v needs %v arguments, but %v provided"
+	msg_already_defined = "client interpreter: %s already defined"
+	msg_no_such_method  = "client interpreter: no such method: %s"
+	msg_no_such_command = "client interpreter: no such command: %s. options: %v"
+	msg_cant_parse      = "client interpreter: do not know how to parse %s"
+	msg_arg_mismatch    = "client interpreter: %v needs %v arguments, but %v provided"
 )
