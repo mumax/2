@@ -6,6 +6,11 @@ TARG=mumax/client
 GOFILES=\
 	client.go\
 	main.go\
+	ipc.go\
+	apigen.go\
+	apigen_lang.go\
+	apigen_java.go\
+	apigen_python.go\
 
 CGOFILES=\
 
