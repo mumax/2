@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# An example hook script to verify what is about to be committed.
+# A hook script to verify what is about to be committed.
 # Called by git-commit with no arguments.  The hook should
 # exit with non-zero status after issuing an appropriate message if
 # it wants to stop the commit.
-#
-# To enable this hook, rename this file to "pre-commit".
+
+echo 'Running tests...'
 
 # Nicely format all go source files
 gofmt -w src/pkg/*/*.go src/pkg/*/*/*.go
@@ -18,7 +18,8 @@ if (make test 2>> test.log >> test.log); then
 else
 	cat test.log;
 	echo
-	echo Commit aborted due to failed tests
+	echo Commit aborted due to failed tests.
+	echo 'Fix the code or commit with --no-verify (not on a stable branch!)'
 	echo
 	exit 2;
 fi;

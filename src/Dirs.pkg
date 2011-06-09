@@ -3,10 +3,9 @@
 # Usage:
 # dirs=dir1 dir2 dir3
 # include Dirs.pkg
-#
+# all:$(dirs)
 
-.PHONY: all $(dirs)
-all: $(dirs)
+.PHONY: $(dirs)
 
 $(dirs):
 	$(MAKE) --no-print-directory --directory=$@ $(TARGET)

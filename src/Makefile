@@ -3,5 +3,7 @@ dirs=\
 	lib\
 	pkg\
 	api\
+	
+all: $(dirs)
 
 include Dirs.pkg

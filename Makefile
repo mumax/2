@@ -1,9 +1,11 @@
 dirs=\
 	src\
-	doc\
+
+all: $(dirs) githooks
+
+.PHONY: githooks
+githooks:
+	ln -sf $(CURDIR)/git/pre-commit .git/hooks 
 
 include src/Dirs.pkg
 
-#.PHONY: doc
-#doc:
-#	$(MAKE) --no-print-directory --directory=doc

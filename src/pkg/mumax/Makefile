@@ -6,6 +6,8 @@ dirs=\
 	apigen\
 	main\
 
+all: $(dirs)
+
 include ../../Dirs.pkg
 
 host: common
