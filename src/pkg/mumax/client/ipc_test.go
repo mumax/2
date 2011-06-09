@@ -12,11 +12,16 @@ import (
 )
 
 func TestIPC(test *testing.T) {
+	// do not crash on panic, but fail
+	defer func(){
+		if err := recover(); err != nil{test.Fatal(err)}
+	}()
+
 	recv := &St{1}
 	var c ipc
 	c.init(recv)
 	retval := c.call("Get", []string{})[0]
-	if retval.(int) != 1{
+	if retval.(int) != 1 {
 		test.Fatal("Expected", 1, "got", retval)
 	}
 }

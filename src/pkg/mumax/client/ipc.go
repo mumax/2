@@ -50,7 +50,7 @@ func (c *ipc) call(funcName string, args []string) []interface{} {
 
 	// convert []reflect.Value to []interface{}
 	ret := make([]interface{}, len(retVals))
-	for i := range retVals{
+	for i := range retVals {
 		ret[i] = retVals[i].Interface()
 	}
 	return ret
