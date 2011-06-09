@@ -27,13 +27,13 @@ $(executables):	%:	%.go
 
 .PHONY:	clean
 clean:
-	rm -f  $(executables) *.a *.$O $(CLEANFILES)
+	rm -f  $(executables) *.a *.$O $(CLEANFILES) mumax2.py mumax2.java mumax2.h mumax2.lua
 
 .PHONY: install
 install:
 
-.PHONY: test
-test:
+test: all
+	./apigen
 	python mumax2.py
 
 	
