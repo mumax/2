@@ -12,8 +12,7 @@
 
 package client
 
-import (
-		)
+import ()
 
 // the package name
 const pkg = "mumax2"
