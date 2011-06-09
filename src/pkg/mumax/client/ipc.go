@@ -38,12 +38,22 @@ func (c *ipc) init(receiver_ interface{}) {
 }
 
 // calls the method determined by the funcName with given arguments and returns the return value
-func (c *ipc) call(funcName string, args []string) (returnValues []reflect.Value) {
+func (c *ipc) call(funcName string, args []string) []interface{} {
+	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
 		panic(IOErr(fmt.Sprintf(msg_no_such_method, funcName)))
 	}
-	return f.Call(parseArgs(f, args))
+
+	// call
+	retVals := f.Call(parseArgs(f, args))
+
+	// convert []reflect.Value to []interface{}
+	ret := make([]interface{}, len(retVals))
+	for i := range retVals{
+		ret[i] = retVals[i].Interface()
+	}
+	return ret
 }
 
 

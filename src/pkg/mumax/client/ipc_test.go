@@ -15,7 +15,10 @@ func TestIPC(test *testing.T) {
 	recv := &St{1}
 	var c ipc
 	c.init(recv)
-	c.call("Get", []string{})
+	retval := c.call("Get", []string{})[0]
+	if retval.(int) != 1{
+		test.Fatal("Expected", 1, "got", retval)
+	}
 }
 
 type St struct {
