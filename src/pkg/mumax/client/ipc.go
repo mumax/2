@@ -12,3 +12,6 @@ package client
 
 import ()
 
+type ipc struct{
+	
+}

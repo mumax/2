@@ -13,7 +13,7 @@
 package client
 
 import (
-)
+		)
 
 // the package name
 const pkg = "mumax2"

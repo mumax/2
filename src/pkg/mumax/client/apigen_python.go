@@ -15,26 +15,26 @@ import (
 )
 
 
-type Python struct{}
+type python struct{}
 
-func (p *Python) FileExt() string {
+func (p *python) fileExt() string {
 	return "py"
 }
 
-func (p *Python) Comment() string {
+func (p *python) comment() string {
 	return "#"
 }
 
-func (p *Python) WriteHeader(out io.Writer) {
+func (p *python) writeHeader(out io.Writer) {
 
 }
 
 
-func (p *Python) WriteFooter(out io.Writer) {
+func (p *python) writeFooter(out io.Writer) {
 
 }
 
-func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
+func (p *python) writeFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
 	fmt.Fprint(out, "def ", name, "(")
 

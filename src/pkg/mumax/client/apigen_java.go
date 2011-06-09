@@ -15,17 +15,17 @@ import (
 )
 
 
-type Java struct{}
+type java struct{}
 
-func (j *Java) FileExt() string {
+func (j *java) fileExt() string {
 	return "java"
 }
 
-func (j *Java) Comment() string {
+func (j *java) comment() string {
 	return "//"
 }
 
-func (j *Java) WriteHeader(out io.Writer) {
+func (j *java) writeHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 public class Mumax2{
 	private void recv(){
@@ -35,12 +35,12 @@ public class Mumax2{
 }
 
 
-func (j *Java) WriteFooter(out io.Writer) {
+func (j *java) writeFooter(out io.Writer) {
 	fmt.Fprint(out, `}`)
 }
 
 
-func (j *Java) WriteFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
+func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
 	ret := "void"
 	if returnType != nil {

@@ -14,10 +14,10 @@ import (
 )
 
 // Represents a programming language.
-type Lang interface {
-	FileExt() string                                                                        // Extension of source files
-	Comment() string                                                                        // Comment token like # or //
-	WriteHeader(out io.Writer)                                                              // Write the header of the source file
-	WriteFooter(out io.Writer)                                                              // Write the footer of the source file
-	WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) // Write a function wrapper to the source file
+type lang interface {
+	fileExt() string                                                                        // Extension of source files
+	comment() string                                                                        // Comment token like # or //
+	writeHeader(out io.Writer)                                                              // Write the header of the source file
+	writeFooter(out io.Writer)                                                              // Write the footer of the source file
+	writeFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) // Write a function wrapper to the source file
 }
