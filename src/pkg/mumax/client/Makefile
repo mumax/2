@@ -7,6 +7,7 @@ GOFILES=\
 	client.go\
 	main.go\
 	ipc.go\
+	interpreter.go\
 	apigen.go\
 	apigen_lang.go\
 	apigen_java.go\
