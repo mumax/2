@@ -10,7 +10,7 @@
 // library in any of the supported programming languages is
 // automatically generated.
 
-package apigen
+package client
 
 import (
 	. "mumax/common"
@@ -23,7 +23,8 @@ import (
 // the package name
 const pkg = "mumax2"
 
-func Main() {
+// Auto-generate API libraries.
+func APIGen() {
 	// make a refsh shell that will tell us the methods of a mumax client
 	c := new(client.Client)
 	r := refsh.New()
