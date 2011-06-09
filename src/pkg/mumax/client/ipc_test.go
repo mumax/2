@@ -22,7 +22,7 @@ type St struct {
 	It int
 }
 
-func (s *St) Method() int {
+func (s *St) Get() int {
 	return s.It
 }
 

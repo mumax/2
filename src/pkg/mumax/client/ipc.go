@@ -26,7 +26,7 @@ type ipc struct {
 func (c *ipc) init(receiver_ interface{}) {
 	c.method = make(map[string]reflect.Value)
 	receiver := reflect.ValueOf(receiver_)
-	typ := reflect.TypeOf(receiver)
+	typ := reflect.TypeOf(receiver_)
 	for i := 0; i < typ.NumMethod(); i++ {
 		name := typ.Method(i).Name
 		if unicode.IsUpper(int(name[0])) {
@@ -39,7 +39,7 @@ func (c *ipc) init(receiver_ interface{}) {
 func (c *ipc) call(funcName string, args []string) (returnValues []reflect.Value) {
 	f, ok := c.method[funcName]
 	if !ok {
-		panic(IOErr(fmt.Sprintf(msg_already_defined, funcName)))
+		panic(IOErr(fmt.Sprintf(msg_no_such_method, funcName)))
 	}
 	return f.Call(parseArgs(f, args))
 }
