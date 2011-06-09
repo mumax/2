@@ -2,7 +2,7 @@ include $(GOROOT)/src/Make.inc
 
 executables=\
 	mumax2\
-	apigen\
+	#apigen\
 	#mumax2-engine\
 
 GC+=\
@@ -10,14 +10,12 @@ GC+=\
 	-I../client/_obj\
 	-I../engine/_obj\
 	-I../apigen/_obj\
-	-I../../refsh/_obj\
 	
 LD+=\
 	-L../common/_obj\
 	-L../client/_obj\
 	-L../engine/_obj\
 	-L../apigen/_obj\
-	-L../../refsh/_obj\
 
 all: $(executables)
 
@@ -35,8 +33,9 @@ clean:
 .PHONY: install
 install:
 
+.PHONY: test
 test: all
-	./apigen
+	#./apigen
 	#python mumax2.py
 	#javac mumax2.java
 
