@@ -19,7 +19,13 @@ func (c *Client) Version() int {
 	return 2
 
 }
+
 // For testing purposes.
 func (c *Client) Echo(i int) int {
 	return i
+}
+
+// For testing purposes.
+func (c *Client) Sum(i, j int) int {
+	return i + j
 }

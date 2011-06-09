@@ -7,6 +7,7 @@ GOFILES=\
 	main.go\
 	lang.go\
 	python.go\
+	java.go\
 
 CGOFILES=\
 

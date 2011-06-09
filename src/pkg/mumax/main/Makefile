@@ -21,7 +21,10 @@ LD+=\
 
 all: $(executables)
 
-$(executables):	%:	%.go
+# always build executables
+# build is fast and dependencies complex
+.PHONY: $(executables)
+$(executables):	%:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
 
@@ -34,7 +37,8 @@ install:
 
 test: all
 	./apigen
-	python mumax2.py
+	#python mumax2.py
+	#javac mumax2.java
 
 	
 .PHONY: bench

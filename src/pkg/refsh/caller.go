@@ -22,6 +22,8 @@ type Caller interface {
 	Call(args []reflect.Value) []reflect.Value // Call it
 	In(i int) reflect.Type                     // Types of the input parameters
 	NumIn() int                                // Number of input parameters
+	Out(i int) reflect.Type                    // Return type
+	NumOut() int
 }
 
 
@@ -51,6 +53,16 @@ func (m *MethodWrapper) NumIn() int {
 	return (m.function.Type()).NumIn() - 1 // do not treat the reciever (1st argument) as an actual argument
 }
 
+// Implements Caller
+func (m *MethodWrapper) Out(i int) reflect.Type {
+	return (m.function.Type()).Out(i)
+}
+
+// Implements Caller
+func (m *MethodWrapper) NumOut() int {
+	return (m.function.Type()).NumOut()
+}
+
 
 // Wraps a function in the Caller interface
 type FuncWrapper reflect.Value
@@ -68,4 +80,15 @@ func (f FuncWrapper) NumIn() int {
 // Implements Caller
 func (f FuncWrapper) Call(args []reflect.Value) []reflect.Value {
 	return (reflect.Value)(f).Call(args)
+}
+
+
+// Implements Caller
+func (f FuncWrapper) Out(i int) reflect.Type {
+	return (reflect.Value)(f).Type().Out(i)
+}
+
+// Implements Caller
+func (f FuncWrapper) NumOut() int {
+	return (reflect.Value)(f).Type().NumOut()
 }
