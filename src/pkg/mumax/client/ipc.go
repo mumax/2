@@ -17,8 +17,10 @@ import (
 	"fmt"
 )
 
+
+// an ipc takes care of inter-procedural communication.
 type ipc struct {
-	method map[string]reflect.Value
+	method map[string]reflect.Value // list of methods that can be called.
 }
 
 
