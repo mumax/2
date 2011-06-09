@@ -24,6 +24,7 @@ type ipc struct {
 
 // add all exported methods of receiver to the ipc's map
 func (c *ipc) init(receiver_ interface{}) {
+	c.method = make(map[string]reflect.Value)
 	receiver := reflect.ValueOf(receiver_)
 	typ := reflect.TypeOf(receiver)
 	for i := 0; i < typ.NumMethod(); i++ {
@@ -34,17 +35,14 @@ func (c *ipc) init(receiver_ interface{}) {
 	}
 }
 
-func (c *ipc) call(funcName string, args []string) (returnValues []reflect.Value){
+// calls the method determined by the funcName with given arguments and returns the return value
+func (c *ipc) call(funcName string, args []string) (returnValues []reflect.Value) {
 	f, ok := c.method[funcName]
-	if !ok{
+	if !ok {
 		panic(IOErr(fmt.Sprintf(msg_already_defined, funcName)))
 	}
-	f.Call(parseArgs(f, args))
-
-	return nil
+	return f.Call(parseArgs(f, args))
 }
-
-
 
 
 // parses the argument list "argv" to values suited for the function named by "fname"
@@ -81,10 +79,9 @@ func parseArg(arg string, argtype reflect.Type) reflect.Value {
 	case "string":
 		return reflect.ValueOf(arg)
 	}
-	panic("Bug")
+	panic(Bug("Bug"))
 	//return reflect.ValueOf(666) // is never reached.
 }
-
 
 
 // error message
