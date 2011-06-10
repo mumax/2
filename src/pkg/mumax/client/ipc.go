@@ -35,8 +35,8 @@ func runInputFiles() {
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
 
-	go logStream("[" + command + "]", proc.Stderr)
-	go logStream("[" + command + "]", proc.Stdout)
+	go logStream("["+command+":err]", proc.Stderr)
+	go logStream("["+command+":out]", proc.Stdout)
 
 	msg, err := proc.Wait(0)
 	if err != nil {
@@ -55,8 +55,8 @@ func runInputFiles() {
 // given a file name (e.g. file.py)
 // this returns a command to run the file (e.g. python)
 func commandForFile(file string) string {
-	if *scriptcmd != "" {
-		return *scriptcmd
+	if *flag_scriptcmd != "" {
+		return *flag_scriptcmd
 	}
 	switch path.Ext(file) {
 	default:
@@ -69,13 +69,15 @@ func commandForFile(file string) string {
 }
 
 // pipes standard output/err of the command to the logger
-func logStream(prefix string, in io.Reader){
+func logStream(prefix string, in io.Reader) {
 	var bytes [512]byte
 	buf := bytes[:]
 	var err os.Error = nil
-	n:=0
-	for err == nil{
-		n,err= in.Read(buf)
-		if n != 0{Log(prefix, string(buf))}// TODO: no printLN
+	n := 0
+	for err == nil {
+		n, err = in.Read(buf)
+		if n != 0 {
+			Log(prefix, string(buf))
+		} // TODO: no printLN
 	}
 }

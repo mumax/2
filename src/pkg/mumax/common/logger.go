@@ -34,8 +34,14 @@ func InitLogger(logfile string) {
 	logger.Init(logfile)
 }
 
+type LogOption int
+const(
+		LOG_SILENT LogOption = 1 << iota
+		LOG_DEBUG LogOption = 1 << iota
+)
+
 // INTERNAL Initiates the logger and sets a log file.
-func (l *Logger) Init(logfile string) {
+func (l *Logger) Init(logfile string, options ...LogOption) {
 	l.Screen = log.New(os.Stderr, "", 0)
 	l.ShowDebug = true
 	l.ShowWarn = true

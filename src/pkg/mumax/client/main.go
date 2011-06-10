@@ -19,10 +19,12 @@ import (
 
 
 var (
-	help      *bool   = flag.Bool("help", false, "Print help and exit")
-	outdir    *string = flag.String("o", "", "Override the standard output directory")
-	scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
-	apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit")
+	flag_help      *bool   = flag.Bool("help", false, "Print help and exit")
+	flag_outdir    *string = flag.String("o", "", "Override the standard output directory")
+	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
+	flag_debug *bool = flag.Bool("g", true, "Enable debug output")
+	flag_silent *bool = flag.Bool("s", false, "Be silent")
+	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit")
 )
 
 // Mumax2 main function
@@ -43,6 +45,7 @@ func Main() {
 
 func initialize() {
 	InitLogger(LOGFILE)
+
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
 	flag.Parse()
@@ -50,11 +53,11 @@ func initialize() {
 
 
 func run() {
-	if *apigen {
+	if *flag_apigen {
 		APIGen()
 		return
 	}
-	if *help {
+	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
 		return
