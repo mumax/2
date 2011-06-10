@@ -28,7 +28,22 @@ func runInputFiles() {
 	}
 
 	file := flag.Arg(0)
-	commandForFile(file)
+	command := commandForFile(file)
+
+	proc := subprocess(command, flag.Args())
+	Debug(command, "PID:", proc.Process.Pid)
+
+	msg, err := proc.Wait(0)
+	if err != nil {
+		panic(InputErr(err.String()))
+	}
+
+	stat := msg.ExitStatus()
+	Debug(command, "exited with status", stat)
+
+	if stat != 0 {
+		exit(ERR_INPUT)
+	}
 }
 
 
