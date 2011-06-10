@@ -11,17 +11,20 @@ import (
 	. "mumax/common"
 	"runtime"
 	"runtime/debug"
+	"fmt"
 	"os"
 	"flag"
 )
 
 
 var (
-		apigen *bool = flag.Bool("apigen", false, "Generate API files and exit")
-		)
+	apigen *bool = flag.Bool("apigen", false, "Generate API files and exit")
+	help *bool = flag.Bool("help", false, "Print help and exit")
+)
 
 // Mumax2 main function
 func Main() {
+	// if anything goes wrong, produce a nice crash report
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -44,11 +47,15 @@ func initialize() {
 
 
 func run() {
-	if *apigen{
+	if *apigen {
 		APIGen()
 		return
-	}	
-
+	}
+	if *help{
+		fmt.Fprintln(os.Stderr, "Usage:")
+		flag.PrintDefaults()
+		return
+	}
 }
 
 
@@ -69,19 +76,21 @@ func crashreport(err interface{}) {
 // The first irrelevant lines are discarded
 // (they trace to this function), so the trace
 // starts with the relevant panic() call.
-func GetCrashStack() string{
-		stack := debug.Stack()
-		// remove the first 8 lines, which are irrelevant
-		nlines := 0
-		start := 0
-		for i:=range stack{
-			if stack[i]	== byte('\n') {nlines++}
-			if nlines == 8{
-				start = i+1
-				break
-			}
+func GetCrashStack() string {
+	stack := debug.Stack()
+	// remove the first 8 lines, which are irrelevant
+	nlines := 0
+	start := 0
+	for i := range stack {
+		if stack[i] == byte('\n') {
+			nlines++
 		}
-		return string(stack[start:])	
+		if nlines == 8 {
+			start = i + 1
+			break
+		}
+	}
+	return string(stack[start:])
 }
 
 const (
