@@ -59,8 +59,7 @@ func run() {
 		flag.PrintDefaults()
 		return
 	}
-	panic(IOErr("ioerr"))
-	//runInputFiles()
+	runInputFiles()
 }
 
 
@@ -84,7 +83,8 @@ func crashreport(err interface{}) {
 		Log("bug:", err, "\n", getCrashStack())
 		Log(SENDMAIL)
 		status = ERR_BUG
-	case InputErr:		Log("illegal input:", err, "\n", getCrashStack())
+	case InputErr:
+		Log("illegal input:", err, "\n", getCrashStack())
 		status = ERR_INPUT
 	case IOErr:
 		Log("IO error:", err, "\n", getCrashStack())
@@ -120,26 +120,26 @@ func getCrashStack() string {
 
 // Returns a stack trace for debugging an expected error (like IO).
 // Only the stack element of the panic() call is shown.
-func getPanicCaller() string {
-	stack := debug.Stack()
-	// remove the first 8 lines, which are irrelevant
-	nlines := 0
-	start := 0
-	stop := 0
-	for i := range stack {
-		if stack[i] == byte('\n') {
-			nlines++
-		}
-		if nlines == 8 {
-			start = i + 1
-		}
-		if nlines == 10 {
-			stop = i + 1
-			break
-		}
-	}
-	return string(stack[start:stop])
-}
+//func getPanicCaller() string {
+//	stack := debug.Stack()
+//	// remove the first 8 lines, which are irrelevant
+//	nlines := 0
+//	start := 0
+//	stop := 0
+//	for i := range stack {
+//		if stack[i] == byte('\n') {
+//			nlines++
+//		}
+//		if nlines == 8 {
+//			start = i + 1
+//		}
+//		if nlines == 10 {
+//			stop = i + 1
+//			break
+//		}
+//	}
+//	return string(stack[start:stop])
+//}
 
 
 const (
