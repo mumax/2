@@ -22,25 +22,34 @@ import (
 
 // run the input files given on the command line
 func runInputFile() {
-
+	// make FIFOs for communciation
 	makeFifos(outputDir)
 
+	// run the sub-command (e.g. python) to interpret the script file
 	command := commandForFile(inputFile)
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
 
+	// pipe sub-command output to the logger
 	go logStream("["+command+":err]", proc.Stderr)
 	go logStream("["+command+":out]", proc.Stdout)
 
-	msg, err := proc.Wait(0)
-	if err != nil {
-		panic(InputErr(err.String()))
-	}
+	// make channel to wait for the sub-command to exit
+	waiter := make(chan (int))
+	exitstat := 0
+	go func() {
+		msg, err := proc.Wait(0)
+		if err != nil {
+			panic(InputErr(err.String()))
+		}
+		exitstat = msg.ExitStatus()
+		Debug(command, "exited with status", exitstat)
+		waiter <- 1
+	}()
 
-	stat := msg.ExitStatus()
-	Debug(command, "exited with status", stat)
+	<-waiter
 
-	if stat != 0 {
+	if exitstat != 0 {
 		Exit(ERR_INPUT)
 	}
 }
@@ -88,15 +97,15 @@ func makeFifos(outputDir string) {
 
 // makes a fifo
 // syscall.Mkfifo seems unavailable for the moment.
-func mkFifo(fname string){
-	err := syscommand("mkfifo", []string{fname})	
-	if err != nil{
+func mkFifo(fname string) {
+	err := syscommand("mkfifo", []string{fname})
+	if err != nil {
 		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
 	}
 }
 
 // Default FIFO filename for inter-process communication.
-const(
-		INFIFO = "in.fifo"
-		OUTFIFO = "out.fifo"
+const (
+	INFIFO  = "in.fifo"
+	OUTFIFO = "out.fifo"
 )
