@@ -32,6 +32,10 @@ func (e InputErr) String() string {
 	return string(e)
 }
 
+// Empty function implements interface{InputErr()}
+func (e *InputErr) InputErr(){
+}
+
 // A file could not be read/written
 type IOErr string
 
@@ -39,11 +43,19 @@ func (e IOErr) String() string {
 	return string(e)
 }
 
+// Empty function implements interface{IOErr()}
+func (e *IOErr) IOErr(){
+}
+
 // An unexpected error occurred which should be reported
 type Bug string
 
 func (e Bug) String() string {
 	return string(e)
+}
+
+// Empty function implements interface{Bug()}
+func (e *Bug) Bug(){
 }
 
 // Exits with the exit code if the error is not nil.
@@ -57,9 +69,13 @@ func CheckErr(err os.Error, code int) {
 
 // Exit error code
 const (
-	ERR_INPUT               = 1
-	ERR_IO                  = 2
-	ERR_UNKNOWN_FILE_FORMAT = 3
-	ERR_SUBPROCESS          = 4
-	ERR_BUG                 = 255
+	ERR_NONE	= iota // Successful exit, no error.
+	ERR_IO                  // IO error
+	ERR_INPUT               // Illegal input
+	ERR_CUDA                 // CUDA error
+	ERR_BUG                 // Bug
+	ERR_PANIC			   // Unspecified panic
 )
+
+// Human readable description of exit codes
+var ErrString []string = []string {"Succes", "I/O error", "Illegal input", "CUDA error", "Bug", "Unexpected panic"}

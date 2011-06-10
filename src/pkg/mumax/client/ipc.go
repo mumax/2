@@ -11,17 +11,39 @@ package client
 // between mumax and a scripting language.
 
 import (
-		. "mumax/common"
-	"flag"	
-		)
+	. "mumax/common"
+	"flag"
+	"path"
+)
 
-func runInputFiles(){
-	if flag.NArg() == 0{
+// run the input files given on the command line
+func runInputFiles() {
+	// check if there is just one input file given on the command line
+	if flag.NArg() == 0 {
 		Log("No input files")
 		return
 	}
-	if flag.NArg() > 1{
+	if flag.NArg() > 1 {
 		Log("Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
 	}
 
+	file := flag.Arg(0)
+	commandForFile(file)
+}
+
+
+// given a file name (e.g. file.py)
+// this returns a command to run the file (e.g. python)
+func commandForFile(file string) string {
+	if *scriptcmd != "" {
+		return *scriptcmd
+	}
+	switch path.Ext(file) {
+	default:
+		panic(InputErr("Cannot handle files with extension " + path.Ext(file)))
+	case ".py":
+		return "python"
+	}
+	panic(Bug("unreachable"))
+	return ""
 }

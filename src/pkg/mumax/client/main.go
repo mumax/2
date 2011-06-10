@@ -9,6 +9,7 @@ package client
 
 import (
 	. "mumax/common"
+	cu "cuda/driver"
 	"runtime"
 	"runtime/debug"
 	"fmt"
@@ -18,9 +19,10 @@ import (
 
 
 var (
-	help   *bool   = flag.Bool("help", false, "Print help and exit")
-	outdir *string = flag.String("o", "", "Override the standard output directory")
-	apigen *bool   = flag.Bool("apigen", false, "Generate API files and exit")
+	help      *bool   = flag.Bool("help", false, "Print help and exit")
+	outdir    *string = flag.String("o", "", "Override the standard output directory")
+	scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
+	apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit")
 )
 
 // Mumax2 main function
@@ -57,29 +59,48 @@ func run() {
 		flag.PrintDefaults()
 		return
 	}
-
-	runInputFiles()
+	panic(IOErr("ioerr"))
+	//runInputFiles()
 }
 
 
 func cleanup() {
-	Log("Finished")
+	exit(0)
+}
+
+func exit(status int) {
+	Log("Exiting with error status", status, "(", ErrString[status], ")")
+	os.Exit(status)
 }
 
 func crashreport(err interface{}) {
-	stack := GetCrashStack()
-	Log("panic:", err, "\n", stack)
-	Log("If you think this is a bug, please send the log file \"" + LOGFILE + "\" to Arne.Vansteenkiste@UGent.be and/or Ben.VandeWiele@UGent.be")
-	stat := 1
-	Log("Exiting with error status", stat)
-	os.Exit(stat)
+	status := 0
+	switch err.(type) {
+	default:
+		Log("panic:", err, "\n", getCrashStack())
+		Log(SENDMAIL)
+		status = ERR_PANIC
+	case Bug:
+		Log("bug:", err, "\n", getCrashStack())
+		Log(SENDMAIL)
+		status = ERR_BUG
+	case InputErr:		Log("illegal input:", err, "\n", getCrashStack())
+		status = ERR_INPUT
+	case IOErr:
+		Log("IO error:", err, "\n", getCrashStack())
+		status = ERR_IO
+	case cu.Result:
+		Log("cuda error:", err, "\n", getCrashStack())
+		status = ERR_CUDA
+	}
+	exit(status)
 }
 
 // Returns a stack trace for debugging a crash.
 // The first irrelevant lines are discarded
 // (they trace to this function), so the trace
 // starts with the relevant panic() call.
-func GetCrashStack() string {
+func getCrashStack() string {
 	stack := debug.Stack()
 	// remove the first 8 lines, which are irrelevant
 	nlines := 0
@@ -96,7 +117,33 @@ func GetCrashStack() string {
 	return string(stack[start:])
 }
 
+
+// Returns a stack trace for debugging an expected error (like IO).
+// Only the stack element of the panic() call is shown.
+func getPanicCaller() string {
+	stack := debug.Stack()
+	// remove the first 8 lines, which are irrelevant
+	nlines := 0
+	start := 0
+	stop := 0
+	for i := range stack {
+		if stack[i] == byte('\n') {
+			nlines++
+		}
+		if nlines == 8 {
+			start = i + 1
+		}
+		if nlines == 10 {
+			stop = i + 1
+			break
+		}
+	}
+	return string(stack[start:stop])
+}
+
+
 const (
-	WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
-	LOGFILE = "mumax2.log"
+	WELCOME  = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
+	LOGFILE  = "mumax2.log"
+	SENDMAIL = "\n-----\nIf you would like to have this issue fixed, please send \"" + LOGFILE + "\" to Arne.Vansteenkiste@UGent.be and/or Ben.VandeWiele@UGent.be\n-----\n"
 )
