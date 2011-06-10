@@ -30,27 +30,37 @@ type Logger struct {
 
 // Initiates the logger and sets the log file.
 // logfile == "" disables logging to file.
-func InitLogger(logfile string) {
-	logger.Init(logfile)
+func InitLogger(logfile string, options ...LogOption) {
+	logger.Init(logfile, options...)
 }
 
 type LogOption int
-const(
-		LOG_SILENT LogOption = 1 << iota
-		LOG_DEBUG LogOption = 1 << iota
+
+const (
+	LOG_NOSTDOUT LogOption = 1 << iota
+	LOG_NODEBUG  LogOption = 1 << iota
+	LOG_NOWARN   LogOption = 1 << iota
 )
 
 // INTERNAL Initiates the logger and sets a log file.
 func (l *Logger) Init(logfile string, options ...LogOption) {
+	opt := 0
+	for i := range options {
+		opt |= int(options[i])
+	}
 	l.Screen = log.New(os.Stderr, "", 0)
-	l.ShowDebug = true
-	l.ShowWarn = true
-	l.ShowPrint = true
+
+	l.ShowDebug = opt&int(LOG_NODEBUG) == 0
+	l.ShowWarn = opt&int(LOG_NOWARN) == 0
+	l.ShowPrint = opt&int(LOG_NOSTDOUT) == 0
 	if logfile != "" {
 		out := FOpen(logfile)
 		l.File = log.New(out, "", log.Ltime|log.Lmicroseconds)
 		Debug("Opened log file:", logfile)
 	}
+	//Log("log normal output:", l.ShowPrint)
+	//Log("log debug messages:", l.ShowDebug)
+	//Log("log warnings:", l.ShowWarn)
 }
 
 // Log a debug message.

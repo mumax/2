@@ -22,8 +22,9 @@ var (
 	flag_help      *bool   = flag.Bool("help", false, "Print help and exit")
 	flag_outdir    *string = flag.String("o", "", "Override the standard output directory")
 	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
-	flag_debug *bool = flag.Bool("g", true, "Enable debug output")
-	flag_silent *bool = flag.Bool("s", false, "Be silent")
+	flag_debug     *bool   = flag.Bool("g", true, "Enable debug output")
+	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
+	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
 	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit")
 )
 
@@ -44,11 +45,20 @@ func Main() {
 
 
 func initialize() {
-	InitLogger(LOGFILE)
-
+	flag.Parse()
+	var opts LogOption
+	if !*flag_debug {
+		opts |= LOG_NODEBUG
+	}
+	if *flag_silent {
+		opts |= LOG_NOSTDOUT | LOG_NODEBUG | LOG_NOWARN
+	}
+	if !*flag_warn {
+		opts |= LOG_NOWARN
+	}
+	InitLogger(LOGFILE, opts)
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
-	flag.Parse()
 }
 
 
