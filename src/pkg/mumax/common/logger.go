@@ -14,6 +14,7 @@ package common
 import (
 	"log"
 	"os"
+	"fmt"
 )
 
 // INTERNAL global logger
@@ -26,6 +27,7 @@ type Logger struct {
 	ShowPrint bool        // Include normal output in stderr output?
 	Screen    *log.Logger // Logs to the screen (stderr), usually prints only limited output
 	File      *log.Logger // Logs to a log file, usually prints all output (including debug)
+	Initialized bool		  // If the logger is not initialized, dump output to stderr.
 }
 
 // Initiates the logger and sets the log file.
@@ -58,6 +60,7 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 		l.File = log.New(out, "", log.Ltime|log.Lmicroseconds)
 		Debug("Opened log file:", logfile)
 	}
+	l.Initialized = true
 	//Log("log normal output:", l.ShowPrint)
 	//Log("log debug messages:", l.ShowDebug)
 	//Log("log warnings:", l.ShowWarn)
@@ -65,6 +68,9 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 
 // Log a debug message.
 func Debug(msg ...interface{}) {
+	if !logger.Initialized{
+		fmt.Fprintln(os.Stderr,msg...)
+	}
 	if logger.ShowDebug {
 		logger.Screen.Println(msg...)
 	}
@@ -75,6 +81,9 @@ const MSG_WARNING = "Warning:"
 
 // Log a warning.
 func Warn(msg ...interface{}) {
+	if !logger.Initialized{
+		fmt.Fprintln(os.Stderr,msg...)
+	}
 	if logger.ShowWarn {
 		logger.Screen.Println(msg...)
 	}
@@ -83,6 +92,9 @@ func Warn(msg ...interface{}) {
 
 // Log normal output.
 func Log(msg ...interface{}) {
+	if !logger.Initialized{
+		fmt.Fprintln(os.Stderr,msg...)
+	}
 	if logger.ShowPrint {
 		logger.Screen.Println(msg...)
 	}

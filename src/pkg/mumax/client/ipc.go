@@ -18,19 +18,10 @@ import (
 	"os"
 )
 
+
 // run the input files given on the command line
 func runInputFiles() {
-	// check if there is just one input file given on the command line
-	if flag.NArg() == 0 {
-		Log("No input files")
-		return
-	}
-	if flag.NArg() > 1 {
-		Log("Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
-	}
-
-	file := flag.Arg(0)
-	command := commandForFile(file)
+	command := commandForFile(inputFile)
 
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
@@ -77,7 +68,7 @@ func logStream(prefix string, in io.Reader) {
 	for err == nil {
 		n, err = in.Read(buf)
 		if n != 0 {
-			Log(prefix, string(buf))
+			Log(prefix, string(buf[:n]))
 		} // TODO: no printLN
 	}
 }

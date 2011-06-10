@@ -19,14 +19,21 @@ import (
 
 
 var (
-	flag_help      *bool   = flag.Bool("help", false, "Print help and exit")
-	flag_outdir    *string = flag.String("o", "", "Override the standard output directory")
+	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
+	flag_outputdir    *string = flag.String("o", "", "Override the standard output directory")
+	flag_logfile    *string = flag.String("l", "", "Override the standard log file")
 	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
-	flag_debug     *bool   = flag.Bool("g", true, "Enable debug output")
+	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
 	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
-	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit")
+	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
 )
+
+var(
+	outputDir string // the output directory
+	inputFile string // the input file
+	logFile string = "mumax2.log"// the log file
+	)
 
 // Mumax2 main function
 func Main() {
@@ -46,6 +53,44 @@ func Main() {
 
 func initialize() {
 	flag.Parse()
+
+	initInputFile()
+	initOutputDir()
+	initLogger()
+
+	Log(WELCOME)
+	Debug("Go version:", runtime.Version())
+}
+
+
+// initialize the global inputFile variable
+func initInputFile(){
+	// check if there is just one input file given on the command line
+	if flag.NArg() == 0 {
+		fmt.Fprintln(os.Stderr,"No input files")
+		os.Exit(ERR_INPUT)
+	}
+	if flag.NArg() > 1 {
+		fmt.Fprintln(os.Stderr,"Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
+		os.Exit(ERR_INPUT)
+	}
+	inputFile = flag.Arg(0)
+}
+
+
+// initialize the global outputDirectory variable
+func initOutputDir(){
+	if *flag_outputdir != ""{
+		outputDir = *flag_outputdir
+	}else{
+		outputDir = ReplaceExt(inputFile, ".out")
+	}
+	Mkdir(outputDir)	
+}
+
+
+// initialize the logger
+func initLogger(){
 	var opts LogOption
 	if !*flag_debug {
 		opts |= LOG_NODEBUG
@@ -56,11 +101,9 @@ func initialize() {
 	if !*flag_warn {
 		opts |= LOG_NOWARN
 	}
-	InitLogger(LOGFILE, opts)
-	Log(WELCOME)
-	Debug("Go version:", runtime.Version())
+	if *flag_logfile != ""{logFile = *flag_logfile}else{logFile = outputDir + "/mumax2.log"}
+	InitLogger(logFile, opts)
 }
-
 
 func run() {
 	if *flag_apigen {
@@ -97,10 +140,10 @@ func crashreport(err interface{}) {
 		Log(SENDMAIL)
 		status = ERR_BUG
 	case InputErr:
-		Log("illegal input:", err, "\n", getCrashStack())
+		Log("illegal input:", err, "\n")
 		status = ERR_INPUT
 	case IOErr:
-		Log("IO error:", err, "\n", getCrashStack())
+		Log("IO error:", err, "\n")
 		status = ERR_IO
 	case cu.Result:
 		Log("cuda error:", err, "\n", getCrashStack())
