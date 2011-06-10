@@ -10,4 +10,17 @@ package client
 // This file implements Inter-Process-Communication
 // between mumax and a scripting language.
 
-import ()
+import (
+		. "mumax/common"
+	"flag"	
+		)
+
+func runInputFiles(){
+	if flag.NArg() == 0{
+		Log("No input files")
+		return
+	}
+	if flag.NArg() > 1{
+		Log("Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
+	}
+}

@@ -18,8 +18,9 @@ import (
 
 
 var (
-	apigen *bool = flag.Bool("apigen", false, "Generate API files and exit")
 	help   *bool = flag.Bool("help", false, "Print help and exit")
+	outdir *string = flag.String("o", "", "Override the standard output directory")
+	apigen *bool = flag.Bool("apigen", false, "Generate API files and exit")
 )
 
 // Mumax2 main function
@@ -56,8 +57,8 @@ func run() {
 		flag.PrintDefaults()
 		return
 	}
-
-
+	
+	runInputFiles()	
 }
 
 
