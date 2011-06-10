@@ -67,12 +67,12 @@ func initialize() {
 func initInputFile() {
 	// check if there is just one input file given on the command line
 	if flag.NArg() == 0 {
-		fmt.Fprintln(os.Stderr, "No input files")
-		os.Exit(ERR_INPUT)
+		Log("No input files")
+		Exit(ERR_INPUT)
 	}
 	if flag.NArg() > 1 {
-		fmt.Fprintln(os.Stderr, "Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
-		os.Exit(ERR_INPUT)
+		Log("Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
+		Exit(ERR_INPUT)
 	}
 	inputFile = flag.Arg(0)
 }
@@ -124,13 +124,9 @@ func run() {
 
 
 func cleanup() {
-	exit(0)
+	Exit(0)
 }
 
-func exit(status int) {
-	Log("Exiting with error status", status, "(", ErrString[status], ")")
-	os.Exit(status)
-}
 
 func crashreport(err interface{}) {
 	status := 0
@@ -153,7 +149,7 @@ func crashreport(err interface{}) {
 		Log("cuda error:", err, "\n", getCrashStack())
 		status = ERR_CUDA
 	}
-	exit(status)
+	Exit(status)
 }
 
 // Returns a stack trace for debugging a crash.

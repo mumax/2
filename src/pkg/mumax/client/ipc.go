@@ -16,13 +16,16 @@ import (
 	"path"
 	"io"
 	"os"
+	//"syscall"
 )
 
 
 // run the input files given on the command line
 func runInputFile() {
-	command := commandForFile(inputFile)
 
+	makeFifos(outputDir)
+
+	command := commandForFile(inputFile)
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
 
@@ -38,7 +41,7 @@ func runInputFile() {
 	Debug(command, "exited with status", stat)
 
 	if stat != 0 {
-		exit(ERR_INPUT)
+		Exit(ERR_INPUT)
 	}
 }
 
@@ -59,7 +62,9 @@ func commandForFile(file string) string {
 	return ""
 }
 
+
 // pipes standard output/err of the command to the logger
+// typically called in a separate goroutine
 func logStream(prefix string, in io.Reader) {
 	var bytes [512]byte
 	buf := bytes[:]
@@ -71,4 +76,10 @@ func logStream(prefix string, in io.Reader) {
 			Log(prefix, string(buf[:n]))
 		} // TODO: no printLN
 	}
+}
+
+
+func makeFifos(outputDir string){
+	//err := syscall.Mkfifo(outputDir + "/" + OUTFIFO)	
+	
 }

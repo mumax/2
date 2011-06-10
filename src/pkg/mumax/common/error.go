@@ -15,7 +15,6 @@ package common
 
 import (
 	"os"
-	"fmt"
 )
 
 // We define different error types so a recover() after
@@ -59,12 +58,17 @@ func (e *Bug) Bug() {
 }
 
 // Exits with the exit code if the error is not nil.
-// TODO: rename CheckErr
 func CheckErr(err os.Error, code int) {
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(code)
+		Log(err)
+		Exit(code)
 	}
+}
+
+
+func Exit(status int){
+	Log("Exiting with status", status, ":", ErrString[status])
+	os.Exit(status)
 }
 
 // Exit error code
