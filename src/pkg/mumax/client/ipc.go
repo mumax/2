@@ -13,10 +13,10 @@ package client
 import (
 	. "mumax/common"
 	"flag"
+	"fmt"
 	"path"
 	"io"
 	"os"
-	//"syscall"
 )
 
 
@@ -79,7 +79,24 @@ func logStream(prefix string, in io.Reader) {
 }
 
 
-func makeFifos(outputDir string){
-	//err := syscall.Mkfifo(outputDir + "/" + OUTFIFO)	
-	
+// makes the FIFOs for inter-process communications
+func makeFifos(outputDir string) {
+	mkFifo(outputDir + "/" + OUTFIFO)
+	mkFifo(outputDir + "/" + INFIFO)
 }
+
+
+// makes a fifo
+// syscall.Mkfifo seems unavailable for the moment.
+func mkFifo(fname string){
+	err := syscommand("mkfifo", []string{fname})	
+	if err != nil{
+		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
+	}
+}
+
+// Default FIFO filename for inter-process communication.
+const(
+		INFIFO = "in.fifo"
+		OUTFIFO = "out.fifo"
+)

@@ -66,7 +66,7 @@ func CheckErr(err os.Error, code int) {
 }
 
 
-func Exit(status int){
+func Exit(status int) {
 	Log("Exiting with status", status, ":", ErrString[status])
 	os.Exit(status)
 }
