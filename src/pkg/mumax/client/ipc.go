@@ -23,4 +23,5 @@ func runInputFiles(){
 	if flag.NArg() > 1{
 		Log("Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
 	}
+
 }
