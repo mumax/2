@@ -11,10 +11,14 @@ import (
 	. "mumax/common"
 	"runtime"
 	"runtime/debug"
+	"os"
+	"flag"
 )
 
 
-var ()
+var (
+		apigen *bool = flag.Bool("apigen", false, "Generate API files and exit")
+		)
 
 // Mumax2 main function
 func Main() {
@@ -35,11 +39,16 @@ func initialize() {
 	InitLogger(LOGFILE)
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
+	flag.Parse()
 }
 
 
 func run() {
-	panic("hello panic")
+	if *apigen{
+		APIGen()
+		return
+	}	
+
 }
 
 
@@ -48,13 +57,34 @@ func cleanup() {
 }
 
 func crashreport(err interface{}) {
-	stack := string(debug.Stack())
+	stack := GetCrashStack()
 	Log("panic:", err, "\n", stack)
-	Log("If you think this is a bug, please send the log file " + LOGFILE + " to Arne.Vansteenkiste@UGent.be")
-	Log("Crashed")
+	Log("If you think this is a bug, please send the log file \"" + LOGFILE + "\" to Arne.Vansteenkiste@UGent.be and/or Ben.VandeWiele@UGent.be")
+	stat := 1
+	Log("Exiting with error status", stat)
+	os.Exit(stat)
 }
 
-const(
-	   	WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
-		LOGFILE = "mumax2.log"
+// Returns a stack trace for debugging a crash.
+// The first irrelevant lines are discarded
+// (they trace to this function), so the trace
+// starts with the relevant panic() call.
+func GetCrashStack() string{
+		stack := debug.Stack()
+		// remove the first 8 lines, which are irrelevant
+		nlines := 0
+		start := 0
+		for i:=range stack{
+			if stack[i]	== byte('\n') {nlines++}
+			if nlines == 8{
+				start = i+1
+				break
+			}
+		}
+		return string(stack[start:])	
+}
+
+const (
+	WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
+	LOGFILE = "mumax2.log"
 )

@@ -36,7 +36,7 @@ func InitLogger(logfile string) {
 
 // INTERNAL Initiates the logger and sets a log file.
 func (l *Logger) Init(logfile string) {
-	l.Screen = log.New(os.Stderr, "", 0)
+	l.Screen = log.New(os.Stderr, "",0)
 	l.ShowDebug = true
 	l.ShowWarn = true
 	l.ShowPrint = true
