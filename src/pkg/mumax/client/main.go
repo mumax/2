@@ -19,7 +19,7 @@ import (
 
 var (
 	apigen *bool = flag.Bool("apigen", false, "Generate API files and exit")
-	help *bool = flag.Bool("help", false, "Print help and exit")
+	help   *bool = flag.Bool("help", false, "Print help and exit")
 )
 
 // Mumax2 main function
@@ -51,11 +51,13 @@ func run() {
 		APIGen()
 		return
 	}
-	if *help{
+	if *help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
 		return
 	}
+
+
 }
 
 
