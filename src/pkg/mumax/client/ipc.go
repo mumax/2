@@ -34,7 +34,8 @@ func runInputFile() {
 	go logStream("["+command+":err]", proc.Stderr)
 	go logStream("["+command+":out]", proc.Stdout)
 
-	// make channel to wait for the sub-command to exit
+	// wait for sub-command asynchronously and
+	// use a channel to signal sub-command completion
 	waiter := make(chan (int))
 	exitstat := 0
 	go func() {
@@ -44,9 +45,11 @@ func runInputFile() {
 		}
 		exitstat = msg.ExitStatus()
 		Debug(command, "exited with status", exitstat)
-		waiter <- 1
+		waiter <- 1 // send dummy value to signal completion
 	}()
 
+
+	// wait for the sub-command to exit
 	<-waiter
 
 	if exitstat != 0 {
