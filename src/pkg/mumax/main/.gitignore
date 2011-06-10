@@ -4,3 +4,4 @@ apigen
 mumax2.py
 mumax2.java
 mumax2.lua
+*.log

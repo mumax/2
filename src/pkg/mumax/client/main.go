@@ -12,21 +12,43 @@ import (
 	"runtime"
 )
 
-const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
 
+var ()
+
+// Mumax2 main function
 func Main() {
+	defer func() {
+		err := recover()
+		if err != nil {
+			crashreport(err)
+		}
+	}()
+
 	initialize()
-	defer cleanup()
+	run()
+	cleanup()
 }
 
 
 func initialize() {
-	InitLogger("mumax-client.log")
+	InitLogger("mumax2.log")
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
+}
+
+
+func run() {
+	panic("hello panic")
 }
 
 
 func cleanup() {
 	Log("Finished.")
 }
+
+func crashreport(err interface{}) {
+	Log(err)
+	Log("Crashed.")
+}
+
+const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
