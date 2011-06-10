@@ -10,6 +10,7 @@ package client
 import (
 	. "mumax/common"
 	"runtime"
+	"runtime/debug"
 )
 
 
@@ -31,7 +32,7 @@ func Main() {
 
 
 func initialize() {
-	InitLogger("mumax2.log")
+	InitLogger(LOGFILE)
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
 }
@@ -43,12 +44,17 @@ func run() {
 
 
 func cleanup() {
-	Log("Finished.")
+	Log("Finished")
 }
 
 func crashreport(err interface{}) {
-	Log(err)
-	Log("Crashed.")
+	stack := string(debug.Stack())
+	Log("panic:", err, "\n", stack)
+	Log("If you think this is a bug, please send the log file " + LOGFILE + " to Arne.Vansteenkiste@UGent.be")
+	Log("Crashed")
 }
 
-const WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
+const(
+	   	WELCOME = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
+		LOGFILE = "mumax2.log"
+)
