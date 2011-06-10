@@ -32,7 +32,7 @@ func subprocess(command string, args []string) *exec.Cmd {
 	}
 
 	Debug("exec", allargs)
-	cmd, err3 := exec.Run(command, allargs, os.Environ(), wd, exec.PassThrough, exec.PassThrough, exec.PassThrough)
+	cmd, err3 := exec.Run(command, allargs, os.Environ(), wd, exec.PassThrough, exec.Pipe, exec.Pipe)
 	if err3 != nil {
 		panic(IOErr(err3.String()))
 	}

@@ -14,6 +14,8 @@ import (
 	. "mumax/common"
 	"flag"
 	"path"
+	"io"
+	"os"
 )
 
 // run the input files given on the command line
@@ -32,6 +34,9 @@ func runInputFiles() {
 
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
+
+	go logStream("[" + command + "]", proc.Stderr)
+	go logStream("[" + command + "]", proc.Stdout)
 
 	msg, err := proc.Wait(0)
 	if err != nil {
@@ -61,4 +66,16 @@ func commandForFile(file string) string {
 	}
 	panic(Bug("unreachable"))
 	return ""
+}
+
+// pipes standard output/err of the command to the logger
+func logStream(prefix string, in io.Reader){
+	var bytes [512]byte
+	buf := bytes[:]
+	var err os.Error = nil
+	n:=0
+	for err == nil{
+		n,err= in.Read(buf)
+		if n != 0{Log(prefix, string(buf))}// TODO: no printLN
+	}
 }
