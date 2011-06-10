@@ -20,8 +20,8 @@ import (
 
 var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
-	flag_outputdir    *string = flag.String("o", "", "Override the standard output directory")
-	flag_logfile    *string = flag.String("l", "", "Override the standard log file")
+	flag_outputdir *string = flag.String("o", "", "Override the standard output directory")
+	flag_logfile   *string = flag.String("l", "", "Override the standard log file")
 	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
 	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
@@ -29,11 +29,11 @@ var (
 	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
 )
 
-var(
-	outputDir string // the output directory
-	inputFile string // the input file
-	logFile string = "mumax2.log"// the log file
-	)
+var (
+	outputDir string                // the output directory
+	inputFile string                // the input file
+	logFile   string = "mumax2.log" // the log file
+)
 
 // Mumax2 main function
 func Main() {
@@ -64,14 +64,14 @@ func initialize() {
 
 
 // initialize the global inputFile variable
-func initInputFile(){
+func initInputFile() {
 	// check if there is just one input file given on the command line
 	if flag.NArg() == 0 {
-		fmt.Fprintln(os.Stderr,"No input files")
+		fmt.Fprintln(os.Stderr, "No input files")
 		os.Exit(ERR_INPUT)
 	}
 	if flag.NArg() > 1 {
-		fmt.Fprintln(os.Stderr,"Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
+		fmt.Fprintln(os.Stderr, "Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
 		os.Exit(ERR_INPUT)
 	}
 	inputFile = flag.Arg(0)
@@ -79,18 +79,18 @@ func initInputFile(){
 
 
 // initialize the global outputDirectory variable
-func initOutputDir(){
-	if *flag_outputdir != ""{
+func initOutputDir() {
+	if *flag_outputdir != "" {
 		outputDir = *flag_outputdir
-	}else{
+	} else {
 		outputDir = ReplaceExt(inputFile, ".out")
 	}
-	Mkdir(outputDir)	
+	Mkdir(outputDir)
 }
 
 
 // initialize the logger
-func initLogger(){
+func initLogger() {
 	var opts LogOption
 	if !*flag_debug {
 		opts |= LOG_NODEBUG
@@ -101,7 +101,11 @@ func initLogger(){
 	if !*flag_warn {
 		opts |= LOG_NOWARN
 	}
-	if *flag_logfile != ""{logFile = *flag_logfile}else{logFile = outputDir + "/mumax2.log"}
+	if *flag_logfile != "" {
+		logFile = *flag_logfile
+	} else {
+		logFile = outputDir + "/mumax2.log"
+	}
 	InitLogger(logFile, opts)
 }
 

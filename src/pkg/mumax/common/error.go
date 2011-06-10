@@ -78,4 +78,4 @@ const (
 )
 
 // Human readable description of exit codes
-var ErrString []string = []string{"Succes", "I/O error", "Illegal input", "CUDA error", "Bug", "Unexpected panic"}
+var ErrString []string = []string{"Success", "I/O error", "Illegal input", "CUDA error", "Bug", "Unexpected panic"}
