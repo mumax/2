@@ -20,7 +20,7 @@ import (
 
 
 // run the input files given on the command line
-func runInputFiles() {
+func runInputFile() {
 	command := commandForFile(inputFile)
 
 	proc := subprocess(command, flag.Args())

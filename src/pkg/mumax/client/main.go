@@ -119,7 +119,7 @@ func run() {
 		flag.PrintDefaults()
 		return
 	}
-	runInputFiles()
+	runInputFile()
 }
 
 
