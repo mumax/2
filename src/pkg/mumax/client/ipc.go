@@ -52,7 +52,7 @@ func runInputFile() {
 	<-waiter
 
 	if exitstat != 0 {
-		Exit(ERR_INPUT)
+		panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
 	}
 }
 
