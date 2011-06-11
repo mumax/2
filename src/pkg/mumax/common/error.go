@@ -59,17 +59,26 @@ func (e *Bug) Bug() {
 
 // Exits with the exit code if the error is not nil.
 func CheckErr(err os.Error, code int) {
-	if err != nil {
-		Log(err)
-		Exit(code)
+	if err == nil {
+		return
+	}
+	switch code {
+	default:
+		panic(err)
+	case ERR_IO:
+		panic(IOErr(err.String()))
+	case ERR_INPUT:
+		panic(InputErr(err.String()))
+	case ERR_BUG:
+		panic(Bug(err.String()))
 	}
 }
 
 
-func Exit(status int) {
-	Log("Exiting with status", status, ":", ErrString[status])
-	os.Exit(status)
-}
+//func Exit(status int) {
+//	Log("Exiting with status", status, ":", ErrString[status])
+//	os.Exit(status)
+//}
 
 // Exit error code
 const (

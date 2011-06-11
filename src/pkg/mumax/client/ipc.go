@@ -48,7 +48,6 @@ func runInputFile() {
 		waiter <- 1 // send dummy value to signal completion
 	}()
 
-
 	// wait for the sub-command to exit
 	<-waiter
 

@@ -67,12 +67,10 @@ func initialize() {
 func initInputFile() {
 	// check if there is just one input file given on the command line
 	if flag.NArg() == 0 {
-		Log("No input files")
-		Exit(ERR_INPUT)
+		panic(InputErr("no input files"))
 	}
 	if flag.NArg() > 1 {
-		Log("Need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())
-		Exit(ERR_INPUT)
+		panic(InputErr(fmt.Sprint("need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())))
 	}
 	inputFile = flag.Arg(0)
 }
@@ -124,7 +122,8 @@ func run() {
 
 
 func cleanup() {
-	Exit(0)
+	// remove fifos
+	// kill subprocess
 }
 
 
@@ -149,7 +148,8 @@ func crashreport(err interface{}) {
 		Log("cuda error:", err, "\n", getCrashStack())
 		status = ERR_CUDA
 	}
-	Exit(status)
+	Log("Exiting with status", status, ErrString[status])
+	os.Exit(status)
 }
 
 // Returns a stack trace for debugging a crash.
