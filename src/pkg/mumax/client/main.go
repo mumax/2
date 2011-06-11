@@ -18,6 +18,7 @@ import (
 )
 
 
+// command-line flags
 var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
 	flag_outputdir *string = flag.String("o", "", "Override the standard output directory")
@@ -29,10 +30,13 @@ var (
 	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
 )
 
+
+// client global variables
 var (
 	outputDir string                // the output directory
 	inputFile string                // the input file
 	logFile   string = "mumax2.log" // the log file
+	cleanfiles []string	// list of files to be deleted upon program exit
 )
 
 // Mumax2 main function
@@ -46,7 +50,6 @@ func Main() {
 			crashreport(err)
 		}
 	}()
-
 
 	initialize()
 	run()
@@ -125,7 +128,14 @@ func run() {
 
 func cleanup() {
 	Debug("cleanup")
-	// remove fifos
+
+	// remove neccesary files
+	for i:=range cleanfiles{
+		Debug("rm", cleanfiles[i])
+		err := os.Remove(cleanfiles[i]) 
+		if err!=nil{Debug(err)}// ignore errors, there's nothing we can do about it during cleanup
+	}
+
 	// kill subprocess
 }
 
