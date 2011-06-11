@@ -94,13 +94,15 @@ func logStream(prefix string, in io.Reader) {
 func makeFifos(outputDir string) {
 	outfname := outputDir + "/" + OUTFIFO
 	infname := outputDir + "/" + INFIFO
-	cleanfiles = append(cleanfiles, infname, outfname)
+	//cleanfiles = append(cleanfiles, infname, outfname)
 	mkFifo(infname)
 	mkFifo(outfname)
 
+	// TODO: blocks until the other end is openend
+	// to be moved until after subprocess is started
 	var err os.Error
 	outfifo, err = os.OpenFile(outfname, os.O_WRONLY, 0666)
-	CheckErr(err, ERR_IO)
+	CheckErr(err, ERR_BUG)
 	infifo, err = os.OpenFile(infname, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
 }
