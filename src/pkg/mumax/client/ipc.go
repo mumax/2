@@ -92,11 +92,17 @@ func logStream(prefix string, in io.Reader) {
 
 // makes the FIFOs for inter-process communications
 func makeFifos(outputDir string) {
-	outfifo := outputDir + "/" + OUTFIFO
-	infifo := outputDir + "/" + INFIFO
-	cleanfiles = append(cleanfiles, infifo, outfifo)
-	mkFifo(infifo)
-	mkFifo(outfifo)
+	outfname := outputDir + "/" + OUTFIFO
+	infname := outputDir + "/" + INFIFO
+	cleanfiles = append(cleanfiles, infname, outfname)
+	mkFifo(infname)
+	mkFifo(outfname)
+
+	var err os.Error
+	outfifo, err = os.OpenFile(outfname, os.O_WRONLY, 0666)
+	CheckErr(err, ERR_IO)
+	infifo, err = os.OpenFile(infname, os.O_RDONLY, 0666)
+	CheckErr(err, ERR_IO)
 }
 
 

@@ -33,10 +33,11 @@ var (
 
 // client global variables
 var (
-	outputDir string                // the output directory
-	inputFile string                // the input file
-	logFile   string = "mumax2.log" // the log file
-	cleanfiles []string	// list of files to be deleted upon program exit
+	outputDir       string                  // the output directory
+	inputFile       string                  // the input file
+	logFile         string   = "mumax2.log" // the log file
+	cleanfiles      []string                // list of files to be deleted upon program exit
+	infifo, outfifo *os.File                // FIFOs for inter-process communication
 )
 
 // Mumax2 main function
@@ -130,10 +131,12 @@ func cleanup() {
 	Debug("cleanup")
 
 	// remove neccesary files
-	for i:=range cleanfiles{
+	for i := range cleanfiles {
 		Debug("rm", cleanfiles[i])
-		err := os.Remove(cleanfiles[i]) 
-		if err!=nil{Debug(err)}// ignore errors, there's nothing we can do about it during cleanup
+		err := os.Remove(cleanfiles[i])
+		if err != nil {
+			Debug(err)
+		} // ignore errors, there's nothing we can do about it during cleanup
 	}
 
 	// kill subprocess
