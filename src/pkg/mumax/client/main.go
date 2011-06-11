@@ -37,17 +37,19 @@ var (
 
 // Mumax2 main function
 func Main() {
+
 	// if anything goes wrong, produce a nice crash report
 	defer func() {
+		cleanup()
 		err := recover()
 		if err != nil {
 			crashreport(err)
 		}
 	}()
 
+
 	initialize()
 	run()
-	cleanup()
 }
 
 
@@ -122,6 +124,7 @@ func run() {
 
 
 func cleanup() {
+	Debug("cleanup")
 	// remove fifos
 	// kill subprocess
 }
