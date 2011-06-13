@@ -25,7 +25,7 @@ import (
 func runInputFile() {
 
 	// run the sub-command (e.g. python) to interpret the script file
-	command := commandForFile(inputFile) // e.g.: "python"
+	command := commandForFile(inputFile()) // e.g.: "python"
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
 
@@ -41,7 +41,7 @@ func runInputFile() {
 	// the correct order (first OUT then IN).
 	// this function hangs when the subprocess does not open the fifos.
 	Debug("Opening FIFOs will block until", command, "opens the other end")
-	makeFifos(outputDir)
+	makeFifos(outputDir())
 
 	// wait for sub-command asynchronously and
 	// use a channel to signal sub-command completion

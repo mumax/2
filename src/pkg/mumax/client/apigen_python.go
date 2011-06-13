@@ -34,8 +34,9 @@ outfifo = 0
 def init():
 	global infifo
 	global outfifo
-	infifo=open('test.out/out.fifo', 'r')
-	outfifo=open('test.out/in.fifo', 'w')
+	# the order in which the fifos are opened matters
+	infifo=open('test.out/out.fifo', 'r') # mumax's out is our in
+	outfifo=open('test.out/in.fifo', 'w') # mumax's in is our out
 
 ## Calls a mumax2 command and returns the result as string.
 def call(command, args):

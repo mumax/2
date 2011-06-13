@@ -33,8 +33,8 @@ var (
 
 // client global variables
 var (
-	outputDir       string                  // the output directory
-	inputFile       string                  // the input file
+	//outputDir       string                  // the output directory
+	//inputFile       string                  // the input file
 	logFile         string   = "mumax2.log" // the log file
 	cleanfiles      []string                // list of files to be deleted upon program exit
 	infifo, outfifo *os.File                // FIFOs for inter-process communication
@@ -42,11 +42,22 @@ var (
 
 // Mumax2 main function
 func Main() {
+	// first test for flags that do not actually run a simulation
+	flag.Parse()
+	if *flag_apigen {
+		APIGen()
+		return
+	}
+	if *flag_help {
+		fmt.Fprintln(os.Stderr, "Usage:")
+		flag.PrintDefaults()
+		return
+	}
 
-	// if anything goes wrong, produce a nice crash report
+	// actual run
 	defer func() {
-		cleanup()
-		err := recover()
+		cleanup()        // make sure we always clean up, no matter what
+		err := recover() // if anything goes wrong, produce a nice crash report
 		if err != nil {
 			crashreport(err)
 		}
@@ -58,19 +69,14 @@ func Main() {
 
 
 func initialize() {
-	flag.Parse()
-
-	initInputFile()
-	initOutputDir()
 	initLogger()
-
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())
 }
 
 
-// initialize the global inputFile variable
-func initInputFile() {
+// return the input file
+func inputFile() string {
 	// check if there is just one input file given on the command line
 	if flag.NArg() == 0 {
 		panic(InputErr("no input files"))
@@ -78,18 +84,17 @@ func initInputFile() {
 	if flag.NArg() > 1 {
 		panic(InputErr(fmt.Sprint("need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())))
 	}
-	inputFile = flag.Arg(0)
+	return flag.Arg(0)
 }
 
 
-// initialize the global outputDirectory variable
-func initOutputDir() {
+// return the output directory
+func outputDir() string {
 	if *flag_outputdir != "" {
-		outputDir = *flag_outputdir
-	} else {
-		outputDir = ReplaceExt(inputFile, ".out")
+		return *flag_outputdir
 	}
-	Mkdir(outputDir)
+	return ReplaceExt(inputFile(), ".out")
+	//Mkdir(outputDir)
 }
 
 
@@ -108,21 +113,12 @@ func initLogger() {
 	if *flag_logfile != "" {
 		logFile = *flag_logfile
 	} else {
-		logFile = outputDir + "/mumax2.log"
+		logFile = outputDir() + "/mumax2.log"
 	}
 	InitLogger(logFile, opts)
 }
 
 func run() {
-	if *flag_apigen {
-		APIGen()
-		return
-	}
-	if *flag_help {
-		fmt.Fprintln(os.Stderr, "Usage:")
-		flag.PrintDefaults()
-		return
-	}
 	runInputFile()
 }
 
@@ -156,12 +152,21 @@ func crashreport(err interface{}) {
 		status = ERR_BUG
 	case InputErr:
 		Log("illegal input:", err, "\n")
+		if *flag_debug {
+			Log(getCrashStack())
+		}
 		status = ERR_INPUT
 	case IOErr:
 		Log("IO error:", err, "\n")
+		if *flag_debug {
+			Log(getCrashStack())
+		}
 		status = ERR_IO
 	case cu.Result:
 		Log("cuda error:", err, "\n", getCrashStack())
+		if *flag_debug {
+			Log(getCrashStack())
+		}
 		status = ERR_CUDA
 	}
 	Log("Exiting with status", status, ErrString[status])
