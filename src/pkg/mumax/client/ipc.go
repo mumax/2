@@ -101,7 +101,7 @@ func logStream(prefix string, in io.Reader) {
 func makeFifos(outputDir string) {
 	outfname := outputDir + "/" + OUTFIFO
 	infname := outputDir + "/" + INFIFO
-	//cleanfiles = append(cleanfiles, infname, outfname)
+	cleanfiles = append(cleanfiles, infname, outfname)
 	mkFifo(infname)
 	mkFifo(outfname)
 
