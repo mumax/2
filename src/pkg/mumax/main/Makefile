@@ -37,8 +37,8 @@ install:
 
 .PHONY: test
 test: all
-	#./apigen
-	#python mumax2.py
+	./mumax2 -apigen
+	python mumax2.py #checks for syntax errors
 	#javac mumax2.java
 
 	
