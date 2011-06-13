@@ -69,6 +69,10 @@ func Main() {
 
 
 func initialize() {
+	// make the output dir
+	errOut := os.Mkdir(outputDir(), 0777)
+	CheckErr(errOut, ERR_IO)
+
 	initLogger()
 	Log(WELCOME)
 	Debug("Go version:", runtime.Version())

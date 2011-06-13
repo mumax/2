@@ -29,6 +29,7 @@ func (p *python) writeHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 infifo = 0
 outfifo = 0
+initialized = 0
 
 ## Initializes the communication with mumax2.
 def init():
@@ -37,9 +38,12 @@ def init():
 	# the order in which the fifos are opened matters
 	infifo=open('test.out/out.fifo', 'r') # mumax's out is our in
 	outfifo=open('test.out/in.fifo', 'w') # mumax's in is our out
+	initialized = 1
 
 ## Calls a mumax2 command and returns the result as string.
 def call(command, args):
+	if (initialized == 0):
+		init()
 	outfifo.write(command)
 	for a in args:
 			outfifo.write(" ")

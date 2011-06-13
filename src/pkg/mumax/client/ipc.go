@@ -24,26 +24,15 @@ import (
 // run the input files given on the command line
 func runInputFile() {
 
+	// make the FIFOs but do not yet try to open them
+	makeFifos(outputDir())
+
 	// run the sub-command (e.g. python) to interpret the script file
+	// it will first hang while trying to open the FIFOs
 	command := commandForFile(inputFile()) // e.g.: "python"
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
-
-	// pipe sub-command output to the logger
-	go logStream("["+command+":err]", proc.Stderr)
-	go logStream("["+command+":out]", proc.Stdout)
-
-	// make FIFOs for communication
-	// there is a synchronization subtlety here:
-	// opening the fifo's blocks until they have been
-	// opened on the other side as well. So the subprocess
-	// must be started first and must open the fifos in
-	// the correct order (first OUT then IN).
-	// this function hangs when the subprocess does not open the fifos.
-	Debug("Opening FIFOs will block until", command, "opens the other end")
-	makeFifos(outputDir())
-
-	// wait for sub-command asynchronously and
+	// start waiting for sub-command asynchronously and
 	// use a channel to signal sub-command completion
 	waiter := make(chan (int))
 	go func() {
@@ -53,6 +42,27 @@ func runInputFile() {
 		}
 		waiter <- msg.ExitStatus() // send exit status to signal completion 
 	}()
+	// pipe sub-command output to the logger
+	go logStream("["+command+":err]", proc.Stderr)
+	go logStream("["+command+":out]", proc.Stdout)
+
+	// open FIFOs for communication
+	// there is a synchronization subtlety here:
+	// opening the fifo's blocks until they have been
+	// opened on the other side as well. So the subprocess
+	// must be started first and must open the fifos in
+	// the correct order (first OUT then IN).
+	// this function hangs when the subprocess does not open the fifos.
+	Debug("Opening FIFOs will block until", command, "opens the other end")
+	var err os.Error
+	//Debug("Opening", outfname)
+	outfifo, err = os.OpenFile(outputDir()+"/"+OUTFIFO, os.O_WRONLY, 0666)
+	CheckErr(err, ERR_BUG)
+	//Debug("Opened ", outfname)
+	//Debug("Opening", infname)
+	infifo, err = os.OpenFile(outputDir()+"/"+INFIFO, os.O_RDONLY, 0666)
+	CheckErr(err, ERR_IO)
+	//Debug("Opened ", infname)
 
 	// interpreter exports client methods
 	c := new(Client)
@@ -127,18 +137,6 @@ func makeFifos(outputDir string) {
 	mkFifo(infname)
 	mkFifo(outfname)
 
-	// TODO: blocks until the other end is openend
-	// to be moved until after subprocess is started
-	var err os.Error
-	//Debug("Opening", outfname)
-	outfifo, err = os.OpenFile(outfname, os.O_WRONLY, 0666)
-	CheckErr(err, ERR_BUG)
-	//Debug("Opened ", outfname)
-
-	//Debug("Opening", infname)
-	infifo, err = os.OpenFile(infname, os.O_RDONLY, 0666)
-	CheckErr(err, ERR_IO)
-	//Debug("Opened ", infname)
 }
 
 
