@@ -22,6 +22,7 @@ import (
 
 
 // run the input files given on the command line
+// todo: split in smaller functions
 func run() {
 
 	// make the output dir
@@ -115,6 +116,10 @@ func commandForFile(file string) string {
 		panic(InputErr("Cannot handle files with extension " + path.Ext(file)))
 	case ".py":
 		return "python"
+	case ".class":
+		return "java"
+	case ".lua":
+		return "lua"
 	}
 	panic(Bug("unreachable"))
 	return ""
@@ -149,7 +154,6 @@ func makeFifos(outputDir string) {
 	mkFifo(outfname)
 
 }
-
 
 
 // Default FIFO filename for inter-process communication.

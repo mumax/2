@@ -8,12 +8,12 @@
 package client
 
 import (
-	. "mumax/common"	
+	. "mumax/common"
 	"fmt"
 	"io"
 	"os"
 	"strings"
-		)
+)
 
 
 // makes a fifo
@@ -61,5 +61,3 @@ func readChar(in io.Reader) (char byte, eof bool) {
 	char = buffer[0]
 	return
 }
-
-
