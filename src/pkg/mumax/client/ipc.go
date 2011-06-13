@@ -18,11 +18,23 @@ import (
 	"strings"
 	"io"
 	"os"
+	"runtime"
 )
 
 
 // run the input files given on the command line
 func runInputFile() {
+
+	// make the output dir
+	errOut := os.Mkdir(outputDir(), 0777)
+	CheckErr(errOut, ERR_IO)
+
+	// initialize the logger
+	// it needs the output dir to log to
+	// until now, everything went to stderr
+	initLogger()
+	Log(WELCOME)
+	Debug("Go version:", runtime.Version())
 
 	// make the FIFOs but do not yet try to open them
 	makeFifos(outputDir())

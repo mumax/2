@@ -10,7 +10,7 @@ package client
 import (
 	. "mumax/common"
 	cu "cuda/driver"
-	"runtime"
+	//"runtime"
 	"runtime/debug"
 	"fmt"
 	"os"
@@ -33,8 +33,6 @@ var (
 
 // client global variables
 var (
-	//outputDir       string                  // the output directory
-	//inputFile       string                  // the input file
 	logFile         string   = "mumax2.log" // the log file
 	cleanfiles      []string                // list of files to be deleted upon program exit
 	infifo, outfifo *os.File                // FIFOs for inter-process communication
@@ -69,13 +67,6 @@ func Main() {
 
 
 func initialize() {
-	// make the output dir
-	errOut := os.Mkdir(outputDir(), 0777)
-	CheckErr(errOut, ERR_IO)
-
-	initLogger()
-	Log(WELCOME)
-	Debug("Go version:", runtime.Version())
 }
 
 
