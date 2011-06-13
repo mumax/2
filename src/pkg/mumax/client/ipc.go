@@ -53,6 +53,9 @@ func runInputFile() {
 		waiter <- msg.ExitStatus() // send exit status to signal completion 
 	}()
 
+	//var ipc interpreter
+	//ipc.init(client)
+
 	// wait for the sub-command to exit
 	exitstat := <-waiter
 
