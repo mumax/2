@@ -15,6 +15,7 @@ import (
 	"flag"
 	"fmt"
 	"path"
+	"strings"
 	"io"
 	"os"
 )
@@ -53,8 +54,16 @@ func runInputFile() {
 		waiter <- msg.ExitStatus() // send exit status to signal completion 
 	}()
 
-	//var ipc interpreter
-	//ipc.init(client)
+	// client executes commands from subprocess
+	c := new(Client)
+	var ipc interpreter
+	ipc.init(c)
+	var line []string
+	eof := false
+	for !eof {
+		line, eof = parseLine(infifo)
+		Debug("readline:", line)
+	}
 
 	// wait for the sub-command to exit
 	exitstat := <-waiter
@@ -85,7 +94,7 @@ func commandForFile(file string) string {
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
 func logStream(prefix string, in io.Reader) {
-	var bytes [512]byte
+	var bytes [BUFSIZE]byte
 	buf := bytes[:]
 	var err os.Error = nil
 	n := 0
@@ -96,6 +105,9 @@ func logStream(prefix string, in io.Reader) {
 		} // TODO: no printLN
 	}
 }
+
+// IO buffer size
+const BUFSIZE = 4096
 
 
 // makes the FIFOs for inter-process communications
@@ -124,6 +136,44 @@ func mkFifo(fname string) {
 		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
 	}
 }
+
+
+func parseLine(in io.Reader) (words []string, eof bool) {
+	str := ""
+	var c byte
+	c, eof = readChar(in)
+	if eof {
+		return
+	}
+	for c != '\n' {
+		str += string(c)
+		//Debug("str:", str)
+		c, eof = readChar(in)
+		if eof {
+			return
+		}
+	}
+	words = strings.Split(str, " ", -1)
+	return
+}
+
+func readChar(in io.Reader) (char byte, eof bool) {
+	var buffer [1]byte
+
+	n := 0
+	var err os.Error
+	for n == 0 {
+		n, err = in.Read(buffer[:])
+		if err != nil {
+			Debug(err)
+			eof = true
+			return
+		}
+	}
+	char = buffer[0]
+	return
+}
+
 
 // Default FIFO filename for inter-process communication.
 const (
