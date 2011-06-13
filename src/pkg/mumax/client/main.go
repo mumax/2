@@ -61,12 +61,7 @@ func Main() {
 		}
 	}()
 
-	initialize()
 	run()
-}
-
-
-func initialize() {
 }
 
 
@@ -89,7 +84,6 @@ func outputDir() string {
 		return *flag_outputdir
 	}
 	return ReplaceExt(inputFile(), ".out")
-	//Mkdir(outputDir)
 }
 
 
@@ -111,10 +105,6 @@ func initLogger() {
 		logFile = outputDir() + "/mumax2.log"
 	}
 	InitLogger(logFile, opts)
-}
-
-func run() {
-	runInputFile()
 }
 
 

@@ -23,7 +23,7 @@ import (
 
 
 // run the input files given on the command line
-func runInputFile() {
+func run() {
 
 	// make the output dir
 	errOut := os.Mkdir(outputDir(), 0777)
