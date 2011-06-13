@@ -25,7 +25,7 @@ import (
 func runInputFile() {
 
 	// run the sub-command (e.g. python) to interpret the script file
-	command := commandForFile(inputFile)
+	command := commandForFile(inputFile) // e.g.: "python"
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
 
