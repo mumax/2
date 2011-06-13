@@ -32,14 +32,14 @@ func runInputFile() {
 	go logStream("["+command+":err]", proc.Stderr)
 	go logStream("["+command+":out]", proc.Stdout)
 
-
 	// make FIFOs for communication
 	// there is a synchronization subtlety here:
 	// opening the fifo's blocks until they have been
 	// opened on the other side as well. So the subprocess
 	// must be started first and must open the fifos in
-	// the correct order (first OUT then IN)
-	makeFifos(outputDir)
+	// the correct order (first OUT then IN).
+	// this function hangs when the subprocess does not open the fifos.
+	go makeFifos(outputDir)
 
 	// wait for sub-command asynchronously and
 	// use a channel to signal sub-command completion
@@ -52,7 +52,6 @@ func runInputFile() {
 		}
 		exitstat = msg.ExitStatus()
 		Debug(command, "exited with status", exitstat)
-		if exitstat != 0{panic(exitstat)}
 		waiter <- 1 // send dummy value to signal completion
 	}()
 
