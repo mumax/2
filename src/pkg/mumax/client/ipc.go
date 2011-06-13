@@ -39,7 +39,7 @@ func runInputFile() {
 	// must be started first and must open the fifos in
 	// the correct order (first OUT then IN).
 	// this function hangs when the subprocess does not open the fifos.
-	go makeFifos(outputDir)
+	makeFifos(outputDir)
 
 	// wait for sub-command asynchronously and
 	// use a channel to signal sub-command completion
