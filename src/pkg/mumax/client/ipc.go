@@ -61,9 +61,9 @@ func runInputFile() {
 
 	// interpreter executes commands from subprocess
 	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {
-		Debug("call:", line)
+		//Debug("call:", line)
 		ret := ipc.call(line[0], line[1:])
-		Debug("return:", ret)
+		//Debug("return:", ret)
 		switch len(ret) {
 		default:
 			panic(Bug("Method returned too many values"))
@@ -130,15 +130,15 @@ func makeFifos(outputDir string) {
 	// TODO: blocks until the other end is openend
 	// to be moved until after subprocess is started
 	var err os.Error
-	Debug("Opening", outfname)
+	//Debug("Opening", outfname)
 	outfifo, err = os.OpenFile(outfname, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
-	Debug("Opened", outfname)
+	//Debug("Opened ", outfname)
 
-	Debug("Opening", infname)
+	//Debug("Opening", infname)
 	infifo, err = os.OpenFile(infname, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
-	Debug("Opened", infname)
+	//Debug("Opened ", infname)
 }
 
 

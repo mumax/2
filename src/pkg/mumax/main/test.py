@@ -1,17 +1,17 @@
 infifo=open('test.out/out.fifo', 'r')
 outfifo=open('test.out/in.fifo', 'w')
 
-print "send"
+print "Version"
 outfifo.write('Version\n')
 outfifo.flush()
-print "got", infifo.readline()
+print infifo.readline()
 
-print "send"
+print "Echo 123"
 outfifo.write('Echo 123\n')
 outfifo.flush()
-print "got", infifo.readline()
+print infifo.readline()
 
-print "send"
+print "Sum 1 2"
 outfifo.write('Sum 1 2\n')
 outfifo.flush()
-print "got", infifo.readline()
+print infifo.readline()
