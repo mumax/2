@@ -39,24 +39,22 @@ func runInputFile() {
 	// must be started first and must open the fifos in
 	// the correct order (first OUT then IN).
 	// this function hangs when the subprocess does not open the fifos.
+	Debug("Opening FIFOs will block until", command, "opens the other end")
 	makeFifos(outputDir)
 
 	// wait for sub-command asynchronously and
 	// use a channel to signal sub-command completion
 	waiter := make(chan (int))
-	exitstat := 0
 	go func() {
 		msg, err := proc.Wait(0)
 		if err != nil {
 			panic(InputErr(err.String()))
 		}
-		exitstat = msg.ExitStatus()
-		Debug(command, "exited with status", exitstat)
-		waiter <- 1 // send dummy value to signal completion
+		waiter <- msg.ExitStatus() // send exit status to signal completion 
 	}()
 
 	// wait for the sub-command to exit
-	<-waiter
+	exitstat := <-waiter
 
 	if exitstat != 0 {
 		panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
