@@ -54,14 +54,24 @@ func runInputFile() {
 		waiter <- msg.ExitStatus() // send exit status to signal completion 
 	}()
 
-	// client executes commands from subprocess
+	// interpreter exports client methods
 	c := new(Client)
 	var ipc interpreter
 	ipc.init(c)
 
-	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo){
-		Debug("readline:", line)
-		ipc.call(line[0], line[1:])
+	// interpreter executes commands from subprocess
+	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {
+		Debug("call:", line)
+		ret := ipc.call(line[0], line[1:])
+		Debug("return:", ret)
+		switch len(ret) {
+		default:
+			panic(Bug("Method returned too many values"))
+		case 0:
+			fmt.Fprintln(outfifo)
+		case 1:
+			fmt.Fprintln(outfifo, ret[0])
+		}
 	}
 
 	// wait for the sub-command to exit
@@ -120,10 +130,15 @@ func makeFifos(outputDir string) {
 	// TODO: blocks until the other end is openend
 	// to be moved until after subprocess is started
 	var err os.Error
+	Debug("Opening", outfname)
 	outfifo, err = os.OpenFile(outfname, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
+	Debug("Opened", outfname)
+
+	Debug("Opening", infname)
 	infifo, err = os.OpenFile(infname, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
+	Debug("Opened", infname)
 }
 
 
