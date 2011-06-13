@@ -15,7 +15,6 @@ import (
 	"flag"
 	"fmt"
 	"path"
-	"strings"
 	"io"
 	"os"
 	"runtime"
@@ -151,52 +150,6 @@ func makeFifos(outputDir string) {
 
 }
 
-
-// makes a fifo
-// syscall.Mkfifo seems unavailable for the moment.
-func mkFifo(fname string) {
-	err := syscommand("mkfifo", []string{fname})
-	if err != nil {
-		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
-	}
-}
-
-
-func parseLine(in io.Reader) (words []string, eof bool) {
-	str := ""
-	var c byte
-	c, eof = readChar(in)
-	if eof {
-		return
-	}
-	for c != '\n' {
-		str += string(c)
-		//Debug("str:", str)
-		c, eof = readChar(in)
-		if eof {
-			return
-		}
-	}
-	words = strings.Split(str, " ", -1)
-	return
-}
-
-func readChar(in io.Reader) (char byte, eof bool) {
-	var buffer [1]byte
-
-	n := 0
-	var err os.Error
-	for n == 0 {
-		n, err = in.Read(buffer[:])
-		if err != nil {
-			Debug(err)
-			eof = true
-			return
-		}
-	}
-	char = buffer[0]
-	return
-}
 
 
 // Default FIFO filename for inter-process communication.

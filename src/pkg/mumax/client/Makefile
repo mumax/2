@@ -6,6 +6,7 @@ TARG=mumax/client
 GOFILES=\
 	client.go\
 	main.go\
+	io.go\
 	ipc.go\
 	exec.go\
 	interpreter.go\
