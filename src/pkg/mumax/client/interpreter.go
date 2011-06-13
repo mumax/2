@@ -42,7 +42,7 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
-		panic(IOErr(fmt.Sprintf(msg_no_such_method, funcName)))
+		panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
 	}
 
 	// call

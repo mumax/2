@@ -58,11 +58,10 @@ func runInputFile() {
 	c := new(Client)
 	var ipc interpreter
 	ipc.init(c)
-	var line []string
-	eof := false
-	for !eof {
-		line, eof = parseLine(infifo)
+
+	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo){
 		Debug("readline:", line)
+		ipc.call(line[0], line[1:])
 	}
 
 	// wait for the sub-command to exit
