@@ -26,7 +26,27 @@ func (p *python) comment() string {
 }
 
 func (p *python) writeHeader(out io.Writer) {
+	fmt.Fprintln(out, `
+infifo = 0
+outfifo = 0
 
+## Initializes the communication with mumax2.
+def init():
+	global infifo
+	global outfifo
+	infifo=open('test.out/out.fifo', 'r')
+	outfifo=open('test.out/in.fifo', 'w')
+
+## Calls a mumax2 command and returns the result as string.
+def call(command, args):
+	outfifo.write(command)
+	for a in args:
+			outfifo.write(" ")
+			outfifo.write(str(a))
+	outfifo.write("\n")
+	outfifo.flush()
+	return infifo.readline()
+`)
 }
 
 
