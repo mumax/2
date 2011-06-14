@@ -20,6 +20,7 @@ import (
 // command-line flags
 var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
+	flag_version   *bool   = flag.Bool("v", false, "Print version and exit")
 	flag_outputdir *string = flag.String("o", "", "Specify output directory")
 	flag_rmoutput  *bool   = flag.Bool("f", false, "Force run, remove pre-existing output directory")
 	flag_logfile   *string = flag.String("l", "", "Specify log file")
@@ -41,13 +42,17 @@ var (
 func Main() {
 	// first test for flags that do not actually run a simulation
 	flag.Parse()
-	if *flag_apigen {
-		APIGen()
-		return
-	}
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
+		return
+	}
+	if *flag_version {
+		fmt.Println(WELCOME)
+		return
+	}
+	if *flag_apigen {
+		APIGen()
 		return
 	}
 
