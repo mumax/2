@@ -36,25 +36,7 @@ func run() {
 
 	openFifos()
 
-	// interpreter exports client methods
-	c := new(Client)
-	var ipc interpreter
-	ipc.init(c)
-
-	// interpreter executes commands from subprocess
-	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {
-		//Debug("call:", line)
-		ret := ipc.call(line[0], line[1:])
-		//Debug("return:", ret)
-		switch len(ret) {
-		default:
-			panic(Bug("Method returned too many values"))
-		case 0:
-			fmt.Fprintln(outfifo)
-		case 1:
-			fmt.Fprintln(outfifo, ret[0])
-		}
-	}
+	interpretCommands()
 
 	// wait for the sub-command to exit
 	exitstat := <-waiter
@@ -122,15 +104,14 @@ func startSubcommand() (command string, waiter chan (int)) {
 }
 
 
-
-	// open FIFOs for communication
-	// there is a synchronization subtlety here:
-	// opening the fifo's blocks until they have been
-	// opened on the other side as well. So the subprocess
-	// must be started first and must open the fifos in
-	// the correct order (first OUT then IN).
-	// this function hangs when the subprocess does not open the fifos.
-func openFifos(){
+// open FIFOs for communication
+// there is a synchronization subtlety here:
+// opening the fifo's blocks until they have been
+// opened on the other side as well. So the subprocess
+// must be started first and must open the fifos in
+// the correct order (first OUT then IN).
+// this function hangs when the subprocess does not open the fifos.
+func openFifos() {
 	Debug("Opening FIFOs will block until child process opens the other end")
 	var err os.Error
 	//Debug("Opening", outfname)
@@ -143,6 +124,28 @@ func openFifos(){
 	//Debug("Opened ", infname)
 }
 
+
+func interpretCommands(){
+	// interpreter exports client methods
+	c := new(Client)
+	var ipc interpreter
+	ipc.init(c)
+
+	// interpreter executes commands from subprocess
+	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {
+		//Debug("call:", line)
+		ret := ipc.call(line[0], line[1:])
+		//Debug("return:", ret)
+		switch len(ret) {
+		default:
+			panic(Bug("Method returned too many values"))
+		case 0:
+			fmt.Fprintln(outfifo)
+		case 1:
+			fmt.Fprintln(outfifo, ret[0])
+		}
+	}
+}
 
 // given a file name (e.g. file.py)
 // this returns a command to run the file (e.g. python)
