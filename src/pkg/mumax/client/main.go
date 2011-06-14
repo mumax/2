@@ -33,7 +33,7 @@ var (
 
 // client global variables
 var (
-	logFile         string   = "mumax2.log" // the log file
+	//logFile         string   = "mumax2.log" // the log file
 	cleanfiles      []string                // list of files to be deleted upon program exit
 	infifo, outfifo *os.File                // FIFOs for inter-process communication
 )
@@ -99,10 +99,10 @@ func initLogger() {
 	if !*flag_warn {
 		opts |= LOG_NOWARN
 	}
-	if *flag_logfile != "" {
-		logFile = *flag_logfile
-	} else {
-		logFile = outputDir() + "/mumax2.log"
+
+	logFile := *flag_logfile 
+	if logFile == ""{
+			logFile = outputDir() + "/mumax2.log"
 	}
 	InitLogger(logFile, opts)
 }
