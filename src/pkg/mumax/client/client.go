@@ -25,7 +25,7 @@ func (c *Client) Echo(i int) int {
 }
 
 // For testing purposes.
-func (c *Client) Sink(i int, f float32, d float64, s string) {
+func (c *Client) Sink(b bool, i int, f float32, d float64, s string) {
 	return
 }
 
@@ -42,6 +42,12 @@ func (c *Client) GetDouble() float64 {
 // For testing purposes.
 func (c *Client) GetString() string {
 	return "hello"
+}
+
+
+// For testing purposes.
+func (c *Client) GetBool() bool {
+	return true
 }
 
 
