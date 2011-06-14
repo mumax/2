@@ -25,9 +25,26 @@ func (c *Client) Echo(i int) int {
 }
 
 // For testing purposes.
-func (c *Client) Sink(i int) {
-	return 
+func (c *Client) Sink(i int, f float32, d float64, s string) {
+	return
 }
+
+// For testing purposes.
+func (c *Client) GetFloat() float32 {
+	return 42.
+}
+
+// For testing purposes.
+func (c *Client) GetDouble() float64 {
+	return 42.
+}
+
+// For testing purposes.
+func (c *Client) GetString() string {
+	return "hello"
+}
+
+
 // For testing purposes.
 func (c *Client) Sum(i, j int) int {
 	return i + j

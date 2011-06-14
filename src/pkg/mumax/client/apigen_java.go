@@ -77,21 +77,21 @@ func (j *java) writeFooter(out io.Writer) {
 
 func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
-	
-	ret := "void"
+
+	ret := ""
 	if returnType != nil {
 		ret = returnType.String()
 	}
 
 	fmt.Fprintf(out, `
-	public static %s %s(`,ret, funcName)
+	public static %s %s(`,java_type[ret], funcName)
 
 	args := ""
 	for i := range argTypes {
 		if i != 0 {
 			args += ", "
 		}
-		args += argTypes[i].String() + " "
+		args += java_type[argTypes[i].String()] + " "
 		args += "arg" + fmt.Sprint(i+1)
 	}
 	fmt.Fprintln(out, args, "){")
@@ -105,12 +105,23 @@ func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type
 		fmt.Fprintf(out, `"" + arg%v`, i+1)
 	}
 	fmt.Fprintln(out, "});")
-	if returnType != nil{
-	fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
-	fmt.Fprintln(out)
+	if returnType != nil {
+		fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
+		fmt.Fprintln(out)
 	}
 	fmt.Fprintln(out, `	}`)
 }
 
 
-var java_parse map[string]string = map[string]string{"int": "Integer.parseInt"}
+var (
+	// functions for parsing go types from string
+	java_parse map[string]string = map[string]string{"int": "Integer.parseInt",
+		"float32": "Float.parseFloat",
+		"float64": "Double.parseDouble"}
+	// maps go types onto java types
+	java_type map[string]string = map[string]string{"int": "int",
+		"float32": "float",
+		"float64": "double",
+		"string":  "String",
+		"":        "void"}
+)
