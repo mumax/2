@@ -86,25 +86,6 @@ func outputDir() string {
 }
 
 
-// initialize the logger
-func initLogger() {
-	var opts LogOption
-	if !*flag_debug {
-		opts |= LOG_NODEBUG
-	}
-	if *flag_silent {
-		opts |= LOG_NOSTDOUT | LOG_NODEBUG | LOG_NOWARN
-	}
-	if !*flag_warn {
-		opts |= LOG_NOWARN
-	}
-
-	logFile := *flag_logfile
-	if logFile == "" {
-		logFile = outputDir() + "/mumax2.log"
-	}
-	InitLogger(logFile, opts)
-}
 
 
 func cleanup() {

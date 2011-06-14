@@ -52,7 +52,7 @@ func syscommand(command string, args []string) (err os.Error) {
 	cmd := subprocess(command, args)
 	msg, werr := cmd.Wait(0)
 	err = werr
-	if msg.ExitStatus() != 0{
+	if msg.ExitStatus() != 0 {
 		err = IOErr(fmt.Sprint(command, " exited with status ", msg.ExitStatus()))
 	}
 	return

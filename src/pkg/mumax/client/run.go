@@ -24,37 +24,16 @@ import (
 // run the input files given on the command line
 // todo: split in smaller functions
 func run() {
-
 	initOutputDir()
 
-	// initialize the logger
-	// it needs the output dir to log to
-	// until now, everything went to stderr
 	initLogger()
 	Log(WELCOME)
-	Debug("Go version:", runtime.Version())
+	Debug("Go", runtime.Version())
 
-	// make the FIFOs but do not yet try to open them
-	makeFifos(outputDir())
+	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
 
-	// run the sub-command (e.g. python) to interpret the script file
-	// it will first hang while trying to open the FIFOs
-	command := commandForFile(inputFile()) // e.g.: "python"
-	proc := subprocess(command, flag.Args())
-	Debug(command, "PID:", proc.Process.Pid)
-	// start waiting for sub-command asynchronously and
-	// use a channel to signal sub-command completion
-	waiter := make(chan (int))
-	go func() {
-		msg, err := proc.Wait(0)
-		if err != nil {
-			panic(InputErr(err.String()))
-		}
-		waiter <- msg.ExitStatus() // send exit status to signal completion 
-	}()
-	// pipe sub-command output to the logger
-	go logStream("["+command+":err]", proc.Stderr)
-	go logStream("["+command+":out]", proc.Stdout)
+	command, waiter := startSubcommand()	
+
 
 	// open FIFOs for communication
 	// there is a synchronization subtlety here:
@@ -106,15 +85,58 @@ func run() {
 // make the output dir
 func initOutputDir() {
 	if *flag_rmoutput {
-			err :=	syscommand("rm", []string{"-rf", outputDir()}) // ignore errors.
-			if err != nil{
-				Log("rm -rf", outputDir(), ":", err)
-			}
+		err := syscommand("rm", []string{"-rf", outputDir()}) // ignore errors.
+		if err != nil {
+			Log("rm -rf", outputDir(), ":", err)
+		}
 	}
 	errOut := os.Mkdir(outputDir(), 0777)
 	CheckErr(errOut, ERR_IO)
 }
 
+
+// initialize the logger
+func initLogger() {
+	var opts LogOption
+	if !*flag_debug {
+		opts |= LOG_NODEBUG
+	}
+	if *flag_silent {
+		opts |= LOG_NOSTDOUT | LOG_NODEBUG | LOG_NOWARN
+	}
+	if !*flag_warn {
+		opts |= LOG_NOWARN
+	}
+
+	logFile := *flag_logfile
+	if logFile == "" {
+		logFile = outputDir() + "/mumax2.log"
+	}
+	InitLogger(logFile, opts)
+}
+
+
+	// run the sub-command (e.g. python) to interpret the script file
+	// it will first hang while trying to open the FIFOs
+func startSubcommand() (command string, waiter chan(int)){
+	command = commandForFile(inputFile()) // e.g.: "python"
+	proc := subprocess(command, flag.Args())
+	Debug(command, "PID:", proc.Process.Pid)
+	// start waiting for sub-command asynchronously and
+	// use a channel to signal sub-command completion
+	waiter = make(chan (int))
+	go func() {
+		msg, err := proc.Wait(0)
+		if err != nil {
+			panic(InputErr(err.String()))
+		}
+		waiter <- msg.ExitStatus() // send exit status to signal completion 
+	}()
+	// pipe sub-command output to the logger
+	go logStream("["+command+":err]", proc.Stderr)
+	go logStream("["+command+":out]", proc.Stdout)
+	return
+}
 
 // given a file name (e.g. file.py)
 // this returns a command to run the file (e.g. python)
