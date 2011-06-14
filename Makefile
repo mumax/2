@@ -1,9 +1,13 @@
 dirs=\
 	src\
 	bin\
+	tests\
 
 all: $(dirs) githooks
 
+bin: src
+
+tests: bin
 
 .PHONY: githooks
 githooks:

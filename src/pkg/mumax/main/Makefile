@@ -37,13 +37,7 @@ clean:
 install:
 
 .PHONY: test
-test: all
-	./mumax2-client -apigen
-	python mumax2.py #checks for syntax errors
-	./mumax2-client -f test.py
-	javac Mumax2.java
-	javac Test.java
-	./mumax2-client -f Test.class
+test: 
 
 	
 .PHONY: bench
