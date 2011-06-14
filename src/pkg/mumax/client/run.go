@@ -18,6 +18,7 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"time"
 )
 
 
@@ -34,11 +35,17 @@ func run() {
 
 	command, waiter := startSubcommand()
 
+	ok := handshake(waiter)
+	if !ok{
+		panic(InputErr(fmt.Sprint("subcommand ", command, " exited prematurely")))
+	}
+
 	openFifos()
 
 	interpretCommands()
 
 	// wait for the sub-command to exit
+	Debug("Waiting for subcommand ", command, "to exit")
 	exitstat := <-waiter
 
 	if exitstat != 0 {
@@ -125,7 +132,9 @@ func openFifos() {
 }
 
 
-func interpretCommands(){
+// read text commands from infifo, execute them and return the result to outfifo
+// stop when a fifo gets closed by the other end
+func interpretCommands() {
 	// interpreter exports client methods
 	c := new(Client)
 	var ipc interpreter
@@ -145,6 +154,38 @@ func interpretCommands(){
 			fmt.Fprintln(outfifo, ret[0])
 		}
 	}
+}
+
+
+// wait until the subcommand creates the handshake file,
+// indicating that it will open the fifos. however, if the
+// the subprocess exits before creating the handshake file,
+// return not OK. in that case we should not attempt to ope
+// the fifos because they will block forever.
+func handshake(procwaiter chan(int)) (ok bool){
+	Debug("waiting for handshake")
+	filewaiter := pollFile(outputDir() + "/" + HANDSHAKEFILE)	
+	select{
+		case <-filewaiter: return true
+		case exitstat := <- procwaiter:
+			Log("Child command exited with status ", exitstat)
+			return false
+	}
+	panic(Bug("unreachable"))
+	return false
+}
+
+
+// returns a channel that will signal when the file has appeared
+func pollFile(fname string) (waiter chan(int)){
+		waiter = make(chan(int))
+		go func(){
+		for !FileExists(fname){
+			time.Sleep(10)
+		}
+		waiter <- 1
+		}()
+		return
 }
 
 // given a file name (e.g. file.py)
@@ -202,4 +243,5 @@ func makeFifos(outputDir string) {
 const (
 	INFIFO  = "in.fifo"
 	OUTFIFO = "out.fifo"
+	HANDSHAKEFILE = "handshake"
 )

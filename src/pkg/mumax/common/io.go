@@ -40,6 +40,18 @@ func Mkdir(filename string) {
 	}
 }
 
+
+// Checks if the file exists.
+func FileExists(file string) bool {
+	f, err := os.Open(file)
+	if err != nil {
+		return false
+	}
+	f.Close()
+	return true
+}
+
+
 // Permission flag for rw-rw-rw
 const MASK_NO_EXEC = 0666
 
