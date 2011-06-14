@@ -10,7 +10,6 @@ package client
 import (
 	. "mumax/common"
 	cu "cuda/driver"
-	//"runtime"
 	"runtime/debug"
 	"fmt"
 	"os"
@@ -22,8 +21,9 @@ import (
 var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
 	flag_outputdir *string = flag.String("o", "", "Specify output directory")
+	flag_rmoutput *bool = flag.Bool("f", false, "Force run, remove pre-existing output directory")
 	flag_logfile   *string = flag.String("l", "", "Specify log file")
-	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file.")
+	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file")
 	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
 	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
@@ -33,8 +33,8 @@ var (
 
 // client global variables
 var (
-	cleanfiles      []string                // list of files to be deleted upon program exit
-	infifo, outfifo *os.File                // FIFOs for inter-process communication
+	cleanfiles      []string // list of files to be deleted upon program exit
+	infifo, outfifo *os.File // FIFOs for inter-process communication
 )
 
 // Mumax2 main function
@@ -99,9 +99,9 @@ func initLogger() {
 		opts |= LOG_NOWARN
 	}
 
-	logFile := *flag_logfile 
-	if logFile == ""{
-			logFile = outputDir() + "/mumax2.log"
+	logFile := *flag_logfile
+	if logFile == "" {
+		logFile = outputDir() + "/mumax2.log"
 	}
 	InitLogger(logFile, opts)
 }

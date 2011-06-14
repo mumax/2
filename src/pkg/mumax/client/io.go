@@ -7,6 +7,8 @@
 
 package client
 
+// This file implements some basic I/O functions.
+
 import (
 	. "mumax/common"
 	"fmt"
@@ -26,6 +28,7 @@ func mkFifo(fname string) {
 }
 
 
+// reads a line from the reader and splits it in words
 func parseLine(in io.Reader) (words []string, eof bool) {
 	str := ""
 	var c byte
@@ -45,6 +48,7 @@ func parseLine(in io.Reader) (words []string, eof bool) {
 	return
 }
 
+// reads one character from the reader
 func readChar(in io.Reader) (char byte, eof bool) {
 	var buffer [1]byte
 

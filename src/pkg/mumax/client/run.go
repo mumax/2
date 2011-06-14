@@ -25,9 +25,7 @@ import (
 // todo: split in smaller functions
 func run() {
 
-	// make the output dir
-	errOut := os.Mkdir(outputDir(), 0777)
-	CheckErr(errOut, ERR_IO)
+	initOutputDir()
 
 	// initialize the logger
 	// it needs the output dir to log to
@@ -102,6 +100,16 @@ func run() {
 	if exitstat != 0 {
 		panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
 	}
+}
+
+
+// make the output dir
+func initOutputDir(){
+	if *flag_rmoutput{
+		syscommand("rm", []string{"-rf", outputDir()})		
+	}
+	errOut := os.Mkdir(outputDir(), 0777)
+	CheckErr(errOut, ERR_IO)
 }
 
 
