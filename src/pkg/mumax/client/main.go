@@ -24,7 +24,7 @@ var (
 	flag_rmoutput  *bool   = flag.Bool("f", false, "Force run, remove pre-existing output directory")
 	flag_logfile   *string = flag.String("l", "", "Specify log file")
 	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file")
-	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
+	flag_debug     *bool   = flag.Bool("g", false, "Show debug output")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
 	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
 	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")

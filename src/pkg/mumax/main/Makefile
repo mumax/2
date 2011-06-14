@@ -1,7 +1,7 @@
 include $(GOROOT)/src/Make.inc
 
 executables=\
-	mumax2\
+	mumax2-client\
 	#apigen\
 	#mumax2-engine\
 
@@ -27,6 +27,7 @@ all: $(executables)
 $(executables):	%:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
+	cp -f $@ ../../../../bin
 
 .PHONY:	clean
 clean:
@@ -37,10 +38,12 @@ install:
 
 .PHONY: test
 test: all
-	./mumax2 -apigen
+	./mumax2-client -apigen
 	python mumax2.py #checks for syntax errors
-	./mumax2 -f test.py
+	./mumax2-client -f test.py
 	javac Mumax2.java
+	javac Test.java
+	./mumax2-client -f Test.class
 
 	
 .PHONY: bench

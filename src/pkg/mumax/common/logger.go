@@ -68,7 +68,7 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 
 // Log a debug message.
 func Debug(msg ...interface{}) {
-	if !logger.Initialized {
+	if !logger.Initialized && logger.ShowDebug {
 		fmt.Fprintln(os.Stderr, msg...)
 	}
 	if logger.ShowDebug {
@@ -81,7 +81,7 @@ const MSG_WARNING = "Warning:"
 
 // Log a warning.
 func Warn(msg ...interface{}) {
-	if !logger.Initialized {
+	if !logger.Initialized && logger.ShowWarn {
 		fmt.Fprintln(os.Stderr, msg...)
 	}
 	if logger.ShowWarn {

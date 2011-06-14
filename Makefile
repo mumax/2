@@ -1,5 +1,6 @@
 dirs=\
 	src\
+	bin\
 
 all: $(dirs) githooks
 
