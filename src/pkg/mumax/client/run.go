@@ -104,9 +104,12 @@ func run() {
 
 
 // make the output dir
-func initOutputDir(){
-	if *flag_rmoutput{
-		syscommand("rm", []string{"-rf", outputDir()})		
+func initOutputDir() {
+	if *flag_rmoutput {
+			err :=	syscommand("rm", []string{"-rf", outputDir()}) // ignore errors.
+			if err != nil{
+				Log("rm -rf", outputDir(), ":", err)
+			}
 	}
 	errOut := os.Mkdir(outputDir(), 0777)
 	CheckErr(errOut, ERR_IO)

@@ -21,7 +21,7 @@ import (
 var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
 	flag_outputdir *string = flag.String("o", "", "Specify output directory")
-	flag_rmoutput *bool = flag.Bool("f", false, "Force run, remove pre-existing output directory")
+	flag_rmoutput  *bool   = flag.Bool("f", false, "Force run, remove pre-existing output directory")
 	flag_logfile   *string = flag.String("l", "", "Specify log file")
 	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file")
 	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")

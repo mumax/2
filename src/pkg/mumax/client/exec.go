@@ -12,6 +12,7 @@ package client
 import (
 	. "mumax/common"
 	"os"
+	"fmt"
 	"exec"
 )
 
@@ -42,7 +43,6 @@ func subprocess(command string, args []string) *exec.Cmd {
 
 // Runs the subprocess and waits for it to finish.
 // The command is looked up in the PATH.
-// Output is passed through to stdout/stderr.
 // Typically used for simple system commands: rm, mkfifo, cp, ... 
 func syscommand(command string, args []string) (err os.Error) {
 	command, err = exec.LookPath(command)
@@ -50,6 +50,10 @@ func syscommand(command string, args []string) (err os.Error) {
 		return
 	}
 	cmd := subprocess(command, args)
-	_, err = cmd.Wait(0)
+	msg, werr := cmd.Wait(0)
+	err = werr
+	if msg.ExitStatus() != 0{
+		err = IOErr(fmt.Sprint(command, " exited with status ", msg.ExitStatus()))
+	}
 	return
 }
