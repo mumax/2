@@ -7,7 +7,7 @@ GOFILES=\
 	client.go\
 	main.go\
 	io.go\
-	ipc.go\
+	run.go\
 	exec.go\
 	interpreter.go\
 	apigen.go\

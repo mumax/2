@@ -21,9 +21,9 @@ import (
 // command-line flags
 var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
-	flag_outputdir *string = flag.String("o", "", "Override the standard output directory")
-	flag_logfile   *string = flag.String("l", "", "Override the standard log file")
-	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file. E.g.: python2.6")
+	flag_outputdir *string = flag.String("o", "", "Specify output directory")
+	flag_logfile   *string = flag.String("l", "", "Specify log file")
+	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file.")
 	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
 	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
@@ -33,7 +33,6 @@ var (
 
 // client global variables
 var (
-	//logFile         string   = "mumax2.log" // the log file
 	cleanfiles      []string                // list of files to be deleted upon program exit
 	infifo, outfifo *os.File                // FIFOs for inter-process communication
 )
@@ -178,30 +177,6 @@ func getCrashStack() string {
 	}
 	return string(stack[start:])
 }
-
-
-// Returns a stack trace for debugging an expected error (like IO).
-// Only the stack element of the panic() call is shown.
-//func getPanicCaller() string {
-//	stack := debug.Stack()
-//	// remove the first 8 lines, which are irrelevant
-//	nlines := 0
-//	start := 0
-//	stop := 0
-//	for i := range stack {
-//		if stack[i] == byte('\n') {
-//			nlines++
-//		}
-//		if nlines == 8 {
-//			start = i + 1
-//		}
-//		if nlines == 10 {
-//			stop = i + 1
-//			break
-//		}
-//	}
-//	return string(stack[start:stop])
-//}
 
 
 const (
