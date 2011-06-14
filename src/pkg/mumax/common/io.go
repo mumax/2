@@ -53,9 +53,9 @@ func FileExists(file string) bool {
 
 
 // Safe os.Readlink
-func Readlink(name string) string{
+func Readlink(name string) string {
 	str, err := os.Readlink(name)
-	if err != nil{
+	if err != nil {
 		panic(IOErr(err.String()))
 	}
 	return str
