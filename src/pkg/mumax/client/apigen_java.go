@@ -28,9 +28,22 @@ func (j *java) comment() string {
 
 func (j *java) writeHeader(out io.Writer) {
 	fmt.Fprintln(out, `
+import java.io.*;
+
 public class Mumax2{
-	private void recv(){
-					
+	private static InputStream infifo, outfifo;
+	private static String outputDir;
+	private static boolean initialized;
+
+	public static void init() throws IOException{
+		// get the output directory from the environment
+		outputDir = System.getenv("MUMAX2_OUTPUTDIR");
+		// signal our intent to open the fifos
+		new File(outputDir, "handshake").createNewFile();
+		// the order in which the fifos are opened matters
+		infifo = new FileInputStream(new File(outputDir, "out.fifo")); // mumax's out is our in
+		outfifo = new FileInputStream(new File(outputDir, "in.fifo")); // mumax's in is our out
+		initialized = true;
 	}
 `)
 }
@@ -42,30 +55,31 @@ func (j *java) writeFooter(out io.Writer) {
 
 
 func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
-	fmt.Fprintln(out)
-	ret := "void"
-	if returnType != nil {
-		ret = returnType.String()
-	}
-	fmt.Fprintf(out, `	public static %s %s(`, ret, funcName)
+	//fmt.Fprintln(out)
+	//ret := "void"
+	//if returnType != nil {
+	//	ret = returnType.String()
+	//}
+	//fmt.Fprintf(out, `
+	//public static %s %s(`, ret, funcName)
 
-	args := ""
-	for i := range argTypes {
-		if i != 0 {
-			args += ", "
-		}
-		args += returnType.String() + " "
-		args += "arg" + fmt.Sprint(i+1)
-	}
-	fmt.Fprintln(out, args, "){")
+	//args := ""
+	//for i := range argTypes {
+	//	if i != 0 {
+	//		args += ", "
+	//	}
+	//	args += returnType.String() + " "
+	//	args += "arg" + fmt.Sprint(i+1)
+	//}
+	//fmt.Fprintln(out, args, "){")
 
-	fmt.Fprintf(out, `		System.out.Print("%s");`, funcName)
-	fmt.Fprintln(out)
+	//fmt.Fprintf(out, `		System.out.Print("%s");`, funcName)
+	//fmt.Fprintln(out)
 
-	for i := range argTypes {
-		fmt.Fprintln(out, "\t", "System.out.Print(\"\"+arg", i+1, ");")
-	}
-	fmt.Fprintln(out, "\t", "System.out.Println();")
-	fmt.Fprintln(out, "\t", "System.out.Flush();")
-	fmt.Fprintln(out, "}")
+	//for i := range argTypes {
+	//	fmt.Fprintln(out, "\t", "System.out.Print(\"\"+arg", i+1, ");")
+	//}
+	//fmt.Fprintln(out, "\t", "System.out.Println();")
+	//fmt.Fprintln(out, "\t", "System.out.Flush();")
+	//fmt.Fprintln(out, "}")
 }

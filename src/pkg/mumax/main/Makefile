@@ -40,7 +40,7 @@ test: all
 	./mumax2 -apigen
 	python mumax2.py #checks for syntax errors
 	./mumax2 -f test.py
-	#javac mumax2.java
+	javac Mumax2.java
 
 	
 .PHONY: bench

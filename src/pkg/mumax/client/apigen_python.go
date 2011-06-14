@@ -41,7 +41,7 @@ def init():
 	global outputdir
 	# get the output directory from environment
 	outputdir=os.environ["MUMAX2_OUTPUTDIR"] + "/"
-	# signal out intent to open the fifos
+	# signal our intent to open the fifos
 	handshake=open(outputdir + 'handshake', 'w')
 	handshake.close()
 	# the order in which the fifos are opened matters
