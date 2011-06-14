@@ -86,8 +86,6 @@ func outputDir() string {
 }
 
 
-
-
 func cleanup() {
 	Debug("cleanup")
 

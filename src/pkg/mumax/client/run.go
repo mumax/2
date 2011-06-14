@@ -32,26 +32,9 @@ func run() {
 
 	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
 
-	command, waiter := startSubcommand()	
+	command, waiter := startSubcommand()
 
-
-	// open FIFOs for communication
-	// there is a synchronization subtlety here:
-	// opening the fifo's blocks until they have been
-	// opened on the other side as well. So the subprocess
-	// must be started first and must open the fifos in
-	// the correct order (first OUT then IN).
-	// this function hangs when the subprocess does not open the fifos.
-	Debug("Opening FIFOs will block until", command, "opens the other end")
-	var err os.Error
-	//Debug("Opening", outfname)
-	outfifo, err = os.OpenFile(outputDir()+"/"+OUTFIFO, os.O_WRONLY, 0666)
-	CheckErr(err, ERR_BUG)
-	//Debug("Opened ", outfname)
-	//Debug("Opening", infname)
-	infifo, err = os.OpenFile(outputDir()+"/"+INFIFO, os.O_RDONLY, 0666)
-	CheckErr(err, ERR_IO)
-	//Debug("Opened ", infname)
+	openFifos()
 
 	// interpreter exports client methods
 	c := new(Client)
@@ -116,9 +99,9 @@ func initLogger() {
 }
 
 
-	// run the sub-command (e.g. python) to interpret the script file
-	// it will first hang while trying to open the FIFOs
-func startSubcommand() (command string, waiter chan(int)){
+// run the sub-command (e.g. python) to interpret the script file
+// it will first hang while trying to open the FIFOs
+func startSubcommand() (command string, waiter chan (int)) {
 	command = commandForFile(inputFile()) // e.g.: "python"
 	proc := subprocess(command, flag.Args())
 	Debug(command, "PID:", proc.Process.Pid)
@@ -137,6 +120,29 @@ func startSubcommand() (command string, waiter chan(int)){
 	go logStream("["+command+":out]", proc.Stdout)
 	return
 }
+
+
+
+	// open FIFOs for communication
+	// there is a synchronization subtlety here:
+	// opening the fifo's blocks until they have been
+	// opened on the other side as well. So the subprocess
+	// must be started first and must open the fifos in
+	// the correct order (first OUT then IN).
+	// this function hangs when the subprocess does not open the fifos.
+func openFifos(){
+	Debug("Opening FIFOs will block until child process opens the other end")
+	var err os.Error
+	//Debug("Opening", outfname)
+	outfifo, err = os.OpenFile(outputDir()+"/"+OUTFIFO, os.O_WRONLY, 0666)
+	CheckErr(err, ERR_BUG)
+	//Debug("Opened ", outfname)
+	//Debug("Opening", infname)
+	infifo, err = os.OpenFile(outputDir()+"/"+INFIFO, os.O_RDONLY, 0666)
+	CheckErr(err, ERR_IO)
+	//Debug("Opened ", infname)
+}
+
 
 // given a file name (e.g. file.py)
 // this returns a command to run the file (e.g. python)
