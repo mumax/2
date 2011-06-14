@@ -15,7 +15,7 @@ import (
 
 // Represents a programming language.
 type lang interface {
-	fileExt() string                                                                        // Extension of source files
+	filename() string                                                                       // file name for the API file
 	comment() string                                                                        // Comment token like # or //
 	writeHeader(out io.Writer)                                                              // Write the header of the source file
 	writeFooter(out io.Writer)                                                              // Write the footer of the source file

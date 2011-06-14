@@ -32,7 +32,7 @@ func APIGen() {
 
 	// output api files for each language.
 	for _, lang := range langs {
-		file := pkg + "." + lang.fileExt()
+		file := lang.filename()
 		Log("Generating", file)
 		out := FOpen(file)
 

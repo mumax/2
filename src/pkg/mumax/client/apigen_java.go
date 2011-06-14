@@ -17,9 +17,10 @@ import (
 
 type java struct{}
 
-func (j *java) fileExt() string {
-	return "java"
+func (p *java) filename() string {
+	return "Mumax2.java"
 }
+
 
 func (j *java) comment() string {
 	return "//"

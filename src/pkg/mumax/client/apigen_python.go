@@ -17,8 +17,8 @@ import (
 
 type python struct{}
 
-func (p *python) fileExt() string {
-	return "py"
+func (p *python) filename() string {
+	return "mumax2.py"
 }
 
 func (p *python) comment() string {
