@@ -10,6 +10,7 @@ package client
 import (
 	. "mumax/common"
 	cu "cuda/driver"
+	"runtime"
 	"runtime/debug"
 	"fmt"
 	"os"
@@ -49,6 +50,7 @@ func Main() {
 	}
 	if *flag_version {
 		fmt.Println(WELCOME)
+		fmt.Println("Go", runtime.Version())
 		return
 	}
 	if *flag_apigen {
