@@ -31,7 +31,8 @@ func (j *java) writeHeader(out io.Writer) {
 import java.io.*;
 
 public class Mumax2{
-	private static InputStream infifo, outfifo;
+	private static BufferedReader infifo;
+	private static PrintStream outfifo;
 	private static String outputDir;
 	private static boolean initialized;
 
@@ -41,9 +42,19 @@ public class Mumax2{
 		// signal our intent to open the fifos
 		new File(outputDir, "handshake").createNewFile();
 		// the order in which the fifos are opened matters
-		infifo = new FileInputStream(new File(outputDir, "out.fifo")); // mumax's out is our in
-		outfifo = new FileInputStream(new File(outputDir, "in.fifo")); // mumax's in is our out
+		infifo = new BufferedReader(new FileReader(new File(outputDir, "out.fifo"))); // mumax's out is our in
+		outfifo = new PrintStream(new FileOutputStream(new File(outputDir, "in.fifo"))); // mumax's in is our out
 		initialized = true;
+	}
+
+	public static String call(String command, String[] args) throws IOException{
+		outfifo.print(command);	
+		for(int i=0; i<args.length; i++){
+			outfifo.print(" ");
+			outfifo.print(args[i]);
+		}
+		outfifo.println();
+		return infifo.readLine();
 	}
 `)
 }
