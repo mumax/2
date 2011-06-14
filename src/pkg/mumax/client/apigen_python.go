@@ -27,20 +27,26 @@ func (p *python) comment() string {
 
 func (p *python) writeHeader(out io.Writer) {
 	fmt.Fprintln(out, `
+import os
+
 infifo = 0
 outfifo = 0
 initialized = 0
+outputdir = ""
 
 ## Initializes the communication with mumax2.
 def init():
 	global infifo
 	global outfifo
+	global outputdir
+	# get the output directory from environment
+	outputdir=os.environ["MUMAX2_OUTPUTDIR"] + "/"
 	# signal out intent to open the fifos
-	handshake=open('test.out/handshake', 'w')
+	handshake=open(outputdir + 'handshake', 'w')
 	handshake.close()
 	# the order in which the fifos are opened matters
-	infifo=open('test.out/out.fifo', 'r') # mumax's out is our in
-	outfifo=open('test.out/in.fifo', 'w') # mumax's in is our out
+	infifo=open(outputdir + 'out.fifo', 'r') # mumax's out is our in
+	outfifo=open(outputdir + 'in.fifo', 'w') # mumax's in is our out
 	initialized = 1
 
 ## Calls a mumax2 command and returns the result as string.
@@ -74,9 +80,5 @@ func (p *python) writeFunc(out io.Writer, name string, argTypes []reflect.Type, 
 		args += "arg" + fmt.Sprint(i+1)
 	}
 	fmt.Fprintln(out, args, "):")
-	if len(args) != 0 {
-		args = args + ","
-	}
-	fmt.Fprintln(out, "\tprint", name, ",", args, "\"\\n\"")
-	fmt.Fprintln(out, "\tstdout.flush()")
+	fmt.Fprintln(out, fmt.Sprint(`	return call("`, name, `", [`, args, `])`))
 }

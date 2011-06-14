@@ -64,6 +64,9 @@ func initOutputDir() {
 	}
 	errOut := os.Mkdir(outputDir(), 0777)
 	CheckErr(errOut, ERR_IO)
+
+	// set the output dir in the environment so the child process can fetch it.
+	CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", outputDir()), ERR_IO)
 }
 
 

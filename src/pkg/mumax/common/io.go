@@ -52,6 +52,16 @@ func FileExists(file string) bool {
 }
 
 
+// Safe os.Readlink
+func Readlink(name string) string{
+	str, err := os.Readlink(name)
+	if err != nil{
+		panic(IOErr(err.String()))
+	}
+	return str
+}
+
+
 // Permission flag for rw-rw-rw
 const MASK_NO_EXEC = 0666
 
