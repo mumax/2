@@ -12,7 +12,6 @@ package client
 
 import (
 	. "mumax/common"
-	"flag"
 	"fmt"
 	"path"
 	"io"
@@ -94,8 +93,9 @@ func initLogger() {
 // run the sub-command (e.g. python) to interpret the script file
 // it will first hang while trying to open the FIFOs
 func startSubcommand() (command string, waiter chan (int)) {
-	command = commandForFile(inputFile()) // e.g.: "python"
-	proc := subprocess(command, flag.Args())
+	var args []string
+	command, args = commandForFile(inputFile()) // e.g.: "python"
+	proc := subprocess(command, args)
 	Debug(command, "PID:", proc.Process.Pid)
 	// start waiting for sub-command asynchronously and
 	// use a channel to signal sub-command completion
@@ -189,23 +189,23 @@ func pollFile(fname string) (waiter chan (int)) {
 }
 
 // given a file name (e.g. file.py)
-// this returns a command to run the file (e.g. python)
-func commandForFile(file string) string {
+// this returns a command to run the file (e.g. python file.py, java File)
+func commandForFile(file string) (command string, args []string) {
 	if *flag_scriptcmd != "" {
-		return *flag_scriptcmd
+		return *flag_scriptcmd, []string{file}
 	}
 	switch path.Ext(file) {
 	default:
 		panic(InputErr("Cannot handle files with extension " + path.Ext(file)))
 	case ".py":
-		return "python"
+		return "python", []string{file}
 	case ".class":
-		return "java"
+		return "java", []string{ReplaceExt(file, "")}
 	case ".lua":
-		return "lua"
+		return "lua", []string{file}
 	}
 	panic(Bug("unreachable"))
-	return ""
+	return "", nil
 }
 
 

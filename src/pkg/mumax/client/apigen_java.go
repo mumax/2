@@ -82,7 +82,7 @@ func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type
 		ret = returnType.String()
 	}
 	fmt.Fprintf(out, `
-	public static %s %s(`, ret, funcName)
+	public static %s %s(`,ret, funcName)
 
 	args := ""
 	for i := range argTypes {
@@ -97,12 +97,12 @@ func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type
 	fmt.Fprintf(out, `		String returned = call("%s",new String[]{`, funcName)
 
 	for i := range argTypes {
-		if i != 0{
+		if i != 0 {
 			fmt.Fprintf(out, ", ")
 		}
 		fmt.Fprintf(out, `"" + arg%v`, i+1)
-		}
-		fmt.Fprintln(out, "});")
+	}
+	fmt.Fprintln(out, "});")
 	fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
 	fmt.Fprintln(out)
 	fmt.Fprintln(out, `	}`)
