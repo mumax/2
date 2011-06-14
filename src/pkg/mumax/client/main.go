@@ -35,8 +35,8 @@ var (
 
 // client global variables
 var (
-	cleanfiles      []string // list of files to be deleted upon program exit
-	infifo, outfifo *os.File // FIFOs for inter-process communication
+	cleanfiles []string // list of files to be deleted upon program exit
+	//infifo, outfifo *os.File // FIFOs for inter-process communication
 )
 
 // Mumax2 main function

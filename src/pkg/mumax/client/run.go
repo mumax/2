@@ -39,9 +39,9 @@ func run() {
 		panic(InputErr(fmt.Sprint("subcommand ", command, " exited prematurely")))
 	}
 
-	openFifos()
+	infifo, outfifo := openFifos()
 
-	interpretCommands()
+	interpretCommands(infifo, outfifo)
 
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
@@ -125,19 +125,20 @@ func startSubcommand() (command string, waiter chan (int)) {
 // must be started first and must open the fifos in
 // the correct order (first OUT then IN).
 // this function hangs when the subprocess does not open the fifos.
-func openFifos() {
+func openFifos() (infifo, outfifo *os.File) {
 	Debug("Opening FIFOs will block until child process opens the other end")
 	var err os.Error
 	outfifo, err = os.OpenFile(outputDir()+"/"+OUTFIFO, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
 	infifo, err = os.OpenFile(outputDir()+"/"+INFIFO, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
+	return
 }
 
 
 // read text commands from infifo, execute them and return the result to outfifo
 // stop when a fifo gets closed by the other end
-func interpretCommands() {
+func interpretCommands(infifo, outfifo *os.File) {
 	// interpreter exports client methods
 	c := new(Client)
 	var ipc interpreter
