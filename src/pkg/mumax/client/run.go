@@ -94,8 +94,8 @@ func initLogger() {
 // it will first hang while trying to open the FIFOs
 func startSubcommand() (command string, waiter chan (int)) {
 
-	os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir()+"../lib"))
-	os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir()+"../lib"))
+	os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir()))
+	os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir()))
 
 	var args []string
 	command, args = commandForFile(inputFile()) // e.g.: "python"
