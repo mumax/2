@@ -36,7 +36,7 @@ public class Mumax2{
 	private static String outputDir;
 	private static boolean initialized;
 
-	public static void init() throws IOException{
+	private static void init() throws IOException{
 		// get the output directory from the environment
 		outputDir = System.getenv("MUMAX2_OUTPUTDIR");
 		// signal our intent to open the fifos
@@ -47,7 +47,7 @@ public class Mumax2{
 		initialized = true;
 	}
 
-	public static String call(String command, String[] args){
+	private static String call(String command, String[] args){
 		try{
 			if(!initialized){
 				init();
@@ -77,10 +77,12 @@ func (j *java) writeFooter(out io.Writer) {
 
 func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
+	
 	ret := "void"
 	if returnType != nil {
 		ret = returnType.String()
 	}
+
 	fmt.Fprintf(out, `
 	public static %s %s(`,ret, funcName)
 
@@ -89,12 +91,12 @@ func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type
 		if i != 0 {
 			args += ", "
 		}
-		args += returnType.String() + " "
+		args += argTypes[i].String() + " "
 		args += "arg" + fmt.Sprint(i+1)
 	}
 	fmt.Fprintln(out, args, "){")
 
-	fmt.Fprintf(out, `		String returned = call("%s",new String[]{`, funcName)
+	fmt.Fprintf(out, `		String returned = call("%s", new String[]{`, funcName)
 
 	for i := range argTypes {
 		if i != 0 {
@@ -103,8 +105,10 @@ func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type
 		fmt.Fprintf(out, `"" + arg%v`, i+1)
 	}
 	fmt.Fprintln(out, "});")
+	if returnType != nil{
 	fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
 	fmt.Fprintln(out)
+	}
 	fmt.Fprintln(out, `	}`)
 }
 

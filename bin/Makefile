@@ -1,5 +1,10 @@
-.PHONY: all
-all:
+all: apigen
+
+
+apigen:
+	./mumax2 -apigen
+	python mumax2.py
+	javac Mumax2.java
 
 .PHONY: clean
 clean:

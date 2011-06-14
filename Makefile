@@ -4,6 +4,7 @@ dirs=\
 
 all: $(dirs) githooks
 
+
 .PHONY: githooks
 githooks:
 	ln -sf $(CURDIR)/git/pre-commit .git/hooks 

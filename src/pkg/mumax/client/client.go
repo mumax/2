@@ -25,6 +25,10 @@ func (c *Client) Echo(i int) int {
 }
 
 // For testing purposes.
+func (c *Client) Sink(i int) {
+	return 
+}
+// For testing purposes.
 func (c *Client) Sum(i, j int) int {
 	return i + j
 }
