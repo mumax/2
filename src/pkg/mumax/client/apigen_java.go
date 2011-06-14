@@ -47,14 +47,24 @@ public class Mumax2{
 		initialized = true;
 	}
 
-	public static String call(String command, String[] args) throws IOException{
-		outfifo.print(command);	
-		for(int i=0; i<args.length; i++){
-			outfifo.print(" ");
-			outfifo.print(args[i]);
+	public static String call(String command, String[] args){
+		try{
+			if(!initialized){
+				init();
+			}
+			outfifo.print(command);	
+			for(int i=0; i<args.length; i++){
+				outfifo.print(" ");
+				outfifo.print(args[i]);
+			}
+			outfifo.println();
+			return infifo.readLine();
+		}catch(IOException e){
+			System.err.println(e);
+			System.exit(-1);
 		}
-		outfifo.println();
-		return infifo.readLine();
+		System.exit(-2); // unreachable
+		return "bug";
 	}
 `)
 }
@@ -66,31 +76,37 @@ func (j *java) writeFooter(out io.Writer) {
 
 
 func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
-	//fmt.Fprintln(out)
-	//ret := "void"
-	//if returnType != nil {
-	//	ret = returnType.String()
-	//}
-	//fmt.Fprintf(out, `
-	//public static %s %s(`, ret, funcName)
+	fmt.Fprintln(out)
+	ret := "void"
+	if returnType != nil {
+		ret = returnType.String()
+	}
+	fmt.Fprintf(out, `
+	public static %s %s(`, ret, funcName)
 
-	//args := ""
-	//for i := range argTypes {
-	//	if i != 0 {
-	//		args += ", "
-	//	}
-	//	args += returnType.String() + " "
-	//	args += "arg" + fmt.Sprint(i+1)
-	//}
-	//fmt.Fprintln(out, args, "){")
+	args := ""
+	for i := range argTypes {
+		if i != 0 {
+			args += ", "
+		}
+		args += returnType.String() + " "
+		args += "arg" + fmt.Sprint(i+1)
+	}
+	fmt.Fprintln(out, args, "){")
 
-	//fmt.Fprintf(out, `		System.out.Print("%s");`, funcName)
-	//fmt.Fprintln(out)
+	fmt.Fprintf(out, `		String returned = call("%s",new String[]{`, funcName)
 
-	//for i := range argTypes {
-	//	fmt.Fprintln(out, "\t", "System.out.Print(\"\"+arg", i+1, ");")
-	//}
-	//fmt.Fprintln(out, "\t", "System.out.Println();")
-	//fmt.Fprintln(out, "\t", "System.out.Flush();")
-	//fmt.Fprintln(out, "}")
+	for i := range argTypes {
+		if i != 0{
+			fmt.Fprintf(out, ", ")
+		}
+		fmt.Fprintf(out, `"" + arg%v`, i+1)
+		}
+		fmt.Fprintln(out, "});")
+	fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, `	}`)
 }
+
+
+var java_parse map[string]string = map[string]string{"int": "Integer.parseInt"}
