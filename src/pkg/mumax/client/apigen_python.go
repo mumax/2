@@ -80,5 +80,21 @@ func (p *python) writeFunc(out io.Writer, name string, argTypes []reflect.Type, 
 		args += "arg" + fmt.Sprint(i+1)
 	}
 	fmt.Fprintln(out, args, "):")
-	fmt.Fprintln(out, fmt.Sprint(`	return call("`, name, `", [`, args, `])`))
+
+	var retType string
+	if returnType != nil {
+		retType = returnType.String()
+	}
+	fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s]))`, python_convert[retType], name, args))
 }
+
+
+var (
+	// maps go types to python types	
+	python_convert map[string]string = map[string]string{"int": "int",
+		"float32": "float",
+		"float64": "float",
+		"string":  "str",
+		"bool":    "boolean",
+		"":        ""}
+)

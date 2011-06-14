@@ -118,7 +118,7 @@ var (
 	java_parse map[string]string = map[string]string{"int": "Integer.parseInt",
 		"float32": "Float.parseFloat",
 		"float64": "Double.parseDouble",
-		"bool": "Boolean.parseBoolean"}
+		"bool":    "Boolean.parseBoolean"}
 	// maps go types onto java types
 	java_type map[string]string = map[string]string{"int": "int",
 		"float32": "float",
