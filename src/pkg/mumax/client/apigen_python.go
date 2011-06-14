@@ -35,6 +35,9 @@ initialized = 0
 def init():
 	global infifo
 	global outfifo
+	# signal out intent to open the fifos
+	handshake=open('test.out/handshake', 'w')
+	handshake.close()
 	# the order in which the fifos are opened matters
 	infifo=open('test.out/out.fifo', 'r') # mumax's out is our in
 	outfifo=open('test.out/in.fifo', 'w') # mumax's in is our out

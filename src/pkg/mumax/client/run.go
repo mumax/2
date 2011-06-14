@@ -36,7 +36,7 @@ func run() {
 	command, waiter := startSubcommand()
 
 	ok := handshake(waiter)
-	if !ok{
+	if !ok {
 		panic(InputErr(fmt.Sprint("subcommand ", command, " exited prematurely")))
 	}
 
@@ -121,14 +121,10 @@ func startSubcommand() (command string, waiter chan (int)) {
 func openFifos() {
 	Debug("Opening FIFOs will block until child process opens the other end")
 	var err os.Error
-	//Debug("Opening", outfname)
 	outfifo, err = os.OpenFile(outputDir()+"/"+OUTFIFO, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
-	//Debug("Opened ", outfname)
-	//Debug("Opening", infname)
 	infifo, err = os.OpenFile(outputDir()+"/"+INFIFO, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
-	//Debug("Opened ", infname)
 }
 
 
@@ -162,14 +158,15 @@ func interpretCommands() {
 // the subprocess exits before creating the handshake file,
 // return not OK. in that case we should not attempt to ope
 // the fifos because they will block forever.
-func handshake(procwaiter chan(int)) (ok bool){
+func handshake(procwaiter chan (int)) (ok bool) {
 	Debug("waiting for handshake")
-	filewaiter := pollFile(outputDir() + "/" + HANDSHAKEFILE)	
-	select{
-		case <-filewaiter: return true
-		case exitstat := <- procwaiter:
-			Log("Child command exited with status ", exitstat)
-			return false
+	filewaiter := pollFile(outputDir() + "/" + HANDSHAKEFILE)
+	select {
+	case <-filewaiter:
+		return true
+	case exitstat := <-procwaiter:
+		Log("Child command exited with status ", exitstat)
+		return false
 	}
 	panic(Bug("unreachable"))
 	return false
@@ -177,15 +174,15 @@ func handshake(procwaiter chan(int)) (ok bool){
 
 
 // returns a channel that will signal when the file has appeared
-func pollFile(fname string) (waiter chan(int)){
-		waiter = make(chan(int))
-		go func(){
-		for !FileExists(fname){
+func pollFile(fname string) (waiter chan (int)) {
+	waiter = make(chan (int))
+	go func() {
+		for !FileExists(fname) {
 			time.Sleep(10)
 		}
 		waiter <- 1
-		}()
-		return
+	}()
+	return
 }
 
 // given a file name (e.g. file.py)
@@ -241,7 +238,7 @@ func makeFifos(outputDir string) {
 
 // Default FIFO filename for inter-process communication.
 const (
-	INFIFO  = "in.fifo"
-	OUTFIFO = "out.fifo"
+	INFIFO        = "in.fifo"
+	OUTFIFO       = "out.fifo"
 	HANDSHAKEFILE = "handshake"
 )
