@@ -2,6 +2,9 @@ include $(GOROOT)/src/Make.inc
 
 GOFILES=\
 	main.go\
+	node.go\
+	gpu.go\
+	task.go\
 
 main: $(GOFILES)
 	$(GC) -I_obj $(GOFILES)
