@@ -89,7 +89,7 @@ func outputDir() string {
 	if *flag_outputdir != "" {
 		return *flag_outputdir
 	}
-	return ReplaceExt(inputFile(), ".out")
+	return inputFile() +  ".out"
 }
 
 
