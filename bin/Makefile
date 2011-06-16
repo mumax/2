@@ -7,9 +7,17 @@ apigen:
 	javac Mumax2.java
 	#g++ mumax2.h
 
+CLEANFILES=\
+	mumax2-client\
+	mumax2.py\
+	mumax2.pyc\
+	Mumax2.java\
+	Mumax2.class\
+
+
 .PHONY: clean
 clean:
-	rm -rf mumax2-client
+	rm -rf $(CLEANFILES)
 
 .PHONY: install
 install:
