@@ -13,6 +13,7 @@ GOFILES=\
 	apigen.go\
 	apigen_lang.go\
 	apigen_java.go\
+	apigen_c.go\
 	apigen_python.go\
 
 CGOFILES=\
