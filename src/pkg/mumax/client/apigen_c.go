@@ -33,8 +33,6 @@ func (x *c) writeHeader(out io.Writer) {
 
 #ifdef __cplusplus
 extern "C" {
-#else
-define bool int
 #endif
 
 `)
@@ -60,7 +58,6 @@ func (x *c) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, r
 	}
 	ret = c_type[ret]
 
-
 	// make list of args
 	args := ""
 	for i := range argTypes {
@@ -70,50 +67,48 @@ func (x *c) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, r
 		args += c_type[argTypes[i].String()] + " "
 		args += "arg" + fmt.Sprint(i+1)
 	}
-	
-	
+
 	code := fmt.Sprintf(`
 %s %s(%s){
-
 }
-`, ret, funcName, args)
+`,ret, funcName, args)
 
 	fmt.Fprintln(out, code)
 
-//	fmt.Fprintln(out)
-//
-//	ret := ""
-//	if returnType != nil {
-//		ret = returnType.String()
-//	}
-//
-//	fmt.Fprintf(out, `
-//	public static %s %s(`,java_type[ret], funcName)
-//
-//	args := ""
-//	for i := range argTypes {
-//		if i != 0 {
-//			args += ", "
-//		}
-//		args += java_type[argTypes[i].String()] + " "
-//		args += "arg" + fmt.Sprint(i+1)
-//	}
-//	fmt.Fprintln(out, args, "){")
-//
-//	fmt.Fprintf(out, `		String returned = call("%s", new String[]{`, funcName)
-//
-//	for i := range argTypes {
-//		if i != 0 {
-//			fmt.Fprintf(out, ", ")
-//		}
-//		fmt.Fprintf(out, `"" + arg%v`, i+1)
-//	}
-//	fmt.Fprintln(out, "});")
-//	if returnType != nil {
-//		fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
-//		fmt.Fprintln(out)
-//	}
-//	fmt.Fprintln(out, `	}`)
+	//	fmt.Fprintln(out)
+	//
+	//	ret := ""
+	//	if returnType != nil {
+	//		ret = returnType.String()
+	//	}
+	//
+	//	fmt.Fprintf(out, `
+	//	public static %s %s(`,java_type[ret], funcName)
+	//
+	//	args := ""
+	//	for i := range argTypes {
+	//		if i != 0 {
+	//			args += ", "
+	//		}
+	//		args += java_type[argTypes[i].String()] + " "
+	//		args += "arg" + fmt.Sprint(i+1)
+	//	}
+	//	fmt.Fprintln(out, args, "){")
+	//
+	//	fmt.Fprintf(out, `		String returned = call("%s", new String[]{`, funcName)
+	//
+	//	for i := range argTypes {
+	//		if i != 0 {
+	//			fmt.Fprintf(out, ", ")
+	//		}
+	//		fmt.Fprintf(out, `"" + arg%v`, i+1)
+	//	}
+	//	fmt.Fprintln(out, "});")
+	//	if returnType != nil {
+	//		fmt.Fprintf(out, `		return %s(returned);`, java_parse[ret])
+	//		fmt.Fprintln(out)
+	//	}
+	//	fmt.Fprintln(out, `	}`)
 }
 
 
