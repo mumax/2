@@ -89,7 +89,7 @@ func outputDir() string {
 	if *flag_outputdir != "" {
 		return *flag_outputdir
 	}
-	return inputFile() +  ".out"
+	return inputFile() + ".out"
 }
 
 
