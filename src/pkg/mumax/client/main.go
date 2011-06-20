@@ -31,7 +31,7 @@ var (
 	flag_warn       *bool
 	flag_engineAddr *string
 	flag_localAddr  *string
-	flag_net  *string
+	flag_net        *string
 	flag_apigen     *bool
 )
 

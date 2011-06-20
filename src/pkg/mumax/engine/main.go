@@ -17,7 +17,7 @@ import (
 var (
 	flag_port      *string
 	flag_localAddr *string
-	flag_net *string
+	flag_net       *string
 	flag_logfile   *string
 	flag_debug     *bool
 	flag_silent    *bool

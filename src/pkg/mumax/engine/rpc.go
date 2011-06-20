@@ -65,7 +65,7 @@ func LocalConn() io.ReadWriteCloser {
 	rpc.RegisterName("engine", export)
 
 	Debug("running local engine")
-	end1, end2 := Pipe2()
+	end1, end2 := net.Pipe()
 	go func() {
 		rpc.ServeConn(end1)
 		Debug("engine: done serving")
