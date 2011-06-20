@@ -58,7 +58,7 @@ func listen() {
 }
 
 
-func LocalConn() io.ReadWriteCloser{
+func LocalConn() io.ReadWriteCloser {
 	Assert(export == nil)
 	export = new(Export)
 	Debug("rpc.Register", export)
@@ -66,7 +66,7 @@ func LocalConn() io.ReadWriteCloser{
 
 	Debug("running local engine")
 	end1, end2 := Pipe2()
-	go func(){
+	go func() {
 		rpc.ServeConn(end1)
 		Debug("engine: done serving")
 	}()

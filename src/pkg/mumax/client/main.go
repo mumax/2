@@ -20,17 +20,18 @@ import (
 
 // command-line flags
 var (
-	flag_help       *bool   = flag.Bool("h", false, "Print help and exit")
-	flag_version    *bool   = flag.Bool("v", false, "Print version and exit")
-	flag_outputdir  *string = flag.String("o", "", "Specify output directory")
-	flag_rmoutput   *bool   = flag.Bool("f", false, "Force run, remove pre-existing output directory")
-	flag_logfile    *string = flag.String("l", "", "Specify log file")
-	flag_scriptcmd  *string = flag.String("c", "", "Override the command for executing the source file")
-	flag_debug      *bool   = flag.Bool("g", true, "Show debug output")
-	flag_silent     *bool   = flag.Bool("s", false, "Be silent")
-	flag_warn       *bool   = flag.Bool("w", true, "Show warnings")
-	flag_engineAddr *string = flag.String("e", "", "Remote engine to connect to (host:port)")
-	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
+	flag_help       *bool
+	flag_version    *bool
+	flag_outputdir  *string
+	flag_rmoutput   *bool
+	flag_logfile    *string
+	flag_scriptcmd  *string
+	flag_debug      *bool
+	flag_silent     *bool
+	flag_warn       *bool
+	flag_engineAddr *string
+	flag_localAddr  *string
+	flag_apigen     *bool
 )
 
 
@@ -43,7 +44,7 @@ var (
 // Mumax2 main function
 func Main() {
 	// first test for flags that do not actually run a simulation
-	flag.Parse()
+	initFlags()
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
@@ -71,6 +72,22 @@ func Main() {
 	run()
 }
 
+
+func initFlags() {
+	flag_help = flag.Bool("help", false, "Print help and exit")
+	flag_version = flag.Bool("version", false, "Print version and exit")
+	flag_outputdir = flag.String("output", "", "Specify output directory")
+	flag_rmoutput = flag.Bool("force", false, "Force run, remove pre-existing output directory")
+	flag_logfile = flag.String("log", "", "Specify log file")
+	flag_scriptcmd = flag.String("command", "", "Override the command for executing the source file")
+	flag_debug = flag.Bool("debug", true, "Show debug output")
+	flag_silent = flag.Bool("silent", false, "Be silent")
+	flag_warn = flag.Bool("warn", true, "Show warnings")
+	flag_engineAddr = flag.String("remote", "", "Remote engine to connect to (host:port)")
+	flag_localAddr = flag.String("local", "", "Local IP address to connect from")
+	flag_apigen = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
+	flag.Parse()
+}
 
 // return the input file
 func inputFile() string {
