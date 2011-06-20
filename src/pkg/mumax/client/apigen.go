@@ -28,7 +28,7 @@ func APIGen() {
 	ipc.init(new(Client))
 
 	// target languages
-	langs := []lang{&python{}, &java{}}
+	langs := []lang{&python{}, &java{}, &lua{}}
 
 	// output api files for each language.
 	for _, lang := range langs {

@@ -15,6 +15,7 @@ GOFILES=\
 	apigen_java.go\
 	apigen_c.go\
 	apigen_python.go\
+	apigen_lua.go\
 
 CGOFILES=\
 
