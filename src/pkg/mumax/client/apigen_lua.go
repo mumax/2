@@ -49,7 +49,7 @@ func (l *lua) writeFunc(out io.Writer, name string, argTypes []reflect.Type, ret
 function %s (%s)
 	
 end
-`, name, args)
+`,name, args)
 
 	fmt.Fprintln(out, code)
 	//fmt.Fprintln(out, args, "):")
