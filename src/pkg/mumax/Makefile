@@ -6,6 +6,8 @@ dirs=\
 	client\
 	main\
 
+CLEANFILES+=*.log
+
 all: $(dirs)
 
 host: common

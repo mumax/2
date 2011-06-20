@@ -3,6 +3,8 @@ dirs=\
 	bin\
 	tests\
 
+CLEANFILES+=*.log
+
 all: $(dirs) githooks
 
 bin: src

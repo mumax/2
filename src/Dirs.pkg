@@ -29,4 +29,5 @@ bench: install
 .PHONY: clean
 clean:
 	$(MAKE) TARGET=clean
+	rm -rf $(CLEANFILES)
 

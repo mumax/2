@@ -22,6 +22,6 @@ bench:
 
 .PHONY: clean
 clean:
-	rm -rf *.out
+	rm -rf *.out *.log
 
 
