@@ -15,10 +15,10 @@ import (
 
 
 var (
-		flag_port *string = flag.String("p", ":2527", "Set TCP incoming port")
-//logFile     *string = flag.String("log", "mumax.log", "Specify the log file.")
-//rpcType     *string = flag.String("rpc", "shell", "Specify RPC protocol: shell, (go, json)")
-//interactive *bool   = flag.Bool("i", true, "interactive mode")
+	flag_port *string = flag.String("p", ":2527", "Set TCP incoming port")
+	//logFile     *string = flag.String("log", "mumax.log", "Specify the log file.")
+	//rpcType     *string = flag.String("rpc", "shell", "Specify RPC protocol: shell, (go, json)")
+	//interactive *bool   = flag.Bool("i", true, "interactive mode")
 )
 
 func Main() {

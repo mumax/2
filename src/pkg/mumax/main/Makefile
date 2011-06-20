@@ -27,7 +27,7 @@ all: $(executables)
 $(executables):	%:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
-	cp -f $@ ../../../../bin
+	mv -f $@ ../../../../bin
 
 .PHONY:	clean
 clean:

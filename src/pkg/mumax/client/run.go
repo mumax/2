@@ -13,6 +13,7 @@ package client
 import (
 	. "mumax/common"
 	"fmt"
+	"net"
 	"path"
 	"io"
 	"os"
@@ -29,6 +30,8 @@ func run() {
 	initLogger()
 	Log(WELCOME)
 	Debug("Go", runtime.Version())
+
+	initEngine()
 
 	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
 
@@ -52,6 +55,18 @@ func run() {
 	}
 }
 
+
+func initEngine() {
+	laddr, err1 := net.ResolveTCPAddr("tcp", "localhost:0")
+	CheckErr(err1, ERR_IO)
+
+	raddr, err2 := net.ResolveTCPAddr("tpc", *flag_engineAddr)
+	CheckErr(err2, ERR_IO)
+
+	conn, err3 := net.DialTCP("tcp", laddr, raddr)
+	CheckErr(err3, ERR_IO)
+	Debug("connected to engine", conn)
+}
 
 // make the output dir
 func initOutputDir() {

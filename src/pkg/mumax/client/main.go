@@ -20,16 +20,17 @@ import (
 
 // command-line flags
 var (
-	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
-	flag_version   *bool   = flag.Bool("v", false, "Print version and exit")
-	flag_outputdir *string = flag.String("o", "", "Specify output directory")
-	flag_rmoutput  *bool   = flag.Bool("f", false, "Force run, remove pre-existing output directory")
-	flag_logfile   *string = flag.String("l", "", "Specify log file")
-	flag_scriptcmd *string = flag.String("c", "", "Override the command for executing the source file")
-	flag_debug     *bool   = flag.Bool("g", false, "Show debug output")
-	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
-	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
-	flag_apigen    *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
+	flag_help       *bool   = flag.Bool("h", false, "Print help and exit")
+	flag_version    *bool   = flag.Bool("v", false, "Print version and exit")
+	flag_outputdir  *string = flag.String("o", "", "Specify output directory")
+	flag_rmoutput   *bool   = flag.Bool("f", false, "Force run, remove pre-existing output directory")
+	flag_logfile    *string = flag.String("l", "", "Specify log file")
+	flag_scriptcmd  *string = flag.String("c", "", "Override the command for executing the source file")
+	flag_debug      *bool   = flag.Bool("g", true, "Show debug output")
+	flag_silent     *bool   = flag.Bool("s", false, "Be silent")
+	flag_warn       *bool   = flag.Bool("w", true, "Show warnings")
+	flag_engineAddr *string = flag.String("e", "localhost:2527", "Address of engine to connect to")
+	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
 )
 
 

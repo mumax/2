@@ -41,7 +41,7 @@ func Listen() {
 	Debug("rpc.Register", export)
 	rpc.RegisterName("engine", export)
 
-	addr, err1 := net.ResolveTCPAddr("tcp", "localhost" + *flag_port)
+	addr, err1 := net.ResolveTCPAddr("tcp", "localhost"+*flag_port)
 	CheckErr(err1, ERR_IO)
 	Debug("listen addr", addr)
 
@@ -49,7 +49,7 @@ func Listen() {
 	CheckErr(err2, ERR_IO)
 	Debug("listening...")
 
-	conn,err3 := listener.Accept()
+	conn, err3 := listener.Accept()
 	CheckErr(err3, ERR_IO)
 	Debug("connected", conn)
 	rpc.ServeConn(conn)
