@@ -19,6 +19,22 @@ import (
 )
 
 
+// command-line flags (more in engine/main.go)
+var (
+	Flag_engine     *bool   = flag.Bool("listen", false, "Run engine on incoming port")
+	Flag_engineAddr *string = flag.String("connect", "", "Connect to engine server")
+	Flag_outputdir  *string = flag.String("out", "", "Specify output directory")
+	Flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
+	Flag_logfile    *string = flag.String("log", "", "Specify log file")
+	Flag_scriptcmd  *string = flag.String("command", "", "Override interpreter command")
+	Flag_debug      *bool   = flag.Bool("debug", true, "Show debug output")
+	Flag_silent     *bool   = flag.Bool("silent", false, "Be silent")
+	Flag_warn       *bool   = flag.Bool("warn", true, "Show warnings")
+	Flag_help       *bool   = flag.Bool("help", false, "Print help and exit")
+	Flag_version    *bool   = flag.Bool("version", false, "Print version info and exit")
+	Flag_test       *bool   = flag.Bool("test", false, "Test CUDA and exit")
+	Flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
+)
 
 
 // client global variables
@@ -30,17 +46,17 @@ var (
 func Main() {
 	// first test for flags that do not actually run a simulation
 	flag.Parse()
-	if *engine.Flag_help {
+	if *Flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
 		return
 	}
-	if *engine.Flag_version {
+	if *Flag_version {
 		fmt.Println(WELCOME)
 		fmt.Println("Go", runtime.Version())
 		return
 	}
-	if *engine.Flag_apigen {
+	if *Flag_apigen {
 		APIGen()
 		return
 	}
@@ -54,18 +70,17 @@ func Main() {
 		}
 	}()
 
-	if *engine.Flag_test{
+	if *Flag_test {
 		cu.Init()
 		return
 	}
-	if *engine.Flag_engine{
-			engine.Run()
-			return
+	if *Flag_engine {
+		engine.Run()
+		return
 	}
 	// else...
 	run()
 }
-
 
 
 // return the input file
@@ -83,8 +98,8 @@ func inputFile() string {
 
 // return the output directory
 func outputDir() string {
-	if *engine.Flag_outputdir != "" {
-		return *engine.flag_Outputdir
+	if *Flag_outputdir != "" {
+		return *Flag_outputdir
 	}
 	return inputFile() + ".out"
 }
@@ -119,19 +134,19 @@ func crashreport(err interface{}) {
 		status = ERR_BUG
 	case InputErr:
 		Log("illegal input:", err, "\n")
-		if *flag_debug {
+		if *Flag_debug {
 			Log(getCrashStack())
 		}
 		status = ERR_INPUT
 	case IOErr:
 		Log("IO error:", err, "\n")
-		if *flag_debug {
+		if *Flag_debug {
 			Log(getCrashStack())
 		}
 		status = ERR_IO
 	case cu.Result:
 		Log("cuda error:", err, "\n", getCrashStack())
-		if *flag_debug {
+		if *Flag_debug {
 			Log(getCrashStack())
 		}
 		status = ERR_CUDA

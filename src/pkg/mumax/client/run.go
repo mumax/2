@@ -64,10 +64,10 @@ func initEngine() {
 
 
 func engineConn() io.ReadWriteCloser {
-	if *flag_engineAddr == "" { // no remote engine specified, use local one
+	if *Flag_engineAddr == "" { // no remote engine specified, use local one
 		return engine.LocalConn()
 	} else {
-		conn, err := net.Dial(*flag_net, *flag_engineAddr)
+		conn, err := net.Dial(*engine.Flag_net, *Flag_engineAddr)
 		CheckErr(err, ERR_IO)
 		return conn
 	}
@@ -77,7 +77,7 @@ func engineConn() io.ReadWriteCloser {
 
 // make the output dir
 func initOutputDir() {
-	if *flag_rmoutput {
+	if *Flag_force {
 		err := syscommand("rm", []string{"-rf", outputDir()}) // ignore errors.
 		if err != nil {
 			Log("rm -rf", outputDir(), ":", err)
@@ -94,17 +94,17 @@ func initOutputDir() {
 // initialize the logger
 func initLogger() {
 	var opts LogOption
-	if !*flag_debug {
+	if !*Flag_debug {
 		opts |= LOG_NODEBUG
 	}
-	if *flag_silent {
+	if *Flag_silent {
 		opts |= LOG_NOSTDOUT | LOG_NODEBUG | LOG_NOWARN
 	}
-	if !*flag_warn {
+	if !*Flag_warn {
 		opts |= LOG_NOWARN
 	}
 
-	logFile := *flag_logfile
+	logFile := *Flag_logfile
 	if logFile == "" {
 		logFile = outputDir() + "/mumax2.log"
 	}
@@ -218,8 +218,8 @@ func pollFile(fname string) (waiter chan (int)) {
 // given a file name (e.g. file.py)
 // this returns a command to run the file (e.g. python file.py, java File)
 func commandForFile(file string) (command string, args []string) {
-	if *flag_scriptcmd != "" {
-		return *flag_scriptcmd, []string{file}
+	if *Flag_scriptcmd != "" {
+		return *Flag_scriptcmd, []string{file}
 	}
 	switch path.Ext(file) {
 	default:
