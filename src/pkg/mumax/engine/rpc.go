@@ -11,6 +11,7 @@ package engine
 import (
 	. "mumax/common"
 	"os"
+	"net"
 	"rpc"
 )
 
@@ -37,6 +38,20 @@ var export *Export
 func Listen() {
 	Assert(export == nil)
 	export = new(Export)
+	Debug("rpc.Register", export)
 	rpc.RegisterName("engine", export)
-	//rpc.ServeConn()
+
+	addr, err1 := net.ResolveTCPAddr("tcp", "localhost" + *flag_port)
+	CheckErr(err1, ERR_IO)
+	Debug("listen addr", addr)
+
+	listener, err2 := net.ListenTCP("tcp", addr)
+	CheckErr(err2, ERR_IO)
+	Debug("listening...")
+
+	conn,err3 := listener.Accept()
+	CheckErr(err3, ERR_IO)
+	Debug("connected", conn)
+	rpc.ServeConn(conn)
+	Debug("done serving")
 }
