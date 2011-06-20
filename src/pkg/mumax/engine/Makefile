@@ -7,13 +7,7 @@ GOFILES=\
 	universe.go\
 	units.go\
 	field.go\
-	ioformat.go\
-	stephandler.go\
-	server_api.go\
-	server.go\
-	client.go\
 	rpc.go\
-	rpc_refsh.go\
 	main.go
 
 CGOFILES=\
