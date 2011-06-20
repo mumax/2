@@ -21,6 +21,7 @@ CGOFILES=\
 
 GC+=\
 	-I../common/_obj\
+	-I../engine/_obj\
 	-I../../cuda/driver/_obj\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 

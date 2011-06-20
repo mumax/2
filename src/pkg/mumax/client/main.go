@@ -29,7 +29,7 @@ var (
 	flag_debug      *bool   = flag.Bool("g", true, "Show debug output")
 	flag_silent     *bool   = flag.Bool("s", false, "Be silent")
 	flag_warn       *bool   = flag.Bool("w", true, "Show warnings")
-	flag_engineAddr *string = flag.String("e", "localhost:2527", "Address of engine to connect to")
+	flag_engineAddr *string = flag.String("e", "", "Remote engine to connect to (host:port)")
 	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
 )
 

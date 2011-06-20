@@ -11,6 +11,7 @@ package engine
 import (
 	. "mumax/common"
 	"os"
+	"io"
 	"net"
 	"rpc"
 )
@@ -35,7 +36,7 @@ func (e *Export) Call(args *CallArgs, reply *interface{}) os.Error {
 
 var export *Export
 
-func Listen() {
+func listen() {
 	Assert(export == nil)
 	export = new(Export)
 	Debug("rpc.Register", export)
@@ -54,4 +55,20 @@ func Listen() {
 	Debug("connected", conn)
 	rpc.ServeConn(conn)
 	Debug("done serving")
+}
+
+
+func LocalConn() io.ReadWriteCloser{
+	Assert(export == nil)
+	export = new(Export)
+	Debug("rpc.Register", export)
+	rpc.RegisterName("engine", export)
+
+	Debug("running local engine")
+	end1, end2 := Pipe2()
+	go func(){
+		rpc.ServeConn(end1)
+		Debug("engine: done serving")
+	}()
+	return end2
 }

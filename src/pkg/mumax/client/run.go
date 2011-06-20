@@ -12,6 +12,7 @@ package client
 
 import (
 	. "mumax/common"
+	"mumax/engine"
 	"fmt"
 	"net"
 	"path"
@@ -57,15 +58,27 @@ func run() {
 
 
 func initEngine() {
-	laddr, err1 := net.ResolveTCPAddr("tcp", "localhost:0")
-	CheckErr(err1, ERR_IO)
+	conn := engineConn()
+	Debug("Connected to engine", conn)
+}
 
-	raddr, err2 := net.ResolveTCPAddr("tpc", *flag_engineAddr)
-	CheckErr(err2, ERR_IO)
 
-	conn, err3 := net.DialTCP("tcp", laddr, raddr)
-	CheckErr(err3, ERR_IO)
-	Debug("connected to engine", conn)
+func engineConn() io.ReadWriteCloser {
+	if *flag_engineAddr == "" { // no remote engine specified, use local one
+		return engine.LocalConn()
+	} else {
+		laddr, err1 := net.ResolveTCPAddr("tcp", "localhost:0")
+		CheckErr(err1, ERR_IO)
+
+		raddr, err2 := net.ResolveTCPAddr("tpc", *flag_engineAddr)
+		CheckErr(err2, ERR_IO)
+
+		conn, err3 := net.DialTCP("tcp", laddr, raddr)
+		CheckErr(err3, ERR_IO)
+		return conn
+	}
+	panic(Bug("unreachable"))
+	return nil
 }
 
 // make the output dir
