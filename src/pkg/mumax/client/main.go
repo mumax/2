@@ -9,6 +9,7 @@ package client
 
 import (
 	. "mumax/common"
+	"mumax/engine"
 	cu "cuda/driver"
 	"runtime"
 	"runtime/debug"
@@ -18,45 +19,28 @@ import (
 )
 
 
-// command-line flags
-var (
-	flag_help       *bool
-	flag_version    *bool
-	flag_outputdir  *string
-	flag_rmoutput   *bool
-	flag_logfile    *string
-	flag_scriptcmd  *string
-	flag_debug      *bool
-	flag_silent     *bool
-	flag_warn       *bool
-	flag_engineAddr *string
-	flag_localAddr  *string
-	flag_net        *string
-	flag_apigen     *bool
-)
 
 
 // client global variables
 var (
 	cleanfiles []string // list of files to be deleted upon program exit
-	//infifo, outfifo *os.File // FIFOs for inter-process communication
 )
 
 // Mumax2 main function
 func Main() {
 	// first test for flags that do not actually run a simulation
-	initFlags()
-	if *flag_help {
+	flag.Parse()
+	if *engine.Flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
 		return
 	}
-	if *flag_version {
+	if *engine.Flag_version {
 		fmt.Println(WELCOME)
 		fmt.Println("Go", runtime.Version())
 		return
 	}
-	if *flag_apigen {
+	if *engine.Flag_apigen {
 		APIGen()
 		return
 	}
@@ -70,26 +54,19 @@ func Main() {
 		}
 	}()
 
+	if *engine.Flag_test{
+		cu.Init()
+		return
+	}
+	if *engine.Flag_engine{
+			engine.Run()
+			return
+	}
+	// else...
 	run()
 }
 
 
-func initFlags() {
-	flag_help = flag.Bool("help", false, "Print help and exit")
-	flag_version = flag.Bool("version", false, "Print version and exit")
-	flag_outputdir = flag.String("output", "", "Specify output directory")
-	flag_rmoutput = flag.Bool("force", false, "Force run, remove pre-existing output directory")
-	flag_logfile = flag.String("log", "", "Specify log file")
-	flag_scriptcmd = flag.String("command", "", "Override the command for executing the source file")
-	flag_debug = flag.Bool("debug", true, "Show debug output")
-	flag_silent = flag.Bool("silent", false, "Be silent")
-	flag_warn = flag.Bool("warn", true, "Show warnings")
-	flag_engineAddr = flag.String("remote", "", "Remote engine to connect to (host:port)")
-	flag_localAddr = flag.String("local", "", "Local IP address to connect from")
-	flag_net = flag.String("net", "tcp", "Set network protocal: tcp, tcp4, tcp6, udp[4,6], unix, unixgram")
-	flag_apigen = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
-	flag.Parse()
-}
 
 // return the input file
 func inputFile() string {
@@ -106,8 +83,8 @@ func inputFile() string {
 
 // return the output directory
 func outputDir() string {
-	if *flag_outputdir != "" {
-		return *flag_outputdir
+	if *engine.Flag_outputdir != "" {
+		return *engine.flag_Outputdir
 	}
 	return inputFile() + ".out"
 }
