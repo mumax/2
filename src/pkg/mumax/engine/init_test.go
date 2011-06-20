@@ -13,11 +13,11 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
+	"mumax/gpu"
 	cu "cuda/driver"
 )
 
 func init() {
-	cu.Init()
-	InitDebugGPUs()
+	cu.Init() //TODO: put in initgpus
+	gpu.InitDebugGPUs()
 }

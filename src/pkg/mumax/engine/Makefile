@@ -7,8 +7,8 @@ GOFILES=\
 	universe.go\
 	units.go\
 	field.go\
+	main.go\
 	rpc.go\
-	main.go
 
 CGOFILES=\
 
