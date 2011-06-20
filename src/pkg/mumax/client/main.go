@@ -31,6 +31,7 @@ var (
 	flag_warn       *bool
 	flag_engineAddr *string
 	flag_localAddr  *string
+	flag_net  *string
 	flag_apigen     *bool
 )
 
@@ -85,6 +86,7 @@ func initFlags() {
 	flag_warn = flag.Bool("warn", true, "Show warnings")
 	flag_engineAddr = flag.String("remote", "", "Remote engine to connect to (host:port)")
 	flag_localAddr = flag.String("local", "", "Local IP address to connect from")
+	flag_net = flag.String("net", "tcp", "Set network protocal: tcp, tcp4, tcp6, udp[4,6], unix, unixgram")
 	flag_apigen = flag.Bool("apigen", false, "Generate API files and exit (internal use)")
 	flag.Parse()
 }

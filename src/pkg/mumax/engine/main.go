@@ -17,6 +17,7 @@ import (
 var (
 	flag_port      *string
 	flag_localAddr *string
+	flag_net *string
 	flag_logfile   *string
 	flag_debug     *bool
 	flag_silent    *bool
@@ -38,6 +39,7 @@ func Main() {
 func initFlags() {
 	flag_port = flag.String("port", ":2527", "Set TCP incoming port")
 	flag_localAddr = flag.String("local", "", "Local IP address to connect from")
+	flag_net = flag.String("net", "tcp", "Set network protocal: tcp, tcp4, tcp6, udp[4,6], unix, unixgram")
 	flag_logfile = flag.String("log", "", "Specify log file")
 	flag_debug = flag.Bool("debug", true, "Show debug output")
 	flag_silent = flag.Bool("silent", false, "Be silent")
