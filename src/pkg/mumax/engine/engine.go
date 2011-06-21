@@ -15,3 +15,48 @@ package engine
 type Engine struct {
 
 }
+
+
+
+
+// For testing purposes.
+func ( e *Engine) Version() int {
+	return 2
+}
+
+// For testing purposes.
+func ( e *Engine) Echo(i int) int {
+	return i
+}
+
+// For testing purposes.
+func ( e *Engine) Sink(b bool, i int, f float32, d float64, s string) {
+	return
+}
+
+// For testing purposes.
+func ( e *Engine) GetFloat() float32 {
+	return 42.
+}
+
+// For testing purposes.
+func ( e *Engine) GetDouble() float64 {
+	return 42.
+}
+
+// For testing purposes.
+func ( e *Engine) GetString() string {
+	return "hello"
+}
+
+
+// For testing purposes.
+func ( e *Engine) GetBool() bool {
+	return true
+}
+
+
+// For testing purposes.
+func ( e *Engine) Sum(i, j int) int {
+	return i + j
+}

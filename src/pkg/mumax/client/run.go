@@ -15,6 +15,7 @@ import (
 	"mumax/engine"
 	"fmt"
 	"net"
+	"rpc"
 	"path"
 	"io"
 	"os"
@@ -32,7 +33,7 @@ func run() {
 	Log(WELCOME)
 	Debug("Go", runtime.Version())
 
-	initEngine()
+	server := rpc.NewClient(engineConn())
 
 	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
 
@@ -45,7 +46,7 @@ func run() {
 
 	infifo, outfifo := openFifos()
 
-	interpretCommands(infifo, outfifo)
+	interpretCommands(infifo, outfifo, server)
 
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
@@ -57,16 +58,13 @@ func run() {
 }
 
 
-func initEngine() {
-	conn := engineConn()
-	Debug("Connected to engine", conn)
-}
-
 
 func engineConn() io.ReadWriteCloser {
 	if *Flag_engineAddr == "" { // no remote engine specified, use local one
-		return engine.LocalConn()
+			Debug("Connecting to local engine")
+			return  engine.LocalConn()
 	} else {
+			Debug("Connecting to remote engine: ", *engine.Flag_net, *Flag_engineAddr)
 		conn, err := net.Dial(*engine.Flag_net, *Flag_engineAddr)
 		CheckErr(err, ERR_IO)
 		return conn
@@ -74,6 +72,7 @@ func engineConn() io.ReadWriteCloser {
 	panic(Bug("unreachable"))
 	return nil
 }
+
 
 // make the output dir
 func initOutputDir() {
@@ -160,7 +159,7 @@ func openFifos() (infifo, outfifo *os.File) {
 
 // read text commands from infifo, execute them and return the result to outfifo
 // stop when a fifo gets closed by the other end
-func interpretCommands(infifo, outfifo *os.File) {
+func interpretCommands(infifo, outfifo *os.File, server *rpc.Client) {
 	// interpreter exports client methods
 	c := new(Client)
 	var ipc interpreter
