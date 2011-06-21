@@ -12,20 +12,26 @@ package client
 
 import (
 	. "mumax/common"
+	"mumax/engine"
 	"reflect"
 	"unicode"
 	"fmt"
+	"rpc"
 )
 
 
 // an interpreter takes care of inter-procedural communication.
 type interpreter struct {
 	method map[string]reflect.Value // list of methods that can be called.
+	server *rpc.Client
 }
 
 
-// add all exported methods of receiver to the interpreter's map
-func (c *interpreter) init(receiver_ interface{}) {
+// add all exported methods of receiver to the interpreter's map.
+// calls to function names that are not present are passed through
+// to the rpc client.
+func (c *interpreter) init(receiver_ interface{}, server *rpc.Client) {
+	c.server = server
 	c.method = make(map[string]reflect.Value)
 	receiver := reflect.ValueOf(receiver_)
 	typ := reflect.TypeOf(receiver_)
@@ -42,7 +48,10 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
-		panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
+		//panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
+		var reply interface{}
+		err := c.server.Call("ReflectCall", &engine.CallArgs{funcName, args}, &reply)
+		CheckErr(err, ERR_IO)
 	}
 
 	// call

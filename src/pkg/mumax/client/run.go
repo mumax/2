@@ -58,13 +58,12 @@ func run() {
 }
 
 
-
 func engineConn() io.ReadWriteCloser {
 	if *Flag_engineAddr == "" { // no remote engine specified, use local one
-			Debug("Connecting to local engine")
-			return  engine.LocalConn()
+		Debug("Connecting to local engine")
+		return engine.LocalConn()
 	} else {
-			Debug("Connecting to remote engine: ", *engine.Flag_net, *Flag_engineAddr)
+		Debug("Connecting to remote engine: ", *engine.Flag_net, *Flag_engineAddr)
 		conn, err := net.Dial(*engine.Flag_net, *Flag_engineAddr)
 		CheckErr(err, ERR_IO)
 		return conn
@@ -159,11 +158,11 @@ func openFifos() (infifo, outfifo *os.File) {
 
 // read text commands from infifo, execute them and return the result to outfifo
 // stop when a fifo gets closed by the other end
-func interpretCommands(infifo, outfifo *os.File, server *rpc.Client) {
+func interpretCommands(infifo, outfifo *os.File, engine *rpc.Client) {
 	// interpreter exports client methods
 	c := new(Client)
 	var ipc interpreter
-	ipc.init(c)
+	ipc.init(c, engine)
 
 	// interpreter executes commands from subprocess
 	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {

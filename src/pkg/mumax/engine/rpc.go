@@ -19,7 +19,7 @@ import (
 
 type CallArgs struct {
 	Func string
-	Args []interface{}
+	Args []string
 }
 
 
@@ -28,8 +28,7 @@ type Export struct {
 }
 
 
-func (e *Export) Call(args *CallArgs, reply *interface{}) os.Error {
-
+func (e *Export) ReflectCall(args *CallArgs, reply *interface{}) os.Error {
 	return nil
 }
 
