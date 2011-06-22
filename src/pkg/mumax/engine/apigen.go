@@ -10,7 +10,7 @@
 // library in any of the supported programming languages is
 // automatically generated.
 
-package client
+package engine
 
 import (
 	. "mumax/common"
@@ -25,7 +25,7 @@ const pkg = "mumax2"
 func APIGen() {
 	// interpreter can extract the methods
 	var ipc interpreter
-	ipc.init(new(Client))
+	ipc.init(new(Client), nil)
 
 	// target languages
 	langs := []lang{&python{}, &java{}, &lua{}}

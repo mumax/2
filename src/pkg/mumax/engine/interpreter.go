@@ -5,14 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package client
+package engine
 
 // This file implements Inter-Process-Communication
 // between mumax and a scripting language.
 
 import (
 	. "mumax/common"
-	"mumax/engine"
 	"reflect"
 	"unicode"
 	"fmt"
@@ -50,7 +49,7 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 	if !ok {
 		//panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
 		var reply interface{}
-		err := c.server.Call("ReflectCall", &engine.CallArgs{funcName, args}, &reply)
+		err := c.server.Call("ReflectCall", &CallArgs{funcName, args}, &reply)
 		CheckErr(err, ERR_IO)
 	}
 

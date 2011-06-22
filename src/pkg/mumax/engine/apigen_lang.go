@@ -6,7 +6,7 @@
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 
-package client
+package engine
 
 import (
 	"io"
