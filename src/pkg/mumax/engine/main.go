@@ -33,8 +33,8 @@ var (
 	flag_version    *bool   = flag.Bool("version", false, "Print version info and exit")
 	flag_test       *bool   = flag.Bool("test", false, "Test CUDA and exit")
 	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
-	flag_port *string = flag.String("port", ":2527", "Set TCP listen port for engine")
-	flag_net  *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
+	flag_port       *string = flag.String("port", ":2527", "Set TCP listen port for engine")
+	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
 )
 
 

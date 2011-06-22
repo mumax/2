@@ -3,7 +3,6 @@ dirs=\
 	host\
 	gpu\
 	engine\
-	client\
 	main\
 
 CLEANFILES+=*.log
@@ -12,8 +11,8 @@ all: $(dirs)
 
 host: common
 gpu: common host
-client: common gpu host engine
-main: client engine
+engine: common gpu host
+main: common engine
 
 include ../../Dirs.pkg
 
