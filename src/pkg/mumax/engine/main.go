@@ -28,8 +28,8 @@ var (
 	flag_logfile    *string = flag.String("log", "", "Specify log file")
 	flag_scriptcmd  *string = flag.String("command", "", "Override interpreter command")
 	flag_debug      *bool   = flag.Bool("debug", true, "Show debug output")
-	flag_cpuprof    *string = flag.String("cpuprof", "", "Write CPU profile to file")
-	flag_memprof    *string = flag.String("memprof", "", "Write memory profile to file")
+	flag_cpuprof    *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
+	flag_memprof    *string = flag.String("memprof", "", "Write gopprof memory profile to file")
 	flag_silent     *bool   = flag.Bool("silent", false, "Be silent")
 	flag_warn       *bool   = flag.Bool("warn", true, "Show warnings")
 	flag_help       *bool   = flag.Bool("help", false, "Print help and exit")
@@ -64,7 +64,7 @@ func Main() {
 		APIGen()
 		return
 	}
-	if *flag_cpuprof {
+	if *flag_cpuprof != "" {
 		f, err := os.Create(*flag_cpuprof)
 		CheckErr(err, ERR_IO)
 		Log("Writing CPU profile to", *flag_cpuprof)
@@ -92,7 +92,7 @@ func Main() {
 	run()
 
 	// memory profile is single-shot, run at the end of program
-	if *flag_memprof {
+	if *flag_memprof != "" {
 		f, err := os.Create(*flag_memprof)
 		CheckErr(err, ERR_IO)
 		Log("Writing memory profile to", *flag_memprof)
