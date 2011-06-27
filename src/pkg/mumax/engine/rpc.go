@@ -52,11 +52,11 @@ func (e *engineRPCWrapper) ReflectCall(args_ *CallArgs, reply *interface{}) os.E
 }
 
 
-var export *engineRPCWrapper
+var engRPCWrap *engineRPCWrapper
 var eng *Engine
 
 func listen() {
-	initEngineExport()
+	initEngineWrapper()
 
 	addr, err1 := net.ResolveTCPAddr("tcp", "localhost"+*flag_port)
 	CheckErr(err1, ERR_IO)
@@ -75,7 +75,7 @@ func listen() {
 
 
 func localConn() io.ReadWriteCloser {
-	initEngineExport()
+	initEngineWrapper()
 
 	Debug("running local engine")
 	end1, end2 := net.Pipe()
@@ -88,11 +88,11 @@ func localConn() io.ReadWriteCloser {
 }
 
 
-func initEngineExport() {
-	Assert(export == nil)
+func initEngineWrapper() {
+	Assert(engRPCWrap == nil)
 	Assert(eng == nil)
 	eng = newEngine()
-	export = newEngineRPCWrapper(eng)
-	Debug("rpc.Register", export)
-	rpc.RegisterName("engine", export)
+	engRPCWrap = newEngineRPCWrapper(eng)
+	//Debug("rpc.Register", engRPCWrap)
+	rpc.RegisterName("engine", engRPCWrap)
 }
