@@ -38,8 +38,9 @@ type ReflectCallArgs struct {
 // wraps an engine to allow its methods to be called over rpc
 // via ReflectCall(funcname, args). This avoids having to write
 // all of engine's methods in the special format required by rpc.
-type Server struct { // todo: rename
+type Server struct {
 	ipc Interpreter
+	// engine!
 }
 
 
