@@ -20,7 +20,6 @@ GOFILES=\
 	rpc.go\
 	units.go\
 	universe.go\
-	#run.go\
 
 CGOFILES=\
 

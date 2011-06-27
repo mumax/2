@@ -97,11 +97,12 @@ func Main() {
 }
 
 
-// return the input file
+// return the input file. "" means none
 func inputFile() string {
 	// check if there is just one input file given on the command line
 	if flag.NArg() == 0 {
-		panic(InputErr("no input files"))
+		//panic(InputErr("no input files"))
+		return ""
 	}
 	if flag.NArg() > 1 {
 		panic(InputErr(fmt.Sprint("need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())))

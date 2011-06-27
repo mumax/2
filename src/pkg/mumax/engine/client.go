@@ -97,6 +97,10 @@ func engineConn() io.ReadWriteCloser {
 
 // make the output dir
 func initOutputDir() {
+	if inputFile() == "" {
+		return
+	}
+
 	if *flag_force {
 		err := syscommand("rm", []string{"-rf", outputDir()}) // ignore errors.
 		if err != nil {
@@ -240,6 +244,9 @@ func pollFile(fname string) (waiter chan (int)) {
 func commandForFile(file string) (command string, args []string) {
 	if *flag_scriptcmd != "" {
 		return *flag_scriptcmd, []string{file}
+	}
+	if file == "" {
+		panic(IOErr("no input file"))
 	}
 	switch path.Ext(file) {
 	default:
