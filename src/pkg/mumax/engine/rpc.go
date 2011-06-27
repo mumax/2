@@ -8,6 +8,15 @@
 package engine
 
 
+// This file implements RPC (Remote Procedure Call) from a client to an engine.
+// Trying to call an undefined client method via its interpreter will automatically
+// forward this call to the engine. In this way, both the client and engine methods
+// are available to the scripting child process in a transparent way.
+//
+// The engine can run locally or connected over the network (see program flags).
+//
+// Author: Arne Vansteenkiste
+
 import (
 	. "mumax/common"
 	"os"
