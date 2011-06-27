@@ -50,6 +50,23 @@ var (
 func Main() {
 	// first test for flags that do not actually run a simulation
 	flag.Parse()
+
+	defer func() {
+		cleanup()        // make sure we always clean up, no matter what
+		err := recover() // if anything goes wrong, produce a nice crash report
+		if err != nil {
+			crashreport(err)
+		}
+	}()
+
+	if *flag_cpuprof != "" {
+		f, err := os.Create(*flag_cpuprof)
+		CheckErr(err, ERR_IO)
+		Log("Writing CPU profile to", *flag_cpuprof)
+		pprof.StartCPUProfile(f)
+		defer func() { Log("Flushing CPU profile", *flag_cpuprof); pprof.StopCPUProfile() }()
+	}
+
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
@@ -64,21 +81,6 @@ func Main() {
 		APIGen()
 		return
 	}
-	if *flag_cpuprof != "" {
-		f, err := os.Create(*flag_cpuprof)
-		CheckErr(err, ERR_IO)
-		Log("Writing CPU profile to", *flag_cpuprof)
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	}
-
-	defer func() {
-		cleanup()        // make sure we always clean up, no matter what
-		err := recover() // if anything goes wrong, produce a nice crash report
-		if err != nil {
-			crashreport(err)
-		}
-	}()
 
 	if *flag_test {
 		cu.Init()
