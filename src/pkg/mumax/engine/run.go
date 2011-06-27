@@ -265,9 +265,8 @@ func makeFifos(outputDir string) {
 }
 
 
-// Default FIFO filename for inter-process communication.
 const (
-	INFIFO        = "in.fifo"
-	OUTFIFO       = "out.fifo"
-	HANDSHAKEFILE = "handshake"
+	INFIFO        = "in.fifo"   // FIFO filename for mumax->subprocess text-based function calls.
+	OUTFIFO       = "out.fifo"  // FIFO filename for mumax<-subprocess text-based function calls.
+	HANDSHAKEFILE = "handshake" // Presence of this file indicates subprocess initialization OK.
 )

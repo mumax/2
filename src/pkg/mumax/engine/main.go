@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
+	"time"
 	"fmt"
 	"os"
 	"flag"
@@ -22,7 +23,7 @@ import (
 // command-line flags (more in engine/main.go)
 var (
 	flag_engine     *bool   = flag.Bool("listen", false, "Run engine on incoming port")
-	flag_engineAddr *string = flag.String("connect", "", "Connect to engine server")
+	flag_engineAddr *string = flag.String("dial", "", "Connect to engine server")
 	flag_outputdir  *string = flag.String("out", "", "Specify output directory")
 	flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
 	flag_logfile    *string = flag.String("log", "", "Specify log file")
@@ -38,6 +39,7 @@ var (
 	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
 	flag_port       *string = flag.String("port", ":2527", "Set TCP listen port for engine")
 	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
+	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
 )
 
 
@@ -60,15 +62,6 @@ func Main() {
 	}()
 
 	defer func() { // memory profile is single-shot, run at the end of program
-		if *flag_memprof != "" {
-			f, err := os.Create(*flag_memprof)
-			if err != nil {
-				Log(err)
-			}
-			Log("Writing memory profile to", *flag_memprof)
-			pprof.WriteHeapProfile(f)
-			f.Close()
-		}
 	}()
 
 	if *flag_cpuprof != "" {
@@ -78,17 +71,17 @@ func Main() {
 		}
 		Log("Writing CPU profile to", *flag_cpuprof)
 		pprof.StartCPUProfile(f)
-		defer func() {
-			Log("Flushing CPU profile", *flag_cpuprof)
-			pprof.StopCPUProfile()
-		}()
+		// will be flushed on cleanup
 	}
+
+	initTimeout()
 
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
 		return
 	}
+
 	if *flag_version {
 		fmt.Println(WELCOME)
 		fmt.Println("Go", runtime.Version())
@@ -137,6 +130,23 @@ func outputDir() string {
 
 func cleanup() {
 	Debug("cleanup")
+
+	// write memory profile
+	if *flag_memprof != "" {
+		f, err := os.Create(*flag_memprof)
+		if err != nil {
+			Log(err)
+		}
+		Log("Writing memory profile to", *flag_memprof)
+		pprof.WriteHeapProfile(f)
+		f.Close()
+	}
+
+	// write cpu profile
+	if *flag_cpuprof != "" {
+		Log("Flushing CPU profile", *flag_cpuprof)
+		pprof.StopCPUProfile()
+	}
 
 	// remove neccesary files
 	for i := range cleanfiles {
@@ -206,6 +216,32 @@ func getCrashStack() string {
 	return string(stack[start:])
 }
 
+
+func initTimeout() {
+	timeout := *flag_timeout
+	t := 0.
+	if timeout != "" {
+		switch timeout[len(timeout)-1] {
+		default:
+			t = Atof64(timeout)
+		case 's':
+			t = Atof64(timeout[:len(timeout)-1])
+		case 'h':
+			t = 3600 * Atof64(timeout[:len(timeout)-1])
+		case 'd':
+			t = 24 * 3600 * Atof64(timeout[:len(timeout)-1])
+		}
+	}
+	if t != 0 {
+		Log("Timeout: ", t, "s")
+		go func() {
+			time.Sleep(int64(1e9 * t))
+			Log("Timeout reached:", timeout)
+			cleanup()
+			os.Exit(ERR_IO)
+		}()
+	}
+}
 
 const (
 	WELCOME  = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
