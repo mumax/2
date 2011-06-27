@@ -4,23 +4,23 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/engine
 
 GOFILES=\
-	apigen_c.go\
-	apigen.go\
-	apigen_java.go\
-	apigen_lang.go\
-	apigen_lua.go\
-	apigen_python.go\
 	client.go\
 	engine.go\
+	apigen.go\
+	apigen_lang.go\
+	apigen_c.go\
+	apigen_java.go\
+	apigen_lua.go\
+	apigen_python.go\
 	exec.go\
 	field.go\
 	interpreter.go\
 	io.go\
 	main.go\
 	rpc.go\
-	run.go\
 	units.go\
 	universe.go\
+	#run.go\
 
 CGOFILES=\
 

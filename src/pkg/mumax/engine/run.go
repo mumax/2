@@ -34,6 +34,12 @@ func run() {
 
 	server := rpc.NewClient(engineConn())
 
+	//if *flag_test{
+	//		result := server.rpcCall("Test")
+	//		Log(result)
+	//		return
+	//}
+
 	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
 
 	command, waiter := startSubcommand()

@@ -29,7 +29,7 @@ import (
 
 // INTERNAL but exported because package rpc requires so.
 // wraps the arguments for an rpc call to engine.RelfectCall
-type CallArgs struct {
+type ReflectCallArgs struct {
 	Func string
 	Args []string
 }
@@ -52,8 +52,8 @@ func newEngineRPCWrapper(eng *Engine) *engineRPCWrapper {
 
 // INTERNAL but exported because package rpc requires so.
 // this rpc-exported method uses an interpreter to parse the function name and argument values
-// (strings) in the CallArgs argument, and calls the function using reflection. 
-func (e *engineRPCWrapper) ReflectCall(args_ *CallArgs, reply *interface{}) os.Error {
+// (strings) in the ReflectCallArgs argument, and calls the function using reflection. 
+func (e *engineRPCWrapper) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Error {
 	// TODO: error handling
 	args := *args_
 	ret := e.ipc.call(args.Func, args.Args)
@@ -67,13 +67,6 @@ func (e *engineRPCWrapper) ReflectCall(args_ *CallArgs, reply *interface{}) os.E
 	}
 	return nil
 }
-
-
-// global simulation engine
-var eng *Engine
-
-// global engine wrapper for rpc
-var engRPCWrap *engineRPCWrapper
 
 
 // initializes an engine and starts listening for gob rpc calls on the port determined by flag_port

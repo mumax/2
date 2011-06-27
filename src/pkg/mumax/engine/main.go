@@ -39,14 +39,9 @@ var (
 	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
 	flag_port       *string = flag.String("port", "2527", "Set TCP port for engine")
 	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
-	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
+	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.") // should be named walltime? timeout=only for connection?
 )
 
-
-// client global variables
-var (
-	cleanfiles []string // list of files to be deleted upon program exit
-)
 
 // Mumax2 main function
 func Main() {
@@ -92,10 +87,6 @@ func Main() {
 		return
 	}
 
-	if *flag_test {
-		cu.Init()
-		return
-	}
 	if *flag_engine {
 		listen()
 		return

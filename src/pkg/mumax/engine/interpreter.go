@@ -59,8 +59,8 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 			panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
 		}
 		reply := new(interface{})
-		err := c.server.Call("engine.ReflectCall", &CallArgs{funcName, args}, reply)
-		Debug("engine.Reflectcall", CallArgs{funcName, args}, *reply)
+		err := c.server.Call("engine.ReflectCall", &ReflectCallArgs{funcName, args}, reply)
+		Debug("engine.Reflectcall", ReflectCallArgs{funcName, args}, *reply)
 		CheckErr(err, ERR_IO)
 		return []interface{}{*reply}
 	}
