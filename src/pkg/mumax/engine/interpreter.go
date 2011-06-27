@@ -23,8 +23,8 @@ import (
 // An interpreter takes text-based commands and calls the correspondingly named methods.
 // It is used for inter-process communication with the script.
 type Interpreter struct {
-	method map[string]reflect.Value // list of methods that can be called locally.
-	rpcClient *rpc.Client // non-local methods passed through to rpc server
+	method    map[string]reflect.Value // list of methods that can be called locally.
+	rpcClient *rpc.Client              // non-local methods passed through to rpc server
 }
 
 

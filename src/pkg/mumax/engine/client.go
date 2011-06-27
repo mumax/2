@@ -25,9 +25,9 @@ import (
 
 // client global variables
 var (
-	cleanfiles []string          // list of files to be deleted upon program exit
-	eng        *Engine           // global simulation engine
-	server *Server // global engine wrapper for rpc
+	cleanfiles []string // list of files to be deleted upon program exit
+	eng        *Engine  // global simulation engine
+	server     *Server  // global engine wrapper for rpc
 )
 
 type Client struct {
