@@ -24,32 +24,35 @@ type CallArgs struct {
 }
 
 
-type Export struct { // todo: rename
+type engineRPCWrapper struct { // todo: rename
 	ipc interpreter
 }
 
 
-func newExport(eng *Engine) *Export{
-	e := new(Export)
-	e.ipc.init(eng, nil)	
+func newEngineRPCWrapper(eng *Engine) *engineRPCWrapper {
+	e := new(engineRPCWrapper)
+	e.ipc.init(eng, nil)
 	return e
 }
 
 
-func (e *Export) ReflectCall(args_ *CallArgs, reply *interface{}) os.Error {
+func (e *engineRPCWrapper) ReflectCall(args_ *CallArgs, reply *interface{}) os.Error {
 	// TODO: error handling
 	args := *args_
 	ret := e.ipc.call(args.Func, args.Args)
-	switch len(ret){
-		default: panic(Bug(fmt.Sprint("Too many return values for", args.Func)))
-					   case 0: *reply = nil // no return values
-					   case 1:  *reply = ret[0]
-					   }
+	switch len(ret) {
+	default:
+		panic(Bug(fmt.Sprint("Too many return values for", args.Func)))
+	case 0:
+		*reply = nil // no return values
+	case 1:
+		*reply = ret[0]
+	}
 	return nil
 }
 
 
-var export *Export
+var export *engineRPCWrapper
 var eng *Engine
 
 func listen() {
@@ -85,11 +88,11 @@ func localConn() io.ReadWriteCloser {
 }
 
 
-func initEngineExport(){
+func initEngineExport() {
 	Assert(export == nil)
 	Assert(eng == nil)
 	eng = newEngine()
-	export = newExport(eng)
+	export = newEngineRPCWrapper(eng)
 	Debug("rpc.Register", export)
 	rpc.RegisterName("engine", export)
 }

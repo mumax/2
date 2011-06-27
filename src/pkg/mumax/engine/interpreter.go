@@ -37,7 +37,7 @@ func (c *interpreter) init(receiver_ interface{}, server *rpc.Client) {
 
 
 // adds all public methods of receiver to map
-func addMethods(methods map[string]reflect.Value, receiver_ interface{}){
+func addMethods(methods map[string]reflect.Value, receiver_ interface{}) {
 	receiver := reflect.ValueOf(receiver_)
 	typ := reflect.TypeOf(receiver_)
 	for i := 0; i < typ.NumMethod(); i++ {
@@ -55,7 +55,9 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 	f, ok := c.method[funcName]
 	if !ok {
 		// function not found in exported object: pass on over the network to remote interpreter
-		if c.server == nil{panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))}
+		if c.server == nil {
+			panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
+		}
 		reply := new(interface{})
 		err := c.server.Call("engine.ReflectCall", &CallArgs{funcName, args}, reply)
 		Debug("engine.Reflectcall", CallArgs{funcName, args}, *reply)

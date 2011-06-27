@@ -25,9 +25,9 @@ const pkg = "mumax2"
 func APIGen() {
 	// interpreter can extract the methods
 
-  method := make(map[string]reflect.Value)
-  addMethods(method, new(Client))
-  addMethods(method, new(Engine))
+	method := make(map[string]reflect.Value)
+	addMethods(method, new(Client))
+	addMethods(method, new(Engine))
 
 	// target languages
 	langs := []lang{&python{}, &java{}, &lua{}}
@@ -68,5 +68,3 @@ func ArgTypes(c reflect.Value) []reflect.Type {
 	}
 	return types
 }
-
-
