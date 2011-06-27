@@ -28,7 +28,7 @@ var (
 	flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
 	flag_logfile    *string = flag.String("log", "", "Specify log file")
 	flag_scriptcmd  *string = flag.String("command", "", "Override interpreter command")
-	flag_debug      *bool   = flag.Bool("debug", true, "Show debug output")
+	flag_debug      *bool   = flag.Bool("debug", false, "Show debug output")
 	flag_cpuprof    *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
 	flag_memprof    *string = flag.String("memprof", "", "Write gopprof memory profile to file")
 	flag_silent     *bool   = flag.Bool("silent", false, "Be silent")
@@ -37,7 +37,7 @@ var (
 	flag_version    *bool   = flag.Bool("version", false, "Print version info and exit")
 	flag_test       *bool   = flag.Bool("test", false, "Test CUDA and exit")
 	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
-	flag_port       *string = flag.String("port", ":2527", "Set TCP listen port for engine")
+	flag_port       *string = flag.String("port", "2527", "Set TCP port for engine")
 	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
 	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
 )
@@ -217,6 +217,7 @@ func getCrashStack() string {
 }
 
 
+// sets up a timeout that will kill mumax when it runs too long
 func initTimeout() {
 	timeout := *flag_timeout
 	t := 0.

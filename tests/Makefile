@@ -13,6 +13,7 @@ test: $(TESTFILES)
 .PHONY: $(TESTFILES)
 $(TESTFILES): 
 	$(mumax2) -force $(@:.out='')
+	$(mumax2) -listen -timeout 1s & $(mumax2) -dial localhost -force $(@:.out='')
 
 .PHONY: install
 install:

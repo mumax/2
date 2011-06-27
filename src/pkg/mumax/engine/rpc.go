@@ -80,7 +80,7 @@ var engRPCWrap *engineRPCWrapper
 func listen() {
 	initEngineWrapper()
 
-	addr, err1 := net.ResolveTCPAddr("tcp", "localhost"+*flag_port)
+	addr, err1 := net.ResolveTCPAddr("tcp", "localhost:"+*flag_port)
 	CheckErr(err1, ERR_IO)
 	Debug("listen addr", addr)
 

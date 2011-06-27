@@ -62,8 +62,9 @@ func engineConn() io.ReadWriteCloser {
 		Debug("Connecting to local engine")
 		return localConn()
 	} else {
-		Debug("Connecting to remote engine: ", *flag_net, *flag_engineAddr)
-		conn, err := net.Dial(*flag_net, *flag_engineAddr)
+		engineAddr := *flag_engineAddr + ":" + *flag_port
+		Debug("Connecting to remote engine: ", *flag_net, engineAddr)
+		conn, err := net.Dial(*flag_net, engineAddr)
 		CheckErr(err, ERR_IO)
 		return conn
 	}
