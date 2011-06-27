@@ -65,7 +65,6 @@ func Main() {
 		// will be flushed on cleanup
 	}
 
-
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()

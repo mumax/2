@@ -27,7 +27,7 @@ import (
 var (
 	cleanfiles []string          // list of files to be deleted upon program exit
 	eng        *Engine           // global simulation engine
-	engRPCWrap *engineRPCWrapper // global engine wrapper for rpc
+	server *Server // global engine wrapper for rpc
 )
 
 type Client struct {
@@ -188,13 +188,13 @@ func openFifos() (infifo, outfifo *os.File) {
 func interpretCommands(infifo, outfifo *os.File, engine *rpc.Client) {
 	// interpreter exports client methods
 	c := new(Client)
-	var ipc interpreter
-	ipc.init(c, engine)
+	var ipc Interpreter
+	ipc.Init(c, engine)
 
 	// interpreter executes commands from subprocess
 	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {
 		//Debug("call:", line)
-		ret := ipc.call(line[0], line[1:])
+		ret := ipc.Call(line[0], line[1:])
 		//Debug("return:", ret)
 		switch len(ret) {
 		default:

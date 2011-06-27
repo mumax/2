@@ -17,7 +17,7 @@ GOFILES=\
 	interpreter.go\
 	io.go\
 	main.go\
-	rpc.go\
+	server.go\
 	units.go\
 	universe.go\
 

@@ -38,14 +38,14 @@ type ReflectCallArgs struct {
 // wraps an engine to allow its methods to be called over rpc
 // via ReflectCall(funcname, args). This avoids having to write
 // all of engine's methods in the special format required by rpc.
-type engineRPCWrapper struct { // todo: rename
-	ipc interpreter
+type Server struct { // todo: rename
+	ipc Interpreter
 }
 
 
-func newEngineRPCWrapper(eng *Engine) *engineRPCWrapper {
-	e := new(engineRPCWrapper)
-	e.ipc.init(eng, nil)
+func newServer(eng *Engine) *Server {
+	e := new(Server)
+	e.ipc.Init(eng, nil)
 	return e
 }
 
@@ -53,10 +53,10 @@ func newEngineRPCWrapper(eng *Engine) *engineRPCWrapper {
 // INTERNAL but exported because package rpc requires so.
 // this rpc-exported method uses an interpreter to parse the function name and argument values
 // (strings) in the ReflectCallArgs argument, and calls the function using reflection. 
-func (e *engineRPCWrapper) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Error {
+func (e *Server) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Error {
 	// TODO: error handling
 	args := *args_
-	ret := e.ipc.call(args.Func, args.Args)
+	ret := e.ipc.Call(args.Func, args.Args)
 	switch len(ret) {
 	default:
 		panic(Bug(fmt.Sprint("Too many return values for", args.Func)))
@@ -71,7 +71,7 @@ func (e *engineRPCWrapper) ReflectCall(args_ *ReflectCallArgs, reply *interface{
 
 // initializes an engine and starts listening for gob rpc calls on the port determined by flag_port
 func serverMain() {
-	initEngineWrapper()
+	initServer()
 
 	addr, err1 := net.ResolveTCPAddr("tcp", "localhost:"+*flag_port)
 	CheckErr(err1, ERR_IO)
@@ -92,7 +92,7 @@ func serverMain() {
 // like listen, but used when the engine runs locally. A software pipe is used
 // for the gob communication, avoiding actual network overhead.
 func localConn() io.ReadWriteCloser {
-	initEngineWrapper()
+	initServer()
 
 	Debug("running local engine")
 	end1, end2 := net.Pipe()
@@ -105,11 +105,11 @@ func localConn() io.ReadWriteCloser {
 }
 
 
-func initEngineWrapper() {
-	Assert(engRPCWrap == nil)
+func initServer() {
+	Assert(server == nil)
 	Assert(eng == nil)
 	eng = newEngine()
-	engRPCWrap = newEngineRPCWrapper(eng)
+	server = newServer(eng)
 	//Debug("rpc.Register", engRPCWrap)
-	rpc.RegisterName("engine", engRPCWrap)
+	rpc.RegisterName("server", server)
 }
