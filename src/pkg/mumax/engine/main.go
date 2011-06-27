@@ -78,7 +78,10 @@ func Main() {
 		}
 		Log("Writing CPU profile to", *flag_cpuprof)
 		pprof.StartCPUProfile(f)
-		defer func() { Log("Flushing CPU profile", *flag_cpuprof); pprof.StopCPUProfile() }()
+		defer func() {
+			Log("Flushing CPU profile", *flag_cpuprof)
+			pprof.StopCPUProfile()
+		}()
 	}
 
 	if *flag_help {

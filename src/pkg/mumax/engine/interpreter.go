@@ -32,15 +32,22 @@ type interpreter struct {
 func (c *interpreter) init(receiver_ interface{}, server *rpc.Client) {
 	c.server = server
 	c.method = make(map[string]reflect.Value)
+	addMethods(c.method, receiver_)
+}
+
+
+// adds all public methods of receiver to map
+func addMethods(methods map[string]reflect.Value, receiver_ interface{}){
 	receiver := reflect.ValueOf(receiver_)
 	typ := reflect.TypeOf(receiver_)
 	for i := 0; i < typ.NumMethod(); i++ {
 		name := typ.Method(i).Name
 		if unicode.IsUpper(int(name[0])) {
-			c.method[name] = receiver.Method(i)
+			methods[name] = receiver.Method(i)
 		}
 	}
 }
+
 
 // calls the method determined by the funcName with given arguments and returns the return value
 func (c *interpreter) call(funcName string, args []string) []interface{} {
