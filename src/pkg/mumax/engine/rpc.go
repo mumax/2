@@ -14,6 +14,7 @@ import (
 	"io"
 	"net"
 	"rpc"
+	"fmt"
 )
 
 
@@ -23,23 +24,36 @@ type CallArgs struct {
 }
 
 
-type Export struct {
-
+type Export struct { // todo: rename
+	ipc interpreter
 }
 
 
-func (e *Export) ReflectCall(args *CallArgs, reply *interface{}) os.Error {
+func newExport(eng *Engine) *Export{
+	e := new(Export)
+	e.ipc.init(eng, nil)	
+	return e
+}
+
+
+func (e *Export) ReflectCall(args_ *CallArgs, reply *interface{}) os.Error {
+	// TODO: error handling
+	args := *args_
+	ret := e.ipc.call(args.Func, args.Args)
+	switch len(ret){
+		default: panic(Bug(fmt.Sprint("Too many return values for", args.Func)))
+					   case 0: *reply = nil // no return values
+					   case 1:  *reply = ret[0]
+					   }
 	return nil
 }
 
 
 var export *Export
+var eng *Engine
 
 func listen() {
-	Assert(export == nil)
-	export = new(Export)
-	Debug("rpc.Register", export)
-	rpc.RegisterName("engine", export)
+	initEngineExport()
 
 	addr, err1 := net.ResolveTCPAddr("tcp", "localhost"+*flag_port)
 	CheckErr(err1, ERR_IO)
@@ -58,16 +72,24 @@ func listen() {
 
 
 func localConn() io.ReadWriteCloser {
-	Assert(export == nil)
-	export = new(Export)
-	Debug("rpc.Register", export)
-	rpc.RegisterName("engine", export)
+	initEngineExport()
 
 	Debug("running local engine")
 	end1, end2 := net.Pipe()
+	// TODO(a): this may be a race-condition (return connection before rpc actually runs)
 	go func() {
 		rpc.ServeConn(end1)
 		Debug("engine: done serving")
 	}()
 	return end2
+}
+
+
+func initEngineExport(){
+	Assert(export == nil)
+	Assert(eng == nil)
+	eng = newEngine()
+	export = newExport(eng)
+	Debug("rpc.Register", export)
+	rpc.RegisterName("engine", export)
 }

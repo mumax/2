@@ -17,6 +17,10 @@ type Engine struct {
 }
 
 
+func newEngine() *Engine{
+	return new(Engine)
+}
+
 // For testing purposes.
 func (e *Engine) Version() int {
 	return 2

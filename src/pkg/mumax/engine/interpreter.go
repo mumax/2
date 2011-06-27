@@ -54,10 +54,13 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
-		//panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
-		var reply interface{}
-		err := c.server.Call("ReflectCall", &CallArgs{funcName, args}, &reply)
+		// function not found in exported object: pass on over the network to remote interpreter
+		if c.server == nil{panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))}
+		reply := new(interface{})
+		err := c.server.Call("engine.ReflectCall", &CallArgs{funcName, args}, reply)
+		Debug("engine.Reflectcall", CallArgs{funcName, args}, *reply)
 		CheckErr(err, ERR_IO)
+		return []interface{}{*reply}
 	}
 
 	// call
