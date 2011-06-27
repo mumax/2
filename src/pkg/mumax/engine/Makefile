@@ -14,23 +14,18 @@ GOFILES=\
 	engine.go\
 	exec.go\
 	field.go\
-	field_test.go\
-	gob_test.go\
-	init_test.go\
 	interpreter.go\
 	io.go\
-	ipc_test.go\
 	main.go\
 	rpc.go\
-	rpc_test.go\
 	run.go\
 	units.go\
 	universe.go\
-	universe_test.go\
 
 CGOFILES=\
 
 GC+=\
+	-I../../cuda/driver/_obj\
 	-I../common/_obj\
 	-I../refsh/_obj\
 
