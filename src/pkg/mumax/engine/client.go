@@ -25,9 +25,9 @@ import (
 
 // client global variables
 var (
-	cleanfiles []string // list of files to be deleted upon program exit
- 	eng *Engine // global simulation engine
- 	engRPCWrap *engineRPCWrapper // global engine wrapper for rpc
+	cleanfiles []string          // list of files to be deleted upon program exit
+	eng        *Engine           // global simulation engine
+	engRPCWrap *engineRPCWrapper // global engine wrapper for rpc
 )
 
 type Client struct {
@@ -46,12 +46,12 @@ func run() {
 
 	server := rpc.NewClient(engineConn())
 
-	if *flag_test{
-			var result string
-			err := server.Call("engine.Test", &VoidArgs{}, &result)
-			CheckErr(err, ERR_BUG)
-			Log(result)
-			return
+	if *flag_test {
+		var result string
+		err := server.Call("engine.Test", &VoidArgs{}, &result)
+		CheckErr(err, ERR_BUG)
+		Log(result)
+		return
 	}
 
 	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
