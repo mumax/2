@@ -59,9 +59,23 @@ func Main() {
 		}
 	}()
 
+	defer func() { // memory profile is single-shot, run at the end of program
+		if *flag_memprof != "" {
+			f, err := os.Create(*flag_memprof)
+			if err != nil {
+				Log(err)
+			}
+			Log("Writing memory profile to", *flag_memprof)
+			pprof.WriteHeapProfile(f)
+			f.Close()
+		}
+	}()
+
 	if *flag_cpuprof != "" {
 		f, err := os.Create(*flag_cpuprof)
-		CheckErr(err, ERR_IO)
+		if err != nil {
+			Log(err)
+		}
 		Log("Writing CPU profile to", *flag_cpuprof)
 		pprof.StartCPUProfile(f)
 		defer func() { Log("Flushing CPU profile", *flag_cpuprof); pprof.StopCPUProfile() }()
@@ -93,14 +107,6 @@ func Main() {
 	// else...
 	run()
 
-	// memory profile is single-shot, run at the end of program
-	if *flag_memprof != "" {
-		f, err := os.Create(*flag_memprof)
-		CheckErr(err, ERR_IO)
-		Log("Writing memory profile to", *flag_memprof)
-		pprof.WriteHeapProfile(f)
-		f.Close()
-	}
 }
 
 
