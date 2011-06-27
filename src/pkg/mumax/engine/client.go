@@ -36,8 +36,9 @@ type Client struct {
 
 type VoidArgs struct{}
 
+
 // run the input files given on the command line
-func run() {
+func clientMain() {
 	initOutputDir()
 
 	initLogger()
@@ -80,13 +81,13 @@ func run() {
 // initializes and returns a connection to the engine.
 // it may be a local or networked connection, depending on the program flags.
 func engineConn() io.ReadWriteCloser {
-	if *flag_engineAddr == "" { // no remote engine specified, use local one
+	if *flag_serverAddr == "" { // no remote engine specified, use local one
 		Debug("Connecting to local engine")
 		return localConn()
 	} else {
-		engineAddr := *flag_engineAddr + ":" + *flag_port
-		Debug("Connecting to remote engine: ", *flag_net, engineAddr)
-		conn, err := net.Dial(*flag_net, engineAddr)
+		serverAddr := *flag_serverAddr + ":" + *flag_port
+		Debug("Connecting to remote engine: ", *flag_net, serverAddr)
+		conn, err := net.Dial(*flag_net, serverAddr)
 		CheckErr(err, ERR_IO)
 		return conn
 	}

@@ -70,7 +70,7 @@ func (e *engineRPCWrapper) ReflectCall(args_ *ReflectCallArgs, reply *interface{
 
 
 // initializes an engine and starts listening for gob rpc calls on the port determined by flag_port
-func listen() {
+func serverMain() {
 	initEngineWrapper()
 
 	addr, err1 := net.ResolveTCPAddr("tcp", "localhost:"+*flag_port)

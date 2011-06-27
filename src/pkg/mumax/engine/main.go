@@ -19,11 +19,10 @@ import (
 	"flag"
 )
 
-
 // command-line flags (more in engine/main.go)
 var (
-	flag_engine     *bool   = flag.Bool("listen", false, "Run engine on incoming port")
-	flag_engineAddr *string = flag.String("dial", "", "Connect to engine server")
+	flag_server     *bool   = flag.Bool("listen", false, "Run mumax2 server on incoming port")
+	flag_serverAddr *string = flag.String("server", "", "Connect to engine server")
 	flag_outputdir  *string = flag.String("out", "", "Specify output directory")
 	flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
 	flag_logfile    *string = flag.String("log", "", "Specify log file")
@@ -56,9 +55,6 @@ func Main() {
 		}
 	}()
 
-	defer func() { // memory profile is single-shot, run at the end of program
-	}()
-
 	if *flag_cpuprof != "" {
 		f, err := os.Create(*flag_cpuprof)
 		if err != nil {
@@ -69,7 +65,6 @@ func Main() {
 		// will be flushed on cleanup
 	}
 
-	initTimeout()
 
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
@@ -87,13 +82,15 @@ func Main() {
 		return
 	}
 
-	if *flag_engine {
-		listen()
+	initTimeout()
+
+	if *flag_server {
+		serverMain()
 		return
 	}
-	// else...
-	run()
 
+	// else...
+	clientMain()
 }
 
 
