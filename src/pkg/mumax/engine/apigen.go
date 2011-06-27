@@ -22,7 +22,7 @@ import (
 const pkg = "mumax2"
 
 // Auto-generate API libraries.
-func APIGen() {
+func apiGen() {
 	// interpreter can extract the methods
 
 	method := make(map[string]reflect.Value)
@@ -51,7 +51,7 @@ func APIGen() {
 			case 1:
 				returnType = meth.Type().Out(0)
 			}
-			lang.writeFunc(out, name, ArgTypes(meth), returnType)
+			lang.writeFunc(out, name, argTypes(meth), returnType)
 		}
 
 		lang.writeFooter(out)
@@ -61,7 +61,7 @@ func APIGen() {
 }
 
 // make array with argument types of method.
-func ArgTypes(c reflect.Value) []reflect.Type {
+func argTypes(c reflect.Value) []reflect.Type {
 	types := make([]reflect.Type, c.Type().NumIn())
 	for i := range types {
 		types[i] = c.Type().In(i)

@@ -95,7 +95,7 @@ func Main() {
 		return
 	}
 	if *flag_apigen {
-		APIGen()
+		apiGen()
 		return
 	}
 

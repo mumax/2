@@ -18,12 +18,17 @@ import (
 )
 
 
+// INTERNAL but exported because package rpc requires so.
+// wraps the arguments for an rpc call to engine.RelfectCall
 type CallArgs struct {
 	Func string
 	Args []string
 }
 
 
+// wraps an engine to allow its methods to be called over rpc
+// via ReflectCall(funcname, args). This avoids having to write
+// all of engine's methods in the special format required by rpc.
 type engineRPCWrapper struct { // todo: rename
 	ipc interpreter
 }
@@ -36,6 +41,9 @@ func newEngineRPCWrapper(eng *Engine) *engineRPCWrapper {
 }
 
 
+// INTERNAL but exported because package rpc requires so.
+// this rpc-exported method uses an interpreter to parse the function name and argument values
+// (strings) in the CallArgs argument, and calls the function using reflection. 
 func (e *engineRPCWrapper) ReflectCall(args_ *CallArgs, reply *interface{}) os.Error {
 	// TODO: error handling
 	args := *args_
@@ -52,9 +60,14 @@ func (e *engineRPCWrapper) ReflectCall(args_ *CallArgs, reply *interface{}) os.E
 }
 
 
-var engRPCWrap *engineRPCWrapper
+// global simulation engine
 var eng *Engine
 
+// global engine wrapper for rpc
+var engRPCWrap *engineRPCWrapper
+
+
+// initializes an engine and starts listening for gob rpc calls on the port determined by flag_port
 func listen() {
 	initEngineWrapper()
 
@@ -74,6 +87,8 @@ func listen() {
 }
 
 
+// like listen, but used when the engine runs locally. A software pipe is used
+// for the gob communication, avoiding actual network overhead.
 func localConn() io.ReadWriteCloser {
 	initEngineWrapper()
 
