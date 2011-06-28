@@ -2,6 +2,7 @@ include $(GOROOT)/src/Make.inc
 
 executables=\
 	mumax2-bin\
+	mumax2-apigen\
 
 GC+=\
 	-I../common/_obj\

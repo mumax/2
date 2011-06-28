@@ -6,12 +6,6 @@ TARG=mumax/engine
 GOFILES=\
 	client.go\
 	engine.go\
-	apigen.go\
-	apigen_lang.go\
-	apigen_c.go\
-	apigen_java.go\
-	apigen_lua.go\
-	apigen_python.go\
 	exec.go\
 	field.go\
 	interpreter.go\

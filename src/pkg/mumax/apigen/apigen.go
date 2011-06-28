@@ -10,10 +10,11 @@
 // library in any of the supported programming languages is
 // automatically generated.
 
-package engine
+package apigen
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"reflect"
 	"fmt"
 )
@@ -22,12 +23,12 @@ import (
 const pkg = "mumax2"
 
 // Auto-generate API libraries.
-func apiGen() {
+func APIGen() {
 	// interpreter can extract the methods
 
 	method := make(map[string]reflect.Value)
-	addMethods(method, new(Client))
-	addMethods(method, new(Engine))
+	AddMethods(method, new(Client))
+	AddMethods(method, new(Engine))
 
 	// target languages
 	langs := []lang{&python{}, &java{}, &lua{}}

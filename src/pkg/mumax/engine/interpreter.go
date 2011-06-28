@@ -33,7 +33,7 @@ type Interpreter struct {
 func (c *Interpreter) Init(receiver_ interface{}, rpcClient *rpc.Client) {
 	c.rpcClient = rpcClient
 	c.method = make(map[string]reflect.Value)
-	addMethods(c.method, receiver_)
+	AddMethods(c.method, receiver_)
 }
 
 
@@ -67,8 +67,9 @@ func (c *Interpreter) Call(funcName string, args []string) []interface{} {
 // --------------
 
 
-// adds all public methods of receiver to map
-func addMethods(methods map[string]reflect.Value, receiver_ interface{}) {
+// Adds all public methods of receiver to map
+// INTERNAL, but needed by package apigen
+func AddMethods(methods map[string]reflect.Value, receiver_ interface{}) {
 	receiver := reflect.ValueOf(receiver_)
 	typ := reflect.TypeOf(receiver_)
 	for i := 0; i < typ.NumMethod(); i++ {

@@ -35,7 +35,6 @@ var (
 	flag_help       *bool   = flag.Bool("help", false, "Print help and exit")
 	flag_version    *bool   = flag.Bool("version", false, "Print version info and exit")
 	flag_test       *bool   = flag.Bool("test", false, "Test CUDA and exit")
-	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
 	flag_port       *string = flag.String("port", "2527", "Set TCP port for engine")
 	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
 	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.") // should be named walltime? timeout=only for connection?
@@ -74,10 +73,6 @@ func Main() {
 	if *flag_version {
 		fmt.Println(WELCOME)
 		fmt.Println("Go", runtime.Version())
-		return
-	}
-	if *flag_apigen {
-		apiGen()
 		return
 	}
 
