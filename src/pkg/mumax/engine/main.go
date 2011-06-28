@@ -123,13 +123,13 @@ func cleanup() {
 	}
 
 	// remove neccesary files
-	for i := range cleanfiles {
-		Debug("rm", cleanfiles[i])
-		err := os.Remove(cleanfiles[i])
-		if err != nil {
-			Debug(err)
-		} // ignore errors, there's nothing we can do about it during cleanup
-	}
+	//for i := range cleanfiles {
+	//	Debug("rm", cleanfiles[i])
+	//	err := os.Remove(cleanfiles[i])
+	//	if err != nil {
+	//		Debug(err)
+	//	} // ignore errors, there's nothing we can do about it during cleanup
+	//}
 
 	// kill subprocess
 }

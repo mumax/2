@@ -18,7 +18,6 @@ import (
 	. "mumax/common"
 	"os"
 	"io"
-	"net"
 	"rpc"
 	"fmt"
 )
