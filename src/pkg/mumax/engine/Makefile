@@ -5,8 +5,10 @@ TARG=mumax/engine
 
 GOFILES=\
 	client.go\
+	clientapi.go\
 	client_main.go\
 	engine.go\
+	engineapi.go\
 	exec.go\
 	field.go\
 	interpreter.go\

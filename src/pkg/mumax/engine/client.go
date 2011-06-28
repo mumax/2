@@ -28,6 +28,7 @@ type Client struct {
 	conn                 io.ReadWriteCloser
 	rpcClient            *rpc.Client
 	ipc                  Interpreter
+	api                  ClientAPI
 	infifo, outfifo      *os.File
 	cleanfiles           []string // list of files to be deleted upon program exit
 }
@@ -38,10 +39,10 @@ type Client struct {
 func (c *Client) Init(inputFile, outputDir, command string, conn io.ReadWriteCloser) {
 	c.outputDir = outputDir
 	c.inputFile = inputFile
-
 	c.conn = conn
 	c.rpcClient = rpc.NewClient(conn)
-	c.ipc.Init(c, c.rpcClient)
+	c.api = ClientAPI{c}
+	c.ipc.Init(c.api, c.rpcClient)
 }
 
 
