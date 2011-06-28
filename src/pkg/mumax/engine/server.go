@@ -38,7 +38,7 @@ type ServerRPC Server // Exposes only the server's methods suited for RPC
 
 func (s *Server) Init(eng *Engine, conn io.ReadWriteCloser) {
 	s.conn = conn
-	s.ipc.Init(eng, nil)
+	s.ipc.Init(EngineAPI{eng}, nil)
 	s.eng = eng
 	s.rpcServer = rpc.NewServer()
 	s.rpcServer.RegisterName("server", (*ServerRPC)(s))

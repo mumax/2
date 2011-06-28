@@ -55,8 +55,8 @@ func (c *Client) InitLocal(infile, outdir, command string) {
 
 	eng := NewEngine()
 	var server Server
-	server.Init(eng, end1)
-	go server.Run()
+	go func(){server.Init(eng, end1)
+	server.Run()}()
 
 	c.Init(infile, outdir, command, end2)
 }
@@ -131,12 +131,12 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 // must be started first and must open the fifos in
 // the correct order (first OUT then IN).
 // this function hangs when the subprocess does not open the fifos.
-func (c *Client) openFifos() (infifo, outfifo *os.File) {
+func (c *Client) openFifos() {
 	Debug("Opening FIFOs will block until child process opens the other end")
 	var err os.Error
-	outfifo, err = os.OpenFile(c.outputDir+"/"+OUTFIFO, os.O_WRONLY, 0666)
+	c.outfifo, err = os.OpenFile(c.outputDir+"/"+OUTFIFO, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
-	infifo, err = os.OpenFile(c.outputDir+"/"+INFIFO, os.O_RDONLY, 0666)
+	c.infifo, err = os.OpenFile(c.outputDir+"/"+INFIFO, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
 	return
 }
