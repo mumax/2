@@ -8,12 +8,9 @@
 package engine
 
 
-// This file implements RPC (Remote Procedure Call) from a client to an engine.
-// Trying to call an undefined client method via its interpreter will automatically
-// forward this call to the engine. In this way, both the client and engine methods
-// are available to the scripting child process in a transparent way.
-//
-// The engine can run locally or connected over the network (see program flags).
+// This file implements the mumax server. 
+// The server exposes an engine via RPC (Remote Procedure Call).
+// The server can run locally or connected over the network (see program flags).
 //
 // Author: Arne Vansteenkiste
 
@@ -27,28 +24,38 @@ import (
 )
 
 
-// INTERNAL but exported because package rpc requires so.
-// wraps the arguments for an rpc call to engine.RelfectCall
-type ReflectCallArgs struct {
-	Func string
-	Args []string
-}
-
-
-// wraps an engine to allow its methods to be called over rpc
+// Wraps an engine to allow its methods to be called over rpc
 // via ReflectCall(funcname, args). This avoids having to write
 // all of engine's methods in the special format required by rpc.
 type Server struct {
-	ipc Interpreter
-	// engine!
+	conn      io.ReadWriteCloser
+	ipc       Interpreter
+	rpcServer *rpc.Server
+
+	eng *Engine
 }
 
 
-func newServer(eng *Engine) *Server {
-	e := new(Server)
-	e.ipc.Init(eng, nil)
-	return e
+func (s *Server) Init(eng *Engine, conn io.ReadWriteCloser) {
+	s.conn = conn
+	s.ipc.Init(eng, nil)
+	s.eng = eng
+	s.rpcServer = rpc.NewServer()
+	s.rpcServer.RegisterName("server", s)
 }
+
+
+func (s *Server) Run() {
+	s.rpcServer.ServeConn(s.conn)
+}
+
+
+func (s *Server) ServeConn(conn io.ReadWriteCloser) {
+	rpc.ServeConn(conn)
+	Debug("done serving")
+}
+
+// ---------------
 
 
 // INTERNAL but exported because package rpc requires so.
@@ -70,47 +77,44 @@ func (e *Server) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Erro
 }
 
 
+// INTERNAL but exported because package rpc requires so.
+// wraps the arguments for an rpc call to engine.RelfectCall
+type ReflectCallArgs struct {
+	Func string
+	Args []string
+}
+
+
 // initializes an engine and starts listening for gob rpc calls on the port determined by flag_port
-func serverMain() {
-	initServer()
-
-	addr, err1 := net.ResolveTCPAddr("tcp", "localhost:"+*flag_port)
-	CheckErr(err1, ERR_IO)
-	Debug("listen addr", addr)
-
-	listener, err2 := net.ListenTCP("tcp", addr)
-	CheckErr(err2, ERR_IO)
-	Debug("listening...")
-
-	conn, err3 := listener.Accept()
-	CheckErr(err3, ERR_IO)
-	Debug("connected", conn)
-	rpc.ServeConn(conn)
-	Debug("done serving")
-}
-
-
-// like listen, but used when the engine runs locally. A software pipe is used
-// for the gob communication, avoiding actual network overhead.
-func localConn() io.ReadWriteCloser {
-	initServer()
-
-	Debug("running local engine")
-	end1, end2 := net.Pipe()
-	// TODO(a): this may be a race-condition (return connection before rpc actually runs)
-	go func() {
-		rpc.ServeConn(end1)
-		Debug("engine: done serving")
-	}()
-	return end2
-}
-
-
-func initServer() {
-	Assert(server == nil)
-	Assert(eng == nil)
-	eng = newEngine()
-	server = newServer(eng)
-	//Debug("rpc.Register", engRPCWrap)
-	rpc.RegisterName("server", server)
-}
+//func serverMain() {
+//	initServer()
+//
+//	addr, err1 := net.ResolveTCPAddr("tcp", "localhost:"+*flag_port)
+//	CheckErr(err1, ERR_IO)
+//	Debug("listen addr", addr)
+//
+//	listener, err2 := net.ListenTCP("tcp", addr)
+//	CheckErr(err2, ERR_IO)
+//	Debug("listening...")
+//
+//	conn, err3 := listener.Accept()
+//	CheckErr(err3, ERR_IO)
+//	Debug("connected", conn)
+//	s.ServeConn(conn)
+//}
+//
+//
+//// like listen, but used when the engine runs locally. A software pipe is used
+//// for the gob communication, avoiding actual network overhead.
+//func localConn() io.ReadWriteCloser {
+//	initServer()
+//
+//	Debug("running local engine")
+//	end1, end2 := net.Pipe()
+//	// TODO(a): this may be a race-condition (return connection before rpc actually runs)
+//	go func() {
+//		rpc.ServeConn(end1)
+//		Debug("engine: done serving")
+//	}()
+//	return end2
+//}

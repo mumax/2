@@ -14,59 +14,73 @@ package engine
 import (
 	. "mumax/common"
 	"fmt"
-	"net"
 	"rpc"
+	"net"
 	"path"
 	"io"
 	"os"
-	"runtime"
 	"time"
 )
 
-// client global variables
-var (
-	cleanfiles []string // list of files to be deleted upon program exit
-	eng        *Engine  // global simulation engine
-	server     *Server  // global engine wrapper for rpc
-)
 
 type Client struct {
-
+	inputFile, outputDir string
+	conn                 io.ReadWriteCloser
+	rpcClient            *rpc.Client
+	ipc                  Interpreter
+	infifo, outfifo      *os.File
+	cleanfiles           []string // list of files to be deleted upon program exit
 }
 
-type VoidArgs struct{}
+
+// Initializes the mumax client to parse infile, write output
+// to outdir and connect to a server over conn.
+func (c *Client) Init(inputFile, outputDir, command string, conn io.ReadWriteCloser) {
+	c.outputDir = outputDir
+	c.inputFile = inputFile
+
+	c.conn = conn
+	c.rpcClient = rpc.NewClient(conn)
+	c.ipc.Init(c, c.rpcClient)
+}
 
 
-// run the input files given on the command line
-func clientMain() {
-	initOutputDir()
+// Initializes the mumax client to parse infile, write output
+// to outdir and set up and connect to a local server.
+func (c *Client) InitLocal(infile, outdir, command string) {
+	Debug("Connecting to local engine")
 
-	initLogger()
-	Log(WELCOME)
-	Debug("Go", runtime.Version())
+	end1, end2 := net.Pipe()
 
-	server := rpc.NewClient(engineConn())
+	eng := NewEngine()
+	var server Server
+	server.Init(eng, end1)
+	go server.Run()
 
-	if *flag_test {
-		var result string
-		err := server.Call("engine.Test", &VoidArgs{}, &result)
-		CheckErr(err, ERR_BUG)
-		Log(result)
-		return
-	}
+	c.Init(infile, outdir, command, end2)
+}
 
-	makeFifos(outputDir()) // make the FIFOs but do not yet try to open them
 
-	command, waiter := startSubcommand()
+// Initializes the mumax client to parse infile, write output
+// to outdir and set up and connect to a local server.
+func (c *Client) InitRemote(infile, outdir, command, network, addr string) {
+	Debug("Connecting to remote engine: ", network, addr)
+	conn, err := net.Dial(network, addr)
+	CheckErr(err, ERR_IO)
+	c.Init(infile, outdir, command, conn)
+}
 
-	ok := handshake(waiter)
+
+func (c *Client) Run() {
+
+	c.makeFifos() // make the FIFOs but do not yet try to open them
+	command, waiter := c.startSubcommand()
+	ok := c.handshake(waiter)
 	if !ok {
 		panic(InputErr(fmt.Sprint("subcommand ", command, " exited prematurely")))
 	}
-
-	infifo, outfifo := openFifos()
-
-	interpretCommands(infifo, outfifo, server)
+	c.openFifos()
+	c.interpretCommands()
 
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
@@ -78,74 +92,18 @@ func clientMain() {
 }
 
 
-// initializes and returns a connection to the engine.
-// it may be a local or networked connection, depending on the program flags.
-func engineConn() io.ReadWriteCloser {
-	if *flag_serverAddr == "" { // no remote engine specified, use local one
-		Debug("Connecting to local engine")
-		return localConn()
-	} else {
-		serverAddr := *flag_serverAddr + ":" + *flag_port
-		Debug("Connecting to remote engine: ", *flag_net, serverAddr)
-		conn, err := net.Dial(*flag_net, serverAddr)
-		CheckErr(err, ERR_IO)
-		return conn
-	}
-	panic(Bug("unreachable"))
-	return nil
-}
-
-
-// make the output dir
-func initOutputDir() {
-	if inputFile() == "" {
-		return
-	}
-
-	if *flag_force {
-		err := syscommand("rm", []string{"-rf", outputDir()}) // ignore errors.
-		if err != nil {
-			Log("rm -rf", outputDir(), ":", err)
-		}
-	}
-	errOut := os.Mkdir(outputDir(), 0777)
-	CheckErr(errOut, ERR_IO)
-
-	// set the output dir in the environment so the child process can fetch it.
-	CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", outputDir()), ERR_IO)
-}
-
-
-// initialize the logger
-func initLogger() {
-	var opts LogOption
-	if !*flag_debug {
-		opts |= LOG_NODEBUG
-	}
-	if *flag_silent {
-		opts |= LOG_NOSTDOUT | LOG_NODEBUG | LOG_NOWARN
-	}
-	if !*flag_warn {
-		opts |= LOG_NOWARN
-	}
-
-	logFile := *flag_logfile
-	if logFile == "" {
-		logFile = outputDir() + "/mumax2.log"
-	}
-	InitLogger(logFile, opts)
-}
-
+type VoidArgs struct{}
 
 // run the sub-command (e.g. python) to interpret the script file
 // it will first hang while trying to open the FIFOs
-func startSubcommand() (command string, waiter chan (int)) {
+func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 
-	os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir()))
-	os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir()))
+	CheckErr(os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
+	CheckErr(os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
+	CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", c.outputDir), ERR_IO)
 
 	var args []string
-	command, args = commandForFile(inputFile()) // e.g.: "python"
+	command, args = commandForFile(c.inputFile) // e.g.: "python"
 	proc := subprocess(command, args)
 	Debug(command, "PID:", proc.Process.Pid)
 	// start waiting for sub-command asynchronously and
@@ -172,12 +130,12 @@ func startSubcommand() (command string, waiter chan (int)) {
 // must be started first and must open the fifos in
 // the correct order (first OUT then IN).
 // this function hangs when the subprocess does not open the fifos.
-func openFifos() (infifo, outfifo *os.File) {
+func (c *Client) openFifos() (infifo, outfifo *os.File) {
 	Debug("Opening FIFOs will block until child process opens the other end")
 	var err os.Error
-	outfifo, err = os.OpenFile(outputDir()+"/"+OUTFIFO, os.O_WRONLY, 0666)
+	outfifo, err = os.OpenFile(c.outputDir+"/"+OUTFIFO, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
-	infifo, err = os.OpenFile(outputDir()+"/"+INFIFO, os.O_RDONLY, 0666)
+	infifo, err = os.OpenFile(c.outputDir+"/"+INFIFO, os.O_RDONLY, 0666)
 	CheckErr(err, ERR_IO)
 	return
 }
@@ -185,24 +143,20 @@ func openFifos() (infifo, outfifo *os.File) {
 
 // read text commands from infifo, execute them and return the result to outfifo
 // stop when a fifo gets closed by the other end
-func interpretCommands(infifo, outfifo *os.File, engine *rpc.Client) {
-	// interpreter exports client methods
-	c := new(Client)
-	var ipc Interpreter
-	ipc.Init(c, engine)
+func (c *Client) interpretCommands() {
 
 	// interpreter executes commands from subprocess
-	for line, eof := parseLine(infifo); !eof; line, eof = parseLine(infifo) {
-		//Debug("call:", line)
-		ret := ipc.Call(line[0], line[1:])
-		//Debug("return:", ret)
+	for line, eof := parseLine(c.infifo); !eof; line, eof = parseLine(c.infifo) {
+		// call locally
+		ret := c.ipc.Call(line[0], line[1:])
+		// pass return value to subprocess
 		switch len(ret) {
 		default:
 			panic(Bug("Method returned too many values"))
 		case 0:
-			fmt.Fprintln(outfifo)
+			fmt.Fprintln(c.outfifo)
 		case 1:
-			fmt.Fprintln(outfifo, ret[0])
+			fmt.Fprintln(c.outfifo, ret[0])
 		}
 	}
 }
@@ -213,9 +167,9 @@ func interpretCommands(infifo, outfifo *os.File, engine *rpc.Client) {
 // the subprocess exits before creating the handshake file,
 // return not OK. in that case we should not attempt to ope
 // the fifos because they will block forever.
-func handshake(procwaiter chan (int)) (ok bool) {
+func (c *Client) handshake(procwaiter chan (int)) (ok bool) {
 	Debug("waiting for handshake")
-	filewaiter := pollFile(outputDir() + "/" + HANDSHAKEFILE)
+	filewaiter := pollFile(c.outputDir + "/" + HANDSHAKEFILE)
 	select {
 	case <-filewaiter:
 		return true
@@ -240,31 +194,6 @@ func pollFile(fname string) (waiter chan (int)) {
 	return
 }
 
-// given a file name (e.g. file.py)
-// this returns a command to run the file (e.g. python file.py, java File)
-func commandForFile(file string) (command string, args []string) {
-	if *flag_scriptcmd != "" {
-		return *flag_scriptcmd, []string{file}
-	}
-	if file == "" {
-		panic(IOErr("no input file"))
-	}
-	switch path.Ext(file) {
-	default:
-		panic(InputErr("Cannot handle files with extension " + path.Ext(file)))
-	case ".py":
-		return "python", []string{file}
-	case ".java":
-		return "javaint", []string{file}
-	case ".class":
-		return "java", []string{ReplaceExt(file, "")}
-	case ".lua":
-		return "lua", []string{file}
-	}
-	panic(Bug("unreachable"))
-	return "", nil
-}
-
 
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
@@ -286,18 +215,10 @@ const BUFSIZE = 4096
 
 
 // makes the FIFOs for inter-process communications
-func makeFifos(outputDir string) {
-	outfname := outputDir + "/" + OUTFIFO
-	infname := outputDir + "/" + INFIFO
-	cleanfiles = append(cleanfiles, infname, outfname)
+func (c *Client) makeFifos() {
+	outfname := c.outputDir + "/" + OUTFIFO
+	infname := c.outputDir + "/" + INFIFO
+	c.cleanfiles = append(c.cleanfiles, infname, outfname)
 	mkFifo(infname)
 	mkFifo(outfname)
-
 }
-
-
-const (
-	INFIFO        = "in.fifo"   // FIFO filename for mumax->subprocess text-based function calls.
-	OUTFIFO       = "out.fifo"  // FIFO filename for mumax<-subprocess text-based function calls.
-	HANDSHAKEFILE = "handshake" // Presence of this file indicates subprocess initialization OK.
-)

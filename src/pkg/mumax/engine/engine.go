@@ -17,7 +17,7 @@ type Engine struct {
 }
 
 
-func newEngine() *Engine {
+func NewEngine() *Engine {
 	return new(Engine)
 }
 

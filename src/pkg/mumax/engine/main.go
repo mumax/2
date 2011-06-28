@@ -26,7 +26,7 @@ var (
 	flag_outputdir  *string = flag.String("out", "", "Specify output directory")
 	flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
 	flag_logfile    *string = flag.String("log", "", "Specify log file")
-	flag_scriptcmd  *string = flag.String("command", "", "Override interpreter command")
+	flag_command    *string = flag.String("command", "", "Override interpreter command")
 	flag_debug      *bool   = flag.Bool("debug", false, "Show debug output")
 	flag_cpuprof    *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
 	flag_memprof    *string = flag.String("memprof", "", "Write gopprof memory profile to file")
@@ -99,15 +99,6 @@ func inputFile() string {
 		panic(InputErr(fmt.Sprint("need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())))
 	}
 	return flag.Arg(0)
-}
-
-
-// return the output directory
-func outputDir() string {
-	if *flag_outputdir != "" {
-		return *flag_outputdir
-	}
-	return inputFile() + ".out"
 }
 
 
