@@ -15,6 +15,6 @@ type ClientAPI struct {
 	client *Client
 }
 
-func TestClient(a int) int {
+func (api ClientAPI) TestClient(a int) int {
 	return a + 1
 }

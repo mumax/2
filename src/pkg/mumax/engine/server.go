@@ -34,17 +34,19 @@ type Server struct {
 	eng *Engine
 }
 
+type ServerRPC Server // Exposes only the server's methods suited for RPC
 
 func (s *Server) Init(eng *Engine, conn io.ReadWriteCloser) {
 	s.conn = conn
 	s.ipc.Init(eng, nil)
 	s.eng = eng
 	s.rpcServer = rpc.NewServer()
-	s.rpcServer.RegisterName("server", s)
+	s.rpcServer.RegisterName("server", (*ServerRPC)(s))
 }
 
 
 func (s *Server) Run() {
+	Debug("server running")
 	s.rpcServer.ServeConn(s.conn)
 }
 
@@ -60,7 +62,7 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 // INTERNAL but exported because package rpc requires so.
 // this rpc-exported method uses an interpreter to parse the function name and argument values
 // (strings) in the ReflectCallArgs argument, and calls the function using reflection. 
-func (e *Server) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Error {
+func (e *ServerRPC) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Error {
 	// TODO: error handling
 	args := *args_
 	ret := e.ipc.Call(args.Func, args.Args)
