@@ -2,7 +2,6 @@ dirs=\
 	ptx\
 	lib\
 	pkg\
-	api\
 	
 all: $(dirs)
 

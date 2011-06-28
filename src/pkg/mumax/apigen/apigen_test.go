@@ -5,13 +5,15 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package main
+package apigen
+
+// Author: Arne Vansteenkiste
 
 import (
-	"mumax/client"
+	"testing"
 )
 
 
-func main() {
-	client.Main()
+func TestApiGen(t *testing.T) {
+	APIGen()
 }

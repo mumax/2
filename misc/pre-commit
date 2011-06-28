@@ -4,13 +4,15 @@
 # Called by git-commit with no arguments.  The hook should
 # exit with non-zero status after issuing an appropriate message if
 # it wants to stop the commit.
+# 
+# Add this file to .git/hooks
 
 # I like something to read during the few seconds of unit testing
 echo 'Running unit tests'
 fortune 2> /dev/null
 
 # Nicely format all go source files
-gofmt -w src/pkg/*/*.go src/pkg/*/*/*.go
+gofmt -w src/pkg/*/*/*.go
 
 # Run all unit tests
 rm test.log -rf

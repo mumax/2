@@ -5,26 +5,55 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package client
+package engine
+
 
 import ()
 
-type Client struct {
 
+type EngineAPI struct {
+	engine *Engine
 }
 
 
 // For testing purposes.
-func (c *Client) Version() int {
+func (api EngineAPI) Version() int {
 	return 2
 }
 
 // For testing purposes.
-func (c *Client) Echo(i int) int {
+func (api EngineAPI) Echo(i int) int {
 	return i
 }
 
 // For testing purposes.
-func (c *Client) Sum(i, j int) int {
+func (api EngineAPI) Sink(b bool, i int, f float32, d float64, s string) {
+	return
+}
+
+// For testing purposes.
+func (api EngineAPI) GetFloat() float32 {
+	return 42.
+}
+
+// For testing purposes.
+func (api EngineAPI) GetDouble() float64 {
+	return 42.
+}
+
+// For testing purposes.
+func (api EngineAPI) GetString() string {
+	return "hello"
+}
+
+
+// For testing purposes.
+func (api EngineAPI) GetBool() bool {
+	return true
+}
+
+
+// For testing purposes.
+func (api EngineAPI) Sum(i, j int) int {
 	return i + j
 }

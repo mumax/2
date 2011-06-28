@@ -7,29 +7,27 @@
 
 package engine
 
-// This file implements an RPC front-end for the MuMax Engine.
-// The front-end accecpts text commands with the syntax:
-// 		command arg0 arg1 ...
-//
 
-//import(
-//	"mumax/refsh"
-//	"io"
-//)
 //
-//type RefshRPC struct{
-//	engine *EngineAPI
-//	shell *refsh.Refsh
-//}
-//
-//func NewRefshRPC(e *Engine) *RefshRPC{
-//	rpc := new(RefshRPC)	
-//	rpc.engine = (*EngineAPI)(e)
-//	rpc.shell = refsh.New()
-//	rpc.shell.AddAllMethods(rpc.engine)
-//	return rpc
-//}
-//
-//func(rpc *RefshRPC) ReadFrom(in io.Reader){
-//	rpc.shell.Exec(in)
-//}
+// Author: Arne Vansteenkiste
+
+import (
+	. "mumax/common"
+	"net"
+)
+
+func serverMain() {
+
+	listener, err2 := net.Listen(*flag_net, "localhost:"+*flag_port)
+	CheckErr(err2, ERR_IO)
+	Debug("listening...")
+
+	conn, err3 := listener.Accept()
+	CheckErr(err3, ERR_IO)
+	Debug("connected", conn)
+
+	eng := NewEngine()
+	var server Server
+	server.Init(eng, conn)
+	server.Run()
+}

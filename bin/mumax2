@@ -1,9 +1,9 @@
 #! /bin/bash
-MUMAX2BIN=$(dirname $(readlink -f $0))
+MUMAX2BIN=$(dirname $(readlink -f $0)) # path to this script
 #export LD_LIBRARY_PATH=$SIMROOT/dep/cuda/lib64:$SIMROOT/dep/cuda/lib:$LD_LIBRARY_PATH 
 #echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
 #export LD_LIBRARY_PATH=$SIMROOT/lib/fftw/lib:$LD_LIBRARY_PATH
 #export PYTHONPATH=$PYTHONPATH:$SIMROOT/lib
 #export PATH=$PATH:$SIMROOT/bin
 #export LD_LIBRARY_PATH=$SIMROOT/lib:$LD_LIBRARY_PATH
-exec $MUMAX2BIN/mumax2-client $@
+exec $MUMAX2BIN/mumax2-bin $@

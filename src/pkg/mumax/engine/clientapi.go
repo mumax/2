@@ -5,12 +5,16 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package client
+package engine
 
-// Author: Arne Vansteenkiste
 
 import ()
 
 
-func init() {
+type ClientAPI struct {
+	client *Client
+}
+
+func (api ClientAPI) TestClient(a int) int {
+	return a + 1
 }

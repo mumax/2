@@ -1,20 +1,17 @@
 include $(GOROOT)/src/Make.inc
 
 executables=\
-	mumax2-client\
-	#apigen\
-	#mumax2-engine\
+	mumax2-bin\
+	mumax2-apigen\
 
 GC+=\
 	-I../common/_obj\
-	-I../client/_obj\
 	-I../engine/_obj\
 	-I../apigen/_obj\
 	-I../../cuda/driver/_obj\
 	
 LD+=\
 	-L../common/_obj\
-	-L../client/_obj\
 	-L../engine/_obj\
 	-L../apigen/_obj\
 	-L../../cuda/driver/_obj\
@@ -27,7 +24,7 @@ all: $(executables)
 $(executables):	%:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
-	cp -f $@ ../../../../bin
+	mv -f $@ ../../../../bin
 
 .PHONY:	clean
 clean:
@@ -37,13 +34,7 @@ clean:
 install:
 
 .PHONY: test
-test: all
-	./mumax2-client -apigen
-	python mumax2.py #checks for syntax errors
-	./mumax2-client -f test.py
-	javac Mumax2.java
-	javac Test.java
-	./mumax2-client -f Test.class
+test: 
 
 	
 .PHONY: bench

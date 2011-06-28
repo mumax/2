@@ -12,6 +12,11 @@ package engine
 // An engine is typically steered by a driver, like a python program or
 // command line interface.
 
-//type Engine struct {
-//	universe Universe
-//}
+type Engine struct {
+
+}
+
+
+func NewEngine() *Engine {
+	return new(Engine)
+}

@@ -4,21 +4,25 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/engine
 
 GOFILES=\
-	universe.go\
-	units.go\
-	field.go\
-	ioformat.go\
-	stephandler.go\
-	server_api.go\
-	server.go\
 	client.go\
-	rpc.go\
-	rpc_refsh.go\
-	main.go
+	clientapi.go\
+	client_main.go\
+	engine.go\
+	engineapi.go\
+	exec.go\
+	field.go\
+	interpreter.go\
+	io.go\
+	main.go\
+	server.go\
+	server_main.go\
+	units.go\
+	universe.go\
 
 CGOFILES=\
 
 GC+=\
+	-I../../cuda/driver/_obj\
 	-I../common/_obj\
 	-I../refsh/_obj\
 

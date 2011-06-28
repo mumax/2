@@ -1,7 +1,9 @@
 *.swp
+*.log
 *.a
 *.o
 *.[568]
 *.out
 _testmain.go
-test.log
+*.prof
+*.mprof
