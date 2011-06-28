@@ -55,8 +55,10 @@ func (c *Client) InitLocal(infile, outdir, command string) {
 
 	eng := NewEngine()
 	var server Server
-	go func(){server.Init(eng, end1)
-	server.Run()}()
+	go func() {
+		server.Init(eng, end1)
+		server.Run()
+	}()
 
 	c.Init(infile, outdir, command, end2)
 }
