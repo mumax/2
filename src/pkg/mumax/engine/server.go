@@ -25,16 +25,14 @@ import (
 
 // Wraps an engine to allow its methods to be called over rpc
 // via ReflectCall(funcname, args). This avoids having to write
-// all of engine's methods in the special format required by rpc.
+// all of engine's methods with the special signature required by rpc.
 type Server struct {
-	conn      io.ReadWriteCloser
-	ipc       Interpreter
-	rpcServer *rpc.Server
-
-	eng *Engine
+	conn      io.ReadWriteCloser // connection to client for RPC
+	ipc       Interpreter // interprets commands from ServerRPC.ReflectCall
+	rpcServer *rpc.Server // RPC server
+	eng *Engine // actual simulation engine
 }
 
-type ServerRPC Server // Exposes only the server's methods suited for RPC
 
 func (s *Server) Init(eng *Engine, conn io.ReadWriteCloser) {
 	s.conn = conn
@@ -60,10 +58,23 @@ func (s *Server) ServeConn(conn io.ReadWriteCloser) {
 
 
 // INTERNAL but exported because package rpc requires so.
+type ServerRPC Server // Exposes only the server's methods suited for RPC
+
+// INTERNAL but exported because package rpc requires so.
 // this rpc-exported method uses an interpreter to parse the function name and argument values
 // (strings) in the ReflectCallArgs argument, and calls the function using reflection. 
-func (e *ServerRPC) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) os.Error {
-	// TODO: error handling
+func (e *ServerRPC) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) (err os.Error) {
+	// pass error on to client
+	defer func(){
+		err2 := recover()
+		if err2 != nil{
+			// if the error is already an os.Error, pass it on,
+			// otherwise, convert it to an os.Error
+			osErr, ok := err.(os.Error)
+			if ok{ err = osErr} else { err = os.ErrorString(fmt.Sprint(err2))	}
+		}
+	}()
+
 	args := *args_
 	ret := e.ipc.Call(args.Func, args.Args)
 	switch len(ret) {
