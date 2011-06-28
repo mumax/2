@@ -12,8 +12,22 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+		. "mumax/common"
+		"net"
 )
 
 func serverMain(){
 
+	listener, err2 := net.Listen(*flag_net, "localhost:" + *flag_port)
+	CheckErr(err2, ERR_IO)
+	Debug("listening...")
+
+	conn, err3 := listener.Accept()
+	CheckErr(err3, ERR_IO)
+	Debug("connected", conn)
+
+	eng := NewEngine()
+	var server Server
+	server.Init(eng, conn)
+	server.Run()
 }
