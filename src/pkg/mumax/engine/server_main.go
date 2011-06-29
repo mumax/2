@@ -7,16 +7,27 @@
 
 package engine
 
-// This file implements the simulation engine. The engine stores the
-// entire simulation state and provides methods to run the simulation.
-// An engine is typically steered by a driver, like a python program or
-// command line interface.
 
-type Engine struct {
+//
+// Author: Arne Vansteenkiste
 
-}
+import (
+	. "mumax/common"
+	"net"
+)
 
+func serverMain() {
 
-func NewEngine() *Engine {
-	return new(Engine)
+	listener, err2 := net.Listen(*flag_net, "localhost:"+*flag_port)
+	CheckErr(err2, ERR_IO)
+	Debug("listening...")
+
+	conn, err3 := listener.Accept()
+	CheckErr(err3, ERR_IO)
+	Debug("connected", conn)
+
+	eng := NewEngine()
+	var server Server
+	server.Init(eng, conn)
+	server.Run()
 }

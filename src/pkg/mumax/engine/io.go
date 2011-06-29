@@ -38,7 +38,6 @@ func parseLine(in io.Reader) (words []string, eof bool) {
 	}
 	for c != '\n' {
 		str += string(c)
-		//Debug("str:", str)
 		c, eof = readChar(in)
 		if eof {
 			return
@@ -57,7 +56,7 @@ func readChar(in io.Reader) (char byte, eof bool) {
 	for n == 0 {
 		n, err = in.Read(buffer[:])
 		if err != nil {
-			Debug(err)
+			Debug("readChar:", err)
 			eof = true
 			return
 		}

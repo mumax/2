@@ -5,18 +5,15 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package apigen
 
-// This file implements the simulation engine. The engine stores the
-// entire simulation state and provides methods to run the simulation.
-// An engine is typically steered by a driver, like a python program or
-// command line interface.
+// Author: Arne Vansteenkiste
 
-type Engine struct {
-
-}
+import (
+	"testing"
+)
 
 
-func NewEngine() *Engine {
-	return new(Engine)
+func TestApiGen(t *testing.T) {
+	APIGen()
 }

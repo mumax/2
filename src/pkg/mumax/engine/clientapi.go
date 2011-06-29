@@ -7,16 +7,14 @@
 
 package engine
 
-// This file implements the simulation engine. The engine stores the
-// entire simulation state and provides methods to run the simulation.
-// An engine is typically steered by a driver, like a python program or
-// command line interface.
 
-type Engine struct {
+import ()
 
+
+type ClientAPI struct {
+	client *Client
 }
 
-
-func NewEngine() *Engine {
-	return new(Engine)
+func (api ClientAPI) TestClient(a int) int {
+	return a + 1
 }

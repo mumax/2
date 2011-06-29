@@ -13,7 +13,7 @@ tests: bin
 
 .PHONY: githooks
 githooks:
-	ln -sf $(CURDIR)/git/pre-commit .git/hooks 
+	ln -sf $(CURDIR)/misc/pre-commit .git/hooks 
 
 include src/Dirs.pkg
 

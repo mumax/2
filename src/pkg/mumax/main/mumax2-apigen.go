@@ -5,18 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package main
 
-// This file implements the simulation engine. The engine stores the
-// entire simulation state and provides methods to run the simulation.
-// An engine is typically steered by a driver, like a python program or
-// command line interface.
-
-type Engine struct {
-
-}
+import (
+	"mumax/apigen"
+)
 
 
-func NewEngine() *Engine {
-	return new(Engine)
+func main() {
+	apigen.APIGen()
 }

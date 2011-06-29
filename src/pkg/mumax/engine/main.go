@@ -13,20 +13,20 @@ import (
 	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
+	"time"
 	"fmt"
 	"os"
 	"flag"
 )
 
-
 // command-line flags (more in engine/main.go)
 var (
-	flag_engine     *bool   = flag.Bool("listen", false, "Run engine on incoming port")
-	flag_engineAddr *string = flag.String("connect", "", "Connect to engine server")
+	flag_server     *bool   = flag.Bool("listen", false, "Run mumax2 server on incoming port")
+	flag_serverAddr *string = flag.String("server", "", "Connect to engine server")
 	flag_outputdir  *string = flag.String("out", "", "Specify output directory")
 	flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
 	flag_logfile    *string = flag.String("log", "", "Specify log file")
-	flag_scriptcmd  *string = flag.String("command", "", "Override interpreter command")
+	flag_command    *string = flag.String("command", "", "Override interpreter command")
 	flag_debug      *bool   = flag.Bool("debug", true, "Show debug output")
 	flag_cpuprof    *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
 	flag_memprof    *string = flag.String("memprof", "", "Write gopprof memory profile to file")
@@ -35,42 +35,16 @@ var (
 	flag_help       *bool   = flag.Bool("help", false, "Print help and exit")
 	flag_version    *bool   = flag.Bool("version", false, "Print version info and exit")
 	flag_test       *bool   = flag.Bool("test", false, "Test CUDA and exit")
-	flag_apigen     *bool   = flag.Bool("apigen", false, "Generate API and exit (internal use)")
-	flag_port       *string = flag.String("port", ":2527", "Set TCP listen port for engine")
+	flag_port       *string = flag.String("port", "2527", "Set TCP port for engine")
 	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
+	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.") // should be named walltime? timeout=only for connection?
 )
 
-
-// client global variables
-var (
-	cleanfiles []string // list of files to be deleted upon program exit
-)
 
 // Mumax2 main function
 func Main() {
 	// first test for flags that do not actually run a simulation
 	flag.Parse()
-	if *flag_help {
-		fmt.Fprintln(os.Stderr, "Usage:")
-		flag.PrintDefaults()
-		return
-	}
-	if *flag_version {
-		fmt.Println(WELCOME)
-		fmt.Println("Go", runtime.Version())
-		return
-	}
-	if *flag_apigen {
-		APIGen()
-		return
-	}
-	if *flag_cpuprof != "" {
-		f, err := os.Create(*flag_cpuprof)
-		CheckErr(err, ERR_IO)
-		Log("Writing CPU profile to", *flag_cpuprof)
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
-	}
 
 	defer func() {
 		cleanup()        // make sure we always clean up, no matter what
@@ -80,33 +54,46 @@ func Main() {
 		}
 	}()
 
-	if *flag_test {
-		cu.Init()
-		return
+	if *flag_cpuprof != "" {
+		f, err := os.Create(*flag_cpuprof)
+		if err != nil {
+			Log(err)
+		}
+		Log("Writing CPU profile to", *flag_cpuprof)
+		pprof.StartCPUProfile(f)
+		// will be flushed on cleanup
 	}
-	if *flag_engine {
-		listen()
-		return
-	}
-	// else...
-	run()
 
-	// memory profile is single-shot, run at the end of program
-	if *flag_memprof != "" {
-		f, err := os.Create(*flag_memprof)
-		CheckErr(err, ERR_IO)
-		Log("Writing memory profile to", *flag_memprof)
-		pprof.WriteHeapProfile(f)
-		f.Close()
+	if *flag_help {
+		fmt.Fprintln(os.Stderr, "Usage:")
+		flag.PrintDefaults()
+		return
 	}
+
+	if *flag_version {
+		fmt.Println(WELCOME)
+		fmt.Println("Go", runtime.Version())
+		return
+	}
+
+	initTimeout()
+
+	if *flag_server {
+		serverMain()
+		return
+	}
+
+	// else...
+	clientMain()
 }
 
 
-// return the input file
+// return the input file. "" means none
 func inputFile() string {
 	// check if there is just one input file given on the command line
 	if flag.NArg() == 0 {
-		panic(InputErr("no input files"))
+		//panic(InputErr("no input files"))
+		return ""
 	}
 	if flag.NArg() > 1 {
 		panic(InputErr(fmt.Sprint("need exactly 1 input file, but", flag.NArg(), "given:", flag.Args())))
@@ -115,26 +102,34 @@ func inputFile() string {
 }
 
 
-// return the output directory
-func outputDir() string {
-	if *flag_outputdir != "" {
-		return *flag_outputdir
-	}
-	return inputFile() + ".out"
-}
-
-
 func cleanup() {
 	Debug("cleanup")
 
-	// remove neccesary files
-	for i := range cleanfiles {
-		Debug("rm", cleanfiles[i])
-		err := os.Remove(cleanfiles[i])
+	// write memory profile
+	if *flag_memprof != "" {
+		f, err := os.Create(*flag_memprof)
 		if err != nil {
-			Debug(err)
-		} // ignore errors, there's nothing we can do about it during cleanup
+			Log(err)
+		}
+		Log("Writing memory profile to", *flag_memprof)
+		pprof.WriteHeapProfile(f)
+		f.Close()
 	}
+
+	// write cpu profile
+	if *flag_cpuprof != "" {
+		Log("Flushing CPU profile", *flag_cpuprof)
+		pprof.StopCPUProfile()
+	}
+
+	// remove neccesary files
+	//for i := range cleanfiles {
+	//	Debug("rm", cleanfiles[i])
+	//	err := os.Remove(cleanfiles[i])
+	//	if err != nil {
+	//		Debug(err)
+	//	} // ignore errors, there's nothing we can do about it during cleanup
+	//}
 
 	// kill subprocess
 }
@@ -195,6 +190,33 @@ func getCrashStack() string {
 	return string(stack[start:])
 }
 
+
+// sets up a timeout that will kill mumax when it runs too long
+func initTimeout() {
+	timeout := *flag_timeout
+	t := 0.
+	if timeout != "" {
+		switch timeout[len(timeout)-1] {
+		default:
+			t = Atof64(timeout)
+		case 's':
+			t = Atof64(timeout[:len(timeout)-1])
+		case 'h':
+			t = 3600 * Atof64(timeout[:len(timeout)-1])
+		case 'd':
+			t = 24 * 3600 * Atof64(timeout[:len(timeout)-1])
+		}
+	}
+	if t != 0 {
+		Log("Timeout: ", t, "s")
+		go func() {
+			time.Sleep(int64(1e9 * t))
+			Log("Timeout reached:", timeout)
+			cleanup()
+			os.Exit(ERR_IO)
+		}()
+	}
+}
 
 const (
 	WELCOME  = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`

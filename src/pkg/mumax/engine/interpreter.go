@@ -7,8 +7,9 @@
 
 package engine
 
-// This file implements Inter-Process-Communication
-// between mumax and a scripting language.
+
+// An interpreter takes text-based commands and calls the correspondingly named methods.
+// It is used for inter-process communication with the script.
 
 import (
 	. "mumax/common"
@@ -19,38 +20,36 @@ import (
 )
 
 
-// an interpreter takes care of inter-procedural communication.
-type interpreter struct {
-	method map[string]reflect.Value // list of methods that can be called.
-	server *rpc.Client
+// An interpreter takes text-based commands and calls the correspondingly named methods.
+// It is used for inter-process communication with the script.
+type Interpreter struct {
+	method    map[string]reflect.Value // list of methods that can be called locally.
+	rpcClient *rpc.Client              // non-local methods passed through to rpc server
 }
 
 
-// add all exported methods of receiver to the interpreter's map.
-// calls to function names that are not present are passed through
-// to the rpc client.
-func (c *interpreter) init(receiver_ interface{}, server *rpc.Client) {
-	c.server = server
+// Adds all exported methods of receiver to the interpreter's map of locally callable methods.
+// Calls to function names that are not present are passed through to the rpc client.
+func (c *Interpreter) Init(receiver_ interface{}, rpcClient *rpc.Client) {
+	c.rpcClient = rpcClient
 	c.method = make(map[string]reflect.Value)
-	receiver := reflect.ValueOf(receiver_)
-	typ := reflect.TypeOf(receiver_)
-	for i := 0; i < typ.NumMethod(); i++ {
-		name := typ.Method(i).Name
-		if unicode.IsUpper(int(name[0])) {
-			c.method[name] = receiver.Method(i)
-		}
-	}
+	AddMethods(c.method, receiver_)
 }
 
-// calls the method determined by the funcName with given arguments and returns the return value
-func (c *interpreter) call(funcName string, args []string) []interface{} {
+
+// Calls the method determined by the funcName with given arguments and returns the return value.
+func (c *Interpreter) Call(funcName string, args []string) []interface{} {
 	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
-		//panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
-		var reply interface{}
-		err := c.server.Call("ReflectCall", &CallArgs{funcName, args}, &reply)
+		// function not found in exported object: pass on over the network to remote interpreter
+		if c.rpcClient == nil {
+			panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
+		}
+		reply := new(interface{})
+		err := c.rpcClient.Call("server.ReflectCall", &ReflectCallArgs{funcName, args}, reply)
 		CheckErr(err, ERR_IO)
+		return []interface{}{*reply}
 	}
 
 	// call
@@ -62,6 +61,23 @@ func (c *interpreter) call(funcName string, args []string) []interface{} {
 		ret[i] = retVals[i].Interface()
 	}
 	return ret
+}
+
+
+// --------------
+
+
+// Adds all public methods of receiver to map
+// INTERNAL, but needed by package apigen
+func AddMethods(methods map[string]reflect.Value, receiver_ interface{}) {
+	receiver := reflect.ValueOf(receiver_)
+	typ := reflect.TypeOf(receiver_)
+	for i := 0; i < typ.NumMethod(); i++ {
+		name := typ.Method(i).Name
+		if unicode.IsUpper(int(name[0])) {
+			methods[name] = receiver.Method(i)
+		}
+	}
 }
 
 
@@ -106,9 +122,9 @@ func parseArg(arg string, argtype reflect.Type) reflect.Value {
 
 // error message
 const (
-	msg_already_defined = "client interpreter: %s already defined"
-	msg_no_such_method  = "client interpreter: no such method: %s"
-	msg_no_such_command = "client interpreter: no such command: %s. options: %v"
-	msg_cant_parse      = "client interpreter: do not know how to parse %s"
-	msg_arg_mismatch    = "client interpreter: %v needs %v arguments, but %v provided"
+	msg_already_defined = "interpreter: %s already defined"
+	msg_no_such_method  = "interpreter: no such method: %s"
+	msg_no_such_command = "interpreter: no such command: %s. options: %v"
+	msg_cant_parse      = "interpreter: do not know how to parse %s"
+	msg_arg_mismatch    = "interpreter: %v needs %v arguments, but %v provided"
 )

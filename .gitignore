@@ -5,3 +5,5 @@
 *.[568]
 *.out
 _testmain.go
+*.prof
+*.mprof

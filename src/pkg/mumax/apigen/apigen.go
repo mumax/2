@@ -10,10 +10,11 @@
 // library in any of the supported programming languages is
 // automatically generated.
 
-package engine
+package apigen
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"reflect"
 	"fmt"
 )
@@ -24,8 +25,10 @@ const pkg = "mumax2"
 // Auto-generate API libraries.
 func APIGen() {
 	// interpreter can extract the methods
-	var ipc interpreter
-	ipc.init(new(Client), nil)
+
+	method := make(map[string]reflect.Value)
+	AddMethods(method, new(ClientAPI))
+	AddMethods(method, new(EngineAPI))
 
 	// target languages
 	langs := []lang{&python{}, &java{}, &lua{}}
@@ -40,7 +43,7 @@ func APIGen() {
 
 		lang.writeHeader(out)
 
-		for name, meth := range ipc.method {
+		for name, meth := range method {
 			var returnType reflect.Type
 			switch meth.Type().NumOut() {
 			default:
@@ -49,7 +52,7 @@ func APIGen() {
 			case 1:
 				returnType = meth.Type().Out(0)
 			}
-			lang.writeFunc(out, name, ArgTypes(meth), returnType)
+			lang.writeFunc(out, name, argTypes(meth), returnType)
 		}
 
 		lang.writeFooter(out)
@@ -58,7 +61,8 @@ func APIGen() {
 	}
 }
 
-func ArgTypes(c reflect.Value) []reflect.Type {
+// make array with argument types of method.
+func argTypes(c reflect.Value) []reflect.Type {
 	types := make([]reflect.Type, c.Type().NumIn())
 	for i := range types {
 		types[i] = c.Type().In(i)
