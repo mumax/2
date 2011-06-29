@@ -28,9 +28,9 @@ import (
 // all of engine's methods with the special signature required by rpc.
 type Server struct {
 	conn      io.ReadWriteCloser // connection to client for RPC
-	ipc       Interpreter // interprets commands from ServerRPC.ReflectCall
-	rpcServer *rpc.Server // RPC server
-	eng *Engine // actual simulation engine
+	ipc       Interpreter        // interprets commands from ServerRPC.ReflectCall
+	rpcServer *rpc.Server        // RPC server
+	eng       *Engine            // actual simulation engine
 }
 
 
@@ -65,13 +65,17 @@ type ServerRPC Server // Exposes only the server's methods suited for RPC
 // (strings) in the ReflectCallArgs argument, and calls the function using reflection. 
 func (e *ServerRPC) ReflectCall(args_ *ReflectCallArgs, reply *interface{}) (err os.Error) {
 	// pass error on to client
-	defer func(){
+	defer func() {
 		err2 := recover()
-		if err2 != nil{
+		if err2 != nil {
 			// if the error is already an os.Error, pass it on,
 			// otherwise, convert it to an os.Error
 			osErr, ok := err.(os.Error)
-			if ok{ err = osErr} else { err = os.ErrorString(fmt.Sprint(err2))	}
+			if ok {
+				err = osErr
+			} else {
+				err = os.ErrorString(fmt.Sprint(err2))
+			}
 		}
 	}()
 

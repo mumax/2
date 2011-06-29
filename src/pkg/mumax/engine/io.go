@@ -56,9 +56,12 @@ func readChar(in io.Reader) (char byte, eof bool) {
 	for n == 0 {
 		n, err = in.Read(buffer[:])
 		if err != nil {
-			Debug("readChar:", err)
-			eof = true
-			return
+			if err == os.EOF {
+				eof = true
+				return
+			} else {
+				panic(IOErr(err.String()))
+			}
 		}
 	}
 	char = buffer[0]
