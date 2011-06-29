@@ -10,7 +10,6 @@ GOFILES=\
 	logger.go\
 	math.go\
 	io.go\
-	pipe.go\
 	strconv.go\
 	misc.go\
 	sizes.go\

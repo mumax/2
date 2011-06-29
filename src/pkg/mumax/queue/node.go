@@ -1,4 +1,4 @@
-package main
+package queue
 
 import (
 	"fmt"
@@ -24,8 +24,6 @@ func (n *Node) AddGPU(g *GPU) {
 }
 
 
-
-
-func (n *Node) String() string{
+func (n *Node) String() string {
 	return n.host + ":" + fmt.Sprint(n.gpus)
 }

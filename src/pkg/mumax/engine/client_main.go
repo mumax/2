@@ -105,7 +105,7 @@ func commandForFile(file string) (command string, args []string) {
 	case ".py":
 		return "python", []string{file}
 	case ".java":
-		return "javaint", []string{file}
+		return GetExecDir() + "javaint", []string{file}
 	case ".class":
 		return "java", []string{ReplaceExt(file, "")}
 	case ".lua":

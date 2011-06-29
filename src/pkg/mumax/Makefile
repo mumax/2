@@ -5,6 +5,7 @@ dirs=\
 	engine\
 	main\
 	apigen\
+	queue\
 
 CLEANFILES+=*.log
 
@@ -13,7 +14,7 @@ all: $(dirs)
 host: common
 gpu: common host
 engine: common gpu host
-main: common engine apigen
+main: $(dirs)
 apigen: common engine
 
 include ../../Dirs.pkg

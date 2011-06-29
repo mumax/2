@@ -3,17 +3,20 @@ include $(GOROOT)/src/Make.inc
 executables=\
 	mumax2-bin\
 	mumax2-apigen\
+	mumax2-queue\
 
 GC+=\
 	-I../common/_obj\
 	-I../engine/_obj\
 	-I../apigen/_obj\
+	-I../queue/_obj\
 	-I../../cuda/driver/_obj\
 	
 LD+=\
 	-L../common/_obj\
 	-L../engine/_obj\
 	-L../apigen/_obj\
+	-L../queue/_obj\
 	-L../../cuda/driver/_obj\
 
 all: $(executables)
