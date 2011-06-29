@@ -1,11 +1,8 @@
-package main
+package queue
 
-import (
-)
+import ()
 
 
 type Task struct {
 	command string
 }
-
-

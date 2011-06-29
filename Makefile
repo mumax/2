@@ -10,6 +10,7 @@ all: $(dirs) githooks
 bin: src
 
 tests: bin
+test: bin
 
 .PHONY: githooks
 githooks:

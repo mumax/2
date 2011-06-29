@@ -1,4 +1,4 @@
-package main
+package queue
 
 import (
 	"flag"
@@ -10,15 +10,15 @@ var (
 	nodes []*Node
 	queue []string
 
-	
+
 	//done chan(*Task)
 )
 
-func init(){
+func init() {
 
 }
 
-func main() {
+func Main() {
 	flag.Parse()
 
 	setup()
@@ -27,18 +27,18 @@ func main() {
 }
 
 
-func PrintInfo(){
+func PrintInfo() {
 	PrintNodes()
 }
 
 
-func PrintNodes(){
-	for _, n := range nodes{
+func PrintNodes() {
+	for _, n := range nodes {
 		fmt.Println(n)
 	}
 }
 
-func setup(){
+func setup() {
 	localhost := NewNode("localhost")
 	localhost.AddGPU(NewGPU(512))
 	localhost.AddGPU(NewGPU(512))
