@@ -14,7 +14,8 @@ package apigen
 
 import (
 	. "mumax/common"
-	. "mumax/engine"
+	"mumax/engine"
+	"mumax/frontend"
 	"reflect"
 	"fmt"
 )
@@ -27,7 +28,7 @@ func APIGen() {
 	// interpreter can extract the methods
 
 	method := make(map[string]reflect.Value)
-	AddMethods(method, new(EngineAPI))
+	frontend.AddMethods(method, new(engine.API))
 
 	// target languages
 	langs := []lang{&python{}, &java{}, &lua{}}

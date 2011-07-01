@@ -1,20 +1,22 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=mumax/engine
+TARG=mumax/frontend
 
 GOFILES=\
-	engine.go\
-	api.go\
-	field.go\
-	units.go\
-	universe.go\
+	client.go\
+	client_main.go\
+	exec.go\
+	interpreter.go\
+	io.go\
+	main.go\
 
 CGOFILES=\
 
 GC+=\
 	-I../../cuda/driver/_obj\
 	-I../common/_obj\
+	-I../engine/_obj\
 	-I../refsh/_obj\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 

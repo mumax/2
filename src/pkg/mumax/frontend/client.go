@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package frontend
 
 // The client implements Inter-Process-Communication
 // between mumax and a scripting language.
@@ -13,6 +13,7 @@ package engine
 
 import (
 	. "mumax/common"
+	"mumax/engine"
 	"fmt"
 	"path"
 	"io"
@@ -24,8 +25,8 @@ import (
 type Client struct {
 	inputFile, outputDir string
 	ipc                  Interpreter
-	eng                  *Engine
-	api                  EngineAPI
+	eng                  *engine.Engine
+	api                  engine.API
 	infifo, outfifo      *os.File
 	cleanfiles           []string // list of files to be deleted upon program exit
 }
@@ -36,8 +37,8 @@ type Client struct {
 func (c *Client) Init(inputFile, outputDir, command string) {
 	c.outputDir = outputDir
 	c.inputFile = inputFile
-	c.eng = NewEngine()
-	c.api = EngineAPI{c.eng}
+	c.eng = engine.NewEngine()
+	c.api = engine.API{c.eng}
 	c.ipc.Init(c.api)
 }
 

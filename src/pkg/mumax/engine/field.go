@@ -15,18 +15,18 @@ package engine
 //	. "mumax/common"
 //	"fmt"
 //)
+
+// Conceptually, each field is represented by A(r) * m(t), a pointwise multiplication
+// of an N-vector function of space A(r) by an N-vector function of time m(t).
+// A(r) is an array, m(t) is the multiplier.
 //
-//// Conceptually, each field is represented by A(r) * m(t), a pointwise multiplication
-//// of an N-vector function of space A(r) by an N-vector function of time m(t).
-//// A(r) is an array, m(t) is the multiplier.
-////
-//// When the array is nil/NULL, the field is independent of space. The array is then
-//// interpreted as 1(r), the unit field. In this way, quantities that are constant
-//// over space (homogeneous) can be efficiently represented. These are also called values.
-////
-//// When the array has only one component and the multiplier has N components,
-//// then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
-////
+// When the array is nil/NULL, the field is independent of space. The array is then
+// interpreted as 1(r), the unit field. In this way, quantities that are constant
+// over space (homogeneous) can be efficiently represented. These are also called values.
+//
+// When the array has only one component and the multiplier has N components,
+// then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
+//
 //type Field struct {
 //	array       Array // contains the size
 //	_multiplier [FIELD_MAX_COMP]float32

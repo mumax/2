@@ -11,49 +11,49 @@ package engine
 import ()
 
 
-type EngineAPI struct {
-	engine *Engine
+type API struct {
+	Engine *Engine
 }
 
 
 // For testing purposes.
-func (api EngineAPI) Version() int {
+func (api API) Version() int {
 	return 2
 }
 
 // For testing purposes.
-func (api EngineAPI) Echo(i int) int {
+func (api API) Echo(i int) int {
 	return i
 }
 
 // For testing purposes.
-func (api EngineAPI) Sink(b bool, i int, f float32, d float64, s string) {
+func (api API) Sink(b bool, i int, f float32, d float64, s string) {
 	return
 }
 
 // For testing purposes.
-func (api EngineAPI) GetFloat() float32 {
+func (api API) GetFloat() float32 {
 	return 42.
 }
 
 // For testing purposes.
-func (api EngineAPI) GetDouble() float64 {
+func (api API) GetDouble() float64 {
 	return 42.
 }
 
 // For testing purposes.
-func (api EngineAPI) GetString() string {
+func (api API) GetString() string {
 	return "hello"
 }
 
 
 // For testing purposes.
-func (api EngineAPI) GetBool() bool {
+func (api API) GetBool() bool {
 	return true
 }
 
 
 // For testing purposes.
-func (api EngineAPI) Sum(i, j int) int {
+func (api API) Sum(i, j int) int {
 	return i + j
 }

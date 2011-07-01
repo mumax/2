@@ -3,9 +3,10 @@ dirs=\
 	host\
 	gpu\
 	engine\
-	main\
+	frontend\
 	apigen\
 	queue\
+	main\
 
 CLEANFILES+=*.log
 
@@ -14,8 +15,10 @@ all: $(dirs)
 host: common
 gpu: common host
 engine: common gpu host
-main: $(dirs)
+frontend: engine
 apigen: common engine
+queue: common
+main: $(dirs)
 
 include ../../Dirs.pkg
 

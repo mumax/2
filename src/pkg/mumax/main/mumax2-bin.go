@@ -8,10 +8,10 @@
 package main
 
 import (
-	"mumax/engine"
+	"mumax/frontend"
 )
 
 
 func main() {
-	engine.Main()
+	frontend.Main()
 }
