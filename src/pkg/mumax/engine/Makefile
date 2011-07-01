@@ -9,6 +9,8 @@ GOFILES=\
 	field.go\
 	units.go\
 	universe.go\
+	input.go\
+	output.go\
 
 CGOFILES=\
 
