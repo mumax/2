@@ -6,7 +6,6 @@ TARG=mumax/frontend
 GOFILES=\
 	client.go\
 	client_main.go\
-	exec.go\
 	interpreter.go\
 	io.go\
 	main.go\
