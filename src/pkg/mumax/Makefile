@@ -15,8 +15,8 @@ all: $(dirs)
 host: common
 gpu: common host
 engine: common gpu host
-frontend: engine
-apigen: common engine
+frontend: common engine
+apigen: common engine frontend
 queue: common
 main: $(dirs)
 
