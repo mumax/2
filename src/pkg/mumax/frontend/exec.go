@@ -12,7 +12,7 @@ package frontend
 import (
 	. "mumax/common"
 	"os"
-	"fmt"
+	//"fmt"
 	"exec"
 )
 
@@ -33,10 +33,19 @@ func subprocess(command string, args []string) *exec.Cmd {
 	}
 
 	Debug("exec", allargs)
-	cmd, err3 := exec.Run(command, allargs, os.Environ(), wd, exec.PassThrough, exec.Pipe, exec.Pipe)
+	cmd := exec.Command(command, allargs...)
+	cmd.Env = os.Environ()
+	cmd.Dir = wd
+	err3 := cmd.Start()
+
+	//cmd, err3 := exec.Run(command, allargs, os.Environ(), wd, exec.PassThrough, exec.Pipe, exec.Pipe)
+	output, err4 := cmd.CombinedOutput()
+	CheckErr(err4, ERR_IO)
+	Debug(string(output))
 	if err3 != nil {
 		panic(IOErr(err3.String()))
 	}
+
 	return cmd
 }
 
@@ -45,15 +54,14 @@ func subprocess(command string, args []string) *exec.Cmd {
 // The command is looked up in the PATH.
 // Typically used for simple system commands: rm, mkfifo, cp, ... 
 func syscommand(command string, args []string) (err os.Error) {
-	command, err = exec.LookPath(command)
-	if err != nil {
-		return
-	}
-	cmd := subprocess(command, args)
-	msg, werr := cmd.Wait(0)
-	err = werr
-	if msg.ExitStatus() != 0 {
-		err = IOErr(fmt.Sprint(command, " exited with status ", msg.ExitStatus()))
-	}
-	return
+	return (exec.Command(command, args...).Run())
+	//	cmd := subprocess(command, args)
+	//	werr := cmd.Wait()
+	//	err = werr
+	//	if err != nil{
+	//	if msg, ok := err.(*os.Waitmsg); ok  {
+	//		err = IOErr(fmt.Sprint(command, " exited with status ", msg.ExitStatus()))
+	//	}
+	//	}
+	//	return
 }

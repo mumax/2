@@ -71,7 +71,7 @@ func (x *c) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, r
 	code := fmt.Sprintf(`
 %s %s(%s){
 }
-`,ret, funcName, args)
+`, ret, funcName, args)
 
 	fmt.Fprintln(out, code)
 

@@ -82,15 +82,24 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	// use a channel to signal sub-command completion
 	waiter = make(chan (int))
 	go func() {
-		msg, err := proc.Wait(0)
+		exitstat := 666 // dummy value 
+		err := proc.Wait()
 		if err != nil {
-			panic(InputErr(err.String()))
+			if msg, ok := err.(*os.Waitmsg); ok {
+				exitstat = msg.ExitStatus()
+			} else {
+				panic(InputErr(err.String()))
+			}
 		}
-		waiter <- msg.ExitStatus() // send exit status to signal completion 
+		waiter <- exitstat // send exit status to signal completion 
 	}()
 	// pipe sub-command output to the logger
-	go logStream("["+command+":err]", proc.Stderr)
-	go logStream("["+command+":out]", proc.Stdout)
+	stderr, err4 := proc.StderrPipe()
+	CheckErr(err4, ERR_IO)
+	stdout, err5 := proc.StdoutPipe()
+	CheckErr(err5, ERR_IO)
+	go logStream("["+command+":err]", stderr)
+	go logStream("["+command+":out]", stdout)
 	return
 }
 
