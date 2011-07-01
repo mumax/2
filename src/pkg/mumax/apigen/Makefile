@@ -17,6 +17,7 @@ GC+=\
 	-I../../cuda/driver/_obj\
 	-I../common/_obj\
 	-I../engine/_obj\
+	-I../frontend/_obj\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so mumax2.py mumax2.pyc Mumax2.java Mumax2.class mumax2.lua
 	

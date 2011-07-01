@@ -17,6 +17,7 @@ import (
 	"mumax/engine"
 	"mumax/frontend"
 	"reflect"
+	"strings"
 	"fmt"
 )
 
@@ -68,4 +69,9 @@ func argTypes(c reflect.Value) []reflect.Type {
 		types[i] = c.Type().In(i)
 	}
 	return types
+}
+
+
+func convertCase(funcName string) string{
+	return strings.ToLower(funcName)
 }
