@@ -16,22 +16,18 @@ import (
 	"reflect"
 	"unicode"
 	"fmt"
-	"rpc"
 )
 
 
 // An interpreter takes text-based commands and calls the correspondingly named methods.
 // It is used for inter-process communication with the script.
 type Interpreter struct {
-	method    map[string]reflect.Value // list of methods that can be called locally.
-	rpcClient *rpc.Client              // non-local methods passed through to rpc server
+	method map[string]reflect.Value // list of methods that can be called locally.
 }
 
 
 // Adds all exported methods of receiver to the interpreter's map of locally callable methods.
-// Calls to function names that are not present are passed through to the rpc client.
-func (c *Interpreter) Init(receiver_ interface{}, rpcClient *rpc.Client) {
-	c.rpcClient = rpcClient
+func (c *Interpreter) Init(receiver_ interface{}) {
 	c.method = make(map[string]reflect.Value)
 	AddMethods(c.method, receiver_)
 }
@@ -42,14 +38,7 @@ func (c *Interpreter) Call(funcName string, args []string) []interface{} {
 	// lookup function by name
 	f, ok := c.method[funcName]
 	if !ok {
-		// function not found in exported object: pass on over the network to remote interpreter
-		if c.rpcClient == nil {
-			panic(InputErr(fmt.Sprintf(msg_no_such_method, funcName)))
-		}
-		reply := new(interface{})
-		err := c.rpcClient.Call("server.ReflectCall", &ReflectCallArgs{funcName, args}, reply)
-		CheckErr(err, ERR_IO)
-		return []interface{}{*reply}
+		panic(fmt.Sprintf(msg_no_such_method, funcName))
 	}
 
 	// call

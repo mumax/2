@@ -14,8 +14,6 @@ package engine
 import (
 	. "mumax/common"
 	"fmt"
-	"rpc"
-	"net"
 	"path"
 	"io"
 	"os"
@@ -25,10 +23,9 @@ import (
 
 type Client struct {
 	inputFile, outputDir string
-	conn                 io.ReadWriteCloser
-	rpcClient            *rpc.Client
 	ipc                  Interpreter
-	api                  ClientAPI
+	eng                  *Engine
+	api                  EngineAPI
 	infifo, outfifo      *os.File
 	cleanfiles           []string // list of files to be deleted upon program exit
 }
@@ -36,41 +33,12 @@ type Client struct {
 
 // Initializes the mumax client to parse infile, write output
 // to outdir and connect to a server over conn.
-func (c *Client) Init(inputFile, outputDir, command string, conn io.ReadWriteCloser) {
+func (c *Client) Init(inputFile, outputDir, command string) {
 	c.outputDir = outputDir
 	c.inputFile = inputFile
-	c.conn = conn
-	c.rpcClient = rpc.NewClient(conn)
-	c.api = ClientAPI{c}
-	c.ipc.Init(c.api, c.rpcClient)
-}
-
-
-// Initializes the mumax client to parse infile, write output
-// to outdir and set up and connect to a local server.
-func (c *Client) InitLocal(infile, outdir, command string) {
-	Debug("Connecting to local engine")
-
-	end1, end2 := net.Pipe()
-
-	eng := NewEngine()
-	var server Server
-	go func() {
-		server.Init(eng, end1)
-		server.Run()
-	}()
-
-	c.Init(infile, outdir, command, end2)
-}
-
-
-// Initializes the mumax client to parse infile, write output
-// to outdir and set up and connect to a local server.
-func (c *Client) InitRemote(infile, outdir, command, network, addr string) {
-	Debug("Connecting to remote engine: ", network, addr)
-	conn, err := net.Dial(network, addr)
-	CheckErr(err, ERR_IO)
-	c.Init(infile, outdir, command, conn)
+	c.eng = NewEngine()
+	c.api = EngineAPI{c.eng}
+	c.ipc.Init(c.api)
 }
 
 

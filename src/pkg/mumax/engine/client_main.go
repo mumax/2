@@ -27,12 +27,7 @@ func clientMain() {
 	command := *flag_command
 
 	var client Client
-	if *flag_serverAddr != "" {
-		client.InitRemote(infile, outdir, command, *flag_net, *flag_serverAddr+":"+*flag_port)
-	} else {
-		client.InitLocal(infile, outdir, command)
-	}
-
+	client.Init(infile, outdir, command)
 	client.Run()
 
 	//	if *flag_test {

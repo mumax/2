@@ -21,23 +21,19 @@ import (
 
 // command-line flags (more in engine/main.go)
 var (
-	flag_server     *bool   = flag.Bool("listen", false, "Run mumax2 server on incoming port")
-	flag_serverAddr *string = flag.String("server", "", "Connect to engine server")
-	flag_outputdir  *string = flag.String("out", "", "Specify output directory")
-	flag_force      *bool   = flag.Bool("force", false, "Remove previous output directory if present")
-	flag_logfile    *string = flag.String("log", "", "Specify log file")
-	flag_command    *string = flag.String("command", "", "Override interpreter command")
-	flag_debug      *bool   = flag.Bool("debug", true, "Show debug output")
-	flag_cpuprof    *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
-	flag_memprof    *string = flag.String("memprof", "", "Write gopprof memory profile to file")
-	flag_silent     *bool   = flag.Bool("silent", false, "Be silent")
-	flag_warn       *bool   = flag.Bool("warn", true, "Show warnings")
-	flag_help       *bool   = flag.Bool("help", false, "Print help and exit")
-	flag_version    *bool   = flag.Bool("version", false, "Print version info and exit")
-	flag_test       *bool   = flag.Bool("test", false, "Test CUDA and exit")
-	flag_port       *string = flag.String("port", "2527", "Set TCP port for engine")
-	flag_net        *string = flag.String("net", "tcp", "Set network: tcp[4,6], udp[4,6], unix[gram]")
-	flag_timeout    *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.") // should be named walltime? timeout=only for connection?
+	flag_outputdir *string = flag.String("out", "", "Specify output directory")
+	flag_force     *bool   = flag.Bool("force", false, "Remove previous output directory if present")
+	flag_logfile   *string = flag.String("log", "", "Specify log file")
+	flag_command   *string = flag.String("command", "", "Override interpreter command")
+	flag_debug     *bool   = flag.Bool("debug", true, "Show debug output")
+	flag_cpuprof   *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
+	flag_memprof   *string = flag.String("memprof", "", "Write gopprof memory profile to file")
+	flag_silent    *bool   = flag.Bool("silent", false, "Be silent")
+	flag_warn      *bool   = flag.Bool("warn", true, "Show warnings")
+	flag_help      *bool   = flag.Bool("help", false, "Print help and exit")
+	flag_version   *bool   = flag.Bool("version", false, "Print version info and exit")
+	flag_test      *bool   = flag.Bool("test", false, "Test CUDA and exit")
+	flag_timeout   *string = flag.String("walltime", "", "Set a maximum run time. Units s,h,d are recognized.") // should be named walltime? timeout=only for connection?
 )
 
 
@@ -77,11 +73,6 @@ func Main() {
 	}
 
 	initTimeout()
-
-	if *flag_server {
-		serverMain()
-		return
-	}
 
 	// else...
 	clientMain()

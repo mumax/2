@@ -5,7 +5,6 @@ TARG=mumax/engine
 
 GOFILES=\
 	client.go\
-	clientapi.go\
 	client_main.go\
 	engine.go\
 	engineapi.go\
@@ -14,8 +13,6 @@ GOFILES=\
 	interpreter.go\
 	io.go\
 	main.go\
-	server.go\
-	server_main.go\
 	units.go\
 	universe.go\
 

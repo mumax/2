@@ -27,7 +27,6 @@ func APIGen() {
 	// interpreter can extract the methods
 
 	method := make(map[string]reflect.Value)
-	AddMethods(method, new(ClientAPI))
 	AddMethods(method, new(EngineAPI))
 
 	// target languages
