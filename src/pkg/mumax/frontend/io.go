@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"exec"
 	"strings"
 )
 
@@ -21,7 +22,7 @@ import (
 // makes a fifo
 // syscall.Mkfifo seems unavailable for the moment.
 func mkFifo(fname string) {
-	err := syscommand("mkfifo", []string{fname})
+	err := exec.Command("mkfifo", fname).Run()
 	if err != nil {
 		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
 	}

@@ -53,8 +53,8 @@ func subprocess(command string, args []string) *exec.Cmd {
 // Runs the subprocess and waits for it to finish.
 // The command is looked up in the PATH.
 // Typically used for simple system commands: rm, mkfifo, cp, ... 
-func syscommand(command string, args []string) (err os.Error) {
-	return (exec.Command(command, args...).Run())
+//func syscommand(command string, args []string) (err os.Error) {
+	//return (exec.Command(command, args...).Run())
 	//	cmd := subprocess(command, args)
 	//	werr := cmd.Wait()
 	//	err = werr
@@ -64,4 +64,4 @@ func syscommand(command string, args []string) (err os.Error) {
 	//	}
 	//	}
 	//	return
-}
+//}

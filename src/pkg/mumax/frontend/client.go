@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"path"
 	"io"
+	"exec"
 	"os"
 	"time"
 )
@@ -44,7 +45,6 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 
 
 func (c *Client) Run() {
-
 	c.makeFifos() // make the FIFOs but do not yet try to open them
 	command, waiter := c.startSubcommand()
 	ok := c.handshake(waiter)
@@ -64,7 +64,7 @@ func (c *Client) Run() {
 }
 
 
-type VoidArgs struct{}
+//type VoidArgs struct{}
 
 // run the sub-command (e.g. python) to interpret the script file
 // it will first hang while trying to open the FIFOs
@@ -76,7 +76,17 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 
 	var args []string
 	command, args = commandForFile(c.inputFile) // e.g.: "python"
-	proc := subprocess(command, args)
+
+	proc := exec.Command(command, args...)//:= subprocess(command, args)
+
+	stderr, err4 := proc.StderrPipe()
+	CheckErr(err4, ERR_IO)
+	stdout, err5 := proc.StdoutPipe()
+	CheckErr(err5, ERR_IO)
+	CheckErr(proc.Start(), ERR_IO)
+	go logStream("["+command+":err]", stderr)
+	go logStream("["+command+":out]", stdout)
+
 	Debug(command, "PID:", proc.Process.Pid)
 	// start waiting for sub-command asynchronously and
 	// use a channel to signal sub-command completion
@@ -90,16 +100,10 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 			} else {
 				panic(InputErr(err.String()))
 			}
-		}
+		}else{exitstat = 0}
 		waiter <- exitstat // send exit status to signal completion 
 	}()
 	// pipe sub-command output to the logger
-	stderr, err4 := proc.StderrPipe()
-	CheckErr(err4, ERR_IO)
-	stdout, err5 := proc.StdoutPipe()
-	CheckErr(err5, ERR_IO)
-	go logStream("["+command+":err]", stderr)
-	go logStream("["+command+":out]", stdout)
 	return
 }
 
