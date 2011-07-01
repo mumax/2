@@ -15,17 +15,17 @@ import (
 )
 
 
-type python struct{}
+type Python struct{}
 
-func (p *python) filename() string {
+func (p *Python) Filename() string {
 	return "mumax2.py"
 }
 
-func (p *python) comment() string {
+func (p *Python) Comment() string {
 	return "#"
 }
 
-func (p *python) writeHeader(out io.Writer) {
+func (p *Python) WriteHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 import os
 
@@ -64,11 +64,11 @@ def call(command, args):
 }
 
 
-func (p *python) writeFooter(out io.Writer) {
+func (p *Python) WriteFooter(out io.Writer) {
 
 }
 
-func (p *python) writeFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
+func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
 	fmt.Fprint(out, "def ", name, "(")
 

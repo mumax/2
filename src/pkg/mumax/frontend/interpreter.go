@@ -15,6 +15,7 @@ import (
 	. "mumax/common"
 	"reflect"
 	"unicode"
+	"strings"
 	"fmt"
 )
 
@@ -64,7 +65,7 @@ func AddMethods(methods map[string]reflect.Value, receiver_ interface{}) {
 	for i := 0; i < typ.NumMethod(); i++ {
 		name := typ.Method(i).Name
 		if unicode.IsUpper(int(name[0])) {
-			methods[name] = receiver.Method(i)
+			methods[ConvertCase(name)] = receiver.Method(i)
 		}
 	}
 }
@@ -117,3 +118,9 @@ const (
 	msg_cant_parse      = "interpreter: do not know how to parse %s"
 	msg_arg_mismatch    = "interpreter: %v needs %v arguments, but %v provided"
 )
+
+
+// converts a function name in Go-style casing to the case we want in the API
+func ConvertCase(funcName string) string {
+	return strings.ToLower(funcName)
+}

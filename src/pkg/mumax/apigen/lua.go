@@ -15,26 +15,26 @@ import (
 )
 
 
-type lua struct{}
+type Lua struct{}
 
-func (l *lua) filename() string {
+func (l *Lua) Filename() string {
 	return "mumax2.lua"
 }
 
-func (l *lua) comment() string {
+func (l *Lua) Comment() string {
 	return " -- "
 }
 
-func (p *lua) writeHeader(out io.Writer) {
+func (p *Lua) WriteHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 `)
 }
 
 
-func (l *lua) writeFooter(out io.Writer) {
+func (l *Lua) WriteFooter(out io.Writer) {
 }
 
-func (l *lua) writeFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
+func (l *Lua) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
 
 	// setup args
 	args := ""

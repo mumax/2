@@ -15,18 +15,18 @@ import (
 )
 
 
-type java struct{}
+type Java struct{}
 
-func (p *java) filename() string {
+func (p *Java) Filename() string {
 	return "Mumax2.java"
 }
 
 
-func (j *java) comment() string {
+func (j *Java) Comment() string {
 	return "//"
 }
 
-func (j *java) writeHeader(out io.Writer) {
+func (j *Java) WriteHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 import java.io.*;
 
@@ -70,12 +70,12 @@ public class Mumax2{
 }
 
 
-func (j *java) writeFooter(out io.Writer) {
+func (j *Java) WriteFooter(out io.Writer) {
 	fmt.Fprint(out, `}`)
 }
 
 
-func (j *java) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
+func (j *Java) WriteFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
 
 	ret := ""
