@@ -77,7 +77,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	var args []string
 	command, args = commandForFile(c.inputFile) // e.g.: "python"
 
-	proc := exec.Command(command, args...)//:= subprocess(command, args)
+	proc := exec.Command(command, args...) //:= subprocess(command, args)
 
 	stderr, err4 := proc.StderrPipe()
 	CheckErr(err4, ERR_IO)
@@ -100,7 +100,9 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 			} else {
 				panic(InputErr(err.String()))
 			}
-		}else{exitstat = 0}
+		} else {
+			exitstat = 0
+		}
 		waiter <- exitstat // send exit status to signal completion 
 	}()
 	// pipe sub-command output to the logger

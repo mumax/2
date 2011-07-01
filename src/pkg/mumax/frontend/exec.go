@@ -54,14 +54,14 @@ func subprocess(command string, args []string) *exec.Cmd {
 // The command is looked up in the PATH.
 // Typically used for simple system commands: rm, mkfifo, cp, ... 
 //func syscommand(command string, args []string) (err os.Error) {
-	//return (exec.Command(command, args...).Run())
-	//	cmd := subprocess(command, args)
-	//	werr := cmd.Wait()
-	//	err = werr
-	//	if err != nil{
-	//	if msg, ok := err.(*os.Waitmsg); ok  {
-	//		err = IOErr(fmt.Sprint(command, " exited with status ", msg.ExitStatus()))
-	//	}
-	//	}
-	//	return
+//return (exec.Command(command, args...).Run())
+//	cmd := subprocess(command, args)
+//	werr := cmd.Wait()
+//	err = werr
+//	if err != nil{
+//	if msg, ok := err.(*os.Waitmsg); ok  {
+//		err = IOErr(fmt.Sprint(command, " exited with status ", msg.ExitStatus()))
+//	}
+//	}
+//	return
 //}

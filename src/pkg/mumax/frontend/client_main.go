@@ -54,7 +54,7 @@ func outputDir(inputFile string) string {
 // make the output dir
 func initOutputDir(outputDir string) {
 	if *flag_force {
-		err := exec.Command("rm", "-rf", outputDir).Run()//syscommand("rm", []string{"-rf", outputDir})
+		err := exec.Command("rm", "-rf", outputDir).Run() //syscommand("rm", []string{"-rf", outputDir})
 		if err != nil {
 			Log("rm -rf", outputDir, ":", err)
 		}
