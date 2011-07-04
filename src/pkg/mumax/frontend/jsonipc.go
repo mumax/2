@@ -8,7 +8,6 @@
 package frontend
 
 
-
 import (
 	//. "mumax/common"
 	"io"
@@ -16,17 +15,20 @@ import (
 )
 
 
-type jsonipc struct{
-	in io.Reader
-	out io.Writer
+type jsonipc struct {
+	in      io.Reader
+	out     io.Writer
 	decoder *json.Decoder
 	encoder *json.Encoder
 }
 
 
-func (j *jsonipc) Init(in io.Reader, out io.Writer){
+func (j *jsonipc) Init(in io.Reader, out io.Writer) {
 	j.in = in
 	j.out = out
 	j.decoder = json.NewDecoder(in)
 	j.encoder = json.NewEncoder(out)
 }
+
+
+
