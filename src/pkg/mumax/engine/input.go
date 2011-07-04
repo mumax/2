@@ -49,6 +49,7 @@ func readInt(in io.Reader) int {
 }
 
 func readData(in io.Reader, data []float32) {
+
 	var bytes4 [4]byte
 	bytes := bytes4[:]
 	for i := range data {

@@ -26,8 +26,6 @@ const (
 )
 
 
-
-
 // Writes the array
 func Write(out io.Writer, a *host.Array) {
 	writeInt(out, T_MAGIC)
@@ -39,6 +37,7 @@ func Write(out io.Writer, a *host.Array) {
 }
 
 
+// writes an integer
 func writeInt(out io.Writer, i int) {
 	_, err := out.Write((*[4]byte)(unsafe.Pointer(&i))[:])
 	if err != nil {
@@ -47,17 +46,21 @@ func writeInt(out io.Writer, i int) {
 }
 
 
+// block this many float's for binary I/O
 const block = 256
 
+// writes the array to the writer, in binary format
 func writeData(out io.Writer, data []float32) {
+	// first write as much data as possible data in large blocks
 	count := 0
-	for i := 0; i < len(data); i+= block {
-		_, err := out.Write((*[4*block]byte)(unsafe.Pointer(&data[i]))[:])
+	for i := 0; i < len(data); i += block {
+		_, err := out.Write((*[4 * block]byte)(unsafe.Pointer(&data[i]))[:])
 		if err != nil {
 			panic(IOErr(err.String()))
 		}
 		count += block
 	}
+	// then write the remainder as a few individual floats
 	for i := count; i < len(data); i++ {
 		_, err := out.Write((*[4]byte)(unsafe.Pointer(&data[i]))[:])
 		if err != nil {

@@ -77,7 +77,7 @@ func BenchmarkReadHostArray(bench *testing.B) {
 	bench.StartTimer()
 	for i := 0; i < bench.N; i++ {
 		f, _ := os.Open("iotest.t")
-		t1 = Read(f)
+		t1 = Read(bufio.NewReader(f))
 		f.Close()
 	}
 	bench.StopTimer()
