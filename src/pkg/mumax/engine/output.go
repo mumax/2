@@ -16,7 +16,7 @@ package engine
 
 import (
 	//. "mumax/common"
-	. "mumax/host"
+	"mumax/host"
 	"io"
 	"unsafe"
 )
@@ -37,13 +37,13 @@ const (
 
 
 // Writes the array
-func Write(out io.Writer, t host.Array) {
+func Write(out io.Writer, a host.Array) {
 	out.Write(IntToBytes(T_MAGIC))
-	out.Write(IntToBytes(Rank(t)))
-	for _, s := range t.Size() {
+	out.Write(IntToBytes(a.Rank()))
+	for _, s := range a.Size {
 		out.Write(IntToBytes(s))
 	}
-	for _, f := range t.List() {
+	for _, f := range a.List {
 		out.Write((*[4]byte)(unsafe.Pointer(&f))[:]) // FloatToBytes() inlined for performance.
 	}
 }

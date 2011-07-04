@@ -7,6 +7,8 @@ executables=\
 
 GC+=\
 	-I../common/_obj\
+	-I../host/_obj\
+	-I../gpu/_obj\
 	-I../engine/_obj\
 	-I../frontend/_obj\
 	-I../apigen/_obj\
@@ -15,6 +17,8 @@ GC+=\
 	
 LD+=\
 	-L../common/_obj\
+	-L../host/_obj\
+	-L../gpu/_obj\
 	-L../engine/_obj\
 	-L../frontend/_obj\
 	-L../apigen/_obj\

@@ -17,21 +17,36 @@ import (
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 type Array struct {
-	List  []float32 // Underlying storage
-	Array [][][][]float32
-	Comp  [][]float32
+	List   []float32 // Underlying storage
+	Array  [][][][]float32
+	Comp   [][]float32
+	Size   [4]int // INTERNAL {components, size0, size1, size2}
+	Size4D []int  // {components, size0, size1, size2}
+	Size3D []int  // {size0, size1, size2}
 }
 
 
+// Initializes a pre-allocated Array struct
 func (t *Array) Init(components int, size3D []int) {
 	Assert(len(size3D) == 3)
 	t.List, t.Array = Array4D(components, size3D[0], size3D[1], size3D[2])
 	t.Comp = Slice2D(t.List, []int{components, Prod(size3D)})
+	t.Size[0] = components
+	t.Size[1] = size3D[0]
+	t.Size[2] = size3D[1]
+	t.Size[3] = size3D[2]
+	t.Size4D = t.Size[:]
+	t.Size3D = t.Size[1:]
 }
 
 
+// Allocates an returns a new Array
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
 	t.Init(components, size3D)
 	return t
+}
+
+func (a *Array) Rank() int {
+	return len(a.Size)
 }
