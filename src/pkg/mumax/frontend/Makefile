@@ -7,6 +7,7 @@ GOFILES=\
 	client.go\
 	client_main.go\
 	interpreter.go\
+	jsonipc.go\
 	io.go\
 	main.go\
 
