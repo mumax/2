@@ -45,7 +45,7 @@ var t1, t2 *host.Array
 
 func BenchmarkWriteHostArray(bench *testing.B) {
 	bench.StopTimer()
-	size := []int{350, 190, 10}
+	size := []int{350, 190, 710}
 	if t1 == nil {
 		t1 = host.NewArray(3, size)
 	}
@@ -55,8 +55,8 @@ func BenchmarkWriteHostArray(bench *testing.B) {
 		f, err := os.Create("iotest.t")
 		CheckErr(err, ERR_BUG)
 		b := bufio.NewWriter(f)
-		b.Flush()
 		Write(b, t1)
+		b.Flush()
 		f.Close()
 	}
 	bench.StopTimer()
@@ -65,7 +65,7 @@ func BenchmarkWriteHostArray(bench *testing.B) {
 
 func BenchmarkReadHostArray(bench *testing.B) {
 	bench.StopTimer()
-	size := []int{350, 190, 10}
+	size := []int{350, 190, 710}
 	if t1 == nil {
 		t1 = host.NewArray(3, size)
 	}

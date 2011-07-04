@@ -26,14 +26,6 @@ const (
 )
 
 
-// Utility function, reads from a named file instead of io.Reader.
-//func WriteF(filename string, t host.Array) {
-//	out := MustOpenWRONLY(filename)
-//	defer out.Close()
-//	bufout := bufio.NewWriter(out)
-//	defer bufout.Flush()
-//	Write(bufout, t)
-//}
 
 
 // Writes the array
@@ -55,14 +47,26 @@ func writeInt(out io.Writer, i int) {
 }
 
 
+const block = 256
+
 func writeData(out io.Writer, data []float32) {
-	for _, f := range data {
-		_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
+	count := 0
+	for i := 0; i < len(data); i+= block {
+		_, err := out.Write((*[4*block]byte)(unsafe.Pointer(&data[i]))[:])
+		if err != nil {
+			panic(IOErr(err.String()))
+		}
+		count += block
+	}
+	for i := count; i < len(data); i++ {
+		_, err := out.Write((*[4]byte)(unsafe.Pointer(&data[i]))[:])
 		if err != nil {
 			panic(IOErr(err.String()))
 		}
 	}
 }
+
+
 //func writeFloat(out io.Writer, f float32) {
 //	_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
 //	if err != nil {
@@ -85,4 +89,12 @@ func writeData(out io.Writer, data []float32) {
 // also necessary to implement io.WriterTo, ReaderFrom
 //func (t *T) WriteTo(out io.Writer) {
 //	Write(out, t)
+//}
+// Utility function, reads from a named file instead of io.Reader.
+//func WriteF(filename string, t host.Array) {
+//	out := MustOpenWRONLY(filename)
+//	defer out.Close()
+//	bufout := bufio.NewWriter(out)
+//	defer bufout.Flush()
+//	Write(bufout, t)
 //}
