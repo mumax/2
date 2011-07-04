@@ -12,6 +12,8 @@ import (
 	"mumax/host"
 	"net"
 	"reflect"
+	"os"
+	"exec"
 )
 
 func TestIO(test *testing.T) {
@@ -29,19 +31,22 @@ func TestIO(test *testing.T) {
 }
 
 
-//var t1, t2 *T4
-//
-//func BenchmarkWrite(bench *testing.B) {
-//	size := []int{3, 350, 190, 310}
-//	if t1 == nil {
-//		t1 = NewT4(size)
-//		bench.SetBytes(4 * int64(Len(t1)))
-//	}
-//	for i := 0; i < bench.N; i++ {
-//		WriteF("iotest.t", t1)
-//	}
-//}
-//
+var t1, t2 *host.Array
+
+func BenchmarkWriteHostArray(bench *testing.B) {
+	size := []int{350, 190, 710}
+	if t1 == nil {
+		t1 = host.NewArray(3, size)
+		bench.SetBytes(4 * int64((t1.Len())))
+	}
+	for i := 0; i < bench.N; i++ {
+		f,_ := os.Open("iotest.t")
+		Write(f, t1)
+		f.Close()
+	}
+	exec.Command("rm", "-f", "iotest.t").Run()
+}
+
 //func BenchmarkRead(bench *testing.B) {
 //	size := []int{3, 350, 190, 310}
 //	if t2 == nil {

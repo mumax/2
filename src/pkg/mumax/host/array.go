@@ -50,3 +50,7 @@ func NewArray(components int, size3D []int) *Array {
 func (a *Array) Rank() int {
 	return len(a.Size)
 }
+
+func (a *Array) Len() int {
+	return a.Size[0] *a.Size[1] *a.Size[2] *   a.Size[3] 
+}
