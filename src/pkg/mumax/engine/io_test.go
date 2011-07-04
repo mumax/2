@@ -12,6 +12,7 @@ import (
 	. "mumax/common"
 	"mumax/host"
 	"reflect"
+	"bufio"
 	"os"
 	"exec"
 )
@@ -53,7 +54,9 @@ func BenchmarkWriteHostArray(bench *testing.B) {
 	for i := 0; i < bench.N; i++ {
 		f, err := os.Create("iotest.t")
 		CheckErr(err, ERR_BUG)
-		Write(f, t1)
+		b := bufio.NewWriter(f)
+		b.Flush()
+		Write(b, t1)
 		f.Close()
 	}
 	bench.StopTimer()
