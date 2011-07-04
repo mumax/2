@@ -20,7 +20,6 @@ func TestJSON(test *testing.T) {
 	enc := json.NewEncoder(end1)
 	go enc.Encode([]interface{}{"call", 4, []float32{1, 2, 3, 4, 5}})
 
-
 	var ipc jsonIPC
 	ipc.Init(end2, nil, &Test{})
 	ipc.Run()
@@ -28,6 +27,6 @@ func TestJSON(test *testing.T) {
 }
 
 
-type Test struct{
+type Test struct {
 
 }

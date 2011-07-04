@@ -40,7 +40,7 @@ func (j *jsonIPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
 
 
 func (j *jsonIPC) Run() {
-//for{
+	//for{
 	v := new(interface{})
 	err := j.Decode(v)
 	//if err == os.EOF{break}
@@ -48,7 +48,7 @@ func (j *jsonIPC) Run() {
 
 	if array, ok := (*v).([]interface{}); ok {
 		fmt.Println(array)
-	}else{
+	} else {
 		panic(IOErr(fmt.Sprint("json: ", *v)))
 	}
 	//}
