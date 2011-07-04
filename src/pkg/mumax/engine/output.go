@@ -15,7 +15,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	//. "mumax/common"
+	. "mumax/common"
 	"mumax/host"
 	"io"
 	"unsafe"
@@ -38,25 +38,47 @@ const (
 
 // Writes the array
 func Write(out io.Writer, a *host.Array) {
-	out.Write(IntToBytes(T_MAGIC))
-	out.Write(IntToBytes(a.Rank()))
+	writeInt(out, T_MAGIC)
+	writeInt(out, a.Rank())
 	for _, s := range a.Size {
-		out.Write(IntToBytes(s))
+		writeInt(out, s)
 	}
-	for _, f := range a.List {
-		out.Write((*[4]byte)(unsafe.Pointer(&f))[:]) // FloatToBytes() inlined for performance.
+	writeData(out, a.List)
+}
+
+
+func writeInt(out io.Writer, i int) {
+	_, err := out.Write((*[4]byte)(unsafe.Pointer(&i))[:])
+	if err != nil {
+		panic(IOErr(err.String()))
 	}
 }
+
+
+func writeData(out io.Writer, data []float32) {
+	for _, f := range data {
+		_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
+		if err != nil {
+			panic(IOErr(err.String()))
+		}
+	}
+}
+//func writeFloat(out io.Writer, f float32) {
+//	_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
+//	if err != nil {
+//		panic(IOErr(err.String()))
+//	}
+//}
 
 // Converts the raw int data to a slice of 4 bytes
-func IntToBytes(i int) []byte {
-	return (*[4]byte)(unsafe.Pointer(&i))[:]
-}
-
-// Converts the raw float data to a slice of 4 bytes
-func FloatToBytes(f float32) []byte {
-	return (*[4]byte)(unsafe.Pointer(&f))[:]
-}
+//func IntToBytes(i int) []byte {
+//	return (*[4]byte)(unsafe.Pointer(&i))[:]
+//}
+//
+//// Converts the raw float data to a slice of 4 bytes
+//func FloatToBytes(f float32) []byte {
+//	return (*[4]byte)(unsafe.Pointer(&f))[:]
+//}
 
 
 // TODO: 

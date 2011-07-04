@@ -56,7 +56,8 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 	l.ShowWarn = opt&int(LOG_NOWARN) == 0
 	l.ShowPrint = opt&int(LOG_NOSTDOUT) == 0
 	if logfile != "" {
-		out := FOpen(logfile)
+		out, err := os.Create(logfile)
+		CheckErr(err, ERR_IO)
 		l.File = log.New(out, "", log.Ltime|log.Lmicroseconds)
 		//Debug("Opened log file:", logfile)
 	}

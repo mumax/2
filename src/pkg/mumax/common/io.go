@@ -20,15 +20,15 @@ import (
 // Truncates existing file or creates the file if neccesary.
 // The permission is the same as the parent directory
 // (but without executability).
-func FOpen(filename string) *os.File {
-	//perm := Permission(Parent(filename))
-	//perm &= MASK_NO_EXEC
-	file, err := os.Create(filename)
-	if err != nil {
-		panic(IOErr(err.String()))
-	}
-	return file
-}
+//func FOpen(filename string) *os.File {
+//	//perm := Permission(Parent(filename))
+//	//perm &= MASK_NO_EXEC
+//	file, err := os.Create(filename)
+//	if err != nil {
+//		panic(IOErr(err.String()))
+//	}
+//	return file
+//}
 
 // Makes a directory.
 // The permission is the same as the parent directory.

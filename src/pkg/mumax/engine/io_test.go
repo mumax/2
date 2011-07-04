@@ -9,8 +9,8 @@ package engine
 
 import (
 	"testing"
+	. "mumax/common"
 	"mumax/host"
-	"net"
 	"reflect"
 	"os"
 	"exec"
@@ -22,38 +22,61 @@ func TestIO(test *testing.T) {
 	for i := range a1.List {
 		a1.List[i] = float32(i)
 	}
-	end1, end2 := net.Pipe()
-	go Write(end1, a1)
-	a2 := Read(end2)
+	f, err := os.Create("iotest.t")
+	CheckErr(err, ERR_IO)
+	Write(f, a1)
+	f.Close()
+
+	f, err = os.Open("iotest.t")
+	CheckErr(err, ERR_IO)
+
+	a2 := Read(f)
+	f.Close()
+
 	if !reflect.DeepEqual(a1, a2) {
 		test.Fail()
 	}
+	exec.Command("rm", "-f", "iotest.t").Run()
 }
 
 
 var t1, t2 *host.Array
 
 func BenchmarkWriteHostArray(bench *testing.B) {
-	size := []int{350, 190, 710}
+	bench.StopTimer()
+	size := []int{350, 190, 10}
 	if t1 == nil {
 		t1 = host.NewArray(3, size)
-		bench.SetBytes(4 * int64((t1.Len())))
 	}
+	bench.SetBytes(4 * int64((t1.Len())))
+	bench.StartTimer()
 	for i := 0; i < bench.N; i++ {
-		f,_ := os.Open("iotest.t")
+		f, err := os.Create("iotest.t")
+		CheckErr(err, ERR_BUG)
 		Write(f, t1)
 		f.Close()
 	}
+	bench.StopTimer()
 	exec.Command("rm", "-f", "iotest.t").Run()
 }
 
-//func BenchmarkRead(bench *testing.B) {
-//	size := []int{3, 350, 190, 310}
-//	if t2 == nil {
-//		t2 = NewT4(size)
-//		bench.SetBytes(4 * int64(Len(t2)))
-//	}
-//	for i := 0; i < bench.N; i++ {
-//		t1.ReadFromF("iotest.t")
-//	}
-//}
+func BenchmarkReadHostArray(bench *testing.B) {
+	bench.StopTimer()
+	size := []int{350, 190, 10}
+	if t1 == nil {
+		t1 = host.NewArray(3, size)
+	}
+	bench.SetBytes(4 * int64((t1.Len())))
+	f, err := os.Create("iotest.t")
+	CheckErr(err, ERR_BUG)
+	Write(f, t1)
+	f.Close()
+	bench.StartTimer()
+	for i := 0; i < bench.N; i++ {
+		f, _ := os.Open("iotest.t")
+		t1 = Read(f)
+		f.Close()
+	}
+	bench.StopTimer()
+	exec.Command("rm", "-f", "iotest.t").Run()
+}

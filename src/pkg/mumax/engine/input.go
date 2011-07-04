@@ -41,7 +41,10 @@ func Read(in io.Reader) *host.Array {
 func readInt(in io.Reader) int {
 	var bytes4 [4]byte
 	bytes := bytes4[:]
-	io.ReadFull(in, bytes)
+	_, err := io.ReadFull(in, bytes)
+	if err != nil {
+		panic(IOErr(err.String()))
+	}
 	return *((*int)(unsafe.Pointer(&bytes4[0]))) // bytes-to-int conversion
 }
 
@@ -49,20 +52,23 @@ func readData(in io.Reader, data []float32) {
 	var bytes4 [4]byte
 	bytes := bytes4[:]
 	for i := range data {
-		in.Read(bytes)
+		_, err := in.Read(bytes)
+		if err != nil {
+			panic(IOErr(err.String()))
+		}
 		data[i] = *((*float32)(unsafe.Pointer(&bytes4[0])))
 	}
 }
 
 // converts the raw int data to a slice of 4 bytes
-func bytesToInt(bytes *[4]byte) int {
-	return *((*int)(unsafe.Pointer(bytes)))
-}
-
-// converts the raw float data to a slice of 4 bytes
-func bytesToFloat(bytes *[4]byte) float32 {
-	return *((*float32)(unsafe.Pointer(bytes)))
-}
+//func bytesToInt(bytes *[4]byte) int {
+//	return *((*int)(unsafe.Pointer(bytes)))
+//}
+//
+//// converts the raw float data to a slice of 4 bytes
+//func bytesToFloat(bytes *[4]byte) float32 {
+//	return *((*float32)(unsafe.Pointer(bytes)))
+//}
 
 
 // Reads data from the reader to the
