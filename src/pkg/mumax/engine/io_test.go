@@ -7,24 +7,28 @@
 package engine
 
 
-//import (
-//	"testing"
-//)
-//
-//func TestIO(test *testing.T) {
-//	size := []int{3, 15, 19, 31}
-//	t1 := NewT4(size)
-//	for i := range t1.List() {
-//		t1.List()[i] = float32(i)
-//	}
-//	WriteF("iotest.t", t1)
-//	t2 := ReadF("iotest.t")
-//	if !Equal(t1, t2) {
-//		test.Fail()
-//	}
-//}
-//
-//
+import (
+	"testing"
+	"mumax/host"
+	"net"
+	"reflect"
+)
+
+func TestIO(test *testing.T) {
+	size := []int{15, 19, 31}
+	a1 := host.NewArray(2, size)
+	for i := range a1.List {
+		a1.List[i] = float32(i)
+	}
+	end1, end2 := net.Pipe()
+	go Write(end1, a1)
+	a2 := Read(end2)
+	if !reflect.DeepEqual(a1, a2) {
+		test.Fail()
+	}
+}
+
+
 //var t1, t2 *T4
 //
 //func BenchmarkWrite(bench *testing.B) {
