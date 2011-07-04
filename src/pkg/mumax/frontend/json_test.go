@@ -10,19 +10,24 @@ import (
 	"testing"
 	"json"
 	//"os"
-	"fmt"
-	"reflect"
+	//"fmt"
+	//"reflect"
 	"net"
 )
 
 func TestJSON(test *testing.T) {
-	end1, end2 :=  net.Pipe()
+	end1, end2 := net.Pipe()
 	enc := json.NewEncoder(end1)
 	go enc.Encode([]interface{}{"call", 4, []float32{1, 2, 3, 4, 5}})
-	dec := json.NewDecoder(end2)
-	v := new(interface{})
-	err := dec.Decode(v)
-	fmt.Println(err)
-	fmt.Println(reflect.TypeOf(*v))
+
+
+	var ipc jsonIPC
+	ipc.Init(end2, nil, &Test{})
+	ipc.Run()
+
 }
 
+
+type Test struct{
+
+}
