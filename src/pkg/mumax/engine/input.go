@@ -48,8 +48,8 @@ func readInt(in io.Reader) int {
 	return *((*int)(unsafe.Pointer(&bytes4[0]))) // bytes-to-int conversion
 }
 
+// reads float array from binary data
 func readData(in io.Reader, data []float32) {
-
 	var bytes4 [4]byte
 	bytes := bytes4[:]
 	for i := range data {
