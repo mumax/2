@@ -20,6 +20,12 @@ func (api API) GetArray() *host.Array {
 	return host.NewArray(3, []int{4, 5, 6})
 }
 
+
+// For testing purposes.
+func (api API) SinkArray(a *host.Array) {
+}
+
+
 // For testing purposes.
 func (api API) Version() int {
 	return 2

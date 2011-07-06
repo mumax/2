@@ -93,21 +93,41 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 
 // Convert v to the specified type.
 // JSON returns all numbers as float64's even when, e.g., ints are needed,
-// hence such conversion.
+// hence such conversion. Also, convert to host.Array etc.
 func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	switch typ.Kind() {
-	default:
-		return reflect.ValueOf(v) // do not convert
 	case reflect.Int:
 		Assert(float64(int(v.(float64))) == v.(float64))
 		return reflect.ValueOf(int(v.(float64)))
 	case reflect.Float32:
 		return reflect.ValueOf(float32(v.(float64)))
 	}
-	panic(Bug("unreachable"))
-	return reflect.ValueOf(nil)
+
+	switch typ.String() {
+	case "*host.Array":
+		return reflect.ValueOf(toArray(v))
+	}
+	return reflect.ValueOf(v) // do not convert
 }
 
+
+func toArray(v interface{}) *host.Array {
+	//good := false
+
+	var size [4]int
+	v2 := v
+	for i := range size {
+		if arr, ok := v2.([]interface{}); ok {
+			size[i] = len(arr)
+			v2 = arr[0]
+		} else {
+			break
+		}
+	}
+	panic(size)
+
+	return nil
+}
 
 func convertOutput(vals []interface{}) {
 	for i, v := range vals {
