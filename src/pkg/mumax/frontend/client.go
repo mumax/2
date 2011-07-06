@@ -25,7 +25,7 @@ import (
 
 type Client struct {
 	inputFile, outputDir string
-	ipc                  Interpreter
+	ipc                  jsonIPC
 	eng                  *engine.Engine
 	api                  engine.API
 	infifo, outfifo      *os.File
@@ -40,7 +40,7 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 	c.inputFile = inputFile
 	c.eng = engine.NewEngine()
 	c.api = engine.API{c.eng}
-	c.ipc.Init(c.api)
+	//c.ipc.Init(c.api)
 }
 
 
@@ -52,7 +52,9 @@ func (c *Client) Run() {
 		panic(InputErr(fmt.Sprint("subcommand ", command, " exited prematurely")))
 	}
 	c.openFifos()
-	c.interpretCommands()
+	//c.interpretCommands()
+	c.ipc.Init(c.infifo, c.outfifo, c.api)
+	c.ipc.Run()
 
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
@@ -130,23 +132,23 @@ func (c *Client) openFifos() {
 
 // read text commands from infifo, execute them and return the result to outfifo
 // stop when a fifo gets closed by the other end
-func (c *Client) interpretCommands() {
-
-	// interpreter executes commands from subprocess
-	for line, eof := parseLine(c.infifo); !eof; line, eof = parseLine(c.infifo) {
-		// call locally
-		ret := c.ipc.Call(line[0], line[1:])
-		// pass return value to subprocess
-		switch len(ret) {
-		default:
-			panic(Bug("Method returned too many values"))
-		case 0:
-			fmt.Fprintln(c.outfifo)
-		case 1:
-			fmt.Fprintln(c.outfifo, ret[0])
-		}
-	}
-}
+//func (c *Client) interpretCommands() {
+//
+//	// interpreter executes commands from subprocess
+//	for line, eof := parseLine(c.infifo); !eof; line, eof = parseLine(c.infifo) {
+//		// call locally
+//		ret := c.ipc.Call(line[0], line[1:])
+//		// pass return value to subprocess
+//		switch len(ret) {
+//		default:
+//			panic(Bug("Method returned too many values"))
+//		case 0:
+//			fmt.Fprintln(c.outfifo)
+//		case 1:
+//			fmt.Fprintln(c.outfifo, ret[0])
+//		}
+//	}
+//}
 
 
 // wait until the subcommand creates the handshake file,

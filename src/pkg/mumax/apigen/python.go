@@ -28,6 +28,7 @@ func (p *Python) Comment() string {
 func (p *Python) WriteHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 import os
+import json
 
 infifo = 0
 outfifo = 0
@@ -53,13 +54,10 @@ def init():
 def call(command, args):
 	if (initialized == 0):
 		init()
-	outfifo.write(command)
-	for a in args:
-			outfifo.write(" ")
-			outfifo.write(str(a))
-	outfifo.write("\n")
+	outfifo.write(json.dumps([command, args]))
+	outfifo.write('\n')
 	outfifo.flush()
-	return infifo.readline()
+	return json.loads(infifo.readline())
 `)
 }
 
@@ -85,7 +83,7 @@ func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, 
 	if returnType != nil {
 		retType = returnType.String()
 	}
-	fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s]))`, python_convert[retType], name, args))
+	fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args))
 }
 
 

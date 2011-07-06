@@ -36,21 +36,21 @@ func (c *Interpreter) Init(receiver_ interface{}) {
 
 // Calls the method determined by the funcName with given arguments and returns the return value.
 func (c *Interpreter) Call(funcName string, args []string) []interface{} {
-	// lookup function by name
-	f, ok := c.method[funcName]
-	if !ok {
-		panic(fmt.Sprintf(msg_no_such_method, funcName))
-	}
-
-	// call
-	retVals := f.Call(parseArgs(f, args))
-
-	// convert []reflect.Value to []interface{}
-	ret := make([]interface{}, len(retVals))
-	for i := range retVals {
-		ret[i] = retVals[i].Interface()
-	}
-	return ret
+	//	// lookup function by name
+	//	f, ok := c.method[funcName]
+	//	if !ok {
+	//		panic(fmt.Sprintf(msg_no_such_method, funcName))
+	//	}
+	//
+	//	// call
+	//	retVals := f.Call(parseArgs(f, args))
+	//
+	//	// convert []reflect.Value to []interface{}
+	//	ret := make([]interface{}, len(retVals))
+	//	for i := range retVals {
+	//		ret[i] = retVals[i].Interface()
+	//	}
+	//	return ret
 }
 
 
@@ -118,9 +118,3 @@ const (
 	msg_cant_parse      = "interpreter: do not know how to parse %s"
 	msg_arg_mismatch    = "interpreter: %v needs %v arguments, but %v provided"
 )
-
-
-// converts a function name in Go-style casing to the case we want in the API
-func ConvertCase(funcName string) string {
-	return strings.ToLower(funcName)
-}

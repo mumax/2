@@ -2,7 +2,7 @@ mumax2=../bin/mumax2
 
 TESTFILES=\
 		  test.py.out\
-		  Test.java.out\
+		  #Test.java.out\
 		  
 .PHONY: all
 all:

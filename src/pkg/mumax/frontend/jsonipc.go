@@ -11,7 +11,7 @@ package frontend
 import (
 	. "mumax/common"
 	"io"
-	//"os"
+	"os"
 	"json"
 	"fmt"
 	"reflect"
@@ -40,16 +40,53 @@ func (j *jsonIPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
 
 
 func (j *jsonIPC) Run() {
-	//for{
-	v := new(interface{})
-	err := j.Decode(v)
-	//if err == os.EOF{break}
-	CheckErr(err, ERR_IO)
+	for {
+		v := new(interface{})
+		err := j.Decode(v)
+		if err == os.EOF {
+			break
+		}
+		CheckErr(err, ERR_IO)
 
-	if array, ok := (*v).([]interface{}); ok {
-		fmt.Println(array)
-	} else {
-		panic(IOErr(fmt.Sprint("json: ", *v)))
+		if array, ok := (*v).([]interface{}); ok {
+			Debug("call:", array)
+			Assert(len(array) == 2)
+			ret := j.Call(array[0].(string), array[1].([]interface{}))
+			j.Encode(ret)
+		} else {
+			panic(IOErr(fmt.Sprint("json: ", *v)))
+		}
 	}
-	//}
 }
+
+func (j *jsonIPC) Call(funcName string, args []interface{}) []interface{} {
+	f, ok := j.method[funcName]
+	if !ok {
+		panic(fmt.Sprintf(msg_no_such_method, funcName))
+	}
+
+	// call
+	// convert []interface{} to []reflect.Value  
+	argvals := make([]reflect.Value, len(args))
+	for i := range argvals {
+		argvals[i] = reflect.ValueOf(args[i])
+	}
+	retVals := f.Call(argvals)
+
+	// convert []reflect.Value to []interface{}
+	ret := make([]interface{}, len(retVals))
+	for i := range retVals {
+		ret[i] = retVals[i].Interface()
+	}
+	return ret
+}
+
+
+// error message
+const (
+	//msg_already_defined = "interpreter: %s already defined"
+	msg_no_such_method = "interpreter: no such method: %s"
+	//msg_no_such_command = "interpreter: no such command: %s. options: %v"
+	//msg_cant_parse      = "interpreter: do not know how to parse %s"
+	//msg_arg_mismatch    = "interpreter: %v needs %v arguments, but %v provided"
+)
