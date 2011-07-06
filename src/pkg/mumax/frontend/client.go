@@ -25,7 +25,7 @@ import (
 
 type Client struct {
 	inputFile, outputDir string
-	ipc                  jsonIPC
+	ipc                  jsonRPC
 	eng                  *engine.Engine
 	api                  engine.API
 	infifo, outfifo      *os.File
