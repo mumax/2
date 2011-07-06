@@ -18,6 +18,8 @@ import (
 )
 
 
+
+// An RPC server using simple JSON encoding.
 type jsonIPC struct {
 	in  io.Reader
 	out io.Writer
@@ -28,6 +30,8 @@ type jsonIPC struct {
 }
 
 
+// Sets up the RPC to read JSON-encoded function calls from in and return
+// the result via out. All public methods of the receiver are made accessible.
 func (j *jsonIPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
 	j.in = in
 	j.out = out
@@ -39,6 +43,8 @@ func (j *jsonIPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
 }
 
 
+// Reads JSON values from j.in, calls the corresponding functions and
+// encodes the return values back to j.out.
 func (j *jsonIPC) Run() {
 	for {
 		v := new(interface{})
@@ -59,6 +65,8 @@ func (j *jsonIPC) Run() {
 	}
 }
 
+
+// Calls the function specified by funcName with the given arguments and returns the return values.
 func (j *jsonIPC) Call(funcName string, args []interface{}) []interface{} {
 	f, ok := j.method[funcName]
 	if !ok {
@@ -69,7 +77,7 @@ func (j *jsonIPC) Call(funcName string, args []interface{}) []interface{} {
 	// convert []interface{} to []reflect.Value  
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
-		argvals[i] = reflect.ValueOf(args[i])
+		argvals[i] = convertArg(args[i], f.Type().In(i))//reflect.ValueOf(args[i])
 	}
 	retVals := f.Call(argvals)
 
@@ -79,6 +87,18 @@ func (j *jsonIPC) Call(funcName string, args []interface{}) []interface{} {
 		ret[i] = retVals[i].Interface()
 	}
 	return ret
+}
+
+
+// Convert v to the specified type.
+// JSON returns all numbers as float64's even when, e.g., ints are needed,
+// hence such conversion.
+func convertArg(v interface{}, typ reflect.Type) reflect.Value{
+	switch typ.Kind(){
+		case reflect.Int: Assert(float64(int(v.(float64))) == v.(float64)); return reflect.ValueOf(int(v.(float64)))
+	}	
+	panic(Bug("unreachable"))
+	return reflect.ValueOf(nil)
 }
 
 
