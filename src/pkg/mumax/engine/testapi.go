@@ -10,8 +10,15 @@ package engine
 
 // Dummy API functions for testing
 
-import ()
+import (
+	"mumax/host"
+)
 
+
+// For testing purposes.
+func (api API) GetArray() *host.Array {
+	return host.NewArray(3, []int{4, 5, 6})
+}
 
 // For testing purposes.
 func (api API) Version() int {

@@ -10,6 +10,7 @@ package frontend
 
 import (
 	. "mumax/common"
+	"mumax/host"
 	"io"
 	"os"
 	"json"
@@ -57,6 +58,7 @@ func (j *jsonRPC) Run() {
 			Debug("call:", array)
 			Assert(len(array) == 2)
 			ret := j.Call(array[0].(string), array[1].([]interface{}))
+			convertOutput(ret)
 			j.Encode(ret)
 		} else {
 			panic(IOErr(fmt.Sprint("json: ", *v)))
@@ -106,6 +108,17 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	return reflect.ValueOf(nil)
 }
 
+
+func convertOutput(vals []interface{}) {
+	for i, v := range vals {
+		switch v.(type) {
+		default:
+			vals[i] = v
+		case *host.Array:
+			vals[i] = v.(*host.Array).Array
+		}
+	}
+}
 
 // error message
 const (

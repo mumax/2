@@ -4,8 +4,8 @@ all: apigen
 apigen:
 	./mumax2-apigen
 	python mumax2.py
-	javac Mumax2.java
-	lua mumax2.lua
+	#javac Mumax2.java
+	#lua mumax2.lua
 	#g++ mumax2.h
 
 CLEANFILES=\
