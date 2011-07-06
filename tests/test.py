@@ -11,4 +11,4 @@ from mumax2 import *
 #print "sum 1 2", sum(1, 2)
 #print "getmany", getmany()
 #print "getarray", getarray()
-sinkarray([[[1, 2, 3, 4],[5,6,7,8]]])
+sinkarray([[[[1, 2, 3, 4],[5,6,7,8]]]])

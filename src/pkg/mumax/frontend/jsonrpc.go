@@ -114,6 +114,7 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 func toArray(v interface{}) *host.Array {
 	//good := false
 
+	// determine array size
 	var size [4]int
 	v2 := v
 	for i := range size {
@@ -124,10 +125,12 @@ func toArray(v interface{}) *host.Array {
 			break
 		}
 	}
-	panic(size)
 
-	return nil
+	a := host.NewArray(size[0], size[1:])
+	panic("TODO: check dimensions, read into array")
+	return a
 }
+
 
 func convertOutput(vals []interface{}) {
 	for i, v := range vals {

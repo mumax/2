@@ -11,6 +11,7 @@ package engine
 // Dummy API functions for testing
 
 import (
+	. "mumax/common"
 	"mumax/host"
 )
 
@@ -23,7 +24,9 @@ func (api API) GetArray() *host.Array {
 
 // For testing purposes.
 func (api API) SinkArray(a *host.Array) {
+		Debug("SinkArray", a)
 }
+
 
 
 // For testing purposes.
