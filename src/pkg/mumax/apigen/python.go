@@ -83,7 +83,7 @@ func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, 
 	if returnType != nil {
 		retType = returnType.String()
 	}
-	fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args))
+	fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args))// single return value only
 }
 
 
