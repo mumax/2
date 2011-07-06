@@ -100,7 +100,7 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 		Assert(float64(int(v.(float64))) == v.(float64))
 		return reflect.ValueOf(int(v.(float64)))
 	case reflect.Float32:
-			return reflect.ValueOf(float32(v.(float64)))
+		return reflect.ValueOf(float32(v.(float64)))
 	}
 	panic(Bug("unreachable"))
 	return reflect.ValueOf(nil)

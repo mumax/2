@@ -81,8 +81,10 @@ func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, 
 
 	fmt.Fprintf(out, `	ret = call("%s", [%s])`, name, args)
 	fmt.Fprint(out, "\n	return ")
-	for i := range returnTypes{
-		if i != 0{fmt.Fprint(out, ", ")}
+	for i := range returnTypes {
+		if i != 0 {
+			fmt.Fprint(out, ", ")
+		}
 		fmt.Fprintf(out, `%v(ret[%v])`, python_convert[returnTypes[i].String()], i)
 	}
 	fmt.Fprintln(out)

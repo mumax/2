@@ -15,9 +15,9 @@ import (
 
 // Represents a programming language.
 type Lang interface {
-	Filename() string                                                                       // file name for the API file
-	Comment() string                                                                        // Comment token like # or //
-	WriteHeader(out io.Writer)                                                              // Write the header of the source file
-	WriteFooter(out io.Writer)                                                              // Write the footer of the source file
+	Filename() string                                                                          // file name for the API file
+	Comment() string                                                                           // Comment token like # or //
+	WriteHeader(out io.Writer)                                                                 // Write the header of the source file
+	WriteFooter(out io.Writer)                                                                 // Write the footer of the source file
 	WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnTypes []reflect.Type) // Write a function wrapper to the source file
 }
