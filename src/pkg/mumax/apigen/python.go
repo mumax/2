@@ -66,7 +66,7 @@ func (p *Python) WriteFooter(out io.Writer) {
 
 }
 
-func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnType reflect.Type) {
+func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnTypes []reflect.Type) {
 	fmt.Fprintln(out)
 	fmt.Fprint(out, "def ", name, "(")
 
@@ -79,11 +79,14 @@ func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, 
 	}
 	fmt.Fprintln(out, args, "):")
 
-	var retType string
-	if returnType != nil {
-		retType = returnType.String()
+	fmt.Fprintf(out, `	ret = call("%s", [%s])`, name, args)
+	fmt.Fprint(out, "\n	return ")
+	for i := range returnTypes{
+		if i != 0{fmt.Fprint(out, ", ")}
+		fmt.Fprintf(out, `%v(ret[%v])`, python_convert[returnTypes[i].String()], i)
 	}
-	fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args)) // single return value only
+	fmt.Fprintln(out)
+	//fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args)) // single return value only
 }
 
 
@@ -93,6 +96,6 @@ var (
 		"float32": "float",
 		"float64": "float",
 		"string":  "str",
-		"bool":    "boolean",
+		"bool":    "bool",
 		"":        ""}
 )

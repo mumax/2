@@ -6,7 +6,7 @@ TARG=mumax/frontend
 GOFILES=\
 	client.go\
 	client_main.go\
-	jsonipc.go\
+	jsonrpc.go\
 	io.go\
 	main.go\
 	addmethods.go\

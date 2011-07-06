@@ -94,9 +94,13 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 // hence such conversion.
 func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	switch typ.Kind() {
+	default:
+		return reflect.ValueOf(v) // do not convert
 	case reflect.Int:
 		Assert(float64(int(v.(float64))) == v.(float64))
 		return reflect.ValueOf(int(v.(float64)))
+	case reflect.Float32:
+			return reflect.ValueOf(float32(v.(float64)))
 	}
 	panic(Bug("unreachable"))
 	return reflect.ValueOf(nil)

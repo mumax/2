@@ -33,7 +33,7 @@ func APIGen() {
 	frontend.AddMethods(method, new(engine.API))
 
 	// target languages
-	langs := []Lang{&Python{}, &Java{}, &Lua{}}
+	langs := []Lang{&Python{}}//, &Java{}, &Lua{}}
 
 	// output api files for each language.
 	for _, lang := range langs {
@@ -47,15 +47,11 @@ func APIGen() {
 		lang.WriteHeader(out)
 
 		for name, meth := range method {
-			var returnType reflect.Type
-			switch meth.Type().NumOut() {
-			default:
-				panic(Bug(""))
-			case 0:
-			case 1:
-				returnType = meth.Type().Out(0)
+			returnTypes := make([]reflect.Type, meth.Type().NumOut())
+			for i := range returnTypes{
+				returnTypes[i] = meth.Type().Out(i)
 			}
-			lang.WriteFunc(out, frontend.ConvertCase(name), argTypes(meth), returnType)
+			lang.WriteFunc(out, frontend.ConvertCase(name), argTypes(meth), returnTypes)
 		}
 
 		lang.WriteFooter(out)
