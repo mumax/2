@@ -24,9 +24,8 @@ func (api API) GetArray() *host.Array {
 
 // For testing purposes.
 func (api API) SinkArray(a *host.Array) {
-		Debug("SinkArray", a)
+	Debug("SinkArray", a)
 }
-
 
 
 // For testing purposes.

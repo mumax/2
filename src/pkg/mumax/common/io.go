@@ -63,7 +63,7 @@ func Readlink(name string) string {
 
 
 // Permission flag for rw-rw-rw
-const MASK_NO_EXEC = 0666
+//const MASK_NO_EXEC = 0666
 
 
 // returns the parent directory of a file
