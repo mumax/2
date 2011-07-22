@@ -112,18 +112,28 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 
 
 func toArray(v interface{}) *host.Array {
-	//good := false
+	fmt.Println("toArray", v)
 
-	// determine array size
+	err := false
+	// determine array size as {len(v), len(v[0]), len(v[0][0]), ...}
 	var size [4]int
 	v2 := v
 	for i := range size {
 		if arr, ok := v2.([]interface{}); ok {
 			size[i] = len(arr)
+			if size[i] == 0 {
+				err = true
+				break
+			}
 			v2 = arr[0]
 		} else {
+			err = true
 			break
 		}
+	}
+
+	if err {
+		panic(IOErr(fmt.Sprint("Array with invalid size:", v)))
 	}
 
 	a := host.NewArray(size[0], size[1:])
