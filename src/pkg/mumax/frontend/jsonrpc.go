@@ -112,6 +112,13 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 
 
 func toArray(v interface{}) *host.Array {
+	defer func() {
+		err := recover()
+		if err != nil {
+			panic(IOErr(fmt.Sprint("Error parsing json array: ", v, "\ncause:", err)))
+		}
+	}()
+
 	fmt.Println("toArray", v)
 
 	err := false
@@ -136,9 +143,23 @@ func toArray(v interface{}) *host.Array {
 		panic(IOErr(fmt.Sprint("Array with invalid size:", v)))
 	}
 
-	a := host.NewArray(size[0], size[1:])
-	panic("TODO: check dimensions, read into array")
-	return a
+	arr := host.NewArray(size[0], size[1:])
+	//panic("TODO: check dimensions, read into array")
+	a := arr.Array
+	va := v.([]interface{})
+	for c := range a {
+		va_c := va[c].([]interface{})
+		for i := range a[c] {
+			va_ci := va_c[i].([]interface{})
+			for j := range a[c][i] {
+				va_cij := va_ci[j].([]interface{})
+				for k := range a[c][i][j] {
+					a[c][i][j][k] = float32(va_cij[k].(float64))
+				}
+			}
+		}
+	}
+	return arr
 }
 
 
