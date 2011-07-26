@@ -5,16 +5,9 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// The mumax engine stores the
-// entire simulation state and provides methods to run the simulation.
-// An engine is typically steered by a driver, like a python program or
-// command line interface.
-package engine
+// This package provides a front-end to drive the MuMax2 simulation engine.
+// The front-end executes an input file written in a scripting language like
+// python and makes it communicate with the engine.
+package frontend
 
-type Engine struct {
-
-}
-
-func NewEngine() *Engine {
-	return new(Engine)
-}
+// This files provides package documentation.
