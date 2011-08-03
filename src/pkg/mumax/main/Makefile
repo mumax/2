@@ -33,11 +33,11 @@ all: $(executables)
 $(executables):	%:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
-	mv -f $@ ../../../../bin
+	mv -f $@ ../../../../bin/sub
 
 .PHONY:	clean
 clean:
-	rm -f  $(executables) *.a *.$O $(CLEANFILES) mumax2.py mumax2.java mumax2.h mumax2.lua
+	rm -f  $(executables) *.a *.$O $(CLEANFILES)
 
 .PHONY: install
 install:
@@ -45,7 +45,6 @@ install:
 .PHONY: test
 test: 
 
-	
 .PHONY: bench
 bench:
 

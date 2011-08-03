@@ -40,7 +40,7 @@ func parsePTXArgTypes(fname string) map[string][]argInfo {
 	types := make(map[string][]argInfo)
 	content, err := ioutil.ReadFile(fname)
 	CheckErr(err, ERR_IO)
-	words := strings.Split(string(content), " ", -1)
+	words := strings.Split(string(content), " ")
 	for i, word := range words {
 		if strings.HasSuffix(word, ".param") {
 			typ := words[i+1][1:len(words[i+1])]     // e.g. ".s32"

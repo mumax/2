@@ -6,4 +6,4 @@ MUMAX2BIN=$(dirname $(readlink -f $0)) # path to this script
 #export PYTHONPATH=$PYTHONPATH:$SIMROOT/lib
 #export PATH=$PATH:$SIMROOT/bin
 #export LD_LIBRARY_PATH=$SIMROOT/lib:$LD_LIBRARY_PATH
-exec $MUMAX2BIN/mumax2-bin $@
+exec $MUMAX2BIN/sub/mumax2-bin $@

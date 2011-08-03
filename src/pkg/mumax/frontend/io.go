@@ -44,7 +44,7 @@ func parseLine(in io.Reader) (words []string, eof bool) {
 			return
 		}
 	}
-	words = strings.Split(str, " ", -1)
+	words = strings.Split(str, " ")
 	return
 }
 
