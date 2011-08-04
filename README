@@ -9,3 +9,22 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 
+
+Architecture
+
+src/		Source files
+src/pkg/	Go package sources
+src/ptx/	CUDA sources for PTX assembly files
+src/lib/	CUDA and C sources for C libraries
+
+bin/		Executables, useful to put in $PATH
+bin/sub/	Executables used internally, not useful in $PATH
+
+tests/		Test files
+
+doc/		Documentation
+
+misc/		Miscellaneous scripts
+
+
+

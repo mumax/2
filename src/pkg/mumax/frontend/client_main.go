@@ -20,7 +20,7 @@ import (
 
 // run the input files given on the command line
 func clientMain() {
-	if !*flag_silent{
+	if !*flag_silent {
 		fmt.Println(WELCOME)
 	}
 	infile := inputFile()
