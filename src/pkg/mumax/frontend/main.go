@@ -130,33 +130,33 @@ func crashreport(err interface{}) {
 	status := 0
 	switch err.(type) {
 	default:
-		Log("panic:", err, "\n", getCrashStack())
+		Err("panic:", err, "\n", getCrashStack())
 		Log(SENDMAIL)
 		status = ERR_PANIC
 	case Bug:
-		Log("bug:", err, "\n", getCrashStack())
+		Err("bug:", err, "\n", getCrashStack())
 		Log(SENDMAIL)
 		status = ERR_BUG
 	case InputErr:
-		Log("illegal input:", err, "\n")
+		Err("illegal input:", err, "\n")
 		if *flag_debug {
-			Log(getCrashStack())
+			Debug(getCrashStack())
 		}
 		status = ERR_INPUT
 	case IOErr:
-		Log("IO error:", err, "\n")
+		Err("IO error:", err, "\n")
 		if *flag_debug {
-			Log(getCrashStack())
+			Debug(getCrashStack())
 		}
 		status = ERR_IO
 	case cu.Result:
-		Log("cuda error:", err, "\n", getCrashStack())
+		Err("cuda error:", err, "\n", getCrashStack())
 		if *flag_debug {
-			Log(getCrashStack())
+			Debug(getCrashStack())
 		}
 		status = ERR_CUDA
 	}
-	Log("Exiting with status", status, ErrString[status])
+	Debug("Exiting with status", status, ErrString[status])
 	os.Exit(status)
 }
 
@@ -166,19 +166,7 @@ func crashreport(err interface{}) {
 // starts with the relevant panic() call.
 func getCrashStack() string {
 	stack := debug.Stack()
-	// remove the first 8 lines, which are irrelevant
-	nlines := 0
-	start := 0
-	for i := range stack {
-		if stack[i] == byte('\n') {
-			nlines++
-		}
-		if nlines == 8 {
-			start = i + 1
-			break
-		}
-	}
-	return string(stack[start:])
+	return "stack trace:\n" + string(stack)
 }
 
 
@@ -210,7 +198,16 @@ func initTimeout() {
 }
 
 const (
-	WELCOME  = `MuMax 2.0.0.70 FD Multiphysics Client (C) Arne Vansteenkiste & Ben Van de Wiele, Ghent University.`
+	WELCOME  = `
+ MuMax 2.0.443 FD Multiphysics Engine
+ (C) Arne Vansteenkiste & Ben Van de Wiele,
+     Dynamat/EELAB Ghent University.
+	
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+`
 	LOGFILE  = "mumax2.log"
 	SENDMAIL = "\n-----\nIf you would like to have this issue fixed, please send \"" + LOGFILE + "\" to Arne.Vansteenkiste@UGent.be and/or Ben.VandeWiele@UGent.be\n-----\n"
 )

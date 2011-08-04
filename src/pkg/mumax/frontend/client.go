@@ -86,8 +86,8 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	stdout, err5 := proc.StdoutPipe()
 	CheckErr(err5, ERR_IO)
 	CheckErr(proc.Start(), ERR_IO)
-	go logStream("["+command+":err]", stderr)
-	go logStream("["+command+":out]", stdout)
+	go logStream("["+command+"]", stderr, true)
+	go logStream("["+command+"]", stdout, false)
 
 	Debug(command, "PID:", proc.Process.Pid)
 	// start waiting for sub-command asynchronously and
@@ -163,7 +163,7 @@ func (c *Client) handshake(procwaiter chan (int)) (ok bool) {
 	case <-filewaiter:
 		return true
 	case exitstat := <-procwaiter:
-		Log("Child command exited with status ", exitstat)
+		Debug("Child command exited with status ", exitstat)
 		return false
 	}
 	panic(Bug("unreachable"))
@@ -186,7 +186,7 @@ func pollFile(fname string) (waiter chan (int)) {
 
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
-func logStream(prefix string, in io.Reader) {
+func logStream(prefix string, in io.Reader, error bool) {
 	var bytes [BUFSIZE]byte
 	buf := bytes[:]
 	var err os.Error = nil
@@ -194,7 +194,11 @@ func logStream(prefix string, in io.Reader) {
 	for err == nil {
 		n, err = in.Read(buf)
 		if n != 0 {
+			if error{
+			Err(prefix, string(buf[:n]))
+	} else{
 			Log(prefix, string(buf[:n]))
+	}
 		} // TODO: no printLN
 	}
 }

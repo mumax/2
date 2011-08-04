@@ -7,20 +7,13 @@
 
 package common
 
-import (
-)
+import ()
 
 
 // ANSI escape sequences
 const (
 	ESC        = "\033["
-	ERASE      = "\033[K"  // Erase rest of line
-	RESET      = "\033[0m" // Restore cursor position
 	BOLD       = "\033[1m"
-	LINEUP     = "\033[1A"
-	LINEDOWN   = "\033[1B"
-	HIDECURSOR = "\033[?25l"
-	SHOWCURSOR = "\033[?25h"
 	BLACK      = "\033[30m"
 	RED        = "\033[31m"
 	GREEN      = "\033[32m"
@@ -29,5 +22,10 @@ const (
 	MAGENTA    = "\033[35m"
 	CYAN       = "\033[36m"
 	WHITE      = "\033[37m"
+	RESET      = "\033[0m" // No formatting
+	ERASE      = "\033[K"  // Erase rest of line
+	LINEUP     = "\033[1A"
+	LINEDOWN   = "\033[1B"
+	HIDECURSOR = "\033[?25l"
+	SHOWCURSOR = "\033[?25h"
 )
-

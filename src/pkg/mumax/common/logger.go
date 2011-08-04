@@ -44,10 +44,11 @@ const (
 	LOG_NOWARN   LogOption = 1 << iota
 )
 
-const(
-	LOG_DEBUG_COL = BLUE
-	LOG_WARN_COL = RED
-	LOG_NORMAL_COL = WHITE
+const (
+	LOG_DEBUG_COL  = WHITE
+	LOG_WARN_COL   = RED
+	LOG_ERR_COL    = BOLD + RED
+	LOG_NORMAL_COL = RESET
 )
 
 // INTERNAL Initiates the logger and sets a log file.
@@ -103,6 +104,20 @@ func Warn(msg ...interface{}) {
 	if logger.ShowWarn {
 		logger.Screen.Println(msgcol...)
 	}
+	LogFile(msg...)
+}
+
+// Log an Error.
+func Err(msg ...interface{}) {
+	// put [err ] in front of message
+	msgcol := append([]interface{}{LOG_ERR_COL + "[error]"}, msg...)
+	msgcol = append(msgcol, RESET)
+	msg = append([]interface{}{"[error]"}, msg...)
+
+	if !logger.Initialized {
+		fmt.Fprintln(os.Stderr, msgcol...)
+	}
+	logger.Screen.Println(msgcol...)
 	LogFile(msg...)
 }
 

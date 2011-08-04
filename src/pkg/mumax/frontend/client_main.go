@@ -11,6 +11,7 @@ package frontend
 
 import (
 	. "mumax/common"
+	"fmt"
 	"path"
 	"exec"
 	"os"
@@ -19,11 +20,14 @@ import (
 
 // run the input files given on the command line
 func clientMain() {
+	if !*flag_silent{
+		fmt.Println(WELCOME)
+	}
 	infile := inputFile()
 	outdir := outputDir(infile)
 	initOutputDir(outdir)
 	initLogger(outdir)
-	Log(WELCOME)
+	LogFile(WELCOME)
 	Debug("Go", runtime.Version())
 	command := *flag_command
 
