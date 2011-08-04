@@ -83,6 +83,7 @@ func initLogger(outputDir string) {
 		logFile = outputDir + "/mumax2.log"
 	}
 	InitLogger(logFile, opts)
+	Debug("Logging to", logFile)
 }
 
 

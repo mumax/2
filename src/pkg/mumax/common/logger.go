@@ -69,6 +69,9 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 
 // Log a debug message.
 func Debug(msg ...interface{}) {
+	// put [debug] in front of message
+	msg = append([]interface{}{"[debug]"}, msg...)
+
 	if !logger.Initialized && logger.ShowDebug {
 		fmt.Fprintln(os.Stderr, msg...)
 	}
@@ -82,6 +85,9 @@ const MSG_WARNING = "Warning:"
 
 // Log a warning.
 func Warn(msg ...interface{}) {
+	// put [warn ] in front of message
+	msg = append([]interface{}{"[warn ]"}, msg...)
+
 	if !logger.Initialized && logger.ShowWarn {
 		fmt.Fprintln(os.Stderr, msg...)
 	}
@@ -93,6 +99,9 @@ func Warn(msg ...interface{}) {
 
 // Log normal output.
 func Log(msg ...interface{}) {
+	// put [log  ] in front of message
+	msg = append([]interface{}{"[log  ]"}, msg...)
+
 	if !logger.Initialized {
 		fmt.Fprintln(os.Stderr, msg...)
 	}
