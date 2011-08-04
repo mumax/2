@@ -44,6 +44,12 @@ const (
 	LOG_NOWARN   LogOption = 1 << iota
 )
 
+const(
+	LOG_DEBUG_COL = BLUE
+	LOG_WARN_COL = RED
+	LOG_NORMAL_COL = WHITE
+)
+
 // INTERNAL Initiates the logger and sets a log file.
 func (l *Logger) Init(logfile string, options ...LogOption) {
 	opt := 0
@@ -70,15 +76,17 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 // Log a debug message.
 func Debug(msg ...interface{}) {
 	// put [debug] in front of message
+	msgcol := append([]interface{}{LOG_DEBUG_COL + "[debug]"}, msg...)
 	msg = append([]interface{}{"[debug]"}, msg...)
 
+	LogFile(msg...)
+
 	if !logger.Initialized && logger.ShowDebug {
-		fmt.Fprintln(os.Stderr, msg...)
+		fmt.Fprintln(os.Stderr, msgcol...)
 	}
 	if logger.ShowDebug {
-		logger.Screen.Println(msg...)
+		logger.Screen.Println(msgcol...)
 	}
-	LogFile(msg...)
 }
 
 const MSG_WARNING = "Warning:"
@@ -86,13 +94,14 @@ const MSG_WARNING = "Warning:"
 // Log a warning.
 func Warn(msg ...interface{}) {
 	// put [warn ] in front of message
+	msgcol := append([]interface{}{LOG_WARN_COL + "[warn ]"}, msg...)
 	msg = append([]interface{}{"[warn ]"}, msg...)
 
 	if !logger.Initialized && logger.ShowWarn {
-		fmt.Fprintln(os.Stderr, msg...)
+		fmt.Fprintln(os.Stderr, msgcol...)
 	}
 	if logger.ShowWarn {
-		logger.Screen.Println(msg...)
+		logger.Screen.Println(msgcol...)
 	}
 	LogFile(msg...)
 }
@@ -100,13 +109,14 @@ func Warn(msg ...interface{}) {
 // Log normal output.
 func Log(msg ...interface{}) {
 	// put [log  ] in front of message
+	msgcol := append([]interface{}{LOG_NORMAL_COL + "[log  ]"}, msg...)
 	msg = append([]interface{}{"[log  ]"}, msg...)
 
 	if !logger.Initialized {
-		fmt.Fprintln(os.Stderr, msg...)
+		fmt.Fprintln(os.Stderr, msgcol...)
 	}
 	if logger.ShowPrint {
-		logger.Screen.Println(msg...)
+		logger.Screen.Println(msgcol...)
 	}
 	LogFile(msg...)
 }
