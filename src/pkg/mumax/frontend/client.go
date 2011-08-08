@@ -194,11 +194,11 @@ func logStream(prefix string, in io.Reader, error bool) {
 	for err == nil {
 		n, err = in.Read(buf)
 		if n != 0 {
-			if error{
-			Err(prefix, string(buf[:n]))
-	} else{
-			Log(prefix, string(buf[:n]))
-	}
+			if error {
+				Err(prefix, string(buf[:n]))
+			} else {
+				Log(prefix, string(buf[:n]))
+			}
 		} // TODO: no printLN
 	}
 }
