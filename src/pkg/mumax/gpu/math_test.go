@@ -41,4 +41,11 @@ func TestAddClosure(test *testing.T) {
 	b.CopyFromHost(bh)
 
 	ClAdd(a, a, b)
+
+	sum := a.LocalCopy()
+	for i := range sum.List{
+		if sum.List[i] != ah.List[i] + bh.List[i] {
+			test.Fatal(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
+		}
+	}
 }
