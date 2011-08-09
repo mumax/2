@@ -24,16 +24,15 @@ import (
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	comp [][]slice // List of components, e.g. vector or tensor components TODO: rm
-	list []slice   // All elements as a single, contiguous list. 
-	// The memory layout is not simple enough for a host array to be directly copied to it.
-	_size     [4]int // INTERNAL {components, size0, size1, size2}
-	size4D    []int  // {components, size0, size1, size2}
-	size3D    []int  // {size0, size1, size2}
-	_partSize [3]int
-	partSize  []int
-
-	Comp []Array
+	devPtr    []cu.DevicePtr // Access to the portions on the different GPUs
+	devStream []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
+	_size     [4]int         // INTERNAL {components, size0, size1, size2}
+	size4D    []int          // {components, size0, size1, size2}
+	size3D    []int          // {size0, size1, size2}
+	partSize  []int          // Size3D of the parts stored on each GPU, cut along the Y-axis
+	_partSize [3]int         // INTENRAL
+	length4D  int            // total Number of floats
+	Comp      []Array        // x,y,z components, nil for scalar field
 }
 
 
@@ -42,59 +41,60 @@ type Array struct {
 // E.g.: Init(1, 1000) gives an array of 1000 scalars
 // E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
 func (t *Array) InitArray(components int, size3D []int) {
-	Assert(components > 0)
-	Assert(len(size3D) == 3)
-	length := Prod(size3D)
-
 	devices := getDevices()
 	Ndev := len(devices)
-	t.list = make([]slice, len(devices))
-	slicelen := components * length / Ndev
-	for i := range devices {
-		t.list[i].init(devices[i], slicelen)
-	}
+	length3D := Prod(size3D)
 
 	Assert(size3D[1]%Ndev == 0)
+	Assert(length3D%Ndev == 0)
+
+	t.initSizes(components, size3D)
+
+	// init storage and streams
+	t.devPtr = make([]cu.DevicePtr, Ndev)
+	t.devStream = make([]cu.Stream, Ndev)
+
+	slicelen := components * (length3D / Ndev)
+	for i := range devices {
+		assureContext(getDeviceContext(i)) // Switch device context if necessary
+		t.devPtr[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
+		t.devStream[i] = cu.StreamCreate()
+	}
+
 	compSliceLen := length / Ndev
-
-	t.comp = make([][]slice, components)
-	for i := range t.comp {
-		t.comp[i] = make([]slice, Ndev)
-		for j := range t.comp[i] {
-			cs := &(t.comp[i][j])
-			start := i * compSliceLen
-			stop := (i + 1) * compSliceLen
-			cs.initSlice(&(t.list[j]), start, stop)
-		}
-	}
-
-	t._size[0] = components
-	for i := range size3D {
-		t._size[i+1] = size3D[i]
-	}
-	t.size4D = t._size[:]
-	t.size3D = t._size[1:]
-	// Slice along the J-direction
-	t._partSize[0] = t.size3D[0]
-	t._partSize[1] = t.size3D[1] / Ndev
-	t._partSize[2] = t.size3D[2]
-
-	t.Zero()
 
 	// initialize component arrays
 	t.Comp = make([]Array, components)
 	for c := range t.Comp {
-		t.Comp[c].comp = [][]slice{t.comp[c]}
-		t.Comp[c].list = t.comp[c]
-		t.Comp[c]._size[0] = 1
-		for i := 1; i < len(t._size); i++ {
-			t.Comp[c]._size[i] = t._size[i]
+		t.Comp[c].initSizes(1, t.size3D)
+		t.Comp[c].devPtr = make([]cu.DevicePtr, Ndev) // Todo: could be block-allocated and sliced
+		t.Comp[c].devStream = make([]cu.Stream, Ndev)
+		for i := range devices {
+			assureContext(getDeviceContext(i))
+			t.Comp[c].devPtr[i] = 
+			t.Comp[c].devStream[i] = cu.StreamCreate()
 		}
-		t.Comp[c].size4D = t.Comp[c]._size[:]
-		t.Comp[c].size3D = t.Comp[c]._size[1:]
 	}
+
+	t.Zero() // initialize with zeros
 }
 
+// initializes size3D, size4D, length, ...
+func (a *Array) initSizes(components int, size3D []int) {
+	Assert(components > 0)
+	Assert(len(size3D) == 3)
+
+	a._size[0] = components
+	for i := range size3D {
+		t._size[i+1] = size3D[i]
+	}
+	a.size4D = a._size[:]
+	a.size3D = a._size[1:]
+	a._partSize[0] = a.size3D[0]
+	a._partSize[1] = a.size3D[1] / Ndev // Slice along the J-direction
+	a._partSize[2] = a.size3D[2]
+	a.length4D = Prod(a.size4D)
+}
 
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
