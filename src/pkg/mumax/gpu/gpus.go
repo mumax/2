@@ -163,6 +163,7 @@ func assureContextId(deviceId int) {
 	ctx := _deviceCtxs[deviceId]
 	if _currentCtx != ctx {
 		ctx.SetCurrent()
+		Debug("Set context", ctx)
 		_currentCtx = ctx
 	}
 }

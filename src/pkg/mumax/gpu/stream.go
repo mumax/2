@@ -23,7 +23,7 @@ type Stream []cu.Stream
 func StreamCreate() Stream {
 	NDev := NDevice()
 	str := make([]cu.Stream, NDev)
-	for i := range str{
+	for i := range str {
 		str[i] = cu.StreamCreate()
 	}
 	return Stream(str)

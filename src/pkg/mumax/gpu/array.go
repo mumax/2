@@ -26,17 +26,17 @@ import (
 //
 // TODO: get device part as array?: requires gpuid[] field
 type Array struct {
-	devPtr    []cu.DevicePtr // Access to the portions on the different GPUs
-	devStream []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
-	devId	  []int // 
-	_size     [4]int         // INTERNAL {components, size0, size1, size2}
-	size4D    []int          // {components, size0, size1, size2}
-	size3D    []int          // {size0, size1, size2}
-	partSize  []int          // Size3D of the parts stored on each GPU, cut along the Y-axis
-	_partSize [3]int         // INTENRAL
-	length4D  int            // total Number of floats
-	partLength4D int // total number of floats on each GPU
-	Comp      []Array        // x,y,z components, nil for scalar field
+	devPtr       []cu.DevicePtr // Access to the portions on the different GPUs
+	devStream    []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
+	devId        []int          // 
+	_size        [4]int         // INTERNAL {components, size0, size1, size2}
+	size4D       []int          // {components, size0, size1, size2}
+	size3D       []int          // {size0, size1, size2}
+	partSize     []int          // Size3D of the parts stored on each GPU, cut along the Y-axis
+	_partSize    [3]int         // INTENRAL
+	length4D     int            // total Number of floats
+	partLength4D int            // total number of floats on each GPU
+	Comp         []Array        // x,y,z components, nil for scalar field
 }
 
 
@@ -58,7 +58,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.devStream = make([]cu.Stream, Ndev)
 
 	slicelen := components * (length3D / Ndev)
-	for i := 0; i<Ndev; i++{
+	for i := 0; i < Ndev; i++ {
 		assureContextId(i) // Switch device context if necessary
 		t.devPtr[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
 		t.devStream[i] = cu.StreamCreate()
@@ -72,8 +72,8 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.Comp[c].initSizes(1, t.size3D)
 		t.Comp[c].devPtr = make([]cu.DevicePtr, Ndev) // Todo: could be block-allocated and sliced
 		t.Comp[c].devStream = make([]cu.Stream, Ndev)
-		for i := 0; i < Ndev; i++{
-			t.Comp[c].devPtr[i] = offset(t.devPtr[i], c * t.Comp[c].Len() * SIZEOF_FLOAT)
+		for i := 0; i < Ndev; i++ {
+			t.Comp[c].devPtr[i] = offset(t.devPtr[i], c*t.Comp[c].Len()*SIZEOF_FLOAT)
 			t.Comp[c].devStream[i] = cu.StreamCreate()
 		}
 	}
@@ -126,10 +126,10 @@ func (a *Array) invalidate() {
 	for i := range a._size {
 		a._size[i] = 0 // also sets size3D, size4D to zero
 	}
-	for i := range a._partSize{
+	for i := range a._partSize {
 		a._partSize[i] = 0
 	}
-	for i:= range a.devPtr{
+	for i := range a.devPtr {
 		a.devPtr[i] = cu.DevicePtr(0)
 		a.devStream[i] = cu.Stream(0)
 	}
@@ -139,8 +139,8 @@ func (a *Array) invalidate() {
 	a.size4D = nil
 	a.partSize = nil
 	a.devPtr = nil
-	if a.Comp != nil{
-		for i:=range a.Comp{
+	if a.Comp != nil {
+		for i := range a.Comp {
 			a.Comp[i].invalidate()
 		}
 	}
@@ -254,7 +254,7 @@ func (src *Array) LocalCopy() *host.Array {
 
 func (a *Array) Zero() {
 	// Start memsets in parallel on each device
-	for i:= range a.devPtr{
+	for i := range a.devPtr {
 		assureContextId(i) // !!
 		//cu.MemsetD32Async(a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
 		cu.MemsetD32(a.devPtr[i], 0, int64(a.partLength4D))
