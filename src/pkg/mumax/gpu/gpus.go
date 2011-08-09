@@ -152,6 +152,7 @@ func InitDebugGPUs() {
 // Assures Context ctx is currently active. Switches contexts only when necessary.
 func assureContext(ctx cu.Context) {
 	if _currentCtx != ctx {
+	println("assureContext", ctx)
 		ctx.SetCurrent()
 		_currentCtx = ctx
 	}
@@ -161,11 +162,12 @@ func assureContext(ctx cu.Context) {
 // deviceId is the internal device index (index for getDevices() array), not the cuda device id
 func assureContextId(deviceId int) {
 	ctx := _deviceCtxs[deviceId]
-	if _currentCtx != ctx {
-		ctx.SetCurrent()
-		Debug("Set context", ctx)
-		_currentCtx = ctx
-	}
+	assureContext(ctx)
+	//if _currentCtx != ctx {
+	//	ctx.SetCurrent()
+	//	Debug("Set context", ctx)
+	//	_currentCtx = ctx
+	//}
 }
 
 // Returns the current context

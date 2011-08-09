@@ -10,7 +10,7 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-	//. "mumax/common"
+	. "mumax/common"
 	"mumax/host"
 	"runtime"
 	"testing"
@@ -31,36 +31,37 @@ func TestArrayAlloc(t *testing.T) {
 
 
 // Should init to zeros
-//func TestArrayInit(test *testing.T) {
-//	// fail test on panic, do not crash
-//	defer func() {
-//		if err := recover(); err != nil {
-//			test.Error(err)
-//		}
-//	}()
-//
-//	size := []int{4, 8, 16}
-//	host1 := host.NewArray(3, size)
-//	dev1 := NewArray(3, size); defer dev1.Free()
-//
-//	if dev1.Len() != 3*Prod(size) {
-//		test.Fatal("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
-//	}
-//
-//	l1 := host1.List
-//	for i := range l1 {
-//		l1[i] = float32(i)
-//	}
-//
-//	dev1.CopyToHost(host1)
-//	//host1.CopyFromDevice(dev1)
-//
-//	for i := range l1 {
-//		if l1[i] != 0 {
-//			test.Fatal(l1[i], "!=0")
-//		}
-//	}
-//}
+func TestArrayInit(test *testing.T) {
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
+
+	size := []int{4, 8, 16}
+	host1 := host.NewArray(3, size)
+	dev1 := NewArray(3, size); defer dev1.Free()
+
+	if dev1.Len() != 3*Prod(size) {
+		test.Fatal("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
+	}
+
+	l1 := host1.List
+	for i := range l1 {
+		l1[i] = float32(i)
+	}
+
+	dev1.CopyToHost(host1)
+	//host1.CopyFromDevice(dev1)
+
+	for i := range l1 {
+		if l1[i] != 0 {
+			test.Fail()
+			//test.Fatal(l1[i], "!=0")
+		}
+	}
+}
 
 
 func TestArrayCopy(test *testing.T) {
