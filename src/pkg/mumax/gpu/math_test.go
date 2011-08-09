@@ -16,11 +16,11 @@ import (
 
 func TestAddClosure(test *testing.T) {
 	// fail test on panic, do not crash
-	//	defer func() {
-	//		if err := recover(); err != nil {
-	//			test.Error(err)
-	//		}
-	//	}()
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
 
 	size := []int{8, 16, 32}
 
@@ -43,9 +43,26 @@ func TestAddClosure(test *testing.T) {
 	ClAdd(a, a, b)
 
 	sum := a.LocalCopy()
-	for i := range sum.List{
-		if sum.List[i] != ah.List[i] + bh.List[i] {
+	for i := range sum.List {
+		if sum.List[i] != ah.List[i]+bh.List[i] {
 			test.Fatal(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
 		}
+	}
+}
+
+
+
+func BenchmarkAddClosure(bench *testing.B) {
+	bench.StopTimer()
+	size := []int{8, 16, 32}
+
+	a := NewArray(3, size)
+	defer a.Free()
+	b := NewArray(3, size)
+	defer b.Free()
+
+	bench.StartTimer()
+	for i:=0; i<bench.N; i++{
+		ClAdd(a, a, b)
 	}
 }
