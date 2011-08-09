@@ -41,10 +41,11 @@ func TestArrayInit(test *testing.T) {
 
 	size := []int{4, 8, 16}
 	host1 := host.NewArray(3, size)
-	dev1 := NewArray(3, size); defer dev1.Free()
+	dev1 := NewArray(3, size)
+	defer dev1.Free()
 
 	if dev1.Len() != 3*Prod(size) {
-		test.Fatal("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
+		test.Error("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
 	}
 
 	l1 := host1.List
@@ -57,8 +58,8 @@ func TestArrayInit(test *testing.T) {
 
 	for i := range l1 {
 		if l1[i] != 0 {
-			test.Fail()
-			//test.Fatal(l1[i], "!=0")
+			//test.Fail()
+			test.Error(l1[i], "!=0")
 		}
 	}
 }
@@ -90,8 +91,8 @@ func TestArrayCopy(test *testing.T) {
 	l2 := host2.List
 	for i := range l1 {
 		if l2[i] != float32(i) {
-			//test.Fatal("expected", i, "got:", l2[i])
-			test.Fail()
+			test.Error("expected", i, "got:", l2[i])
+			//test.Fail()
 		}
 	}
 }

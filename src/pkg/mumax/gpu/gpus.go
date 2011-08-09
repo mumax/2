@@ -152,7 +152,7 @@ func InitDebugGPUs() {
 // Assures Context ctx is currently active. Switches contexts only when necessary.
 func assureContext(ctx cu.Context) {
 	if _currentCtx != ctx {
-	println("assureContext", ctx)
+		println("assureContext", ctx)
 		ctx.SetCurrent()
 		_currentCtx = ctx
 	}

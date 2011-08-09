@@ -22,7 +22,7 @@ func TestDuplicateFunc(test *testing.T) {
 		if err == nil {
 			test.Fail()
 		} else {
-				Log("Should be duplicate function error: ", err)
+			Log("Should be duplicate function error: ", err)
 		}
 	}()
 

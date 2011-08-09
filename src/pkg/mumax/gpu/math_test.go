@@ -5,6 +5,8 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+// DO NOT USE TEST.FATAL: -> runtime.GoExit -> context switch -> INVALID CONTEXT!
+
 package gpu
 
 // Author: Arne Vansteenkiste
@@ -45,8 +47,7 @@ func TestAddClosure(test *testing.T) {
 	sum := a.LocalCopy()
 	for i := range sum.List {
 		if sum.List[i] != ah.List[i]+bh.List[i] {
-			//test.Fatal(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
-			test.Fail()
+			test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
 		}
 	}
 }
