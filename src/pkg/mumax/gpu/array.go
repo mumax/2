@@ -17,12 +17,14 @@ import (
 )
 
 
-// A MuMax Array represents a 3-dimensional array of N-vectors.
+// A MuMax Array represents a 3-dimensional array of N-vectors,
+// transparently distributed over multiple GPUs
 //
-// Layout example for a (3,4) vsplice on 2 GPUs:
+// Data layout example for a 3-component array on 2 GPUs:
 // 	GPU0: X0 X1  Y0 Y1 Z0 Z1
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
-// TODO: get components as array (slice in J direction), get device part as array.
+//
+// TODO: get device part as array?: requires gpuid[] field
 type Array struct {
 	devPtr    []cu.DevicePtr // Access to the portions on the different GPUs
 	devStream []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
@@ -37,9 +39,9 @@ type Array struct {
 
 
 // Initializes the array to hold a field with the number of components and given size.
-// E.g.: Init(3, 1000) gives an array of 1000 3-vectors
-// E.g.: Init(1, 1000) gives an array of 1000 scalars
-// E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
+// 	Init(3, 1000) // gives an array of 1000 3-vectors
+// 	Init(1, 1000) // gives an array of 1000 scalars
+// 	Init(6, 1000) // gives an array of 1000 6-vectors or symmetric tensors
 func (t *Array) InitArray(components int, size3D []int) {
 	devices := getDevices()
 	Ndev := len(devices)
@@ -61,7 +63,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.devStream[i] = cu.StreamCreate()
 	}
 
-	compSliceLen := length / Ndev
+	//compSliceLen := length / Ndev
 
 	// initialize component arrays
 	t.Comp = make([]Array, components)
@@ -70,8 +72,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.Comp[c].devPtr = make([]cu.DevicePtr, Ndev) // Todo: could be block-allocated and sliced
 		t.Comp[c].devStream = make([]cu.Stream, Ndev)
 		for i := range devices {
-			assureContext(getDeviceContext(i))
-			t.Comp[c].devPtr[i] = 
+			//t.Comp[c].devPtr[i] = offset(t.devPtr[i], c * t.Comp[c].Len() * SIZEOF_FLOAT)
 			t.Comp[c].devStream[i] = cu.StreamCreate()
 		}
 	}
@@ -86,12 +87,12 @@ func (a *Array) initSizes(components int, size3D []int) {
 
 	a._size[0] = components
 	for i := range size3D {
-		t._size[i+1] = size3D[i]
+		a._size[i+1] = size3D[i]
 	}
 	a.size4D = a._size[:]
 	a.size3D = a._size[1:]
 	a._partSize[0] = a.size3D[0]
-	a._partSize[1] = a.size3D[1] / Ndev // Slice along the J-direction
+	a._partSize[1] = a.size3D[1] / len(getDevices()) // Slice along the J-direction
 	a._partSize[2] = a.size3D[2]
 	a.length4D = Prod(a.size4D)
 }
@@ -104,33 +105,42 @@ func NewArray(components int, size3D []int) *Array {
 }
 
 
-// Frees the underlying storage and sets the size to zero.
-func (v *Array) Free() {
-	for i := range v.list {
-		(&(v.list[i])).free()
+// Frees the underlying storage and invalidates all 
+// array fields to avoid accidental use after Free.
+func (a *Array) Free() {
+
+	for i := range a.devPtr {
+		assureContextId(i)
+		cu.MemFree(&(a.devPtr[i]))
+		a.devStream[i].Destroy()
 	}
 
-	//TODO(a) Destroy streams.
-	// nil pointers, zero lengths, just to be sure
-	for i := range v.comp {
-		slice := v.comp[i]
-		for j := range slice {
-			// The slice must not be freed because the underlying list has already been freed.
-			slice[j].devId = -1 // invalid id 
-			slice[j].stream.Destroy()
-		}
-	}
-	v.comp = nil
+	a.invalidate()
+}
 
-	for i := range v._size {
-		v._size[i] = 0
+// INTENRAL: invalidate all fields to protect against accidental use after Free()
+func (a *Array) invalidate() {
+	for i := range a._size {
+		a._size[i] = 0 // also sets size3D, size4D to zero
 	}
+	for i := range a._partSize{
+		a._partSize[i] = 0
+	}
+	for i:= range a.devPtr{
+		a.devPtr[i] = cu.DevicePtr(0)
+		a.devStream[i] = cu.Stream(0)
+	}
+	a.length4D = 0
+	a.size3D = nil
+	a.size4D = nil
+	a.partSize = nil
+	a.devPtr = nil
 }
 
 
 // Address of part of the array on device deviceId.
 func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
-	return a.list[deviceId].array
+	return a.devPtr[deviceId]
 }
 
 // True if unallocated/freed.
@@ -153,74 +163,74 @@ func (a *Array) Size3D() []int {
 	return a.size3D
 }
 func (dst *Array) CopyFromDevice(src *Array) {
-	// test for equal size
-	for i, d := range dst._size {
-		if d != src._size[i] {
-			panic(MSG_ARRAY_SIZE_MISMATCH)
-		}
-	}
-	d := dst.list
-	s := src.list
-	Assert(len(d) == len(s)) // in principle redundant
-	start := 0
-	// copies run concurrently on the individual devices
-	for i := range s {
-		length := s[i].length // in principle redundant
-		Assert(length == d[i].length)
-		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
-		start += length
-	}
-	// Synchronize with all copies
-	for i := range s {
-		s[i].stream.Synchronize()
-	}
-
+	//	// test for equal size
+	//	for i, d := range dst._size {
+	//		if d != src._size[i] {
+	//			panic(MSG_ARRAY_SIZE_MISMATCH)
+	//		}
+	//	}
+	//	d := dst.list
+	//	s := src.list
+	//	Assert(len(d) == len(s)) // in principle redundant
+	//	start := 0
+	//	// copies run concurrently on the individual devices
+	//	for i := range s {
+	//		length := s[i].length // in principle redundant
+	//		Assert(length == d[i].length)
+	//		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+	//		start += length
+	//	}
+	//	// Synchronize with all copies
+	//	for i := range s {
+	//		s[i].stream.Synchronize()
+	//	}
+	//
 }
 
 
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(srca *host.Array) {
-	src := srca.Comp
-
-	Assert(dst.NComp() == len(src))
-	// we have to work component-wise because of the data layout on the devices
-	for i := range src {
-		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
-		//dst.Comp[i].CopyFromHost(src[i])
-
-		h := src[i]
-		s := dst.comp[i]
-		//Assert(len(h) == len(s)) // in principle redundant
-		start := 0
-		for i := range s {
-			length := s[i].length
-			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
-			start += length
-		}
-	}
+	//	src := srca.Comp
+	//
+	//	Assert(dst.NComp() == len(src))
+	//	// we have to work component-wise because of the data layout on the devices
+	//	for i := range src {
+	//		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
+	//		//dst.Comp[i].CopyFromHost(src[i])
+	//
+	//		h := src[i]
+	//		s := dst.comp[i]
+	//		//Assert(len(h) == len(s)) // in principle redundant
+	//		start := 0
+	//		for i := range s {
+	//			length := s[i].length
+	//			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
+	//			start += length
+	//		}
+	//	}
 }
 
 
 // Copy from device array to host array.
 func (src *Array) CopyToHost(dsta *host.Array) {
-	dst := dsta.Comp
-
-	Assert(src.NComp() == len(dst))
-	for i := range dst {
-		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
-		//src.Comp[i].CopyToHost(dst[i])
-
-		h := dst[i]
-		s := src.comp[i]
-		//Assert(len(h) == len(s)) // in principle redundant
-		start := 0
-		for i := range s {
-			length := s[i].length
-			cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
-			start += length
-		}
-
-	}
+	//	dst := dsta.Comp
+	//
+	//	Assert(src.NComp() == len(dst))
+	//	for i := range dst {
+	//		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
+	//		//src.Comp[i].CopyToHost(dst[i])
+	//
+	//		h := dst[i]
+	//		s := src.comp[i]
+	//		//Assert(len(h) == len(s)) // in principle redundant
+	//		start := 0
+	//		for i := range s {
+	//			length := s[i].length
+	//			cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
+	//			start += length
+	//		}
+	//
+	//	}
 
 }
 
@@ -234,15 +244,22 @@ func (src *Array) LocalCopy() *host.Array {
 
 
 func (a *Array) Zero() {
-	slices := a.list
-	for i := range slices {
-		assureContextId(slices[i].devId)
-		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
-	}
-	for i := range slices {
-		slices[i].stream.Synchronize()
-	}
+	//slices := a.list
+	//for i := range slices {
+	//	assureContextId(slices[i].devId)
+	//	cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
+	//}
+	//for i := range slices {
+	//	slices[i].stream.Synchronize()
+	//}
 }
 
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
+
+
+// INTERNAL: pointer arithmetic.
+// note: Do not forget bytes = floats * SIZEOF_FLOAT.
+func offset(ptr cu.DevicePtr, bytes int) cu.DevicePtr {
+	return cu.DevicePtr(uintptr(ptr) + uintptr(bytes))
+}

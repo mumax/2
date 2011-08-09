@@ -158,6 +158,7 @@ func assureContext(ctx cu.Context) {
 }
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
+// deviceId is the internal device index (index for getDevices() array), not the cuda device id
 func assureContextId(deviceId int) {
 	ctx := _deviceCtxs[deviceId]
 	if _currentCtx != ctx {
