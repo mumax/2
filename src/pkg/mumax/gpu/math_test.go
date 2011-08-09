@@ -1,0 +1,44 @@
+//  This file is part of MuMax, a high-performance micromagnetic simulator.
+//  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
+//  Use of this source code is governed by the GNU General Public License version 3
+//  (as published by the Free Software Foundation) that can be found in the license.txt file.
+//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  copyright notices and prominently state that you modified it, giving a relevant date.
+
+package gpu
+
+// Author: Arne Vansteenkiste
+
+import (
+	"testing"
+	"rand"
+)
+
+func TestAddClosure(test *testing.T) {
+	// fail test on panic, do not crash
+	//	defer func() {
+	//		if err := recover(); err != nil {
+	//			test.Error(err)
+	//		}
+	//	}()
+
+	size := []int{8, 16, 32}
+
+	a := NewArray(3, size)
+	defer a.Free()
+	ah := a.LocalCopy()
+
+	b := NewArray(3, size)
+	defer b.Free()
+	bh := b.LocalCopy()
+
+	for i := range ah.List {
+		ah.List[i] = rand.Float32()
+		bh.List[i] = rand.Float32()
+	}
+
+	a.CopyFromHost(ah)
+	b.CopyFromHost(bh)
+
+	ClAdd(a, a, b)
+}
