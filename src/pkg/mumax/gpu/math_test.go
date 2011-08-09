@@ -51,7 +51,6 @@ func TestAddClosure(test *testing.T) {
 }
 
 
-
 func BenchmarkAddClosure(bench *testing.B) {
 	bench.StopTimer()
 	size := []int{8, 16, 32}
@@ -62,7 +61,7 @@ func BenchmarkAddClosure(bench *testing.B) {
 	defer b.Free()
 
 	bench.StartTimer()
-	for i:=0; i<bench.N; i++{
+	for i := 0; i < bench.N; i++ {
 		ClAdd(a, a, b)
 	}
 }
