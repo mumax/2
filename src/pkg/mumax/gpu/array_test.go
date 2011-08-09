@@ -45,7 +45,9 @@ func TestArrayInit(test *testing.T) {
 	defer dev1.Free()
 
 	if dev1.Len() != 3*Prod(size) {
-		if !test.Failed(){test.Error("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))}
+		if !test.Failed() {
+			test.Error("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
+		}
 	}
 
 	l1 := host1.List
@@ -58,7 +60,9 @@ func TestArrayInit(test *testing.T) {
 
 	for i := range l1 {
 		if l1[i] != 0 {
-			if !test.Failed(){test.Error(l1[i], "!=0")}
+			if !test.Failed() {
+				test.Error(l1[i], "!=0")
+			}
 		}
 	}
 }
@@ -90,7 +94,9 @@ func TestArrayCopy(test *testing.T) {
 	l2 := host2.List
 	for i := range l1 {
 		if l2[i] != float32(i) {
-			if !test.Failed(){test.Error("expected", i, "got:", l2[i])}
+			if !test.Failed() {
+				test.Error("expected", i, "got:", l2[i])
+			}
 		}
 	}
 }

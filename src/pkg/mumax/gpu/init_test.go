@@ -22,7 +22,6 @@ func init() {
 	flag.Parse()
 	InitLogger("")
 	cu.Init()
-	//InitDebugGPUs()
-	InitMultiGPU([]int{0}, 0)
+	InitDebugGPUs()
 	SetPTXLookPath("../../../ptx")
 }
