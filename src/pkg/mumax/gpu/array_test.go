@@ -20,7 +20,7 @@ import (
 func TestArrayAlloc(t *testing.T) {
 	N := BIG / 16
 	size := []int{1, 4, N}
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		t := NewArray(3, size)
 		t.Free()
 	}
@@ -31,7 +31,8 @@ func TestArrayAlloc(t *testing.T) {
 func TestArrayInit(test *testing.T) {
 	size := []int{4, 8, 16}
 	host1 := host.NewArray(3, size)
-	dev1 := NewArray(3, size)
+	dev1 := NewArray(3, size); defer dev1.Free()
+
 	if dev1.Len() != 3*Prod(size) {
 		test.Fatal("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
 	}
@@ -44,10 +45,9 @@ func TestArrayInit(test *testing.T) {
 	dev1.CopyToHost(host1)
 	//host1.CopyFromDevice(dev1)
 
-	l2 := host1.List
 	for i := range l1 {
-		if l2[i] != 0 {
-			test.Fail()
+		if l1[i] != 0 {
+			test.Fatal(l1[i], "!=0")
 		}
 	}
 }

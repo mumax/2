@@ -10,14 +10,19 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
+		. "mumax/common"
 	cu "cuda/driver"
+	"flag"
 )
 
 
 const BIG = 32 * 1024 * 1024
 
 func init() {
+	flag.Parse()
+	InitLogger("")
 	cu.Init()
-	InitDebugGPUs()
+	//InitDebugGPUs()
+	InitMultiGPU([]int{0}, 0)
 	SetPTXLookPath("../../../ptx")
 }

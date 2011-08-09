@@ -40,9 +40,9 @@ func TestIndex1D(test *testing.T) {
 		}
 	}
 
-	if test.Failed() {
-		fmt.Println(A)
-	}
+	//if test.Failed() {
+	//	fmt.Println(A)
+	//}
 }
 
 func TestIndex3D(test *testing.T) {

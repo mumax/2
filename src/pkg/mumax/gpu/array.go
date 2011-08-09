@@ -35,6 +35,7 @@ type Array struct {
 	partSize  []int          // Size3D of the parts stored on each GPU, cut along the Y-axis
 	_partSize [3]int         // INTENRAL
 	length4D  int            // total Number of floats
+	partLength4D int // total number of floats on each GPU
 	Comp      []Array        // x,y,z components, nil for scalar field
 }
 
@@ -58,7 +59,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 
 	slicelen := components * (length3D / Ndev)
 	for i := 0; i<Ndev; i++{
-		assureContext(getDeviceContext(i)) // Switch device context if necessary
+		assureContextId(i) // Switch device context if necessary
 		t.devPtr[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
 		t.devStream[i] = cu.StreamCreate()
 	}
@@ -95,6 +96,7 @@ func (a *Array) initSizes(components int, size3D []int) {
 	a._partSize[1] = a.size3D[1] / NDevice() // Slice along the J-direction
 	a._partSize[2] = a.size3D[2]
 	a.length4D = Prod(a.size4D)
+	a.partLength4D = a.length4D / NDevice()
 }
 
 // Returns an array which holds a field with the number of components and given size.
@@ -132,6 +134,7 @@ func (a *Array) invalidate() {
 		a.devStream[i] = cu.Stream(0)
 	}
 	a.length4D = 0
+	a.partLength4D = 0
 	a.size3D = nil
 	a.size4D = nil
 	a.partSize = nil
@@ -250,13 +253,15 @@ func (src *Array) LocalCopy() *host.Array {
 
 
 func (a *Array) Zero() {
-	//slices := a.list
-	//for i := range slices {
-	//	assureContextId(slices[i].devId)
-	//	cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
-	//}
-	//for i := range slices {
-	//	slices[i].stream.Synchronize()
+	// Start memsets in parallel on each device
+	for i:= range a.devPtr{
+		assureContextId(i) // !!
+		//cu.MemsetD32Async(a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
+		cu.MemsetD32(a.devPtr[i], 0, int64(a.partLength4D))
+	}
+	// Wait for each device to finish
+	//for _,s:= range a.devStream{
+	//		s.Synchronize()
 	//}
 }
 
