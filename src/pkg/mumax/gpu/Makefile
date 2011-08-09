@@ -13,6 +13,7 @@ GOFILES=\
 	module_load.go\
 	module_ptxparse.go\
 	module_find.go\
+	math.go\
 
 CGOFILES=\
 

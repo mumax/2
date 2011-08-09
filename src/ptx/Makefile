@@ -1,5 +1,6 @@
 ptxfiles=\
 	memory.ptx\
+	math.ptx\
 	debug.ptx\
 
 NVCC=nvcc

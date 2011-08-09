@@ -193,8 +193,10 @@ func (c *Closure) Configure1D(N int) {
 
 	// set the special variables N and PART for each device
 	for i := range c.DevClosure {
-		c.DevClosure[i].Seti(c.ArgN, Ndev)
-		c.DevClosure[i].Seti(c.ArgPART, i)
+		c.DevClosure[i].Seti(c.ArgN, Ndev) // always set N, it must be present
+		if c.ArgPART >= 0 {
+			c.DevClosure[i].Seti(c.ArgPART, i)
+		} // only set PART if present in source file
 	}
 }
 

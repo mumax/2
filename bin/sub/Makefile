@@ -25,3 +25,7 @@ test: apigen
 	#javac Mumax2.java
 	#lua mumax2.lua
 	#g++ mumax2.h
+
+.PHONY: bench
+bench:
+

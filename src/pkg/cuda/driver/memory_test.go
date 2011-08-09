@@ -192,16 +192,16 @@ func BenchmarkMemcpy(b *testing.B) {
 	host1 := make([]float32, N)
 	host2 := make([]float32, N)
 	dev1 := MemAlloc(int64(4 * N))
+	defer dev1.Free()
 	dev2 := MemAlloc(int64(4 * N))
+	defer dev2.Free()
 	b.SetBytes(4 * N)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		MemcpyHtoD(dev1, HostPtr(unsafe.Pointer(&host1[0])), 4*N)
-		Memcpy(dev2, dev1, 4*N)
+		MemcpyDtoD(dev2, dev1, 4*N)
 		MemcpyDtoH(HostPtr(unsafe.Pointer(&host2[0])), dev2, 4*N)
 	}
-	dev1.Free()
-	dev2.Free()
 }
 
 
@@ -211,18 +211,18 @@ func BenchmarkMemcpyAsync(b *testing.B) {
 	host1 := make([]float32, N)
 	host2 := make([]float32, N)
 	dev1 := MemAlloc(int64(4 * N))
+	defer dev1.Free()
 	dev2 := MemAlloc(int64(4 * N))
+	defer dev2.Free()
 	stream := StreamCreate()
 	b.SetBytes(4 * N)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		MemcpyHtoDAsync(dev1, HostPtr(unsafe.Pointer(&host1[0])), 4*N, stream)
-		MemcpyAsync(dev2, dev1, 4*N, stream)
+		MemcpyDtoDAsync(dev2, dev1, 4*N, stream)
 		MemcpyDtoHAsync(HostPtr(unsafe.Pointer(&host2[0])), dev2, 4*N, stream)
+		stream.Synchronize()
 	}
-	stream.Synchronize()
-	dev1.Free()
-	dev2.Free()
 }
 
 
