@@ -29,7 +29,7 @@ func Global(modname, funcname string) Closure {
 	Assert(function == _functions[funcname])
 	argInfo := _funcArgs[funcname]
 	var c Closure
-	c.DevClosure = make([]cu.Closure, DeviceCount())
+	c.DevClosure = make([]cu.Closure, NDevice())
 	for i := range c.DevClosure {
 		c.DevClosure[i] = cu.Close(function, len(argInfo))
 	}
@@ -105,7 +105,7 @@ func (c *Closure) SetArgs(args ...interface{}) {
 // Sets an argument for a specific GPU.
 func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
 	Assert(argIdx < len(c.ArgType))
-	Assert(deviceId < DeviceCount())
+	Assert(deviceId < NDevice())
 	c.DevClosure[deviceId].SetArg(argIdx, arg)
 }
 
@@ -183,8 +183,8 @@ func (c *Closure) MaxThreadsPerBlock() int {
 func (c *Closure) Configure1D(N int) {
 	// configure the kernel launch for N elements
 	// with the largest possible number of threads per block
-	Assert(N%DeviceCount() == 0)
-	Ndev := N / DeviceCount() // number of elements per device
+	Assert(N%NDevice() == 0)
+	Ndev := N / NDevice() // number of elements per device
 
 	threads := c.MaxThreadsPerBlock()
 	grid := DivUp(Ndev, threads)
@@ -205,9 +205,9 @@ func (c *Closure) Configure1D(N int) {
 const DEFAULT_TILE = 16
 
 func (c *Closure) Configure2D(size3D []int) {
-	Assert(size3D[1]%DeviceCount() == 0)
+	Assert(size3D[1]%NDevice() == 0)
 	N0 := size3D[0]
-	N1 := size3D[1] / DeviceCount()
+	N1 := size3D[1] / NDevice()
 	N2 := size3D[2]
 
 	threads := []int{DEFAULT_TILE, DEFAULT_TILE, 1}

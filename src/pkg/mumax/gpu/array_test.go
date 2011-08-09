@@ -20,7 +20,7 @@ import (
 func TestArrayAlloc(t *testing.T) {
 	N := BIG / 16
 	size := []int{1, 4, N}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		t := NewArray(3, size)
 		t.Free()
 	}

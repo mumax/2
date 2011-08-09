@@ -28,6 +28,7 @@ import (
 type Array struct {
 	devPtr    []cu.DevicePtr // Access to the portions on the different GPUs
 	devStream []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
+	devId	  []int // 
 	_size     [4]int         // INTERNAL {components, size0, size1, size2}
 	size4D    []int          // {components, size0, size1, size2}
 	size3D    []int          // {size0, size1, size2}
@@ -43,8 +44,7 @@ type Array struct {
 // 	Init(1, 1000) // gives an array of 1000 scalars
 // 	Init(6, 1000) // gives an array of 1000 6-vectors or symmetric tensors
 func (t *Array) InitArray(components int, size3D []int) {
-	devices := getDevices()
-	Ndev := len(devices)
+	Ndev := NDevice()
 	length3D := Prod(size3D)
 
 	Assert(size3D[1]%Ndev == 0)
@@ -57,7 +57,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.devStream = make([]cu.Stream, Ndev)
 
 	slicelen := components * (length3D / Ndev)
-	for i := range devices {
+	for i := 0; i<Ndev; i++{
 		assureContext(getDeviceContext(i)) // Switch device context if necessary
 		t.devPtr[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
 		t.devStream[i] = cu.StreamCreate()
@@ -71,8 +71,8 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.Comp[c].initSizes(1, t.size3D)
 		t.Comp[c].devPtr = make([]cu.DevicePtr, Ndev) // Todo: could be block-allocated and sliced
 		t.Comp[c].devStream = make([]cu.Stream, Ndev)
-		for i := range devices {
-			//t.Comp[c].devPtr[i] = offset(t.devPtr[i], c * t.Comp[c].Len() * SIZEOF_FLOAT)
+		for i := 0; i < Ndev; i++{
+			t.Comp[c].devPtr[i] = offset(t.devPtr[i], c * t.Comp[c].Len() * SIZEOF_FLOAT)
 			t.Comp[c].devStream[i] = cu.StreamCreate()
 		}
 	}
@@ -92,7 +92,7 @@ func (a *Array) initSizes(components int, size3D []int) {
 	a.size4D = a._size[:]
 	a.size3D = a._size[1:]
 	a._partSize[0] = a.size3D[0]
-	a._partSize[1] = a.size3D[1] / len(getDevices()) // Slice along the J-direction
+	a._partSize[1] = a.size3D[1] / NDevice() // Slice along the J-direction
 	a._partSize[2] = a.size3D[2]
 	a.length4D = Prod(a.size4D)
 }
@@ -118,6 +118,7 @@ func (a *Array) Free() {
 	a.invalidate()
 }
 
+
 // INTENRAL: invalidate all fields to protect against accidental use after Free()
 func (a *Array) invalidate() {
 	for i := range a._size {
@@ -135,6 +136,11 @@ func (a *Array) invalidate() {
 	a.size4D = nil
 	a.partSize = nil
 	a.devPtr = nil
+	if a.Comp != nil{
+		for i:=range a.Comp{
+			a.Comp[i].invalidate()
+		}
+	}
 }
 
 

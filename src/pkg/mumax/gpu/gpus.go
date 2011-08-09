@@ -173,16 +173,16 @@ func getContext() cu.Context {
 }
 
 // Returns the list of usable devices. 
-func getDevices() []int {
-	if _useDevice == nil {
-		panic(Bug(MSG_DEVICEUNINITIATED))
-	}
-	return _useDevice
-}
+//func getDevices() []int {
+//	if _useDevice == nil {
+//		panic(Bug(MSG_DEVICEUNINITIATED))
+//	}
+//	return _useDevice
+//}
 
 
 // Returns the number of used GPUs.
-func DeviceCount() int {
+func NDevice() int {
 	return len(_useDevice)
 }
 

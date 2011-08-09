@@ -21,9 +21,9 @@ type Stream []cu.Stream
 // Creates a new multi-GPU stream. Its use is similar as cu.Stream,
 // but operates on all GPUs at the same time.
 func StreamCreate() Stream {
-	devices := getDevices()
-	str := make([]cu.Stream, len(devices))
-	for i := range devices {
+	NDev := NDevice()
+	str := make([]cu.Stream, NDev)
+	for i := range str{
 		str[i] = cu.StreamCreate()
 	}
 	return Stream(str)
