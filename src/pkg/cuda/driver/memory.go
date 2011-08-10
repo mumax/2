@@ -12,6 +12,7 @@ import "C"
 
 import (
 	"unsafe"
+	//"fmt"
 )
 
 type DevicePtr uintptr
@@ -214,3 +215,7 @@ const (
 	// Maps the allocation in CUDA address space. TODO(a): cuMemHostGetDevicePointer()
 	MEMHOSTREGISTER_DEVICEMAP MemHostRegisterFlag = C.CU_MEMHOSTREGISTER_DEVICEMAP
 )
+
+//func (p DevicePtr) String() string{
+//	return fmt.Sprintf("%p", unsafe.Pointer(p))
+//}

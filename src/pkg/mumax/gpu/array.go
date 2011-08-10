@@ -36,6 +36,7 @@ type Array struct {
 	_partSize    [3]int  // INTENRAL
 	length4D     int     // total Number of floats
 	partLength4D int     // total number of floats on each GPU
+	partLength3D int     // total number of floats per component on each GPU
 	Comp         []Array // x,y,z components, nil for scalar field
 }
 
@@ -98,6 +99,7 @@ func (a *Array) initSizes(components int, size3D []int) {
 	a.partSize = a._partSize[:]
 	a.length4D = Prod(a.size4D)
 	a.partLength4D = a.length4D / NDevice()
+	a.partLength3D = a.partLength4D / components
 }
 
 // Returns an array which holds a field with the number of components and given size.
@@ -173,33 +175,44 @@ func (a *Array) Size3D() []int {
 	return a.size3D
 }
 func (dst *Array) CopyFromDevice(src *Array) {
-	//	// test for equal size
-	//	for i, d := range dst._size {
-	//		if d != src._size[i] {
-	//			panic(MSG_ARRAY_SIZE_MISMATCH)
-	//		}
-	//	}
-	//	d := dst.list
-	//	s := src.list
-	//	Assert(len(d) == len(s)) // in principle redundant
-	//	start := 0
-	//	// copies run concurrently on the individual devices
-	//	for i := range s {
-	//		length := s[i].length // in principle redundant
-	//		Assert(length == d[i].length)
-	//		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
-	//		start += length
-	//	}
-	//	// Synchronize with all copies
-	//	for i := range s {
-	//		s[i].stream.Synchronize()
-	//	}
-	//
+	// test for equal size
+	for i, d := range dst._size {
+		if d != src._size[i] {
+			panic(MSG_ARRAY_SIZE_MISMATCH)
+		}
+	}
+	for i := range dst.devPtr {
+		println("cu.MemcpyDtoDAsync", src.devPtr[i], dst.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
+		cu.MemcpyDtoDAsync(src.devPtr[i], dst.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
+	}
+	// Synchronize with all copies
+	for _, s := range dst.devStream {
+		s.Synchronize()
+	}
+
 }
 
 
 // Copy from host array to device array.
-func (dst *Array) CopyFromHost(srca *host.Array) {
+func (dsta *Array) CopyFromHost(srca *host.Array) {
+	// test for equal size
+	for i, d := range dsta._size {
+		if d != srca.Size[i] {
+			panic(MSG_ARRAY_SIZE_MISMATCH)
+		}
+	}
+
+	// we have to work component-wise because of the data layout on the devices
+	for c := range srca.Comp {
+		dst := dsta.Comp[c]
+		src := srca.Comp[c]
+
+		for i := range dst.devPtr {
+			println("cu.MemcpyHtoD", dst.devPtr[i], cu.HostPtr(&(src[i*dst.partLength3D])), SIZEOF_FLOAT*int64(dst.partLength3D))
+			cu.MemcpyHtoD(dst.devPtr[i], cu.HostPtr(&(src[i*dst.partLength3D])), SIZEOF_FLOAT*int64(dst.partLength3D))
+		}
+	}
+
 	//	src := srca.Comp
 	//
 	//	Assert(dst.NComp() == len(src))
@@ -222,7 +235,24 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 
 
 // Copy from device array to host array.
-func (src *Array) CopyToHost(dsta *host.Array) {
+func (srca *Array) CopyToHost(dsta *host.Array) {
+	// test for equal size
+	for i, d := range srca._size {
+		if d != dsta.Size[i] {
+			panic(MSG_ARRAY_SIZE_MISMATCH)
+		}
+	}
+
+	// we have to work component-wise because of the data layout on the devices
+	for c := range srca.Comp {
+		dst := dsta.Comp[c]
+		src := srca.Comp[c]
+
+		for i := range src.devPtr {
+			cu.MemcpyDtoH(cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
+		}
+	}
+
 	//	dst := dsta.Comp
 	//
 	//	Assert(src.NComp() == len(dst))
