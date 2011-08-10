@@ -14,6 +14,7 @@ import (
 	"mumax/host"
 	"runtime"
 	"testing"
+	"fmt"
 )
 
 
@@ -43,6 +44,7 @@ func TestArrayInit(test *testing.T) {
 	host1 := host.NewArray(3, size)
 	dev1 := NewArray(3, size)
 	defer dev1.Free()
+	fmt.Printf("%+v\n", dev1)
 
 	if dev1.Len() != 3*Prod(size) {
 		if !test.Failed() {

@@ -26,17 +26,17 @@ import (
 //
 // TODO: get device part as array?: requires gpuid[] field
 type Array struct {
-	devPtr       []cu.DevicePtr // Access to the portions on the different GPUs
-	devStream    []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
-	devId        []int          // 
-	_size        [4]int         // INTERNAL {components, size0, size1, size2}
-	size4D       []int          // {components, size0, size1, size2}
-	size3D       []int          // {size0, size1, size2}
-	partSize     []int          // Size3D of the parts stored on each GPU, cut along the Y-axis
-	_partSize    [3]int         // INTENRAL
-	length4D     int            // total Number of floats
-	partLength4D int            // total number of floats on each GPU
-	Comp         []Array        // x,y,z components, nil for scalar field
+	devPtr    []cu.DevicePtr // Access to the portions on the different GPUs
+	devStream []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
+	//devId        []int          // 
+	_size        [4]int  // INTERNAL {components, size0, size1, size2}
+	size4D       []int   // {components, size0, size1, size2}
+	size3D       []int   // {size0, size1, size2}
+	partSize     []int   // Size3D of the parts stored on each GPU, cut along the Y-axis
+	_partSize    [3]int  // INTENRAL
+	length4D     int     // total Number of floats
+	partLength4D int     // total number of floats on each GPU
+	Comp         []Array // x,y,z components, nil for scalar field
 }
 
 
@@ -95,6 +95,7 @@ func (a *Array) initSizes(components int, size3D []int) {
 	a._partSize[0] = a.size3D[0]
 	a._partSize[1] = a.size3D[1] / NDevice() // Slice along the J-direction
 	a._partSize[2] = a.size3D[2]
+	a.partSize = a._partSize[:]
 	a.length4D = Prod(a.size4D)
 	a.partLength4D = a.length4D / NDevice()
 }
@@ -256,13 +257,14 @@ func (a *Array) Zero() {
 	// Start memsets in parallel on each device
 	for i := range a.devPtr {
 		assureContextId(i) // !!
-		//cu.MemsetD32Async(a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
-		cu.MemsetD32(a.devPtr[i], 0, int64(a.partLength4D))
+		//println("cu.MemsetD32Async", a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
+		cu.MemsetD32Async(a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
+		//cu.MemsetD32(a.devPtr[i], 0, int64(a.partLength4D))
 	}
 	// Wait for each device to finish
-	//for _,s:= range a.devStream{
-	//		s.Synchronize()
-	//}
+	for _, s := range a.devStream {
+		s.Synchronize()
+	}
 }
 
 // Error message.
