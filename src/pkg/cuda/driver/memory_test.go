@@ -14,7 +14,7 @@ import (
 
 func init() {
 	Init()
-	ctx := CtxCreate(CU_CTX_SCHED_AUTO, 0)
+	ctx := CtxCreate(CTX_SCHED_AUTO, 0)
 	CtxSetCurrent(ctx)
 }
 

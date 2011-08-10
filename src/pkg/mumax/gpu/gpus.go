@@ -34,11 +34,11 @@ var (
 )
 
 // Sets a list of devices to use.
+// flags is passed to CUDA context creation.
 func InitMultiGPU(devices []int, flags uint) {
 	Debug("InitMultiGPU ", devices, flags)
 	Assert(len(devices) > 0)
 	Assert(_useDevice == nil) // should not yet be initialized
-
 
 	// check if device ID's are valid GPU numbers
 	N := cu.DeviceGetCount()
@@ -55,7 +55,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	// output device info
 	for i := range _useDevice {
 		dev := cu.DeviceGet(_useDevice[i])
-		Log("Using GPU", i, dev.GetName(), "on PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), "with",dev.TotalMem()/(1024*1024), "MiB memory")
+		Log("Using GPU", i, dev.GetName(), "on PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), "with", dev.TotalMem()/(1024*1024), "MiB memory")
 	}
 
 	// set up device properties

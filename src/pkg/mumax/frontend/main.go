@@ -35,8 +35,9 @@ var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
 	flag_version   *bool   = flag.Bool("v", false, "Print version info and exit")
 	flag_test      *bool   = flag.Bool("test", false, "Test CUDA and exit")
-	flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.") 
-	flag_gpus *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
+	flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
+	flag_gpus      *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
+	flag_sched     *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
 )
 
 
@@ -77,17 +78,16 @@ func Main() {
 		return
 	}
 
-
 	// else...
 	clientMain()
 }
 
 // based on the -gpu flag, activate set of GPUs to use
-func initMultiGPU(){
+func initMultiGPU() {
 	flag := *flag_gpus
-	cuFlags := uint(0)
+	cuFlags := parseCuFlags()
 
-	if flag == "all"{
+	if flag == "all" {
 		gpu.InitAllGPUs(cuFlags)
 		return
 	}
@@ -97,10 +97,10 @@ func initMultiGPU(){
 	// comma separated list
 	if strings.Contains(flag, ",") {
 		values := strings.Split(flag, ",")
-		for i := range values{
+		for i := range values {
 			gpus = append(gpus, Atoi(values[i]))
 		}
-	} 
+	}
 
 	// range statement
 	if strings.Contains(flag, ":") {
@@ -109,15 +109,36 @@ func initMultiGPU(){
 		default:
 			panic(InputErr(`Expecting "start:stop" :` + flag))
 		case 2:
-				gpus = []int{Atoi(steps[0]), Atoi(steps[1])}
+			gpus = []int{Atoi(steps[0]), Atoi(steps[1])}
 		}
 	}
 
 	// just one value
-	if gpus == nil { gpus = []int{Atoi(flag)} } 
+	if gpus == nil {
+		gpus = []int{Atoi(flag)}
+	}
 
 	gpu.InitMultiGPU(gpus, cuFlags)
+}
 
+
+func parseCuFlags() uint {
+	cudaflag := *flag_sched
+	var flag uint
+
+	switch cudaflag {
+	default:
+		panic(InputErr("Expecting auto,spin,yield or sync: " + cudaflag))
+	case "auto":
+		flag |= cu.CTX_SCHED_AUTO
+	case "spin":
+		flag |= cu.CTX_SCHED_SPIN
+	case "yield":
+		flag |= cu.CTX_SCHED_YIELD
+	case "sync":
+		flag |= cu.CTX_BLOCKING_SYNC
+	}
+	return flag
 }
 
 // return the input file. "" means none
