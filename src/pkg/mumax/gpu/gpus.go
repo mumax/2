@@ -39,6 +39,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	Assert(len(devices) > 0)
 	Assert(_useDevice == nil) // should not yet be initialized
 
+
 	// check if device ID's are valid GPU numbers
 	N := cu.DeviceGetCount()
 	for _, n := range devices {
@@ -54,7 +55,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	// output device info
 	for i := range _useDevice {
 		dev := cu.DeviceGet(_useDevice[i])
-		Log("device", i, "( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem()/(1024*1024), "MiB")
+		Log("Using GPU", i, dev.GetName(), "on PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), "with",dev.TotalMem()/(1024*1024), "MiB memory")
 	}
 
 	// set up device properties

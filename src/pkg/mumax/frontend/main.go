@@ -9,6 +9,7 @@ package frontend
 
 import (
 	. "mumax/common"
+	"mumax/gpu"
 	cu "cuda/driver"
 	"runtime"
 	"runtime/debug"
@@ -17,23 +18,25 @@ import (
 	"fmt"
 	"os"
 	"flag"
+	"strings"
 )
 
 // command-line flags (more in engine/main.go)
 var (
-	flag_outputdir *string = flag.String("out", "", "Specify output directory")
-	flag_force     *bool   = flag.Bool("force", false, "Remove previous output directory if present")
+	flag_outputdir *string = flag.String("o", "", "Specify output directory")
+	flag_force     *bool   = flag.Bool("f", false, "Remove previous output directory if present")
 	flag_logfile   *string = flag.String("log", "", "Specify log file")
 	flag_command   *string = flag.String("command", "", "Override interpreter command")
-	flag_debug     *bool   = flag.Bool("debug", true, "Show debug output")
+	flag_debug     *bool   = flag.Bool("g", false, "Show debug output")
 	flag_cpuprof   *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
 	flag_memprof   *string = flag.String("memprof", "", "Write gopprof memory profile to file")
-	flag_silent    *bool   = flag.Bool("silent", false, "Be silent")
-	flag_warn      *bool   = flag.Bool("warn", true, "Show warnings")
-	flag_help      *bool   = flag.Bool("help", false, "Print help and exit")
-	flag_version   *bool   = flag.Bool("version", false, "Print version info and exit")
+	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
+	flag_warn      *bool   = flag.Bool("w", true, "Show warnings")
+	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
+	flag_version   *bool   = flag.Bool("v", false, "Print version info and exit")
 	flag_test      *bool   = flag.Bool("test", false, "Test CUDA and exit")
-	flag_timeout   *string = flag.String("walltime", "", "Set a maximum run time. Units s,h,d are recognized.") // should be named walltime? timeout=only for connection?
+	flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.") 
+	flag_gpus *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
 )
 
 
@@ -49,6 +52,8 @@ func Main() {
 			crashreport(err)
 		}
 	}()
+
+	initTimeout()
 
 	if *flag_cpuprof != "" {
 		f, err := os.Create(*flag_cpuprof)
@@ -72,12 +77,48 @@ func Main() {
 		return
 	}
 
-	initTimeout()
 
 	// else...
 	clientMain()
 }
 
+// based on the -gpu flag, activate set of GPUs to use
+func initMultiGPU(){
+	flag := *flag_gpus
+	cuFlags := uint(0)
+
+	if flag == "all"{
+		gpu.InitAllGPUs(cuFlags)
+		return
+	}
+
+	var gpus []int
+
+	// comma separated list
+	if strings.Contains(flag, ",") {
+		values := strings.Split(flag, ",")
+		for i := range values{
+			gpus = append(gpus, Atoi(values[i]))
+		}
+	} 
+
+	// range statement
+	if strings.Contains(flag, ":") {
+		steps := strings.Split(flag, ":")
+		switch len(steps) {
+		default:
+			panic(InputErr(`Expecting "start:stop" :` + flag))
+		case 2:
+				gpus = []int{Atoi(steps[0]), Atoi(steps[1])}
+		}
+	}
+
+	// just one value
+	if gpus == nil { gpus = []int{Atoi(flag)} } 
+
+	gpu.InitMultiGPU(gpus, cuFlags)
+
+}
 
 // return the input file. "" means none
 func inputFile() string {
@@ -199,7 +240,7 @@ func initTimeout() {
 
 const (
 	WELCOME  = `
- MuMax 2.0.443 FD Multiphysics Engine
+ MuMax 2.0.476
  (C) Arne Vansteenkiste & Ben Van de Wiele,
      Dynamat/EELAB Ghent University.
 	

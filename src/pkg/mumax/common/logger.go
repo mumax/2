@@ -124,7 +124,7 @@ func Err(msg ...interface{}) {
 // Log normal output.
 func Log(msg ...interface{}) {
 	// put [log  ] in front of message
-	msgcol := append([]interface{}{LOG_NORMAL_COL + "[log  ]"}, msg...)
+	msgcol := append([]interface{}{LOG_NORMAL_COL + ""}, msg...) // no [log] on screen, only in file
 	msg = append([]interface{}{"[log  ]"}, msg...)
 
 	if !logger.Initialized {

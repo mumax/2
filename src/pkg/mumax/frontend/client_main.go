@@ -11,6 +11,7 @@ package frontend
 
 import (
 	. "mumax/common"
+	cu "cuda/driver"
 	"fmt"
 	"path"
 	"exec"
@@ -31,18 +32,15 @@ func clientMain() {
 	Debug("Go", runtime.Version())
 	command := *flag_command
 
+	// initialize CUDA first
+	Debug("Initializing CUDA")
+	cu.Init()
+
+	initMultiGPU()
+
 	var client Client
 	client.Init(infile, outdir, command)
 	client.Run()
-
-	//	if *flag_test {
-	//		var result string
-	//		err := server.Call("engine.Test", &VoidArgs{}, &result)
-	//		CheckErr(err, ERR_BUG)
-	//		Log(result)
-	//		return
-	//	}
-
 }
 
 

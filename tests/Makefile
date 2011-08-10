@@ -12,7 +12,7 @@ test: $(TESTFILES)
 
 .PHONY: $(TESTFILES)
 $(TESTFILES): 
-	$(mumax2) -force $(@:.out='')
+	$(mumax2) -f $(@:.out='')
 
 .PHONY: install
 install:
