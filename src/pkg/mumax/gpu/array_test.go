@@ -90,8 +90,8 @@ func TestArrayCopy(test *testing.T) {
 	}
 
 	dev1.CopyFromHost(host1)
-	dev2.CopyFromDevice(dev1)
-	dev2.CopyToHost(host2)
+	//dev2.CopyFromDevice(dev1)
+	dev1.CopyToHost(host2) // dev2 !!
 
 	l2 := host2.List
 	for i := range l1 {

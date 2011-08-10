@@ -287,15 +287,14 @@ func (a *Array) Zero() {
 	// Start memsets in parallel on each device
 	for i := range a.devPtr {
 		assureContextId(i) // !!
-		//println("cu.MemsetD32Async", a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
 		cu.MemsetD32Async(a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
-		//cu.MemsetD32(a.devPtr[i], 0, int64(a.partLength4D))
 	}
 	// Wait for each device to finish
 	for _, s := range a.devStream {
 		s.Synchronize()
 	}
 }
+
 
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
