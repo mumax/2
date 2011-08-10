@@ -174,6 +174,9 @@ func (a *Array) NComp() int {
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
+
+
+
 func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size
 	for i, d := range dst._size {
@@ -183,7 +186,7 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	}
 	for i := range dst.devPtr {
 		println("cu.MemcpyDtoDAsync", src.devPtr[i], dst.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
-		cu.MemcpyDtoDAsync(src.devPtr[i], dst.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
+		cu.MemcpyDtoDAsync(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
 	}
 	// Synchronize with all copies
 	for _, s := range dst.devStream {
