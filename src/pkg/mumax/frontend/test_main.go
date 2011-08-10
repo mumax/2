@@ -23,7 +23,7 @@ func testMain() {
 	defer b.Free()
 
 	//println("start")
-	N := 200
+	N := 2000
 	start := time.Nanoseconds()
 
 	for i := 0; i < N; i++ {
