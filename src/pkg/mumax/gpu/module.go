@@ -167,7 +167,7 @@ func (c *Closure) Configure(gridDim, blockDim []int) {
 	}
 
 	for i := range c.DevClosure {
-		Debug("setconfig", gridDim, blockDim)
+		//Debug("setconfig", gridDim, blockDim)
 		c.DevClosure[i].SetConfig(gridDim, blockDim)
 	}
 	c.Configured = true
