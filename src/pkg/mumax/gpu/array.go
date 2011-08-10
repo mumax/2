@@ -185,6 +185,8 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	}
 	for i := range dst.devPtr {
 		//cu.MemcpyDtoDAsync(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.partLength4D), dst.devStream[i])
+		assureContextId(i) // ??
+		println("cu.MemcpyDtoD",dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.partLength4D))
 		cu.MemcpyDtoD(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.partLength4D))
 	}
 	// Synchronize with all copies
@@ -251,6 +253,8 @@ func (srca *Array) CopyToHost(dsta *host.Array) {
 		src := srca.Comp[c]
 
 		for i := range src.devPtr {
+			//assureContextId(i)//??
+			println("cu.MemcpyDtoH", cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
 			cu.MemcpyDtoH(cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
 		}
 	}

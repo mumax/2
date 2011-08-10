@@ -33,12 +33,13 @@ func TestArrayAlloc(t *testing.T) {
 
 // Should init to zeros
 func TestArrayInit(test *testing.T) {
+	runtime.LockOSThread()
 	// fail test on panic, do not crash
-	defer func() {
-		if err := recover(); err != nil {
-			test.Error(err)
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		test.Error(err)
+	//	}
+	//}()
 
 	size := []int{4, 8, 16}
 	host1 := host.NewArray(3, size)
@@ -71,12 +72,13 @@ func TestArrayInit(test *testing.T) {
 
 
 func TestArrayCopy(test *testing.T) {
+	runtime.LockOSThread()
 	// fail test on panic, do not crash
-	defer func() {
-		if err := recover(); err != nil {
-			test.Error(err)
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		test.Error(err)
+	//	}
+	//}()
 
 	size := []int{4, 8, 16}
 	host1, host2 := host.NewArray(3, size), host.NewArray(3, size)
