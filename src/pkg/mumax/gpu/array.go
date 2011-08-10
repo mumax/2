@@ -184,13 +184,13 @@ func (dst *Array) CopyFromDevice(src *Array) {
 		}
 	}
 	for i := range dst.devPtr {
-		println("cu.MemcpyDtoDAsync", src.devPtr[i], dst.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
-		cu.MemcpyDtoDAsync(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.length4D), dst.devStream[i])
+		//cu.MemcpyDtoDAsync(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.partLength4D), dst.devStream[i])
+		cu.MemcpyDtoD(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.partLength4D))
 	}
 	// Synchronize with all copies
-	for _, s := range dst.devStream {
-		s.Synchronize()
-	}
+	//for _, s := range dst.devStream {
+	//	s.Synchronize()
+	//}
 
 }
 
