@@ -137,17 +137,18 @@ func InitAllGPUs(flags uint) {
 // test "multi"-GPU code. The distribution over
 // two separate arrays on the same device is a bit
 // silly, but good for debugging.
-func InitDebugGPUs() {
-	var use []int
-	N := cu.DeviceGetCount()
-	for i := 0; i < N; i++ {
-		use = append(use, i)
-	}
-	if N == 1 {
-		use = append(use, 0) // Use the same device twice.
-	}
-	InitMultiGPU(use, 0)
-}
+// TODO(a): as of feat_noslice, does not work anymore.
+//func InitDebugGPUs() {
+//	var use []int
+//	N := cu.DeviceGetCount()
+//	for i := 0; i < N; i++ {
+//		use = append(use, i)
+//	}
+//	if N == 1 {
+//		use = append(use, 0) // Use the same device twice.
+//	}
+//	InitMultiGPU(use, 0)
+//}
 
 // Assures Context ctx is currently active. Switches contexts only when necessary.
 func assureContext(ctx cu.Context) {

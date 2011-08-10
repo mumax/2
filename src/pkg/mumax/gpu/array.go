@@ -253,7 +253,6 @@ func (srca *Array) CopyToHost(dsta *host.Array) {
 		src := srca.Comp[c]
 
 		for i := range src.devPtr {
-			//assureContextId(i)//??
 			println("cu.MemcpyDtoH", cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
 			cu.MemcpyDtoH(cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
 		}
