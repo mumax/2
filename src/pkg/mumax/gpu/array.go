@@ -176,6 +176,7 @@ func (a *Array) Size3D() []int {
 }
 
 
+// TODO(a): async
 func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size
 	for i, d := range dst._size {

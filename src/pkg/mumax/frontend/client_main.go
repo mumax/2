@@ -24,6 +24,7 @@ func clientMain() {
 	if !*flag_silent {
 		fmt.Println(WELCOME)
 	}
+
 	infile := inputFile()
 	outdir := outputDir(infile)
 	initOutputDir(outdir)
@@ -34,9 +35,16 @@ func clientMain() {
 
 	// initialize CUDA first
 	Debug("Initializing CUDA")
+	runtime.LockOSThread()
+	Debug("Locked OS Thread")
 	cu.Init()
 
 	initMultiGPU()
+
+	if *flag_test {
+		testMain()
+		return
+	}
 
 	var client Client
 	client.Init(infile, outdir, command)

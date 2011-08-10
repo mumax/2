@@ -4,11 +4,12 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/frontend
 
 GOFILES=\
+	main.go\
 	client.go\
 	client_main.go\
+	test_main.go\
 	jsonrpc.go\
 	io.go\
-	main.go\
 	addmethods.go\
 	#interpreter.go\
 
