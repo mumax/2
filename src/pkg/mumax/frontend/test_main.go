@@ -22,8 +22,9 @@ func testMain() {
 	b := gpu.NewArray(1, size)
 	defer b.Free()
 
+	Log("Testing CUDA")
 	//println("start")
-	N := 2000
+	N := 1000
 	start := time.Nanoseconds()
 
 	for i := 0; i < N; i++ {
@@ -34,5 +35,5 @@ func testMain() {
 	bw := float64(int64(Prod(size))*int64(N)*SIZEOF_FLOAT) / t
 	bw /= 1e9
 	//println("stop")
-	Log("CUDA bandwidth:", float32(bw), "GB/s")
+	Log("Multi-GPU bandwidth:", float32(bw), "GB/s")
 }
