@@ -31,7 +31,7 @@ func testMain() {
 	}
 
 	t := float64(time.Nanoseconds()-start) / 1e9
-	bw := float64(int64(Prod(size)) * int64(N) * SIZEOF_FLOAT) / t
+	bw := float64(int64(Prod(size))*int64(N)*SIZEOF_FLOAT) / t
 	bw /= 1e9
 	//println("stop")
 	Log("CUDA bandwidth:", float32(bw), "GB/s")
