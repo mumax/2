@@ -9,7 +9,6 @@ $ git checkout master
 Pull:
 $ git pull origin master
 
-
 Make a branch for the new feature you want to work on:
 $ git branch feature_my_new_idea
 $ git checkout feature_my_new_idea
@@ -17,10 +16,9 @@ $ git checkout feature_my_new_idea
 Check if you are on feature_my_new_idea:
 $ git branch
 
-Write code and commit often. Use --no-verify if tests do not pass yet:
+Write code and commit often. Write a test for your code and include it in "make test". The test should first fail to be sure it works. Use --no-verify to commit with failing tests
 $ git commit -a -m --no-verify "Implemented my new idea, does not work yet"
 $ git commit -a -m "Implemented my new idea, it works"
-
 
 When it works, merge back into master:
 $ git checkout master
@@ -28,9 +26,8 @@ $ git pull origin master
 $ git merge feature_my_new_idea
 $ make test
 
-When the master code works, push it:
+If the master code works, push it:
 $ git push origin master
 
-
-Start over with a new feature branch.
+Start over with a NEW feature branch.
 
