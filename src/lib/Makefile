@@ -1,5 +1,12 @@
 OFILES=\
+	gpu_safe.o\
+	gpu_conf.o\
+	gpu_properties.o\
+	add.o\
 	reduce.o\
+
+
+#HFILES=$(OFILES:.o=.h)
 
 NVCC=nvcc 
 NVCC+=\
@@ -10,14 +17,19 @@ NVCC+=\
   -G\
 #--use_fast_math\
 
-all: $(ofiles)
+all: libmumax2.so
 
-$(ofiles): %.o: %.cu %.h
+$(OFILES): %.o: %.cu %.h
 	 $(NVCC) -c $(@:.o=.cu)
 
-libmumax2.so: $(ofiles) libmumax2.h
+libmumax2.so: $(OFILES) libmumax2.h
 	$(NVCC) -shared $(OFILES) $(CUDALIBS) $(L) -o libgpukern.so
 	cp -f $(CURDIR)/libgpukern.so $(CURDIR)/../../lib
+
+#libmumax2.h: $(HFILES)
+#	rm -f libmumax2.h
+#	ls *.h > libmumax2.h
+
 .PHONY: clean
 clean:
 	rm -f *.o
