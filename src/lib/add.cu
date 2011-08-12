@@ -19,13 +19,15 @@ __global__ void addKern(float* dst, float* a, float* b, int Npart){
 }
 
 
-void add(float** dst, float** a, float** b, CUstream** stream, int Npart){
-  dim3 gridSize, blockSize;
-  make1dconf(Npart, &gridSize, &blockSize);
-  for(int i=0; i<Ndev; i++){
-  	addKern<<<gridSize, blockSize, 0, stream[i]>>>(dst[i], a[i], b[i], N);
-  }
-TODO: sync
+void add(float** dst, float** a, float** b, CUstream* stream, int Ndev, int Npart){
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for(int i=0; i<Ndev; i++){
+		addKern<<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>>(dst[i], a[i], b[i], Npart);
+	}
+	for(int i=0; i<Ndev; i++){
+		cuStreamSynchronize(stream[i]);
+	}
 }
 
 

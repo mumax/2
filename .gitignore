@@ -2,6 +2,7 @@
 *.log
 *.a
 *.o
+*.so
 *.[568]
 *.out
 _testmain.go

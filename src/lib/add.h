@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-void add(float** dst, float** a, float** b, CUstream** stream, int Npart);
+void add(float** dst, float** a, float** b, CUstream* stream, int Ndev, int Npart);
 
 
 #ifdef __cplusplus
