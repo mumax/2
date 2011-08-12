@@ -15,7 +15,6 @@ import (
 	. "mumax/common"
 	"mumax/engine"
 	"fmt"
-	"path"
 	"io"
 	"exec"
 	"os"
@@ -72,8 +71,8 @@ func (c *Client) Run() {
 // it will first hang while trying to open the FIFOs
 func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 
-	CheckErr(os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
-	CheckErr(os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
+	//CheckErr(os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
+	//CheckErr(os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
 	CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", c.outputDir), ERR_IO)
 
 	var args []string
