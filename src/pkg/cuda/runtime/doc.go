@@ -2,7 +2,7 @@
 // Use of this source code is governed by a freeBSD
 // license that can be found in the LICENSE.txt file.
 
-//CUDA bindings for Go.
+//CUDA runtime bindings for Go.
 //--------------------
 //
 //This package provides Go bindings for nVIDIA CUDA.

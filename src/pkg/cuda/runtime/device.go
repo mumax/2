@@ -8,9 +8,9 @@ package runtime
 
 //#include <cuda_runtime.h>
 import "C"
-import "unsafe"
 
 import (
+ "unsafe"
 	"fmt"
 )
 
@@ -24,7 +24,7 @@ func GetDevice() int {
 	return device
 }
 
-// Returns the device number on which the host thread executes device code. 
+// Returns the number of GPUs
 func GetDeviceCount() int {
 	var count int
 	err := Error(C.cudaGetDeviceCount((*C.int)(unsafe.Pointer(&count))))
@@ -34,7 +34,7 @@ func GetDeviceCount() int {
 	return count
 }
 
-// Returns the device number on which the host thread executes device code. 
+// Sets the device on which the host thread executes device code. 
 func SetDevice(device int) {
 	err := Error(C.cudaSetDevice(C.int(device)))
 	if err != Success {
@@ -43,13 +43,14 @@ func SetDevice(device int) {
 }
 
 
-// Set device flags
+// Set device flags for the device associated with the host thread
 func SetDeviceFlags(flags DeviceFlag) {
 	err := Error(C.cudaSetDeviceFlags(C.uint(flags)))
 	if err != Success {
 		panic(err)
 	}
 }
+
 
 type DeviceFlag uint
 
