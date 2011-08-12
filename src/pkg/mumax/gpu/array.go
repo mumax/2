@@ -17,90 +17,84 @@ import (
 )
 
 
-// A MuMax Array represents a 3-dimensional array of N-vectors,
-// transparently distributed over multiple GPUs
+// A MuMax Array represents a 3-dimensional array of N-vectors.
 //
-// Data layout example for a 3-component array on 2 GPUs:
+// Layout example for a (3,4) vsplice on 2 GPUs:
 // 	GPU0: X0 X1  Y0 Y1 Z0 Z1
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
-//
-// TODO: get device part as array?: requires gpuid[] field
+// TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	devPtr    []cu.DevicePtr // Access to the portions on the different GPUs
-	devStream []cu.Stream    // devStr[i]: cached stream on device i, no need to create/destroy all the time
-	//devId        []int          // 
-	_size        [4]int  // INTERNAL {components, size0, size1, size2}
-	size4D       []int   // {components, size0, size1, size2}
-	size3D       []int   // {size0, size1, size2}
-	partSize     []int   // Size3D of the parts stored on each GPU, cut along the Y-axis
-	_partSize    [3]int  // INTENRAL
-	length4D     int     // total Number of floats
-	partLength4D int     // total number of floats on each GPU
-	partLength3D int     // total number of floats per component on each GPU
-	Comp         []Array // x,y,z components, nil for scalar field
+	comp [][]slice // List of components, e.g. vector or tensor components TODO: rm
+	list []slice   // All elements as a single, contiguous list. 
+	// The memory layout is not simple enough for a host array to be directly copied to it.
+	_size     [4]int // INTERNAL {components, size0, size1, size2}
+	size4D    []int  // {components, size0, size1, size2}
+	size3D    []int  // {size0, size1, size2}
+	_partSize [3]int
+	partSize  []int
+
+	Comp []Array
 }
 
 
 // Initializes the array to hold a field with the number of components and given size.
-// 	Init(3, 1000) // gives an array of 1000 3-vectors
-// 	Init(1, 1000) // gives an array of 1000 scalars
-// 	Init(6, 1000) // gives an array of 1000 6-vectors or symmetric tensors
+// E.g.: Init(3, 1000) gives an array of 1000 3-vectors
+// E.g.: Init(1, 1000) gives an array of 1000 scalars
+// E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
 func (t *Array) InitArray(components int, size3D []int) {
-	Ndev := NDevice()
-	length3D := Prod(size3D)
+	Assert(components > 0)
+	Assert(len(size3D) == 3)
+	length := Prod(size3D)
 
-	Assert(size3D[1]%Ndev == 0)
-	Assert(length3D%Ndev == 0)
-
-	t.initSizes(components, size3D)
-
-	// init storage and streams
-	t.devPtr = make([]cu.DevicePtr, Ndev)
-	t.devStream = make([]cu.Stream, Ndev)
-
-	slicelen := components * (length3D / Ndev)
-	for i := 0; i < Ndev; i++ {
-		assureContextId(i) // Switch device context if necessary
-		t.devPtr[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
-		t.devStream[i] = cu.StreamCreate()
+	devices := getDevices()
+	Ndev := len(devices)
+	t.list = make([]slice, len(devices))
+	slicelen := components * length / Ndev
+	for i := range devices {
+		t.list[i].init(devices[i], slicelen)
 	}
 
-	//compSliceLen := length / Ndev
+	Assert(size3D[1]%Ndev == 0)
+	compSliceLen := length / Ndev
+
+	t.comp = make([][]slice, components)
+	for i := range t.comp {
+		t.comp[i] = make([]slice, Ndev)
+		for j := range t.comp[i] {
+			cs := &(t.comp[i][j])
+			start := i * compSliceLen
+			stop := (i + 1) * compSliceLen
+			cs.initSlice(&(t.list[j]), start, stop)
+		}
+	}
+
+	t._size[0] = components
+	for i := range size3D {
+		t._size[i+1] = size3D[i]
+	}
+	t.size4D = t._size[:]
+	t.size3D = t._size[1:]
+	// Slice along the J-direction
+	t._partSize[0] = t.size3D[0]
+	t._partSize[1] = t.size3D[1] / Ndev
+	t._partSize[2] = t.size3D[2]
+
+	t.Zero()
 
 	// initialize component arrays
 	t.Comp = make([]Array, components)
 	for c := range t.Comp {
-		t.Comp[c].initSizes(1, t.size3D)
-		t.Comp[c].devPtr = make([]cu.DevicePtr, Ndev) // Todo: could be block-allocated and sliced
-		t.Comp[c].devStream = make([]cu.Stream, Ndev)
-		for i := 0; i < Ndev; i++ {
-			t.Comp[c].devPtr[i] = offset(t.devPtr[i], c*t.Comp[c].Len()*SIZEOF_FLOAT)
-			t.Comp[c].devStream[i] = cu.StreamCreate()
+		t.Comp[c].comp = [][]slice{t.comp[c]}
+		t.Comp[c].list = t.comp[c]
+		t.Comp[c]._size[0] = 1
+		for i := 1; i < len(t._size); i++ {
+			t.Comp[c]._size[i] = t._size[i]
 		}
+		t.Comp[c].size4D = t.Comp[c]._size[:]
+		t.Comp[c].size3D = t.Comp[c]._size[1:]
 	}
-
-	t.Zero() // initialize with zeros
 }
 
-// initializes size3D, size4D, length, ...
-func (a *Array) initSizes(components int, size3D []int) {
-	Assert(components > 0)
-	Assert(len(size3D) == 3)
-
-	a._size[0] = components
-	for i := range size3D {
-		a._size[i+1] = size3D[i]
-	}
-	a.size4D = a._size[:]
-	a.size3D = a._size[1:]
-	a._partSize[0] = a.size3D[0]
-	a._partSize[1] = a.size3D[1] / NDevice() // Slice along the J-direction
-	a._partSize[2] = a.size3D[2]
-	a.partSize = a._partSize[:]
-	a.length4D = Prod(a.size4D)
-	a.partLength4D = a.length4D / NDevice()
-	a.partLength3D = a.partLength4D / components
-}
 
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
@@ -110,49 +104,33 @@ func NewArray(components int, size3D []int) *Array {
 }
 
 
-// Frees the underlying storage and invalidates all 
-// array fields to avoid accidental use after Free.
-func (a *Array) Free() {
-
-	for i := range a.devPtr {
-		assureContextId(i)
-		cu.MemFree(&(a.devPtr[i]))
-		a.devStream[i].Destroy()
+// Frees the underlying storage and sets the size to zero.
+func (v *Array) Free() {
+	for i := range v.list {
+		(&(v.list[i])).free()
 	}
 
-	a.invalidate()
-}
-
-
-// INTENRAL: invalidate all fields to protect against accidental use after Free()
-func (a *Array) invalidate() {
-	for i := range a._size {
-		a._size[i] = 0 // also sets size3D, size4D to zero
-	}
-	for i := range a._partSize {
-		a._partSize[i] = 0
-	}
-	for i := range a.devPtr {
-		a.devPtr[i] = cu.DevicePtr(0)
-		a.devStream[i] = cu.Stream(0)
-	}
-	a.length4D = 0
-	a.partLength4D = 0
-	a.size3D = nil
-	a.size4D = nil
-	a.partSize = nil
-	a.devPtr = nil
-	if a.Comp != nil {
-		for i := range a.Comp {
-			a.Comp[i].invalidate()
+	//TODO(a) Destroy streams.
+	// nil pointers, zero lengths, just to be sure
+	for i := range v.comp {
+		slice := v.comp[i]
+		for j := range slice {
+			// The slice must not be freed because the underlying list has already been freed.
+			slice[j].devId = -1 // invalid id 
+			slice[j].stream.Destroy()
 		}
+	}
+	v.comp = nil
+
+	for i := range v._size {
+		v._size[i] = 0
 	}
 }
 
 
 // Address of part of the array on device deviceId.
 func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
-	return a.devPtr[deviceId]
+	return a.list[deviceId].array
 }
 
 // True if unallocated/freed.
@@ -174,9 +152,6 @@ func (a *Array) NComp() int {
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
-
-
-// TODO(a): async
 func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size
 	for i, d := range dst._size {
@@ -184,58 +159,69 @@ func (dst *Array) CopyFromDevice(src *Array) {
 			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
-	for i := range dst.devPtr {
-		cu.MemcpyDtoDAsync(dst.devPtr[i], src.devPtr[i], SIZEOF_FLOAT*int64(dst.partLength4D), dst.devStream[i])
+	d := dst.list
+	s := src.list
+	Assert(len(d) == len(s)) // in principle redundant
+	start := 0
+	// copies run concurrently on the individual devices
+	for i := range s {
+		length := s[i].length // in principle redundant
+		Assert(length == d[i].length)
+		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+		start += length
 	}
 	// Synchronize with all copies
-	for _, s := range dst.devStream {
-		s.Synchronize()
+	for i := range s {
+		s[i].stream.Synchronize()
 	}
 
 }
 
 
 // Copy from host array to device array.
-func (dsta *Array) CopyFromHost(srca *host.Array) {
-	// test for equal size
-	for i, d := range dsta._size {
-		if d != srca.Size[i] {
-			panic(MSG_ARRAY_SIZE_MISMATCH)
-		}
-	}
+func (dst *Array) CopyFromHost(srca *host.Array) {
+	src := srca.Comp
 
+	Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
-	for c := range srca.Comp {
-		dst := dsta.Comp[c]
-		src := srca.Comp[c]
+	for i := range src {
+		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
+		//dst.Comp[i].CopyFromHost(src[i])
 
-		for i := range dst.devPtr {
-			//println("cu.MemcpyHtoD", dst.devPtr[i], cu.HostPtr(&(src[i*dst.partLength3D])), SIZEOF_FLOAT*int64(dst.partLength3D))
-			cu.MemcpyHtoD(dst.devPtr[i], cu.HostPtr(&(src[i*dst.partLength3D])), SIZEOF_FLOAT*int64(dst.partLength3D))
+		h := src[i]
+		s := dst.comp[i]
+		//Assert(len(h) == len(s)) // in principle redundant
+		start := 0
+		for i := range s {
+			length := s[i].length
+			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
+			start += length
 		}
 	}
 }
 
 
 // Copy from device array to host array.
-func (srca *Array) CopyToHost(dsta *host.Array) {
-	// test for equal size
-	for i, d := range srca._size {
-		if d != dsta.Size[i] {
-			panic(MSG_ARRAY_SIZE_MISMATCH)
+func (src *Array) CopyToHost(dsta *host.Array) {
+	dst := dsta.Comp
+
+	Assert(src.NComp() == len(dst))
+	for i := range dst {
+		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
+		//src.Comp[i].CopyToHost(dst[i])
+
+		h := dst[i]
+		s := src.comp[i]
+		//Assert(len(h) == len(s)) // in principle redundant
+		start := 0
+		for i := range s {
+			length := s[i].length
+			cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
+			start += length
 		}
+
 	}
 
-	// we have to work component-wise because of the data layout on the devices
-	for c := range srca.Comp {
-		dst := dsta.Comp[c]
-		src := srca.Comp[c]
-
-		for i := range src.devPtr {
-			//println("cu.MemcpyDtoH", cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
-			cu.MemcpyDtoH(cu.HostPtr(&dst[i*src.partLength3D]), src.devPtr[i], SIZEOF_FLOAT*int64(src.partLength3D))
-		}
-	}
 }
 
 
@@ -248,24 +234,15 @@ func (src *Array) LocalCopy() *host.Array {
 
 
 func (a *Array) Zero() {
-	// Start memsets in parallel on each device
-	for i := range a.devPtr {
-		assureContextId(i) // !!
-		cu.MemsetD32Async(a.devPtr[i], 0, int64(a.partLength4D), a.devStream[i])
+	slices := a.list
+	for i := range slices {
+		assureContextId(slices[i].devId)
+		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
 	}
-	// Wait for each device to finish
-	for _, s := range a.devStream {
-		s.Synchronize()
+	for i := range slices {
+		slices[i].stream.Synchronize()
 	}
 }
-
 
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
-
-
-// INTERNAL: pointer arithmetic.
-// note: Do not forget bytes = floats * SIZEOF_FLOAT.
-func offset(ptr cu.DevicePtr, bytes int) cu.DevicePtr {
-	return cu.DevicePtr(uintptr(ptr) + uintptr(bytes))
-}
