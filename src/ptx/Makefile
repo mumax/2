@@ -1,9 +1,9 @@
+include ../Make.inc
+
 ptxfiles=\
 	memory.ptx\
 	math.ptx\
 	debug.ptx\
-
-NVCC=nvcc
 
 all: $(ptxfiles)
 

@@ -1,7 +1,7 @@
 include $(GOROOT)/src/Make.inc
 
 executables=\
-	mumax2-bin\
+	mumax2\
 	mumax2-apigen\
 	mumax2-queue\
 
@@ -33,7 +33,7 @@ all: $(executables)
 $(executables):	%:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
-	mv -f $@ ../../../../bin/sub
+	mv -f $@ ../../../../lib
 
 .PHONY:	clean
 clean:

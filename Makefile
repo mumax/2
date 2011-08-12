@@ -1,16 +1,16 @@
+include src/Make.inc
+
 dirs=\
 	src\
-	bin\
 	tests\
 
 CLEANFILES+=*.log
 
 all: $(dirs) githooks
 
-bin: src
 
-tests: bin
-test: bin
+tests: src
+test: src
 
 .PHONY: githooks
 githooks:
