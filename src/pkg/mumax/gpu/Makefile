@@ -29,7 +29,13 @@ CGO_CFLAGS+=\
 CGO_LDFLAGS+=\
 	-L/usr/local/cuda/lib\
    	-L/usr/local/cuda/lib64\
+	-L/usr/lib/nvidia-current/\
    	-L../../../../lib\
+
+CGO_LDFLAGS+=\
+	-lcuda\
+   	-lcudart\
+	libmumax2.so\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	

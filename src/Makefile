@@ -5,4 +5,6 @@ dirs=\
 	
 all: $(dirs)
 
+pkg: lib
+
 include Dirs.pkg
