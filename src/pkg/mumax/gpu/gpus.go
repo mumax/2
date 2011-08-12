@@ -34,7 +34,6 @@ var (
 )
 
 // Sets a list of devices to use.
-// flags is passed to CUDA context creation.
 func InitMultiGPU(devices []int, flags uint) {
 	Debug("InitMultiGPU ", devices, flags)
 	Assert(len(devices) > 0)
@@ -55,7 +54,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	// output device info
 	for i := range _useDevice {
 		dev := cu.DeviceGet(_useDevice[i])
-		Log("Using GPU", i, dev.GetName(), "on PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), "with", dev.TotalMem()/(1024*1024), "MiB memory")
+		Log("device", i, "( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem()/(1024*1024), "MiB")
 	}
 
 	// set up device properties
@@ -138,38 +137,33 @@ func InitAllGPUs(flags uint) {
 // test "multi"-GPU code. The distribution over
 // two separate arrays on the same device is a bit
 // silly, but good for debugging.
-// TODO(a): as of feat_noslice, does not work anymore.
-//func InitDebugGPUs() {
-//	var use []int
-//	N := cu.DeviceGetCount()
-//	for i := 0; i < N; i++ {
-//		use = append(use, i)
-//	}
-//	if N == 1 {
-//		use = append(use, 0) // Use the same device twice.
-//	}
-//	InitMultiGPU(use, 0)
-//}
+func InitDebugGPUs() {
+	var use []int
+	N := cu.DeviceGetCount()
+	for i := 0; i < N; i++ {
+		use = append(use, i)
+	}
+	if N == 1 {
+		use = append(use, 0) // Use the same device twice.
+	}
+	InitMultiGPU(use, 0)
+}
 
 // Assures Context ctx is currently active. Switches contexts only when necessary.
 func assureContext(ctx cu.Context) {
 	if _currentCtx != ctx {
-		//println("assureContext", ctx)
 		ctx.SetCurrent()
 		_currentCtx = ctx
 	}
 }
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
-// deviceId is the internal device index (index for getDevices() array), not the cuda device id
 func assureContextId(deviceId int) {
 	ctx := _deviceCtxs[deviceId]
-	assureContext(ctx)
-	//if _currentCtx != ctx {
-	//	ctx.SetCurrent()
-	//	Debug("Set context", ctx)
-	//	_currentCtx = ctx
-	//}
+	if _currentCtx != ctx {
+		ctx.SetCurrent()
+		_currentCtx = ctx
+	}
 }
 
 // Returns the current context
@@ -178,17 +172,22 @@ func getContext() cu.Context {
 }
 
 // Returns the list of usable devices. 
-//func getDevices() []int {
-//	if _useDevice == nil {
-//		panic(Bug(MSG_DEVICEUNINITIATED))
-//	}
-//	return _useDevice
-//}
+func getDevices() []int {
+	if _useDevice == nil {
+		panic(Bug(MSG_DEVICEUNINITIATED))
+	}
+	return _useDevice
+}
 
 
 // Returns the number of used GPUs.
-func NDevice() int {
+func DeviceCount() int {
 	return len(_useDevice)
+}
+
+//TODO: rm
+func NDevice() int {
+	return DeviceCount()
 }
 
 

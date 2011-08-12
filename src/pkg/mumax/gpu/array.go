@@ -167,7 +167,7 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	for i := range s {
 		length := s[i].length // in principle redundant
 		Assert(length == d[i].length)
-		cu.MemcpyDtoDAsync(cu.DevicePtr(s[i].array), cu.DevicePtr(d[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i].array), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
 		start += length
 	}
 	// Synchronize with all copies
