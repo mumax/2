@@ -10,6 +10,7 @@ GOFILES=\
 	doc.go\
 	gpus.go\
 	array.go\
+	slice.go\
 	stream.go\
 	module.go\
 	module_load.go\
