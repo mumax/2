@@ -19,7 +19,7 @@ GOFILES=\
 	math.go\
 
 CGOFILES=\
-	cmath.go\
+#cmath.go\
 
 GC+=\
 	-I../../cuda/driver/_obj\

@@ -54,43 +54,43 @@ func TestAddClosure(test *testing.T) {
 	}
 }
 
-func TestAddCgo(test *testing.T) {
-	// fail test on panic, do not crash
-	defer func() {
-		if err := recover(); err != nil {
-			test.Error(err)
-		}
-	}()
-
-	size := []int{8, 16, 32}
-
-	a := NewArray(3, size)
-	defer a.Free()
-	ah := a.LocalCopy()
-
-	b := NewArray(3, size)
-	defer b.Free()
-	bh := b.LocalCopy()
-
-	for i := range ah.List {
-		ah.List[i] = rand.Float32()
-		bh.List[i] = rand.Float32()
-	}
-
-	a.CopyFromHost(ah)
-	b.CopyFromHost(bh)
-
-	CAdd(a, a, b)
-
-	sum := a.LocalCopy()
-	for i := range sum.List {
-		if sum.List[i] != ah.List[i]+bh.List[i] {
-			if !test.Failed() {
-				test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
-			}
-		}
-	}
-}
+//func TestAddCgo(test *testing.T) {
+//	// fail test on panic, do not crash
+//	defer func() {
+//		if err := recover(); err != nil {
+//			test.Error(err)
+//		}
+//	}()
+//
+//	size := []int{8, 16, 32}
+//
+//	a := NewArray(3, size)
+//	defer a.Free()
+//	ah := a.LocalCopy()
+//
+//	b := NewArray(3, size)
+//	defer b.Free()
+//	bh := b.LocalCopy()
+//
+//	for i := range ah.List {
+//		ah.List[i] = rand.Float32()
+//		bh.List[i] = rand.Float32()
+//	}
+//
+//	a.CopyFromHost(ah)
+//	b.CopyFromHost(bh)
+//
+//	CAdd(a, a, b)
+//
+//	sum := a.LocalCopy()
+//	for i := range sum.List {
+//		if sum.List[i] != ah.List[i]+bh.List[i] {
+//			if !test.Failed() {
+//				test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
+//			}
+//		}
+//	}
+//}
 
 
 func BenchmarkAddClosure(bench *testing.B) {
@@ -108,17 +108,17 @@ func BenchmarkAddClosure(bench *testing.B) {
 	}
 }
 
-func BenchmarkAddCgo(bench *testing.B) {
-	bench.StopTimer()
-	size := []int{64, 1024, 1024}
-
-	a := NewArray(3, size)
-	defer a.Free()
-	b := NewArray(3, size)
-	defer b.Free()
-
-	bench.StartTimer()
-	for i := 0; i < bench.N; i++ {
-		CAdd(a, a, b)
-	}
-}
+//func BenchmarkAddCgo(bench *testing.B) {
+//	bench.StopTimer()
+//	size := []int{64, 1024, 1024}
+//
+//	a := NewArray(3, size)
+//	defer a.Free()
+//	b := NewArray(3, size)
+//	defer b.Free()
+//
+//	bench.StartTimer()
+//	for i := 0; i < bench.N; i++ {
+//		CAdd(a, a, b)
+//	}
+//}
