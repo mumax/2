@@ -28,3 +28,10 @@ misc/		Miscellaneous scripts
 
 
 
+
+
+Acknowledgements:
+
+reduce.cu is partly based on code from "The Regents of the University of California, Davis
+campus and NVIDIA Corporation.
+

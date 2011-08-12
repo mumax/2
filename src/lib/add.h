@@ -1,5 +1,5 @@
-#ifndef _LIBMUMAX2_H
-#define _LIBMUMAX2_H
+#ifndef _ADD_H_
+#define _ADD_H_
 
 #include <cuda.h>
 

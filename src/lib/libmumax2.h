@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-
+#include "add.h"
 
 
 #ifdef __cplusplus

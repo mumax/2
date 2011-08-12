@@ -15,11 +15,21 @@ GOFILES=\
 	math.go\
 
 CGOFILES=\
+	cmath.go\
 
 GC+=\
 	-I../../cuda/driver/_obj\
 	-I../common/_obj\
 	-I../host/_obj\
+
+CGO_CFLAGS+=\
+	-I/usr/local/cuda/include/\
+	-I../../../lib\
+
+CGO_LDFLAGS+=\
+	-L/usr/local/cuda/lib\
+   	-L/usr/local/cuda/lib64\
+   	-L../../../../lib\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	
