@@ -22,8 +22,9 @@ func init() {
 	flag.Parse()
 	InitLogger("")
 	cu.Init()
-	InitAllGPUs(0)
+	//InitAllGPUs(0)
 	//println("		*****  u s i n g    1    g p u  *******  ")
 	//InitMultiGPU([]int{0}, 0)
+	InitDebugGPUs()
 	SetPTXLookPath("../../../ptx")
 }
