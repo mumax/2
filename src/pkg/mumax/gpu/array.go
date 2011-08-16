@@ -39,7 +39,7 @@ type Array struct {
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component
 	stream    []cu.Stream
-	//Comp []Array
+	Comp []Array
 }
 
 
@@ -48,15 +48,12 @@ type Array struct {
 // E.g.: Init(1, 1000) gives an array of 1000 scalars
 // E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
 func (t *Array) InitArray(components int, size3D []int) {
-	Assert(components > 0)
-	Assert(len(size3D) == 3)
-	length := Prod(size3D)
+	t.initSize(components, size3D)
 
 	devices := getDevices()
 	Ndev := len(devices)
-	t.pointer = make([]cu.DevicePtr, len(devices))
-	t.partLen4D = components * length / Ndev
-	t.partLen3D = length / Ndev
+
+	t.pointer = make([]cu.DevicePtr, Ndev)
 	t.devId = make([]int, Ndev)
 	t.stream = make([]cu.Stream, Ndev)
 	for i := range devices {
@@ -66,29 +63,17 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
 	}
 
-	Assert(size3D[1]%Ndev == 0)
-	compSliceLen := length / Ndev
 
 	t.comp = make([][]cu.DevicePtr, components)
 	for i := range t.comp {
 		t.comp[i] = make([]cu.DevicePtr, Ndev)
 		for j := range t.comp[i] {
-			start := i * compSliceLen
+			start := i * t.partLen3D
 			assureContextId(t.devId[j])
 			t.comp[i][j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
 		}
 	}
 
-	t._size[0] = components
-	for i := range size3D {
-		t._size[i+1] = size3D[i]
-	}
-	t.size4D = t._size[:]
-	t.size3D = t._size[1:]
-	// Slice along the J-direction
-	t._partSize[0] = t.size3D[0]
-	t._partSize[1] = t.size3D[1] / Ndev
-	t._partSize[2] = t.size3D[2]
 
 	t.Zero()
 
@@ -106,6 +91,29 @@ func (t *Array) InitArray(components int, size3D []int) {
 	//}
 }
 
+
+func (a *Array) initSize(components int, size3D []int){
+	Ndev := len(getDevices())
+	Assert(components > 0)
+	Assert(len(size3D) == 3)
+	length3D := Prod(size3D) // length
+	a.partLen4D = components * length3D / Ndev
+	a.partLen3D = length3D / Ndev
+
+	Assert(size3D[1]%Ndev == 0)
+
+	a._size[0] = components
+	for i := range size3D {
+		a._size[i+1] = size3D[i]
+	}
+	a.size4D = a._size[:]
+	a.size3D = a._size[1:]
+	// Slice along the J-direction
+	a._partSize[0] = a.size3D[0]
+	a._partSize[1] = a.size3D[1] / Ndev
+	a._partSize[2] = a.size3D[2]
+
+}
 
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
