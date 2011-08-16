@@ -62,8 +62,6 @@ func (a *Array) InitArray(components int, size3D []int) {
 		a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
 	}
 
-	//t.Comp = make([][]cu.DevicePtr, components)
-
 	a.Zero()
 
 	// initialize component arrays
@@ -91,7 +89,7 @@ func (a *Array) initSize(components int, size3D []int) {
 	Ndev := len(getDevices())
 	Assert(components > 0)
 	Assert(len(size3D) == 3)
-	length3D := Prod(size3D) // length
+	length3D := Prod(size3D) 
 	a.partLen4D = components * length3D / Ndev
 	a.partLen3D = length3D / Ndev
 
@@ -141,20 +139,25 @@ func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
 	return a.pointer[deviceId]
 }
 
+
 // Total number of elements
 func (a *Array) Len() int {
 	return a._size[0] * a._size[1] * a._size[2] * a._size[3]
 }
+
 
 // Number of components (1: scalar, 3: vector, ...).
 func (a *Array) NComp() int {
 	return a._size[0]
 }
 
+
 // Size of the vector field
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
+
+
 func (dst *Array) CopyFromDevice(src *Array) {
 	// test for equal size
 	for i, d := range dst._size {
