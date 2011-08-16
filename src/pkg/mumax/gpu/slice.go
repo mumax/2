@@ -39,16 +39,16 @@ type slice struct {
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *slice) init(deviceId int, length int) {
-	Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
+func (s *slice) init(devices_i int, slicelen int) {
+	//Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
 
 	// Switch device context if necessary
-	assureContextId(deviceId)
+	assureContextId(devices_i)
 
-	s.devId = deviceId
-	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(length))
+	s.devId = devices_i
+	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
 	s.stream = cu.StreamCreate()
-	s.length = length
+	s.length = slicelen
 }
 
 

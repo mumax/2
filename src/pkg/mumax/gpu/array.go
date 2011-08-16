@@ -52,6 +52,9 @@ func (t *Array) InitArray(components int, size3D []int) {
 	slicelen := components * length / Ndev
 	for i := range devices {
 		t.list[i].init(devices[i], slicelen)
+
+
+
 	}
 
 	Assert(size3D[1]%Ndev == 0)
