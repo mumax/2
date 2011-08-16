@@ -25,7 +25,7 @@ import (
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
 	pointer []cu.DevicePtr
-	comp [][]cu.DevicePtr
+	comp    [][]cu.DevicePtr
 	//list []slice // All elements as a single, contiguous list. 
 	//comp  [][]slice // List of components, e.g. vector or tensor components TODO: rm
 
@@ -130,7 +130,14 @@ func NewArray(components int, size3D []int) *Array {
 func (v *Array) Free() {
 	for i := range v.pointer {
 		//(&(v.list[i])).free()
-		sliceFree(v.devId[i], v.pointer[i], v.stream[i])
+		//sliceFree(v.devId[i], v.pointer[i], v.stream[i])
+
+		assureContextId(v.devId[i])
+		v.pointer[i].Free()
+		v.pointer[i] = 0
+		v.stream[i].Destroy()
+		v.stream[i]= 0
+		
 	}
 
 	//TODO(a) Destroy streams.
@@ -269,3 +276,9 @@ func (a *Array) Zero() {
 
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
+
+// Pointer arithmetic.
+func offset(ptr uintptr, bytes int) uintptr {
+	return ptr + uintptr(bytes)
+}
+
