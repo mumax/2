@@ -53,16 +53,16 @@ func (s *slice) init(deviceId int, length int) {
 
 
 // Takes a sub-slice.
-func (b *slice) initSlice(a *slice, start, stop int) {
-	if b.array != cu.DevicePtr(uintptr(0)) {
-		panic("cuda slice already initialized")
-	}
-	assureContextId(a.devId)
-	b.array = cu.DevicePtr(offset(uintptr(a.array), start*SIZEOF_FLOAT))
-	b.length = stop - start
-	b.devId = a.devId
-	b.stream = cu.StreamCreate()
-}
+//func (b *slice) initSlice(a *slice, start, stop int) {
+//	if b.array != cu.DevicePtr(uintptr(0)) {
+//		panic("cuda slice already initialized")
+//	}
+//	assureContextId(a.devId)
+//	b.array = cu.DevicePtr(offset(uintptr(a.array), start*SIZEOF_FLOAT))
+//	b.length = stop - start
+//	b.devId = a.devId
+//	b.stream = cu.StreamCreate()
+//}
 
 // Pointer arithmetic.
 func offset(ptr uintptr, bytes int) uintptr {
@@ -77,7 +77,7 @@ func offset(ptr uintptr, bytes int) uintptr {
 //	s.devId = -1 // invalid id to make sure it's not used
 //}
 
-func sliceFree(devId int, array cu.DevicePtr, stream cu.Stream){
+func sliceFree(devId int, array cu.DevicePtr, stream cu.Stream) {
 	assureContextId(devId) // necessary in a multi-GPU context
 	array.Free()
 	stream.Destroy()

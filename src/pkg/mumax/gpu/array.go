@@ -64,7 +64,14 @@ func (t *Array) InitArray(components int, size3D []int) {
 			cs := &(t.comp[i][j])
 			start := i * compSliceLen
 			stop := (i + 1) * compSliceLen
-			cs.initSlice(&(t.list[j]), start, stop)
+			//cs.initSlice(&(t.list[j]), start, stop)
+
+			assureContextId(t.list[j].devId)
+			cs.array = cu.DevicePtr(offset(uintptr(t.list[j].array), start*SIZEOF_FLOAT))
+			cs.length = stop - start
+			cs.devId = t.list[j].devId
+			cs.stream = cu.StreamCreate()
+
 		}
 	}
 
