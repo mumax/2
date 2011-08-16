@@ -60,13 +60,10 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.devId = make([]int, Ndev)
 	t.stream = make([]cu.Stream, Ndev)
 	for i := range devices {
-		//t.list[i].init(devices[i], slicelen)
 		assureContextId(devices[i])
 		t.devId[i] = devices[i]
 		t.stream[i] = cu.StreamCreate()
 		t.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
-		//t.list[i].length = slicelen
-
 	}
 
 	Assert(size3D[1]%Ndev == 0)
@@ -76,17 +73,9 @@ func (t *Array) InitArray(components int, size3D []int) {
 	for i := range t.comp {
 		t.comp[i] = make([]cu.DevicePtr, Ndev)
 		for j := range t.comp[i] {
-			//cs := &(t.comp[i][j])
 			start := i * compSliceLen
-			//stop := (i + 1) * compSliceLen
-			//cs.initSlice(&(t.list[j]), start, stop)
-
 			assureContextId(t.devId[j])
 			t.comp[i][j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
-			//cs.length = stop - start
-			//cs.devId = t.list[j].devId
-			//cs.stream = cu.StreamCreate()
-
 		}
 	}
 
@@ -129,28 +118,13 @@ func NewArray(components int, size3D []int) *Array {
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
 	for i := range v.pointer {
-		//(&(v.list[i])).free()
-		//sliceFree(v.devId[i], v.pointer[i], v.stream[i])
-
 		assureContextId(v.devId[i])
 		v.pointer[i].Free()
 		v.pointer[i] = 0
 		v.stream[i].Destroy()
-		v.stream[i]= 0
-		
-	}
+		v.stream[i] = 0
 
-	//TODO(a) Destroy streams.
-	// nil pointers, zero lengths, just to be sure
-	//for i := range v.comp {
-	//slice := v.comp[i]
-	//for j := range slice {
-	// The slice must not be freed because the underlying list has already been freed.
-	//slice[j].devId = -1 // invalid id 
-	//v.slice[j].stream.Destroy()
-	//}
-	//}
-	//v.comp = nil
+	}
 
 	for i := range v._size {
 		v._size[i] = 0
@@ -162,11 +136,6 @@ func (v *Array) Free() {
 func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
 	return a.pointer[deviceId]
 }
-
-// True if unallocated/freed.
-//func (a *Array) IsNil() bool {
-//	return a.splice.IsNil()
-//}
 
 // Total number of elements
 func (a *Array) Len() int {
@@ -281,4 +250,3 @@ const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
 func offset(ptr uintptr, bytes int) uintptr {
 	return ptr + uintptr(bytes)
 }
-
