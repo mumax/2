@@ -14,6 +14,7 @@ package gpu
 import (
 	"testing"
 	"rand"
+	"fmt"
 )
 
 func TestAddClosure(test *testing.T) {
@@ -56,11 +57,11 @@ func TestAddClosure(test *testing.T) {
 
 func TestAddCgo(test *testing.T) {
 	// fail test on panic, do not crash
-	//defer func() {
-	//	if err := recover(); err != nil {
-	//		test.Error(err)
-	//	}
-	//}()
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
 
 	size := []int{8, 16, 32}
 
@@ -95,7 +96,13 @@ func TestAddCgo(test *testing.T) {
 
 func BenchmarkAddClosure(bench *testing.B) {
 	bench.StopTimer()
-	size := []int{16, 1024, 1024}
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	size := []int{1, 1024, 1024}
 
 	a := NewArray(3, size)
 	defer a.Free()
@@ -110,7 +117,13 @@ func BenchmarkAddClosure(bench *testing.B) {
 
 func BenchmarkAddCgo(bench *testing.B) {
 	bench.StopTimer()
-	size := []int{16, 1024, 1024}
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+		}
+	}()
+	size := []int{1, 1024, 1024}
 
 	a := NewArray(3, size)
 	defer a.Free()
