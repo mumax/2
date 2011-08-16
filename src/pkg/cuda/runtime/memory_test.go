@@ -12,9 +12,9 @@ import (
 
 
 func TestMalloc(t *testing.T) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			t.Error(err)
 		}
 	}()
@@ -28,9 +28,9 @@ func TestMalloc(t *testing.T) {
 
 
 func TestArray(t *testing.T) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			t.Error(err)
 		}
 	}()
@@ -44,9 +44,9 @@ func TestArray(t *testing.T) {
 
 
 func TestMemcpy(t *testing.T) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			t.Error(err)
 		}
 	}()
@@ -72,9 +72,9 @@ func TestMemcpy(t *testing.T) {
 }
 
 func BenchmarkMemcpyToDevice(b *testing.B) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			println(err)
 		}
 	}()
@@ -96,9 +96,9 @@ func BenchmarkMemcpyToDevice(b *testing.B) {
 }
 
 func BenchmarkMemcpyOnDevice(b *testing.B) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			println(err)
 		}
 	}()
@@ -118,9 +118,9 @@ func BenchmarkMemcpyOnDevice(b *testing.B) {
 }
 
 func TestMemcpyAsync(t *testing.T) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			t.Error(err)
 		}
 	}()

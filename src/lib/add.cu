@@ -22,11 +22,11 @@ void add(float **dst, float **a, float **b, CUstream * stream, int Ndev, int Npa
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int i = 0; i < Ndev; i++) {
-		cudaSetDevice(i); // CHANGE TO DEV[i] !!!!!!!!
+		gpu_safe(cudaSetDevice(i)); // CHANGE TO DEV[i] !!!!!!!!
 		addKern <<< gridSize, blockSize, 0, cudaStream_t(stream[i]) >>> (dst[i], a[i], b[i], Npart);
 	}
 	for (int i = 0; i < Ndev; i++) {
-		cudaSetDevice(i); // CHANGE TO DEV[i] !!!!!!!!
+		gpu_safe(cudaSetDevice(i)); // CHANGE TO DEV[i] !!!!!!!!
 		gpu_safe(cudaStreamSynchronize(stream[i]));
 	}
 }

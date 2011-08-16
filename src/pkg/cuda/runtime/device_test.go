@@ -11,9 +11,9 @@ import (
 )
 
 func TestDevice(t *testing.T) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			t.Error(err)
 		}
 	}()
