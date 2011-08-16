@@ -42,7 +42,7 @@ func (s *slice) init(deviceId int, length int) {
 	Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
 
 	// Switch device context if necessary
-	assureContext(getDeviceContext(deviceId))
+	assureContextId(deviceId)
 
 	s.devId = deviceId
 	s.stream = cu.StreamCreate()

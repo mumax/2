@@ -13,6 +13,7 @@ package gpu
 import (
 	. "mumax/common"
 	cu "cuda/driver"
+	cuda "cuda/runtime"
 	"fmt"
 )
 
@@ -21,10 +22,10 @@ import (
 var _useDevice []int = nil
 
 // INTERNAL: List of contexts for each used device. _deviceCtxs[i] is valid for GPU number _useDevice[i].
-var _deviceCtxs []cu.Context
+//var _deviceCtxs []cu.Context
 
 // INTERNAL: The currently active CUDA context (element of _deviceCtxs)
-var _currentCtx cu.Context
+//var _currentCtx cu.Context
 
 // INTERNAL: Device properties
 var (
@@ -69,10 +70,10 @@ func InitMultiGPU(devices []int, flags uint) {
 	Debug("Max", maxThreadsPerBlock, "threads per block, max", maxGridDim, "x", maxBlockDim, "threads per GPU")
 
 	// setup contexts
-	_deviceCtxs = make([]cu.Context, len(_useDevice))
-	for i := range _deviceCtxs {
-		_deviceCtxs[i] = cu.CtxCreate(flags, cu.DeviceGet(_useDevice[i]))
-	}
+	//_deviceCtxs = make([]cu.Context, len(_useDevice))
+	//for i := range _deviceCtxs {
+	//	_deviceCtxs[i] = cu.CtxCreate(flags, cu.DeviceGet(_useDevice[i]))
+	//}
 
 	// enable peer access if more than 1 GPU is specified
 	// do not try to enable for one GPU so that device with CC < 2.0
@@ -80,29 +81,32 @@ func InitMultiGPU(devices []int, flags uint) {
 	// also do not enable if GPU 0 is used twice for debug purposes
 	if len(_useDevice) > 1 && !allZero(_useDevice) {
 		Debug("Enabling device peer-to-peer access")
-		for i := range _deviceCtxs {
-			dev := cu.DeviceGet(_useDevice[i])
+		for i := range _useDevice{//_deviceCtxs {
+			//dev := cu.DeviceGet(_useDevice[i])
 			//Debug("Device ", i, "UNIFIED_ADDRESSING:", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
-			if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
-				panic(ERR_UNIFIED_ADDR)
-			}
-			for j := range _deviceCtxs {
+			//if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
+			//	panic(ERR_UNIFIED_ADDR)
+			//}
+			for j := range _useDevice {
 				//Debug("CanAccessPeer", i, j, ":", cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])))
 				if i != j {
-					if !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
-						panic(ERR_UNIFIED_ADDR)
-					}
+					//if !cu.DeviceCanAccessPeer(cu.DeviceGet(_useDevice[i]), cu.DeviceGet(_useDevice[j])) {
+					//	panic(ERR_UNIFIED_ADDR)
+					//}
 					// enable access between context i and j
-					_deviceCtxs[i].SetCurrent()
-					_deviceCtxs[j].EnablePeerAccess()
+					//_deviceCtxs[i].SetCurrent()
+					//_deviceCtxs[j].EnablePeerAccess()
+					cuda.SetDevice(_useDevice[i])
+					cuda.DeviceEnablePeerAccess(_useDevice[j])
 				}
 			}
 		}
 	}
 
 	// set the current context
-	_deviceCtxs[0].SetCurrent()
-	_currentCtx = _deviceCtxs[0]
+	cuda.SetDevice(_useDevice[0])
+	//_deviceCtxs[0].SetCurrent()
+	//_currentCtx = _deviceCtxs[0]
 }
 
 
@@ -150,26 +154,27 @@ func InitDebugGPUs() {
 }
 
 // Assures Context ctx is currently active. Switches contexts only when necessary.
-func assureContext(ctx cu.Context) {
-	if _currentCtx != ctx {
-		ctx.SetCurrent()
-		_currentCtx = ctx
-	}
-}
+//func assureContext(ctx cu.Context) {
+//	if _currentCtx != ctx {
+//		ctx.SetCurrent()
+//		_currentCtx = ctx
+//	}
+//}
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
 func assureContextId(deviceId int) {
-	ctx := _deviceCtxs[deviceId]
-	if _currentCtx != ctx {
-		ctx.SetCurrent()
-		_currentCtx = ctx
-	}
+		cuda.SetDevice(_useDevice[deviceId])
+//	ctx := _deviceCtxs[deviceId]
+//	if _currentCtx != ctx {
+//		ctx.SetCurrent()
+//		_currentCtx = ctx
+//	}
 }
 
 // Returns the current context
-func getContext() cu.Context {
-	return _currentCtx
-}
+//func getContext() cu.Context {
+//	return _currentCtx
+//}
 
 // Returns the list of usable devices. 
 func getDevices() []int {
@@ -192,9 +197,9 @@ func NDevice() int {
 
 
 // Returns a context for the current device.
-func getDeviceContext(deviceId int) cu.Context {
-	return _deviceCtxs[deviceId]
-}
+//func getDeviceContext(deviceId int) cu.Context {
+	//return _deviceCtxs[deviceId]
+//}
 
 
 // Divides the size of a multi-GPU array into single-GPU parts.
