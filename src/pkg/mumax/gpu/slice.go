@@ -77,7 +77,7 @@ func offset(ptr uintptr, bytes int) uintptr {
 //	s.devId = -1 // invalid id to make sure it's not used
 //}
 
-func sliceFree(devId int, array cu.DevPtr, stream cu.Stream){
+func sliceFree(devId int, array cu.DevicePtr, stream cu.Stream){
 	assureContextId(devId) // necessary in a multi-GPU context
 	array.Free()
 	stream.Destroy()
