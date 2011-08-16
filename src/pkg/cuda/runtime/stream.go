@@ -27,6 +27,7 @@ func StreamCreate() Stream {
 	return Stream(unsafe.Pointer(stream))
 }
 
+
 // Destroys an asynchronous stream
 func StreamDestroy(stream Stream) {
 	err := Error(C.cudaStreamDestroy(C.cudaStream_t(unsafe.Pointer(stream))))
@@ -35,10 +36,12 @@ func StreamDestroy(stream Stream) {
 	}
 }
 
+
 // Returns Success if all operations have completed, ErrorNotReady otherwise
 func StreamQuery(stream Stream) Error {
 	return Error(C.cudaStreamQuery(C.cudaStream_t(unsafe.Pointer(stream))))
 }
+
 
 // Blocks until the stream has completed.
 func StreamSynchronize(stream Stream) {
@@ -46,4 +49,25 @@ func StreamSynchronize(stream Stream) {
 	if err != Success {
 		panic(err)
 	}
+}
+
+
+// Blocks until the stream has completed.
+func (s Stream) Synchronize() {
+	err := Error(C.cudaStreamSynchronize(C.cudaStream_t(unsafe.Pointer(s))))
+	if err != Success {
+		panic(err)
+	}
+}
+
+// Returns Success if all operations have completed, ErrorNotReady otherwise
+func (s Stream) Query() Error {
+	return StreamQuery(s)
+}
+
+
+// Destroys an asynchronous stream
+func (s *Stream) Destroy() {
+	StreamDestroy(*s)
+	*s = 0
 }

@@ -17,6 +17,7 @@ __global__ void addKern(float *dst, float *a, float *b, int Npart) {
 	}
 }
 
+
 void add(float **dst, float **a, float **b, CUstream * stream, int Ndev, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
