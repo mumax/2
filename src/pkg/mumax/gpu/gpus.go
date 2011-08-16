@@ -70,10 +70,11 @@ func InitMultiGPU(devices []int, flags uint) {
 	Debug("Max", maxThreadsPerBlock, "threads per block, max", maxGridDim, "x", maxBlockDim, "threads per GPU")
 
 	// setup contexts
-	//_deviceCtxs = make([]cu.Context, len(_useDevice))
-	//for i := range _deviceCtxs {
-	//	_deviceCtxs[i] = cu.CtxCreate(flags, cu.DeviceGet(_useDevice[i]))
-	//}
+	for i := range _useDevice {
+		assureContextId(i)
+		dummy := cuda.Malloc(1)// initializes a cuda context for the device
+		cuda.Free(dummy)
+	}
 
 	// enable peer access if more than 1 GPU is specified
 	// do not try to enable for one GPU so that device with CC < 2.0

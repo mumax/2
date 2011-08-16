@@ -15,6 +15,7 @@ package gpu
 import (
 	. "mumax/common"
 	cu "cuda/driver"
+	//cuda "cuda/runtime"
 )
 
 
@@ -45,8 +46,8 @@ func (s *slice) init(deviceId int, length int) {
 	assureContextId(deviceId)
 
 	s.devId = deviceId
-	s.stream = cu.StreamCreate()
 	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(length))
+	s.stream = cu.StreamCreate()
 	s.length = length
 }
 
