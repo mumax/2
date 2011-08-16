@@ -27,10 +27,10 @@ func CAdd(dst, a, b *Array) {
 	var bPtr [MAXGPU]unsafe.Pointer
 	var devStream [MAXGPU]unsafe.Pointer
 
-	for i := range dst.list {
-		dstPtr[i] = unsafe.Pointer(dst.list[i].array)
-		aPtr[i] = unsafe.Pointer(a.list[i].array)
-		bPtr[i] = unsafe.Pointer(b.list[i].array)
+	for i := range dst.pointer {
+		dstPtr[i] = unsafe.Pointer(dst.pointer[i])
+		aPtr[i] = unsafe.Pointer(a.pointer[i])
+		bPtr[i] = unsafe.Pointer(b.pointer[i])
 		devStream[i] = unsafe.Pointer(dst.stream[i])
 	}
 	partLength4D := dst.partLen4D

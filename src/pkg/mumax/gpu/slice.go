@@ -22,12 +22,12 @@ import (
 // Slices are the building blocks of Splices.
 // A Slice resides on a single GPU. Multiple
 // slices are combined into a splice.
-type slice struct {
-	array cu.DevicePtr // Access to the array on the GPU.
-	//length int          // Number of floats
-	//devId  int       // index of CUDA context of this slice's allocation
-	//stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
-}
+//type slice struct {
+//	array cu.DevicePtr // Access to the array on the GPU.
+//	//length int          // Number of floats
+//	//devId  int       // index of CUDA context of this slice's allocation
+//	//stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
+//}
 
 
 // Allocates and initiates a new slice. See slice.Init().
