@@ -39,49 +39,49 @@ type Array struct {
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component
 	Stream
-	Comp      []Array
+	Comp []Array
 }
 
 
 // Initializes the array to hold a field with the number of components and given size.
-// E.g.: Init(3, 1000) gives an array of 1000 3-vectors
-// E.g.: Init(1, 1000) gives an array of 1000 scalars
-// E.g.: Init(6, 1000) gives an array of 1000 6-vectors or symmetric tensors
-func (t *Array) InitArray(components int, size3D []int) {
-	t.initSize(components, size3D)
+// 	Init(3, 1000) // gives an array of 1000 3-vectors
+// 	Init(1, 1000) // gives an array of 1000 scalars
+// 	Init(6, 1000) // gives an array of 1000 6-vectors or symmetric tensors
+func (a *Array) InitArray(components int, size3D []int) {
+	a.initSize(components, size3D)
 
 	devices := getDevices()
 	Ndev := len(devices)
 
-	t.pointer = make([]cu.DevicePtr, Ndev)
-	t.devId = make([]int, Ndev)
-	t.Stream = NewStream()
+	a.pointer = make([]cu.DevicePtr, Ndev)
+	a.devId = make([]int, Ndev)
+	a.Stream = NewStream()
 	for i := range devices {
 		setDevice(devices[i])
-		t.devId[i] = devices[i]
-		t.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
+		a.devId[i] = devices[i]
+		a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
 	}
 
 	//t.Comp = make([][]cu.DevicePtr, components)
 
-	t.Zero()
+	a.Zero()
 
 	// initialize component arrays
-	t.Comp = make([]Array, components)
+	a.Comp = make([]Array, components)
 
-	for c := range t.Comp {
-		t.Comp[c].initSize(1, size3D)
-		t.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
-		t.Comp[c].Stream = NewStream()
-		t.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
-		t.Comp[c].Comp = nil
+	for c := range a.Comp {
+		a.Comp[c].initSize(1, size3D)
+		a.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
+		a.Comp[c].Stream = NewStream()
+		a.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
+		a.Comp[c].Comp = nil
 
-		for j := range t.Comp[c].pointer {
-			setDevice(t.devId[j])
-			start := c * t.partLen3D
-			t.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
+		for j := range a.Comp[c].pointer {
+			setDevice(a.devId[j])
+			start := c * a.partLen3D
+			a.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(a.pointer[j]), start*SIZEOF_FLOAT))
 
-			t.Comp[c].devId[j] = t.devId[j]
+			a.Comp[c].devId[j] = a.devId[j]
 		}
 	}
 }
@@ -120,8 +120,8 @@ func NewArray(components int, size3D []int) *Array {
 
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
-		v.Stream.Destroy()
-		v.Stream = nil
+	v.Stream.Destroy()
+	v.Stream = nil
 
 	for i := range v.pointer {
 		setDevice(v.devId[i])
@@ -175,7 +175,6 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	}
 	// Synchronize with all copies
 	dst.Stream.Sync()
-	
 
 }
 
