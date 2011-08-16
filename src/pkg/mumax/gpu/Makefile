@@ -8,7 +8,6 @@ TARG=mumax/gpu
 
 GOFILES=\
 	doc.go\
-	gpus.go\
 	array.go\
 	stream.go\
 	module.go\
@@ -18,6 +17,7 @@ GOFILES=\
 	math.go\
 
 CGOFILES=\
+	gpus.go\
 	cmath.go\
 
 GC+=\

@@ -10,6 +10,9 @@ package gpu
 // This file implements GPU selection for multi-device operation.
 // Author: Arne Vansteenkiste
 
+//#include "libmumax2.h"
+import "C"
+
 import (
 	. "mumax/common"
 	cu "cuda/driver"
@@ -21,11 +24,6 @@ import (
 // INTERNAL: List of GPU ids to use for multi-GPU operation. E.g.: {0,1,2,3}
 var _useDevice []int = nil
 
-// INTERNAL: List of contexts for each used device. _deviceCtxs[i] is valid for GPU number _useDevice[i].
-//var _deviceCtxs []cu.Context
-
-// INTERNAL: The currently active CUDA context (element of _deviceCtxs)
-//var _currentCtx cu.Context
 
 // INTERNAL: Device properties
 var (
@@ -34,9 +32,21 @@ var (
 	maxGridDim         [3]int
 )
 
+
 // Sets a list of devices to use.
 func InitMultiGPU(devices []int, flags uint) {
 	Debug("InitMultiGPU ", devices, flags)
+
+	initMultiGPUList(devices)
+	initMultiGPUCgo()
+	printMultiGPUInfo()
+	initMultiGPUProperties()
+	initMultiGPUPeerAccess()
+}
+
+
+// init global _useDevice
+func initMultiGPUList(devices []int){
 	Assert(len(devices) > 0)
 	Assert(_useDevice == nil) // should not yet be initialized
 
@@ -51,14 +61,27 @@ func InitMultiGPU(devices []int, flags uint) {
 	// set up list with used device IDs
 	_useDevice = make([]int, len(devices))
 	copy(_useDevice, devices)
+}
 
-	// output device info
+
+// set C global variables
+func initMultiGPUCgo(){
+	println("todo")
+}
+
+
+// output device info
+func printMultiGPUInfo(){
 	for i := range _useDevice {
 		dev := cu.DeviceGet(_useDevice[i])
 		Log("device", i, "( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem()/(1024*1024), "MiB")
 	}
 
-	// set up device properties
+}
+
+
+// set up device properties
+func initMultiGPUProperties(){
 	dev := cu.DeviceGet(_useDevice[0])
 	maxThreadsPerBlock = dev.GetAttribute(cu.A_MAX_THREADS_PER_BLOCK)
 	maxBlockDim[0] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_X)
@@ -68,8 +91,11 @@ func InitMultiGPU(devices []int, flags uint) {
 	maxGridDim[1] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Y)
 	maxGridDim[2] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Z)
 	Debug("Max", maxThreadsPerBlock, "threads per block, max", maxGridDim, "x", maxBlockDim, "threads per GPU")
+}
 
-	// setup contexts
+
+func initMultiGPUPeerAccess(){
+	// first init contexts
 	for i := range _useDevice {
 		setDevice(_useDevice[i])
 		dummy := cuda.Malloc(1) // initializes a cuda context for the device
@@ -106,8 +132,6 @@ func InitMultiGPU(devices []int, flags uint) {
 
 	// set the current context
 	cuda.SetDevice(_useDevice[0])
-	//_deviceCtxs[0].SetCurrent()
-	//_currentCtx = _deviceCtxs[0]
 }
 
 
@@ -155,35 +179,20 @@ func InitDebugGPUs() {
 	InitMultiGPU(use, 0)
 }
 
-// Assures Context ctx is currently active. Switches contexts only when necessary.
-//func assureContext(ctx cu.Context) {
-//	if _currentCtx != ctx {
-//		ctx.SetCurrent()
-//		_currentCtx = ctx
-//	}
-//}
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
 func setDevice(deviceId int) {
-	// debug
+		// debug: test if device is supposed to be used
 	ok := false
 	for _,d := range _useDevice{
 		if deviceId == d{ok = true; break}
 	}
 	if !ok{panic(Bug(fmt.Sprint("Invalid device Id", deviceId, "should be in", _useDevice)))}
 
+	// actually set the device
 	cuda.SetDevice(deviceId)
-	//	ctx := _deviceCtxs[deviceId]
-	//	if _currentCtx != ctx {
-	//		ctx.SetCurrent()
-	//		_currentCtx = ctx
-	//	}
 }
 
-// Returns the current context
-//func getContext() cu.Context {
-//	return _currentCtx
-//}
 
 // Returns the list of usable devices. 
 func getDevices() []int {
@@ -203,38 +212,6 @@ func DeviceCount() int {
 func NDevice() int {
 	return DeviceCount()
 }
-
-
-// Returns a context for the current device.
-//func getDeviceContext(deviceId int) cu.Context {
-//return _deviceCtxs[deviceId]
-//}
-
-
-// Divides the size of a multi-GPU array into single-GPU parts.
-// Slices along the J direction (Y in user space).
-//func partition(fullSize []int) []int{
-//	if _useDevice == nil {
-//		panic(Bug(MSG_DEVICEUNINITIATED))
-//	}
-//	Assert(fullSize[1] % DeviceCount() == 0)
-//	
-//}
-
-// Distributes elements over the available GPUs.
-// length: number of elements to distribute.
-// slicelen[i]: number of elements for device i.
-//func distribute(length int, devices []int) (slicelen []int) {
-//	N := len(devices)
-//	slicelen = make([]int, N)
-//
-//	// equal slicing
-//	Assert(length%N == 0)
-//	for i := range slicelen {
-//		slicelen[i] = length / N
-//	}
-//	return
-//}
 
 
 // Error message
