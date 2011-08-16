@@ -56,11 +56,11 @@ func TestAddClosure(test *testing.T) {
 
 func TestAddCgo(test *testing.T) {
 	// fail test on panic, do not crash
-	defer func() {
-		if err := recover(); err != nil {
-			test.Error(err)
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		test.Error(err)
+	//	}
+	//}()
 
 	size := []int{8, 16, 32}
 
