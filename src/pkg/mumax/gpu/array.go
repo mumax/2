@@ -57,7 +57,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.devId = make([]int, Ndev)
 	t.stream = make([]cu.Stream, Ndev)
 	for i := range devices {
-		assureContextId(devices[i])
+		setDevice(devices[i])
 		t.devId[i] = devices[i]
 		t.stream[i] = cu.StreamCreate()
 		t.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
@@ -75,14 +75,15 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
 		t.Comp[c].stream = make([]cu.Stream, Ndev)
 		t.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
+		t.Comp[c].Comp = nil
 
 		for j := range t.Comp[c].pointer {
-			assureContextId(t.devId[j])
+			setDevice(t.devId[j])
 			start := c * t.partLen3D
 			t.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
 
 			t.Comp[c].devId[j] = t.devId[j]
-			t.Comp[c].stream[j]= cu.StreamCreate()
+			t.Comp[c].stream[j] = cu.StreamCreate()
 		}
 	}
 }
@@ -122,7 +123,7 @@ func NewArray(components int, size3D []int) *Array {
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
 	for i := range v.pointer {
-		assureContextId(v.devId[i])
+		setDevice(v.devId[i])
 		v.pointer[i].Free()
 		v.pointer[i] = 0
 		v.stream[i].Destroy()
@@ -239,7 +240,7 @@ func (src *Array) LocalCopy() *host.Array {
 func (a *Array) Zero() {
 	slices := a.pointer
 	for i := range slices {
-		assureContextId(a.devId[i])
+		setDevice(a.devId[i])
 		cu.MemsetD32Async(slices[i], 0, int64(a.partLen4D), a.stream[i])
 	}
 	for i := range slices {

@@ -71,7 +71,7 @@ func InitMultiGPU(devices []int, flags uint) {
 
 	// setup contexts
 	for i := range _useDevice {
-		assureContextId(i)
+		setDevice(_useDevice[i])
 		dummy := cuda.Malloc(1) // initializes a cuda context for the device
 		cuda.Free(dummy)
 	}
@@ -149,8 +149,8 @@ func InitDebugGPUs() {
 		use = append(use, i)
 	}
 	if N == 1 {
-		println("WARING: using only one GPU")
-		//use = append(use, 0) // Use the same device twice.
+		//println("WARING: using only one GPU")
+		use = append(use, 0) // Use the same device twice.
 	}
 	InitMultiGPU(use, 0)
 }
@@ -164,8 +164,15 @@ func InitDebugGPUs() {
 //}
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
-func assureContextId(deviceId int) {
-	cuda.SetDevice(_useDevice[deviceId])
+func setDevice(deviceId int) {
+	// debug
+	ok := false
+	for _,d := range _useDevice{
+		if deviceId == d{ok = true; break}
+	}
+	if !ok{panic(Bug(fmt.Sprint("Invalid device Id", deviceId, "should be in", _useDevice)))}
+
+	cuda.SetDevice(deviceId)
 	//	ctx := _deviceCtxs[deviceId]
 	//	if _currentCtx != ctx {
 	//		ctx.SetCurrent()
