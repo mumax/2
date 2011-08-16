@@ -21,24 +21,10 @@ const MAXGPU = 4
 
 // Adds 2 multi-GPU arrays: dst = a + b
 func CAdd(dst, a, b *Array) {
-	// avoid allocation:
-	var dstPtr [MAXGPU]unsafe.Pointer
-	var aPtr [MAXGPU]unsafe.Pointer
-	var bPtr [MAXGPU]unsafe.Pointer
-	var devStream [MAXGPU]unsafe.Pointer
-
-	for i := range dst.pointer {
-		dstPtr[i] = unsafe.Pointer(dst.pointer[i])
-		aPtr[i] = unsafe.Pointer(a.pointer[i])
-		bPtr[i] = unsafe.Pointer(b.pointer[i])
-		devStream[i] = unsafe.Pointer(dst.stream[i])
-	}
-	partLength4D := dst.partLen4D
-
 	C.add(
-		(**C.float)(unsafe.Pointer(&(dstPtr[0]))),
-		(**C.float)(unsafe.Pointer(&(aPtr[0]))),
-		(**C.float)(unsafe.Pointer(&(bPtr[0]))),
-		(*C.CUstream)(unsafe.Pointer(&(devStream[0]))),
-		C.int(partLength4D))
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(dst.stream[0]))),
+		C.int(dst.partLen4D))
 }
