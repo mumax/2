@@ -89,7 +89,7 @@ func (a *Array) initSize(components int, size3D []int) {
 	Ndev := len(getDevices())
 	Assert(components > 0)
 	Assert(len(size3D) == 3)
-	length3D := Prod(size3D) 
+	length3D := Prod(size3D)
 	a.partLen4D = components * length3D / Ndev
 	a.partLen3D = length3D / Ndev
 

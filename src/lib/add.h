@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-void add(float** dst, float** a, float** b, CUstream* stream, int Npart);
+void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart);
 
 
 #ifdef __cplusplus

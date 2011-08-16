@@ -81,7 +81,7 @@ func TestAddCgo(test *testing.T) {
 	a.CopyFromHost(ah)
 	b.CopyFromHost(bh)
 
-	CAdd(a, a, b)
+	Add(a, a, b)
 
 	sum := a.LocalCopy()
 	for i := range sum.List {
@@ -132,6 +132,6 @@ func BenchmarkAddCgo(bench *testing.B) {
 
 	bench.StartTimer()
 	for i := 0; i < bench.N; i++ {
-		CAdd(a, a, b)
+		Add(a, a, b)
 	}
 }
