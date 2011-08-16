@@ -1,5 +1,6 @@
 dirs=\
 	driver\
+	runtime\
 
 all:$(dirs)
 

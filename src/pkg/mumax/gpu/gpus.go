@@ -72,7 +72,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	// setup contexts
 	for i := range _useDevice {
 		assureContextId(i)
-		dummy := cuda.Malloc(1)// initializes a cuda context for the device
+		dummy := cuda.Malloc(1) // initializes a cuda context for the device
 		cuda.Free(dummy)
 	}
 
@@ -82,7 +82,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	// also do not enable if GPU 0 is used twice for debug purposes
 	if len(_useDevice) > 1 && !allZero(_useDevice) {
 		Debug("Enabling device peer-to-peer access")
-		for i := range _useDevice{//_deviceCtxs {
+		for i := range _useDevice { //_deviceCtxs {
 			//dev := cu.DeviceGet(_useDevice[i])
 			//Debug("Device ", i, "UNIFIED_ADDRESSING:", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
 			//if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
@@ -164,12 +164,12 @@ func InitDebugGPUs() {
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
 func assureContextId(deviceId int) {
-		cuda.SetDevice(_useDevice[deviceId])
-//	ctx := _deviceCtxs[deviceId]
-//	if _currentCtx != ctx {
-//		ctx.SetCurrent()
-//		_currentCtx = ctx
-//	}
+	cuda.SetDevice(_useDevice[deviceId])
+	//	ctx := _deviceCtxs[deviceId]
+	//	if _currentCtx != ctx {
+	//		ctx.SetCurrent()
+	//		_currentCtx = ctx
+	//	}
 }
 
 // Returns the current context
@@ -199,7 +199,7 @@ func NDevice() int {
 
 // Returns a context for the current device.
 //func getDeviceContext(deviceId int) cu.Context {
-	//return _deviceCtxs[deviceId]
+//return _deviceCtxs[deviceId]
 //}
 
 

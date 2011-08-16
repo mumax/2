@@ -23,6 +23,7 @@ CGOFILES=\
 
 GC+=\
 	-I../../cuda/driver/_obj\
+	-I../../cuda/runtime/_obj\
 	-I../common/_obj\
 	-I../host/_obj\
 
