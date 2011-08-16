@@ -26,7 +26,7 @@ import (
 type Array struct {
 	list []slice // All elements as a single, contiguous list. 
 
-	comp [][]slice // List of components, e.g. vector or tensor components TODO: rm
+	comp  [][]slice // List of components, e.g. vector or tensor components TODO: rm
 	devId []int
 
 	_size     [4]int // INTERNAL {components, size0, size1, size2}
@@ -36,8 +36,7 @@ type Array struct {
 	partSize  []int
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component
-
-
+	stream []cu.Stream 
 	//Comp []Array
 }
 
@@ -57,12 +56,13 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.partLen4D = components * length / Ndev
 	t.partLen3D = length / Ndev
 	t.devId = make([]int, Ndev)
+	t.stream = make([]cu.Stream, Ndev)
 	for i := range devices {
 		//t.list[i].init(devices[i], slicelen)
 		assureContextId(devices[i])
 		t.devId[i] = devices[i]
+		t.stream[i] = cu.StreamCreate()
 		t.list[i].array = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
-		t.list[i].stream = cu.StreamCreate()
 		//t.list[i].length = slicelen
 
 	}
@@ -83,7 +83,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 			cs.array = cu.DevicePtr(offset(uintptr(t.list[j].array), start*SIZEOF_FLOAT))
 			//cs.length = stop - start
 			//cs.devId = t.list[j].devId
-			cs.stream = cu.StreamCreate()
+			//cs.stream = cu.StreamCreate()
 
 		}
 	}
@@ -128,20 +128,20 @@ func NewArray(components int, size3D []int) *Array {
 func (v *Array) Free() {
 	for i := range v.list {
 		//(&(v.list[i])).free()
-		sliceFree(v.devId[i], v.list[i].array, v.list[i].stream)
+		sliceFree(v.devId[i], v.list[i].array, v.stream[i])
 	}
 
 	//TODO(a) Destroy streams.
 	// nil pointers, zero lengths, just to be sure
-	for i := range v.comp {
-		slice := v.comp[i]
-		for j := range slice {
+	//for i := range v.comp {
+		//slice := v.comp[i]
+		//for j := range slice {
 			// The slice must not be freed because the underlying list has already been freed.
 			//slice[j].devId = -1 // invalid id 
-			slice[j].stream.Destroy()
-		}
-	}
-	v.comp = nil
+			//v.slice[j].stream.Destroy()
+		//}
+	//}
+	//v.comp = nil
 
 	for i := range v._size {
 		v._size[i] = 0
@@ -188,12 +188,12 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	for i := range s {
 		length := src.partLen4D //s[i].length // in principle redundant     ---------------------- ------
 		Assert(length == dst.partLen4D)
-		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i].array), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
+		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i].array), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length), dst.stream[i])
 		start += length
 	}
 	// Synchronize with all copies
 	for i := range s {
-		s[i].stream.Synchronize()
+		dst.stream[i].Synchronize()
 	}
 
 }
@@ -258,10 +258,10 @@ func (a *Array) Zero() {
 	slices := a.list
 	for i := range slices {
 		assureContextId(a.devId[i])
-		cu.MemsetD32Async(slices[i].array, 0, int64(a.partLen4D), slices[i].stream)
+		cu.MemsetD32Async(slices[i].array, 0, int64(a.partLen4D), a.stream[i])
 	}
 	for i := range slices {
-		slices[i].stream.Synchronize()
+		a.stream[i].Synchronize()
 	}
 }
 

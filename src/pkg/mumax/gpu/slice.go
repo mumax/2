@@ -26,7 +26,7 @@ type slice struct {
 	array cu.DevicePtr // Access to the array on the GPU.
 	//length int          // Number of floats
 	//devId  int       // index of CUDA context of this slice's allocation
-	stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
+	//stream cu.Stream // General-purpose stream for use with this slice (to avoid creating/destroying many streams)
 }
 
 
