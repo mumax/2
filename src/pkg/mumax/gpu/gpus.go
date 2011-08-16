@@ -65,7 +65,7 @@ func initMultiGPUList(devices []int) {
 }
 
 
-// set C global variables
+// set C global variables. refer libmumax2,global.h
 func initMultiGPUCgo() {
 	Debug("setUsedDevices", _useDevice, len(_useDevice))
 	C.setUsedGPUs((*C.int)(unsafe.Pointer(&_useDevice[0])), C.int(len(_useDevice)))
@@ -96,6 +96,7 @@ func initMultiGPUProperties() {
 }
 
 
+// init inter-device access
 func initMultiGPUPeerAccess() {
 	// first init contexts
 	for i := range _useDevice {
@@ -211,13 +212,10 @@ func getDevices() []int {
 
 
 // Returns the number of used GPUs.
-func DeviceCount() int {
-	return len(_useDevice)
-}
-
-//TODO: rm
+// This may be less than the number of available GPUs.
+// (or even more)
 func NDevice() int {
-	return DeviceCount()
+	return len(_useDevice)
 }
 
 
