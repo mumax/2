@@ -38,7 +38,7 @@ type Array struct {
 	partSize  []int
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component
-	stream    []cu.Stream
+	Stream
 	Comp      []Array
 }
 
@@ -55,11 +55,10 @@ func (t *Array) InitArray(components int, size3D []int) {
 
 	t.pointer = make([]cu.DevicePtr, Ndev)
 	t.devId = make([]int, Ndev)
-	t.stream = make([]cu.Stream, Ndev)
+	t.Stream = NewStream()
 	for i := range devices {
 		setDevice(devices[i])
 		t.devId[i] = devices[i]
-		t.stream[i] = cu.StreamCreate()
 		t.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
 	}
 
@@ -73,7 +72,7 @@ func (t *Array) InitArray(components int, size3D []int) {
 	for c := range t.Comp {
 		t.Comp[c].initSize(1, size3D)
 		t.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
-		t.Comp[c].stream = make([]cu.Stream, Ndev)
+		t.Comp[c].Stream = NewStream()
 		t.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
 		t.Comp[c].Comp = nil
 
@@ -83,7 +82,6 @@ func (t *Array) InitArray(components int, size3D []int) {
 			t.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
 
 			t.Comp[c].devId[j] = t.devId[j]
-			t.Comp[c].stream[j] = cu.StreamCreate()
 		}
 	}
 }
@@ -122,12 +120,13 @@ func NewArray(components int, size3D []int) *Array {
 
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
+		v.Stream.Destroy()
+		v.Stream = nil
+
 	for i := range v.pointer {
 		setDevice(v.devId[i])
 		v.pointer[i].Free()
 		v.pointer[i] = 0
-		v.stream[i].Destroy()
-		v.stream[i] = 0
 
 	}
 
@@ -171,13 +170,12 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	for i := range s {
 		length := src.partLen4D //s[i].length // in principle redundant     ---------------------- ------
 		Assert(length == dst.partLen4D)
-		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i]), cu.DevicePtr(s[i]), SIZEOF_FLOAT*int64(length), dst.stream[i])
+		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i]), cu.DevicePtr(s[i]), SIZEOF_FLOAT*int64(length), dst.Stream[i])
 		start += length
 	}
 	// Synchronize with all copies
-	for i := range s {
-		dst.stream[i].Synchronize()
-	}
+	dst.Stream.Sync()
+	
 
 }
 
@@ -241,11 +239,9 @@ func (a *Array) Zero() {
 	slices := a.pointer
 	for i := range slices {
 		setDevice(a.devId[i])
-		cu.MemsetD32Async(slices[i], 0, int64(a.partLen4D), a.stream[i])
+		cu.MemsetD32Async(slices[i], 0, int64(a.partLen4D), a.Stream[i])
 	}
-	for i := range slices {
-		a.stream[i].Synchronize()
-	}
+	a.Stream.Sync()
 }
 
 // Error message.
