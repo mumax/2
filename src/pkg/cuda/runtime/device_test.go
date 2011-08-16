@@ -11,6 +11,13 @@ import (
 )
 
 func TestDevice(t *testing.T) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			t.Error(err)
+		}
+	}()
+
 	runtime.LockOSThread()
 	count := GetDeviceCount()
 	for i := 0; i < count; i++ {

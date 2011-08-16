@@ -12,6 +12,13 @@ import (
 
 
 func TestMalloc(t *testing.T) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			t.Error(err)
+		}
+	}()
+
 	runtime.LockOSThread()
 	for i := 0; i < 1024; i++ {
 		pointer := Malloc(16 * 1024 * 1024)
@@ -21,6 +28,13 @@ func TestMalloc(t *testing.T) {
 
 
 func TestArray(t *testing.T) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			t.Error(err)
+		}
+	}()
+
 	runtime.LockOSThread()
 	for i := 0; i < 1024; i++ {
 		array := NewFloat32Array(16 * 1024 * 1024)
@@ -30,6 +44,13 @@ func TestArray(t *testing.T) {
 
 
 func TestMemcpy(t *testing.T) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			t.Error(err)
+		}
+	}()
+
 	N := (32 * 1024)
 	host1 := make([]float32, N)
 	for i := range host1 {
@@ -51,6 +72,13 @@ func TestMemcpy(t *testing.T) {
 }
 
 func BenchmarkMemcpyToDevice(b *testing.B) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			println(err)
+		}
+	}()
+
 	b.StopTimer()
 	N := (32 * 1024 * 1024)
 	b.SetBytes(int64(4 * N))
@@ -68,6 +96,13 @@ func BenchmarkMemcpyToDevice(b *testing.B) {
 }
 
 func BenchmarkMemcpyOnDevice(b *testing.B) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			println(err)
+		}
+	}()
+
 	b.StopTimer()
 	N := (16 * 1024 * 1024)
 	b.SetBytes(int64(4 * N))
@@ -83,6 +118,13 @@ func BenchmarkMemcpyOnDevice(b *testing.B) {
 }
 
 func TestMemcpyAsync(t *testing.T) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			t.Error(err)
+		}
+	}()
+
 	N := (32 * 1024)
 	host1 := make([]float32, N)
 	for i := range host1 {
