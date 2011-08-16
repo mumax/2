@@ -13,7 +13,7 @@
 package gpu
 
 import (
-	. "mumax/common"
+	//. "mumax/common"
 	cu "cuda/driver"
 	//cuda "cuda/runtime"
 )
@@ -39,17 +39,16 @@ type slice struct {
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
-func (s *slice) init(devices_i int, slicelen int) {
-	//Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
-
-	// Switch device context if necessary
-	assureContextId(devices_i)
-
-	s.devId = devices_i
-	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
-	s.stream = cu.StreamCreate()
-	s.length = slicelen
-}
+//func (s *slice) init(devices_i int, slicelen int) {
+//	//Assert(deviceId >= 0 && deviceId < cu.DeviceGetCount())
+//
+//	// Switch device context if necessary
+//	assureContextId(devices_i)
+//	s.devId = devices_i
+//	s.array = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
+//	s.stream = cu.StreamCreate()
+//	s.length = slicelen
+//}
 
 
 // Takes a sub-slice.

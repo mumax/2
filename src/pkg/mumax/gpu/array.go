@@ -51,9 +51,13 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.list = make([]slice, len(devices))
 	slicelen := components * length / Ndev
 	for i := range devices {
-		t.list[i].init(devices[i], slicelen)
+		//t.list[i].init(devices[i], slicelen)
 
-
+		assureContextId(devices[i])
+		t.list[i].devId = devices[i]
+		t.list[i].array = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
+		t.list[i].stream = cu.StreamCreate()
+		t.list[i].length = slicelen
 
 	}
 
