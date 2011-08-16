@@ -24,16 +24,19 @@ import (
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	comp [][]slice // List of components, e.g. vector or tensor components TODO: rm
-	list []slice   // All elements as a single, contiguous list. 
-	// The memory layout is not simple enough for a host array to be directly copied to it.
-	_size     [4]int // INTERNAL {components, size0, size1, size2}
-	size4D    []int  // {components, size0, size1, size2}
-	size3D    []int  // {size0, size1, size2}
+	list      []slice   // All elements as a single, contiguous list. 
+
+	comp      [][]slice // List of components, e.g. vector or tensor components TODO: rm
+
+	_size     [4]int    // INTERNAL {components, size0, size1, size2}
+	size4D    []int     // {components, size0, size1, size2}
+	size3D    []int     // {size0, size1, size2}
 	_partSize [3]int
 	partSize  []int
+	partLen4D int // total number of floats per GPU
+	partLen3D int // total number of floats per GPU for one component
 
-	Comp []Array
+	//Comp []Array
 }
 
 
@@ -49,15 +52,16 @@ func (t *Array) InitArray(components int, size3D []int) {
 	devices := getDevices()
 	Ndev := len(devices)
 	t.list = make([]slice, len(devices))
-	slicelen := components * length / Ndev
+	t.partLen4D = components * length / Ndev
+	t.partLen3D = length / Ndev
 	for i := range devices {
 		//t.list[i].init(devices[i], slicelen)
 
 		assureContextId(devices[i])
 		t.list[i].devId = devices[i]
-		t.list[i].array = cu.MemAlloc(SIZEOF_FLOAT * int64(slicelen))
+		t.list[i].array = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
 		t.list[i].stream = cu.StreamCreate()
-		t.list[i].length = slicelen
+		//t.list[i].length = slicelen
 
 	}
 
@@ -70,12 +74,12 @@ func (t *Array) InitArray(components int, size3D []int) {
 		for j := range t.comp[i] {
 			cs := &(t.comp[i][j])
 			start := i * compSliceLen
-			stop := (i + 1) * compSliceLen
+			//stop := (i + 1) * compSliceLen
 			//cs.initSlice(&(t.list[j]), start, stop)
 
 			assureContextId(t.list[j].devId)
 			cs.array = cu.DevicePtr(offset(uintptr(t.list[j].array), start*SIZEOF_FLOAT))
-			cs.length = stop - start
+			//cs.length = stop - start
 			cs.devId = t.list[j].devId
 			cs.stream = cu.StreamCreate()
 
@@ -96,17 +100,17 @@ func (t *Array) InitArray(components int, size3D []int) {
 	t.Zero()
 
 	// initialize component arrays
-	t.Comp = make([]Array, components)
-	for c := range t.Comp {
-		t.Comp[c].comp = [][]slice{t.comp[c]}
-		t.Comp[c].list = t.comp[c]
-		t.Comp[c]._size[0] = 1
-		for i := 1; i < len(t._size); i++ {
-			t.Comp[c]._size[i] = t._size[i]
-		}
-		t.Comp[c].size4D = t.Comp[c]._size[:]
-		t.Comp[c].size3D = t.Comp[c]._size[1:]
-	}
+	//t.Comp = make([]Array, components)
+	//for c := range t.Comp {
+	//	t.Comp[c].comp = [][]slice{t.comp[c]}
+	//	t.Comp[c].list = t.comp[c]
+	//	t.Comp[c]._size[0] = 1
+	//	for i := 1; i < len(t._size); i++ {
+	//		t.Comp[c]._size[i] = t._size[i]
+	//	}
+	//	t.Comp[c].size4D = t.Comp[c]._size[:]
+	//	t.Comp[c].size3D = t.Comp[c]._size[1:]
+	//}
 }
 
 
@@ -180,8 +184,8 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	start := 0
 	// copies run concurrently on the individual devices
 	for i := range s {
-		length := s[i].length // in principle redundant
-		Assert(length == d[i].length)
+		length := src.partLen4D //s[i].length // in principle redundant     ---------------------- ------
+		Assert(length == dst.partLen4D)
 		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i].array), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length), s[i].stream)
 		start += length
 	}
@@ -208,7 +212,7 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 		//Assert(len(h) == len(s)) // in principle redundant
 		start := 0
 		for i := range s {
-			length := s[i].length
+			length := dst.partLen3D
 			cu.MemcpyHtoD(cu.DevicePtr(s[i].array), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 			start += length
 		}
@@ -230,7 +234,7 @@ func (src *Array) CopyToHost(dsta *host.Array) {
 		//Assert(len(h) == len(s)) // in principle redundant
 		start := 0
 		for i := range s {
-			length := s[i].length
+			length := src.partLen3D//s[i].length
 			cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i].array), SIZEOF_FLOAT*int64(length))
 			start += length
 		}
@@ -252,7 +256,7 @@ func (a *Array) Zero() {
 	slices := a.list
 	for i := range slices {
 		assureContextId(slices[i].devId)
-		cu.MemsetD32Async(slices[i].array, 0, int64(slices[i].length), slices[i].stream)
+		cu.MemsetD32Async(slices[i].array, 0, int64(a.partLen4D), slices[i].stream)
 	}
 	for i := range slices {
 		slices[i].stream.Synchronize()

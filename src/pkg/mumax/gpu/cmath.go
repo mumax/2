@@ -33,7 +33,7 @@ func CAdd(dst, a, b *Array) {
 		bPtr[i] = unsafe.Pointer(b.list[i].array)
 		devStream[i] = unsafe.Pointer(dst.list[i].stream)
 	}
-	partLength4D := dst.list[0].length
+	partLength4D := dst.partLen4D
 
 	C.add(
 		(**C.float)(unsafe.Pointer(&(dstPtr[0]))),
