@@ -25,7 +25,7 @@ import (
 // TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
 	pointer []cu.DevicePtr
-	comp    [][]cu.DevicePtr
+	//comp    [][]cu.DevicePtr
 	//list []slice // All elements as a single, contiguous list. 
 	//comp  [][]slice // List of components, e.g. vector or tensor components TODO: rm
 
@@ -39,7 +39,7 @@ type Array struct {
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component
 	stream    []cu.Stream
-	Comp []Array
+	Comp      []Array
 }
 
 
@@ -63,36 +63,32 @@ func (t *Array) InitArray(components int, size3D []int) {
 		t.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(t.partLen4D))
 	}
 
-
-	t.comp = make([][]cu.DevicePtr, components)
-	for i := range t.comp {
-		t.comp[i] = make([]cu.DevicePtr, Ndev)
-		for j := range t.comp[i] {
-			start := i * t.partLen3D
-			assureContextId(t.devId[j])
-			t.comp[i][j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
-		}
-	}
-
+	//t.Comp = make([][]cu.DevicePtr, components)
 
 	t.Zero()
 
 	// initialize component arrays
-	//t.Comp = make([]Array, components)
-	//for c := range t.Comp {
-	//	t.Comp[c].comp = [][]slice{t.comp[c]}
-	//	t.Comp[c].list = t.comp[c]
-	//	t.Comp[c]._size[0] = 1
-	//	for i := 1; i < len(t._size); i++ {
-	//		t.Comp[c]._size[i] = t._size[i]
-	//	}
-	//	t.Comp[c].size4D = t.Comp[c]._size[:]
-	//	t.Comp[c].size3D = t.Comp[c]._size[1:]
-	//}
+	t.Comp = make([]Array, components)
+
+	for c := range t.Comp {
+		t.Comp[c].initSize(1, size3D)
+		t.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
+		t.Comp[c].stream = make([]cu.Stream, Ndev)
+		t.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
+
+		for j := range t.Comp[c].pointer {
+			assureContextId(t.devId[j])
+			start := c * t.partLen3D
+			t.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(t.pointer[j]), start*SIZEOF_FLOAT))
+
+			t.Comp[c].devId[j] = t.devId[j]
+			t.Comp[c].stream[j]= cu.StreamCreate()
+		}
+	}
 }
 
 
-func (a *Array) initSize(components int, size3D []int){
+func (a *Array) initSize(components int, size3D []int) {
 	Ndev := len(getDevices())
 	Assert(components > 0)
 	Assert(len(size3D) == 3)
@@ -196,7 +192,7 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 		//dst.Comp[i].CopyFromHost(src[i])
 
 		h := src[i]
-		s := dst.comp[i]
+		s := dst.Comp[i].pointer
 		//Assert(len(h) == len(s)) // in principle redundant
 		start := 0
 		for i := range s {
@@ -218,7 +214,7 @@ func (src *Array) CopyToHost(dsta *host.Array) {
 		//src.Comp[i].CopyToHost(dst[i])
 
 		h := dst[i]
-		s := src.comp[i]
+		s := src.Comp[i].pointer
 		//Assert(len(h) == len(s)) // in principle redundant
 		start := 0
 		for i := range s {
