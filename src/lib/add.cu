@@ -1,6 +1,7 @@
 
 #include "add.h"
 
+#include "multigpu.h"
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
@@ -18,15 +19,15 @@ __global__ void addKern(float *dst, float *a, float *b, int Npart) {
 }
 
 
-void add(float **dst, float **a, float **b, CUstream * stream, int Ndev, int Npart) {
+void add(float **dst, float **a, float **b, CUstream * stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
-	for (int i = 0; i < Ndev; i++) {
-		gpu_safe(cudaSetDevice(i)); // CHANGE TO DEV[i] !!!!!!!!
+	for (int i = 0; i < nDevice(); i++) {
+		gpu_safe(cudaSetDevice(deviceId(i)));
 		addKern <<< gridSize, blockSize, 0, cudaStream_t(stream[i]) >>> (dst[i], a[i], b[i], Npart);
 	}
-	for (int i = 0; i < Ndev; i++) {
-		gpu_safe(cudaSetDevice(i)); // CHANGE TO DEV[i] !!!!!!!!
+	for (int i = 0; i < nDevice(); i++) {
+		gpu_safe(cudaSetDevice(deviceId(i)));
 		gpu_safe(cudaStreamSynchronize(stream[i]));
 	}
 }

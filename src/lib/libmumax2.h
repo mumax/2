@@ -19,6 +19,7 @@
 extern "C" {
 #endif
 
+#include "multigpu.h"
 #include "add.h"
 
 

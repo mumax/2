@@ -40,6 +40,5 @@ func CAdd(dst, a, b *Array) {
 		(**C.float)(unsafe.Pointer(&(aPtr[0]))),
 		(**C.float)(unsafe.Pointer(&(bPtr[0]))),
 		(*C.CUstream)(unsafe.Pointer(&(devStream[0]))),
-		C.int(NDevice()),
 		C.int(partLength4D))
 }

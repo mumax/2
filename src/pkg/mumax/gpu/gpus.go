@@ -17,6 +17,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	cuda "cuda/runtime"
+	"unsafe"
 	"fmt"
 )
 
@@ -46,7 +47,7 @@ func InitMultiGPU(devices []int, flags uint) {
 
 
 // init global _useDevice
-func initMultiGPUList(devices []int){
+func initMultiGPUList(devices []int) {
 	Assert(len(devices) > 0)
 	Assert(_useDevice == nil) // should not yet be initialized
 
@@ -65,13 +66,14 @@ func initMultiGPUList(devices []int){
 
 
 // set C global variables
-func initMultiGPUCgo(){
-	println("todo")
+func initMultiGPUCgo() {
+	Debug("setUsedDevices", _useDevice, len(_useDevice))
+	C.setUsedGPUs((*C.int)(unsafe.Pointer(&_useDevice[0])), C.int(len(_useDevice)))
 }
 
 
 // output device info
-func printMultiGPUInfo(){
+func printMultiGPUInfo() {
 	for i := range _useDevice {
 		dev := cu.DeviceGet(_useDevice[i])
 		Log("device", i, "( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem()/(1024*1024), "MiB")
@@ -81,7 +83,7 @@ func printMultiGPUInfo(){
 
 
 // set up device properties
-func initMultiGPUProperties(){
+func initMultiGPUProperties() {
 	dev := cu.DeviceGet(_useDevice[0])
 	maxThreadsPerBlock = dev.GetAttribute(cu.A_MAX_THREADS_PER_BLOCK)
 	maxBlockDim[0] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_X)
@@ -94,7 +96,7 @@ func initMultiGPUProperties(){
 }
 
 
-func initMultiGPUPeerAccess(){
+func initMultiGPUPeerAccess() {
 	// first init contexts
 	for i := range _useDevice {
 		setDevice(_useDevice[i])
@@ -182,12 +184,17 @@ func InitDebugGPUs() {
 
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
 func setDevice(deviceId int) {
-		// debug: test if device is supposed to be used
+	// debug: test if device is supposed to be used
 	ok := false
-	for _,d := range _useDevice{
-		if deviceId == d{ok = true; break}
+	for _, d := range _useDevice {
+		if deviceId == d {
+			ok = true
+			break
+		}
 	}
-	if !ok{panic(Bug(fmt.Sprint("Invalid device Id", deviceId, "should be in", _useDevice)))}
+	if !ok {
+		panic(Bug(fmt.Sprint("Invalid device Id", deviceId, "should be in", _useDevice)))
+	}
 
 	// actually set the device
 	cuda.SetDevice(deviceId)

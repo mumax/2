@@ -6,6 +6,7 @@ OFILES=\
 	gpu_properties.o\
 	add.o\
 	reduce.o\
+	multigpu.o\
 
 all: libmumax2.so
 
