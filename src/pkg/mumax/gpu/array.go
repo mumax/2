@@ -107,7 +107,8 @@ func NewArray(components int, size3D []int) *Array {
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
 	for i := range v.list {
-		(&(v.list[i])).free()
+		//(&(v.list[i])).free()
+		sliceFree(v.list[i].devId, v.list[i].array, v.list[i].stream)
 	}
 
 	//TODO(a) Destroy streams.

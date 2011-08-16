@@ -31,11 +31,11 @@ type slice struct {
 
 
 // Allocates and initiates a new slice. See slice.Init().
-func newSlice(deviceId int, length int) *slice {
-	s := new(slice)
-	s.init(deviceId, length)
-	return s
-}
+//func newSlice(deviceId int, length int) *slice {
+//	s := new(slice)
+//	s.init(deviceId, length)
+//	return s
+//}
 
 
 // Initiates the slice to refer to an array of "length" float32s on GPU number "deviceId".
@@ -70,11 +70,17 @@ func offset(ptr uintptr, bytes int) uintptr {
 }
 
 
-func (s *slice) free() {
-	assureContextId(s.devId) // necessary in a multi-GPU context
-	s.array.Free()
-	s.stream.Destroy()
-	s.devId = -1 // invalid id to make sure it's not used
+//func (s *slice) free() {
+//	assureContextId(s.devId) // necessary in a multi-GPU context
+//	s.array.Free()
+//	s.stream.Destroy()
+//	s.devId = -1 // invalid id to make sure it's not used
+//}
+
+func sliceFree(devId int, array cu.DevPtr, stream cu.Stream){
+	assureContextId(devId) // necessary in a multi-GPU context
+	array.Free()
+	stream.Destroy()
 }
 
 
