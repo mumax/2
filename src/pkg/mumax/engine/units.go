@@ -78,8 +78,8 @@ var (
 	Mu0    float64 // Permeability of vacuum in internal units
 	Gamma0 float64 // Gyromagnetic ratio in internal units 
 	Kb     float64 // Boltzmann's constant in  internal units
-	MuB    float64 // Bohr magneton in  internal units
-	E      float64 // Electron charge in  internal units
+	MuB    float64 // Bohr magneton in internal units
+	E      float64 // Electron charge in internal units
 )
 
 

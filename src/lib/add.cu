@@ -24,7 +24,7 @@ void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart) {
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int i = 0; i < nDevice(); i++) {
 		gpu_safe(cudaSetDevice(deviceId(i)));
-		addKern <<< gridSize, blockSize, 0, cudaStream_t(stream[i]) >>> (dst[i], a[i], b[i], Npart);
+		addKern <<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>> (dst[i], a[i], b[i], Npart);
 	}
 }
 
