@@ -23,12 +23,11 @@ import (
 // 	GPU0: X0 X1  Y0 Y1 Z0 Z1
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 type Array struct {
-	pointer []cu.DevicePtr // Pointers to array parts on each GPU.
-	//devId []int
-	_size     [4]int // INTERNAL {components, size0, size1, size2}
-	size4D    []int  // {components, size0, size1, size2}
-	size3D    []int  // {size0, size1, size2}
-	_partSize [3]int
+	pointer   []cu.DevicePtr // Pointers to array parts on each GPU.
+	_size     [4]int         // INTERNAL {components, size0, size1, size2}
+	size4D    []int          // {components, size0, size1, size2}
+	size3D    []int          // {size0, size1, size2}
+	_partSize [3]int         // INTERNAL 
 	partSize  []int
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component

@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 ///@internal
-__global__ void addKern(float *dst, float *a, float *b, int Npart) {
+__global__ void addKern(float* dst, float* a, float* b, int Npart) {
 	int i = threadindex;
 	if (i < Npart) {
 		dst[i] = a[i] + b[i];
@@ -19,7 +19,7 @@ __global__ void addKern(float *dst, float *a, float *b, int Npart) {
 }
 
 
-void addAsync(float **dst, float **a, float **b, CUstream * stream, int Npart) {
+void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int i = 0; i < nDevice(); i++) {
