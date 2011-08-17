@@ -20,6 +20,10 @@ import (
 // INTERNAL global logger
 var logger Logger
 
+func init(){
+	InitLogger("") // make sure there is always *a* logger present. May be re-initiated later.
+}
+
 // INTERNAL 
 type Logger struct {
 	ShowDebug   bool        // Include debug messages in stderr output?

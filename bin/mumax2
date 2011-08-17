@@ -3,12 +3,12 @@
 # This is a wrapper script for the mumax2 binary.
 
 
+# 1) set up environment
 MUMAX2BIN=$(dirname $(readlink -f $0)) # path to this script
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MUMAX2BIN/../lib
-echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
+#echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:$MUMAX2BIN/../lib
-echo PYTHONPATH: $PYTHONPATH
-#export PATH=$PATH:$SIMROOT/bin
+#echo PYTHONPATH: $PYTHONPATH
 
-# run mumax
+# 2) run mumax
 exec $MUMAX2BIN/../lib/mumax2 $@
