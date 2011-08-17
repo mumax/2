@@ -39,15 +39,16 @@ void gpu_setmaxthreads(int max);
 
 /**
  * @internal
- * Macro for integer division, but rounded UP
+ * Macro for integer division x/y , but rounded UP
  */
 #define divUp(x, y) ( (((x)-1)/(y)) +1 )
 // It's almost like LISP ;-)
 
+
 #ifndef X
 #define X 0
-#define Y 0
-#define Z 0
+#define Y 1
+#define Z 2
 #endif
                
 /**
