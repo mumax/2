@@ -22,15 +22,9 @@ import (
 // Layout example for a (3,4) vsplice on 2 GPUs:
 // 	GPU0: X0 X1  Y0 Y1 Z0 Z1
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
-// TODO: get components as array (slice in J direction), get device part as array.
 type Array struct {
-	pointer []cu.DevicePtr
-	//comp    [][]cu.DevicePtr
-	//list []slice // All elements as a single, contiguous list. 
-	//comp  [][]slice // List of components, e.g. vector or tensor components TODO: rm
-
-	devId []int
-
+	pointer []cu.DevicePtr // Pointers to array parts on each GPU.
+	//devId []int
 	_size     [4]int // INTERNAL {components, size0, size1, size2}
 	size4D    []int  // {components, size0, size1, size2}
 	size3D    []int  // {size0, size1, size2}
@@ -54,11 +48,11 @@ func (a *Array) InitArray(components int, size3D []int) {
 	Ndev := len(devices)
 
 	a.pointer = make([]cu.DevicePtr, Ndev)
-	a.devId = make([]int, Ndev)
+	//a.devId = make([]int, Ndev)
 	a.Stream = NewStream()
 	for i := range devices {
 		setDevice(devices[i])
-		a.devId[i] = devices[i]
+		//a.devId[i] = devices[i]
 		a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
 	}
 
@@ -71,15 +65,14 @@ func (a *Array) InitArray(components int, size3D []int) {
 		a.Comp[c].initSize(1, size3D)
 		a.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
 		a.Comp[c].Stream = NewStream()
-		a.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
+		//a.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
 		a.Comp[c].Comp = nil
 
 		for j := range a.Comp[c].pointer {
-			setDevice(a.devId[j])
+			setDevice(_useDevice[j])
 			start := c * a.partLen3D
 			a.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(a.pointer[j]), start*SIZEOF_FLOAT))
-
-			a.Comp[c].devId[j] = a.devId[j]
+			//a.Comp[c].devId[j] = a.devId[j]
 		}
 	}
 }
@@ -122,7 +115,7 @@ func (v *Array) Free() {
 	v.Stream = nil
 
 	for i := range v.pointer {
-		setDevice(v.devId[i])
+		setDevice(_useDevice[i])
 		v.pointer[i].Free()
 		v.pointer[i] = 0
 
@@ -240,7 +233,7 @@ func (src *Array) LocalCopy() *host.Array {
 func (a *Array) Zero() {
 	slices := a.pointer
 	for i := range slices {
-		setDevice(a.devId[i])
+		setDevice(_useDevice[i])
 		cu.MemsetD32Async(slices[i], 0, int64(a.partLen4D), a.Stream[i])
 	}
 	a.Stream.Sync()
