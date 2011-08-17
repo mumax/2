@@ -110,7 +110,7 @@ func BenchmarkAddClosure(bench *testing.B) {
 	defer b.Free()
 
 	// warm up
-		//ClAdd(a, a, b)
+	ClAdd(a, a, b)
 
 	bench.StartTimer()
 	for i := 0; i < bench.N; i++ {
@@ -134,7 +134,7 @@ func BenchmarkAddCgo(bench *testing.B) {
 	defer b.Free()
 
 	// warm up
-	//Add(a, a, b)
+	Add(a, a, b)
 
 	bench.StartTimer()
 	for i := 0; i < bench.N; i++ {
