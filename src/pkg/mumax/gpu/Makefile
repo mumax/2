@@ -39,7 +39,7 @@ CGO_LDFLAGS+=\
 CGO_LDFLAGS+=\
 	-lcuda\
    	-lcudart\
-	libmumax2.so\
+	libmultigpu.so\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	

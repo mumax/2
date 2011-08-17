@@ -8,15 +8,15 @@ OFILES=\
 	reduce.o\
 	multigpu.o\
 
-all: libmumax2.so
+all: libmultigpu.so
 
 $(OFILES): %.o: %.cu %.h
 	 $(NVCC) -c $(@:.o=.cu)
 
-libmumax2.so: $(OFILES) libmumax2.h
-	$(NVCC) -shared $(OFILES) -o libmumax2.so
-	cp -f $(CURDIR)/libmumax2.so $(CURDIR)/../../lib
-	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
+libmultigpu.so: $(OFILES) libmultigpu.h
+	$(NVCC) -shared $(OFILES) -o libmultigpu.so
+	cp -f $(CURDIR)/libmultigpu.so $(CURDIR)/../../lib
+	ln -sf $(CURDIR)/libmultigpu.so ../pkg/mumax/gpu
 
 
 .PHONY: clean

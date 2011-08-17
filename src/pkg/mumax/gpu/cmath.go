@@ -8,11 +8,10 @@
 
 package gpu
 
-//#include "libmumax2.h"
+//#include "libmultigpu.h"
 import "C"
 
 import (
-	//. "mumax/common"
 	"unsafe"
 )
 

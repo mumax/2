@@ -10,7 +10,7 @@ package gpu
 // This file implements GPU selection for multi-device operation.
 // Author: Arne Vansteenkiste
 
-//#include "libmumax2.h"
+//#include "libmultigpu.h"
 import "C"
 
 import (
