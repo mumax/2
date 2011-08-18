@@ -1,12 +1,16 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
+# to make tests run
+LD_LIBRARY_PATH+=:../../../../lib
+
 TARG=mumax/engine
 
 GOFILES=\
 	engine.go\
 	api.go\
-	field.go\
+	quant.go\
+	updater.go\
 	units.go\
 	universe.go\
 	input.go\

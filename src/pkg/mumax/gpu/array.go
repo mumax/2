@@ -40,7 +40,7 @@ type Array struct {
 // 	Init(3, 1000) // gives an array of 1000 3-vectors
 // 	Init(1, 1000) // gives an array of 1000 scalars
 // 	Init(6, 1000) // gives an array of 1000 6-vectors or symmetric tensors
-func (a *Array) InitArray(components int, size3D []int) {
+func (a *Array) Init(components int, size3D []int) {
 	a.initSize(components, size3D)
 
 	devices := getDevices()
@@ -103,7 +103,7 @@ func (a *Array) initSize(components int, size3D []int) {
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
-	t.InitArray(components, size3D)
+	t.Init(components, size3D)
 	return t
 }
 
