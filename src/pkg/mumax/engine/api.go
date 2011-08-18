@@ -8,7 +8,10 @@
 package engine
 
 
-import ()
+import (
+	. "mumax/common"
+	"os"
+)
 
 
 type API struct {
@@ -22,4 +25,13 @@ func (a API) SetScalar(name string, value float32) {
 
 func (a API) Get(name string) interface{} {
 	return 42
+}
+
+
+func(a API) SaveGraph(file string){
+	f, err := os.Create(file)
+	defer f.Close()
+	CheckIO(err)
+	a.Engine.WriteDot(f)
+	Debug("Wrote", file)
 }

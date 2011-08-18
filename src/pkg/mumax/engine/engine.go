@@ -15,6 +15,7 @@ import (
 )
 
 type Engine struct {
+	outputDir string
 	quantity map[string]*Quant
 }
 
@@ -80,10 +81,10 @@ func (e *Engine) String() string {
 // Write .dot file for graphviz, 
 // representing the physics graph.
 func (e *Engine) WriteDot(out io.Writer) {
-	fmt.Fprintln(out, "digraph G{")
+	fmt.Fprintln(out, "digraph Physics{")
 	quants := e.quantity
 	for k, v := range quants {
-		fmt.Fprintln(out, k, ";")
+		fmt.Fprintln(out, k, " [shape=box];")
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")
 		}
