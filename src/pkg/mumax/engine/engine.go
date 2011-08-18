@@ -125,6 +125,7 @@ func (e *Engine) String() string {
 // representing the physics graph.
 func (e *Engine) WriteDot(out io.Writer) {
 	fmt.Fprintln(out, "digraph Physics{")
+	fmt.Fprintln(out, "trankdir=LR")
 	quants := e.quantity
 	for k, v := range quants {
 		fmt.Fprintln(out, k, " [shape=box];")

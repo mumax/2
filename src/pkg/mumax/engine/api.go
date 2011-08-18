@@ -19,8 +19,8 @@ type API struct {
 }
 
 
-func(a API) SetSize(x,y,z int){
-	a.Engine.SetSize([]int{z,y,x}) // convert to internal axes
+func (a API) SetSize(x, y, z int) {
+	a.Engine.SetSize([]int{z, y, x}) // convert to internal axes
 	a.Engine.InitMicromagnetism()
 }
 

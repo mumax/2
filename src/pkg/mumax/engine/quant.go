@@ -38,7 +38,6 @@ type Quant struct {
 }
 
 
-
 func newQuant(name string, nComp int, size3D []int) *Quant {
 	q := new(Quant)
 	q.init(name, nComp, size3D)
