@@ -20,8 +20,8 @@ import (
 // A data structure consisting of interconnected quantities
 // determines what should be updated and when.
 type Engine struct {
-	outputDir string
-	quantity  map[string]*Quant
+	size3D   []int             // size of the FD grid
+	quantity map[string]*Quant // maps quantity names onto their data structures
 }
 
 // Make new engine.
@@ -38,6 +38,26 @@ func (e *Engine) init() {
 }
 
 
+// Sets the FD grid size
+func (e *Engine) SetSize(size3D []int) {
+	Assert(len(size3D) == 3)
+	if e.size3D == nil {
+		e.size3D = make([]int, 3)
+	} else {
+		panic(InputErr("Size already set"))
+	}
+	copy(e.size3D, size3D)
+}
+
+
+// Gets the FD grid size
+func (e *Engine) Size() []int {
+	if e.size3D == nil {
+		panic(InputErr("Size should be set first"))
+	}
+	return e.size3D
+}
+
 // Add a scalar quantity
 func (e *Engine) AddScalar(name string) {
 	e.addQuant(name, 1, nil)
@@ -45,7 +65,7 @@ func (e *Engine) AddScalar(name string) {
 
 
 func (e *Engine) AddVectorField(name string) {
- //Todo
+	e.addQuant(name, 3, e.Size())
 }
 
 // INTERNAL: add an arbitrary quantity
