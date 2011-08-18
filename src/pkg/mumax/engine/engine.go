@@ -14,12 +14,17 @@ import (
 	"io"
 )
 
+
+// Engine is the heart of a multiphysics simulation.
+// The engine stores named quantities like "m", "B", "alpha", ...
+// A data structure consisting of interconnected quantities
+// determines what should be updated and when.
 type Engine struct {
 	outputDir string
-	quantity map[string]*Quant
+	quantity  map[string]*Quant
 }
 
-
+// Make new engine.
 func NewEngine() *Engine {
 	e := new(Engine)
 	e.init()
@@ -27,15 +32,19 @@ func NewEngine() *Engine {
 }
 
 
+// initialize
 func (e *Engine) init() {
 	e.quantity = make(map[string]*Quant)
 }
 
 
+// Add a scalar quantity
 func (e *Engine) AddScalar(name string) {
 	e.addQuant(name, 1, nil)
 }
 
+
+// INTERNAL: add an arbitrary quantity
 func (e *Engine) addQuant(name string, nComp int, size3D []int) {
 	Debug("engine.Add", name, nComp, size3D)
 	// quantity should not yet be defined
@@ -45,6 +54,8 @@ func (e *Engine) addQuant(name string, nComp int, size3D []int) {
 	e.quantity[name] = newQuant(name, nComp, size3D)
 }
 
+
+// Mark childQuantity to depend on parentQuantity
 func (e *Engine) AddDependency(childQuantity, parentQuantity string) {
 	child := e.getQuant(childQuantity)
 	parent := e.getQuant(parentQuantity)
@@ -59,8 +70,15 @@ func (e *Engine) AddDependency(childQuantity, parentQuantity string) {
 	parent.children = append(parent.children, child)
 }
 
+
+// retrieve a quantity by its name
 func (e *Engine) getQuant(name string) *Quant {
-	return e.quantity[name]
+		if q,ok :=  e.quantity[name]; ok{
+			return q
+		}else{
+				panic(Bug("engine: undefined: " + name))
+		}
+		return nil//silence gc
 }
 
 

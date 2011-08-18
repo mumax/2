@@ -28,7 +28,7 @@ func (a API) Get(name string) interface{} {
 }
 
 
-func(a API) SaveGraph(file string){
+func (a API) SaveGraph(file string) {
 	f, err := os.Create(file)
 	defer f.Close()
 	CheckIO(err)

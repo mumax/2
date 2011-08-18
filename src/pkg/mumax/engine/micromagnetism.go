@@ -17,5 +17,5 @@ func (e *Engine) InitMicromagnetism() {
 	e.AddScalar("alpha")
 	e.AddScalar("msat")
 	e.AddScalar("aexch")
-	e.AddDependency("alpha", "time")
+	//e.AddVectorField("m")
 }
