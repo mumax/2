@@ -44,6 +44,10 @@ func (e *Engine) AddScalar(name string) {
 }
 
 
+func (e *Engine) AddVectorField(name string) {
+ //Todo
+}
+
 // INTERNAL: add an arbitrary quantity
 func (e *Engine) addQuant(name string, nComp int, size3D []int) {
 	Debug("engine.Add", name, nComp, size3D)
@@ -73,12 +77,12 @@ func (e *Engine) AddDependency(childQuantity, parentQuantity string) {
 
 // retrieve a quantity by its name
 func (e *Engine) getQuant(name string) *Quant {
-		if q,ok :=  e.quantity[name]; ok{
-			return q
-		}else{
-				panic(Bug("engine: undefined: " + name))
-		}
-		return nil//silence gc
+	if q, ok := e.quantity[name]; ok {
+		return q
+	} else {
+		panic(Bug("engine: undefined: " + name))
+	}
+	return nil //silence gc
 }
 
 

@@ -1,7 +1,8 @@
 mumax2=../bin/mumax2
 
 TESTFILES=\
-		  test.py.out\
+		  api.py.out\
+		  engine.py.out\
 		  #Test.java.out\
 		  
 .PHONY: all

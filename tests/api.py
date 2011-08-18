@@ -1,5 +1,8 @@
 from mumax2 import *
 
+# tests the "dummy" engine/testapi.go
+# may be removed later
+
 print "version", version()
 print "echo 123", echo(123)
 print "sink"
@@ -12,5 +15,3 @@ print "sum 1 2", sum(1, 2)
 print "getmany", getmany()
 print "getarray", getarray()
 sinkarray([[[[1, 2, 3, 4],[5,6,7,8]]]])
-print "writing dot"
-savegraph("graph.dot")
