@@ -9,6 +9,7 @@ TARG=mumax/engine
 GOFILES=\
 	engine.go\
 	api.go\
+	micromagnetism.go\
 	quant.go\
 	updater.go\
 	units.go\

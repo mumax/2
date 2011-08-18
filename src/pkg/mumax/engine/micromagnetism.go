@@ -7,19 +7,13 @@
 
 package engine
 
+import(
+		. "mumax/common"
+)
 
-import ()
-
-
-type API struct {
-	Engine *Engine
-}
-
-
-func (a API) SetScalar(name string, value float32) {
-
-}
-
-func (a API) Get(name string) interface{} {
-	return 42
+func (e *Engine) InitMicromagnetism() {
+		Debug("engine.InitMicromagnetism")
+	e.AddScalar("time")
+	e.AddScalar("alpha")
+	e.AddDependency("alpha", "time")
 }

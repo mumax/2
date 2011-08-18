@@ -32,14 +32,15 @@ type Quant struct {
 	array      *gpu.Array // Underlying array, nil for space-independent quantity
 	multiplier []float32  // Point-wise multiplication coefficients for array
 	updateSelf Updater    // Called to update this quantity
+	upToDate   bool       // Flags if this quantity needs to be updated
 	children   []*Quant   // Quantities this one depends on
 	parents    []*Quant   // Quantities that depend on this one
 }
 
 
-func NewScalar(name string) *Quant {
-	return newQuant(name, 1, nil)
-}
+//func NewScalar(name string) *Quant {
+//	return newQuant(name, 1, nil)
+//}
 
 func newQuant(name string, nComp int, size3D []int) *Quant {
 	q := new(Quant)
@@ -64,6 +65,10 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	for i := range q.multiplier {
 		q.multiplier[i] = 1
 	}
+
+	const CAP = 2
+	q.children = make([]*Quant, 0, CAP)
+	q.parents = make([]*Quant, 0, CAP)
 }
 //func newVector(name string) *Field {
 //	return newField(name, 3, nil)
