@@ -10,6 +10,8 @@ package engine
 
 import (
 	. "mumax/common"
+	"fmt"
+	"io"
 )
 
 type Engine struct {
@@ -33,8 +35,8 @@ func (e *Engine) AddScalar(name string) {
 	e.addQuant(name, 1, nil)
 }
 
-func(e *Engine) addQuant(name string, nComp int, size3D []int){
-		Debug("engine.Add", name, nComp, size3D)
+func (e *Engine) addQuant(name string, nComp int, size3D []int) {
+	Debug("engine.Add", name, nComp, size3D)
 	// quantity should not yet be defined
 	if _, ok := e.quantity[name]; ok {
 		panic(Bug("engine: Already defined: " + name))
@@ -42,23 +44,26 @@ func(e *Engine) addQuant(name string, nComp int, size3D []int){
 	e.quantity[name] = newQuant(name, nComp, size3D)
 }
 
-func(e *Engine) AddDependency(childQuantity, parentQuantity string){
+func (e *Engine) AddDependency(childQuantity, parentQuantity string) {
 	child := e.getQuant(childQuantity)
 	parent := e.getQuant(parentQuantity)
-	for _,p := range child.parents{
-		if p.name == parentQuantity{
-				panic(Bug("engine:addDependency(" + childQuantity + ", " + parentQuantity + "): already present"))
+
+	for _, p := range child.parents {
+		if p.name == parentQuantity {
+			panic(Bug("engine:addDependency(" + childQuantity + ", " + parentQuantity + "): already present"))
 		}
 	}
+
 	child.parents = append(child.parents, parent)
+	parent.children = append(parent.children, child)
 }
 
-func(e *Engine) getQuant(name string)*Quant{
+func (e *Engine) getQuant(name string) *Quant {
 	return e.quantity[name]
 }
 
 
-func (e *Engine) String() string{
+func (e *Engine) String() string {
 	str := "engine\n"
 	quants := e.quantity
 	for k, v := range quants {
@@ -72,3 +77,16 @@ func (e *Engine) String() string{
 }
 
 
+// Write .dot file for graphviz, 
+// representing the physics graph.
+func (e *Engine) WriteDot(out io.Writer) {
+	fmt.Fprintln(out, "digraph G{")
+	quants := e.quantity
+	for k, v := range quants {
+		fmt.Fprintln(out, k, ";")
+		for _, c := range v.children {
+			fmt.Fprintln(out, k, "->", c.name, ";")
+		}
+	}
+	fmt.Fprintln(out, "}")
+}

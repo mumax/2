@@ -7,12 +7,12 @@
 
 package engine
 
-import(
-		. "mumax/common"
+import (
+	. "mumax/common"
 )
 
 func (e *Engine) InitMicromagnetism() {
-		Debug("engine.InitMicromagnetism")
+	Debug("engine.InitMicromagnetism")
 	e.AddScalar("time")
 	e.AddScalar("alpha")
 	e.AddDependency("alpha", "time")
