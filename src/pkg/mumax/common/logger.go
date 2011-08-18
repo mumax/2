@@ -20,7 +20,7 @@ import (
 // INTERNAL global logger
 var logger Logger
 
-func init(){
+func init() {
 	InitLogger("") // make sure there is always *a* logger present. May be re-initiated later.
 }
 
