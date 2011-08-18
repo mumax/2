@@ -21,6 +21,7 @@ type API struct {
 
 func(a API) SetSize(x,y,z int){
 	a.Engine.SetSize([]int{z,y,x}) // convert to internal axes
+	a.Engine.InitMicromagnetism()
 }
 
 func (a API) SetScalar(name string, value float32) {

@@ -18,4 +18,6 @@ func (e *Engine) InitMicromagnetism() {
 	e.AddScalar("msat")
 	e.AddScalar("aexch")
 	e.AddVectorField("m")
+
+	Debug(e.String())
 }

@@ -38,9 +38,6 @@ type Quant struct {
 }
 
 
-//func NewScalar(name string) *Quant {
-//	return newQuant(name, 1, nil)
-//}
 
 func newQuant(name string, nComp int, size3D []int) *Quant {
 	q := new(Quant)
@@ -58,7 +55,7 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	q.name = name
 
 	if size3D != nil {
-		q.array.Init(nComp, size3D)
+		q.array = gpu.NewArray(nComp, size3D)
 	}
 
 	q.multiplier = make([]float32, nComp)
@@ -70,19 +67,8 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	q.children = make([]*Quant, 0, CAP)
 	q.parents = make([]*Quant, 0, CAP)
 }
-//func newVector(name string) *Field {
-//	return newField(name, 3, nil)
-//}
-//
-//func newScalarField(name string, size3D []int) *Field {
-//	return newField(name, 1, size3D)
-//}
-//
-//func newVectorField(name string, size3D []int) *Field {
-//	return newField(name, 3, size3D)
-//}
-//
-//
+
+
 //
 //func (f *Field) Free() {
 //	f.array.Free()

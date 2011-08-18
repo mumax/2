@@ -40,6 +40,7 @@ func (e *Engine) init() {
 
 // Sets the FD grid size
 func (e *Engine) SetSize(size3D []int) {
+	Debug("engine:SetSize", size3D)
 	Assert(len(size3D) == 3)
 	if e.size3D == nil {
 		e.size3D = make([]int, 3)

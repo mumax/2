@@ -38,11 +38,9 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 	c.outputDir = outputDir
 	c.inputFile = inputFile
 	c.eng = engine.NewEngine()
-	c.eng.InitMicromagnetism()
-	Debug(c.eng.String())
-	f, err := os.Create(outputDir + "/graph.dot")
-	CheckIO(err)
-	c.eng.WriteDot(f)
+	//c.eng.InitMicromagnetism()
+	//Debug(c.eng.String())
+
 	c.api = engine.API{c.eng}
 	//c.ipc.Init(c.api)
 }

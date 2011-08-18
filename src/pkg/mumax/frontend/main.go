@@ -27,7 +27,7 @@ var (
 	flag_force     *bool   = flag.Bool("f", false, "Remove previous output directory if present")
 	flag_logfile   *string = flag.String("log", "", "Specify log file")
 	flag_command   *string = flag.String("command", "", "Override interpreter command")
-	flag_debug     *bool   = flag.Bool("g", false, "Show debug output")
+	flag_debug     *bool   = flag.Bool("g",true, "Show debug output")
 	flag_cpuprof   *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
 	flag_memprof   *string = flag.String("memprof", "", "Write gopprof memory profile to file")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
