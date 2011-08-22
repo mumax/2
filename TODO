@@ -2,3 +2,4 @@ TODO
 
 * Exchange not in convolution by default, is less accurate.
 * Numerically accurate exchange formula: (m1-m0) + (m2-m0) + (m3-m0) ...
+* High-order exchange by default (12 neigh?) to avoid check-board instability
