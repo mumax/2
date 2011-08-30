@@ -8,7 +8,8 @@
 #
 # This script is tweaked for Ubuntu.
 
-/sbin/modprobe nvidia-current
+# Try to load ubuntu's nvidia-current or nvidia's native nvidia module
+/sbin/modprobe nvidia-current || /sbin/modprobe nvidia
 
 if [ "$?" -eq 0 ]; then
 

@@ -10,7 +10,7 @@ package frontend
 // This file implements the mumax2's main routines for client mode.
 
 import (
-	. "mumax/common"
+	.  "mumax/common"
 	cu "cuda/driver"
 	"fmt"
 	"path"

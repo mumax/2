@@ -84,7 +84,8 @@ func (j *Java) WriteFunc(out io.Writer, funcName string, argTypes []reflect.Type
 	}
 
 	fmt.Fprintf(out, `
-	public static %s %s(`, java_type[ret], funcName)
+	public static %s %s(`,
+		java_type[ret], funcName)
 
 	args := ""
 	for i := range argTypes {

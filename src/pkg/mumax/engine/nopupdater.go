@@ -12,9 +12,7 @@ import ()
 
 
 // Trivial Updater that does nothing.
-type NopUpdater struct {
-
-}
+type NopUpdater struct{}
 
 
 // Does nothing.
