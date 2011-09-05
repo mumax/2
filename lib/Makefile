@@ -17,7 +17,7 @@ clean:
 	rm -rf $(CLEANFILES)
 
 .PHONY: install
-install:
+install: all
 
 .PHONY: test
 test: apigen

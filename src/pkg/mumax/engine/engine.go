@@ -24,6 +24,7 @@ type Engine struct {
 	quantity map[string]*Quant // maps quantity names onto their data structures
 }
 
+
 // Make new engine.
 func NewEngine() *Engine {
 	e := new(Engine)
@@ -59,18 +60,21 @@ func (e *Engine) Size() []int {
 	return e.size3D
 }
 
+
 // Add a scalar quantity
 func (e *Engine) AddScalar(name string) {
-	e.addQuant(name, 1, nil)
+	e.AddQuant(name, 1, nil)
 }
 
 
 func (e *Engine) AddVectorField(name string) {
-	e.addQuant(name, 3, e.Size())
+	e.AddQuant(name, 3, e.Size())
 }
 
+
+
 // INTERNAL: add an arbitrary quantity
-func (e *Engine) addQuant(name string, nComp int, size3D []int) {
+func (e *Engine) AddQuant(name string, nComp int, size3D []int) {
 	Debug("engine.Add", name, nComp, size3D)
 	// quantity should not yet be defined
 	if _, ok := e.quantity[name]; ok {
@@ -82,8 +86,8 @@ func (e *Engine) addQuant(name string, nComp int, size3D []int) {
 
 // Mark childQuantity to depend on parentQuantity
 func (e *Engine) Depends(childQuantity, parentQuantity string) {
-	child := e.getQuant(childQuantity)
-	parent := e.getQuant(parentQuantity)
+	child := e.GetQuant(childQuantity)
+	parent := e.GetQuant(parentQuantity)
 
 	for _, p := range child.parents {
 		if p.name == parentQuantity {
@@ -97,7 +101,7 @@ func (e *Engine) Depends(childQuantity, parentQuantity string) {
 
 
 // retrieve a quantity by its name
-func (e *Engine) getQuant(name string) *Quant {
+func (e *Engine) GetQuant(name string) *Quant {
 	if q, ok := e.quantity[name]; ok {
 		return q
 	} else {
