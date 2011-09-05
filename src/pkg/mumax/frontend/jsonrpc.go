@@ -20,6 +20,7 @@ import (
 
 
 // An RPC server using simple JSON encoding.
+// Note: we do not use the official JSON-RPC protocol.
 type jsonRPC struct {
 	in  io.Reader
 	out io.Writer
@@ -55,7 +56,7 @@ func (j *jsonRPC) Run() {
 		CheckErr(err, ERR_IO)
 
 		if array, ok := (*v).([]interface{}); ok {
-			Debug("call:", array)
+			//Debug("call:", array)
 			Assert(len(array) == 2)
 			ret := j.Call(array[0].(string), array[1].([]interface{}))
 			convertOutput(ret)
@@ -119,7 +120,7 @@ func toArray(v interface{}) *host.Array {
 		}
 	}()
 
-	fmt.Println("toArray", v)
+	//fmt.Println("toArray", v)
 
 	err := false
 	// determine array size as {len(v), len(v[0]), len(v[0][0]), ...}
