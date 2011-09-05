@@ -39,6 +39,8 @@ func (e *Engine) init() {
 }
 
 
+//__________________________________________________________________ set/get
+
 // Sets the FD grid size
 func (e *Engine) SetSize(size3D []int) {
 	Debug("engine:SetSize", size3D)
@@ -61,16 +63,28 @@ func (e *Engine) Size() []int {
 }
 
 
+// retrieve a quantity by its name
+func (e *Engine) GetQuant(name string) *Quant {
+	if q, ok := e.quantity[name]; ok {
+		return q
+	} else {
+		panic(Bug("engine: undefined: " + name))
+	}
+	return nil //silence gc
+}
+
+//__________________________________________________________________ add
+
 // Add a scalar quantity
 func (e *Engine) AddScalar(name string) {
 	e.AddQuant(name, 1, nil)
 }
 
 
+// Adds a vector field
 func (e *Engine) AddVectorField(name string) {
 	e.AddQuant(name, 3, e.Size())
 }
-
 
 
 // INTERNAL: add an arbitrary quantity
@@ -100,17 +114,9 @@ func (e *Engine) Depends(childQuantity, parentQuantity string) {
 }
 
 
-// retrieve a quantity by its name
-func (e *Engine) GetQuant(name string) *Quant {
-	if q, ok := e.quantity[name]; ok {
-		return q
-	} else {
-		panic(Bug("engine: undefined: " + name))
-	}
-	return nil //silence gc
-}
+//__________________________________________________________________ output
 
-
+// String representation
 func (e *Engine) String() string {
 	str := "engine\n"
 	quants := e.quantity

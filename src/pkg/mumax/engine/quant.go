@@ -14,6 +14,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/gpu"
+	"fmt"
 )
 
 // Conceptually, each quantity is represented by A(r) * m(t), a pointwise multiplication
@@ -38,6 +39,9 @@ type Quant struct {
 }
 
 
+//____________________________________________________________________ init
+
+// Returns a new quantity. See Quant.init().
 func newQuant(name string, nComp int, size3D []int) *Quant {
 	q := new(Quant)
 	q.init(name, nComp, size3D)
@@ -67,6 +71,36 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	q.parents = make([]*Quant, 0, CAP)
 }
 
+
+//____________________________________________________________________ set
+
+// Sets the value to a space-independent scalar.
+// The quantity must have been first initialized as scalar.
+// If it was previously space-dependent, the array is freed.
+func (q *Quant) SetScalar(value float32) {
+	if q.array != nil {
+		q.array.Free()
+		q.array = nil
+	}
+
+	if len(q.multiplier) != 1 {
+		panic(InputErr(fmt.Sprintf(q.Name(), "has", q.NComp(), "components")))
+	}
+	q.multiplier[0] = value
+}
+
+
+//____________________________________________________________________ get
+
+// Gets the name
+func (q *Quant) Name() string {
+	return q.name
+}
+
+// Gets the number of components
+func (q *Quant) NComp() int {
+	return len(q.multiplier)
+}
 
 //
 //func (f *Field) Free() {
