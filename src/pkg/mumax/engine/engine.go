@@ -81,9 +81,19 @@ func (e *Engine) AddScalar(name string) {
 }
 
 
+// Adds a scalar field
+func (e *Engine) AddScalarField(name string) {
+	e.AddQuant(name, 1, e.Size())
+}
+
 // Adds a vector field
 func (e *Engine) AddVectorField(name string) {
 	e.AddQuant(name, 3, e.Size())
+}
+
+// Adds a tensor field
+func (e *Engine) AddTensorField(name string) {
+	e.AddQuant(name, 9, e.Size())
 }
 
 

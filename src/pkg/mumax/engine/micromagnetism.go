@@ -22,26 +22,77 @@ func (e *Engine) InitMicromagnetism() {
 
 	e.AddVectorField("m")
 
-	e.AddVectorField("h_d")
-	e.Depends("h_d", "m")
-	e.Depends("h_d", "msat")
+	e.AddVectorField("H_d")
+	e.Depends("H_d", "m")
+	e.Depends("H_d", "msat")
 
-	e.AddVectorField("h_e")
-	e.Depends("h_e", "m")
-	e.Depends("h_e", "aexch")
+	e.AddVectorField("H_e")
+	e.Depends("H_e", "m")
+	e.Depends("H_e", "aexch")
 
-	e.AddVectorField("h_z")
-	e.Depends("h_z", "t")
+	e.AddVectorField("H_z")
+	e.Depends("H_z", "t")
 
-	e.AddVectorField("h")
-	e.Depends("h", "h_d")
-	e.Depends("h", "h_e")
-	e.Depends("h", "h_z")
+	e.AddVectorField("H_a")
+	e.AddScalar("k1")
+	e.AddScalar("k2")
+	e.Depends("H_a", "k1")
+	e.Depends("H_a", "k2")
+	e.Depends("H_a", "m")
+
+	e.AddVectorField("H")
+	e.Depends("H", "H_d")
+	e.Depends("H", "H_e")
+	e.Depends("H", "H_z")
+	e.Depends("H", "H_a")
 
 	e.AddVectorField("torque")
 	e.Depends("torque", "m")
-	e.Depends("torque", "h")
+	e.Depends("torque", "H")
 	e.Depends("torque", "alpha")
+
+	e.AddScalarField("e_e")
+	e.Depends("e_e", "m")
+	e.Depends("e_e", "H_e")
+	e.AddScalarField("E_e")
+	e.Depends("E_e", "e_e")
+
+	e.AddScalarField("e_d")
+	e.Depends("e_d", "m")
+	e.Depends("e_d", "H_d")
+	e.AddScalarField("E_d")
+	e.Depends("E_d", "e_d")
+
+	e.AddScalarField("e_z")
+	e.Depends("e_z", "m")
+	e.Depends("e_z", "H_z")
+	e.AddScalarField("E_z")
+	e.Depends("E_z", "e_z")
+
+	e.AddScalarField("e_a")
+	e.Depends("e_a", "m")
+	e.Depends("e_a", "H_a")
+	e.AddScalarField("E_a")
+	e.Depends("E_a", "e_a")
+
+	e.AddScalarField("e")
+	e.Depends("e", "e_a")
+	e.Depends("e", "e_z")
+	e.Depends("e", "e_e")
+	e.Depends("e", "e_d")
+
+	e.AddScalarField("E")
+	e.Depends("E", "E_a")
+	e.Depends("E", "E_z")
+	e.Depends("E", "E_e")
+	e.Depends("E", "E_d")
+
+	e.AddVectorField("m_norm")
+	e.Depends("m", "m_norm")
+
+	e.AddVectorField("j")
+	e.Depends("j", "t")
+	e.Depends("torque", "j")
 
 	Debug(e.String())
 }

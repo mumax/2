@@ -18,4 +18,4 @@ setfield('m', m)
 
 print 'm', getfield('m')
 
-print 'h', getfield('h')
+print 'H', getfield('H')
