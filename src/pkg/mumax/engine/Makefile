@@ -17,6 +17,7 @@ GOFILES=\
 	universe.go\
 	input.go\
 	output.go\
+	buffer.go\
 	testapi.go\
 
 CGOFILES=\

@@ -105,6 +105,34 @@ func (q *Quant) NComp() int {
 	return len(q.multiplier)
 }
 
+
+// True if the quantity is a space-independent scalar
+func (q *Quant) IsScalar() bool {
+	return q.array == nil && len(q.multiplier) == 1
+}
+
+// True if the quantity is a space-dependent scalar field
+func (q *Quant) IsScalarField() bool {
+	return q.array != nil && len(q.multiplier) == 1
+}
+
+// True if the quantity is a space-independent 3-component vector
+func (q *Quant) IsVector() bool {
+	return q.array == nil && len(q.multiplier) == 3
+}
+
+// True if the quantity is a space-dependent 3-component vector field
+func (q *Quant) IsVectorField() bool {
+	return q.array != nil && len(q.multiplier) == 3
+}
+
+
+func (q *Quant) ScalarValue() float32 {
+	if !q.IsScalar() {
+		panic(Bug("not a scalar"))
+	}
+	return q.multiplier[0]
+}
 //
 //func (f *Field) Free() {
 //	f.array.Free()

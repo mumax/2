@@ -18,4 +18,3 @@ type NopUpdater uint
 // Does nothing.
 func (n *NopUpdater) UpdateSelf() {
 }
-

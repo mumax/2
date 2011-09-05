@@ -24,14 +24,20 @@ func (a API) SetSize(x, y, z int) {
 	a.Engine.InitMicromagnetism()
 }
 
-func (a API) SetConst(name string, value float32) {
+func (a API) SetScalar(name string, value float32) {
 	e := a.Engine
-	q := e.GetQuant("name")
+	q := e.GetQuant(name)
 	q.SetScalar(value)
 }
 
 func (a API) Get(name string) interface{} {
-	return 42
+	e := a.Engine
+	q := e.GetQuant(name)
+	switch {
+	case q.IsScalar():
+		return q.ScalarValue()
+	}
+	panic(Bug("unimplemented case"))
 }
 
 
