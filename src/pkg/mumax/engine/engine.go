@@ -68,7 +68,7 @@ func (e *Engine) GetQuant(name string) *Quant {
 	if q, ok := e.quantity[name]; ok {
 		return q
 	} else {
-		panic(Bug("engine: undefined: " + name))
+		panic(InputErr("engine: undefined: " + name))
 	}
 	return nil //silence gc
 }

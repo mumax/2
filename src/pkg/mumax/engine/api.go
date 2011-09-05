@@ -24,10 +24,15 @@ func (a API) SetSize(x, y, z int) {
 	a.Engine.InitMicromagnetism()
 }
 
+
 func (a API) SetScalar(name string, value float32) {
 	e := a.Engine
 	q := e.GetQuant(name)
 	q.SetScalar(value)
+}
+
+func (a API) GetScalar(name string) float32 {
+	return a.Engine.GetQuant(name).ScalarValue()
 }
 
 func (a API) Get(name string) interface{} {
