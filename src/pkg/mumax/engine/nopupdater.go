@@ -12,9 +12,10 @@ import ()
 
 
 // Trivial Updater that does nothing.
-type NopUpdater struct{}
+type NopUpdater uint
 
 
 // Does nothing.
 func (n *NopUpdater) UpdateSelf() {
 }
+

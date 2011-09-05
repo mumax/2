@@ -12,6 +12,7 @@ GOFILES=\
 	micromagnetism.go\
 	quant.go\
 	updater.go\
+	nopupdater.go\
 	units.go\
 	universe.go\
 	input.go\

@@ -66,6 +66,8 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 		q.multiplier[i] = 1
 	}
 
+	q.updateSelf = new(NopUpdater)
+
 	const CAP = 2
 	q.children = make([]*Quant, 0, CAP)
 	q.parents = make([]*Quant, 0, CAP)
@@ -86,6 +88,7 @@ func (q *Quant) SetScalar(value float32) {
 	if len(q.multiplier) != 1 {
 		panic(InputErr(fmt.Sprintf(q.Name(), "has", q.NComp(), "components")))
 	}
+
 	q.multiplier[0] = value
 }
 
