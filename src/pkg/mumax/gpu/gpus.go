@@ -14,8 +14,8 @@ package gpu
 import "C"
 
 import (
-	.    "mumax/common"
-	cu   "cuda/driver"
+	. "mumax/common"
+	cu "cuda/driver"
 	cuda "cuda/runtime"
 	"unsafe"
 	"fmt"

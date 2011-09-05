@@ -10,7 +10,7 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-	.  "mumax/common"
+	. "mumax/common"
 	cu "cuda/driver"
 	"flag"
 )

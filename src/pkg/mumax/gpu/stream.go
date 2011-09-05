@@ -12,7 +12,7 @@ package gpu
 
 import (
 	//. "mumax/common"
-	cu   "cuda/driver"
+	cu "cuda/driver"
 	cuda "cuda/runtime"
 )
 
