@@ -81,7 +81,7 @@ func (e *Engine) addQuant(name string, nComp int, size3D []int) {
 
 
 // Mark childQuantity to depend on parentQuantity
-func (e *Engine) AddDependency(childQuantity, parentQuantity string) {
+func (e *Engine) Depends(childQuantity, parentQuantity string) {
 	child := e.getQuant(childQuantity)
 	parent := e.getQuant(parentQuantity)
 
