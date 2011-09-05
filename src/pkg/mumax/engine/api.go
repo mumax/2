@@ -54,13 +54,21 @@ func (a API) LoadVectorField(quant, filename string) {
 	panic("unimplemented")
 }
 
-func (a API) SetVectorField(quant string, field *host.Array) {
-	panic("unimplemented")
+
+func (a API) SetField(quant string, field *host.Array) {
+	q := a.Engine.GetQuant(quant)
+	q.array.CopyFromHost(field)
+			
 }
 
 
 func (a API) GetField(quant string) *host.Array {
-	return a.Engine.GetQuant(quant).FieldValue()
+	q := a.Engine.GetQuant(quant)
+	buffer := NewBuffer(q.array.NComp(), q.array.Size3D())
+	q.array.CopyToHost(buffer)
+	return buffer
+	//TODO: buffer should be global and re-cycled.
+	//TODO: transpose to userspace
 }
 
 // Get the value of a general quantity

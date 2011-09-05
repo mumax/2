@@ -12,4 +12,7 @@ print 'msat', getscalar('msat')
 setscalar('aexch', 12e-13)
 print 'aexch', getscalar('aexch')
 
+m=getfield('m')
+m[0][0][0][0] = 1
+setfield('m', m)
 print 'm', getfield('m')
