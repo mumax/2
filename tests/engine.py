@@ -1,6 +1,6 @@
 from mumax2 import *
 
-setgridsize(2, 64, 64)
+setgridsize(2, 8, 16)
 savegraph("graph.dot")
 
 setscalar('alpha', 0.01)
@@ -15,4 +15,7 @@ print 'aexch', getscalar('aexch')
 m=getfield('m')
 m[0][0][0][0] = 1
 setfield('m', m)
+
 print 'm', getfield('m')
+
+print 'h', getfield('h')
