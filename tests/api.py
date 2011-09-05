@@ -3,7 +3,7 @@ from mumax2 import *
 # tests the "dummy" engine/testapi.go
 # may be removed later
 
-setsize(1,1,1) # must be called
+setgridsize(1,1,1) # must be called
 
 print "version", version()
 print "echo 123", echo(123)

@@ -7,34 +7,63 @@
 
 package engine
 
+//
+//	Here the user input (X,Y,Z) is changed to internal input (Z,Y,X)
+//
 
 import (
 	. "mumax/common"
+	"mumax/host"
 	"os"
 )
 
 
+// The API methods are accessible to the end-user through scripting languages.
 type API struct {
 	Engine *Engine
 }
 
 
-func (a API) SetSize(x, y, z int) {
+//________________________________________________________________________________ init
+
+// Set the grid size 
+func (a API) SetGridSize(x, y, z int) {
 	a.Engine.SetSize([]int{z, y, x}) // convert to internal axes
 	a.Engine.InitMicromagnetism()
 }
 
 
+//________________________________________________________________________________ quant
+
+
+// Set the value of a scalar, space-independent quantity
 func (a API) SetScalar(name string, value float32) {
 	e := a.Engine
 	q := e.GetQuant(name)
 	q.SetScalar(value)
 }
 
+
+// Get the value of a scalar, space-independent quantity
 func (a API) GetScalar(name string) float32 {
 	return a.Engine.GetQuant(name).ScalarValue()
 }
 
+
+func (a API) LoadVectorField(quant, filename string) {
+	panic("unimplemented")
+}
+
+func (a API) SetVectorField(quant string, field *host.Array) {
+	panic("unimplemented")
+}
+
+
+func (a API) GetField(quant string) *host.Array {
+	return a.Engine.GetQuant(quant).FieldValue()
+}
+
+// Get the value of a general quantity
 func (a API) Get(name string) interface{} {
 	e := a.Engine
 	q := e.GetQuant(name)
@@ -45,6 +74,8 @@ func (a API) Get(name string) interface{} {
 	panic(Bug("unimplemented case"))
 }
 
+
+//________________________________________________________________________________ misc
 
 func (a API) SaveGraph(file string) {
 	f, err := os.Create(file)

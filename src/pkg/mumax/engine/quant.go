@@ -14,6 +14,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/gpu"
+	"mumax/host"
 	"fmt"
 )
 
@@ -127,12 +128,24 @@ func (q *Quant) IsVectorField() bool {
 }
 
 
+// If the quantity represents a space-independent scalar, return its value.
 func (q *Quant) ScalarValue() float32 {
 	if !q.IsScalar() {
 		panic(Bug("not a scalar"))
 	}
 	return q.multiplier[0]
 }
+
+
+// If the quantity represents a space-dependent field, return a host copy of its value.
+// Call FreeBuffer() to recycle it.
+func (q *Quant) FieldValue() *host.Array {
+	a := q.array
+	buffer := NewBuffer(a.NComp(), a.Size3D())
+	q.array.CopyToHost(buffer)
+	return buffer
+}
+
 //
 //func (f *Field) Free() {
 //	f.array.Free()
