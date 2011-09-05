@@ -17,30 +17,30 @@ func (e *Engine) InitMicromagnetism() {
 	e.AddScalar("t")
 
 	e.AddScalar("alpha")
-	e.AddScalar("Msat")
+	e.AddScalar("msat")
 	e.AddScalar("aexch")
 
 	e.AddVectorField("m")
 
-	e.AddVectorField("Hd")
-	e.Depends("Hd", "m")
-	e.Depends("Hd", "Msat")
+	e.AddVectorField("h_d")
+	e.Depends("h_d", "m")
+	e.Depends("h_d", "msat")
 
-	e.AddVectorField("He")
-	e.Depends("He", "m")
-	e.Depends("He", "aexch")
+	e.AddVectorField("h_e")
+	e.Depends("h_e", "m")
+	e.Depends("h_e", "aexch")
 
-	e.AddVectorField("Hz")
-	e.Depends("Hz", "t")
+	e.AddVectorField("h_z")
+	e.Depends("h_z", "t")
 
-	e.AddVectorField("H")
-	e.Depends("H", "Hd")
-	e.Depends("H", "He")
-	e.Depends("H", "Hz")
+	e.AddVectorField("h")
+	e.Depends("h", "h_d")
+	e.Depends("h", "h_e")
+	e.Depends("h", "h_z")
 
 	e.AddVectorField("torque")
 	e.Depends("torque", "m")
-	e.Depends("torque", "H")
+	e.Depends("torque", "h")
 	e.Depends("torque", "alpha")
 
 	Debug(e.String())
