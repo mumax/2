@@ -7,17 +7,28 @@
 
 package engine
 
-import ()
+import (
+	. "mumax/common"
+)
 
 
 func (e *Engine) Step() {
+	Debug("Engine.Step")
+
 	// update input for ODE solver recursively
 	for _, ode := range e.ode {
 		ode[RHS].Update()
 	}
 
 	// step
+	// set new t, dt, m
 
 	// invalidate everything that depends on solver
+	e.dt.Invalidate()
+	e.t.Invalidate()
+
+	for _, ode := range e.ode {
+		ode[RHS].Invalidate()
+	}
 
 }

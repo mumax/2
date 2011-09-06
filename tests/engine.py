@@ -9,3 +9,4 @@ print 'cellsize', getcellsize()
 load('test')
 savegraph("graph.dot")
 
+step()
