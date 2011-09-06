@@ -23,8 +23,7 @@ libmultigpu.so: $(OFILES) libmultigpu.h
 clean:
 	rm -f *.o *.so
 
-.PHONY: install
-install:
+install: all
 
 .PHONY: test
 test:

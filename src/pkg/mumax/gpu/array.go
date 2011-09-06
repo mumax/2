@@ -14,6 +14,7 @@ import (
 	. "mumax/common"
 	"mumax/host"
 	cu "cuda/driver"
+	"sync"
 )
 
 
@@ -28,11 +29,12 @@ type Array struct {
 	size4D    []int          // {components, size0, size1, size2}
 	size3D    []int          // {size0, size1, size2}
 	_partSize [3]int         // INTERNAL 
-	partSize  []int
+	partSize  []int // size of the parts of the array on each gpu. 
 	partLen4D int // total number of floats per GPU
 	partLen3D int // total number of floats per GPU for one component
-	Stream
-	Comp []Array
+	Stream // multi-GPU stream for general use with this array
+	Comp []Array // X,Y,Z components as arrays
+	sync.RWMutex // mutex for safe concurrent access to this array
 }
 
 
