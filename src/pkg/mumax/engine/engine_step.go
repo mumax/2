@@ -11,5 +11,13 @@ import ()
 
 
 func (e *Engine) Step() {
+	// update input for ODE solver recursively
+	for _, ode := range e.ode {
+		ode[RHS].Update()
+	}
+
+	// step
+
+	// invalidate everything that depends on solver
 
 }

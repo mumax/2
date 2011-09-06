@@ -7,8 +7,7 @@
 
 package engine
 
-import (
-)
+import ()
 
 func (e *Engine) LoadMicromag() {
 

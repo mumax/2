@@ -12,6 +12,7 @@ GOFILES=\
 	mod_micromag.go\
 	mod_micromagenergy.go\
 	mod_spintorque.go\
+	mod_testmod.go\
 	quant.go\
 	updater.go\
 	nopupdater.go\

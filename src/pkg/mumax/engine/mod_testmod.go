@@ -7,10 +7,12 @@
 
 package engine
 
-
 import ()
 
-
-type Updater interface {
-	Update()
+// Loads a test module.
+func (e *Engine) LoadTest() {
+	e.AddVectorField("m")
+	e.AddVectorField("torque")
+	e.Depends("torque", "m")
+	e.ODE1("m", "torque")
 }

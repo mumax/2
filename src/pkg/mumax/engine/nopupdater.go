@@ -16,5 +16,5 @@ type NopUpdater uint
 
 
 // Does nothing.
-func (n *NopUpdater) UpdateSelf() {
+func (n *NopUpdater) Update() {
 }

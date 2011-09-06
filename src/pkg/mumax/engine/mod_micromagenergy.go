@@ -7,49 +7,9 @@
 
 package engine
 
-import (
-	. "mumax/common"
-)
+import ()
 
 func (e *Engine) LoadMicromagEnergy() {
-	Debug("engine.LoadMicromagnetism")
-
-	e.AddScalar("alpha")
-	e.AddScalar("msat")
-	e.AddScalar("aexch")
-
-	e.AddVectorField("m")
-
-	e.AddVectorField("H_d")
-	e.Depends("H_d", "m")
-	e.Depends("H_d", "m") // redundant, but should not crash
-	e.Depends("H_d", "msat")
-
-	e.AddVectorField("H_e")
-	e.Depends("H_e", "m")
-	e.Depends("H_e", "aexch")
-
-	e.AddVectorField("H_z")
-	e.Depends("H_z", "t")
-
-	e.AddVectorField("H_a")
-	e.AddScalar("k1")
-	e.AddScalar("k2")
-	e.Depends("H_a", "k1")
-	e.Depends("H_a", "k2")
-	e.Depends("H_a", "m")
-
-	e.AddVectorField("H")
-	e.Depends("H", "H_d")
-	e.Depends("H", "H_e")
-	e.Depends("H", "H_z")
-	e.Depends("H", "H_a")
-
-	e.AddVectorField("torque")
-	e.Depends("torque", "m")
-	e.Depends("torque", "H")
-	e.Depends("torque", "alpha")
-
 	e.AddScalarField("e_e")
 	e.Depends("e_e", "m")
 	e.Depends("e_e", "H_e")
@@ -85,15 +45,4 @@ func (e *Engine) LoadMicromagEnergy() {
 	e.Depends("E", "E_z")
 	e.Depends("E", "E_e")
 	e.Depends("E", "E_d")
-
-	e.AddVectorField("m_norm")
-	e.Depends("m", "m_norm")
-
-	e.AddVectorField("j")
-	e.Depends("j", "t")
-	e.Depends("torque", "j")
-
-	e.ODE1("m", "torque")
-
-	Debug(e.String())
 }

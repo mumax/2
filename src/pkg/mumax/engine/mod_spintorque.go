@@ -9,7 +9,7 @@ package engine
 
 import ()
 
-func (e *Engine) LoadSpintorque(){
+func (e *Engine) LoadSpintorque() {
 	e.AddVectorField("j")
 	e.Depends("j", "t")
 	e.Depends("torque", "j")

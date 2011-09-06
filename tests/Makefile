@@ -3,6 +3,7 @@ mumax2=../bin/mumax2
 TESTFILES=\
 		  api.py.out\
 		  engine.py.out\
+		  micromag.py.out\
 		  #Test.java.out\
 		  
 .PHONY: all

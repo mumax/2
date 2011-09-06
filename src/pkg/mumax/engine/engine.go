@@ -26,7 +26,16 @@ type Engine struct {
 	cellSize  []float64         // size of the FD cells, nil means not yet set
 	quantity  map[string]*Quant // maps quantity names onto their data structures
 	ode       [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
+	time      *Quant            // time quantity is always present
+	dt        *Quant            // time step quantity is always present
 }
+
+
+// Left-hand side and right-hand side indices for Engine.ode[i]
+const (
+	LHS = 0
+	RHS = 1
+)
 
 
 // Make new engine.
@@ -40,7 +49,11 @@ func NewEngine() *Engine {
 // initialize
 func (e *Engine) init() {
 	e.quantity = make(map[string]*Quant)
+	// special quantities time and dt are always present
 	e.AddScalar("t")
+	e.AddScalar("dt")
+	e.time = e.GetQuant("t")
+	e.dt = e.GetQuant("dt")
 }
 
 
@@ -128,10 +141,12 @@ func (e *Engine) AddTensorField(name string) {
 // INTERNAL: add an arbitrary quantity
 func (e *Engine) AddQuant(name string, nComp int, size3D []int) {
 	Debug("engine.Add", name, nComp, size3D)
+
 	// quantity should not yet be defined
 	if _, ok := e.quantity[name]; ok {
 		panic(Bug("engine: Already defined: " + name))
 	}
+
 	e.quantity[name] = newQuant(name, nComp, size3D)
 }
 
@@ -161,6 +176,15 @@ func (e *Engine) Depends(childQuantity, parentQuantity string) {
 func (e *Engine) ODE1(y, diff string) {
 	yQ := e.GetQuant(y)
 	dQ := e.GetQuant(diff)
+	if e.ode != nil {
+		for _, ode := range e.ode {
+			for _, q := range ode {
+				if q.Name() == y || q.Name() == diff {
+					panic(Bug("Already in ODE: " + y + ", " + diff))
+				}
+			}
+		}
+	}
 	e.ode = append(e.ode, [2]*Quant{yQ, dQ})
 }
 

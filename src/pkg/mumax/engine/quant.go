@@ -167,6 +167,26 @@ func (q *Quant) ScalarValue() float32 {
 }
 
 
+//____________________________________________________________________ tree walk
+
+
+func (q *Quant) Update() {
+	if q.upToDate {
+		return
+	}
+
+	// update parents first
+	for _, p := range q.parents {
+		p.Update()
+	}
+
+	// now update self
+	Debug("update " + q.Name())
+	q.updateSelf.Update()
+
+	q.upToDate = true
+}
+
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.
 //func (q *Quant) FieldValue() *host.Array {
