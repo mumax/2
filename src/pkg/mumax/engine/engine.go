@@ -25,7 +25,7 @@ type Engine struct {
 	cellSize_ [3]float64        // INTENRAL
 	cellSize  []float64         // size of the FD cells, nil means not yet set
 	quantity  map[string]*Quant // maps quantity names onto their data structures
-	ode [][2]*Quant // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
+	ode       [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
 }
 
 
@@ -157,10 +157,10 @@ func (e *Engine) Depends(childQuantity, parentQuantity string) {
 //	d y / d t = diff
 // E.g.: ODE1("m", "torque")
 // No direct dependency should be declared between the arguments.
-func(e*Engine) ODE1(y, diff string){
-		yQ := e.GetQuant(y)
-		dQ := e.GetQuant(diff)
-		e.ode = append(e.ode, [2]*Quant{yQ, dQ})
+func (e *Engine) ODE1(y, diff string) {
+	yQ := e.GetQuant(y)
+	dQ := e.GetQuant(diff)
+	e.ode = append(e.ode, [2]*Quant{yQ, dQ})
 }
 
 //__________________________________________________________________ output
@@ -175,6 +175,10 @@ func (e *Engine) String() string {
 			str += p.name + " "
 		}
 		str += ")\n"
+	}
+	str += "ODEs:\n"
+	for _,ode := range e.ode{
+		str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
 	}
 	return str
 }
@@ -191,6 +195,12 @@ func (e *Engine) WriteDot(out io.Writer) {
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")
 		}
+	}
+	
+	fmt.Fprintln(out, "ODE1 [shape=box];")
+	for _,ode := range e.ode{
+		fmt.Fprintln(out, ode[0].Name(), "->", "ODE1", ";")
+		fmt.Fprintln(out, "ODE1", "->", ode[1].Name(), ";")
 	}
 	fmt.Fprintln(out, "}")
 }
