@@ -177,7 +177,7 @@ func (e *Engine) String() string {
 		str += ")\n"
 	}
 	str += "ODEs:\n"
-	for _,ode := range e.ode{
+	for _, ode := range e.ode {
 		str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
 	}
 	return str
@@ -196,9 +196,9 @@ func (e *Engine) WriteDot(out io.Writer) {
 			fmt.Fprintln(out, k, "->", c.name, ";")
 		}
 	}
-	
+
 	fmt.Fprintln(out, "ODE1 [shape=box];")
-	for _,ode := range e.ode{
+	for _, ode := range e.ode {
 		fmt.Fprintln(out, ode[0].Name(), "->", "ODE1", ";")
 		fmt.Fprintln(out, "ODE1", "->", ode[1].Name(), ";")
 	}
