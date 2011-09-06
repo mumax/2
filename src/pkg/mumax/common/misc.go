@@ -17,10 +17,10 @@ import (
 
 
 // Array component.
-const(
-		X = 0
-		Y = 1
-		Z = 2
+const (
+	X = 0
+	Y = 1
+	Z = 2
 )
 
 

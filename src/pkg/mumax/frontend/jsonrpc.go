@@ -69,11 +69,11 @@ func (j *jsonRPC) Run() {
 
 
 // Like fmt.Sprint with a maximum length.
-func shortPrint(a interface{}) string{
+func shortPrint(a interface{}) string {
 	const MAX = 30
 	str := fmt.Sprint(a)
-	if len(str) > MAX{
-			return str[:MAX] + "..."
+	if len(str) > MAX {
+		return str[:MAX] + "..."
 	}
 	return str
 }
@@ -136,6 +136,7 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 }
 
 
+// converts a json array to a host.Array
 func toArray(v interface{}) *host.Array {
 	defer func() {
 		err := recover()
@@ -188,6 +189,9 @@ func toArray(v interface{}) *host.Array {
 }
 
 
+// convert mumax return values to types suited for json encoding
+// most values remain the same, but host.Array gets converted
+// to [][][][][]float32
 func convertOutput(vals []interface{}) {
 	for i, v := range vals {
 		switch v.(type) {
@@ -198,6 +202,7 @@ func convertOutput(vals []interface{}) {
 		}
 	}
 }
+
 
 // error message
 const (
