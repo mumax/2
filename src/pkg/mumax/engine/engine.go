@@ -193,7 +193,7 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for k, v := range quants {
-			fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];")
+		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];")
 		// Add dependencies
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")
@@ -211,27 +211,29 @@ func (e *Engine) WriteDot(out io.Writer) {
 
 	// align similar nodes
 	i := 0
-	for _,a := range quants{
-			j := 0
-			for _,b := range quants{
-				if i < j{
-					if similar(a.Name(), b.Name()){
-				fmt.Fprintln(out, "{rank=same;", a.Name(), ";", b.Name(), "};")
-					}
-				}	
-					j++
+	for _, a := range quants {
+		j := 0
+		for _, b := range quants {
+			if i < j {
+				if similar(a.Name(), b.Name()) {
+					fmt.Fprintln(out, "{rank=same;", a.Name(), ";", b.Name(), "};")
+				}
 			}
-			i++
+			j++
+		}
+		i++
 	}
 
 	fmt.Fprintln(out, "}")
 }
 
 
-func similar(a, b string) (similar bool){
-	defer func(){
-		if recover() != nil{return}	
+func similar(a, b string) (similar bool) {
+	defer func() {
+		if recover() != nil {
+			return
+		}
 	}()
-	similar = a[0] == b[0] && a[1] == '_' && b [1] == '_'
+	similar = a[0] == b[0] && a[1] == '_' && b[1] == '_'
 	return
 }
