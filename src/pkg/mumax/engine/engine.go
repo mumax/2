@@ -218,7 +218,7 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for k, v := range quants {
-		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];")
+		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];") // use first letter as group name.
 		// Add dependencies
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")
@@ -230,8 +230,8 @@ func (e *Engine) WriteDot(out io.Writer) {
 	for _, ode := range e.ode {
 		fmt.Fprintln(out, "ODE1", "->", ode[0].Name(), ";")
 		fmt.Fprintln(out, ode[1].Name(), "->", "ODE1", ";")
-		fmt.Fprintln(out, "{rank=source;", ode[0].Name(), "};")
-		fmt.Fprintln(out, "{rank=sink;", ode[1].Name(), "};")
+		fmt.Fprintln(out, "{rank=source;", ode[LHS].Name(), "};")
+		fmt.Fprintln(out, "{rank=sink;", ode[RHS].Name(), "};")
 	}
 
 	// align similar nodes
@@ -253,6 +253,7 @@ func (e *Engine) WriteDot(out io.Writer) {
 }
 
 
+// true if a and b are similar names, to be equally ranked in the dot graph.
 func similar(a, b string) (similar bool) {
 	defer func() {
 		if recover() != nil {

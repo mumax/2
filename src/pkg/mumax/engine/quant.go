@@ -195,12 +195,10 @@ func (q *Quant) Update() {
 
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
-func(q*Quant) Invalidate(){
-	if q.upToDate{
+func (q *Quant) Invalidate() {
 		q.upToDate = false
 		Debug("invalidate " + q.Name())
-	}
-	for _,c := range q.children{
+	for _, c := range q.children {
 		c.Invalidate()
 	}
 }

@@ -10,3 +10,4 @@ load('test')
 savegraph("graph.dot")
 
 step()
+step()

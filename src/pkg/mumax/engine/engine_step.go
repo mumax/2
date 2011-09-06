@@ -28,7 +28,7 @@ func (e *Engine) Step() {
 	e.time.Invalidate()
 
 	for _, ode := range e.ode {
-		ode[RHS].Invalidate()
+		ode[LHS].Invalidate()
 	}
 
 }
