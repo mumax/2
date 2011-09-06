@@ -15,6 +15,7 @@ GOFILES=\
 	mod_spintorque.go\
 	mod_testmod.go\
 	quant.go\
+	torque.go\
 	updater.go\
 	nopupdater.go\
 	units.go\

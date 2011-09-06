@@ -17,8 +17,8 @@ import (
 
 // Engine is the heart of a multiphysics simulation.
 // The engine stores named quantities like "m", "B", "alpha", ...
-// A data structure consisting of interconnected quantities
-// determines what should be updated and when.
+// An acyclic graph structure consisting of interconnected quantities
+// determines what should be calculated and when.
 type Engine struct {
 	size3D_   [3]int            // INTENRAL
 	size3D    []int             // size of the FD grid, nil means not yet set

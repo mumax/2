@@ -29,6 +29,8 @@ import (
 // When the array has only one component and the multiplier has N components,
 // then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
 //
+// Quantities are also the nodes of an acyclic graph representing the differential
+// equation to be solved.
 type Quant struct {
 	name       string      // Unique identifier
 	array      *gpu.Array  // Underlying array, nil for space-independent quantity
