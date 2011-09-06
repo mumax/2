@@ -13,3 +13,19 @@ package gpu
 
 //#include "libmultigpu.h"
 import "C"
+
+import (
+	"unsafe"
+)
+
+
+// Adds 2 multi-GPU arrays: dst = a + b
+func Add(dst, a, b *Array) {
+	C.addAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
