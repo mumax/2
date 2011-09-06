@@ -5,6 +5,7 @@ OFILES=\
 	gpu_conf.o\
 	gpu_properties.o\
 	add.o\
+	torque.o\
 	reduce.o\
 	multigpu.o\
 

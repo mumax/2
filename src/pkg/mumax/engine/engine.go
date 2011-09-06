@@ -230,14 +230,14 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add ODE node
 	for i, _ := range e.ode {
 		ODE := "ODE" + fmt.Sprint(i)
-		fmt.Fprintln(out, ODE + " [style=filled, shape=box];")
+		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
 	}
 	fmt.Fprintln(out, "}")
 
 	// Add ODE node
 	for i, ode := range e.ode {
 		ODE := "ODE" + fmt.Sprint(i)
-		fmt.Fprintln(out, ODE + " [style=filled, shape=box];")
+		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
 		fmt.Fprintln(out, ODE, "->", ode[0].Name(), ";")
 		fmt.Fprintln(out, ode[1].Name(), "->", ODE, ";")
 		fmt.Fprintln(out, "{rank=source;", ode[LHS].Name(), "};")
