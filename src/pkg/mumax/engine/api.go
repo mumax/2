@@ -50,6 +50,15 @@ func (a API) SetCellSize(x, y, z float64) {
 }
 
 
+// Set the cell size.
+// WARNING: convert to ZYX, internal units
+func (a API) GetCellSize() (x,y,z float64) {
+	l := UnitLength
+	size := a.Engine.CellSize()
+	return size[Z]*l, size[Y]*l, size[X]*l // convert to internal axes
+}
+
+
 // Load a physics module.
 func (a API) Modprobe(module string) {
 	switch module {
@@ -78,7 +87,7 @@ func (a API) GetScalar(name string) float32 {
 }
 
 
-func (a API) LoadVectorField(quant, filename string) {
+func (a API) LoadField(quant, filename string) {
 	panic("unimplemented")
 }
 
@@ -98,6 +107,7 @@ func (a API) GetField(quant string) *host.Array {
 	array.CopyToHost(buffer)
 	return buffer
 }
+
 
 // Get the value of a general quantity
 func (a API) Get(name string) interface{} {

@@ -24,6 +24,7 @@ func (e *Engine) InitMicromagnetism() {
 
 	e.AddVectorField("H_d")
 	e.Depends("H_d", "m")
+	e.Depends("H_d", "m") // redundant
 	e.Depends("H_d", "msat")
 
 	e.AddVectorField("H_e")

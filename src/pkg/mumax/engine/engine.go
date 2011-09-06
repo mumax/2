@@ -134,14 +134,16 @@ func (e *Engine) AddQuant(name string, nComp int, size3D []int) {
 }
 
 
-// Mark childQuantity to depend on parentQuantity
+// Mark childQuantity to depend on parentQuantity.
+// Multiply adding the same dependency has no effect.
 func (e *Engine) Depends(childQuantity, parentQuantity string) {
 	child := e.GetQuant(childQuantity)
 	parent := e.GetQuant(parentQuantity)
 
 	for _, p := range child.parents {
 		if p.name == parentQuantity {
-			panic(Bug("engine:addDependency(" + childQuantity + ", " + parentQuantity + "): already present"))
+			return // Dependency is already defined, do not add it twice
+			//panic(Bug("Engine.addDependency(" + childQuantity + ", " + parentQuantity + "): already present"))
 		}
 	}
 
