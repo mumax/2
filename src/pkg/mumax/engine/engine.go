@@ -20,11 +20,11 @@ import (
 // A data structure consisting of interconnected quantities
 // determines what should be updated and when.
 type Engine struct {
-	size3D_   [3]int  // INTENRAL
-	size3D []int            // size of the FD grid, nil means not yet set
-	cellSize_ [3]float64  // INTENRAL
-	cellSize []float64		// size of the FD cells, nil means not yet set
-	quantity map[string]*Quant // maps quantity names onto their data structures
+	size3D_   [3]int            // INTENRAL
+	size3D    []int             // size of the FD grid, nil means not yet set
+	cellSize_ [3]float64        // INTENRAL
+	cellSize  []float64         // size of the FD cells, nil means not yet set
+	quantity  map[string]*Quant // maps quantity names onto their data structures
 }
 
 

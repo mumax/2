@@ -64,7 +64,7 @@ func (a API) LoadVectorField(quant, filename string) {
 
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.GetQuant(quant)
-	q.array.CopyFromHost(field)
+	q.Array().CopyFromHost(field)
 
 }
 
