@@ -1,7 +1,8 @@
-//  Copyright 2010  Arne Vansteenkiste
+//  This file is part of MuMax, a high-performance micromagnetic simulator.
+//  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any
+//  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package omf
@@ -18,14 +19,11 @@ import (
 )
 
 
-func FRead(filename string) (info *Info, data *tensor.T4) {
-	in := MustOpenRDONLY(filename)
-	info, data = Read(in)
-	return
-}
 
 func Read(in_ io.Reader) (info *Info, data *tensor.T4) {
-	in := NewBlockingReader(bufio.NewReader(in_))
+
+
+	in := NewBlockingReader(in_)
 	info = ReadHeader(in)
 
 	size := []int{3, info.Size[Z], info.Size[Y], info.Size[X]}
@@ -48,56 +46,36 @@ func Read(in_ io.Reader) (info *Info, data *tensor.T4) {
 }
 
 
-func Decode(in io.Reader) (t *tensor.T4, metadata map[string]interface{}) {
-	info, data := Read(in)
-	t = data
-	metadata = info.Desc
-	return
-}
-
-
-// omf.Info represents the header part of an omf file.
-// TODO: add Err to return error status
-// Perhaps CheckErr() func
-type Info struct {
-	Desc            map[string]interface{}
-	Size            [3]int
-	ValueMultiplier float32
-	ValueUnit       string
-	Format          string // binary or text
-	DataFormat      string // 4 or 8
-	StepSize        [3]float32
-	MeshUnit        string
-}
-
-
 // Safe way to get Desc values: panics when key not present
 func (i *Info) DescGet(key string) interface{} {
 	value, ok := i.Desc[key]
 	if !ok {
-		panic("Key not found in Desc: " + key)
+		panic(InputErr("Key not found in Desc: " + key))
 	}
 	return value
 }
+
 
 // Safe way to get a float from Desc
 func (i *Info) DescGetFloat32(key string) float32 {
 	value := i.DescGet(key)
 	fl, err := strconv.Atof32(value.(string))
 	if err != nil {
-		panic("Could not parse " + key + " to float32: " + err.String())
+		panic(InputErr("Could not parse " + key + " to float32: " + err.String()))
 	}
 	return fl
 }
 
 
-type File struct {
-	Info
-	*tensor.T4
-}
-
 
 func readDataText(in io.Reader, t *tensor.T4) {
+	defer func(){
+		err := recover()
+		if err != nil{
+				panic(InputErr("Error reading omf file:", fmt.Sprint(err)))
+		}
+	}()
+
 	size := t.Size()[1:] // without the leading "3"
 	data := t.Array()
 	// Here we loop over X,Y,Z, not Z,Y,X, because
@@ -117,6 +95,12 @@ func readDataText(in io.Reader, t *tensor.T4) {
 }
 
 func readDataBinary4(in io.Reader, t *tensor.T4) {
+	defer func(){
+		err := recover()
+		if err != nil{
+				panic(InputErr("Error reading omf file:", fmt.Sprint(err)))
+		}
+	}()
 
 	size := t.Size()[1:] // without the leading "3"
 	data := t.Array()
@@ -124,17 +108,17 @@ func readDataBinary4(in io.Reader, t *tensor.T4) {
 	var bytes4 [4]byte
 	bytes := bytes4[:]
 
-	in.Read(bytes)                                                                  // TODO: check for error, also on output (iotool.MustReader/MustWriter?)
+	err := in.Read(bytes)                                                                  if err != nil{panic(err)}
+
 	bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0] // swap endianess
 
 	// OOMMF requires this number to be first to check the format
 	var controlnumber float32 = 0.
 
-	// Wicked conversion form float32 [4]byte in big-endian
+	// Conversion form float32 [4]byte in big-endian
 	// encoding/binary is too slow
 	// Inlined for performance, terabytes of data will pass here...
 	controlnumber = *((*float32)(unsafe.Pointer(&bytes4)))
-	// 	fmt.Println("Control number:", controlnumber)
 	if controlnumber != CONTROL_NUMBER {
 		panic("invalid control number: " + fmt.Sprint(controlnumber))
 	}
@@ -145,7 +129,7 @@ func readDataBinary4(in io.Reader, t *tensor.T4) {
 		for j := 0; j < size[Y]; j++ {
 			for k := 0; k < size[Z]; k++ {
 				for c := Z; c >= X; c-- {
-					n, err := in.Read(bytes) // TODO: check for error, also on output (iotool.MustReader/MustWriter?, have to block until all input is read)
+					n, err := in.Read(bytes) 
 					if err != nil || n != 4 {
 						panic(err)
 					}
@@ -228,10 +212,3 @@ func ReadHeader(in io.Reader) *Info {
 	return info
 }
 
-func atoi(a string) int {
-	i, err := strconv.Atoi(a)
-	if err != nil {
-		panic(err)
-	}
-	return i
-}

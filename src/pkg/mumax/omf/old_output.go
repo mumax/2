@@ -7,8 +7,7 @@
 package omf
 
 import (
-	. "mumax/common"
-	"mumax/tensor"
+	"mumax/host"
 	"io"
 	"bufio"
 	"fmt"
@@ -103,7 +102,7 @@ func Encode(out_ io.Writer, f File) {
 // 	Encode(out_, f)
 // }
 
-func writeDataText(out io.Writer, tens tensor.Interface) {
+func writeDataText(out io.Writer, tens *host.Array) {
 	data := (tensor.ToT4(tens)).Array()
 	vecsize := tens.Size()
 	gridsize := vecsize[1:]
