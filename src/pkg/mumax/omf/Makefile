@@ -4,9 +4,6 @@ PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 TARG=mumax/omf
 
 GOFILES=\
-	file.go\
-	output.go\
-	#input.go\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a
 

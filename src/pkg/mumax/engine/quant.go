@@ -36,6 +36,7 @@ type Quant struct {
 	upToDate   bool       // Flags if this quantity needs to be updated
 	children   []*Quant   // Quantities this one depends on
 	parents    []*Quant   // Quantities that depend on this one
+	size3D		[]int
 }
 
 
@@ -51,6 +52,7 @@ func newQuant(name string, nComp int, size3D []int) *Quant {
 
 // Initiates a field with nComp components and array size size3D.
 // When size3D == nil, the field is space-independent (homogeneous).
+// Storage is not yet allocated!
 func (q *Quant) init(name string, nComp int, size3D []int) {
 	Assert(nComp > 0)
 	Assert(size3D == nil || len(size3D) == 3)
@@ -58,7 +60,8 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	q.name = name
 
 	if size3D != nil {
-		q.array = gpu.NewArray(nComp, size3D)
+			q.size3D = size3D
+	//	q.array = gpu.NewArray(nComp, size3D)
 	}
 
 	q.multiplier = make([]float32, nComp)
@@ -71,6 +74,14 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	const CAP = 2
 	q.children = make([]*Quant, 0, CAP)
 	q.parents = make([]*Quant, 0, CAP)
+}
+
+
+// Make sure the underlying storage is allocated.
+func (q*Quant) initArray(){
+	if q.array == nil {
+		q.array = gpu.NewArray(q.NComp(), q.Size3D())
+	}
 }
 
 
@@ -103,6 +114,12 @@ func (q *Quant) Name() string {
 // Gets the number of components
 func (q *Quant) NComp() int {
 	return len(q.multiplier)
+}
+
+
+// Gets the 3D grid size
+func (q *Quant) Size3D() []int {
+	return q.size3D
 }
 
 

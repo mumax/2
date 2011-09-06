@@ -20,7 +20,10 @@ import (
 // A data structure consisting of interconnected quantities
 // determines what should be updated and when.
 type Engine struct {
-	size3D   []int             // size of the FD grid
+	size3D_   [3]int  // INTENRAL
+	size3D []int            // size of the FD grid, nil means not yet set
+	cellSize_ [3]float64  // INTENRAL
+	cellSize []float64		// size of the FD cells, nil means not yet set
 	quantity map[string]*Quant // maps quantity names onto their data structures
 }
 
@@ -41,25 +44,48 @@ func (e *Engine) init() {
 
 //__________________________________________________________________ set/get
 
+
 // Sets the FD grid size
-func (e *Engine) SetSize(size3D []int) {
-	Debug("engine:SetSize", size3D)
+func (e *Engine) SetGridSize(size3D []int) {
+	Debug("Engine.SetGridSize", size3D)
 	Assert(len(size3D) == 3)
 	if e.size3D == nil {
-		e.size3D = make([]int, 3)
+		e.size3D = e.size3D_[:]
+		copy(e.size3D, size3D)
 	} else {
-		panic(InputErr("Size already set"))
+		panic(InputErr("Grid size already set"))
 	}
-	copy(e.size3D, size3D)
 }
 
 
 // Gets the FD grid size
-func (e *Engine) Size() []int {
+func (e *Engine) GridSize() []int {
 	if e.size3D == nil {
-		panic(InputErr("Size should be set first"))
+		panic(InputErr("Grid size should be set first"))
 	}
 	return e.size3D
+}
+
+
+// Sets the FD cell size
+func (e *Engine) SetCellSize(size []float64) {
+	Debug("Engine.SetCellSize", size)
+	Assert(len(size) == 3)
+	if e.size3D == nil {
+		e.cellSize = e.cellSize_[:]
+		copy(e.cellSize, size)
+	} else {
+		panic(InputErr("Cell size already set"))
+	}
+}
+
+
+// Gets the FD cell size
+func (e *Engine) CellSize() []float64 {
+	if e.cellSize == nil {
+		panic(InputErr("Cell size should be set first"))
+	}
+	return e.cellSize
 }
 
 
@@ -83,17 +109,17 @@ func (e *Engine) AddScalar(name string) {
 
 // Adds a scalar field
 func (e *Engine) AddScalarField(name string) {
-	e.AddQuant(name, 1, e.Size())
+	e.AddQuant(name, 1, e.GridSize())
 }
 
 // Adds a vector field
 func (e *Engine) AddVectorField(name string) {
-	e.AddQuant(name, 3, e.Size())
+	e.AddQuant(name, 3, e.GridSize())
 }
 
 // Adds a tensor field
 func (e *Engine) AddTensorField(name string) {
-	e.AddQuant(name, 9, e.Size())
+	e.AddQuant(name, 9, e.GridSize())
 }
 
 

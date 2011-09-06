@@ -26,10 +26,17 @@ type API struct {
 
 //________________________________________________________________________________ init
 
-// Set the grid size 
+// Set the grid size.
+// WARNING: convert to ZYX
 func (a API) SetGridSize(x, y, z int) {
-	a.Engine.SetSize([]int{z, y, x}) // convert to internal axes
-	a.Engine.InitMicromagnetism()
+	a.Engine.SetGridSize([]int{z, y, x}) // convert to internal axes
+}
+
+
+// Set the cell size.
+// WARNING: convert to ZYX
+func (a API) SetCellSize(x, y, z float64) {
+	a.Engine.SetCellSize([]float64{z, y, x}) // convert to internal axes
 }
 
 
