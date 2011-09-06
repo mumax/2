@@ -42,11 +42,13 @@ func (a API) SetCellSize(x, y, z float64) {
 
 
 // Load a physics module.
-func(a API) Modprobe(module string){
-	switch module{
-			default: panic(InputErr(fmt.Sprint("Unknown module:", module, "Options: micromag")))
-	case "micromag": a.Engine.InitMicromagnetism()
-	}	
+func (a API) Modprobe(module string) {
+	switch module {
+	default:
+		panic(InputErr(fmt.Sprint("Unknown module:", module, "Options: micromag")))
+	case "micromag":
+		a.Engine.InitMicromagnetism()
+	}
 }
 
 
@@ -80,7 +82,7 @@ func (a API) SetField(quant string, field *host.Array) {
 
 
 func (a API) GetField(quant string) *host.Array {
-		// TODO: not sync'ed
+	// TODO: not sync'ed
 	q := a.Engine.GetQuant(quant)
 	array := q.Array()
 	buffer := q.Buffer()

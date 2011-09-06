@@ -23,7 +23,7 @@ type File struct {
 
 // Represents the header part of an omf file.
 type Header struct {
-	Desc            map[string]interface{} 
+	Desc            map[string]interface{}
 	Size            [3]int
 	ValueMultiplier float32
 	ValueUnit       string
@@ -32,5 +32,3 @@ type Header struct {
 	StepSize        [3]float32
 	MeshUnit        string
 }
-
-

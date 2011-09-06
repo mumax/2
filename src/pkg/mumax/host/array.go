@@ -18,13 +18,13 @@ import (
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 type Array struct {
-	List   []float32 // Underlying contiguous storage
-	Array  [][][][]float32 // Array in the usual way
-	Comp   [][]float32 // Components as contiguous lists
-	Size   [4]int // INTERNAL {components, size0, size1, size2}
-	Size4D []int  // {components, size0, size1, size2}
-	Size3D []int  // {size0, size1, size2}
-	sync.RWMutex // mutex for safe concurrent access to this array
+	List         []float32       // Underlying contiguous storage
+	Array        [][][][]float32 // Array in the usual way
+	Comp         [][]float32     // Components as contiguous lists
+	Size         [4]int          // INTERNAL {components, size0, size1, size2}
+	Size4D       []int           // {components, size0, size1, size2}
+	Size3D       []int           // {size0, size1, size2}
+	sync.RWMutex                 // mutex for safe concurrent access to this array
 }
 
 

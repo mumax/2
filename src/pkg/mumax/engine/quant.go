@@ -30,15 +30,15 @@ import (
 // then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
 //
 type Quant struct {
-	name       string     // Unique identifier
-	array      *gpu.Array // Underlying array, nil for space-independent quantity
-	multiplier []float32  // Point-wise multiplication coefficients for array
-	upToDate   bool       // Flags if this quantity needs to be updated
-	updateSelf Updater    // Called to update this quantity
-	children   []*Quant   // Quantities this one depends on
-	parents    []*Quant   // Quantities that depend on this one
-	size3D     []int      // FD size (might deviate form engine size)
-	buffer *host.Array // Host buffer for copying from/to the GPU array
+	name       string      // Unique identifier
+	array      *gpu.Array  // Underlying array, nil for space-independent quantity
+	multiplier []float32   // Point-wise multiplication coefficients for array
+	upToDate   bool        // Flags if this quantity needs to be updated
+	updateSelf Updater     // Called to update this quantity
+	children   []*Quant    // Quantities this one depends on
+	parents    []*Quant    // Quantities that depend on this one
+	size3D     []int       // FD size (might deviate form engine size)
+	buffer     *host.Array // Host buffer for copying from/to the GPU array
 }
 
 
@@ -99,7 +99,6 @@ func (q *Quant) SetScalar(value float32) {
 }
 
 
-
 //____________________________________________________________________ get
 
 // Gets the name
@@ -120,7 +119,7 @@ func (q *Quant) Size3D() []int {
 
 
 // Gets the GPU array, initializing it if necessary
-func(q *Quant) Array() *gpu.Array{
+func (q *Quant) Array() *gpu.Array {
 	if q.array == nil {
 		Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
 		q.array = gpu.NewArray(q.NComp(), q.Size3D())
@@ -129,15 +128,13 @@ func(q *Quant) Array() *gpu.Array{
 }
 
 // Gets a host array for buffering the GPU array, initializing it if necessary.
-func(q *Quant) Buffer() *host.Array{
+func (q *Quant) Buffer() *host.Array {
 	if q.buffer == nil {
 		Debug("buffer ", q.Name(), q.NComp(), "x", q.Size3D())
 		q.buffer = host.NewArray(q.NComp(), q.Size3D())
 	}
 	return q.buffer
 }
-
-
 
 
 // True if the quantity is a space-independent scalar
