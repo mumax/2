@@ -40,6 +40,7 @@ func NewEngine() *Engine {
 // initialize
 func (e *Engine) init() {
 	e.quantity = make(map[string]*Quant)
+	e.AddScalar("t")
 }
 
 
