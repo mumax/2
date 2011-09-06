@@ -64,8 +64,9 @@ func (a API) Modprobe(module string) {
 	switch module {
 	default:
 		panic(InputErr(fmt.Sprint("Unknown module:", module, "Options: micromag")))
-	case "micromag":
-		a.Engine.InitMicromagnetism()
+	case "micromag": a.Engine.LoadMicromag()
+	case "micromagenergy": a.Engine.LoadMicromagEnergy()
+	case "spintorque": a.Engine.LoadSpintorque()
 	}
 }
 

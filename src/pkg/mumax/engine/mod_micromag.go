@@ -8,11 +8,9 @@
 package engine
 
 import (
-	. "mumax/common"
 )
 
-func (e *Engine) InitMicromagnetism() {
-	Debug("engine.InitMicromagnetism")
+func (e *Engine) LoadMicromag() {
 
 	e.AddScalar("alpha")
 	e.AddScalar("msat")
@@ -50,50 +48,5 @@ func (e *Engine) InitMicromagnetism() {
 	e.Depends("torque", "H")
 	e.Depends("torque", "alpha")
 
-	e.AddScalarField("e_e")
-	e.Depends("e_e", "m")
-	e.Depends("e_e", "H_e")
-	e.AddScalarField("E_e")
-	e.Depends("E_e", "e_e")
-
-	e.AddScalarField("e_d")
-	e.Depends("e_d", "m")
-	e.Depends("e_d", "H_d")
-	e.AddScalarField("E_d")
-	e.Depends("E_d", "e_d")
-
-	e.AddScalarField("e_z")
-	e.Depends("e_z", "m")
-	e.Depends("e_z", "H_z")
-	e.AddScalarField("E_z")
-	e.Depends("E_z", "e_z")
-
-	e.AddScalarField("e_a")
-	e.Depends("e_a", "m")
-	e.Depends("e_a", "H_a")
-	e.AddScalarField("E_a")
-	e.Depends("E_a", "e_a")
-
-	e.AddScalarField("e")
-	e.Depends("e", "e_a")
-	e.Depends("e", "e_z")
-	e.Depends("e", "e_e")
-	e.Depends("e", "e_d")
-
-	e.AddScalarField("E")
-	e.Depends("E", "E_a")
-	e.Depends("E", "E_z")
-	e.Depends("E", "E_e")
-	e.Depends("E", "E_d")
-
-	e.AddVectorField("m_norm")
-	e.Depends("m", "m_norm")
-
-	e.AddVectorField("j")
-	e.Depends("j", "t")
-	e.Depends("torque", "j")
-
 	e.ODE1("m", "torque")
-
-	Debug(e.String())
 }

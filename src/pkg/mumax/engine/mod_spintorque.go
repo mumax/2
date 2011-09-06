@@ -7,13 +7,9 @@
 
 package engine
 
-import (
-	. "mumax/common"
-)
+import ()
 
-func (e *Engine) InitSpintorque
-	Debug("engine.InitSpintorque")
-
+func (e *Engine) LoadSpintorque(){
 	e.AddVectorField("j")
 	e.Depends("j", "t")
 	e.Depends("torque", "j")

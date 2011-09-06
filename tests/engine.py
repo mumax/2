@@ -7,6 +7,7 @@ setcellsize(5e-9, 5e-9, 50e-9)
 print 'cellsize', getcellsize()
 
 modprobe('micromag')
+modprobe('spintorque')
 savegraph("graph.dot")
 
 setscalar('alpha', 0.01)
