@@ -71,7 +71,7 @@ func (e *Engine) GridSize() []int {
 func (e *Engine) SetCellSize(size []float64) {
 	Debug("Engine.SetCellSize", size)
 	Assert(len(size) == 3)
-	if e.size3D == nil {
+	if e.cellSize == nil {
 		e.cellSize = e.cellSize_[:]
 		copy(e.cellSize, size)
 	} else {

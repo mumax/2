@@ -68,8 +68,21 @@ func (j *jsonRPC) Run() {
 }
 
 
+
 // Calls the function specified by funcName with the given arguments and returns the return values.
 func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
+	Debug("rpc.Call", funcName, args)
+
+	// Print which function was being called when an error occured, for easy debugging.
+	// Do not recover, however, continue on panicking.
+	defer func(){
+		err := recover()
+		if err != nil{
+			Err(fmt.Sprint("error calling ", funcName, args))
+			panic(err)
+		}
+	}()
+
 	f, ok := j.method[funcName]
 	if !ok {
 		panic(fmt.Sprintf(msg_no_such_method, funcName))

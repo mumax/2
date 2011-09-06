@@ -14,6 +14,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/host"
+	"fmt"
 	"os"
 )
 
@@ -37,6 +38,14 @@ func (a API) SetGridSize(x, y, z int) {
 // WARNING: convert to ZYX
 func (a API) SetCellSize(x, y, z float64) {
 	a.Engine.SetCellSize([]float64{z, y, x}) // convert to internal axes
+}
+
+
+func(a API) Modprobe(module string){
+	switch module{
+			default: panic(InputErr(fmt.Sprint("Unknown module:", module, "Options: micromag")))
+	case "micromag": a.Engine.InitMicromagnetism()
+	}	
 }
 
 
