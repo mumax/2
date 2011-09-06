@@ -14,8 +14,8 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/gpu"
+	"mumax/host"
 	"fmt"
-	"sync"
 )
 
 // Conceptually, each quantity is represented by A(r) * m(t), a pointwise multiplication
@@ -38,7 +38,7 @@ type Quant struct {
 	children   []*Quant   // Quantities this one depends on
 	parents    []*Quant   // Quantities that depend on this one
 	size3D     []int      // FD size (might deviate form engine size)
-	sync.RWMutex
+	buffer *host.Array // Host buffer for copying from/to the GPU array
 }
 
 
@@ -119,14 +119,26 @@ func (q *Quant) Size3D() []int {
 }
 
 
-// Gets the array, initializing it when neccesary
+// Gets the GPU array, initializing it if necessary
 func(q *Quant) Array() *gpu.Array{
 	if q.array == nil {
-		Debug("Allocate ", q.Name(), q.NComp(), "x", q.Size3D())
+		Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
 		q.array = gpu.NewArray(q.NComp(), q.Size3D())
 	}
 	return q.array
 }
+
+// Gets a host array for buffering the GPU array, initializing it if necessary.
+func(q *Quant) Buffer() *host.Array{
+	if q.buffer == nil {
+		Debug("buffer ", q.Name(), q.NComp(), "x", q.Size3D())
+		q.buffer = host.NewArray(q.NComp(), q.Size3D())
+	}
+	return q.buffer
+}
+
+
+
 
 // True if the quantity is a space-independent scalar
 func (q *Quant) IsScalar() bool {

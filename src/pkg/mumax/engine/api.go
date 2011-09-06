@@ -41,6 +41,7 @@ func (a API) SetCellSize(x, y, z float64) {
 }
 
 
+// Load a physics module.
 func(a API) Modprobe(module string){
 	switch module{
 			default: panic(InputErr(fmt.Sprint("Unknown module:", module, "Options: micromag")))
@@ -79,12 +80,12 @@ func (a API) SetField(quant string, field *host.Array) {
 
 
 func (a API) GetField(quant string) *host.Array {
+		// TODO: not sync'ed
 	q := a.Engine.GetQuant(quant)
-	buffer := NewBuffer(q.array.NComp(), q.array.Size3D())
-	q.array.CopyToHost(buffer)
+	array := q.Array()
+	buffer := q.Buffer()
+	array.CopyToHost(buffer)
 	return buffer
-	//TODO: buffer should be global and re-cycled.
-	//TODO: transpose to userspace
 }
 
 // Get the value of a general quantity
