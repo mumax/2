@@ -229,7 +229,7 @@ func (e *Engine) WriteDot(out io.Writer) {
 	fmt.Fprintln(out, "rank=sink;")
 	// Add ODE node
 	for i, _ := range e.ode {
-		ODE := "ODE" + fmt.Sprint(i)
+		ODE := "solver" + fmt.Sprint(i)
 		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
 	}
 	fmt.Fprintln(out, "}")

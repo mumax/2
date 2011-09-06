@@ -29,3 +29,11 @@ func Add(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+
+
+func Torque(torque, m, h, alpha *Array){
+	
+//	C.torqueAsync(
+//		(**C.float)(unsafe.Pointer(&(torque.Comp[0]	
+//	)
+}
