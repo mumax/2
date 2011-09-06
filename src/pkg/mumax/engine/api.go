@@ -52,10 +52,10 @@ func (a API) SetCellSize(x, y, z float64) {
 
 // Set the cell size.
 // WARNING: convert to ZYX, internal units
-func (a API) GetCellSize() (x,y,z float64) {
+func (a API) GetCellSize() (x, y, z float64) {
 	l := UnitLength
 	size := a.Engine.CellSize()
-	return size[Z]*l, size[Y]*l, size[X]*l // convert to internal axes
+	return size[Z] * l, size[Y] * l, size[X] * l // convert to internal axes
 }
 
 

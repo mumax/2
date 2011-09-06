@@ -25,6 +25,7 @@ type Engine struct {
 	cellSize_ [3]float64        // INTENRAL
 	cellSize  []float64         // size of the FD cells, nil means not yet set
 	quantity  map[string]*Quant // maps quantity names onto their data structures
+	ode [][2]*Quant // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
 }
 
 
@@ -151,6 +152,16 @@ func (e *Engine) Depends(childQuantity, parentQuantity string) {
 	parent.children = append(parent.children, child)
 }
 
+
+// Add a 1st order differential equation:
+//	d y / d t = diff
+// E.g.: ODE1("m", "torque")
+// No direct dependency should be declared between the arguments.
+func(e*Engine) ODE1(y, diff string){
+		yQ := e.GetQuant(y)
+		dQ := e.GetQuant(diff)
+		e.ode = append(e.ode, [2]*Quant{yQ, dQ})
+}
 
 //__________________________________________________________________ output
 
