@@ -16,6 +16,14 @@ import (
 )
 
 
+// Array component.
+const(
+		X = 0
+		Y = 1
+		Z = 2
+)
+
+
 // Go equivalent of &array[index] (for a float array).
 func ArrayOffset(array uintptr, index int) uintptr {
 	return uintptr(array + uintptr(SIZEOF_FLOAT*index))

@@ -2,6 +2,7 @@ from mumax2 import *
 
 setgridsize(16, 8, 2)
 setcellsize(5e-9, 5e-9, 50e-9)
+
 modprobe('micromag')
 savegraph("graph.dot")
 

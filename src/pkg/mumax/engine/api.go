@@ -34,10 +34,19 @@ func (a API) SetGridSize(x, y, z int) {
 }
 
 
-// Set the cell size.
+// Get the grid size.
 // WARNING: convert to ZYX
+func (a API) GetGridSize() (x,y,z int){
+		size := a.Engine.GridSize() 
+		return size[Z], size[Y], size[X] // convert to internal axes
+}
+
+
+// Set the cell size.
+// WARNING: convert to ZYX, internal units
 func (a API) SetCellSize(x, y, z float64) {
-	a.Engine.SetCellSize([]float64{z, y, x}) // convert to internal axes
+	l := UnitLength
+	a.Engine.SetCellSize([]float64{z/l, y/l, x/l}) // convert to internal axes and units
 }
 
 
