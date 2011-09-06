@@ -225,11 +225,21 @@ func (e *Engine) WriteDot(out io.Writer) {
 		}
 	}
 
+	fmt.Fprintln(out, "subgraph solver{")
+	fmt.Fprintln(out, "rank=sink;")
 	// Add ODE node
-	fmt.Fprintln(out, "ODE1 [style=filled, shape=box];")
-	for _, ode := range e.ode {
-		fmt.Fprintln(out, "ODE1", "->", ode[0].Name(), ";")
-		fmt.Fprintln(out, ode[1].Name(), "->", "ODE1", ";")
+	for i, _ := range e.ode {
+		ODE := "ODE" + fmt.Sprint(i)
+		fmt.Fprintln(out, ODE + " [style=filled, shape=box];")
+	}
+	fmt.Fprintln(out, "}")
+
+	// Add ODE node
+	for i, ode := range e.ode {
+		ODE := "ODE" + fmt.Sprint(i)
+		fmt.Fprintln(out, ODE + " [style=filled, shape=box];")
+		fmt.Fprintln(out, ODE, "->", ode[0].Name(), ";")
+		fmt.Fprintln(out, ode[1].Name(), "->", ODE, ";")
 		fmt.Fprintln(out, "{rank=source;", ode[LHS].Name(), "};")
 		fmt.Fprintln(out, "{rank=sink;", ode[RHS].Name(), "};")
 	}

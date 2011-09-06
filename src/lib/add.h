@@ -19,6 +19,7 @@ extern "C" {
 void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart);
 
 
+
 #ifdef __cplusplus
 }
 #endif

@@ -12,7 +12,15 @@ import ()
 // Loads a test module.
 func (e *Engine) LoadTest() {
 	e.AddVectorField("m")
+
+	e.AddVectorField("h_z")
+	e.Depends("h_z", "t")
+	e.AddVectorField("h")
+	e.Depends("h", "h_z")
+
 	e.AddVectorField("torque")
 	e.Depends("torque", "m")
+	e.Depends("torque", "h")
+
 	e.ODE1("m", "torque")
 }
