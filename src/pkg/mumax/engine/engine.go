@@ -189,14 +189,18 @@ func (e *Engine) String() string {
 func (e *Engine) WriteDot(out io.Writer) {
 	fmt.Fprintln(out, "digraph Physics{")
 	fmt.Fprintln(out, "rankdir=LR")
+
+	// Add quantities
 	quants := e.quantity
 	for k, v := range quants {
-		fmt.Fprintln(out, k, " [shape=box];")
+			fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];")
+		// Add dependencies
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")
 		}
 	}
 
+	// Add ODE node
 	fmt.Fprintln(out, "ODE1 [style=filled, shape=box];")
 	for _, ode := range e.ode {
 		fmt.Fprintln(out, "ODE1", "->", ode[0].Name(), ";")
@@ -204,5 +208,30 @@ func (e *Engine) WriteDot(out io.Writer) {
 		fmt.Fprintln(out, "{rank=source;", ode[0].Name(), "};")
 		fmt.Fprintln(out, "{rank=sink;", ode[1].Name(), "};")
 	}
+
+	// align similar nodes
+	i := 0
+	for _,a := range quants{
+			j := 0
+			for _,b := range quants{
+				if i < j{
+					if similar(a.Name(), b.Name()){
+				fmt.Fprintln(out, "{rank=same;", a.Name(), ";", b.Name(), "};")
+					}
+				}	
+					j++
+			}
+			i++
+	}
+
 	fmt.Fprintln(out, "}")
+}
+
+
+func similar(a, b string) (similar bool){
+	defer func(){
+		if recover() != nil{return}	
+	}()
+	similar = a[0] == b[0] && a[1] == '_' && b [1] == '_'
+	return
 }
