@@ -5,29 +5,11 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
 
-import (
-	. "mumax/common"
-)
+// This file wraps libmultigpu.so.
+// Author: Arne Vansteenkiste
 
+package gpu
 
-func (e *Engine) Step() {
-	Debug("Engine.Step")
-
-	// update input for ODE solver recursively
-	for _, ode := range e.ode {
-		ode[RHS].Update()
-	}
-
-	// step
-	// set new t, dt, m
-
-	// invalidate everything that depends on solver
-	e.dt.Invalidate()
-	e.time.Invalidate()
-	for _, ode := range e.ode {
-		ode[LHS].Invalidate()
-	}
-
-}
+//#include "libmultigpu.h"
+import "C"

@@ -19,6 +19,7 @@ GOFILES=\
 CGOFILES=\
 	gpus.go\
 	cmath.go\
+	libmultigpu.go\
 
 GC+=\
 	-I../../cuda/driver/_obj\
