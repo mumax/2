@@ -9,7 +9,9 @@ TARG=mumax/engine
 GOFILES=\
 	engine.go\
 	api.go\
-	micromagnetism.go\
+	mod_micromag.go\
+	mod_micromagenergy.go\
+	mod_spintorque.go\
 	quant.go\
 	updater.go\
 	nopupdater.go\
