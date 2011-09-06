@@ -170,6 +170,11 @@ func (q *Quant) ScalarValue() float32 {
 //____________________________________________________________________ tree walk
 
 
+// If q.upToDate is false, update this node recursively.
+// First Update all parents (on which this node depends),
+// and then call Quant.updateSelf.Update().
+// upToDate is set true.
+// See: Invalidate()
 func (q *Quant) Update() {
 	if q.upToDate {
 		return
@@ -186,6 +191,20 @@ func (q *Quant) Update() {
 
 	q.upToDate = true
 }
+
+
+// Opposite of Update. Sets upToDate flag of this node and
+// all its children (which depend on this node) to false.
+func(q*Quant) Invalidate(){
+	if q.upToDate{
+		q.upToDate = false
+		Debug("invalidate " + q.Name())
+	}
+	for _,c := range q.children{
+		c.Invalidate()
+	}
+}
+
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.

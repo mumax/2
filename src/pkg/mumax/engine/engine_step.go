@@ -25,7 +25,7 @@ func (e *Engine) Step() {
 
 	// invalidate everything that depends on solver
 	e.dt.Invalidate()
-	e.t.Invalidate()
+	e.time.Invalidate()
 
 	for _, ode := range e.ode {
 		ode[RHS].Invalidate()
