@@ -197,10 +197,12 @@ func (e *Engine) WriteDot(out io.Writer) {
 		}
 	}
 
-	fmt.Fprintln(out, "ODE1 [shape=box];")
+	fmt.Fprintln(out, "ODE1 [style=filled, shape=box];")
 	for _, ode := range e.ode {
-		fmt.Fprintln(out, ode[0].Name(), "->", "ODE1", ";")
-		fmt.Fprintln(out, "ODE1", "->", ode[1].Name(), ";")
+		fmt.Fprintln(out, "ODE1", "->", ode[0].Name(), ";")
+		fmt.Fprintln(out, ode[1].Name(), "->", "ODE1", ";")
+		fmt.Fprintln(out, "{rank=source;", ode[0].Name(), "};")
+		fmt.Fprintln(out, "{rank=sink;", ode[1].Name(), "};")
 	}
 	fmt.Fprintln(out, "}")
 }

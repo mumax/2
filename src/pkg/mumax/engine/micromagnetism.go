@@ -24,7 +24,7 @@ func (e *Engine) InitMicromagnetism() {
 
 	e.AddVectorField("H_d")
 	e.Depends("H_d", "m")
-	e.Depends("H_d", "m") // redundant
+	e.Depends("H_d", "m") // redundant, but should not crash
 	e.Depends("H_d", "msat")
 
 	e.AddVectorField("H_e")
@@ -94,6 +94,8 @@ func (e *Engine) InitMicromagnetism() {
 	e.AddVectorField("j")
 	e.Depends("j", "t")
 	e.Depends("torque", "j")
+
+	e.ODE1("m", "torque")
 
 	Debug(e.String())
 }
