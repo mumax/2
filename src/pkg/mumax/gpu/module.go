@@ -77,7 +77,7 @@ func (c *Closure) SetArg(argIdx int, arg interface{}) {
 	if arr, ok := arg.(*Array); ok { // handle gpu.Array as a special case
 		Assert(c.ArgType[argIdx] == u64)
 		for i, dc := range c.DevClosure {
-			dc.SetDevicePtr(argIdx, arr.DevicePtr(i))
+			dc.SetDevicePtr(argIdx, arr.DevicePtr()[i])
 		}
 	} else {
 		argType := c.ArgType[argIdx]

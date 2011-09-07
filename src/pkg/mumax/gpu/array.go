@@ -148,8 +148,8 @@ func (v *Array) Free() {
 
 
 // Address of part of the array on device deviceId.
-func (a *Array) DevicePtr(deviceId int) cu.DevicePtr {
-	return a.pointer[deviceId]
+func (a *Array) DevicePtr() []cu.DevicePtr {
+	return a.pointer
 }
 
 
