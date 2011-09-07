@@ -13,6 +13,7 @@ GOFILES=\
 	strconv.go\
 	misc.go\
 	sizes.go\
+	size.go\
 	ansi.go\
 
 CGOFILES=\

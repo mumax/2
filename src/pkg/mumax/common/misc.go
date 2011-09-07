@@ -39,7 +39,7 @@ func CheckSize(a, b []int) {
 
 
 // True if a and b are equal. Used to check for equal array sizes.
-func EqualSize(a, b []int)bool{
+func EqualSize(a, b []int) bool {
 	if len(a) != len(b) {
 		return false
 	}

@@ -1,6 +1,6 @@
 from mumax2 import *
 
-setgridsize(3, 2, 1)
+setgridsize(8, 2, 1)
 print 'gridsize', getgridsize()
 
 setcellsize(5e-9, 5e-9, 50e-9)
