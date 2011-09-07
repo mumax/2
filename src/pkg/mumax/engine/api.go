@@ -91,7 +91,7 @@ func (a API) Step() {
 func (a API) SetScalar(name string, value float32) {
 	e := a.Engine
 	q := e.GetQuant(name)
-	q.SetScalar(value)
+	q.SetValue([]float32{value})
 }
 
 
@@ -108,13 +108,12 @@ func (a API) LoadField(quant, filename string) {
 
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.GetQuant(quant)
-	aArr := q.Array()
-	if !EqualSize(field.Size3D, aArr.Size3D()) {
-		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(aArr.Size3D()))
-		field = Resample(field, aArr.Size3D())
+	qArray := q.Array()
+	if !EqualSize(field.Size3D, qArray.Size3D()) {
+		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
+		field = Resample(field, qArray.Size3D())
 	}
-	aArr.CopyFromHost(field)
-	q.Invalidate() //!
+	q.SetField(field)
 }
 
 

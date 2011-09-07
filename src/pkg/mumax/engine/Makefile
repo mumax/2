@@ -16,6 +16,7 @@ GOFILES=\
 	mod_spintorque.go\
 	mod_testmod.go\
 	quant.go\
+	quantkind.go\
 	torque.go\
 	updater.go\
 	nopupdater.go\

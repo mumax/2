@@ -15,7 +15,6 @@ import (
 	. "mumax/common"
 	"mumax/gpu"
 	"mumax/host"
-	"fmt"
 )
 
 // A quantity represents a scalar/vector/tensor field,value or mask.
@@ -45,6 +44,7 @@ type Quant struct {
 	parents    []*Quant    // Quantities that depend on this one
 	buffer     *host.Array // Host buffer for copying from/to the GPU array
 	desc       string      // Human-readable description
+	kind       QuantKind   // VALUE, FIELD or MASK
 }
 
 
@@ -58,14 +58,6 @@ func newQuant(name string, nComp int, size3D []int, kind QuantKind, desc ...stri
 	return q
 }
 
-type QuantKind int
-
-const (
-	VALUE QuantKind = 1 // A value is constant in space. Has a multiplier (to store the value) but a nil *array.
-	FIELD QuantKind = 2 // A field is space-dependent. Has no multiplier but allocated array.
-	MASK  QuantKind = 3 // A mask is a point-wise multiplication of a field with a value. Has an array (possibly with NULL parts) and a multiplier.
-)
-
 
 // Number of components.
 const (
@@ -74,6 +66,7 @@ const (
 	SYMMTENS = 6
 	TENS     = 9
 )
+
 
 // Initiates a field with nComp components and array size size3D.
 // When size3D == nil, the field is space-independent (homogeneous) and the array will
@@ -87,6 +80,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 
 	q.name = name
 	q.nComp = nComp
+	q.kind = kind
 
 	switch kind {
 	case FIELD:
@@ -141,21 +135,45 @@ func zeros(n int) []float32 {
 
 //____________________________________________________________________ set
 
-// Sets the value to a space-independent scalar.
-// The quantity must have been first initialized as scalar.
-// If it was previously space-dependent, the array is freed.
-func (q *Quant) SetScalar(value float32) {
-	if q.array != nil {
-		q.array.Free()
-		q.array = nil
-	}
 
-	if len(q.multiplier) != 1 {
-		panic(InputErr(fmt.Sprintf(q.Name(), "has", q.NComp(), "components")))
-	}
-
-	q.multiplier[0] = value
+//
+func (q *Quant) SetField(field *host.Array) {
+	checkKind(q, FIELD)
+	q.Array().CopyFromHost(field)
+	q.Invalidate() //!
 }
+
+func(q *Quant) SetValue(val []float32){
+	checkKind(q, VALUE)
+	Assert(len(val) == q.nComp)
+	for i,v := range val{
+	q.multiplier[i] = v
+	}	
+	q.Invalidate() //!
+}
+
+
+func checkKind(q *Quant, kind QuantKind){
+	if q.kind != kind {
+		panic(InputErr(q.name + " is not " + kind.String() + "but " + q.kind.String()))
+	}
+}
+
+//// Sets the value to a space-independent scalar.
+//// The quantity must have been first initialized as scalar.
+//// If it was previously space-dependent, the array is freed.
+//func (q *Quant) SetScalar(value float32) {
+//	if q.array != nil {
+//		q.array.Free()
+//		q.array = nil
+//	}
+//
+//	if len(q.multiplier) != 1 {
+//		panic(InputErr(fmt.Sprintf(q.Name(), "has", q.NComp(), "components")))
+//	}
+//
+//	q.multiplier[0] = value
+//}
 
 
 //____________________________________________________________________ get
