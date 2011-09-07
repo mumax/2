@@ -168,6 +168,7 @@ func jsonToHostArray(v interface{}) *host.Array {
 
 	size3D := size[1:]
 	arr := host.NewArray(size[0], []int{size3D[X], size3D[Y], size3D[Z]})
+	fmt.Println("jsonToHostArray:", size[0], []int{size3D[X], size3D[Y], size3D[Z]})
 	a := arr.Array
 	va := v.([]interface{})
 	for c := range a {
