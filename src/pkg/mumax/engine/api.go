@@ -102,7 +102,6 @@ func (a API) SetScalar(name string, value float32) {
 
 
 
-
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.GetQuant(quant)
 	qArray := q.Array()
