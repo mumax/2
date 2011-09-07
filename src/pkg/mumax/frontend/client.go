@@ -30,7 +30,7 @@ type Client struct {
 	api                  engine.API
 	infifo, outfifo      *os.File
 	cleanfiles           []string // list of files to be deleted upon program exit
-	logWait chan int // channel to wait for completion of go logStream()
+	logWait              chan int // channel to wait for completion of go logStream()
 }
 
 
@@ -96,7 +96,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	stdout, err5 := proc.StdoutPipe()
 	CheckErr(err5, ERR_IO)
 	CheckErr(proc.Start(), ERR_IO)
-	
+
 	go logStream("["+command+"]", stderr, true, c.logWait)
 	go logStream("["+command+"]", stdout, false, c.logWait)
 
@@ -198,7 +198,7 @@ func pollFile(fname string) (waiter chan (int)) {
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
 func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
-	defer func(){waiter <- 1}() // signal completion
+	defer func() { waiter <- 1 }() // signal completion
 	var bytes [BUFSIZE]byte
 	buf := bytes[:]
 	var err os.Error = nil
