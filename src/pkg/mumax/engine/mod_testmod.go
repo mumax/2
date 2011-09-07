@@ -23,4 +23,5 @@ func (e *Engine) LoadTest() {
 	e.Depends("torque", "h")
 
 	e.ODE1("m", "torque")
+	e.ODE1("h_z", "h")
 }
