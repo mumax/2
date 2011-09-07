@@ -10,8 +10,8 @@ package engine
 // This file implements the Landau-Lifshitz torque Quantity
 // Author: Arne Vansteenkiste
 
-import(
-		"mumax/gpu"
+import (
+	"mumax/gpu"
 )
 
 func (e *Engine) AddTorqueNode() {
@@ -24,15 +24,15 @@ func (e *Engine) AddTorqueNode() {
 	H := e.GetQuant("H")
 	alpha := e.GetQuant("alpha")
 
-	t.updateSelf = &torqueUpdater{t, m, H, alpha}	
+	t.updateSelf = &torqueUpdater{t, m, H, alpha}
 }
 
 
-type torqueUpdater struct{
-	torque, m, h, alpha *Quant
+type torqueUpdater struct {
+	τ, m, h, α *Quant
 }
 
 
-func(u *torqueUpdater) Update(){
-	gpu.Torque(u.t.Array(), u.m.Array(), u.h.Array(), u.alpha.Array(), u.alpha.Multiplier()[0])
+func (u *torqueUpdater) Update() {
+	gpu.Torque(u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), u.α.multiplier[0])
 }

@@ -15,7 +15,7 @@ package gpu
 import "C"
 
 import (
-		. "mumax/common"
+	. "mumax/common"
 	"unsafe"
 )
 
@@ -32,8 +32,8 @@ func Add(dst, a, b *Array) {
 }
 
 
-func Torque(τ, m, H, αMap *Array, αMul float32){
-	
+func Torque(τ, m, H, αMap *Array, αMul float32) {
+
 	C.torqueAsync(
 		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))),
@@ -54,5 +54,5 @@ func Torque(τ, m, H, αMap *Array, αMul float32){
 
 		(C.int)(m.partLen3D))
 	τ.Stream.Sync()
-	
+
 }

@@ -52,13 +52,13 @@ func TestArrayInit(test *testing.T) {
 			test.Error("Len(): ", dev1.Len(), "expected: ", 3*Prod(size))
 		}
 	}
-	
-	if dev1.PartLen4D() != 3*Prod(size)/NDevice(){
-		test.Fail()	
+
+	if dev1.PartLen4D() != 3*Prod(size)/NDevice() {
+		test.Fail()
 	}
 
-	if dev1.PartLen3D() != Prod(size)/NDevice(){
-		test.Fail()	
+	if dev1.PartLen3D() != Prod(size)/NDevice() {
+		test.Fail()
 	}
 
 	l1 := host1.List
