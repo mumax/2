@@ -130,37 +130,39 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind) {
 }
 
 
-	// AddQuant(name, nComp, VALUE)
-func(e*Engine) AddValue(name string, nComp int){
+// AddQuant(name, nComp, VALUE)
+func (e *Engine) AddValue(name string, nComp int) {
 	e.AddQuant(name, nComp, VALUE)
 }
 
-	// AddQuant(name, nComp, FIELD)
-func(e*Engine) AddField(name string, nComp int){
+// AddQuant(name, nComp, FIELD)
+func (e *Engine) AddField(name string, nComp int) {
 	e.AddQuant(name, nComp, FIELD)
 }
 
-	// AddQuant(name, nComp, MASK)
-func(e*Engine) AddMask(name string, nComp int){
+// AddQuant(name, nComp, MASK)
+func (e *Engine) AddMask(name string, nComp int) {
 	e.AddQuant(name, nComp, MASK)
 }
 
 
 // Mark childQuantity to depend on parentQuantity.
 // Multiply adding the same dependency has no effect.
-func (e *Engine) Depends(childQuantity, parentQuantity string) {
+func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 	child := e.GetQuant(childQuantity)
-	parent := e.GetQuant(parentQuantity)
+	for _, parentQuantity := range parentQuantities {
+		parent := e.GetQuant(parentQuantity)
 
-	for _, p := range child.parents {
-		if p.name == parentQuantity {
-			return // Dependency is already defined, do not add it twice
-			//panic(Bug("Engine.addDependency(" + childQuantity + ", " + parentQuantity + "): already present"))
+		for _, p := range child.parents {
+			if p.name == parentQuantity {
+				return // Dependency is already defined, do not add it twice
+				//panic(Bug("Engine.addDependency(" + childQuantity + ", " + parentQuantity + "): already present"))
+			}
 		}
-	}
 
-	child.parents = append(child.parents, parent)
-	parent.children = append(parent.children, child)
+		child.parents = append(child.parents, parent)
+		parent.children = append(parent.children, child)
+	}
 }
 
 

@@ -38,7 +38,7 @@ type Quant struct {
 	name       string      // Unique identifier
 	array      *gpu.Array  // Underlying array, may be nil. Holds nil pointers for space-independent quantity
 	multiplier []float32   // Point-wise multiplication coefficients for array, may be nil
-	nComp	int	// Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
+	nComp      int         // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool        // Flags if this quantity needs to be updated
 	updateSelf Updater     // Called to update this quantity
 	children   []*Quant    // Quantities this one depends on
@@ -59,19 +59,19 @@ func newQuant(name string, nComp int, size3D []int, kind QuantKind) *Quant {
 
 type QuantKind int
 
-const(
-		VALUE QuantKind = 1 // A value is constant in space. Has a multiplier (to store the value) but a nil *array.
-		FIELD QuantKind = 2 // A field is space-dependent. Has no multiplier but allocated array.
-		MASK  QuantKind = 3 // A mask is a point-wise multiplication of a field with a value. Has an array (possibly with NULL parts) and a multiplier.
+const (
+	VALUE QuantKind = 1 // A value is constant in space. Has a multiplier (to store the value) but a nil *array.
+	FIELD QuantKind = 2 // A field is space-dependent. Has no multiplier but allocated array.
+	MASK  QuantKind = 3 // A mask is a point-wise multiplication of a field with a value. Has an array (possibly with NULL parts) and a multiplier.
 )
 
 
 // Number of components.
-const(
-		SCALAR = 1
-		VECTOR = 3
-		SYMMTENS = 6
-		TENS = 9
+const (
+	SCALAR   = 1
+	VECTOR   = 3
+	SYMMTENS = 6
+	TENS     = 9
 )
 
 // Initiates a field with nComp components and array size size3D.
@@ -87,18 +87,18 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 	q.name = name
 	q.nComp = nComp
 
-	switch kind{
+	switch kind {
 	case FIELD:
-			q.array = gpu.NewArray(nComp, size3D)
-			q.multiplier = nil
-	case MASK:	
-			q.array = gpu.NilArray(nComp, size3D)
-			q.multiplier = ones(nComp)
+		q.array = gpu.NewArray(nComp, size3D)
+		q.multiplier = nil
+	case MASK:
+		q.array = gpu.NilArray(nComp, size3D)
+		q.multiplier = ones(nComp)
 	case VALUE:
-			q.array = nil
-			q.multiplier = zeros(nComp)
+		q.array = nil
+		q.multiplier = zeros(nComp)
 	default:
-			panic(Bug("Quant.init kind"))
+		panic(Bug("Quant.init kind"))
 	}
 
 	q.updateSelf = new(NopUpdater)
@@ -109,9 +109,9 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 }
 
 // array with n 1's.
-func ones(n int) []float32{
+func ones(n int) []float32 {
 	ones := make([]float32, n)
-	for i := range ones{
+	for i := range ones {
 		ones[i] = 1
 	}
 	return ones
@@ -119,9 +119,9 @@ func ones(n int) []float32{
 
 
 // array with n 0's.
-func zeros(n int) []float32{
+func zeros(n int) []float32 {
 	zeros := make([]float32, n)
-	for i := range zeros{
+	for i := range zeros {
 		zeros[i] = 0
 	}
 	return zeros
@@ -160,19 +160,16 @@ func (q *Quant) NComp() int {
 }
 
 
-
-
-
 // Gets the GPU array.
 func (q *Quant) Array() *gpu.Array {
-//	if q.array == nil {
-//		if q.Size3D() == nil{
-//			q.array = gpu.NilArray(q.NComp(), q.Size3D())
-//		}else{
-//			Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
-//			q.array = gpu.NewArray(q.NComp(), q.Size3D())
-//}
-//	}
+	//	if q.array == nil {
+	//		if q.Size3D() == nil{
+	//			q.array = gpu.NilArray(q.NComp(), q.Size3D())
+	//		}else{
+	//			Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
+	//			q.array = gpu.NewArray(q.NComp(), q.Size3D())
+	//}
+	//	}
 	return q.array
 }
 
@@ -186,18 +183,17 @@ func (q *Quant) Buffer() *host.Array {
 }
 
 
-
-func(q *Quant) IsSpaceDependent() bool{
+func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr(0) != 0
 }
 
 
 // If the quantity represents a space-independent scalar, return its value.
 //func (q *Quant) ScalarValue() float32 {
-	//if q.IsSpaceDependent() {
-		//panic(Bug("not a scalar"))
-	//}
-	//return q.multiplier[0]
+//if q.IsSpaceDependent() {
+//panic(Bug("not a scalar"))
+//}
+//return q.multiplier[0]
 //}
 
 

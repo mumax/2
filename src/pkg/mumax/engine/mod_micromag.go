@@ -23,8 +23,7 @@ func (e *Engine) LoadMicromag() {
 	e.Depends("H_d", "msat")
 
 	e.AddQuant("H_e", VECTOR, FIELD)
-	e.Depends("H_e", "m")
-	e.Depends("H_e", "aexch")
+	e.Depends("H_e", "m", "aexch")
 
 	e.AddQuant("H_z", VECTOR, MASK)
 	e.Depends("H_z", "t")
@@ -32,20 +31,13 @@ func (e *Engine) LoadMicromag() {
 	e.AddQuant("H_a", VECTOR, FIELD)
 	e.AddQuant("k1", SCALAR, MASK)
 	e.AddQuant("k2", SCALAR, MASK)
-	e.Depends("H_a", "k1")
-	e.Depends("H_a", "k2")
-	e.Depends("H_a", "m")
+	e.Depends("H_a", "k1", "k2", "m")
 
 	e.AddQuant("H", VECTOR, FIELD)
-	e.Depends("H", "H_d")
-	e.Depends("H", "H_e")
-	e.Depends("H", "H_z")
-	e.Depends("H", "H_a")
+	e.Depends("H", "H_d", "H_e", "H_z", "H_a")
 
 	e.AddQuant("torque", VECTOR, FIELD)
-	e.Depends("torque", "m")
-	e.Depends("torque", "H")
-	e.Depends("torque", "alpha")
+	e.Depends("torque", "m", "H", "alpha")
 
 	e.ODE1("m", "torque")
 }
