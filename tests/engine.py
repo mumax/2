@@ -9,5 +9,11 @@ print 'cellsize', getcellsize()
 load('test')
 savegraph("graph.dot")
 
+m=[ [[[ 111 ]]] , [[[ 222 ]]] , [[[ 333 ]]] ]
+setfield('m', m)
+
+m=getfield('m')
+print 'm', m
+
 step()
 step()

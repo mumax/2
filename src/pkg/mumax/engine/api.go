@@ -108,13 +108,17 @@ func (a API) LoadField(quant, filename string) {
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.GetQuant(quant)
 	q.Array().CopyFromHost(field)
-
+	q.Invalidate()//!
 }
+
+
+
 
 
 func (a API) GetField(quant string) *host.Array {
 	// TODO: not sync'ed
 	q := a.Engine.GetQuant(quant)
+	q.Update() //!
 	array := q.Array()
 	buffer := q.Buffer()
 	array.CopyToHost(buffer)
