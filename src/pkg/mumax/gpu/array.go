@@ -179,18 +179,9 @@ func (a *Array) Size3D() []int {
 }
 
 
-// Panics if a and b have different sizes
-func checkSize(a, b []int) {
-	for i, s := range a {
-		if s != b[i] {
-			panic(MSG_ARRAY_SIZE_MISMATCH)
-		}
-	}
-}
-
 // Copy from device array to device array.
 func (dst *Array) CopyFromDevice(src *Array) {
-	checkSize(dst.size4D, src.size4D)
+	CheckSize(dst.size4D, src.size4D)
 
 	d := dst.pointer
 	s := src.pointer
@@ -209,7 +200,7 @@ func (dst *Array) CopyFromDevice(src *Array) {
 
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(srca *host.Array) {
-	checkSize(dst.size4D, srca.Size4D)
+	CheckSize(dst.size4D, srca.Size4D)
 
 	src := srca.Comp
 	//Assert(dst.NComp() == len(src))
@@ -233,7 +224,7 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 
 // Copy from device array to host array.
 func (src *Array) CopyToHost(dsta *host.Array) {
-	checkSize(dsta.Size4D, src.size4D)
+	CheckSize(dsta.Size4D, src.size4D)
 
 	dst := dsta.Comp
 	//Assert(src.NComp() == len(dst))

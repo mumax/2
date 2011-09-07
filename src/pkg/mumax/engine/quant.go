@@ -195,7 +195,7 @@ func (q *Quant) Buffer() *host.Array {
 
 
 func (q *Quant) IsSpaceDependent() bool {
-	return q.array != nil && q.array.DevicePtr(0) != 0
+	return q.array != nil && q.array.DevicePtr()[0] != 0
 }
 
 

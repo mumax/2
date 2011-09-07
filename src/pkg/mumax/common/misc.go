@@ -13,6 +13,7 @@ package common
 import (
 	"path"
 	"os"
+	"fmt"
 )
 
 
@@ -22,6 +23,19 @@ const (
 	Y = 1
 	Z = 2
 )
+
+
+// Check if array sizes are equal. Panics if arrays a and b are different. 
+func CheckSize(a, b []int) {
+	if len(a) != len(b) {
+		panic(InputErr(fmt.Sprint("array size mismatch: ", a, "!=", b)))
+	}
+	for i, s := range a {
+		if s != b[i] {
+			panic(InputErr(fmt.Sprint("array size mismatch: ", a, "!=", b)))
+		}
+	}
+}
 
 
 // Go equivalent of &array[index] (for a float array).
