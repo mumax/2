@@ -32,24 +32,27 @@ func Add(dst, a, b *Array) {
 }
 
 
-func Torque(torque, m, h, alphaMap *Array, alphaMul float32){
+func Torque(τ, m, H, αMap *Array, αMul float32){
 	
 	C.torqueAsync(
-		(**C.float)(unsafe.Pointer(&(torque.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(torque.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(torque.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[Z].pointer[0]))),
 
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
 
-		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(H.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(H.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(H.Comp[Z].pointer[0]))),
 
-		(**C.float)(unsafe.Pointer(&(alpha.Comp[Z].pointer[0]))),
-		(C.float)(alphaMul),
+		(**C.float)(unsafe.Pointer(&(αMap.pointer[0]))),
+		(C.float)(αMul),
 
-		(C.int)(m.partLen))
+		(*C.CUstream)(unsafe.Pointer(&(τ.Stream[0]))),
+
+		(C.int)(m.partLen3D))
+	τ.Stream.Sync()
 	
 }
