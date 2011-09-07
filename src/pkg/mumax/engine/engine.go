@@ -10,8 +10,6 @@ package engine
 
 import (
 	. "mumax/common"
-	"fmt"
-	"io"
 )
 
 
@@ -205,68 +203,3 @@ func (e *Engine) String() string {
 	return str
 }
 
-
-// Write .dot file for graphviz, 
-// representing the physics graph.
-func (e *Engine) WriteDot(out io.Writer) {
-	fmt.Fprintln(out, "digraph Physics{")
-	fmt.Fprintln(out, "rankdir=LR")
-
-	// Add quantities
-	quants := e.quantity
-	for k, v := range quants {
-		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];") // use first letter as group name.
-		// Add dependencies
-		for _, c := range v.children {
-			fmt.Fprintln(out, k, "->", c.name, ";")
-		}
-	}
-
-	fmt.Fprintln(out, "subgraph solver{")
-	fmt.Fprintln(out, "rank=sink;")
-	// Add ODE node
-	for i, _ := range e.ode {
-		ODE := "solver" + fmt.Sprint(i)
-		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
-	}
-	fmt.Fprintln(out, "}")
-
-	// Add ODE node
-	for i, ode := range e.ode {
-		ODE := "ODE" + fmt.Sprint(i)
-		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
-		fmt.Fprintln(out, ODE, "->", ode[0].Name(), ";")
-		fmt.Fprintln(out, ode[1].Name(), "->", ODE, ";")
-		fmt.Fprintln(out, "{rank=source;", ode[LHS].Name(), "};")
-		fmt.Fprintln(out, "{rank=sink;", ode[RHS].Name(), "};")
-	}
-
-	// align similar nodes
-	i := 0
-	for _, a := range quants {
-		j := 0
-		for _, b := range quants {
-			if i < j {
-				if similar(a.Name(), b.Name()) {
-					fmt.Fprintln(out, "{rank=same;", a.Name(), ";", b.Name(), "};")
-				}
-			}
-			j++
-		}
-		i++
-	}
-
-	fmt.Fprintln(out, "}")
-}
-
-
-// true if a and b are similar names, to be equally ranked in the dot graph.
-func similar(a, b string) (similar bool) {
-	defer func() {
-		if recover() != nil {
-			return
-		}
-	}()
-	similar = a[0] == b[0] && a[1] == '_' && b[1] == '_'
-	return
-}
