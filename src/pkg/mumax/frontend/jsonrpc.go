@@ -7,6 +7,8 @@
 
 package frontend
 
+// This file implements a JSON-RPC-like remote procedure call protocol.
+// Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
@@ -20,7 +22,11 @@ import (
 
 
 // An RPC server using simple JSON encoding.
-// Note: we do not use the official JSON-RPC protocol.
+// Note: we do not use the official JSON-RPC protocol
+// but a simpler variant well-suited for our needs.
+// Protocol:
+// 	Call: ["methodname", [arg1, arg2, ...]]
+// 	Response: [return_value1, return_value2, ...]
 type jsonRPC struct {
 	in  io.Reader
 	out io.Writer
@@ -84,7 +90,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 
 	Debug("rpc.Call", funcName, shortPrint(args))
 
-	// Print which function was being called when an error occured, for easy debugging.
+	// Print which function was being called when an error occurred, for easy debugging.
 	// Do not recover, however, continue on panicking.
 	defer func() {
 		err := recover()
@@ -103,7 +109,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	// convert []interface{} to []reflect.Value  
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
-		argvals[i] = convertArg(args[i], f.Type().In(i)) //reflect.ValueOf(args[i])
+		argvals[i] = convertArg(args[i], f.Type().In(i)) 
 	}
 	retVals := f.Call(argvals)
 
@@ -130,14 +136,14 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 
 	switch typ.String() {
 	case "*host.Array":
-		return reflect.ValueOf(toArray(v))
+		return reflect.ValueOf(jsonToHostArray(v))
 	}
 	return reflect.ValueOf(v) // do not convert
 }
 
 
 // converts a json array to a host.Array
-func toArray(v interface{}) *host.Array {
+func jsonToHostArray(v interface{}) *host.Array {
 	defer func() {
 		err := recover()
 		if err != nil {
