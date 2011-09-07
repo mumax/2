@@ -18,7 +18,7 @@ import (
 )
 
 
-// Read a simple text file on the webserver to see if a newer version is available
+// Read a text file on a webserver that should contain a single string representing an integer.
 func GetLatestVersionNumber(url string) (version int) {
 	// Don't crash. Ever.
 	defer func() {
