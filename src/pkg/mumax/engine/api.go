@@ -143,5 +143,5 @@ func (a API) SaveGraph(file string) {
 	defer f.Close()
 	CheckIO(err)
 	a.Engine.WriteDot(f)
-	Debug("Wrote", file)
+	Log("Wrote", file, "Run command: \"dot -Tpng", file, "\" to plot the physics graph (requires package graphviz).")
 }
