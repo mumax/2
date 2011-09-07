@@ -109,11 +109,11 @@ func (a API) LoadField(quant, filename string) {
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.GetQuant(quant)
 	aArr := q.Array()
-	if !EqualSize(field.Size3D, aArr.Size3D()) {
-		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(aArr.Size3D()))
-		field = Resample(field, aArr.Size3D())
-	}
-	q.Array().CopyFromHost(field)
+	//if !EqualSize(field.Size3D, aArr.Size3D()) {
+	//	Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(aArr.Size3D()))
+	//	field = Resample(field, aArr.Size3D())
+	//}
+	aArr.CopyFromHost(field)
 	q.Invalidate() //!
 }
 
