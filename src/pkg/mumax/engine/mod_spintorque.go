@@ -10,7 +10,7 @@ package engine
 import ()
 
 func (e *Engine) LoadSpintorque() {
-	e.AddVectorField("j")
+	e.AddQuant("j", VECTOR, MASK)
 	e.Depends("j", "t")
 	e.Depends("torque", "j")
 }

@@ -11,38 +11,38 @@ import ()
 
 func (e *Engine) LoadMicromag() {
 
-	e.AddScalar("alpha")
-	e.AddScalar("msat")
-	e.AddScalar("aexch")
+	e.AddQuant("alpha", SCALAR, MASK)
+	e.AddQuant("msat", SCALAR, MASK)
+	e.AddQuant("aexch", SCALAR, MASK)
 
-	e.AddVectorField("m")
+	e.AddQuant("m", VECTOR, FIELD)
 
-	e.AddVectorField("H_d")
+	e.AddQuant("H_d", VECTOR, FIELD)
 	e.Depends("H_d", "m")
 	e.Depends("H_d", "m") // redundant, but should not crash
 	e.Depends("H_d", "msat")
 
-	e.AddVectorField("H_e")
+	e.AddQuant("H_e", VECTOR, FIELD)
 	e.Depends("H_e", "m")
 	e.Depends("H_e", "aexch")
 
-	e.AddVectorField("H_z")
+	e.AddQuant("H_z", VECTOR, MASK)
 	e.Depends("H_z", "t")
 
-	e.AddVectorField("H_a")
-	e.AddScalar("k1")
-	e.AddScalar("k2")
+	e.AddQuant("H_a", VECTOR, FIELD)
+	e.AddQuant("k1", SCALAR, MASK)
+	e.AddQuant("k2", SCALAR, MASK)
 	e.Depends("H_a", "k1")
 	e.Depends("H_a", "k2")
 	e.Depends("H_a", "m")
 
-	e.AddVectorField("H")
+	e.AddQuant("H", VECTOR, FIELD)
 	e.Depends("H", "H_d")
 	e.Depends("H", "H_e")
 	e.Depends("H", "H_z")
 	e.Depends("H", "H_a")
 
-	e.AddVectorField("torque")
+	e.AddQuant("torque", VECTOR, FIELD)
 	e.Depends("torque", "m")
 	e.Depends("torque", "H")
 	e.Depends("torque", "alpha")

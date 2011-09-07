@@ -38,6 +38,7 @@ type Quant struct {
 	name       string      // Unique identifier
 	array      *gpu.Array  // Underlying array, may be nil. Holds nil pointers for space-independent quantity
 	multiplier []float32   // Point-wise multiplication coefficients for array, may be nil
+	nComp	int	// Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool        // Flags if this quantity needs to be updated
 	updateSelf Updater     // Called to update this quantity
 	children   []*Quant    // Quantities this one depends on
@@ -84,6 +85,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 	Assert(size3D == nil || len(size3D) == 3)
 
 	q.name = name
+	q.nComp = nComp
 
 	switch kind{
 	case FIELD:
@@ -92,7 +94,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 	case MASK:	
 			q.array = gpu.NilArray(nComp, size3D)
 			q.multiplier = ones(nComp)
-	case CONST:
+	case VALUE:
 			q.array = nil
 			q.multiplier = zeros(nComp)
 	default:
@@ -107,20 +109,22 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 }
 
 // array with n 1's.
-func ones(n int) []int{
+func ones(n int) []float32{
 	ones := make([]float32, n)
 	for i := range ones{
 		ones[i] = 1
 	}
+	return ones
 }
 
 
 // array with n 0's.
-func zeros(n int) []int{
+func zeros(n int) []float32{
 	zeros := make([]float32, n)
 	for i := range zeros{
 		zeros[i] = 0
 	}
+	return zeros
 }
 
 
@@ -152,36 +156,31 @@ func (q *Quant) Name() string {
 
 // Gets the number of components
 func (q *Quant) NComp() int {
-	return len(q.multiplier)
-}
-
-
-// Gets the 3D grid size
-func (q *Quant) Size3D() []int {
-	return q.size3D
+	return q.nComp
 }
 
 
 
-// Gets the GPU array, initializing it if necessary
-// An array with 
+
+
+// Gets the GPU array.
 func (q *Quant) Array() *gpu.Array {
-	if q.array == nil {
-		if q.Size3D() == nil{
-			q.array = gpu.NilArray(q.NComp(), q.Size3D())
-		}else{
-			Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
-			q.array = gpu.NewArray(q.NComp(), q.Size3D())
-}
-	}
+//	if q.array == nil {
+//		if q.Size3D() == nil{
+//			q.array = gpu.NilArray(q.NComp(), q.Size3D())
+//		}else{
+//			Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
+//			q.array = gpu.NewArray(q.NComp(), q.Size3D())
+//}
+//	}
 	return q.array
 }
 
 // Gets a host array for buffering the GPU array, initializing it if necessary.
 func (q *Quant) Buffer() *host.Array {
 	if q.buffer == nil {
-		Debug("buffer ", q.Name(), q.NComp(), "x", q.Size3D())
-		q.buffer = host.NewArray(q.NComp(), q.Size3D())
+		Debug("buffer ", q.Name(), q.NComp(), "x", q.Array().Size3D())
+		q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
 	}
 	return q.buffer
 }
@@ -189,36 +188,17 @@ func (q *Quant) Buffer() *host.Array {
 
 
 func(q *Quant) IsSpaceDependent() bool{
-	return q.array != nil && q.array.pointer[0] != 0
-}
-
-// True if the quantity is a space-independent scalar
-func (q *Quant) IsScalar() bool {
-}
-
-// True if the quantity is a space-dependent scalar field
-func (q *Quant) IsScalarField() bool {
-	return q.array != nil && len(q.multiplier) == 1
-}
-
-// True if the quantity is a space-independent 3-component vector
-func (q *Quant) IsVector() bool {
-	return q.array == nil && len(q.multiplier) == 3
-}
-
-// True if the quantity is a space-dependent 3-component vector field
-func (q *Quant) IsVectorField() bool {
-	return q.array != nil && len(q.multiplier) == 3
+	return q.array != nil && q.array.DevicePtr(0) != 0
 }
 
 
 // If the quantity represents a space-independent scalar, return its value.
-func (q *Quant) ScalarValue() float32 {
-	if !q.IsScalar() {
-		panic(Bug("not a scalar"))
-	}
-	return q.multiplier[0]
-}
+//func (q *Quant) ScalarValue() float32 {
+	//if q.IsSpaceDependent() {
+		//panic(Bug("not a scalar"))
+	//}
+	//return q.multiplier[0]
+//}
 
 
 //____________________________________________________________________ tree walk

@@ -119,14 +119,14 @@ func (e *Engine) GetQuant(name string) *Quant {
 
 // Add an arbitrary quantity
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind) {
-	Debug("engine.Add", name, nComp, size3D, kind)
+	Debug("engine.Add", name, nComp, e.size3D, kind)
 
 	// quantity should not yet be defined
 	if _, ok := e.quantity[name]; ok {
 		panic(Bug("engine: Already defined: " + name))
 	}
 
-	e.quantity[name] = newQuant(name, nComp, size3D, kind)
+	e.quantity[name] = newQuant(name, nComp, e.size3D, kind)
 }
 
 
@@ -140,9 +140,9 @@ func(e*Engine) AddField(name string, nComp int){
 	e.AddQuant(name, nComp, FIELD)
 }
 
-	// AddQuant(name, nComp, MAP)
-func(e*Engine) AddMap(name string, nComp int){
-	e.AddQuant(name, nComp, MAP)
+	// AddQuant(name, nComp, MASK)
+func(e*Engine) AddMask(name string, nComp int){
+	e.AddQuant(name, nComp, MASK)
 }
 
 

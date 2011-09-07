@@ -95,9 +95,9 @@ func (a API) SetScalar(name string, value float32) {
 
 
 // Get the value of a scalar, space-independent quantity
-func (a API) GetScalar(name string) float32 {
-	return a.Engine.GetQuant(name).ScalarValue()
-}
+//func (a API) GetScalar(name string) float32 {
+//	return a.Engine.GetQuant(name).ScalarValue()
+//}
 
 
 func (a API) LoadField(quant, filename string) {
@@ -123,15 +123,15 @@ func (a API) GetField(quant string) *host.Array {
 
 
 // Get the value of a general quantity
-func (a API) Get(name string) interface{} {
-	e := a.Engine
-	q := e.GetQuant(name)
-	switch {
-	case q.IsScalar():
-		return q.ScalarValue()
-	}
-	panic(Bug("unimplemented case"))
-}
+//func (a API) Get(name string) interface{} {
+//	e := a.Engine
+//	q := e.GetQuant(name)
+//	switch {
+//	case q.IsScalar():
+//		return q.ScalarValue()
+//	}
+//	panic(Bug("unimplemented case"))
+//}
 
 
 //________________________________________________________________________________ misc

@@ -15,7 +15,7 @@ import (
 )
 
 func (e *Engine) AddTorqueNode() {
-	e.AddQuant("torque", 3, e.GridSize())
+	e.AddQuant("torque", VECTOR, FIELD)
 	e.Depends("torque", "m")
 	e.Depends("torque", "H")
 	e.Depends("torque", "alpha")
