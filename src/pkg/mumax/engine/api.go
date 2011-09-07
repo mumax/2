@@ -101,9 +101,6 @@ func (a API) SetScalar(name string, value float32) {
 //}
 
 
-func (a API) LoadField(quant, filename string) {
-	panic("unimplemented")
-}
 
 
 func (a API) SetField(quant string, field *host.Array) {

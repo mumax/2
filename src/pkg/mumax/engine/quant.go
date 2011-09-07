@@ -143,17 +143,17 @@ func (q *Quant) SetField(field *host.Array) {
 	q.Invalidate() //!
 }
 
-func(q *Quant) SetValue(val []float32){
+func (q *Quant) SetValue(val []float32) {
 	checkKind(q, VALUE)
 	Assert(len(val) == q.nComp)
-	for i,v := range val{
-	q.multiplier[i] = v
-	}	
+	for i, v := range val {
+		q.multiplier[i] = v
+	}
 	q.Invalidate() //!
 }
 
 
-func checkKind(q *Quant, kind QuantKind){
+func checkKind(q *Quant, kind QuantKind) {
 	if q.kind != kind {
 		panic(InputErr(q.name + " is not " + kind.String() + "but " + q.kind.String()))
 	}
