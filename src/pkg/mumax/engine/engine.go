@@ -50,8 +50,8 @@ func NewEngine() *Engine {
 func (e *Engine) init() {
 	e.quantity = make(map[string]*Quant)
 	// special quantities time and dt are always present
-	e.AddScalar("t")
-	e.AddScalar("dt")
+	e.AddQuant("t", SCALAR, VALUE)
+	e.AddQuant("dt", SCALAR, VALUE)
 	e.time = e.GetQuant("t")
 	e.dt = e.GetQuant("dt")
 }
@@ -116,38 +116,33 @@ func (e *Engine) GetQuant(name string) *Quant {
 
 //__________________________________________________________________ add
 
-// Add a scalar quantity
-func (e *Engine) AddScalar(name string) {
-	e.AddQuant(name, 1, nil)
-}
 
-
-// Adds a scalar field
-func (e *Engine) AddScalarField(name string) {
-	e.AddQuant(name, 1, e.GridSize())
-}
-
-// Adds a vector field
-func (e *Engine) AddVectorField(name string) {
-	e.AddQuant(name, 3, e.GridSize())
-}
-
-// Adds a tensor field
-func (e *Engine) AddTensorField(name string) {
-	e.AddQuant(name, 9, e.GridSize())
-}
-
-
-// INTERNAL: add an arbitrary quantity
-func (e *Engine) AddQuant(name string, nComp int, size3D []int) {
-	Debug("engine.Add", name, nComp, size3D)
+// Add an arbitrary quantity
+func (e *Engine) AddQuant(name string, nComp int, kind QuantKind) {
+	Debug("engine.Add", name, nComp, size3D, kind)
 
 	// quantity should not yet be defined
 	if _, ok := e.quantity[name]; ok {
 		panic(Bug("engine: Already defined: " + name))
 	}
 
-	e.quantity[name] = newQuant(name, nComp, size3D)
+	e.quantity[name] = newQuant(name, nComp, size3D, kind)
+}
+
+
+	// AddQuant(name, nComp, VALUE)
+func(e*Engine) AddValue(name string, nComp int){
+	e.AddQuant(name, nComp, VALUE)
+}
+
+	// AddQuant(name, nComp, FIELD)
+func(e*Engine) AddField(name string, nComp int){
+	e.AddQuant(name, nComp, FIELD)
+}
+
+	// AddQuant(name, nComp, MAP)
+func(e*Engine) AddMap(name string, nComp int){
+	e.AddQuant(name, nComp, MAP)
 }
 
 

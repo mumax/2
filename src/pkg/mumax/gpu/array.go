@@ -42,7 +42,8 @@ type Array struct {
 // 	Init(3, 1000) // gives an array of 1000 3-vectors
 // 	Init(1, 1000) // gives an array of 1000 scalars
 // 	Init(6, 1000) // gives an array of 1000 6-vectors or symmetric tensors
-func (a *Array) Init(components int, size3D []int) {
+// Storage is allocated only if alloc == true.
+func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initSize(components, size3D)
 
 	devices := getDevices()
@@ -54,10 +55,14 @@ func (a *Array) Init(components int, size3D []int) {
 	for i := range devices {
 		setDevice(devices[i])
 		//a.devId[i] = devices[i]
-		a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
+		if alloc {
+			a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
+		}
 	}
 
-	a.Zero()
+	if alloc {
+		a.Zero()
+	}
 
 	// initialize component arrays
 	a.Comp = make([]Array, components)
@@ -105,7 +110,19 @@ func (a *Array) initSize(components int, size3D []int) {
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
-	t.Init(components, size3D)
+	t.Init(components, size3D, true)
+	return t
+}
+
+
+// Returns an array without underlying storage. 
+// This is used for space-independent quantities. These pass
+// a multiplier value and a null pointer for each GPU.
+// A NilArray already has null pointers for each GPU set,
+// so it is more convenient than just a nil pointer of type *Array.
+func NilArray(components int, size3D []int) *Array {
+	t := new(Array)
+	t.Init(components, size3D, false)
 	return t
 }
 
@@ -117,8 +134,10 @@ func (v *Array) Free() {
 
 	for i := range v.pointer {
 		setDevice(_useDevice[i])
-		v.pointer[i].Free()
-		v.pointer[i] = 0
+		if v.pointer[i] != 0 {
+			v.pointer[i].Free()
+			v.pointer[i] = 0
+		}
 
 	}
 

@@ -18,28 +18,30 @@ import (
 	"fmt"
 )
 
-// Conceptually, each quantity is represented by A(r) * m(t), a pointwise multiplication
-// of an N-vector function of space A(r) by an N-vector function of time m(t).
-// A(r) is an array, m(t) is the multiplier.
+// A quantity represents a scalar/vector/tensor field,value or mask.
 //
-// When the array is nil/NULL, the field is independent of space. The array is then
-// interpreted as 1(r), the unit field. In this way, quantities that are constant
-// over space (homogeneous) can be efficiently represented. These are also called values.
+// * By "value" we mean a single, space-independent scalar,vector or tensor.
+// * By "field" we mean a space-dependent field of scalars, vectors or tensors.
+// * By "mask" we mean the point-wise multiplication of a field by a value.
 //
-// When the array has only one component and the multiplier has N components,
-// then the field has N components: a(r) * m0(t), a(r) * m1(t), ... a(r) * mN(t)
+// Typically a mask represents A(r) * f(t), a pointwise multiplication
+// of an N-vector function of space A(r) by an N-vector function of time f(t).
+// A(r) is an array, f(t) is the multiplier which will be updated every time step.
+// When a mask's array contains NULL pointers for each gpu, the mask is independent of space. 
+// The array is then interpreted as 1(r), the unit field. In this way, masks that happen to be
+// constant values in space (homogeneous) can be efficiently represented. 
+// TODO: deduplicate identical mask arrays by setting identical pointers?
 //
-// Quantities are also the nodes of an acyclic graph representing the differential
+// Quantities are the nodes of an acyclic graph representing the differential
 // equation to be solved.
 type Quant struct {
 	name       string      // Unique identifier
-	array      *gpu.Array  // Underlying array, nil for space-independent quantity
-	multiplier []float32   // Point-wise multiplication coefficients for array
+	array      *gpu.Array  // Underlying array, may be nil. Holds nil pointers for space-independent quantity
+	multiplier []float32   // Point-wise multiplication coefficients for array, may be nil
 	upToDate   bool        // Flags if this quantity needs to be updated
 	updateSelf Updater     // Called to update this quantity
 	children   []*Quant    // Quantities this one depends on
 	parents    []*Quant    // Quantities that depend on this one
-	size3D     []int       // FD size (might deviate form engine size)
 	buffer     *host.Array // Host buffer for copying from/to the GPU array
 }
 
@@ -48,30 +50,53 @@ type Quant struct {
 
 
 // Returns a new quantity. See Quant.init().
-func newQuant(name string, nComp int, size3D []int) *Quant {
+func newQuant(name string, nComp int, size3D []int, kind QuantKind) *Quant {
 	q := new(Quant)
-	q.init(name, nComp, size3D)
+	q.init(name, nComp, size3D, kind)
 	return q
 }
 
+type QuantKind int
+
+const(
+		VALUE QuantKind = 1 // A value is constant in space. Has a multiplier (to store the value) but a nil *array.
+		FIELD QuantKind = 2 // A field is space-dependent. Has no multiplier but allocated array.
+		MASK  QuantKind = 3 // A mask is a point-wise multiplication of a field with a value. Has an array (possibly with NULL parts) and a multiplier.
+)
+
+
+// Number of components.
+const(
+		SCALAR = 1
+		VECTOR = 3
+		SYMMTENS = 6
+		TENS = 9
+)
 
 // Initiates a field with nComp components and array size size3D.
-// When size3D == nil, the field is space-independent (homogeneous).
-// Storage is not yet allocated!
-func (q *Quant) init(name string, nComp int, size3D []int) {
+// When size3D == nil, the field is space-independent (homogeneous) and the array will
+// hold NULL pointers for each of the GPU parts.
+// When multiply == false no multiplier will be allocated,
+// indicating this quantity should not be post-multiplied.
+// multiply = true
+func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 	Assert(nComp > 0)
 	Assert(size3D == nil || len(size3D) == 3)
 
 	q.name = name
 
-	if size3D != nil {
-		q.size3D = size3D
-		//	q.array = gpu.NewArray(nComp, size3D)
-	}
-
-	q.multiplier = make([]float32, nComp)
-	for i := range q.multiplier {
-		q.multiplier[i] = 1
+	switch kind{
+	case FIELD:
+			q.array = gpu.NewArray(nComp, size3D)
+			q.multiplier = nil
+	case MASK:	
+			q.array = gpu.NilArray(nComp, size3D)
+			q.multiplier = ones(nComp)
+	case CONST:
+			q.array = nil
+			q.multiplier = zeros(nComp)
+	default:
+			panic(Bug("Quant.init kind"))
 	}
 
 	q.updateSelf = new(NopUpdater)
@@ -79,6 +104,23 @@ func (q *Quant) init(name string, nComp int, size3D []int) {
 	const CAP = 2
 	q.children = make([]*Quant, 0, CAP)
 	q.parents = make([]*Quant, 0, CAP)
+}
+
+// array with n 1's.
+func ones(n int) []int{
+	ones := make([]float32, n)
+	for i := range ones{
+		ones[i] = 1
+	}
+}
+
+
+// array with n 0's.
+func zeros(n int) []int{
+	zeros := make([]float32, n)
+	for i := range zeros{
+		zeros[i] = 0
+	}
 }
 
 
@@ -120,11 +162,17 @@ func (q *Quant) Size3D() []int {
 }
 
 
+
 // Gets the GPU array, initializing it if necessary
+// An array with 
 func (q *Quant) Array() *gpu.Array {
 	if q.array == nil {
-		Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
-		q.array = gpu.NewArray(q.NComp(), q.Size3D())
+		if q.Size3D() == nil{
+			q.array = gpu.NilArray(q.NComp(), q.Size3D())
+		}else{
+			Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
+			q.array = gpu.NewArray(q.NComp(), q.Size3D())
+}
 	}
 	return q.array
 }
@@ -139,9 +187,13 @@ func (q *Quant) Buffer() *host.Array {
 }
 
 
+
+func(q *Quant) IsSpaceDependent() bool{
+	return q.array != nil && q.array.pointer[0] != 0
+}
+
 // True if the quantity is a space-independent scalar
 func (q *Quant) IsScalar() bool {
-	return q.array == nil && len(q.multiplier) == 1
 }
 
 // True if the quantity is a space-dependent scalar field
