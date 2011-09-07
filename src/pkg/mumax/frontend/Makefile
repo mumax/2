@@ -14,6 +14,7 @@ GOFILES=\
 	jsonrpc.go\
 	io.go\
 	addmethods.go\
+	version.go\
 	#interpreter.go\
 
 CGOFILES=\
