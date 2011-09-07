@@ -29,6 +29,7 @@ type Client struct {
 	api                  engine.API
 	infifo, outfifo      *os.File
 	cleanfiles           []string // list of files to be deleted upon program exit
+	logWait chan int // channel to wait for completion of go logStream()
 }
 
 
@@ -48,6 +49,7 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 
 func (c *Client) Run() {
 	c.makeFifos() // make the FIFOs but do not yet try to open them
+	c.logWait = make(chan int)
 	command, waiter := c.startSubcommand()
 	ok := c.handshake(waiter)
 	if !ok {
@@ -65,6 +67,11 @@ func (c *Client) Run() {
 	if exitstat != 0 {
 		panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
 	}
+
+
+	// wait for full pipe of sub-command output to the logger
+	<-c.logWait // stderr
+	<-c.logWait // stdout (or the other way around ;-)
 }
 
 
@@ -88,8 +95,9 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	stdout, err5 := proc.StdoutPipe()
 	CheckErr(err5, ERR_IO)
 	CheckErr(proc.Start(), ERR_IO)
-	go logStream("["+command+"]", stderr, true)
-	go logStream("["+command+"]", stdout, false)
+	
+	go logStream("["+command+"]", stderr, true, c.logWait)
+	go logStream("["+command+"]", stdout, false, c.logWait)
 
 	Debug(command, "PID:", proc.Process.Pid)
 	// start waiting for sub-command asynchronously and
@@ -109,7 +117,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 		}
 		waiter <- exitstat // send exit status to signal completion 
 	}()
-	// pipe sub-command output to the logger
+
 	return
 }
 
@@ -188,7 +196,7 @@ func pollFile(fname string) (waiter chan (int)) {
 
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
-func logStream(prefix string, in io.Reader, error bool) {
+func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
 	var bytes [BUFSIZE]byte
 	buf := bytes[:]
 	var err os.Error = nil
@@ -203,6 +211,7 @@ func logStream(prefix string, in io.Reader, error bool) {
 			}
 		} // TODO: no printLN
 	}
+	waiter <- 1 // signal completion
 }
 
 // IO buffer size
