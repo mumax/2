@@ -142,7 +142,6 @@ func jsonToHostArray(v interface{}) *host.Array {
 		}
 	}()
 
-
 	err := false
 	// determine array size as {len(v), len(v[0]), len(v[0][0]), ...}
 	var size [4]int
