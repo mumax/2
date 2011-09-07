@@ -74,28 +74,17 @@ func (j *jsonRPC) Run() {
 }
 
 
-// Like fmt.Sprint with a maximum length.
-func shortPrint(a interface{}) string {
-	const MAX = 30
-	str := fmt.Sprint(a)
-	if len(str) > MAX {
-		return str[:MAX] + "..."
-	}
-	return str
-}
-
-
 // Calls the function specified by funcName with the given arguments and returns the return values.
 func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 
-	Debug("rpc.Call", funcName, shortPrint(args))
+	Debug("rpc.Call", funcName, ShortPrint(args))
 
 	// Print which function was being called when an error occurred, for easy debugging.
 	// Do not recover, however, continue on panicking.
 	defer func() {
 		err := recover()
 		if err != nil {
-			Err(fmt.Sprint("error calling ", funcName, args))
+			Err(fmt.Sprint("error calling ", funcName, ShortPrint(args)))
 			panic(err)
 		}
 	}()
@@ -109,7 +98,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	// convert []interface{} to []reflect.Value  
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
-		argvals[i] = convertArg(args[i], f.Type().In(i)) 
+		argvals[i] = convertArg(args[i], f.Type().In(i))
 	}
 	retVals := f.Call(argvals)
 
@@ -142,12 +131,14 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 }
 
 
-// converts a json array to a host.Array
+// Converts a json vector array to a host.Array.
+// Also swaps XYZ - ZYX convention
+// TODO: works only for 4D vector arrays
 func jsonToHostArray(v interface{}) *host.Array {
 	defer func() {
 		err := recover()
 		if err != nil {
-			panic(IOErr(fmt.Sprint("Error parsing json array: ", v, "\ncause:", err)))
+			panic(IOErr(fmt.Sprint("Error parsing json array: ", ShortPrint(v), "\ncause: ", err)))
 		}
 	}()
 
@@ -172,11 +163,11 @@ func jsonToHostArray(v interface{}) *host.Array {
 	}
 
 	if err {
-		panic(IOErr(fmt.Sprint("Array with invalid size:", v)))
+		panic(IOErr(fmt.Sprint("Array with invalid size:", ShortPrint(v))))
 	}
 
-	arr := host.NewArray(size[0], size[1:])
-	//panic("TODO: check dimensions, read into array")
+	size3D := size[1:]
+	arr := host.NewArray(size[0], []int{size3D[X], size3D[Y], size3D[Z]})
 	a := arr.Array
 	va := v.([]interface{})
 	for c := range a {
@@ -186,12 +177,12 @@ func jsonToHostArray(v interface{}) *host.Array {
 			for j := range a[c][i] {
 				va_cij := va_ci[j].([]interface{})
 				for k := range a[c][i][j] {
-					a[c][i][j][k] = float32(va_cij[k].(float64))
+					a[c][i][j][k] = float32(va_cij[k].(float64)) // convert XYZ-ZYX, works only for 3D
 				}
 			}
 		}
 	}
-	return arr
+	return convertXYZ(arr)
 }
 
 
@@ -207,6 +198,26 @@ func convertOutput(vals []interface{}) {
 			vals[i] = v.(*host.Array).Array
 		}
 	}
+}
+
+
+// Convert mumax's internal ZYX convention to userspace XYZ.
+func convertXYZ(arr *host.Array) *host.Array {
+	s := arr.Size3D
+	n := arr.NComp()
+	a := arr.Array
+	transp := host.NewArray(n, []int{s[Z], s[Y], s[X]})
+	t := transp.Array
+	for c := 0; c < n; c++ {
+		for i := 0; i < s[X]; i++ {
+			for j := 0; j < s[Y]; j++ {
+				for k := 0; k < s[Z]; k++ {
+					t[(n-1)-c][k][j][i] = a[c][i][j][k]
+				}
+			}
+		}
+	}
+	return transp
 }
 
 

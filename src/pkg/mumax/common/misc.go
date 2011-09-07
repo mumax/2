@@ -38,6 +38,18 @@ func CheckSize(a, b []int) {
 }
 
 
+// Like fmt.Sprint with a maximum length.
+// Used to limit the length of error messages that contain, e.g., a large array.
+func ShortPrint(a interface{}) string {
+	const MAX = 30
+	str := fmt.Sprint(a)
+	if len(str) > MAX {
+		return str[:MAX] + "..."
+	}
+	return str
+}
+
+
 // Go equivalent of &array[index] (for a float array).
 func ArrayOffset(array uintptr, index int) uintptr {
 	return uintptr(array + uintptr(SIZEOF_FLOAT*index))
