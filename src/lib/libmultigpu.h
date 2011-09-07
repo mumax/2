@@ -12,8 +12,8 @@
  * @author Ben Van de Wiele
  */
 
-#ifndef _LIBMUMAX2_H
-#define _LIBMUMAX2_H
+#ifndef _LIBMULTIGPU_H
+#define _LIBMULTIGPU_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +21,7 @@ extern "C" {
 
 #include "multigpu.h"
 #include "add.h"
+#include "torque.h"
 
 
 #ifdef __cplusplus

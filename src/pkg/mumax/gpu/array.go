@@ -139,6 +139,15 @@ func (a *Array) Len() int {
 	return a._size[0] * a._size[1] * a._size[2] * a._size[3]
 }
 
+// Total number of elements per GPU
+func (a *Array) PartLen4D() int {
+	return a.partLen4D
+}
+
+// Number of elements per component per GPU
+func (a *Array) PartLen3D() int {
+	return a.partLen3D
+}
 
 // Number of components (1: scalar, 3: vector, ...).
 func (a *Array) NComp() int {
@@ -150,6 +159,8 @@ func (a *Array) NComp() int {
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
+
+
 
 
 func (dst *Array) CopyFromDevice(src *Array) {

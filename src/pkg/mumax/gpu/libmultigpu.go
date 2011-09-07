@@ -15,6 +15,7 @@ package gpu
 import "C"
 
 import (
+		. "mumax/common"
 	"unsafe"
 )
 
@@ -31,9 +32,24 @@ func Add(dst, a, b *Array) {
 }
 
 
-func Torque(torque, m, h, alpha *Array){
+func Torque(torque, m, h, alphaMap *Array, alphaMul float32){
 	
-//	C.torqueAsync(
-//		(**C.float)(unsafe.Pointer(&(torque.Comp[0]	
-//	)
+	C.torqueAsync(
+		(**C.float)(unsafe.Pointer(&(torque.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(torque.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(torque.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(alpha.Comp[Z].pointer[0]))),
+		(C.float)(alphaMul),
+
+		(C.int)(m.partLen))
+	
 }
