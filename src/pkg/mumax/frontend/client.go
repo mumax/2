@@ -54,7 +54,7 @@ func (c *Client) Run() {
 	command, waiter := c.startSubcommand()
 	ok := c.handshake(waiter)
 	if !ok {
-		panic(InputErr(fmt.Sprint("subcommand ", command, " exited prematurely")))
+		panic(InputErr(fmt.Sprint("subcommand ", command, " exited without calling any mumax function")))
 	}
 	c.openFifos()
 	//c.interpretCommands()
@@ -198,6 +198,7 @@ func pollFile(fname string) (waiter chan (int)) {
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
 func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
+	defer func(){waiter <- 1}() // signal completion
 	var bytes [BUFSIZE]byte
 	buf := bytes[:]
 	var err os.Error = nil
@@ -212,7 +213,7 @@ func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
 			}
 		} // TODO: no printLN
 	}
-	waiter <- 1 // signal completion
+	Debug("logStream done: ", err)
 }
 
 // IO buffer size
