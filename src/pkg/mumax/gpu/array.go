@@ -89,10 +89,10 @@ func (a *Array) initSize(components int, size3D []int) {
 	Assert(components > 0)
 	Assert(len(size3D) == 3)
 	length3D := Prod(size3D)
+	Assert(length3D > 0)
 	a.partLen4D = components * length3D / Ndev
 	a.partLen3D = length3D / Ndev
-
-	Assert(size3D[1]%Ndev == 0)
+	Assert(size3D[Y]%Ndev == 0)
 
 	a._size[0] = components
 	for i := range size3D {
@@ -101,9 +101,9 @@ func (a *Array) initSize(components int, size3D []int) {
 	a.size4D = a._size[:]
 	a.size3D = a._size[1:]
 	// Slice along the J-direction
-	a._partSize[0] = a.size3D[0]
-	a._partSize[1] = a.size3D[1] / Ndev
-	a._partSize[2] = a.size3D[2]
+	a._partSize[X] = a.size3D[X]
+	a._partSize[Y] = a.size3D[Y] / Ndev
+	a._partSize[Z] = a.size3D[Z]
 
 }
 
@@ -138,7 +138,6 @@ func (v *Array) Free() {
 			v.pointer[i].Free()
 			v.pointer[i] = 0
 		}
-
 	}
 
 	for i := range v._size {
@@ -180,21 +179,25 @@ func (a *Array) Size3D() []int {
 }
 
 
-func (dst *Array) CopyFromDevice(src *Array) {
-	// test for equal size
-	for i, d := range dst._size {
-		if d != src._size[i] {
+// Panics if a and b have different sizes
+func checkSize(a, b []int) {
+	for i, s := range a {
+		if s != b[i] {
 			panic(MSG_ARRAY_SIZE_MISMATCH)
 		}
 	}
+}
+
+// Copy from device array to device array.
+func (dst *Array) CopyFromDevice(src *Array) {
+	checkSize(dst.size4D, src.size4D)
+
 	d := dst.pointer
 	s := src.pointer
-	Assert(len(d) == len(s)) // in principle redundant
 	start := 0
 	// copies run concurrently on the individual devices
 	for i := range s {
-		length := src.partLen4D //s[i].length // in principle redundant     ---------------------- ------
-		Assert(length == dst.partLen4D)
+		length := src.partLen4D
 		cu.MemcpyDtoDAsync(cu.DevicePtr(d[i]), cu.DevicePtr(s[i]), SIZEOF_FLOAT*int64(length), dst.Stream[i])
 		start += length
 	}
@@ -206,9 +209,10 @@ func (dst *Array) CopyFromDevice(src *Array) {
 
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(srca *host.Array) {
-	src := srca.Comp
+	checkSize(dst.size4D, srca.Size4D)
 
-	Assert(dst.NComp() == len(src))
+	src := srca.Comp
+	//Assert(dst.NComp() == len(src))
 	// we have to work component-wise because of the data layout on the devices
 	for i := range src {
 		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
@@ -229,9 +233,10 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 
 // Copy from device array to host array.
 func (src *Array) CopyToHost(dsta *host.Array) {
-	dst := dsta.Comp
+	checkSize(dsta.Size4D, src.size4D)
 
-	Assert(src.NComp() == len(dst))
+	dst := dsta.Comp
+	//Assert(src.NComp() == len(dst))
 	for i := range dst {
 		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
 		//src.Comp[i].CopyToHost(dst[i])
