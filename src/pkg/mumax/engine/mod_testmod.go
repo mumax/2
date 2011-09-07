@@ -11,17 +11,15 @@ import ()
 
 // Loads a test module.
 func (e *Engine) LoadTest() {
-	e.AddQuant("m", VECTOR, FIELD)
+	e.AddQuant("m", VECTOR, FIELD, "magnetization")
 
-	e.AddQuant("h_z", VECTOR, FIELD)
+	e.AddQuant("h_z", VECTOR, FIELD, "external field")
 	e.Depends("h_z", "t")
-	e.AddQuant("h", VECTOR, FIELD)
+	e.AddQuant("h", VECTOR, FIELD, "total field")
 	e.Depends("h", "h_z")
 
 	e.AddQuant("torque", VECTOR, FIELD)
-	e.Depends("torque", "m")
-	e.Depends("torque", "h")
+	e.Depends("torque", "m", "h")
 
 	e.ODE1("m", "torque")
-	e.ODE1("h_z", "h")
 }

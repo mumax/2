@@ -116,7 +116,7 @@ func (e *Engine) GetQuant(name string) *Quant {
 
 
 // Add an arbitrary quantity
-func (e *Engine) AddQuant(name string, nComp int, kind QuantKind) {
+func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc... string) {
 	Debug("engine.Add", name, nComp, e.size3D, kind)
 
 	// quantity should not yet be defined
@@ -124,7 +124,7 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind) {
 		panic(Bug("engine: Already defined: " + name))
 	}
 
-	e.quantity[name] = newQuant(name, nComp, e.size3D, kind)
+	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, desc...)
 }
 
 

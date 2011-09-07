@@ -44,6 +44,7 @@ type Quant struct {
 	children   []*Quant    // Quantities this one depends on
 	parents    []*Quant    // Quantities that depend on this one
 	buffer     *host.Array // Host buffer for copying from/to the GPU array
+	desc string	// Human-readable description
 }
 
 
@@ -51,9 +52,9 @@ type Quant struct {
 
 
 // Returns a new quantity. See Quant.init().
-func newQuant(name string, nComp int, size3D []int, kind QuantKind) *Quant {
+func newQuant(name string, nComp int, size3D []int, kind QuantKind, desc ...string) *Quant {
 	q := new(Quant)
-	q.init(name, nComp, size3D, kind)
+	q.init(name, nComp, size3D, kind, desc...)
 	return q
 }
 
@@ -80,7 +81,7 @@ const (
 // When multiply == false no multiplier will be allocated,
 // indicating this quantity should not be post-multiplied.
 // multiply = true
-func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
+func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc ...string) {
 	Assert(nComp > 0)
 	Assert(size3D == nil || len(size3D) == 3)
 
@@ -106,6 +107,14 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind) {
 	const CAP = 2
 	q.children = make([]*Quant, 0, CAP)
 	q.parents = make([]*Quant, 0, CAP)
+
+	// concatenate desc strings
+	buf := ""
+	for i,str := range desc{
+		if i > 0{str += " "}
+		buf += str
+	}
+	q.desc = buf
 }
 
 // array with n 1's.

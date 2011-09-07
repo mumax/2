@@ -26,7 +26,9 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for k, v := range quants {
-		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], "];") // use first letter as group name.
+		label := ""
+		if v.desc != "" {label = "label="+ `"`+k+"\\n("+v.desc+`)"`}
+		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
 		// Add dependencies
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")
@@ -38,7 +40,7 @@ func (e *Engine) WriteDot(out io.Writer) {
 	fmt.Fprintln(out, "rank=sink;")
 	for i, _ := range e.ode {
 		ODE := "solver" + fmt.Sprint(i)
-		fmt.Fprintln(out, ODE + " [style=filled, shape=box];")
+		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
 	}
 	fmt.Fprintln(out, "}")
 
