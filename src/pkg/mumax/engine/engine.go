@@ -116,7 +116,7 @@ func (e *Engine) GetQuant(name string) *Quant {
 
 
 // Add an arbitrary quantity
-func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc... string) {
+func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc ...string) {
 	Debug("engine.Add", name, nComp, e.size3D, kind)
 
 	// quantity should not yet be defined

@@ -44,7 +44,7 @@ type Quant struct {
 	children   []*Quant    // Quantities this one depends on
 	parents    []*Quant    // Quantities that depend on this one
 	buffer     *host.Array // Host buffer for copying from/to the GPU array
-	desc string	// Human-readable description
+	desc       string      // Human-readable description
 }
 
 
@@ -110,8 +110,10 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 
 	// concatenate desc strings
 	buf := ""
-	for i,str := range desc{
-		if i > 0{str += " "}
+	for i, str := range desc {
+		if i > 0 {
+			str += " "
+		}
 		buf += str
 	}
 	q.desc = buf

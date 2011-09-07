@@ -27,7 +27,9 @@ func (e *Engine) WriteDot(out io.Writer) {
 	quants := e.quantity
 	for k, v := range quants {
 		label := ""
-		if v.desc != "" {label = "label="+ `"`+k+"\\n("+v.desc+`)"`}
+		if v.desc != "" {
+			label = "label=" + `"` + k + "\\n(" + v.desc + `)"`
+		}
 		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
 		// Add dependencies
 		for _, c := range v.children {
