@@ -38,6 +38,19 @@ func CheckSize(a, b []int) {
 }
 
 
+// True if a and b are equal. Used to check for equal array sizes.
+func EqualSize(a, b []int)bool{
+	if len(a) != len(b) {
+		return false
+	}
+	for i, s := range a {
+		if s != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Like fmt.Sprint with a maximum length.
 // Used to limit the length of error messages that contain, e.g., a large array.
 func ShortPrint(a interface{}) string {

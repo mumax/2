@@ -60,7 +60,7 @@ func (a API) GetCellSize() (x, y, z float64) {
 
 
 // Load a physics module. Not aware of dependencies (yet)
-// TODO: cleaner management.
+// TODO: cleaner management a la modprobe
 func (a API) Load(module string) {
 	switch module {
 	default:
@@ -79,6 +79,7 @@ func (a API) Load(module string) {
 
 //________________________________________________________________________________ run
 
+// Take one solver step
 func (a API) Step() {
 	a.Engine.Step()
 }
@@ -107,6 +108,11 @@ func (a API) LoadField(quant, filename string) {
 
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.GetQuant(quant)
+	aArr := q.Array()
+	if !EqualSize(field.Size3D, aArr.Size3D()){
+		Log("auto-resampling ", quant , "from", field.Size3D, "to", aArr.Size3D())
+		field = Resample(field, aArr.Size3D())
+	}
 	q.Array().CopyFromHost(field)
 	q.Invalidate() //!
 }
