@@ -9,6 +9,7 @@ package frontend
 
 // The client implements Inter-Process-Communication
 // between mumax and a scripting language.
+// Author: Arne Vansteenkiste
 
 
 import (
@@ -68,8 +69,8 @@ func (c *Client) Run() {
 		panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
 	}
 
-
 	// wait for full pipe of sub-command output to the logger
+	// not sure if this has much effect.
 	<-c.logWait // stderr
 	<-c.logWait // stdout (or the other way around ;-)
 }

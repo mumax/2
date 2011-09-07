@@ -26,10 +26,10 @@ m=[ [ [[111],[111]],  [[111],[111]],  [[111],[111]],
 
 print "-------------- len m", len(m) 
 
-setfield('m', m)
-
-m=getfield('m')
-print 'm', m
-
-step()
-step()
+#setfield('m', m)
+#
+#m=getfield('m')
+#print 'm', m
+#
+#step()
+#step()
