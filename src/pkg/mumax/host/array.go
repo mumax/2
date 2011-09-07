@@ -58,6 +58,6 @@ func (a *Array) Len() int {
 }
 
 
-func (a *Array) NComp()int{
+func (a *Array) NComp() int {
 	return a.Size[0]
 }

@@ -188,14 +188,14 @@ func jsonToHostArray(v interface{}) *host.Array {
 
 // convert mumax return values to types suited for json encoding
 // most values remain the same, but host.Array gets converted
-// to [][][][][]float32
+// to [][][][][]float32 and transposed into ZYX userspace
 func convertOutput(vals []interface{}) {
 	for i, v := range vals {
 		switch v.(type) {
 		default:
 			vals[i] = v
 		case *host.Array:
-			vals[i] = v.(*host.Array).Array
+			vals[i] = convertXYZ(v.(*host.Array)).Array
 		}
 	}
 }
