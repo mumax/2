@@ -137,7 +137,7 @@ func jsonToFloat32Array(v interface{}) []float32 {
 		}
 	}()
 
-	switch v.(type){//reflect.TypeOf(v).String() {
+	switch v.(type) { //reflect.TypeOf(v).String() {
 	case float64:
 		return []float32{float32(v.(float64))}
 	case []interface{}:
