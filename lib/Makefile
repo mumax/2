@@ -1,7 +1,9 @@
-all: apigen
+all: mumax2.py
 
-apigen:
+mumax2.py: mumax2.py.tail mumax2-apigen
 	./mumax2-apigen
+	mv mumax2.py mumax2.py.head
+	cat mumax2.py.head mumax2.py.tail > mumax2.py
 
 CLEANFILES=\
 	mumax2-apigen\
@@ -20,7 +22,7 @@ clean:
 install: all
 
 .PHONY: test
-test: apigen
+test: mumax2.py
 	python mumax2.py
 	#javac Mumax2.java
 	#lua mumax2.lua

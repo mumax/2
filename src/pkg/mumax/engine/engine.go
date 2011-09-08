@@ -45,8 +45,8 @@ func (e *Engine) init() {
 	// special quantities time and dt are always present
 	e.AddQuant("t", SCALAR, VALUE)
 	e.AddQuant("dt", SCALAR, VALUE)
-	e.time = e.GetQuant("t")
-	e.dt = e.GetQuant("dt")
+	e.time = e.Quant("t")
+	e.dt = e.Quant("dt")
 }
 
 //__________________________________________________________________ set/get
@@ -92,7 +92,7 @@ func (e *Engine) CellSize() []float64 {
 }
 
 // retrieve a quantity by its name
-func (e *Engine) GetQuant(name string) *Quant {
+func (e *Engine) Quant(name string) *Quant {
 	if q, ok := e.quantity[name]; ok {
 		return q
 	} else {
@@ -133,9 +133,9 @@ func (e *Engine) AddMask(name string, nComp int) {
 // Mark childQuantity to depend on parentQuantity.
 // Multiply adding the same dependency has no effect.
 func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
-	child := e.GetQuant(childQuantity)
+	child := e.Quant(childQuantity)
 	for _, parentQuantity := range parentQuantities {
-		parent := e.GetQuant(parentQuantity)
+		parent := e.Quant(parentQuantity)
 
 		for _, p := range child.parents {
 			if p.name == parentQuantity {
@@ -154,8 +154,8 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 // E.g.: ODE1("m", "torque")
 // No direct dependency should be declared between the arguments.
 func (e *Engine) ODE1(y, diff string) {
-	yQ := e.GetQuant(y)
-	dQ := e.GetQuant(diff)
+	yQ := e.Quant(y)
+	dQ := e.Quant(diff)
 	if e.ode != nil {
 		for _, ode := range e.ode {
 			for _, q := range ode {

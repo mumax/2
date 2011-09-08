@@ -5,13 +5,14 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// Author: Arne Vansteenkiste
-
 package engine
 
 import ()
 
-// Update() is called to update the value of a Quant.
-type Updater interface {
-	Update()
+type PointwiseUpdater struct{
+
+}
+
+func (n *PointwiseUpdater) Update() {
+	panic("unimpl.")
 }

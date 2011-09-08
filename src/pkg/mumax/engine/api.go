@@ -79,21 +79,27 @@ func (a API) Step() {
 
 //________________________________________________________________________________ quant
 
+
+
+func (a API) SetValue(name string, value []float32){
+	q := a.Engine.Quant(name)
+}
+
 // Set the value of a scalar, space-independent quantity
 func (a API) SetScalar(name string, value float32) {
 	e := a.Engine
-	q := e.GetQuant(name)
+	q := e.Quant(name)
 	q.SetValue([]float32{value})
 }
 
 // Get the value of a scalar, space-independent quantity
 //func (a API) GetScalar(name string) float32 {
-//	return a.Engine.GetQuant(name).ScalarValue()
+//	return a.Engine.Quant(name).ScalarValue()
 //}
 
 
 func (a API) SetField(quant string, field *host.Array) {
-	q := a.Engine.GetQuant(quant)
+	q := a.Engine.Quant(quant)
 	qArray := q.Array()
 	if !EqualSize(field.Size3D, qArray.Size3D()) {
 		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
@@ -102,9 +108,10 @@ func (a API) SetField(quant string, field *host.Array) {
 	q.SetField(field)
 }
 
+
+// 
 func (a API) GetField(quant string) *host.Array {
-	// TODO: not sync'ed
-	q := a.Engine.GetQuant(quant)
+	q := a.Engine.Quant(quant)
 	q.Update() //!
 	array := q.Array()
 	buffer := q.Buffer()
@@ -115,7 +122,7 @@ func (a API) GetField(quant string) *host.Array {
 // Get the value of a general quantity
 //func (a API) Get(name string) interface{} {
 //	e := a.Engine
-//	q := e.GetQuant(name)
+//	q := e.Quant(name)
 //	switch {
 //	case q.IsScalar():
 //		return q.ScalarValue()
@@ -125,6 +132,8 @@ func (a API) GetField(quant string) *host.Array {
 
 //________________________________________________________________________________ misc
 
+
+// Save .dot file with the physics graph for plotting with graphviz.
 func (a API) SaveGraph(file string) {
 	f, err := os.Create(file)
 	defer f.Close()

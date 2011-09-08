@@ -16,13 +16,11 @@ import (
 
 func (e *Engine) AddTorqueNode() {
 	e.AddQuant("torque", VECTOR, FIELD)
-	e.Depends("torque", "m")
-	e.Depends("torque", "H")
-	e.Depends("torque", "alpha")
-	t := e.GetQuant("torque")
-	m := e.GetQuant("m")
-	H := e.GetQuant("H")
-	alpha := e.GetQuant("alpha")
+	e.Depends("torque", "m", "H", "alpha")
+	t := e.Quant("torque")
+	m := e.Quant("m")
+	H := e.Quant("H")
+	alpha := e.Quant("alpha")
 
 	t.updateSelf = &torqueUpdater{t, m, H, alpha}
 }

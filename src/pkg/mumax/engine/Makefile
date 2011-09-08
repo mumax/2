@@ -19,7 +19,8 @@ GOFILES=\
 	quantkind.go\
 	torque.go\
 	updater.go\
-	nopupdater.go\
+	nop_updater.go\
+	pointwise_updater.go\
 	units.go\
 	universe.go\
 	input.go\
