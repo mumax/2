@@ -129,7 +129,6 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	return reflect.ValueOf(v) // do not convert
 }
 
-
 // Converts []interface{} array to []float32.
 // Also, converts a single float32 to a 1-element array.
 func jsonToFloat32Array(v interface{}) []float32 {
@@ -155,7 +154,6 @@ func jsonToFloat32Array(v interface{}) []float32 {
 	return nil //silence 6g
 }
 
-
 // Converts []interface{} array to []float64.
 // Also, converts a single float64 to a 1-element array.
 func jsonToFloat64Array(v interface{}) []float64 {
@@ -180,7 +178,6 @@ func jsonToFloat64Array(v interface{}) []float64 {
 	panic(IOErr("Expected float64 or float64 array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
 	return nil //silence 6g
 }
-
 
 // Converts a json vector array to a host.Array.
 // Also swaps XYZ - ZYX convention
