@@ -79,7 +79,6 @@ func (a API) Step() {
 
 //________________________________________________________________________________ quant
 
-
 // Sets the MULTIPLIER of a MASK quantity.
 func (a API) SetValue(name string, value []float32) {
 	q := a.Engine.Quant(name)

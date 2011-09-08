@@ -137,12 +137,19 @@ func jsonToFloat32Array(v interface{}) []float32 {
 		}
 	}()
 
-	switch v.(type) {
+	switch v.(type){//reflect.TypeOf(v).String() {
 	case float64:
 		return []float32{float32(v.(float64))}
+	case []interface{}:
+		varray := v.([]interface{})
+		array := make([]float32, len(varray))
+		for i := range array {
+			array[i] = float32(varray[i].(float64))
+			return array
+		}
 	}
 
-	panic(IOErr("Expected float32 or float32 array, got: " + ShortPrint(v)))
+	panic(IOErr("Expected float32 or float32 array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
 	return nil //silence 6g
 }
 

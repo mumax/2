@@ -139,9 +139,10 @@ func (q *Quant) SetField(field *host.Array) {
 
 // Set the multiplier of a mask
 func (q *Quant) SetMultiplier(val []float32) {
+	Debug("SetMultiplier", q.name, val)
 	checkKind(q, MASK)
-	if len(val) != q.nComp{
-		panic(InputErr(fmt.Sprint(q.Name() , " has ", q.nComp, " components, but ", len(val), " are provided.")))
+	if len(val) != q.nComp {
+		panic(InputErr(fmt.Sprint(q.Name(), " has ", q.nComp, " components, but ", len(val), " are provided.")))
 	}
 	for i, v := range val {
 		q.multiplier[i] = v
