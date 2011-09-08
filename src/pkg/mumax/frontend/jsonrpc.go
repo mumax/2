@@ -112,7 +112,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	switch typ.Kind() {
 	case reflect.Int:
-		Assert(float64(int(v.(float64))) == v.(float64))
+		AssertMsg(float64(int(v.(float64))) == v.(float64), "need 32-bit integer") // make sure it actually fits in an int
 		return reflect.ValueOf(int(v.(float64)))
 	case reflect.Float32:
 		return reflect.ValueOf(float32(v.(float64)))
@@ -121,8 +121,29 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	switch typ.String() {
 	case "*host.Array":
 		return reflect.ValueOf(jsonToHostArray(v))
+	case "[]float32":
+		return reflect.ValueOf(jsonToFloat32Array(v))
 	}
 	return reflect.ValueOf(v) // do not convert
+}
+
+// Converts []interface{} array to []float32.
+// Also, converts a single float32 to a 1-element array.
+func jsonToFloat32Array(v interface{}) []float32 {
+	defer func() {
+		err := recover()
+		if err != nil {
+			panic(IOErr(fmt.Sprint("Error parsing json array: ", ShortPrint(v), "\ncause: ", err)))
+		}
+	}()
+
+	switch v.(type) {
+	case float64:
+		return []float32{float32(v.(float64))}
+	}
+
+	panic(IOErr("Expected float32 or float32 array, got: " + ShortPrint(v)))
+	return nil //silence 6g
 }
 
 // Converts a json vector array to a host.Array.

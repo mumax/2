@@ -9,7 +9,7 @@ package engine
 
 import ()
 
-type PointwiseUpdater struct{
+type PointwiseUpdater struct {
 
 }
 

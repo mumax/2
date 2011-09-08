@@ -16,5 +16,7 @@ setfield('m', m)
 m=getfield('m')
 print 'm', m
 
+setvalue('H_z', 1)
+
 #step()
 #step()

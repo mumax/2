@@ -15,6 +15,7 @@ import (
 	. "mumax/common"
 	"mumax/gpu"
 	"mumax/host"
+	"fmt"
 )
 
 // A quantity represents a scalar/vector/tensor field,value or mask.
@@ -136,9 +137,12 @@ func (q *Quant) SetField(field *host.Array) {
 	q.Invalidate() //!
 }
 
-func (q *Quant) SetValue(val []float32) {
-	checkKind(q, VALUE)
-	Assert(len(val) == q.nComp)
+// Set the multiplier of a mask
+func (q *Quant) SetMultiplier(val []float32) {
+	checkKind(q, MASK)
+	if len(val) != q.nComp{
+		panic(InputErr(fmt.Sprint(q.Name() , " has ", q.nComp, " components, but ", len(val), " are provided.")))
+	}
 	for i, v := range val {
 		q.multiplier[i] = v
 	}
@@ -147,7 +151,7 @@ func (q *Quant) SetValue(val []float32) {
 
 func checkKind(q *Quant, kind QuantKind) {
 	if q.kind != kind {
-		panic(InputErr(q.name + " is not " + kind.String() + "but " + q.kind.String()))
+		panic(InputErr(q.name + " is not " + kind.String() + " but " + q.kind.String()))
 	}
 }
 

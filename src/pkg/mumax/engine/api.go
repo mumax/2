@@ -80,17 +80,18 @@ func (a API) Step() {
 //________________________________________________________________________________ quant
 
 
-
-func (a API) SetValue(name string, value []float32){
+// Sets the MULTIPLIER of a MASK quantity.
+func (a API) SetValue(name string, value []float32) {
 	q := a.Engine.Quant(name)
+	q.SetMultiplier(value)
 }
 
 // Set the value of a scalar, space-independent quantity
-func (a API) SetScalar(name string, value float32) {
-	e := a.Engine
-	q := e.Quant(name)
-	q.SetValue([]float32{value})
-}
+//func (a API) SetScalar(name string, value float32) {
+//	e := a.Engine
+//	q := e.Quant(name)
+//	q.SetValue([]float32{value})
+//}
 
 // Get the value of a scalar, space-independent quantity
 //func (a API) GetScalar(name string) float32 {
@@ -107,7 +108,6 @@ func (a API) SetField(quant string, field *host.Array) {
 	}
 	q.SetField(field)
 }
-
 
 // 
 func (a API) GetField(quant string) *host.Array {
@@ -131,7 +131,6 @@ func (a API) GetField(quant string) *host.Array {
 //}
 
 //________________________________________________________________________________ misc
-
 
 // Save .dot file with the physics graph for plotting with graphviz.
 func (a API) SaveGraph(file string) {
