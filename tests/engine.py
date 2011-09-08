@@ -16,7 +16,11 @@ setfield('m', m)
 m=getfield('m')
 print 'm', m
 
-setvalue('H_z', [1, 0, 0])
+Bx = 0
+By = 0
+Bz = 100e3
+
+setvalue('H_z', [Bx/mu0, By/mu0, Bz/mu0])
 
 #step()
 #step()
