@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements manipulations on CUDA functions
 
 //#include <cuda.h>
@@ -16,7 +15,6 @@ import (
 
 // Represents a CUDA CUfunction, a reference to a function within a module.
 type Function uintptr
-
 
 func FuncGetAttribute(attrib FunctionAttribute, function Function) int {
 	var attr C.int

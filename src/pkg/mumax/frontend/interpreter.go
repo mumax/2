@@ -7,7 +7,6 @@
 
 package frontend
 
-
 // An interpreter takes text-based commands and calls the correspondingly named methods.
 // It is used for inter-process communication with the script.
 
@@ -19,20 +18,17 @@ import (
 	"fmt"
 )
 
-
 // An interpreter takes text-based commands and calls the correspondingly named methods.
 // It is used for inter-process communication with the script.
 type Interpreter struct {
 	method map[string]reflect.Value // list of methods that can be called locally.
 }
 
-
 // Adds all exported methods of receiver to the interpreter's map of locally callable methods.
 func (c *Interpreter) Init(receiver_ interface{}) {
 	c.method = make(map[string]reflect.Value)
 	AddMethods(c.method, receiver_)
 }
-
 
 // Calls the method determined by the funcName with given arguments and returns the return value.
 func (c *Interpreter) Call(funcName string, args []string) []interface{} {
@@ -53,9 +49,7 @@ func (c *Interpreter) Call(funcName string, args []string) []interface{} {
 	//	return ret
 }
 
-
 // --------------
-
 
 // Adds all public methods of receiver to map
 // INTERNAL, but needed by package apigen
@@ -69,7 +63,6 @@ func AddMethods(methods map[string]reflect.Value, receiver_ interface{}) {
 		}
 	}
 }
-
 
 // parses the argument list "argv" to values suited for the function named by "fname"
 func parseArgs(function reflect.Value, argv []string) []reflect.Value {
@@ -85,7 +78,6 @@ func parseArgs(function reflect.Value, argv []string) []reflect.Value {
 	}
 	return args
 }
-
 
 // parses a string representation of a given type to a value
 func parseArg(arg string, argtype reflect.Type) reflect.Value {
@@ -108,7 +100,6 @@ func parseArg(arg string, argtype reflect.Type) reflect.Value {
 	panic(Bug("Bug"))
 	//return reflect.ValueOf(666) // is never reached.
 }
-
 
 // error message
 const (

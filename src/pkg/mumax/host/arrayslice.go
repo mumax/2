@@ -15,7 +15,6 @@ package host
 
 import ()
 
-
 // Allocates a 2D array, as well as the contiguous 1D array backing it.
 func Array2D(size0, size1 int) ([]float32, [][]float32) {
 	// First make the slice and then the list. When the memory is not fragmented,
@@ -28,7 +27,6 @@ func Array2D(size0, size1 int) ([]float32, [][]float32) {
 	return list, sliced
 }
 
-
 // Makes a 2D array from a contiguous 1D list
 func Slice2D(list []float32, size []int) [][]float32 {
 	sliced := make([][]float32, size[0])
@@ -37,7 +35,6 @@ func Slice2D(list []float32, size []int) [][]float32 {
 	}
 	return sliced
 }
-
 
 // Allocates a 3D array, as well as the contiguous 1D array backing it.
 func Array3D(size0, size1, size2 int) ([]float32, [][][]float32) {
@@ -54,7 +51,6 @@ func Array3D(size0, size1, size2 int) ([]float32, [][][]float32) {
 	return list, sliced
 }
 
-
 // Makes a 3D array from a contiguous 1D list.
 func Slice3D(list []float32, size []int) [][][]float32 {
 	sliced := make([][][]float32, size[0])
@@ -68,7 +64,6 @@ func Slice3D(list []float32, size []int) [][][]float32 {
 	}
 	return sliced
 }
-
 
 // Allocates a 4D array, as well as the contiguous 1D array backing it.
 func Array4D(size0, size1, size2, size3 int) ([]float32, [][][][]float32) {
@@ -92,7 +87,6 @@ func Array4D(size0, size1, size2, size3 int) ([]float32, [][][][]float32) {
 	return list, sliced
 }
 
-
 // Makes a 4D array from a contiguous 1D list.
 func Slice4D(list []float32, size []int) [][][][]float32 {
 
@@ -115,7 +109,6 @@ func Slice4D(list []float32, size []int) [][][][]float32 {
 	}
 	return sliced
 }
-
 
 // Allocates a 5D array, as well as the contiguous 1D array backing it.
 func Array5D(size0, size1, size2, size3, size4 int) ([]float32, [][][][][]float32) {

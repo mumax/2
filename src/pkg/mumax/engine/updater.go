@@ -7,9 +7,7 @@
 
 package engine
 
-
 import ()
-
 
 type Updater interface {
 	Update()

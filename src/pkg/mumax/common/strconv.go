@@ -14,7 +14,6 @@ import (
 	"strconv"
 )
 
-
 // Safe strconv.Atof32
 func Atof32(s string) float32 {
 	f, err := strconv.Atof32(s)

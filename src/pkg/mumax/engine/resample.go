@@ -18,7 +18,6 @@ import (
 	"mumax/host"
 )
 
-
 // 
 func Resample(in *host.Array, size2 []int) *host.Array {
 	Assert(len(size2) == 3)
@@ -41,7 +40,6 @@ func Resample(in *host.Array, size2 []int) *host.Array {
 	}
 	return out
 }
-
 
 // input is assumed vector field
 //func subsample4(data *tensor.T4, small *tensor.T4, f int) {
@@ -91,7 +89,6 @@ func min(a, b int) int {
 	}
 	return b
 }
-
 
 //func resample3(in *tensor.T3, size2 []int) *tensor.T3 {
 //	size1 := in.Size()

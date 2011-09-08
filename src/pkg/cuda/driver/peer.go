@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements CUDA unified addressing.
 
 //#include <cuda.h>
@@ -14,7 +13,6 @@ import (
 	"unsafe"
 )
 
-
 // Make allocations from the peer Context available to the current context.
 func CtxEnablePeerAccess(peer Context) {
 	err := Result(C.cuCtxEnablePeerAccess(C.CUcontext(unsafe.Pointer(peer)), C.uint(0)))
@@ -23,12 +21,10 @@ func CtxEnablePeerAccess(peer Context) {
 	}
 }
 
-
 // Make allocations from the peer Context available to the current context.
 func (peer Context) EnablePeerAccess() {
 	CtxEnablePeerAccess(peer)
 }
-
 
 // Reverses CtxEnablePeerAccess().
 func CtxDisablePeerAccess(peer Context) {
@@ -37,7 +33,6 @@ func CtxDisablePeerAccess(peer Context) {
 		panic(err)
 	}
 }
-
 
 // Reverses EnablePeerAccess().
 func (peer Context) DisablePeerAccess() {
@@ -53,7 +48,6 @@ func DeviceCanAccessPeer(dev, peer Device) bool {
 	}
 	return int(canAccessPeer) != 0
 }
-
 
 // Returns true if CtxEnablePeerAccess can be called on a context for dev and peerDev.
 func (dev Device) CanAccessPeer(peer Device) bool {

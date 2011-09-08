@@ -18,7 +18,6 @@ import (
 	"path"
 )
 
-
 // INTERNAL
 var (
 	_modules   map[string]cu.Module   // maps a module name (file name without .ptx) on the module
@@ -66,7 +65,6 @@ func assureModule(modname string) {
 		LoadModule(findModule(modname))
 	}
 }
-
 
 // Error message
 const (

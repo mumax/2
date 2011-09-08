@@ -22,7 +22,6 @@ import (
 	"time"
 )
 
-
 type Client struct {
 	inputFile, outputDir string
 	ipc                  jsonRPC
@@ -32,7 +31,6 @@ type Client struct {
 	cleanfiles           []string // list of files to be deleted upon program exit
 	logWait              chan int // channel to wait for completion of go logStream()
 }
-
 
 // Initializes the mumax client to parse infile, write output
 // to outdir and connect to a server over conn.
@@ -46,7 +44,6 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 	c.api = engine.API{c.eng}
 	//c.ipc.Init(c.api)
 }
-
 
 func (c *Client) Run() {
 	c.makeFifos() // make the FIFOs but do not yet try to open them
@@ -74,7 +71,6 @@ func (c *Client) Run() {
 	<-c.logWait // stderr
 	<-c.logWait // stdout (or the other way around ;-)
 }
-
 
 //type VoidArgs struct{}
 
@@ -122,7 +118,6 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	return
 }
 
-
 // open FIFOs for communication
 // there is a synchronization subtlety here:
 // opening the fifo's blocks until they have been
@@ -139,7 +134,6 @@ func (c *Client) openFifos() {
 	CheckErr(err, ERR_IO)
 	return
 }
-
 
 // read text commands from infifo, execute them and return the result to outfifo
 // stop when a fifo gets closed by the other end
@@ -161,7 +155,6 @@ func (c *Client) openFifos() {
 //	}
 //}
 
-
 // wait until the subcommand creates the handshake file,
 // indicating that it will open the fifos. however, if the
 // the subprocess exits before creating the handshake file,
@@ -181,7 +174,6 @@ func (c *Client) handshake(procwaiter chan (int)) (ok bool) {
 	return false
 }
 
-
 // returns a channel that will signal when the file has appeared
 func pollFile(fname string) (waiter chan (int)) {
 	waiter = make(chan (int))
@@ -193,7 +185,6 @@ func pollFile(fname string) (waiter chan (int)) {
 	}()
 	return
 }
-
 
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
@@ -218,7 +209,6 @@ func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
 
 // IO buffer size
 const BUFSIZE = 4096
-
 
 // makes the FIFOs for inter-process communications
 func (c *Client) makeFifos() {

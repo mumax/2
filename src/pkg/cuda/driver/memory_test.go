@@ -11,7 +11,6 @@ import (
 	"math"
 )
 
-
 func init() {
 	Init()
 	ctx := CtxCreate(CTX_SCHED_AUTO, 0)
@@ -33,7 +32,6 @@ func TestMalloc(t *testing.T) {
 		pointer.Free()
 	}
 }
-
 
 func TestMemAddressRange(t *testing.T) {
 	N := 12345
@@ -62,7 +60,6 @@ func TestMemGetInfo(t *testing.T) {
 		t.Fail()
 	}
 }
-
 
 func TestMemsetAsync(t *testing.T) {
 	N := int64(32 * 1024)
@@ -116,7 +113,6 @@ func TestMemset(t *testing.T) {
 	}
 	dev1.Free()
 }
-
 
 func TestMemcpy(t *testing.T) {
 	N := int64(32 * 1024)
@@ -185,7 +181,6 @@ func TestMemcpyAsyncRegistered(t *testing.T) {
 	dev2.Free()
 }
 
-
 func BenchmarkMemcpy(b *testing.B) {
 	b.StopTimer()
 	N := int64(32 * 1024 * 1024)
@@ -203,7 +198,6 @@ func BenchmarkMemcpy(b *testing.B) {
 		MemcpyDtoH(HostPtr(unsafe.Pointer(&host2[0])), dev2, 4*N)
 	}
 }
-
 
 func BenchmarkMemcpyAsync(b *testing.B) {
 	b.StopTimer()
@@ -224,7 +218,6 @@ func BenchmarkMemcpyAsync(b *testing.B) {
 		stream.Synchronize()
 	}
 }
-
 
 func MakeLockedFloat32Slice(length int) []float32 {
 	PAGESIZE := 4096
@@ -267,7 +260,6 @@ func MakeLockedFloat32Slice(length int) []float32 {
 //	dev1.Free()
 //	dev2.Free()
 //}
-
 
 //func BenchmarkMemcpyToDevice(b *testing.B) {
 //	b.StopTimer()

@@ -74,7 +74,6 @@ func CheckErr(err os.Error, code int) {
 	}
 }
 
-
 func CheckIO(err os.Error) {
 	CheckErr(err, ERR_IO)
 }

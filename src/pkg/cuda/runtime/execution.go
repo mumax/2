@@ -27,7 +27,6 @@ func Dim(n uint) dim3 {
 	return dim3{n, 1, 1}
 }
 
-
 // UNSAFE
 // Push grid size on the execution stack. To be followed by SetupArgument()
 func ConfigureCall(gridDim, blockDim dim3, sharedMem uint, stream Stream) {

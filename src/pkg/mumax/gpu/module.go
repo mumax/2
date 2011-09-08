@@ -16,7 +16,6 @@ import (
 	"fmt"
 )
 
-
 // Loads a __global__ CUDA function from a .ptx file.
 // E.g.:
 //	function := Global("testmodule", "testMemset")
@@ -58,7 +57,6 @@ func Global(modname, funcname string) Closure {
 	return c
 }
 
-
 // Multi-GPU analog of cuda/driver/Closure.
 type Closure struct {
 	DevClosure []cu.Closure // INTERNAL: separate closures for each GPU. WARNING: loop over i, not values!
@@ -67,7 +65,6 @@ type Closure struct {
 	ArgN       int          // INTERNAL: index of automatically set argument "N" (for 1D) or "N0" (for 3D, then "N1", "N2" should immediately follow)
 	Configured bool         // INTERNAL: false if no Configure*() has yet been called.
 }
-
 
 // Sets the same argument for all GPUs.
 func (c *Closure) SetArg(argIdx int, arg interface{}) {
@@ -109,7 +106,6 @@ func (c *Closure) SetDeviceArg(deviceId, argIdx int, arg interface{}) {
 	c.DevClosure[deviceId].SetArg(argIdx, arg)
 }
 
-
 // Asynchronous call. 
 // Executes the closure with its currently set arguments
 // and does not wait for the result.
@@ -122,14 +118,12 @@ func (c *Closure) Go() {
 	}
 }
 
-
 // Blocks until the previous Go() call has been completed.
 func (c *Closure) Synchronize() {
 	for _, dc := range c.DevClosure {
 		dc.Synchronize()
 	}
 }
-
 
 // Synchronous call. 
 // Executes the closure with its currently set arguments
@@ -199,7 +193,6 @@ func (c *Closure) Configure1D(N int) {
 		} // only set PART if present in source file
 	}
 }
-
 
 // Default matrix tile in floats (16x16)
 const DEFAULT_TILE = 16

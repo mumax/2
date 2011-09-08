@@ -42,7 +42,6 @@ func SetDevice(device int) {
 	}
 }
 
-
 // Set device flags for the device associated with the host thread
 func SetDeviceFlags(flags DeviceFlag) {
 	err := Error(C.cudaSetDeviceFlags(C.uint(flags)))
@@ -50,7 +49,6 @@ func SetDeviceFlags(flags DeviceFlag) {
 		panic(err)
 	}
 }
-
 
 type DeviceFlag uint
 
@@ -62,7 +60,6 @@ const (
 	DeviceMapHost         DeviceFlag = 8  //Support mapped pinned allocations
 	DeviceLmemResizeToMax DeviceFlag = 16 //Keep local memory allocation after launch
 )
-
 
 // Returns the device properties
 func GetDeviceProperties(device int) *DeviceProp {
@@ -105,7 +102,6 @@ func GetDeviceProperties(device int) *DeviceProp {
 	return devProp
 }
 
-
 // Stores device properties
 type DeviceProp struct {
 	Name                     string
@@ -134,7 +130,6 @@ type DeviceProp struct {
 	PciDeviceID              int
 	TccDriver                int
 }
-
 
 func (prop *DeviceProp) String() string {
 	return fmt.Sprintln("Name:                    ", prop.Name) +

@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements execution of CUDA kernels
 
 //#include <cuda.h>

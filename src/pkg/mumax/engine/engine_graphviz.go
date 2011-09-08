@@ -16,7 +16,6 @@ import (
 	"io"
 )
 
-
 // Write .dot file for graphviz, 
 // representing the physics graph.
 func (e *Engine) WriteDot(out io.Writer) {
@@ -73,7 +72,6 @@ func (e *Engine) WriteDot(out io.Writer) {
 
 	fmt.Fprintln(out, "}")
 }
-
 
 // true if a and b are similar names, to be equally ranked in the dot graph.
 func similar(a, b string) (similar bool) {

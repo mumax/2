@@ -16,10 +16,8 @@ import (
 	"fmt"
 )
 
-
 // CUDA error status
 type Result int
-
 
 // Message string for the error
 func (err Result) String() string {
@@ -75,7 +73,6 @@ const (
 	ERROR_CONTEXT_IS_DESTROYED           Result = C.CUDA_ERROR_CONTEXT_IS_DESTROYED
 	ERROR_UNKNOWN                        Result = C.CUDA_ERROR_UNKNOWN
 )
-
 
 // Map with error strings for Result error numbers
 var errorString map[Result]string = map[Result]string{

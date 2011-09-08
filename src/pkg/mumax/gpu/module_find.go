@@ -15,10 +15,8 @@ import (
 	"path"
 )
 
-
 // INTERNAL: where to look for .ptx files.
 var _lookPath string
-
 
 // Finds the full path of a module specified by name, using _lookPath.
 func findModule(modname string) (filename string) {

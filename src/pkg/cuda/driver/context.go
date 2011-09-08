@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements CUDA driver context management
 
 //#include <cuda.h>
@@ -14,7 +13,6 @@ import "unsafe"
 import ()
 
 type Context uintptr
-
 
 func CtxCreate(flags uint, dev Device) Context {
 	var ctx C.CUcontext
@@ -61,7 +59,6 @@ func (ctx Context) SetCurrent() {
 	CtxSetCurrent(ctx)
 }
 
-
 // Returns the ordinal of the current context's device.
 func CtxGetDevice() Device {
 	var dev C.CUdevice
@@ -79,7 +76,6 @@ func CtxSynchronize() {
 		panic(err)
 	}
 }
-
 
 // Flags for CtxCreate
 const (

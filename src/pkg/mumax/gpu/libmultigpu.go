@@ -5,7 +5,6 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-
 // This file wraps libmultigpu.so.
 // Author: Arne Vansteenkiste
 
@@ -19,7 +18,6 @@ import (
 	"unsafe"
 )
 
-
 // Adds 2 multi-GPU arrays: dst = a + b
 func Add(dst, a, b *Array) {
 	C.addAsync(
@@ -30,7 +28,6 @@ func Add(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
-
 
 func Torque(τ, m, H, αMap *Array, αMul float32) {
 

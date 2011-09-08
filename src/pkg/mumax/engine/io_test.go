@@ -6,7 +6,6 @@
 
 package engine
 
-
 import (
 	"testing"
 	. "mumax/common"
@@ -39,7 +38,6 @@ func TestIO(test *testing.T) {
 	}
 	exec.Command("rm", "-f", "iotest.t").Run()
 }
-
 
 var t1, t2 *host.Array
 

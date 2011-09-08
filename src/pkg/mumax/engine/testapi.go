@@ -7,7 +7,6 @@
 
 package engine
 
-
 // Dummy API functions for testing
 
 import (
@@ -15,18 +14,15 @@ import (
 	"mumax/host"
 )
 
-
 // For testing purposes.
 func (api API) GetArray() *host.Array {
 	return host.NewArray(3, []int{4, 5, 6})
 }
 
-
 // For testing purposes.
 func (api API) SinkArray(a *host.Array) {
 	Debug("SinkArray", a)
 }
-
 
 // For testing purposes.
 func (api API) Version() int {
@@ -58,12 +54,10 @@ func (api API) GetString() string {
 	return "hello"
 }
 
-
 // For testing purposes.
 func (api API) GetBool() bool {
 	return true
 }
-
 
 // For testing purposes.
 func (api API) Sum(i, j int) int {

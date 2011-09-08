@@ -11,7 +11,6 @@ import (
 	"mumax/frontend"
 )
 
-
 func main() {
 	frontend.Main()
 }

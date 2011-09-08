@@ -16,14 +16,12 @@ import (
 	"fmt"
 )
 
-
 // Array component.
 const (
 	X = 0
 	Y = 1
 	Z = 2
 )
-
 
 // Check if array sizes are equal. Panics if arrays a and b are different. 
 func CheckSize(a, b []int) {
@@ -36,7 +34,6 @@ func CheckSize(a, b []int) {
 		}
 	}
 }
-
 
 // True if a and b are equal. Used to check for equal array sizes.
 func EqualSize(a, b []int) bool {
@@ -62,12 +59,10 @@ func ShortPrint(a interface{}) string {
 	return str
 }
 
-
 // Go equivalent of &array[index] (for a float array).
 func ArrayOffset(array uintptr, index int) uintptr {
 	return uintptr(array + uintptr(SIZEOF_FLOAT*index))
 }
-
 
 // Replaces the extension of filename by a new one.
 func ReplaceExt(filename, newext string) string {
@@ -75,14 +70,12 @@ func ReplaceExt(filename, newext string) string {
 	return filename[:len(filename)-len(extension)] + newext
 }
 
-
 // Gets the directory where the executable is located.
 func GetExecDir() string {
 	dir, err := os.Readlink("/proc/self/exe")
 	CheckErr(err, ERR_IO)
 	return Parent(dir)
 }
-
 
 // Combines two Errors into one.
 // If a and b are nil, the returned error is nil.

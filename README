@@ -12,7 +12,8 @@ GNU General Public License for more details.
 
 Known issues:
 
-* PNG images may sometimes contain black pixels when they should have been full red.
+* Auto-saving a file in both binary and ascii OMF format will cause only one of the two to appear. This is because they have the same file names causing the first format to be overwritten by the second.
+* PNG images may sometimes contain black pixels when they should have been full red. This is purely an issue of the rendering and does not imply something is wrong with e.g. the magnetization.
 * Long Python output to stdout (e.g. by print) may be truncated due to buffering on the Python side. 
 
 

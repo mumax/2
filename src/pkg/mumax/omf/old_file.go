@@ -6,20 +6,17 @@
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 
-
 package omf
 
 import (
 	"mumax/host"
 )
 
-
 // Represents an omf file
 type File struct {
 	Header
 	*host.Array
 }
-
 
 // Represents the header part of an omf file.
 type Header struct {

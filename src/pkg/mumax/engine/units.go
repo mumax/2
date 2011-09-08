@@ -23,11 +23,9 @@ package engine
 
 import ()
 
-
 func init() {
 	UpdateUnits()
 }
-
 
 // Physical constants in SI units
 // Our primal SI units are:
@@ -44,7 +42,6 @@ const (
 	PI       = 3.14159265358979323846264338327950288
 )
 
-
 // Primary internal units. 
 // Should only be changed once at the beginning of a simulation.
 // When changed, UpdateUnits() should be called to update the derived units.
@@ -55,7 +52,6 @@ var (
 	UnitEnergy float64 = 1e-18 // J
 )
 // Unit temperature = 1K
-
 
 // Derived internal units.
 // Should NOT be set directly. Instead,
@@ -71,7 +67,6 @@ var (
 	UnitMoment         float64 // Internal unit of magnetic moment, expressed in Am2
 )
 
-
 // Physical constants in internal units.
 // Do not change.
 var (
@@ -81,7 +76,6 @@ var (
 	MuB    float64 // Bohr magneton in internal units
 	E      float64 // Electron charge in internal units
 )
-
 
 // Updates the derived internal units and physical constants
 // after the primary internal units have changed.

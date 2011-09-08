@@ -4,12 +4,10 @@
 
 package driver
 
-
 import (
 	"testing"
 	"fmt"
 )
-
 
 func TestClosure(t *testing.T) {
 	defer func() {

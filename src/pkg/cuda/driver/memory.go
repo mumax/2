@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements CUDA memory management on the driver level
 
 //#include <cuda.h>
@@ -18,7 +17,6 @@ import (
 type DevicePtr uintptr
 type HostPtr unsafe.Pointer
 
-
 // Allocates a number of bytes of device memory.
 func MemAlloc(bytes int64) DevicePtr {
 	var devptr C.CUdeviceptr
@@ -28,7 +26,6 @@ func MemAlloc(bytes int64) DevicePtr {
 	}
 	return DevicePtr(devptr)
 }
-
 
 // Frees device memory allocated by MemAlloc().
 // Overwrites the pointer with NULL.
@@ -45,14 +42,12 @@ func MemFree(ptr *DevicePtr) {
 	}
 }
 
-
 // Frees device memory allocated by MemAlloc().
 // Overwrites the pointer with NULL.
 // It is safe to double-free.
 func (ptr *DevicePtr) Free() {
 	MemFree(ptr)
 }
-
 
 // Copies a number of bytes on the current device.
 // Requires unified addressing to be supported.
@@ -65,7 +60,6 @@ func Memcpy(dst, src DevicePtr, bytes int64) {
 	}
 }
 
-
 // Asynchronously copies a number of bytes on the current device.
 func MemcpyAsync(dst, src DevicePtr, bytes int64, stream Stream) {
 	err := Result(C.cuMemcpyAsync(C.CUdeviceptr(dst), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
@@ -74,7 +68,6 @@ func MemcpyAsync(dst, src DevicePtr, bytes int64, stream Stream) {
 	}
 }
 
-
 // Copies a number of bytes from host to device.
 func MemcpyDtoD(dst, src DevicePtr, bytes int64) {
 	err := Result(C.cuMemcpyDtoD(C.CUdeviceptr(dst), C.CUdeviceptr(src), C.size_t(bytes)))
@@ -82,7 +75,6 @@ func MemcpyDtoD(dst, src DevicePtr, bytes int64) {
 		panic(err)
 	}
 }
-
 
 // Asynchronously copies a number of bytes from host to device.
 func MemcpyDtoDAsync(dst, src DevicePtr, bytes int64, stream Stream) {
@@ -99,7 +91,6 @@ func MemcpyHtoD(dst DevicePtr, src HostPtr, bytes int64) {
 	}
 }
 
-
 // Asynchronously copies a number of bytes from host to device.
 // The host memory must be page-locked (see MemRegister)
 func MemcpyHtoDAsync(dst DevicePtr, src HostPtr, bytes int64, stream Stream) {
@@ -109,7 +100,6 @@ func MemcpyHtoDAsync(dst DevicePtr, src HostPtr, bytes int64, stream Stream) {
 	}
 }
 
-
 // Copies a number of bytes from device to host.
 func MemcpyDtoH(dst HostPtr, src DevicePtr, bytes int64) {
 	err := Result(C.cuMemcpyDtoH(unsafe.Pointer(dst), C.CUdeviceptr(src), C.size_t(bytes)))
@@ -117,7 +107,6 @@ func MemcpyDtoH(dst HostPtr, src DevicePtr, bytes int64) {
 		panic(err)
 	}
 }
-
 
 // Asynchronously copies a number of bytes device host to host.
 // The host memory must be page-locked (see MemRegister)
@@ -128,7 +117,6 @@ func MemcpyDtoHAsync(dst HostPtr, src DevicePtr, bytes int64, stream Stream) {
 	}
 }
 
-
 // Copies from device memory in one context (device) to another.
 func MemcpyPeer(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Context, bytes int64) {
 	err := Result(C.cuMemcpyPeer(C.CUdeviceptr(dst), C.CUcontext(unsafe.Pointer(dstCtx)), C.CUdeviceptr(src), C.CUcontext(unsafe.Pointer(srcCtx)), C.size_t(bytes)))
@@ -137,7 +125,6 @@ func MemcpyPeer(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Context, by
 	}
 }
 
-
 // Asynchronously copies from device memory in one context (device) to another.
 func MemcpyPeerAsync(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Context, bytes int64, stream Stream) {
 	err := Result(C.cuMemcpyPeerAsync(C.CUdeviceptr(dst), C.CUcontext(unsafe.Pointer(dstCtx)), C.CUdeviceptr(src), C.CUcontext(unsafe.Pointer(srcCtx)), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
@@ -145,7 +132,6 @@ func MemcpyPeerAsync(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Contex
 		panic(err)
 	}
 }
-
 
 // Returns the base address and size of the allocation (by MemAlloc) that contains the input pointer ptr.
 func MemGetAddressRange(ptr DevicePtr) (bytes int64, base DevicePtr) {
@@ -160,19 +146,16 @@ func MemGetAddressRange(ptr DevicePtr) (bytes int64, base DevicePtr) {
 	return
 }
 
-
 // Returns the base address and size of the allocation (by MemAlloc) that contains the input pointer ptr.
 func (ptr DevicePtr) GetAddressRange() (bytes int64, base DevicePtr) {
 	return MemGetAddressRange(ptr)
 }
-
 
 // Returns the size of the allocation (by MemAlloc) that contains the input pointer ptr.
 func (ptr DevicePtr) Bytes() (bytes int64) {
 	bytes, _ = MemGetAddressRange(ptr)
 	return
 }
-
 
 // Returns the free and total amount of memroy in the current Context (in bytes).
 func MemGetInfo() (free, total int64) {
@@ -186,7 +169,6 @@ func MemGetInfo() (free, total int64) {
 	return
 }
 
-
 // Page-locks memory specified by the pointer and bytes.
 // The pointer and byte size must be aligned to the host page size (4KB)
 // See also: MemHostUnregister()
@@ -196,7 +178,6 @@ func MemHostRegister(ptr HostPtr, bytes int64, flags MemHostRegisterFlag) {
 		panic(err)
 	}
 }
-
 
 // Unmaps memory locked by MemHostRegister().
 func MemHostUnregister(ptr HostPtr) {

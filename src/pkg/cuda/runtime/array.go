@@ -8,7 +8,6 @@ package runtime
 
 import ()
 
-
 type Array interface {
 	Pointer() uintptr
 	Bytes() int
@@ -19,18 +18,15 @@ type AnyArray struct {
 	bytes   int
 }
 
-
 // Returns the address of the underlying storage
 func (a *AnyArray) Pointer() uintptr {
 	return a.pointer
 }
 
-
 // Returns the size of the array in bytes.
 func (a *AnyArray) Bytes() int {
 	return a.bytes
 }
-
 
 // Frees the Array's underlying storage.
 // After freeing the array points to nil to avoid dangling pointers.
@@ -48,7 +44,6 @@ func (a *AnyArray) IsNil() bool {
 	return a.pointer == uintptr(0)
 }
 
-
 type Float32Array struct {
 	AnyArray
 }
@@ -65,7 +60,6 @@ func NewFloat32Array(elements int) *Float32Array {
 	return a
 }
 
-
 type Complex64Array struct {
 	AnyArray
 }
@@ -81,7 +75,6 @@ func NewComplex64Array(elements int) *Complex64Array {
 	a.pointer = Malloc(a.bytes)
 	return a
 }
-
 
 //// New array holding the specified number of complex32 elements
 //func NewComplex64Array(elements int) *Array {

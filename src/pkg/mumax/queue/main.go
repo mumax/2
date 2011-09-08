@@ -5,11 +5,9 @@ import (
 	"fmt"
 )
 
-
 var (
 	nodes []*Node
 	queue []string
-
 
 	//done chan(*Task)
 )
@@ -26,11 +24,9 @@ func Main() {
 	PrintInfo()
 }
 
-
 func PrintInfo() {
 	PrintNodes()
 }
-
 
 func PrintNodes() {
 	for _, n := range nodes {

@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements CUDA driver initialization
 
 //#include <cuda.h>

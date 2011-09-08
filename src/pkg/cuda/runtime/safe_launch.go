@@ -16,7 +16,6 @@ import (
 	"reflect"
 )
 
-
 func CallAsync(function string, config *LaunchConfig, arguments ...interface{}) {
 	ConfigureCall(config.GridDim, config.BlockDim, config.SharedMem, config.Stream) // TODO: inline
 	for _, arg := range arguments {
@@ -27,7 +26,6 @@ func CallAsync(function string, config *LaunchConfig, arguments ...interface{}) 
 	}
 	Launch(function)
 }
-
 
 type LaunchConfig struct {
 	GridDim   dim3

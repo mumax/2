@@ -7,11 +7,9 @@
 
 package engine
 
-
 import (
 	. "mumax/common"
 )
-
 
 // Engine is the heart of a multiphysics simulation.
 // The engine stores named quantities like "m", "B", "alpha", ...
@@ -28,13 +26,11 @@ type Engine struct {
 	dt        *Quant            // time step quantity is always present
 }
 
-
 // Left-hand side and right-hand side indices for Engine.ode[i]
 const (
 	LHS = 0
 	RHS = 1
 )
-
 
 // Make new engine.
 func NewEngine() *Engine {
@@ -42,7 +38,6 @@ func NewEngine() *Engine {
 	e.init()
 	return e
 }
-
 
 // initialize
 func (e *Engine) init() {
@@ -54,9 +49,7 @@ func (e *Engine) init() {
 	e.dt = e.GetQuant("dt")
 }
 
-
 //__________________________________________________________________ set/get
-
 
 // Sets the FD grid size
 func (e *Engine) SetGridSize(size3D []int) {
@@ -70,7 +63,6 @@ func (e *Engine) SetGridSize(size3D []int) {
 	}
 }
 
-
 // Gets the FD grid size
 func (e *Engine) GridSize() []int {
 	if e.size3D == nil {
@@ -78,7 +70,6 @@ func (e *Engine) GridSize() []int {
 	}
 	return e.size3D
 }
-
 
 // Sets the FD cell size
 func (e *Engine) SetCellSize(size []float64) {
@@ -92,7 +83,6 @@ func (e *Engine) SetCellSize(size []float64) {
 	}
 }
 
-
 // Gets the FD cell size
 func (e *Engine) CellSize() []float64 {
 	if e.cellSize == nil {
@@ -100,7 +90,6 @@ func (e *Engine) CellSize() []float64 {
 	}
 	return e.cellSize
 }
-
 
 // retrieve a quantity by its name
 func (e *Engine) GetQuant(name string) *Quant {
@@ -114,7 +103,6 @@ func (e *Engine) GetQuant(name string) *Quant {
 
 //__________________________________________________________________ add
 
-
 // Add an arbitrary quantity
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc ...string) {
 	Debug("engine.Add", name, nComp, e.size3D, kind)
@@ -126,7 +114,6 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc ...string
 
 	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, desc...)
 }
-
 
 // AddQuant(name, nComp, VALUE)
 func (e *Engine) AddValue(name string, nComp int) {
@@ -142,7 +129,6 @@ func (e *Engine) AddField(name string, nComp int) {
 func (e *Engine) AddMask(name string, nComp int) {
 	e.AddQuant(name, nComp, MASK)
 }
-
 
 // Mark childQuantity to depend on parentQuantity.
 // Multiply adding the same dependency has no effect.
@@ -162,7 +148,6 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 		parent.children = append(parent.children, child)
 	}
 }
-
 
 // Add a 1st order differential equation:
 //	d y / d t = diff

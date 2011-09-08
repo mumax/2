@@ -14,13 +14,11 @@ import (
 	"fmt"
 )
 
-
 type c struct{}
 
 func (x *c) filename() string {
 	return "mumax2.h"
 }
-
 
 func (x *c) comment() string {
 	return "//"
@@ -38,7 +36,6 @@ extern "C" {
 `)
 }
 
-
 func (x *c) writeFooter(out io.Writer) {
 	fmt.Fprint(out, `
 #ifdef __cplusplus
@@ -47,7 +44,6 @@ func (x *c) writeFooter(out io.Writer) {
 #endif
 `)
 }
-
 
 func (x *c) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
 
@@ -111,7 +107,6 @@ func (x *c) writeFunc(out io.Writer, funcName string, argTypes []reflect.Type, r
 	//	}
 	//	fmt.Fprintln(out, `	}`)
 }
-
 
 var (
 	// functions for parsing go types from string

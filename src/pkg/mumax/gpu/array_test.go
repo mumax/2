@@ -17,7 +17,6 @@ import (
 	"fmt"
 )
 
-
 // Test repeated alloc/free.
 func TestArrayAlloc(t *testing.T) {
 	runtime.LockOSThread()
@@ -29,7 +28,6 @@ func TestArrayAlloc(t *testing.T) {
 		t.Free()
 	}
 }
-
 
 // Should init to zeros
 func TestArrayInit(test *testing.T) {
@@ -77,7 +75,6 @@ func TestArrayInit(test *testing.T) {
 		}
 	}
 }
-
 
 func TestArrayCopy(test *testing.T) {
 	runtime.LockOSThread()

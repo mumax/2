@@ -4,12 +4,10 @@
 
 package driver
 
-
 import (
 	"testing"
 	"unsafe"
 )
-
 
 func TestModule(test *testing.T) {
 	mod := ModuleLoad("testmodule.ptx")
@@ -51,7 +49,6 @@ func TestModule(test *testing.T) {
 	}
 	//fmt.Println(a)
 }
-
 
 // Integer division rounded up.
 func DivUp(x, y int) int {

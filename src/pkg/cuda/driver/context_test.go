@@ -4,11 +4,9 @@
 
 package driver
 
-
 import (
 	"testing"
 )
-
 
 func TestContext(t *testing.T) {
 	ctx := CtxCreate(CTX_SCHED_AUTO, 0)

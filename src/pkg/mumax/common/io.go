@@ -15,7 +15,6 @@ import (
 	"path"
 )
 
-
 // Opens a file for read-write.
 // Truncates existing file or creates the file if neccesary.
 // The permission is the same as the parent directory
@@ -40,7 +39,6 @@ func Mkdir(filename string) {
 	}
 }
 
-
 // Checks if the file exists.
 func FileExists(file string) bool {
 	f, err := os.Open(file)
@@ -51,7 +49,6 @@ func FileExists(file string) bool {
 	return true
 }
 
-
 // Safe os.Readlink
 func Readlink(name string) string {
 	str, err := os.Readlink(name)
@@ -61,10 +58,8 @@ func Readlink(name string) string {
 	return str
 }
 
-
 // Permission flag for rw-rw-rw
 //const MASK_NO_EXEC = 0666
-
 
 // returns the parent directory of a file
 func Parent(filename string) string {
@@ -74,7 +69,6 @@ func Parent(filename string) string {
 	}
 	return dir
 }
-
 
 // returns the file's permissions
 func Permission(filename string) uint32 {

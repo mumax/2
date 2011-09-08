@@ -9,7 +9,6 @@ import (
 	"runtime"
 )
 
-
 const SIZE = 1024 * 1024
 
 func TestCopyEmptyArray(t *testing.T) {
@@ -24,7 +23,6 @@ func TestCopyEmptyArray(t *testing.T) {
 	CopyDeviceToDevice(dev2, dev1)
 	CopyDeviceToHost(host2, dev2)
 }
-
 
 func TestCopyFromTo(t *testing.T) {
 	runtime.LockOSThread()

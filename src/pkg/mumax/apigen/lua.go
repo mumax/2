@@ -14,7 +14,6 @@ import (
 	"fmt"
 )
 
-
 type Lua struct{}
 
 func (l *Lua) Filename() string {
@@ -29,7 +28,6 @@ func (p *Lua) WriteHeader(out io.Writer) {
 	fmt.Fprintln(out, `
 `)
 }
-
 
 func (l *Lua) WriteFooter(out io.Writer) {
 }
@@ -61,7 +59,6 @@ end
 	//}
 	//fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s]))`, lua_convert[retType], name, args))
 }
-
 
 var (
 	// maps go types to lua types	

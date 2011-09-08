@@ -10,7 +10,6 @@ import (
 	"unsafe"
 )
 
-
 func TestMalloc(t *testing.T) {
 	defer func() {
 		err := recover()
@@ -26,7 +25,6 @@ func TestMalloc(t *testing.T) {
 	}
 }
 
-
 func TestArray(t *testing.T) {
 	defer func() {
 		err := recover()
@@ -41,7 +39,6 @@ func TestArray(t *testing.T) {
 		array.Free()
 	}
 }
-
 
 func TestMemcpy(t *testing.T) {
 	defer func() {

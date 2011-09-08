@@ -4,12 +4,10 @@
 
 package driver
 
-
 import (
 	"testing"
 	"fmt"
 )
-
 
 func TestDevice(t *testing.T) {
 	fmt.Println("CUDA device", CtxGetDevice())

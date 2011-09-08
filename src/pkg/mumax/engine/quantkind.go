@@ -9,17 +9,14 @@
 
 package engine
 
-
 // Kind of quantity: VALUE, FIELD or MASK
 type QuantKind int
-
 
 const (
 	VALUE QuantKind = 1 // A value is constant in space. Has a multiplier (to store the value) but a nil *array.
 	FIELD QuantKind = 2 // A field is space-dependent. Has no multiplier but allocated array.
 	MASK  QuantKind = 3 // A mask is a point-wise multiplication of a field with a value. Has an array (possibly with NULL parts) and a multiplier.
 )
-
 
 // Human-readible string.
 func (k QuantKind) String() string {

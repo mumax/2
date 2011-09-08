@@ -14,7 +14,6 @@ import (
 	"sync"
 )
 
-
 var add Closure
 var initAdd sync.Once
 

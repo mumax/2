@@ -14,7 +14,6 @@ package runtime
 import "C"
 import ()
 
-
 // CUDA error status
 type Error int
 

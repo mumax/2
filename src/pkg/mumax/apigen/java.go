@@ -14,13 +14,11 @@ import (
 	"fmt"
 )
 
-
 type Java struct{}
 
 func (p *Java) Filename() string {
 	return "Mumax2.java"
 }
-
 
 func (j *Java) Comment() string {
 	return "//"
@@ -69,11 +67,9 @@ public class Mumax2{
 `)
 }
 
-
 func (j *Java) WriteFooter(out io.Writer) {
 	fmt.Fprint(out, `}`)
 }
-
 
 func (j *Java) WriteFunc(out io.Writer, funcName string, argTypes []reflect.Type, returnType reflect.Type) {
 	fmt.Fprintln(out)
@@ -112,7 +108,6 @@ func (j *Java) WriteFunc(out io.Writer, funcName string, argTypes []reflect.Type
 	}
 	fmt.Fprintln(out, `	}`)
 }
-
 
 var (
 	// functions for parsing go types from string

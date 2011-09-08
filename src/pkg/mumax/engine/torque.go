@@ -27,11 +27,9 @@ func (e *Engine) AddTorqueNode() {
 	t.updateSelf = &torqueUpdater{t, m, H, alpha}
 }
 
-
 type torqueUpdater struct {
 	τ, m, h, α *Quant
 }
-
 
 func (u *torqueUpdater) Update() {
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), u.α.multiplier[0])

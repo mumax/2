@@ -4,13 +4,11 @@
 
 package driver
 
-
 // This file implements CUDA driver version management
 
 //#include <cuda.h>
 import "C"
 import ()
-
 
 // Returns the CUDA driver version.
 func GetVersion() int {

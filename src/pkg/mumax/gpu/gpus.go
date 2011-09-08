@@ -21,10 +21,8 @@ import (
 	"fmt"
 )
 
-
 // INTERNAL: List of GPU ids to use for multi-GPU operation. E.g.: {0,1,2,3}
 var _useDevice []int = nil
-
 
 // INTERNAL: Device properties
 var (
@@ -32,7 +30,6 @@ var (
 	maxBlockDim        [3]int
 	maxGridDim         [3]int
 )
-
 
 // Sets a list of devices to use.
 func InitMultiGPU(devices []int, flags uint) {
@@ -44,7 +41,6 @@ func InitMultiGPU(devices []int, flags uint) {
 	initMultiGPUProperties()
 	initMultiGPUPeerAccess()
 }
-
 
 // init global _useDevice
 func initMultiGPUList(devices []int) {
@@ -64,13 +60,11 @@ func initMultiGPUList(devices []int) {
 	copy(_useDevice, devices)
 }
 
-
 // set C global variables. refer libmumax2,global.h
 func initMultiGPUCgo() {
 	Debug("setUsedDevices", _useDevice, len(_useDevice))
 	C.setUsedGPUs((*C.int)(unsafe.Pointer(&_useDevice[0])), C.int(len(_useDevice)))
 }
-
 
 // output device info
 func printMultiGPUInfo() {
@@ -80,7 +74,6 @@ func printMultiGPUInfo() {
 	}
 
 }
-
 
 // set up device properties
 func initMultiGPUProperties() {
@@ -94,7 +87,6 @@ func initMultiGPUProperties() {
 	maxGridDim[2] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Z)
 	Debug("Max", maxThreadsPerBlock, "threads per block, max", maxGridDim, "x", maxBlockDim, "threads per GPU")
 }
-
 
 // init inter-device access
 func initMultiGPUPeerAccess() {
@@ -137,10 +129,8 @@ func initMultiGPUPeerAccess() {
 	cuda.SetDevice(_useDevice[0])
 }
 
-
 // Error message
 const ERR_UNIFIED_ADDR = "A GPU does not support unified addressing and can not be used in a multi-GPU setup."
-
 
 // INTERNAL: true if all elements are 0.
 func allZero(a []int) bool {
@@ -152,7 +142,6 @@ func allZero(a []int) bool {
 	return true
 }
 
-
 // Like InitMultiGPU(), but uses all available GPUs.
 func InitAllGPUs(flags uint) {
 	var use []int
@@ -162,7 +151,6 @@ func InitAllGPUs(flags uint) {
 	}
 	InitMultiGPU(use, flags)
 }
-
 
 // Use GPU list suitable for debugging:
 // if only 1 is present: use it twice to
@@ -182,7 +170,6 @@ func InitDebugGPUs() {
 	InitMultiGPU(use, 0)
 }
 
-
 // Assures Context ctx[id] is currently active. Switches contexts only when necessary.
 func setDevice(deviceId int) {
 	// debug: test if device is supposed to be used
@@ -201,7 +188,6 @@ func setDevice(deviceId int) {
 	cuda.SetDevice(deviceId)
 }
 
-
 // Returns the list of usable devices. 
 func getDevices() []int {
 	if _useDevice == nil {
@@ -210,14 +196,12 @@ func getDevices() []int {
 	return _useDevice
 }
 
-
 // Returns the number of used GPUs.
 // This may be less than the number of available GPUs.
 // (or even more)
 func NDevice() int {
 	return len(_useDevice)
 }
-
 
 // Error message
 const (

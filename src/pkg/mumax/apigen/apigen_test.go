@@ -13,7 +13,6 @@ import (
 	"testing"
 )
 
-
 func TestApiGen(t *testing.T) {
 	APIGen()
 }

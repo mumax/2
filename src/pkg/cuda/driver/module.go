@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements loading of CUDA ptx modules
 
 //#include <cuda.h>
@@ -14,10 +13,8 @@ import (
 	"unsafe"
 )
 
-
 // Represents a CUDA CUmodule, a reference to executable device code.
 type Module uintptr
-
 
 // Loads a compute module from file
 func ModuleLoad(fname string) Module {
@@ -30,7 +27,6 @@ func ModuleLoad(fname string) Module {
 	return Module(unsafe.Pointer(mod))
 }
 
-
 // Loads a compute module from string
 func ModuleLoadData(image string) Module {
 	var mod C.CUmodule
@@ -41,7 +37,6 @@ func ModuleLoadData(image string) Module {
 	return Module(unsafe.Pointer(mod))
 }
 
-
 // Returns a Function handle
 func ModuleGetFunction(module Module, name string) Function {
 	var function C.CUfunction
@@ -51,7 +46,6 @@ func ModuleGetFunction(module Module, name string) Function {
 	}
 	return Function(unsafe.Pointer(function))
 }
-
 
 func (m Module) GetFunction(name string) Function {
 	return ModuleGetFunction(m, name)

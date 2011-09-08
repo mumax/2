@@ -12,7 +12,6 @@ import "unsafe"
 
 import ()
 
-
 // Low-level memory allocation. Not memory-safe and not garbage collected.
 // Must be freed with Free().
 // NewArray() provides a memory-safe and garbage collected alternative.
@@ -25,7 +24,6 @@ func Malloc(bytes int) uintptr {
 	return uintptr(arr)
 }
 
-
 // Low-level free of memory allocated by Malloc.
 func Free(array uintptr) {
 	err := Error(C.cudaFree(unsafe.Pointer(array)))
@@ -33,7 +31,6 @@ func Free(array uintptr) {
 		panic(err)
 	}
 }
-
 
 // Sets the first count bytes to value.
 func Memset(devPtr uintptr, value int, count int) {
@@ -43,7 +40,6 @@ func Memset(devPtr uintptr, value int, count int) {
 	}
 }
 
-
 // Low-level unsafe memory copy
 func Memcpy(dest, source uintptr, bytes int, direction MemcpyKind) {
 	//println("Memcpy ", dest, ", ", source, ", ", bytes, ", ", direction)
@@ -52,7 +48,6 @@ func Memcpy(dest, source uintptr, bytes int, direction MemcpyKind) {
 		panic(err)
 	}
 }
-
 
 // Low-level asynchronous unsafe memory copy
 // Works on device memory or page-locked host memory.
@@ -73,7 +68,6 @@ const (
 	MemcpyDeviceToDevice MemcpyKind = C.cudaMemcpyDeviceToDevice
 )
 
-
 // Gets the address of the symbol on the device (variable in global or constant memory space)
 func GetSymbolAddress(symbol string) uintptr {
 	var devptr unsafe.Pointer
@@ -84,7 +78,6 @@ func GetSymbolAddress(symbol string) uintptr {
 	return uintptr(devptr)
 }
 
-
 // Gets the size (bytes) of the symbol on the device (variable in global or constant memory space)
 func GetSymbolSize(symbol string) int {
 	var size C.size_t
@@ -94,7 +87,6 @@ func GetSymbolSize(symbol string) int {
 	}
 	return int(size)
 }
-
 
 const (
 	SIZEOF_FLOAT32    = 4

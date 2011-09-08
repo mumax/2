@@ -4,10 +4,8 @@
 
 package driver
 
-
 // This file implements "closures", wrappers around a cuda function + argument list + launch configuration.
 // The low-level func LaunchKernel() is rather arcane to use.
-
 
 
 import (
@@ -15,7 +13,6 @@ import (
 	"reflect"
 	"fmt"
 )
-
 
 // Wraps a CUDA Function, argument list, launch configuration and stream.
 type Closure struct {
@@ -27,7 +24,6 @@ type Closure struct {
 	SharedMemBytes int
 	Str            Stream
 }
-
 
 // Creates a closure for the function with argCount arguments.
 func Close(f Function, argCount int) (c Closure) {
@@ -50,7 +46,6 @@ func (c *Closure) SetConfig(gridDim, blockDim []int) {
 		c.GridDim[i] = gridDim[i]
 	}
 }
-
 
 // Error message.
 const UNKNOWN_ARG_TYPE = "Can not handle argument type %v %v"
@@ -75,7 +70,6 @@ func (c *Closure) Seti(argIndex int, value int) {
 	*((*int)(unsafe.Pointer(c.ArgPtrs[argIndex]))) = value
 }
 
-
 // Sets a float32 argument.
 func (c *Closure) Setf(argIndex int, value float32) {
 	c.ArgPtrs[argIndex] = uintptr(unsafe.Pointer(&(c.ArgVals[argIndex])))
@@ -88,18 +82,15 @@ func (c *Closure) SetDevicePtr(argIndex int, value DevicePtr) {
 	*((*DevicePtr)(unsafe.Pointer(c.ArgPtrs[argIndex]))) = value
 }
 
-
 // Executes the closure without waiting for the result.
 // See: Closure.Synchronize()
 func (c *Closure) Go() {
 	LaunchKernel(c.Func, c.GridDim[0], c.GridDim[1], c.GridDim[2], c.BlockDim[0], c.BlockDim[1], c.BlockDim[2], c.SharedMemBytes, c.Str, c.ArgPtrs)
 }
 
-
 func (c *Closure) Synchronize() {
 	c.Str.Synchronize()
 }
-
 
 func (c *Closure) Call() {
 	c.Go()

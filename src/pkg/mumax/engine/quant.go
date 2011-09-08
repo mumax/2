@@ -47,9 +47,7 @@ type Quant struct {
 	kind       QuantKind   // VALUE, FIELD or MASK
 }
 
-
 //____________________________________________________________________ init
-
 
 // Returns a new quantity. See Quant.init().
 func newQuant(name string, nComp int, size3D []int, kind QuantKind, desc ...string) *Quant {
@@ -58,7 +56,6 @@ func newQuant(name string, nComp int, size3D []int, kind QuantKind, desc ...stri
 	return q
 }
 
-
 // Number of components.
 const (
 	SCALAR   = 1
@@ -66,7 +63,6 @@ const (
 	SYMMTENS = 6
 	TENS     = 9
 )
-
 
 // Initiates a field with nComp components and array size size3D.
 // When size3D == nil, the field is space-independent (homogeneous) and the array will
@@ -122,7 +118,6 @@ func ones(n int) []float32 {
 	return ones
 }
 
-
 // array with n 0's.
 func zeros(n int) []float32 {
 	zeros := make([]float32, n)
@@ -132,9 +127,7 @@ func zeros(n int) []float32 {
 	return zeros
 }
 
-
 //____________________________________________________________________ set
-
 
 //
 func (q *Quant) SetField(field *host.Array) {
@@ -151,7 +144,6 @@ func (q *Quant) SetValue(val []float32) {
 	}
 	q.Invalidate() //!
 }
-
 
 func checkKind(q *Quant, kind QuantKind) {
 	if q.kind != kind {
@@ -175,7 +167,6 @@ func checkKind(q *Quant, kind QuantKind) {
 //	q.multiplier[0] = value
 //}
 
-
 //____________________________________________________________________ get
 
 // Gets the name
@@ -187,7 +178,6 @@ func (q *Quant) Name() string {
 func (q *Quant) NComp() int {
 	return q.nComp
 }
-
 
 // Gets the GPU array.
 func (q *Quant) Array() *gpu.Array {
@@ -211,11 +201,9 @@ func (q *Quant) Buffer() *host.Array {
 	return q.buffer
 }
 
-
 func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr()[0] != 0
 }
-
 
 // If the quantity represents a space-independent scalar, return its value.
 //func (q *Quant) ScalarValue() float32 {
@@ -225,9 +213,7 @@ func (q *Quant) IsSpaceDependent() bool {
 //return q.multiplier[0]
 //}
 
-
 //____________________________________________________________________ tree walk
-
 
 // If q.upToDate is false, update this node recursively.
 // First Update all parents (on which this node depends),
@@ -251,7 +237,6 @@ func (q *Quant) Update() {
 	q.upToDate = true
 }
 
-
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
@@ -261,7 +246,6 @@ func (q *Quant) Invalidate() {
 		c.Invalidate()
 	}
 }
-
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.

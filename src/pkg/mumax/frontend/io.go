@@ -18,7 +18,6 @@ import (
 	"strings"
 )
 
-
 // makes a fifo
 // syscall.Mkfifo seems unavailable for the moment.
 func mkFifo(fname string) {
@@ -27,7 +26,6 @@ func mkFifo(fname string) {
 		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
 	}
 }
-
 
 // reads a line from the reader and splits it in words
 func parseLine(in io.Reader) (words []string, eof bool) {

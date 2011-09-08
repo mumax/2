@@ -11,7 +11,6 @@ import (
 	"mumax/queue"
 )
 
-
 func main() {
 	queue.Main()
 }

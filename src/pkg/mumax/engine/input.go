@@ -36,7 +36,6 @@ func Read(in io.Reader) *host.Array {
 	return arr
 }
 
-
 // reads a 32-bit int
 func readInt(in io.Reader) int {
 	var bytes4 [4]byte
@@ -71,7 +70,6 @@ func readData(in io.Reader, data []float32) {
 //	return *((*float32)(unsafe.Pointer(bytes)))
 //}
 
-
 // Reads data from the reader to the
 // (already allocated) tensor.
 //func (t *T) ReadFrom(in_ io.Reader) {
@@ -80,7 +78,6 @@ func readData(in io.Reader, data []float32) {
 //	Assert(EqualSize(size, t.Size()))
 //	readData(in, t.List())
 //}
-
 
 // Reads data from the named file to the
 // (already allocated) tensor.

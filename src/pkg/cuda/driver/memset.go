@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements CUDA memset functions.
 
 //#include <cuda.h>
@@ -21,7 +20,6 @@ func MemsetD32(dst DevicePtr, value uint32, N int64) {
 		panic(err)
 	}
 }
-
 
 // Asynchronously sets the first N 32-bit values of dst array to value.
 func MemsetD32Async(dst DevicePtr, value uint32, N int64, stream Stream) {

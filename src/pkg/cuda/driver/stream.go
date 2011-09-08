@@ -27,7 +27,6 @@ func StreamCreate() Stream {
 	return Stream(unsafe.Pointer(stream))
 }
 
-
 // Destroys the asynchronous stream
 func (stream *Stream) Destroy() {
 	str := *stream
@@ -37,7 +36,6 @@ func (stream *Stream) Destroy() {
 		panic(err)
 	}
 }
-
 
 // Destroys an asynchronous stream
 func StreamDestroy(stream *Stream) {
@@ -56,7 +54,6 @@ func (stream Stream) Synchronize() {
 func (stream Stream) Query() Result {
 	return Result(C.cuStreamQuery(C.CUstream(unsafe.Pointer(stream))))
 }
-
 
 // Returns Success if all operations have completed, ErrorNotReady otherwise
 func StreamQuery(stream Stream) Result {

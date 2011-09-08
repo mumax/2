@@ -15,9 +15,7 @@ import (
 	"runtime"
 )
 
-
 const MSG_ASSERTIONFAILED = "Assertion failed: %v line %v"
-
 
 // Panics if test is false
 func Assert(test bool) {
@@ -27,14 +25,12 @@ func Assert(test bool) {
 	}
 }
 
-
 // Panics if test is false, printing the message.
 func AssertMsg(test bool, msg ...interface{}) {
 	if !test {
 		panic(Bug(fmt.Sprint(msg...)))
 	}
 }
-
 
 // Panics if the slice are not equal.
 // Used to check for equal tensor sizes.

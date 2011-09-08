@@ -7,7 +7,6 @@
 
 package engine
 
-
 import (
 	. "mumax/common"
 )

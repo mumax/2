@@ -15,7 +15,6 @@ import (
 	"sync"
 )
 
-
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 type Array struct {
 	List         []float32       // Underlying contiguous storage
@@ -26,7 +25,6 @@ type Array struct {
 	Size3D       []int           // {size0, size1, size2}
 	sync.RWMutex                 // mutex for safe concurrent access to this array
 }
-
 
 // Initializes a pre-allocated Array struct
 func (t *Array) Init(components int, size3D []int) {
@@ -40,7 +38,6 @@ func (t *Array) Init(components int, size3D []int) {
 	t.Size4D = t.Size[:]
 	t.Size3D = t.Size[1:]
 }
-
 
 // Allocates an returns a new Array
 func NewArray(components int, size3D []int) *Array {
@@ -56,7 +53,6 @@ func (a *Array) Rank() int {
 func (a *Array) Len() int {
 	return a.Size[0] * a.Size[1] * a.Size[2] * a.Size[3]
 }
-
 
 func (a *Array) NComp() int {
 	return a.Size[0]

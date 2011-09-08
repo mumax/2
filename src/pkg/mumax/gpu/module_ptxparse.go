@@ -61,7 +61,6 @@ func parsePTXArgTypes(fname string) map[string][]argInfo {
 	return types
 }
 
-
 // Enumerates PTX argument types.
 const (
 	invalid = iota

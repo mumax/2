@@ -20,7 +20,6 @@ import (
 	"reflect"
 )
 
-
 // An RPC server using simple JSON encoding.
 // Note: we do not use the official JSON-RPC protocol
 // but a simpler variant well-suited for our needs.
@@ -36,7 +35,6 @@ type jsonRPC struct {
 	method   map[string]reflect.Value // list of methods that can be called
 }
 
-
 // Sets up the RPC to read JSON-encoded function calls from in and return
 // the result via out. All public methods of the receiver are made accessible.
 func (j *jsonRPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
@@ -48,7 +46,6 @@ func (j *jsonRPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
 	j.method = make(map[string]reflect.Value)
 	AddMethods(j.method, receiver)
 }
-
 
 // Reads JSON values from j.in, calls the corresponding functions and
 // encodes the return values back to j.out.
@@ -72,7 +69,6 @@ func (j *jsonRPC) Run() {
 		}
 	}
 }
-
 
 // Calls the function specified by funcName with the given arguments and returns the return values.
 func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
@@ -110,7 +106,6 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	return ret
 }
 
-
 // Convert v to the specified type.
 // JSON returns all numbers as float64's even when, e.g., ints are needed,
 // hence such conversion. Also, convert to host.Array etc.
@@ -129,7 +124,6 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	}
 	return reflect.ValueOf(v) // do not convert
 }
-
 
 // Converts a json vector array to a host.Array.
 // Also swaps XYZ - ZYX convention
@@ -184,7 +178,6 @@ func jsonToHostArray(v interface{}) *host.Array {
 	return convertXYZ(arr)
 }
 
-
 // convert mumax return values to types suited for json encoding
 // most values remain the same, but host.Array gets converted
 // to [][][][][]float32 and transposed into ZYX userspace
@@ -198,7 +191,6 @@ func convertOutput(vals []interface{}) {
 		}
 	}
 }
-
 
 // Convert mumax's internal ZYX convention to userspace XYZ.
 func convertXYZ(arr *host.Array) *host.Array {
@@ -218,7 +210,6 @@ func convertXYZ(arr *host.Array) *host.Array {
 	}
 	return transp
 }
-
 
 // error message
 const (

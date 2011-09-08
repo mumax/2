@@ -7,14 +7,12 @@
 
 package frontend
 
-
 import (
 	//. "mumax/common"
 	"reflect"
 	"unicode"
 	"strings"
 )
-
 
 // Adds all public methods of receiver to map
 // INTERNAL, but needed by package apigen
@@ -28,7 +26,6 @@ func AddMethods(methods map[string]reflect.Value, receiver_ interface{}) {
 		}
 	}
 }
-
 
 // converts a function name in Go-style casing to the case we want in the API
 func ConvertCase(funcName string) string {

@@ -17,7 +17,6 @@ import (
 	"strings"
 )
 
-
 // Read a text file on a webserver that should contain a single string representing an integer.
 func GetLatestVersionNumber(url string) (version int) {
 	// Don't crash. Ever.

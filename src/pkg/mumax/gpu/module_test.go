@@ -30,7 +30,6 @@ func TestDuplicateFunc(test *testing.T) {
 	LoadModule(GetExecDir() + "testmodule2.ptx") // bad, contains duplicate function
 }
 
-
 //func TestModule(test *testing.T) {
 //	size := []int{4, 8, 128}
 //	dev := NewArray(1, size)

@@ -9,7 +9,6 @@ package common
 
 import ()
 
-
 // ANSI escape sequences
 const (
 	ESC        = "\033["

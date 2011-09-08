@@ -93,7 +93,6 @@ func TestAddCgo(test *testing.T) {
 	}
 }
 
-
 func BenchmarkAddClosure(bench *testing.B) {
 	bench.StopTimer()
 	// fail test on panic, do not crash

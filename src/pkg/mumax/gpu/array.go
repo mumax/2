@@ -17,7 +17,6 @@ import (
 	"sync"
 )
 
-
 // A MuMax Array represents a 3-dimensional array of N-vectors.
 //
 // Layout example for a (3,4) vsplice on 2 GPUs:
@@ -36,7 +35,6 @@ type Array struct {
 	Comp         []Array        // X,Y,Z components as arrays
 	sync.RWMutex                // mutex for safe concurrent access to this array
 }
-
 
 // Initializes the array to hold a field with the number of components and given size.
 // 	Init(3, 1000) // gives an array of 1000 3-vectors
@@ -83,7 +81,6 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	}
 }
 
-
 func (a *Array) initSize(components int, size3D []int) {
 	Ndev := len(getDevices())
 	Assert(components > 0)
@@ -114,7 +111,6 @@ func NewArray(components int, size3D []int) *Array {
 	return t
 }
 
-
 // Returns an array without underlying storage. 
 // This is used for space-independent quantities. These pass
 // a multiplier value and a null pointer for each GPU.
@@ -125,7 +121,6 @@ func NilArray(components int, size3D []int) *Array {
 	t.Init(components, size3D, false)
 	return t
 }
-
 
 // Frees the underlying storage and sets the size to zero.
 func (v *Array) Free() {
@@ -145,12 +140,10 @@ func (v *Array) Free() {
 	}
 }
 
-
 // Address of part of the array on device deviceId.
 func (a *Array) DevicePtr() []cu.DevicePtr {
 	return a.pointer
 }
-
 
 // Total number of elements
 func (a *Array) Len() int {
@@ -172,12 +165,10 @@ func (a *Array) NComp() int {
 	return a._size[0]
 }
 
-
 // Size of the vector field
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
-
 
 // Copy from device array to device array.
 func (dst *Array) CopyFromDevice(src *Array) {
@@ -196,7 +187,6 @@ func (dst *Array) CopyFromDevice(src *Array) {
 	dst.Stream.Sync()
 
 }
-
 
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(srca *host.Array) {
@@ -220,7 +210,6 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 		}
 	}
 }
-
 
 // Copy from device array to host array.
 func (src *Array) CopyToHost(dsta *host.Array) {
@@ -246,14 +235,12 @@ func (src *Array) CopyToHost(dsta *host.Array) {
 
 }
 
-
 // DEBUG: Make a freshly allocated copy on the host.
 func (src *Array) LocalCopy() *host.Array {
 	dst := host.NewArray(src.NComp(), src.Size3D())
 	src.CopyToHost(dst)
 	return dst
 }
-
 
 func (a *Array) Zero() {
 	slices := a.pointer

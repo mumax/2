@@ -11,7 +11,6 @@ import (
 	. "mumax/common"
 )
 
-
 func (e *Engine) Step() {
 	Debug("Engine.Step")
 

@@ -11,7 +11,6 @@ import (
 	"mumax/apigen"
 )
 
-
 func main() {
 	apigen.APIGen()
 }

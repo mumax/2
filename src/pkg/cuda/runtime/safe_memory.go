@@ -15,7 +15,6 @@ import (
 	"fmt"
 )
 
-
 // High-level safe memory copy.
 // Copies src to dest, each of which can be either a *cuda.Array (on the device)
 // or a Go Array or slice type (on the host).
@@ -48,7 +47,6 @@ func Copy(dest, src interface{}) {
 	}
 }
 
-
 // Specialized version of Copy() to copy to the device form
 // an arbitrary array or slice type on the host.
 // E.g.: CopyHostToDevice(cuda.NewArray(1000), make([]float32, 250))
@@ -77,7 +75,6 @@ func CopyHostToDevice(dest Array, src interface{}) {
 	}
 	Memcpy(dest.Pointer(), addrElem0, bytes, MemcpyHostToDevice)
 }
-
 
 // Specialized version of Copy() to copy to an arbitrary array or slice type on the host,
 // from the device.
@@ -108,7 +105,6 @@ func CopyDeviceToHost(dest interface{}, src Array) {
 	Memcpy(addrElem0, src.Pointer(), src.Bytes(), MemcpyDeviceToHost)
 }
 
-
 // Specialized version of Copy(), device to device.
 // This function provides more compile-time type safety than Copy()
 func CopyDeviceToDevice(dest, src Array) {
@@ -118,7 +114,6 @@ func CopyDeviceToDevice(dest, src Array) {
 	}
 	Memcpy(dest.Pointer(), src.Pointer(), src.Bytes(), MemcpyDeviceToDevice)
 }
-
 
 // Specialized version of Copy(), host-to-host. 
 // src and dest must be array or slice types.
@@ -150,7 +145,6 @@ func CopyHostToHost(dest, src interface{}) {
 	Memcpy(dstAddrElem0, srcAddrElem0, srcBytes, MemcpyHostToHost)
 }
 
-
 // Specialized version of CopyHostToDevice for host []float32 arrays.
 // This function provides more compile-time type safety than Copy()
 func CopyFloat32ArrayToDevice(dest Array, src []float32) {
@@ -161,7 +155,6 @@ func CopyFloat32ArrayToDevice(dest Array, src []float32) {
 	}
 	Memcpy(dest.Pointer(), uintptr(unsafe.Pointer(&src[0])), N, MemcpyHostToDevice)
 }
-
 
 // Specialized version of CopyDeviceToHost for host []float32 arrays.
 // This function provides more compile-time type safety than Copy()

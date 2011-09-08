@@ -11,7 +11,6 @@ import "C"
 
 import ()
 
-
 // Returns whether peer access is possible between device and peerDevice.
 func DeviceCanAccessPeer(device, peerDevice int) bool {
 	var can C.int

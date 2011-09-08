@@ -51,7 +51,6 @@ func clientMain() {
 	client.Run()
 }
 
-
 // return the output directory
 func outputDir(inputFile string) string {
 	if *flag_outputdir != "" {
@@ -59,7 +58,6 @@ func outputDir(inputFile string) string {
 	}
 	return inputFile + ".out"
 }
-
 
 // make the output dir
 func initOutputDir(outputDir string) {
@@ -73,7 +71,6 @@ func initOutputDir(outputDir string) {
 	CheckErr(errOut, ERR_IO)
 
 }
-
 
 // initialize the logger
 func initLogger(outputDir string) {
@@ -95,7 +92,6 @@ func initLogger(outputDir string) {
 	InitLogger(logFile, opts)
 	Debug("Logging to", logFile)
 }
-
 
 // given a file name (e.g. file.py)
 // this returns a command to run the file (e.g. python file.py, java File)
@@ -121,7 +117,6 @@ func commandForFile(file string) (command string, args []string) {
 	panic(Bug("unreachable"))
 	return "", nil
 }
-
 
 const (
 	INFIFO        = "in.fifo"   // FIFO filename for mumax->subprocess text-based function calls.

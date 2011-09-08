@@ -40,7 +40,6 @@ var (
 	flag_sched     *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
 )
 
-
 // Mumax2 main function
 func Main() {
 	// first test for flags that do not actually run a simulation
@@ -121,7 +120,6 @@ func initMultiGPU() {
 	gpu.InitMultiGPU(gpus, cuFlags)
 }
 
-
 func parseCuFlags() uint {
 	cudaflag := *flag_sched
 	var flag uint
@@ -154,7 +152,6 @@ func inputFile() string {
 	return flag.Arg(0)
 }
 
-
 func cleanup() {
 	Debug("cleanup")
 
@@ -186,7 +183,6 @@ func cleanup() {
 
 	// kill subprocess
 }
-
 
 func crashreport(err interface{}) {
 	status := 0
@@ -230,7 +226,6 @@ func getCrashStack() string {
 	stack := debug.Stack()
 	return "stack trace:\n" + string(stack)
 }
-
 
 // sets up a timeout that will kill mumax when it runs too long
 func initTimeout() {

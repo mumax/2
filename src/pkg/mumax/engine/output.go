@@ -25,7 +25,6 @@ const (
 	T_MAGIC = 0x0A317423 // First 32-bit word of tensor blob. Identifies the format. Little-endian ASCII for "#t1\n"
 )
 
-
 // Writes the array
 func Write(out io.Writer, a *host.Array) {
 	writeInt(out, T_MAGIC)
@@ -36,7 +35,6 @@ func Write(out io.Writer, a *host.Array) {
 	writeData(out, a.List)
 }
 
-
 // writes an integer
 func writeInt(out io.Writer, i int) {
 	_, err := out.Write((*[4]byte)(unsafe.Pointer(&i))[:])
@@ -44,7 +42,6 @@ func writeInt(out io.Writer, i int) {
 		panic(IOErr(err.String()))
 	}
 }
-
 
 // block this many float's for binary I/O
 const block = 256
@@ -69,7 +66,6 @@ func writeData(out io.Writer, data []float32) {
 	}
 }
 
-
 //func writeFloat(out io.Writer, f float32) {
 //	_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
 //	if err != nil {
@@ -86,7 +82,6 @@ func writeData(out io.Writer, data []float32) {
 //func FloatToBytes(f float32) []byte {
 //	return (*[4]byte)(unsafe.Pointer(&f))[:]
 //}
-
 
 // TODO: 
 // also necessary to implement io.WriterTo, ReaderFrom

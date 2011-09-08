@@ -26,7 +26,6 @@ func FEncode(filename string, f File) {
 	Encode(out, f)
 }
 
-
 func Encode(out_ io.Writer, f File) {
 	out := bufio.NewWriter(out_)
 	defer out.Flush()
@@ -128,7 +127,6 @@ func writeDataText(out io.Writer, tens *host.Array) {
 	hdr(out, "End", "Data "+format)
 }
 
-
 func writeDataBinary4(out io.Writer, tens tensor.Interface) {
 	data := (tensor.ToT4(tens)).Array()
 	vecsize := tens.Size()
@@ -176,7 +174,6 @@ func floats2bytes(floats []float32) []byte {
 	// 	l := len(floats)
 	return (*[4]byte)(unsafe.Pointer(&floats[0]))[:]
 }
-
 
 // Writes a header key/value pair to out:
 // # Key: Value

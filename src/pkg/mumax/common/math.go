@@ -14,12 +14,10 @@ import (
 	"math"
 )
 
-
 // Integer division rounded up
 func DivUp(x, y int) int {
 	return ((x - 1) / y) + 1
 }
-
 
 // True if not infinite and not NaN
 func IsReal(f float32) bool {
@@ -28,7 +26,6 @@ func IsReal(f float32) bool {
 	}
 	return !math.IsNaN(float64(f))
 }
-
 
 // True if not infinite, not NaN and not zero
 func IsFinite(f float32) bool {
@@ -41,12 +38,10 @@ func IsFinite(f float32) bool {
 	return f != 0
 }
 
-
 // True if f is (positive or negative) infinity
 func IsInf(f float32) bool {
 	return math.IsInf(float64(f), 0)
 }
-
 
 // Absolute value.
 func Abs32(x float32) float32 {
@@ -56,12 +51,10 @@ func Abs32(x float32) float32 {
 	return x
 }
 
-
 // Square root.
 func Sqrt32(x float32) float32 {
 	return float32(math.Sqrt(float64(x)))
 }
-
 
 // Product of ints.
 func Prod(a []int) int {

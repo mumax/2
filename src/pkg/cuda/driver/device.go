@@ -4,7 +4,6 @@
 
 package driver
 
-
 // This file implements CUDA driver device management
 
 //#include <cuda.h>
@@ -12,10 +11,8 @@ import "C"
 
 import ()
 
-
 // CUDA Device number.
 type Device int
-
 
 // Returns the number of devices with compute capability greater than or equal to 1.0 that are available for execution.
 func DeviceGetCount() int {
@@ -27,7 +24,6 @@ func DeviceGetCount() int {
 	return int(count)
 }
 
-
 // Returns in a device handle given an ordinal in the range [0, DeviceGetCount()-1].
 func DeviceGet(ordinal int) Device {
 	var device C.CUdevice
@@ -37,7 +33,6 @@ func DeviceGet(ordinal int) Device {
 	}
 	return Device(device)
 }
-
 
 // Returns the compute capability of the device.
 func (device Device) ComputeCapability() (major, minor int) {
@@ -56,7 +51,6 @@ func DeviceComputeCapability(device Device) (major, minor int) {
 	return
 }
 
-
 // Returns the total amount of memory available on the device in bytes.
 func (device Device) TotalMem() int64 {
 	return DeviceTotalMem(device)
@@ -72,7 +66,6 @@ func DeviceTotalMem(device Device) int64 {
 	return int64(bytes)
 }
 
-
 // Gets the value of a device attribute.
 func DeviceGetAttribute(attrib DeviceAttribute, dev Device) int {
 	var attr C.int
@@ -82,7 +75,6 @@ func DeviceGetAttribute(attrib DeviceAttribute, dev Device) int {
 	}
 	return int(attr)
 }
-
 
 // Gets the value of a device attribute.
 func (dev Device) GetAttribute(attrib DeviceAttribute) int {
@@ -100,7 +92,6 @@ func DeviceGetName(dev Device) string {
 	}
 	return C.GoString(cstr)
 }
-
 
 // Gets the name of the device.
 func (dev Device) GetName() string {

@@ -18,7 +18,6 @@ import (
 
 type Stream []cu.Stream
 
-
 // Creates a new multi-GPU stream. Its use is similar as cu.Stream,
 // but operates on all GPUs at the same time.
 func NewStream() Stream {
@@ -31,7 +30,6 @@ func NewStream() Stream {
 	return Stream(str)
 }
 
-
 // Destroys the multi-GPU stream.
 func (s Stream) Destroy() {
 	for i := range s {
@@ -40,7 +38,6 @@ func (s Stream) Destroy() {
 	}
 }
 
-
 // Synchronizes with all underlying GPU-streams
 func (s Stream) Sync() {
 	for i := range s {
@@ -48,7 +45,6 @@ func (s Stream) Sync() {
 		s[i].Synchronize()
 	}
 }
-
 
 // Returns true if all underlying GPU streams have completed.
 func (s Stream) Ready() (ready bool) {
