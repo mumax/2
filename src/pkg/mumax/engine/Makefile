@@ -21,8 +21,6 @@ GOFILES=\
 	updater.go\
 	nop_updater.go\
 	pointwise_updater.go\
-	units.go\
-	universe.go\
 	input.go\
 	output.go\
 	resample.go\

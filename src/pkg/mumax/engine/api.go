@@ -39,18 +39,16 @@ func (a API) GetGridSize() (x, y, z int) {
 }
 
 // Set the cell size.
-// WARNING: convert to ZYX, internal units
+// WARNING: convert to ZYX
 func (a API) SetCellSize(x, y, z float64) {
-	l := UnitLength
-	a.Engine.SetCellSize([]float64{z / l, y / l, x / l}) // convert to internal axes and units
+	a.Engine.SetCellSize([]float64{z , y , x }) // convert to internal axes and units
 }
 
 // Set the cell size.
 // WARNING: convert to ZYX, internal units
 func (a API) GetCellSize() (x, y, z float64) {
-	l := UnitLength
 	size := a.Engine.CellSize()
-	return size[Z] * l, size[Y] * l, size[X] * l // convert to internal axes
+	return size[Z] , size[Y] , size[X]  // convert to internal axes
 }
 
 // Load a physics module. Not aware of dependencies (yet)

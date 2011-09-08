@@ -15,6 +15,7 @@ GOFILES=\
 	sizes.go\
 	size.go\
 	ansi.go\
+	constants.go\
 
 CGOFILES=\
 
