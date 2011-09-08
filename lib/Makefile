@@ -4,6 +4,7 @@ mumax2.py: mumax2.py.tail mumax2-apigen
 	./mumax2-apigen
 	mv mumax2.py mumax2.py.head
 	cat mumax2.py.head mumax2.py.tail > mumax2.py
+	rm -f mumax2.py.head
 
 CLEANFILES=\
 	mumax2-apigen\
