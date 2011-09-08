@@ -95,6 +95,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
 		argvals[i] = convertArg(args[i], f.Type().In(i))
+		Debug("convertArg", args[i], "=", argvals[i].Interface())
 	}
 	retVals := f.Call(argvals)
 
@@ -147,8 +148,8 @@ func jsonToFloat32Array(v interface{}) []float32 {
 		array := make([]float32, len(varray))
 		for i := range array {
 			array[i] = float32(varray[i].(float64))
-			return array
 		}
+		return array
 	}
 	panic(IOErr("Expected float32 or float32 array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
 	return nil //silence 6g
@@ -172,8 +173,8 @@ func jsonToFloat64Array(v interface{}) []float64 {
 		array := make([]float64, len(varray))
 		for i := range array {
 			array[i] = varray[i].(float64)
-			return array
 		}
+		return array
 	}
 	panic(IOErr("Expected float64 or float64 array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
 	return nil //silence 6g

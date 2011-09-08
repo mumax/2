@@ -16,11 +16,11 @@ setfield('m', m)
 m=getfield('m')
 print 'm', m
 
-Bx = 0
-By = 0
-Bz = 100e3
+Bx = 1
+By = 2
+Bz = 3
 
-setvalue('H_z', [Bx/mu0, By/mu0, Bz/mu0])
+setvalue('H_z', [Bx, By, Bz])
 
 #step()
 #step()
