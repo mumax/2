@@ -7,26 +7,34 @@
 
 package engine
 
-// This file implements the Landau-Lifshitz torque Quantity
+// This file implements the Landau-Lifshitz torque Quantity.
 // Author: Arne Vansteenkiste
 
 import (
 	"mumax/gpu"
 )
 
+// The reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
+//	d m / d t = gamma0 * Msat * τ  
+// Note: the unit of gamma0 * Msat is 1/time.
+// Thus:
+//	τ = (m x h) - α m  x (m x h)
+// with:
+//	h = H / Msat
 func (e *Engine) AddTorqueNode() {
 	e.AddQuant("torque", VECTOR, FIELD)
-	e.Depends("torque", "m", "H", "alpha")
+	e.Depends("torque", "m", "h", "alpha", "Msat")
 	t := e.Quant("torque")
 	m := e.Quant("m")
-	H := e.Quant("H")
+	H := e.Quant("h")
 	alpha := e.Quant("alpha")
+	Msat := e.Quant("alpha")
 
-	t.updateSelf = &torqueUpdater{t, m, H, alpha}
+	t.updateSelf = &torqueUpdater{t, m, H, alpha, Msat}
 }
 
 type torqueUpdater struct {
-	τ, m, h, α *Quant
+	τ, m, h, α, Msat *Quant
 }
 
 func (u *torqueUpdater) Update() {

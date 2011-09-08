@@ -1,6 +1,6 @@
 from mumax2 import *
 
-setgridsize(8, 4, 2)
+setgridsize(8, 4, 1)
 print 'gridsize', getgridsize()
 
 setcellsize(5e-9, 5e-9, 50e-9)
@@ -10,17 +10,19 @@ load('test')
 savegraph("graph.dot")
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
-
 setfield('m', m)
 
-m=getfield('m')
-print 'm', m
 
-Bx = 1
-By = 2
-Bz = 3
+Bx = 0
+By = 0
+Bz = 1000e-3 
 
-setvalue('H_z', [Bx, By, Bz])
+setvalue('H_z', [Bx/mu0, By/mu0, Bz/mu0])
+
+torque=getfield('torque')
+
+print 'toruqe', torque
+
 
 #step()
 #step()

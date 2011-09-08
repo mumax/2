@@ -41,8 +41,8 @@ type Quant struct {
 	nComp      int         // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool        // Flags if this quantity needs to be updated
 	updateSelf Updater     // Called to update this quantity
-	children   []*Quant    // Quantities this one depends on
-	parents    []*Quant    // Quantities that depend on this one
+	children   map[string]*Quant    // Quantities this one depends on, indexed by name
+	parents    map[string]*Quant    // Quantities that depend on this one, indexed by name
 	buffer     *host.Array // Host buffer for copying from/to the GPU array
 	desc       string      // Human-readable description
 	kind       QuantKind   // VALUE, FIELD or MASK
@@ -96,8 +96,8 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 	q.updateSelf = new(NopUpdater)
 
 	const CAP = 2
-	q.children = make([]*Quant, 0, CAP)
-	q.parents = make([]*Quant, 0, CAP)
+	q.children = make(map[string]*Quant)
+	q.parents = make(map[string]*Quant)
 
 	// concatenate desc strings
 	buf := ""

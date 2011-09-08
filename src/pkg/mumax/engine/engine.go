@@ -144,8 +144,8 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 			}
 		}
 
-		child.parents = append(child.parents, parent)
-		parent.children = append(parent.children, child)
+		child.parents[parent.Name()] = parent
+		parent.children[child.Name()] = child
 	}
 }
 

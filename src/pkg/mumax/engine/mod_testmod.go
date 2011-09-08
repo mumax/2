@@ -11,13 +11,17 @@ import ()
 
 // Loads a test module.
 func (e *Engine) LoadTest() {
+
 	e.AddQuant("m", VECTOR, FIELD, "magnetization")
+	e.AddQuant("Msat", VECTOR, FIELD, "saturation magn.")
+
 	e.AddQuant("alpha", SCALAR, MASK, "damping")
 
 	e.AddQuant("H_z", VECTOR, MASK, "external field")
 	e.Depends("H_z", "t")
-	e.AddQuant("H", VECTOR, FIELD, "total field")
-	e.Depends("H", "H_z")
+
+	e.AddQuant("h", VECTOR, FIELD, "red. effective field")
+	e.Depends("h", "H_z")
 
 	e.AddTorqueNode()
 
