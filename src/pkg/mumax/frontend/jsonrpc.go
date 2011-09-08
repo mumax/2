@@ -123,9 +123,12 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 		return reflect.ValueOf(jsonToHostArray(v))
 	case "[]float32":
 		return reflect.ValueOf(jsonToFloat32Array(v))
+	case "[]float64":
+		return reflect.ValueOf(jsonToFloat64Array(v))
 	}
 	return reflect.ValueOf(v) // do not convert
 }
+
 
 // Converts []interface{} array to []float32.
 // Also, converts a single float32 to a 1-element array.
@@ -137,7 +140,7 @@ func jsonToFloat32Array(v interface{}) []float32 {
 		}
 	}()
 
-	switch v.(type) { //reflect.TypeOf(v).String() {
+	switch v.(type) {
 	case float64:
 		return []float32{float32(v.(float64))}
 	case []interface{}:
@@ -148,10 +151,36 @@ func jsonToFloat32Array(v interface{}) []float32 {
 			return array
 		}
 	}
-
 	panic(IOErr("Expected float32 or float32 array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
 	return nil //silence 6g
 }
+
+
+// Converts []interface{} array to []float64.
+// Also, converts a single float64 to a 1-element array.
+func jsonToFloat64Array(v interface{}) []float64 {
+	defer func() {
+		err := recover()
+		if err != nil {
+			panic(IOErr(fmt.Sprint("Error parsing json array: ", ShortPrint(v), "\ncause: ", err)))
+		}
+	}()
+
+	switch v.(type) {
+	case float64:
+		return []float64{v.(float64)}
+	case []interface{}:
+		varray := v.([]interface{})
+		array := make([]float64, len(varray))
+		for i := range array {
+			array[i] = varray[i].(float64)
+			return array
+		}
+	}
+	panic(IOErr("Expected float64 or float64 array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
+	return nil //silence 6g
+}
+
 
 // Converts a json vector array to a host.Array.
 // Also swaps XYZ - ZYX convention

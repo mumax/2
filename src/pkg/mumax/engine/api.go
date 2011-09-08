@@ -41,14 +41,14 @@ func (a API) GetGridSize() (x, y, z int) {
 // Set the cell size.
 // WARNING: convert to ZYX
 func (a API) SetCellSize(x, y, z float64) {
-	a.Engine.SetCellSize([]float64{z , y , x }) // convert to internal axes and units
+	a.Engine.SetCellSize([]float64{z, y, x}) // convert to internal axes and units
 }
 
 // Set the cell size.
 // WARNING: convert to ZYX, internal units
 func (a API) GetCellSize() (x, y, z float64) {
 	size := a.Engine.CellSize()
-	return size[Z] , size[Y] , size[X]  // convert to internal axes
+	return size[Z], size[Y], size[X] // convert to internal axes
 }
 
 // Load a physics module. Not aware of dependencies (yet)
@@ -78,7 +78,7 @@ func (a API) Step() {
 //________________________________________________________________________________ quant
 
 // Sets the MULTIPLIER of a MASK quantity.
-func (a API) SetValue(name string, value []float32) {
+func (a API) SetValue(name string, value []float64) {
 	q := a.Engine.Quant(name)
 	q.SetMultiplier(value)
 }

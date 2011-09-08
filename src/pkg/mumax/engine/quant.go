@@ -37,7 +37,7 @@ import (
 type Quant struct {
 	name       string      // Unique identifier
 	array      *gpu.Array  // Underlying array, may be nil. Holds nil pointers for space-independent quantity
-	multiplier []float32   // Point-wise multiplication coefficients for array, may be nil
+	multiplier []float64   // Point-wise multiplication coefficients for array, may be nil
 	nComp      int         // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool        // Flags if this quantity needs to be updated
 	updateSelf Updater     // Called to update this quantity
@@ -111,8 +111,8 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 }
 
 // array with n 1's.
-func ones(n int) []float32 {
-	ones := make([]float32, n)
+func ones(n int) []float64 {
+	ones := make([]float64, n)
 	for i := range ones {
 		ones[i] = 1
 	}
@@ -120,8 +120,8 @@ func ones(n int) []float32 {
 }
 
 // array with n 0's.
-func zeros(n int) []float32 {
-	zeros := make([]float32, n)
+func zeros(n int) []float64 {
+	zeros := make([]float64, n)
 	for i := range zeros {
 		zeros[i] = 0
 	}
@@ -138,7 +138,7 @@ func (q *Quant) SetField(field *host.Array) {
 }
 
 // Set the multiplier of a mask
-func (q *Quant) SetMultiplier(val []float32) {
+func (q *Quant) SetMultiplier(val []float64) {
 	Debug("SetMultiplier", q.name, val)
 	checkKind(q, MASK)
 	if len(val) != q.nComp {
