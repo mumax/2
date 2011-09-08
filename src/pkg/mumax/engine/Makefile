@@ -17,7 +17,8 @@ GOFILES=\
 	mod_testmod.go\
 	quant.go\
 	quantkind.go\
-	torque.go\
+	torque_node.go\
+	sum_node.go\
 	updater.go\
 	nop_updater.go\
 	pointwise_updater.go\

@@ -35,17 +35,17 @@ import (
 // Quantities are the nodes of an acyclic graph representing the differential
 // equation to be solved.
 type Quant struct {
-	name       string      // Unique identifier
-	array      *gpu.Array  // Underlying array, may be nil. Holds nil pointers for space-independent quantity
-	multiplier []float64   // Point-wise multiplication coefficients for array, may be nil
-	nComp      int         // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
-	upToDate   bool        // Flags if this quantity needs to be updated
-	updateSelf Updater     // Called to update this quantity
-	children   map[string]*Quant    // Quantities this one depends on, indexed by name
-	parents    map[string]*Quant    // Quantities that depend on this one, indexed by name
-	buffer     *host.Array // Host buffer for copying from/to the GPU array
-	desc       string      // Human-readable description
-	kind       QuantKind   // VALUE, FIELD or MASK
+	name       string            // Unique identifier
+	array      *gpu.Array        // Underlying array, may be nil. Holds nil pointers for space-independent quantity
+	multiplier []float64         // Point-wise multiplication coefficients for array, may be nil
+	nComp      int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
+	upToDate   bool              // Flags if this quantity needs to be updated
+	updateSelf Updater           // Called to update this quantity
+	children   map[string]*Quant // Quantities this one depends on, indexed by name
+	parents    map[string]*Quant // Quantities that depend on this one, indexed by name
+	buffer     *host.Array       // Host buffer for copying from/to the GPU array
+	desc       string            // Human-readable description
+	kind       QuantKind         // VALUE, FIELD or MASK
 }
 
 //____________________________________________________________________ init
