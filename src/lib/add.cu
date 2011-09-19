@@ -33,8 +33,14 @@ void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart) {
 ///@internal
 __global__ void maddKern(float* dst, float* a, float* b, float mulB, int Npart) {
 	int i = threadindex;
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
 	if (i < Npart) {
-		dst[i] = a[i] + mulB * b[i];
+		dst[i] = a[i] + mulB * bMask;
 	}
 }
 

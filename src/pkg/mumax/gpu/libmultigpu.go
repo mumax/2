@@ -30,7 +30,16 @@ func Add(dst, a, b *Array) {
 }
 
 // Multiply-add: dst = a + mulB*b
+// b may contain NULL pointers, implemented as all 1's.
 func Madd(dst, a, b *Array, mulB float32) {
+	Debug("gpu.Madd", dst, a, b, mulB)
+	Debug("C.maddAsync",
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
 	C.maddAsync(
 		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
