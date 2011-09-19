@@ -25,7 +25,7 @@ func (e *Engine) AddSumNode(name string, args ...string) {
 		parents[i] = e.Quant(args[i])
 	}
 	e.Depends(name, args...)
-	sum.updateSelf = &sumUpdater{sum, parents}
+	sum.updater = &sumUpdater{sum, parents}
 }
 
 type sumUpdater struct {

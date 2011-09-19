@@ -40,7 +40,7 @@ type Quant struct {
 	multiplier []float64         // Point-wise multiplication coefficients for array, may be nil
 	nComp      int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool              // Flags if this quantity needs to be updated
-	updateSelf Updater           // Called to update this quantity
+	updater    Updater           // Called to update this quantity
 	children   map[string]*Quant // Quantities this one depends on, indexed by name
 	parents    map[string]*Quant // Quantities that depend on this one, indexed by name
 	buffer     *host.Array       // Host buffer for copying from/to the GPU array
@@ -93,7 +93,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 		panic(Bug("Quant.init kind"))
 	}
 
-	q.updateSelf = new(NopUpdater)
+	q.updater = new(NopUpdater)
 
 	const CAP = 2
 	q.children = make(map[string]*Quant)
@@ -237,7 +237,7 @@ func (q *Quant) Update() {
 
 	// now update self
 	Debug("update " + q.Name())
-	q.updateSelf.Update()
+	q.updater.Update()
 
 	q.upToDate = true
 }

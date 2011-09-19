@@ -31,7 +31,7 @@ func (e *Engine) AddTorqueNode() {
 	alpha := e.Quant("alpha")
 	Msat := e.Quant("alpha")
 
-	t.updateSelf = &torqueUpdater{t, m, H, alpha, Msat}
+	t.updater = &torqueUpdater{t, m, H, alpha, Msat}
 }
 
 type torqueUpdater struct {
