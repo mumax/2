@@ -266,7 +266,8 @@ const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
 // Pointer arithmetic.
 func offset(ptr uintptr, bytes int) uintptr {
 	if ptr == 0{
-		panic(Bug("offsetting null pointer"))
+		return 0
+		//panic(Bug("offsetting null pointer"))
 	}
 	return ptr + uintptr(bytes)
 }

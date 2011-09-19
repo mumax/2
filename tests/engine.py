@@ -19,9 +19,9 @@ Bz = 1000e-3
 
 setvalue('h_z', [Bx/mu0, By/mu0, Bz/mu0])
 
-torque=getfield('torque')
+h=getfield('h')
 
-print 'torque', torque
+print 'h', h
 
 
 #step()
