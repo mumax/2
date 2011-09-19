@@ -166,6 +166,16 @@ func (a *Array) NComp() int {
 	return a._size[0]
 }
 
+
+func(a*Array)Component(i int) *Array{
+	return &(a.Comp[i])
+}
+
+
+func(a*Array)Pointers()[]cu.DevicePtr{
+	return a.pointer
+}
+
 // Size of the vector field
 func (a *Array) Size3D() []int {
 	return a.size3D

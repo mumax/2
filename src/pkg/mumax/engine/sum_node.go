@@ -40,11 +40,11 @@ func (u *sumUpdater) Update() {
 	parents := u.parents
 	for i := range parents{
 		parent := parents[i]
-		for c := range sum.Components{
-			parComp := parent.array.Component[c]
+		for c := 1; c<sum.NComp(); c++{
+			parComp := parent.array.Component(c)
 			parMul := parent.multiplier[c]
-			sumComp := sum.array.Component[c]
-			gpu.Madd(sumComp.pointer, parComp.pointer, parMul)	
+			sumComp := sum.array.Component(c)
+			gpu.Madd(sumComp, sumComp, parComp, float32(parMul)	)
 		}
 	}
 }
