@@ -29,22 +29,22 @@ func (e *Engine) AddSumNode(name string, args ...string) {
 }
 
 type sumUpdater struct {
-	sum *Quant
+	sum     *Quant
 	parents []*Quant
 }
 
 func (u *sumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
-	sum.array.Zero()	
+	sum.array.Zero()
 	parents := u.parents
-	for i := range parents{
+	for i := range parents {
 		parent := parents[i]
-		for c := 1; c<sum.NComp(); c++{
+		for c := 1; c < sum.NComp(); c++ {
 			parComp := parent.array.Component(c)
 			parMul := parent.multiplier[c]
 			sumComp := sum.array.Component(c)
-			gpu.Madd(sumComp, sumComp, parComp, float32(parMul)	)
+			gpu.Madd(sumComp, sumComp, parComp, float32(parMul))
 		}
 	}
 }

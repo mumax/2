@@ -7,13 +7,12 @@
 
 package gpu
 
-import(
-		"testing"
-		"rand"
+import (
+	"testing"
+	"rand"
 )
 
-
-func TestAdd(test *testing.T){
+func TestAdd(test *testing.T) {
 	// fail test on panic, do not crash
 	defer func() {
 		if err := recover(); err != nil {
@@ -52,7 +51,7 @@ func TestAdd(test *testing.T){
 
 }
 
-func TestMadd(test *testing.T){
+func TestMadd(test *testing.T) {
 	// fail test on panic, do not crash
 	defer func() {
 		if err := recover(); err != nil {
@@ -85,16 +84,13 @@ func TestMadd(test *testing.T){
 
 	sum := s.LocalCopy()
 	for i := range sum.List {
-		if !veryclose(sum.List[i] ,ah.List[i]+3*bh.List[i]) {
+		if !veryclose(sum.List[i], ah.List[i]+3*bh.List[i]) {
 			if !test.Failed() {
 				test.Error(sum.List[i], "!=", ah.List[i], "+3*", bh.List[i])
 			}
 		}
 	}
 }
-
-
-
 
 // based on math/all_test.go from Go release.r60, copyright the Go authors.
 func tolerance(a, b, e float32) bool {
@@ -111,5 +107,5 @@ func tolerance(a, b, e float32) bool {
 	}
 	return d < e
 }
-func close(a, b float32) bool      { return tolerance(a, b, 1e-5) }
-func veryclose(a, b float32) bool  { return tolerance(a, b, 4e-7) }
+func close(a, b float32) bool     { return tolerance(a, b, 1e-5) }
+func veryclose(a, b float32) bool { return tolerance(a, b, 4e-7) }

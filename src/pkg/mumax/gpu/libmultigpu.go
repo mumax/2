@@ -29,7 +29,6 @@ func Add(dst, a, b *Array) {
 	dst.Stream.Sync()
 }
 
-
 // Multiply-add: dst = a + mulB*b
 func Madd(dst, a, b *Array, mulB float32) {
 	C.maddAsync(
@@ -41,7 +40,6 @@ func Madd(dst, a, b *Array, mulB float32) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
-
 
 // Reduced Landau-Lifshitz torque
 func Torque(τ, m, H, αMap *Array, αMul float32) {
