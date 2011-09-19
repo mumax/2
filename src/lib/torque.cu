@@ -55,6 +55,16 @@ void torqueAsync(float** tx, float** ty, float** tz, float** mx, float** my, flo
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int i = 0; i < nDevice(); i++) {
+		assert(tx[i] != NULL);
+		assert(ty[i] != NULL);
+		assert(tz[i] != NULL);
+		assert(mx[i] != NULL);
+		assert(my[i] != NULL);
+		assert(mz[i] != NULL);
+		assert(hx[i] != NULL);
+		assert(hy[i] != NULL);
+		assert(hz[i] != NULL);
+		// alphaMap may be null
 		gpu_safe(cudaSetDevice(deviceId(i)));
 		torqueKern <<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>> (tx[i],ty[i],tz[i],  mx[i],my[i],mz[i], hx[i],hy[i],hz[i], alpha_map[i], alpha_mul, Npart);
 	}

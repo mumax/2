@@ -17,11 +17,11 @@ func (e *Engine) LoadTest() {
 
 	e.AddQuant("alpha", SCALAR, MASK, "damping")
 
-	e.AddQuant("H_z", VECTOR, MASK, "external field")
-	e.Depends("H_z", "t")
+	//e.AddQuant("h_z", VECTOR, MASK, "red. zeeman field")
+	//e.Depends("h_z", "t")
 
-	e.AddQuant("h", VECTOR, FIELD, "red. effective field")
-	e.Depends("h", "H_z")
+	e.AddQuant("h", VECTOR, MASK, "red. field")
+	//e.Depends("h", "H_z")
 
 	e.AddTorqueNode()
 

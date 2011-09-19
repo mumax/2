@@ -11,7 +11,7 @@ import "C"
 
 import (
 	"unsafe"
-	//"fmt"
+	"fmt"
 )
 
 type DevicePtr uintptr
@@ -197,6 +197,6 @@ const (
 	MEMHOSTREGISTER_DEVICEMAP MemHostRegisterFlag = C.CU_MEMHOSTREGISTER_DEVICEMAP
 )
 
-//func (p DevicePtr) String() string{
-//	return fmt.Sprintf("%p", unsafe.Pointer(p))
-//}
+func (p DevicePtr) String() string {
+	return fmt.Sprint(unsafe.Pointer(p))
+}

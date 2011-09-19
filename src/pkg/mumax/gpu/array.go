@@ -15,6 +15,7 @@ import (
 	"mumax/host"
 	cu "cuda/driver"
 	"sync"
+	"fmt"
 )
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
@@ -257,4 +258,8 @@ const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
 // Pointer arithmetic.
 func offset(ptr uintptr, bytes int) uintptr {
 	return ptr + uintptr(bytes)
+}
+
+func (a *Array) String() string {
+	return fmt.Sprint("gpu.Array{pointers=", a.pointer, "size=", a.size4D, "}")
 }

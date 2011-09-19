@@ -30,6 +30,25 @@ func Add(dst, a, b *Array) {
 }
 
 func Torque(τ, m, H, αMap *Array, αMul float32) {
+	Debug("C.torqueAsync",
+		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(H.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(H.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(H.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(αMap.pointer[0]))),
+		(C.float)(αMul),
+
+		(*C.CUstream)(unsafe.Pointer(&(τ.Stream[0]))),
+
+		(C.int)(m.partLen3D))
 
 	C.torqueAsync(
 		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),

@@ -17,11 +17,11 @@ Bx = 0
 By = 0
 Bz = 1000e-3 
 
-setvalue('H_z', [Bx/mu0, By/mu0, Bz/mu0])
+setvalue('h', [Bx/mu0, By/mu0, Bz/mu0])
 
 torque=getfield('torque')
 
-print 'toruqe', torque
+print 'torque', torque
 
 
 #step()

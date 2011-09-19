@@ -11,6 +11,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -38,5 +39,6 @@ type torqueUpdater struct {
 }
 
 func (u *torqueUpdater) Update() {
+	Debug("gpu.Torque", u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), float32(u.α.multiplier[0]))
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), float32(u.α.multiplier[0]))
 }
