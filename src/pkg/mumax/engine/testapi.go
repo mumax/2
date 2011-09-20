@@ -15,7 +15,7 @@ import (
 )
 
 // For testing purposes.
-func (api API) GetArray() *host.Array {
+func (api API) GetAnArray() *host.Array {
 	return host.NewArray(3, []int{4, 5, 6})
 }
 

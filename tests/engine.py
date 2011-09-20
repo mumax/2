@@ -19,7 +19,7 @@ print 'm', getfield('m')
 print
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
-print 'm', getfield('m')
+print 'm', getarray('m')
 print
 
 

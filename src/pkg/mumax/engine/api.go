@@ -189,6 +189,17 @@ func (a API) GetMask(quant string) *host.Array {
 	return buffer
 }
 
+// FOR DEBUG ONLY.
+// Gets the quantity's array, raw.
+func (a API) GetArray(quant string) *host.Array {
+	q := a.Engine.Quant(quant)
+	q.Update() //!
+	array := q.Array()
+	buffer := q.Buffer()
+	array.CopyToHost(buffer)
+	return buffer
+}
+
 //________________________________________________________________________________ internal
 
 // INTERNAL: swaps the X-Z values of the array.
