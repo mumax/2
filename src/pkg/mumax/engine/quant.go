@@ -217,6 +217,14 @@ func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr()[0] != 0
 }
 
+// Assuming the quantity represent a scalar value, return it as a number.
+func (q *Quant) Scalar() float64{
+	if q.IsSpaceDependent(){
+		panic(InputErr(q.Name() + " is space-dependent, can not return it as a scalar value"))
+	}
+	return q.multiplier[0]
+}
+
 // If the quantity represents a space-independent scalar, return its value.
 //func (q *Quant) ScalarValue() float32 {
 //if q.IsSpaceDependent() {

@@ -22,6 +22,8 @@ GOFILES=\
 	updater.go\
 	nop_updater.go\
 	pointwise_updater.go\
+	solver.go\
+	euler_solver.go\
 	input.go\
 	output.go\
 	resample.go\
