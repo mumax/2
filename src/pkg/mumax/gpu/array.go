@@ -166,10 +166,13 @@ func (a *Array) NComp() int {
 	return a._size[0]
 }
 
+// Gets the i'th component as an array.
+// E.g.: Component(0) is the x-component.
 func (a *Array) Component(i int) *Array {
 	return &(a.Comp[i])
 }
 
+// Array of pointers to parts, one per GPU.
 func (a *Array) Pointers() []cu.DevicePtr {
 	return a.pointer
 }
@@ -251,6 +254,8 @@ func (src *Array) LocalCopy() *host.Array {
 	return dst
 }
 
+
+// Makes all elements zero.
 func (a *Array) Zero() {
 	slices := a.pointer
 	for i := range slices {
@@ -263,7 +268,9 @@ func (a *Array) Zero() {
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
 
-// Pointer arithmetic.
+
+// Pointer arithmetic: returns ptr + bytes.
+// When ptr is NULL, NULL is returned.
 func offset(ptr uintptr, bytes int) uintptr {
 	if ptr == 0 {
 		return 0
@@ -272,6 +279,8 @@ func offset(ptr uintptr, bytes int) uintptr {
 	return ptr + uintptr(bytes)
 }
 
+
+// Human-readable string.
 func (a *Array) String() string {
 	return fmt.Sprint("gpu.Array{pointers=", a.pointer, "size=", a.size4D, "}")
 }
