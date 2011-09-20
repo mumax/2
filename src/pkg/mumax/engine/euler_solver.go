@@ -17,9 +17,8 @@ type EulerSolver struct {
 	y, dy, dt *Quant
 }
 
-
-func NewEuler(y, dy, dt *Quant)*EulerSolver{
-	return &EulerSolver{y,dy,dt}
+func NewEuler(y, dy, dt *Quant) *EulerSolver {
+	return &EulerSolver{y, dy, dt}
 }
 
 func (s *EulerSolver) Step() {

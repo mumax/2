@@ -20,8 +20,8 @@ func (e *Engine) Step() {
 	}
 
 	// step
-	for _, solver := range e.solver{
-		solver.Step()	
+	for _, solver := range e.solver {
+		solver.Step()
 	}
 
 	// set new t, dt, m

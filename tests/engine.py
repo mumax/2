@@ -14,6 +14,8 @@ savegraph("graph.dot")
 #print 'alphaMask', getmask('alpha'), '\n'
 #print 'alpha', getfield('alpha'), '\n'
 
+setscalar('Msat', 800e3)
+print 'Msat', getvalue('Msat'), '\n'
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
@@ -26,15 +28,13 @@ Hz = 1
 setvalue('H_z', [Hx, Hy, Hz])
 #mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
 #setmask('H_z', mask)
-print 'H_z',getvalue('H_z'), '\n'
-
+#print 'H_z',getvalue('H_z'), '\n'
 #print 'H', getfield('H'), '\n'
-
-torque=getfield('torque')
-print 'torque', torque , '\n'
-
+#torque=getfield('torque')
+#print 'torque', torque , '\n'
 #setfield('torque', m) # must fail
 
+setscalar('dt', 1e-14)
 step()
 print 'm', getfield('m'), '\n'
 

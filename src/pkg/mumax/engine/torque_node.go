@@ -11,7 +11,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	//. "mumax/common"
+	. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -44,8 +44,12 @@ type torqueUpdater struct {
 func (u *torqueUpdater) Update() {
 	multiplier := u.τ.multiplier
 	// must set ALL multiplier components
+	γ := u.γ.Scalar()
+	if γ == 0{panic(InputErr("gamma should be non-zero"))}
+	Msat := u.Msat.Scalar()
+	if Msat == 0{panic(InputErr("Msat should be non-zero"))}
 	for i := range multiplier {
-		multiplier[i] = u.γ.Scalar() * u.Msat.multiplier[0]
+		multiplier[i] = Msat * γ
 	}
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
 }
