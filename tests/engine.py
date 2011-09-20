@@ -9,7 +9,7 @@ print 'cellsize', getcellsize()
 load('test')
 savegraph("graph.dot")
 
-#setscalar('alpha', 0.1)
+#setscalar('alpha', 0.3)
 #print 'alpha', getvalue('alpha'), '\n'
 #print 'alphaMask', getmask('alpha'), '\n'
 #print 'alpha', getfield('alpha'), '\n'
@@ -21,9 +21,9 @@ m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
 print 'm', getfield('m'), '\n'
 
-Hx = 0
-Hy = 0
-Hz = 1
+Hx = 0 / mu0
+Hy = 0 / mu0
+Hz = 0.1 / mu0 #1T
 
 setvalue('H_z', [Hx, Hy, Hz])
 #mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
@@ -34,7 +34,18 @@ setvalue('H_z', [Hx, Hy, Hz])
 #print 'torque', torque , '\n'
 #setfield('torque', m) # must fail
 
-setscalar('dt', 1e-14)
-step()
-print 'm', getfield('m'), '\n'
+setscalar('dt', 1e-12)
+f = open('ll', 'w')
+for i in range(1000):
+	t = getscalar('t')
+	m = getfield('m')
+	mx = m[0][0][0][0]
+	my = m[1][0][0][0]
+	mz = m[2][0][0][0]
+	f.write(str(t) + "\t")
+	f.write(str(mx) + "\t")
+	f.write(str(my) + "\t")
+	f.write(str(mz) + "\n")
+	step()
 
+f.close()

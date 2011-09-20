@@ -48,9 +48,10 @@ func (u *sumUpdater) Update() {
 		for c := 0; c < sum.NComp(); c++ {
 			parComp := parent.array.Component(c)
 			parMul := parent.multiplier[c]
+			sumMul := sum.multiplier[c]
 			sumComp := sum.array.Component(c)
 			//Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul))
-			gpu.Madd(sumComp, sumComp, parComp, float32(parMul))
+			gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
 		}
 	}
 }

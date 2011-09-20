@@ -26,30 +26,34 @@ import (
 //	h = H / Msat
 func (e *Engine) AddTorqueNode() {
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
-	e.Depends("torque", "m", "H", "alpha", "Msat", "gamma")
+	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
 	τ.updater = &torqueUpdater{
 		τ:    e.Quant("torque"),
 		m:    e.Quant("m"),
 		H:    e.Quant("H"),
 		α:    e.Quant("alpha"),
-		Msat: e.Quant("Msat"),
+		//Msat: e.Quant("Msat"),
 		γ:    e.Quant("gamma")}
 }
 
 type torqueUpdater struct {
-	τ, m, H, α, Msat, γ *Quant
+	τ, m, H, α, γ *Quant
 }
 
 func (u *torqueUpdater) Update() {
 	multiplier := u.τ.multiplier
 	// must set ALL multiplier components
 	γ := u.γ.Scalar()
-	if γ == 0{panic(InputErr("gamma should be non-zero"))}
-	Msat := u.Msat.Scalar()
-	if Msat == 0{panic(InputErr("Msat should be non-zero"))}
+	if γ == 0 {
+		panic(InputErr("gamma should be non-zero"))
+	}
+	//Msat := u.Msat.Scalar()
+	//if Msat == 0 {
+	//	panic(InputErr("Msat should be non-zero"))
+	//}
 	for i := range multiplier {
-		multiplier[i] = Msat * γ
+		multiplier[i] =  γ
 	}
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
 }
