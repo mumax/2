@@ -14,6 +14,8 @@ Cahn's Axiom:
 
 Known issues:
 
+* MuMax and Python output is generated asynchronously. More specifically, output preceded by [python] may appear later than expected. This is not a bug but a side-effect of running the Python process in parallel to MuMax. 
+
 * Auto-saving a file in both binary and ascii OMF format will cause only one of the two to appear. This is because they have the same file names causing the first format to be overwritten by the second.
 
 * PNG images may sometimes contain black pixels when they should have been full red. This is purely an issue of the rendering and does not imply something is wrong with e.g. the magnetization.

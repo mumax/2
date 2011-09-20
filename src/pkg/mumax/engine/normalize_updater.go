@@ -8,7 +8,7 @@
 package engine
 
 import (
-	. "mumax/common"
+		//. "mumax/common"
 	"mumax/gpu"
 )
 

@@ -16,6 +16,10 @@ func (e *Engine) LoadTest() {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
 	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")
+	
+	m := e.Quant("m")
+	Msat := e.Quant("Msat")
+	m.updater = &normUpdater{m:m, Msat:Msat}
 
 	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
 	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
