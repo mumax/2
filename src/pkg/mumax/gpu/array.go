@@ -68,8 +68,10 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initCompPtrs()
 }
 
+// INTERNAL
+// initialize pointers to the component arrays.
+// called after the GPU storage has been changed.
 func (a *Array) initCompPtrs() {
-
 	for c := range a.Comp {
 		for j := range a.Comp[c].pointer {
 			//setDevice(_useDevice[j])
@@ -79,6 +81,8 @@ func (a *Array) initCompPtrs() {
 	}
 }
 
+// INTERNAL
+// initialize the sizes
 func (a *Array) initSize(components int, size3D []int) {
 	Ndev := len(getDevices())
 	Assert(components > 0)
@@ -150,9 +154,10 @@ func (v *Array) Free() {
 	for i := range v._size {
 		v._size[i] = 0
 	}
+	v.initCompPtrs() // also set component pointers to NULL
 }
 
-// Address of part of the array on device deviceId.
+// Address of part of the array on each GPU device
 func (a *Array) DevicePtr() []cu.DevicePtr {
 	return a.pointer
 }
@@ -198,6 +203,8 @@ func (a *Array) IsNil() bool {
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
+
+
 
 // Copy from device array to device array.
 func (dst *Array) CopyFromDevice(src *Array) {
