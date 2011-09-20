@@ -9,7 +9,7 @@ print 'cellsize', getcellsize()
 load('test')
 savegraph("graph.dot")
 
-#setscalar('alpha', 0.3)
+setscalar('alpha', 0.3)
 #print 'alpha', getvalue('alpha'), '\n'
 #print 'alphaMask', getmask('alpha'), '\n'
 #print 'alpha', getfield('alpha'), '\n'
@@ -19,7 +19,6 @@ print 'Msat', getvalue('Msat'), '\n'
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
-print 'm', getfield('m'), '\n'
 
 Hx = 0 / mu0
 Hy = 0 / mu0
@@ -46,3 +45,6 @@ for i in range(1000):
 	step()
 
 f.close()
+
+
+print 'm', getfield('m'), '\n'

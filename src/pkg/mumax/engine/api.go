@@ -208,10 +208,14 @@ func (a API) GetArray(quant string) *host.Array {
 
 func (a API) ProbeCell(quant string, x, y, z int) []float64 {
 	q := a.Engine.Quant(quant)
-	value := make([]float64, q.NComp())
+	q.Update() //!
+	ncomp := q.NComp()
+	value := make([]float64, ncomp)
 	for c := range value {
-		value[c] = float64(q.Array().Get(c, z, y, x))
+		value[c] = float64(q.Array().Get(c, z, y, x))                      // 
+		Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
 	}
+	swapXYZ(value)
 	return value
 }
 

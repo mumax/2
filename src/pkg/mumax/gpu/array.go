@@ -15,7 +15,6 @@ import (
 	"mumax/host"
 	cu "cuda/driver"
 	"unsafe"
-	"sync"
 	"fmt"
 )
 
@@ -25,17 +24,16 @@ import (
 // 	GPU0: X0 X1  Y0 Y1 Z0 Z1
 // 	GPU1: X2 X3  Y2 Y3 Z2 Z3
 type Array struct {
-	pointer      []cu.DevicePtr // Pointers to array parts on each GPU.
-	_size        [4]int         // INTERNAL {components, size0, size1, size2}
-	size4D       []int          // {components, size0, size1, size2}
-	size3D       []int          // {size0, size1, size2}
-	_partSize    [3]int         // INTERNAL 
-	partSize     []int          // size of the parts of the array on each gpu. 
-	partLen4D    int            // total number of floats per GPU
-	partLen3D    int            // total number of floats per GPU for one component
-	Stream                      // multi-GPU stream for general use with this array
-	Comp         []Array        // X,Y,Z components as arrays
-	sync.RWMutex                // mutex for safe concurrent access to this array
+	pointer   []cu.DevicePtr // Pointers to array parts on each GPU.
+	_size     [4]int         // INTERNAL {components, size0, size1, size2}
+	size4D    []int          // {components, size0, size1, size2}
+	size3D    []int          // {size0, size1, size2}
+	_partSize [3]int         // INTERNAL 
+	partSize  []int          // size of the parts of the array on each gpu. 
+	partLen4D int            // total number of floats per GPU
+	partLen3D int            // total number of floats per GPU for one component
+	Stream                   // multi-GPU stream for general use with this array
+	Comp      []Array        // X,Y,Z components as arrays
 }
 
 // Initializes the array to hold a field with the number of components and given size.
@@ -208,14 +206,24 @@ func (a *Array) Size3D() []int {
 
 // Get a single value
 func (a *Array) Get(comp, x, y, z int) float32 {
+	if comp < 0 || comp >= a.NComp() ||
+		x < 0 || x >= a._size[X] ||
+		y < 0 || y >= a._size[Y] ||
+		z < 0 || z >= a._size[Z] {
+		panic(InputErr("Array.Get out of range"))
+	}
+
 	var value float32
 	dev := (y * NDevice()) / a.size3D[Y] // the device on which the number resides
+	Debug("dev", dev)
 	setDevice(dev)
-	N0 := a.partSize[X]
-	N1 := a.partSize[Y]
-	N2 := a.partSize[Z]
-	index := comp*N0*N1*N2 + x*N1*N2 + y*N2 + z
-	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)), cu.DevicePtr(offset(uintptr(a.pointer[dev]), index)), 1*SIZEOF_FLOAT)
+	acomp := a.Comp[comp]
+	N0 := acomp.partSize[X]
+	N1 := acomp.partSize[Y]
+	N2 := acomp.partSize[Z]
+	index := N0*N1*N2 + x*N1*N2 + y*N2 + z
+	Debug("index", index)
+	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)), cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), index)), 1*SIZEOF_FLOAT)
 	return value
 }
 
