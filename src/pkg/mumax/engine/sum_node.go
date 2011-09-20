@@ -11,7 +11,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
+	//. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -45,7 +45,7 @@ func (u *sumUpdater) Update() {
 			parComp := parent.array.Component(c)
 			parMul := parent.multiplier[c]
 			sumComp := sum.array.Component(c)
-			Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul))
+			//Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul))
 			gpu.Madd(sumComp, sumComp, parComp, float32(parMul))
 		}
 	}

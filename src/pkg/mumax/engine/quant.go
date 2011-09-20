@@ -80,12 +80,19 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 	q.kind = kind
 
 	switch kind {
+	// A FIELD is calculated by mumax itself, not settable by the user.
+	// So it should not have a multiplier, but always have allocated storage.
 	case FIELD:
 		q.array = gpu.NewArray(nComp, size3D)
 		q.multiplier = nil
+	// A MASK should always have a value (stored in the multiplier).
+	// We initialize it to zero. The space-dependent mask is optinal
+	// and not yet allocated.
 	case MASK:
 		q.array = gpu.NilArray(nComp, size3D)
-		q.multiplier = ones(nComp)
+		q.multiplier = zeros(nComp)
+	// A VALUE is space-independent and thus does not have allocated storage.
+	// The value is stored in the multiplier and initialized to zero.
 	case VALUE:
 		q.array = nil
 		q.multiplier = zeros(nComp)

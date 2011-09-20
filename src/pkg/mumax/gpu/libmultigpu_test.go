@@ -20,34 +20,34 @@ func TestAdd(test *testing.T) {
 		}
 	}()
 
-	for _,size := range sizes(){
+	for _, size := range sizes() {
 
-	a := NewArray(3, size)
-	defer a.Free()
-	ah := a.LocalCopy()
+		a := NewArray(3, size)
+		defer a.Free()
+		ah := a.LocalCopy()
 
-	b := NewArray(3, size)
-	defer b.Free()
-	bh := b.LocalCopy()
+		b := NewArray(3, size)
+		defer b.Free()
+		bh := b.LocalCopy()
 
-	for i := range ah.List {
-		ah.List[i] = rand.Float32()
-		bh.List[i] = rand.Float32()
-	}
+		for i := range ah.List {
+			ah.List[i] = rand.Float32()
+			bh.List[i] = rand.Float32()
+		}
 
-	a.CopyFromHost(ah)
-	b.CopyFromHost(bh)
+		a.CopyFromHost(ah)
+		b.CopyFromHost(bh)
 
-	Add(a, a, b)
+		Add(a, a, b)
 
-	sum := a.LocalCopy()
-	for i := range sum.List {
-		if sum.List[i] != ah.List[i]+bh.List[i] {
-			if !test.Failed() {
-				test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
+		sum := a.LocalCopy()
+		for i := range sum.List {
+			if sum.List[i] != ah.List[i]+bh.List[i] {
+				if !test.Failed() {
+					test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
+				}
 			}
 		}
-	}
 	}
 
 }
@@ -60,37 +60,37 @@ func TestMadd(test *testing.T) {
 		}
 	}()
 
-	for _,size := range sizes(){
+	for _, size := range sizes() {
 
-	a := NewArray(3, size)
-	defer a.Free()
-	ah := a.LocalCopy()
+		a := NewArray(3, size)
+		defer a.Free()
+		ah := a.LocalCopy()
 
-	b := NewArray(3, size)
-	defer b.Free()
-	bh := b.LocalCopy()
+		b := NewArray(3, size)
+		defer b.Free()
+		bh := b.LocalCopy()
 
-	s := NewArray(3, size)
-	defer a.Free()
+		s := NewArray(3, size)
+		defer a.Free()
 
-	for i := range ah.List {
-		ah.List[i] = rand.Float32()
-		bh.List[i] = rand.Float32()
-	}
+		for i := range ah.List {
+			ah.List[i] = rand.Float32()
+			bh.List[i] = rand.Float32()
+		}
 
-	a.CopyFromHost(ah)
-	b.CopyFromHost(bh)
+		a.CopyFromHost(ah)
+		b.CopyFromHost(bh)
 
-	Madd(s, a, b, 3)
+		Madd(s, a, b, 3)
 
-	sum := s.LocalCopy()
-	for i := range sum.List {
-		if !veryclose(sum.List[i], ah.List[i]+3*bh.List[i]) {
-			if !test.Failed() {
-				test.Error(sum.List[i], "!=", ah.List[i], "+3*", bh.List[i])
+		sum := s.LocalCopy()
+		for i := range sum.List {
+			if !veryclose(sum.List[i], ah.List[i]+3*bh.List[i]) {
+				if !test.Failed() {
+					test.Error(sum.List[i], "!=", ah.List[i], "+3*", bh.List[i])
+				}
 			}
 		}
-	}
 	}
 }
 

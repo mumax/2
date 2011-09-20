@@ -9,16 +9,19 @@ print 'cellsize', getcellsize()
 load('test')
 savegraph("graph.dot")
 
-m=[ [[[1]]], [[[2]]], [[[3]]] ]
+print 'alpha', getvalue('alpha'), '\n'
+
+
+m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
 m=getfield('m')
 print 'm', m
 print
 
 
-Bx = 1
-By = 2
-Bz = 3
+Bx = 0
+By = 0
+Bz = 1
 
 setvalue('h_z', [Bx, By, Bz])
 hz = getvalue('h_z')

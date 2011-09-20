@@ -28,13 +28,12 @@ func init() {
 	SetPTXLookPath("../../../ptx")
 }
 
-
 // return a few array sizes for testing
-func sizes() [][]int{
-	return [][]int{{2,4,8},{8,2,4}}
+func sizes() [][]int {
+	return [][]int{{2, 4, 8}, {8, 2, 4}}
 }
 
 // return a few numbers of components for testing
-func comps() []int{
-	return []int{1,3}
-} 
+func comps() []int {
+	return []int{1, 3}
+}
