@@ -42,6 +42,10 @@ type torqueUpdater struct {
 }
 
 func (u *torqueUpdater) Update() {
-	u.τ.multiplier[0] = u.γ.multiplier[0] * u.Msat.multiplier[0]
+	multiplier := u.τ.multiplier
+	// must set ALL multiplier components
+	for i := range multiplier {
+		multiplier[i] = u.γ.Scalar() * u.Msat.multiplier[0]
+	}
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
 }

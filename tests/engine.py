@@ -19,7 +19,7 @@ print 'm', getfield('m')
 print
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
-print 'm', getarray('m')
+print 'm', getfield('m')
 print
 
 
@@ -39,6 +39,8 @@ print
 torque=getfield('torque')
 print 'torque', torque 
 print
+
+#setfield('torque', m) # must fail
 
 #step()
 #step()

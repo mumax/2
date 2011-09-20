@@ -115,6 +115,12 @@ func (a API) SetField(quant string, field *host.Array) {
 		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
 		field = Resample(field, qArray.Size3D())
 	}
+	// setting a field when there is a non-1 multiplier is too confusing to allow
+	for _, m := range q.multiplier {
+		if m != 1 {
+			panic(InputErr(fmt.Sprint(q.Name(), " has multiplier value ", q.multiplier, ", can not set its field unambigously.")))
+		}
+	}
 	q.SetField(field)
 }
 
