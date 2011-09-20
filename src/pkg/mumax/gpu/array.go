@@ -188,10 +188,9 @@ func (a *Array) Pointers() []cu.DevicePtr {
 	return a.pointer
 }
 
-
 // True if the array has no underlying GPU storage.
 // E.g., when created by NilArray()
-func(a*Array)IsNil()bool{
+func (a *Array) IsNil() bool {
 	return a.pointer[0] == 0
 }
 

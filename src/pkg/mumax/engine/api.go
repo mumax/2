@@ -101,7 +101,6 @@ func (a API) SetMask(name string, mask *host.Array) {
 	q.SetMask(mask)
 }
 
-
 // Sets a space-dependent field quantity, like the magnetization.
 func (a API) SetField(quant string, field *host.Array) {
 	q := a.Engine.Quant(quant)
@@ -113,17 +112,14 @@ func (a API) SetField(quant string, field *host.Array) {
 	q.SetField(field)
 }
 
-
 //________________________________________________________________________________ get quantities
-
-
 
 // Get the value of a space-independent or masked quantity.
 // Returns an array with vector components or an
 // array with just one element in case of a scalar quantity.
 func (a API) GetValue(name string) []float64 {
 	q := a.Engine.Quant(name)
-	q.Update()//!
+	q.Update() //!
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
 	swapXYZ(value)
@@ -134,26 +130,49 @@ func (a API) GetValue(name string) []float64 {
 // Similar to GetValue, but returns a single number.
 func (a API) GetScalar(name string) float64 {
 	q := a.Engine.Quant(name)
-	q.Update()//!
+	q.Update() //!
 	return q.Scalar()
 }
-
 
 // Gets a space-dependent quantity. If the quantity uses a mask,
 // value*mask is returned.
 func (a API) GetField(quant string) *host.Array {
 	q := a.Engine.Quant(quant)
 	checkKinds(q, MASK, FIELD)
-	q.Update()//!
+	q.Update() //!
 	array := q.Array()
 	buffer := q.Buffer()
-	if array.IsNil(){
-		set ones	
-	}else{
-	array.CopyToHost(buffer)
+	// NULL array is interpreted as all ones.
+	if array.IsNil() {
+		for i := range buffer.List {
+			buffer.List[i] = 1
+		}
+	} else {
+		array.CopyToHost(buffer)
 	}
-	mul with mul
+	// multiply by multiplier if not 1
+	for c := range buffer.Comp {
+		comp := buffer.Comp[c]
+		if q.multiplier[c] != 1 {
+			for i := range comp {
+				comp[i] *= float32(q.multiplier[c])
+			}
+		}
+	}
 	return buffer
+}
+
+
+
+
+// true if array contains only 1s.
+func isOnes(array []float64) bool {
+	for _, v := range array {
+		if v != 1 {
+			return false
+		}
+	}
+	return true
 }
 
 //________________________________________________________________________________ internal
@@ -172,9 +191,6 @@ func swapXYZ(array []float64) {
 //	q := e.Quant(name)
 //	q.SetValue([]float32{value})
 //}
-
-
-
 
 // Get the value of a general quantity
 //func (a API) Get(name string) interface{} {

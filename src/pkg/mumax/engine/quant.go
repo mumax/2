@@ -177,7 +177,6 @@ func (q *Quant) SetMask(field *host.Array) {
 
 //____________________________________________________________________ get
 
-
 // Assuming the quantity represent a scalar value, return it as a number.
 func (q *Quant) Scalar() float64 {
 	if q.IsSpaceDependent() {
@@ -226,7 +225,6 @@ func (q *Quant) Buffer() *host.Array {
 func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr()[0] != 0
 }
-
 
 //____________________________________________________________________ tree walk
 
