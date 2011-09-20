@@ -22,8 +22,7 @@ func (e *Engine) LoadTest() {
 
 	//e.AddQuant("h", VECTOR, FIELD, "red. field")
 	//e.Depends("h", "h_z")
-	e.AddQuant("h_k", VECTOR, MASK, Unit("k"), "kaka")
-	e.AddSumNode("h", "h_z", "h_k")
+	e.AddSumNode("h", "h_z")
 
 	e.AddTorqueNode()
 
