@@ -22,7 +22,7 @@ type Engine struct {
 	cellSize  []float64         // size of the FD cells, nil means not yet set
 	quantity  map[string]*Quant // maps quantity names onto their data structures
 	ode       [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
-	sover     []Solver
+	solver     []Solver
 	time      *Quant // time quantity is always present
 	dt        *Quant // time step quantity is always present
 }
@@ -167,6 +167,7 @@ func (e *Engine) ODE1(y, diff string) {
 		}
 	}
 	e.ode = append(e.ode, [2]*Quant{yQ, dQ})
+	e.solver = append(e.solver, NewEuler(yQ, dQ, e.dt))
 }
 
 //__________________________________________________________________ output

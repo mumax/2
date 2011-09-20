@@ -15,32 +15,26 @@ savegraph("graph.dot")
 #print 'alpha', getfield('alpha'), '\n'
 
 
-print 'm', getfield('m')
-print
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
-print 'm', getfield('m')
-print
+print 'm', getfield('m'), '\n'
 
+Hx = 0
+Hy = 0
+Hz = 1
 
-Bx = 0
-By = 0
-Bz = 1
+setvalue('H_z', [Hx, Hy, Hz])
+#mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
+#setmask('H_z', mask)
+print 'H_z',getvalue('H_z'), '\n'
 
-setvalue('H_z', [Bx, By, Bz])
-mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
-setmask('H_z', mask)
-print 'H_z',getvalue('H_z')
-print
-
-print 'H', getfield('H')
-print
+#print 'H', getfield('H'), '\n'
 
 torque=getfield('torque')
-print 'torque', torque 
-print
+print 'torque', torque , '\n'
 
 #setfield('torque', m) # must fail
 
-#step()
-#step()
+step()
+print 'm', getfield('m'), '\n'
+
