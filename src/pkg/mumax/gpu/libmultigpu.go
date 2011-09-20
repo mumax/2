@@ -32,8 +32,6 @@ func Add(dst, a, b *Array) {
 // Multiply-add: dst = a + mulB*b
 // b may contain NULL pointers, implemented as all 1's.
 func Madd(dst, a, b *Array, mulB float32) {
-	//Debug("gpu.Madd", dst, a, b, mulB)
-	//Debug("C.maddAsync", (**C.float)(unsafe.Pointer(&(dst.pointer[0]))), (**C.float)(unsafe.Pointer(&(a.pointer[0]))), (**C.float)(unsafe.Pointer(&(b.pointer[0]))), (C.float)(mulB), (*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))), C.int(dst.partLen4D))
 	C.maddAsync(
 		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
@@ -46,8 +44,6 @@ func Madd(dst, a, b *Array, mulB float32) {
 
 // Reduced Landau-Lifshitz torque
 func Torque(τ, m, H, αMap *Array, αMul float32) {
-	//Debug("C.torqueAsync", (**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))), (**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))), (**C.float)(unsafe.Pointer(&(τ.Comp[Z].pointer[0]))), (**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))), (**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))), (**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))), (**C.float)(unsafe.Pointer(&(H.Comp[X].pointer[0]))), (**C.float)(unsafe.Pointer(&(H.Comp[Y].pointer[0]))), (**C.float)(unsafe.Pointer(&(H.Comp[Z].pointer[0]))), (**C.float)(unsafe.Pointer(&(αMap.pointer[0]))), (C.float)(αMul), (*C.CUstream)(unsafe.Pointer(&(τ.Stream[0]))), (C.int)(m.partLen3D))
-
 	C.torqueAsync(
 		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))),
@@ -69,4 +65,16 @@ func Torque(τ, m, H, αMap *Array, αMul float32) {
 		(C.int)(m.partLen3D))
 	τ.Stream.Sync()
 
+}
+
+// Normalize
+func Normalize(m, normMap *Array) {
+	C.normalizeAsync(
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(normMap.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))),
+		C.int(m.partLen4D))
+	m.Stream.Sync()
 }

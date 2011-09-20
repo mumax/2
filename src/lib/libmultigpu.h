@@ -22,6 +22,7 @@ extern "C" {
 #include "multigpu.h"
 #include "add.h"
 #include "torque.h"
+#include "normalize.h"
 
 
 #ifdef __cplusplus

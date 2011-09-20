@@ -7,6 +7,7 @@ OFILES=\
 	add.o\
 	torque.o\
 	reduce.o\
+	normalize.o\
 	multigpu.o\
 
 all: libmultigpu.so
