@@ -20,8 +20,6 @@ func (e *Engine) LoadTest() {
 	e.AddQuant("h_z", VECTOR, MASK, Unit("A/m"), "zeeman field")
 	e.Depends("h_z", "t")
 
-	//e.AddQuant("h", VECTOR, FIELD, "red. field")
-	//e.Depends("h", "h_z")
 	e.AddSumNode("h", "h_z")
 
 	e.AddTorqueNode()

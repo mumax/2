@@ -25,8 +25,8 @@ func (e *Engine) AddSumNode(name string, args ...string) {
 	parents := make([]*Quant, len(args))
 	for i := range parents {
 		parents[i] = e.Quant(args[i])
-		if parents[i].Unit() != sum.Unit(){
-				panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parents[i].FullName()))
+		if parents[i].Unit() != sum.Unit() {
+			panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parents[i].FullName()))
 		}
 	}
 	e.Depends(name, args...)

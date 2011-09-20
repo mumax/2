@@ -45,7 +45,7 @@ type Quant struct {
 	parents    map[string]*Quant // Quantities that depend on this one, indexed by name
 	buffer     *host.Array       // Host buffer for copying from/to the GPU array
 	desc       string            // Human-readable description
-	unit	Unit // Unit of the multiplier value, e.g. A/m.
+	unit       Unit              // Unit of the multiplier value, e.g. A/m.
 	kind       QuantKind         // VALUE, FIELD or MASK
 }
 
@@ -199,8 +199,7 @@ func (q *Quant) NComp() int {
 	return q.nComp
 }
 
-
-func (q *Quant) Unit() Unit{
+func (q *Quant) Unit() Unit {
 	return q.unit
 }
 
@@ -231,8 +230,8 @@ func (q *Quant) IsSpaceDependent() bool {
 }
 
 // Assuming the quantity represent a scalar value, return it as a number.
-func (q *Quant) Scalar() float64{
-	if q.IsSpaceDependent(){
+func (q *Quant) Scalar() float64 {
+	if q.IsSpaceDependent() {
 		panic(InputErr(q.Name() + " is space-dependent, can not return it as a scalar value"))
 	}
 	return q.multiplier[0]

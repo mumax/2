@@ -25,7 +25,7 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for k, v := range quants {
-		label := "["+v.Unit().String()+"] "
+		label := "[" + v.Unit().String() + "] "
 		if v.desc != "" {
 			label = "label=" + `"` + k + "\\n(" + v.desc + `)"`
 		}

@@ -8,9 +8,9 @@
 package engine
 
 import (
-	//. "mumax/common"
+//. "mumax/common"
 )
 
-type Solver interface{
+type Solver interface {
 	Step()
 }

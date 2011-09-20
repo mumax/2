@@ -7,23 +7,19 @@
 
 package engine
 
-import(
+import ()
 
-)
-
-
-type EulerSolver struct{
+type EulerSolver struct {
 	y, dy, dt *Quant
 }
 
+func (s *EulerSolver) Step() {
+	//	Y := s.y	
+	//	y := Y.Array()
+	//	Dy := s.dy
+	//	dy := Dy.Array()
+	//
+	//	dt := s.dt.Scalar()	
 
-func(s *EulerSolver) Step(){
-//	Y := s.y	
-//	y := Y.Array()
-//	Dy := s.dy
-//	dy := Dy.Array()
-//
-//	dt := s.dt.Scalar()	
 
-	
 }
