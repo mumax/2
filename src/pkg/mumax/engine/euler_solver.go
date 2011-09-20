@@ -7,19 +7,34 @@
 
 package engine
 
-import ()
+import (
+	. "mumax/common"
+	"mumax/gpu"
+	"fmt"
+)
 
 type EulerSolver struct {
 	y, dy, dt *Quant
 }
 
 func (s *EulerSolver) Step() {
-	//	Y := s.y	
-	//	y := Y.Array()
-	//	Dy := s.dy
-	//	dy := Dy.Array()
-	//
-	//	dt := s.dt.Scalar()	
+		y := s.y.Array()
+		dy := s.dy.Array()
+		dyMul := s.dy.multiplier
+		checkUniform(dyMul)
+		dt := s.dt.Scalar()	
+
+		Debug("dt intern: ", dt * dyMul[0])
+		gpu.Madd(y, y, dy, float32(dt * dyMul[0]))
+
+}
 
 
+//DEBUG
+func checkUniform(array []float64){
+	for _,v := range array{
+			if v != array[0]{
+					panic(Bug(fmt.Sprint("should be all equal:", array)))
+			}
+	}
 }
