@@ -15,8 +15,10 @@ import (
 	"mumax/gpu"
 )
 
-// The reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
+// The array contains reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
 //	d m / d t = gamma0 * Msat * τ  
+// which is dimensionless and of order 1. Thus the multiplier is gamma0*Msat
+// so that the this quantity (array*multiplier) has unit 1/s.
 // Note: the unit of gamma0 * Msat is 1/time.
 // Thus:
 //	τ = (m x h) - α m  x (m x h)
@@ -40,7 +42,6 @@ type torqueUpdater struct {
 }
 
 func (u *torqueUpdater) Update() {
-	//Debug("gpu.Torque", u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), float32(u.α.Scalar()))
 	u.τ.multiplier[0] = u.γ.multiplier[0] * u.Msat.multiplier[0]
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
 }
