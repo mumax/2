@@ -85,8 +85,7 @@ func (a API) SetValue(name string, value []float64) {
 	q.SetMultiplier(value)
 }
 
-
-func(a API) GetValue(name string) []float64{
+func (a API) GetValue(name string) []float64 {
 	q := a.Engine.Quant(name)
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
@@ -95,8 +94,8 @@ func(a API) GetValue(name string) []float64{
 }
 
 // swaps the X-Z values of the array.
-func swapXYZ(array []float64){
-	if len(array) == 3{
+func swapXYZ(array []float64) {
+	if len(array) == 3 {
 		array[X], array[Z] = array[Z], array[X]
 	}
 	return

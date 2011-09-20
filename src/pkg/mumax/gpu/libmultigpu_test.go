@@ -20,7 +20,7 @@ func TestAdd(test *testing.T) {
 		}
 	}()
 
-	size := []int{8, 16, 32}
+	for _,size := range sizes(){
 
 	a := NewArray(3, size)
 	defer a.Free()
@@ -48,6 +48,7 @@ func TestAdd(test *testing.T) {
 			}
 		}
 	}
+	}
 
 }
 
@@ -59,7 +60,7 @@ func TestMadd(test *testing.T) {
 		}
 	}()
 
-	size := []int{8, 16, 32}
+	for _,size := range sizes(){
 
 	a := NewArray(3, size)
 	defer a.Free()
@@ -89,6 +90,7 @@ func TestMadd(test *testing.T) {
 				test.Error(sum.List[i], "!=", ah.List[i], "+3*", bh.List[i])
 			}
 		}
+	}
 	}
 }
 
