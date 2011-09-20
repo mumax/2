@@ -77,12 +77,14 @@ func (a API) Step() {
 
 //________________________________________________________________________________ quant
 
-// Sets the MULTIPLIER of a MASK quantity.
+// Sets the value of a quantity. The quantity must be of type VALUE or MASK.
+// If the quantity is a MASK, the value will be multiplied by a space-dependent mask
+// which typically contains dimensionless numbers between 0 and 1.
 func (a API) SetValue(name string, value []float64) {
 	q := a.Engine.Quant(name)
 	swapXYZ(value)
-	Debug("swapXYZ", value)
-	q.SetMultiplier(value)
+	//Debug("swapXYZ", value)
+	q.SetValue(value)
 }
 
 func (a API) SetMask(name string, mask *host.Array) {

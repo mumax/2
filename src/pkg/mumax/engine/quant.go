@@ -141,6 +141,25 @@ func zeros(n int) []float64 {
 //____________________________________________________________________ set
 
 
+// Set the multiplier of a MASK or the value of a VALUE
+func (q *Quant) SetValue(val []float64) {
+	Debug("SetValue", q.name, val)
+	checkKinds(q, MASK, VALUE)
+	checkComp(q, len(val))
+	for i, v := range val {
+		q.multiplier[i] = v
+	}
+	q.Invalidate() //!
+}
+
+
+// Convenience method for SetValue([]float64{val})
+func (q *Quant) SetScalar(val float64) {
+	checkKind(q, VALUE)
+	q.multiplier[0] = val
+	q.Invalidate() //!
+}
+
 // Sets a space-dependent field.
 func (q *Quant) SetField(field *host.Array) {
 	checkKind(q, FIELD)
@@ -158,58 +177,8 @@ func (q *Quant) SetMask(field *host.Array) {
 	q.Invalidate() //!
 }
 
-// INTERNAL: in case of a MASK, make sure the underlying array is allocted.
-// Used, e.g., when a space-independent mask gets replaced by a space-dependent one.
-func (q *Quant) assureAlloc() {
-	pointers := q.Array().Pointers()
-	if pointers[0] == 0 {
-		Debug("assureAlloc: " + q.Name())
-		q.Array().Alloc()
-		Debug(q.Name(), q.Array())
-	}
-}
 
-// Set the multiplier of a mask
-func (q *Quant) SetMultiplier(val []float64) {
-	Debug("SetMultiplier", q.name, val)
-	checkKind(q, MASK)
-	if len(val) != q.nComp {
-		panic(InputErr(fmt.Sprint(q.Name(), " has ", q.nComp, " components, but ", len(val), " are provided.")))
-	}
-	for i, v := range val {
-		q.multiplier[i] = v
-	}
-	q.Invalidate() //!
-}
 
-// 
-func (q *Quant) SetScalar(val float64) {
-	checkKind(q, VALUE)
-	q.multiplier[0] = val
-	q.Invalidate() //!
-}
-
-func checkKind(q *Quant, kind QuantKind) {
-	if q.kind != kind {
-		panic(InputErr(q.name + " is not " + kind.String() + " but " + q.kind.String()))
-	}
-}
-
-//// Sets the value to a space-independent scalar.
-//// The quantity must have been first initialized as scalar.
-//// If it was previously space-dependent, the array is freed.
-//func (q *Quant) SetScalar(value float32) {
-//	if q.array != nil {
-//		q.array.Free()
-//		q.array = nil
-//	}
-//
-//	if len(q.multiplier) != 1 {
-//		panic(InputErr(fmt.Sprintf(q.Name(), "has", q.NComp(), "components")))
-//	}
-//
-//	q.multiplier[0] = value
-//}
 
 //____________________________________________________________________ get
 
@@ -296,6 +265,46 @@ func (q *Quant) Invalidate() {
 		c.Invalidate()
 	}
 }
+
+
+//___________________________________________________________ 
+
+
+// INTERNAL: in case of a MASK, make sure the underlying array is allocted.
+// Used, e.g., when a space-independent mask gets replaced by a space-dependent one.
+func (q *Quant) assureAlloc() {
+	pointers := q.Array().Pointers()
+	if pointers[0] == 0 {
+		Debug("assureAlloc: " + q.Name())
+		q.Array().Alloc()
+		Debug(q.Name(), q.Array())
+	}
+}
+
+// Checks if the quantity has the specified kind
+// Panics if check fails.
+func checkKind(q *Quant, kind QuantKind) {
+	if q.kind != kind {
+		panic(InputErr(q.name + " is not " + kind.String() + " but " + q.kind.String()))
+	}
+}
+
+// Checks if the quantity has one of the specified kinds.
+// Panics if check fails.
+func checkKinds(q *Quant, kind1, kind2 QuantKind) {
+	if q.kind != kind1 && q.kind != kind2 {
+		panic(InputErr(q.name + " is not " + kind1.String() + " or " + kind2.String() + " but " + q.kind.String()))
+	}
+}
+
+// Checks if the quantity has ncomp components.
+// Panics if check fails.
+func checkComp(q *Quant, ncomp int){
+	if ncomp != q.nComp {
+		panic(InputErr(fmt.Sprint(q.Name(), " has ", q.nComp, " components, but ", ncomp, " are provided.")))
+	}
+}
+
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.
