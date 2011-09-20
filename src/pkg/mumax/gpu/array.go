@@ -51,17 +51,7 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.pointer = make([]cu.DevicePtr, Ndev)
 	//a.devId = make([]int, Ndev)
 	a.Stream = NewStream()
-	for i := range devices {
-		setDevice(devices[i])
-		//a.devId[i] = devices[i]
-		if alloc {
-			a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
-		}
-	}
-
-	if alloc {
-		a.Zero()
-	}
+	if alloc{a.Alloc()}
 
 	// initialize component arrays
 	a.Comp = make([]Array, components)
@@ -117,10 +107,25 @@ func NewArray(components int, size3D []int) *Array {
 // a multiplier value and a null pointer for each GPU.
 // A NilArray already has null pointers for each GPU set,
 // so it is more convenient than just a nil pointer of type *Array.
+// See: Alloc()
 func NilArray(components int, size3D []int) *Array {
 	t := new(Array)
 	t.Init(components, size3D, false)
 	return t
+}
+
+
+// If the array has no underlying storage yet (e.g., it was
+// created by NilArray()), allocate that storage.
+func (a *Array) Alloc(){
+	devices := getDevices()
+	for i := range devices {
+		setDevice(devices[i])
+			Assert(a.pointer[i] == 0)
+			a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
+	}
+	a.Zero()
+	
 }
 
 // Frees the underlying storage and sets the size to zero.

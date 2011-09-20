@@ -85,6 +85,16 @@ func (a API) SetValue(name string, value []float64) {
 	q.SetMultiplier(value)
 }
 
+func (a API) SetMask(name string, mask *host.Array) {
+	q := a.Engine.Quant(name)
+	qArray := q.Array()
+	if !EqualSize(mask.Size3D, qArray.Size3D()) {
+		Log("auto-resampling ",q, "from", Size(mask.Size3D), "to", Size(qArray.Size3D()))
+		mask = Resample(mask, qArray.Size3D())
+	}
+	q.SetMask(mask)
+}
+
 // Get the value of a space-independent quantity.
 // Returns an array with vector components or an
 // array with just one element in case of a scalar quantity.
