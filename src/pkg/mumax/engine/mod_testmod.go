@@ -7,7 +7,9 @@
 
 package engine
 
-import ()
+import (
+	. "mumax/common"
+)
 
 // Loads a test module.
 func (e *Engine) LoadTest() {
@@ -16,6 +18,8 @@ func (e *Engine) LoadTest() {
 	e.AddQuant("Msat", VECTOR, FIELD, Unit("A/m"), "saturation magn.")
 
 	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
+	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
+	e.Quant("gamma").SetScalar(Gamma0)
 
 	e.AddQuant("h_z", VECTOR, MASK, Unit("A/m"), "zeeman field")
 	e.Depends("h_z", "t")

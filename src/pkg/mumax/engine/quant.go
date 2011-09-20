@@ -160,6 +160,12 @@ func (q *Quant) SetMultiplier(val []float64) {
 	q.Invalidate() //!
 }
 
+func (q *Quant) SetScalar(val float64) {
+	checkKind(q, VALUE)
+	q.multiplier[0] = val
+	q.Invalidate() //!
+}
+
 func checkKind(q *Quant, kind QuantKind) {
 	if q.kind != kind {
 		panic(InputErr(q.name + " is not " + kind.String() + " but " + q.kind.String()))
@@ -191,7 +197,11 @@ func (q *Quant) Name() string {
 
 // Gets the name + [unit]
 func (q *Quant) FullName() string {
-	return q.name + "[" + string(q.unit) + "]"
+	unit := string(q.unit)
+	if unit == "" {
+		return q.name
+	}
+	return q.name + " [" + unit + "]"
 }
 
 // Gets the number of components

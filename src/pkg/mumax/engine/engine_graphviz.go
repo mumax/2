@@ -25,9 +25,11 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for k, v := range quants {
-		label := "[" + v.Unit().String() + "] "
+		label := "label=" + `"` + v.FullName()
 		if v.desc != "" {
-			label = "label=" + `"` + k + "\\n(" + v.desc + `)"`
+			label += "\\n(" + v.desc + `)"`
+		} else {
+			label += `"`
 		}
 		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
 		// Add dependencies

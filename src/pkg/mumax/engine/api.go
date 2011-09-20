@@ -85,8 +85,6 @@ func (a API) SetValue(name string, value []float64) {
 	q.SetMultiplier(value)
 }
 
-
-
 // Get the value of a space-independent quantity.
 // Returns an array with vector components or an
 // array with just one element in case of a scalar quantity.
@@ -98,13 +96,11 @@ func (a API) GetValue(name string) []float64 {
 	return value
 }
 
-
 // Get the value of a scalar, space-independent quantity.
 // Similar to GetValue, but returns a single number.
 func (a API) GetScalar(name string) float64 {
 	return a.Engine.Quant(name).Scalar()
 }
-
 
 // INTERNAL: swaps the X-Z values of the array.
 func swapXYZ(array []float64) {
@@ -120,7 +116,6 @@ func swapXYZ(array []float64) {
 //	q := e.Quant(name)
 //	q.SetValue([]float32{value})
 //}
-
 
 
 func (a API) SetField(quant string, field *host.Array) {
