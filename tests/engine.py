@@ -14,8 +14,7 @@ print 'alpha', getvalue('alpha'), '\n'
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
-m=getfield('m')
-print 'm', m
+print 'm', getfield('m')
 print
 
 
@@ -23,13 +22,11 @@ Bx = 0
 By = 0
 Bz = 1
 
-setvalue('h_z', [Bx, By, Bz])
-hz = getvalue('h_z')
-print 'h_z', hz
+setvalue('H_z', [Bx, By, Bz])
+print 'H_z',getvalue('H_z')
 print
 
-h=getfield('h')
-print 'h', h
+print 'H', getfield('H')
 print
 
 torque=getfield('torque')

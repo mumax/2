@@ -11,7 +11,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
+	//. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -24,21 +24,23 @@ import (
 //	h = H / Msat
 func (e *Engine) AddTorqueNode() {
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
-	e.Depends("torque", "m", "h", "alpha", "Msat", "gamma")
-	t := e.Quant("torque")
-	m := e.Quant("m")
-	H := e.Quant("h")
-	alpha := e.Quant("alpha")
-	Msat := e.Quant("alpha")
-
-	t.updater = &torqueUpdater{t, m, H, alpha, Msat}
+	e.Depends("torque", "m", "H", "alpha", "Msat", "gamma")
+	τ := e.Quant("torque")
+	τ.updater = &torqueUpdater{
+		τ:    e.Quant("torque"),
+		m:    e.Quant("m"),
+		H:    e.Quant("H"),
+		α:    e.Quant("alpha"),
+		Msat: e.Quant("Msat"),
+		γ:    e.Quant("gamma")}
 }
 
 type torqueUpdater struct {
-	τ, m, h, α, Msat *Quant
+	τ, m, H, α, Msat, γ *Quant
 }
 
 func (u *torqueUpdater) Update() {
-	Debug("gpu.Torque", u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), float32(u.α.Scalar()))
-	gpu.Torque(u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), float32(u.α.Scalar()))
+	//Debug("gpu.Torque", u.τ.Array(), u.m.Array(), u.h.Array(), u.α.Array(), float32(u.α.Scalar()))
+	u.τ.multiplier[0] = u.γ.multiplier[0] * u.Msat.multiplier[0]
+	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
 }

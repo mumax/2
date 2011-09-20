@@ -21,10 +21,10 @@ func (e *Engine) LoadTest() {
 	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
 	e.Quant("gamma").SetScalar(Gamma0)
 
-	e.AddQuant("h_z", VECTOR, MASK, Unit("A/m"), "zeeman field")
-	e.Depends("h_z", "t")
+	e.AddQuant("H_z", VECTOR, MASK, Unit("A/m"), "zeeman field")
+	e.Depends("H_z", "t")
 
-	e.AddSumNode("h", "h_z")
+	e.AddSumNode("H", "H_z")
 
 	e.AddTorqueNode()
 
