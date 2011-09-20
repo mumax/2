@@ -9,9 +9,14 @@ print 'cellsize', getcellsize()
 load('test')
 savegraph("graph.dot")
 
+setscalar('alpha', 0.1)
 print 'alpha', getvalue('alpha'), '\n'
+print 'alphaMask', getmask('alpha'), '\n'
+print 'alpha', getfield('alpha'), '\n'
 
 
+print 'm', getfield('m')
+print
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
 print 'm', getfield('m')

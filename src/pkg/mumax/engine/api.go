@@ -87,6 +87,13 @@ func (a API) SetValue(name string, value []float64) {
 	q.SetValue(value)
 }
 
+// Convenience method for SetValue() with only one number.
+func (a API) SetScalar(name string, value float64) {
+	q := a.Engine.Quant(name)
+	q.SetValue([]float64{value})
+}
+
+
 // Sets a space-dependent multiplier mask for the quantity.
 // The value of the quantity (set by SetValue), will be multiplied
 // by the mask value in each point of space. The mask is dimensionless
@@ -135,7 +142,7 @@ func (a API) GetScalar(name string) float64 {
 }
 
 // Gets a space-dependent quantity. If the quantity uses a mask,
-// value*mask is returned.
+// the result is equal to GetMask() * GetValue()
 func (a API) GetField(quant string) *host.Array {
 	q := a.Engine.Quant(quant)
 	checkKinds(q, MASK, FIELD)
@@ -163,16 +170,25 @@ func (a API) GetField(quant string) *host.Array {
 }
 
 
-
-
-// true if array contains only 1s.
-func isOnes(array []float64) bool {
-	for _, v := range array {
-		if v != 1 {
-			return false
+// Gets the quantity's mask.
+// The mask is not not multiplied by the value,
+// like is the case with GetField().
+// Returns all ones if the mask was not explicitly set.
+func(a API)GetMask(quant string)*host.Array{
+	q := a.Engine.Quant(quant)
+	checkKind(q, MASK)
+	q.Update() //currently a nop, but might change later.
+	array := q.Array()
+	buffer := q.Buffer()
+	// NULL array is interpreted as all ones.
+	if array.IsNil() {
+		for i := range buffer.List {
+			buffer.List[i] = 1
 		}
+	} else {
+		array.CopyToHost(buffer)
 	}
-	return true
+	return buffer
 }
 
 //________________________________________________________________________________ internal
@@ -185,23 +201,6 @@ func swapXYZ(array []float64) {
 	return
 }
 
-// Set the value of a scalar, space-independent quantity
-//func (a API) SetScalar(name string, value float32) {
-//	e := a.Engine
-//	q := e.Quant(name)
-//	q.SetValue([]float32{value})
-//}
-
-// Get the value of a general quantity
-//func (a API) Get(name string) interface{} {
-//	e := a.Engine
-//	q := e.Quant(name)
-//	switch {
-//	case q.IsScalar():
-//		return q.ScalarValue()
-//	}
-//	panic(Bug("unimplemented case"))
-//}
 
 //________________________________________________________________________________ misc
 
