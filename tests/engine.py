@@ -15,14 +15,15 @@ setfield('m', m)
 
 Bx = 0
 By = 0
-Bz = 1000e-3 
+Bz = 1
 
-setvalue('h_z', [Bx/mu0, By/mu0, Bz/mu0])
+setvalue('h_z', [Bx, By, Bz])
 
 h=getfield('h')
-
 print 'h', h
 
+torque=getfield('torque')
+print 'torque', torque 
 
 #step()
 #step()
