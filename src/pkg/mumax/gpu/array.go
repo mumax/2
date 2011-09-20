@@ -199,12 +199,16 @@ func (a *Array) IsNil() bool {
 	return a.pointer[0] == 0
 }
 
-// Size of the vector field
+// Size of the vector field.
 func (a *Array) Size3D() []int {
 	return a.size3D
 }
 
 
+// Gets one element.
+func(a*Array)Get(comp, i,j,k int)float32{
+
+}
 
 // Copy from device array to device array.
 func (dst *Array) CopyFromDevice(src *Array) {
