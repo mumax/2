@@ -11,19 +11,23 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	//. "mumax/common"
+	. "mumax/common"
 	"mumax/gpu"
 )
 
 func (e *Engine) AddSumNode(name string, args ...string) {
 	parent0 := e.Quant(args[0])
 	nComp := parent0.NComp()
-	e.AddQuant(name, nComp, FIELD)
+	unit := parent0.Unit()
+	e.AddQuant(name, nComp, FIELD, unit)
 
 	sum := e.Quant(name)
 	parents := make([]*Quant, len(args))
 	for i := range parents {
 		parents[i] = e.Quant(args[i])
+		if parents[i].Unit() != sum.Unit(){
+				panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parents[i].FullName()))
+		}
 	}
 	e.Depends(name, args...)
 	sum.updater = &sumUpdater{sum, parents}

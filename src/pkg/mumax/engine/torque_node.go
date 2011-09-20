@@ -23,7 +23,7 @@ import (
 // with:
 //	h = H / Msat
 func (e *Engine) AddTorqueNode() {
-	e.AddQuant("torque", VECTOR, FIELD)
+	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "h", "alpha", "Msat")
 	t := e.Quant("torque")
 	m := e.Quant("m")

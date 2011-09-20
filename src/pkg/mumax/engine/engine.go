@@ -44,8 +44,8 @@ func NewEngine() *Engine {
 func (e *Engine) init() {
 	e.quantity = make(map[string]*Quant)
 	// special quantities time and dt are always present
-	e.AddQuant("t", SCALAR, VALUE)
-	e.AddQuant("dt", SCALAR, VALUE)
+	e.AddQuant("t", SCALAR, VALUE, Unit("s"))
+	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
 }
@@ -105,7 +105,7 @@ func (e *Engine) Quant(name string) *Quant {
 //__________________________________________________________________ add
 
 // Add an arbitrary quantity
-func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc ...string) {
+func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {
 	Debug("engine.Add", name, nComp, e.size3D, kind)
 
 	// quantity should not yet be defined
@@ -113,22 +113,22 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, desc ...string
 		panic(Bug("engine: Already defined: " + name))
 	}
 
-	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, desc...)
+	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
 }
 
 // AddQuant(name, nComp, VALUE)
-func (e *Engine) AddValue(name string, nComp int) {
-	e.AddQuant(name, nComp, VALUE)
+func (e *Engine) AddValue(name string, nComp int, unit Unit) {
+	e.AddQuant(name, nComp, VALUE, unit)
 }
 
 // AddQuant(name, nComp, FIELD)
-func (e *Engine) AddField(name string, nComp int) {
-	e.AddQuant(name, nComp, FIELD)
+func (e *Engine) AddField(name string, nComp int, unit Unit) {
+	e.AddQuant(name, nComp, FIELD, unit)
 }
 
 // AddQuant(name, nComp, MASK)
-func (e *Engine) AddMask(name string, nComp int) {
-	e.AddQuant(name, nComp, MASK)
+func (e *Engine) AddMask(name string, nComp int, unit Unit) {
+	e.AddQuant(name, nComp, MASK, unit)
 }
 
 // Mark childQuantity to depend on parentQuantity.

@@ -18,11 +18,12 @@ type EulerSolver struct{
 
 
 func(s *EulerSolver) Step(){
-	Y := s.y	
-	y := Y.Array()
-	Dy := s.dy
-	dy := Dy.Array()
+//	Y := s.y	
+//	y := Y.Array()
+//	Dy := s.dy
+//	dy := Dy.Array()
+//
+//	dt := s.dt.Scalar()	
 
-	dt := s.dt.Scalar()	
-
+	
 }

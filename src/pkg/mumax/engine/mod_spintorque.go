@@ -10,7 +10,7 @@ package engine
 import ()
 
 func (e *Engine) LoadSpintorque() {
-	e.AddQuant("j", VECTOR, MASK)
+	e.AddQuant("j", VECTOR, MASK, Unit("A/m2"))
 	e.Depends("j", "t")
 	e.Depends("torque", "j")
 }

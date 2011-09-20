@@ -11,32 +11,32 @@ import ()
 
 func (e *Engine) LoadMicromag() {
 
-	e.AddQuant("alpha", SCALAR, MASK)
-	e.AddQuant("msat", SCALAR, MASK)
-	e.AddQuant("aexch", SCALAR, MASK)
+	e.AddQuant("alpha", SCALAR, MASK, Unit(""))
+	e.AddQuant("msat", SCALAR, MASK, Unit("A/m"))
+	e.AddQuant("aexch", SCALAR, MASK, Unit("J/m"))
 
-	e.AddQuant("m", VECTOR, FIELD)
+	e.AddQuant("m", VECTOR, FIELD, Unit(""))
 
-	e.AddQuant("H_d", VECTOR, FIELD)
+	e.AddQuant("H_d", VECTOR, FIELD, Unit("A/m"))
 	e.Depends("H_d", "m")
 	e.Depends("H_d", "m") // redundant, but should not crash
 	e.Depends("H_d", "msat")
 
-	e.AddQuant("H_e", VECTOR, FIELD)
+	e.AddQuant("H_e", VECTOR, FIELD, Unit("A/m"))
 	e.Depends("H_e", "m", "aexch")
 
-	e.AddQuant("H_z", VECTOR, MASK)
+	e.AddQuant("H_z", VECTOR, MASK, Unit("A/m"))
 	e.Depends("H_z", "t")
 
-	e.AddQuant("H_a", VECTOR, FIELD)
-	e.AddQuant("k1", SCALAR, MASK)
-	e.AddQuant("k2", SCALAR, MASK)
+	e.AddQuant("H_a", VECTOR, FIELD, Unit("A/m"))
+	e.AddQuant("k1", SCALAR, MASK, Unit("?"))
+	e.AddQuant("k2", SCALAR, MASK, Unit("?"))
 	e.Depends("H_a", "k1", "k2", "m")
 
-	e.AddQuant("H", VECTOR, FIELD)
+	e.AddQuant("H", VECTOR, FIELD, Unit("A/m"))
 	e.Depends("H", "H_d", "H_e", "H_z", "H_a")
 
-	e.AddQuant("torque", VECTOR, FIELD)
+	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha")
 
 	e.ODE1("m", "torque")

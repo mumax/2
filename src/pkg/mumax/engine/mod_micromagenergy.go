@@ -12,10 +12,10 @@ import ()
 func (e *Engine) LoadMicromagEnergy() {
 	for _, kind := range []string{"e", "d", "z", "a"} {
 		dens := "e_" + kind
-		e.AddQuant(dens, SCALAR, FIELD)
+		e.AddQuant(dens, SCALAR, FIELD, Unit("J/m3"))
 		e.Depends(dens, "m")
 		e.Depends(dens, "H_"+kind)
-		e.AddQuant("E_"+kind, SCALAR, VALUE)
+		e.AddQuant("E_"+kind, SCALAR, VALUE, Unit("J"))
 		e.Depends("E_"+kind, dens)
 	}
 }

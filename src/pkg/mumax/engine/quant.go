@@ -36,8 +36,8 @@ import (
 // equation to be solved.
 type Quant struct {
 	name       string            // Unique identifier
-	array      *gpu.Array        // Underlying array, may be nil. Holds nil pointers for space-independent quantity
-	multiplier []float64         // Point-wise multiplication coefficients for array, may be nil
+	array      *gpu.Array        // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
+	multiplier []float64         // Point-wise multiplication coefficients for array, dimensionfull.
 	nComp      int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool              // Flags if this quantity needs to be updated
 	updater    Updater           // Called to update this quantity
@@ -45,15 +45,16 @@ type Quant struct {
 	parents    map[string]*Quant // Quantities that depend on this one, indexed by name
 	buffer     *host.Array       // Host buffer for copying from/to the GPU array
 	desc       string            // Human-readable description
+	unit	Unit // Unit of the multiplier value, e.g. A/m.
 	kind       QuantKind         // VALUE, FIELD or MASK
 }
 
 //____________________________________________________________________ init
 
 // Returns a new quantity. See Quant.init().
-func newQuant(name string, nComp int, size3D []int, kind QuantKind, desc ...string) *Quant {
+func newQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, desc ...string) *Quant {
 	q := new(Quant)
-	q.init(name, nComp, size3D, kind, desc...)
+	q.init(name, nComp, size3D, kind, unit, desc...)
 	return q
 }
 
@@ -71,7 +72,7 @@ const (
 // When multiply == false no multiplier will be allocated,
 // indicating this quantity should not be post-multiplied.
 // multiply = true
-func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc ...string) {
+func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit Unit, desc ...string) {
 	Assert(nComp > 0)
 	Assert(size3D == nil || len(size3D) == 3)
 
@@ -84,7 +85,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 	// So it should not have a multiplier, but always have allocated storage.
 	case FIELD:
 		q.array = gpu.NewArray(nComp, size3D)
-		q.multiplier = nil
+		q.multiplier = zeros(nComp)
 	// A MASK should always have a value (stored in the multiplier).
 	// We initialize it to zero. The space-dependent mask is optinal
 	// and not yet allocated.
@@ -105,6 +106,8 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, desc 
 	const CAP = 2
 	q.children = make(map[string]*Quant)
 	q.parents = make(map[string]*Quant)
+
+	q.unit = unit
 
 	// concatenate desc strings
 	buf := ""
@@ -186,9 +189,19 @@ func (q *Quant) Name() string {
 	return q.name
 }
 
+// Gets the name + [unit]
+func (q *Quant) FullName() string {
+	return q.name + "[" + string(q.unit) + "]"
+}
+
 // Gets the number of components
 func (q *Quant) NComp() int {
 	return q.nComp
+}
+
+
+func (q *Quant) Unit() Unit{
+	return q.unit
 }
 
 // Gets the GPU array.
