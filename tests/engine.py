@@ -23,8 +23,8 @@ By = 0
 Bz = 1
 
 setvalue('H_z', [Bx, By, Bz])
-mask = [ [ [[1]],[[0]] ], [ [[0]], [[0]] ], [ [[0]], [[0]] ] ]
-#setmask('H_z', mask)
+mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
+setmask('H_z', mask)
 print 'H_z',getvalue('H_z')
 print
 

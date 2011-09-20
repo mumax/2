@@ -150,18 +150,18 @@ func (q *Quant) SetField(field *host.Array) {
 func (q *Quant) SetMask(field *host.Array) {
 	checkKind(q, MASK)
 	q.assureAlloc()
+	Debug(q.Name(), q.Array())
 	q.Array().CopyFromHost(field)
 	q.Invalidate() //!
 }
 
-
 // INTERNAL: in case of a MASK, make sure the underlying array is allocted.
 // Used, e.g., when a space-independent mask gets replaced by a space-dependent one.
-func(q *Quant) assureAlloc(){
+func (q *Quant) assureAlloc() {
 	pointers := q.Array().Pointers()
-	if pointers[0] == 0{
+	if pointers[0] == 0 {
 		Debug("assureAlloc: " + q.Name())
-		q.Array().Alloc()	
+		q.Array().Alloc()
 		Debug(q.Name(), q.Array())
 	}
 }
@@ -307,8 +307,6 @@ func (q *Quant) Invalidate() {
 		c.Invalidate()
 	}
 }
-
-
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.

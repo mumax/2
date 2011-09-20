@@ -51,7 +51,9 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.pointer = make([]cu.DevicePtr, Ndev)
 	//a.devId = make([]int, Ndev)
 	a.Stream = NewStream()
-	if alloc{a.Alloc()}
+	if alloc {
+		a.Alloc()
+	}
 
 	// initialize component arrays
 	a.Comp = make([]Array, components)
@@ -60,16 +62,22 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 		a.Comp[c].initSize(1, size3D)
 		a.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
 		a.Comp[c].Stream = NewStream()
-		//a.Comp[c].devId = make([]int, Ndev) // could re-use parent array's devId here...
 		a.Comp[c].Comp = nil
 
+	}
+	a.initCompPtrs()
+}
+
+
+func(a *Array) initCompPtrs(){
+
+	for c := range a.Comp {
 		for j := range a.Comp[c].pointer {
-			setDevice(_useDevice[j])
+			//setDevice(_useDevice[j])
 			start := c * a.partLen3D
 			a.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(a.pointer[j]), start*SIZEOF_FLOAT))
-			//a.Comp[c].devId[j] = a.devId[j]
 		}
-	}
+}
 }
 
 func (a *Array) initSize(components int, size3D []int) {
@@ -114,18 +122,17 @@ func NilArray(components int, size3D []int) *Array {
 	return t
 }
 
-
 // If the array has no underlying storage yet (e.g., it was
 // created by NilArray()), allocate that storage.
-func (a *Array) Alloc(){
+func (a *Array) Alloc() {
 	devices := getDevices()
 	for i := range devices {
 		setDevice(devices[i])
-			Assert(a.pointer[i] == 0)
-			a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
+		Assert(a.pointer[i] == 0)
+		a.pointer[i] = cu.MemAlloc(SIZEOF_FLOAT * int64(a.partLen4D))
 	}
 	a.Zero()
-	
+	a.initCompPtrs() // need to update the component pointers
 }
 
 // Frees the underlying storage and sets the size to zero.
@@ -222,6 +229,7 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 		start := 0
 		for i := range s {
 			length := dst.partLen3D
+			Debug("cu.MemcpyHtoD", cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 			cu.MemcpyHtoD(cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 			start += length
 		}

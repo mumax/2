@@ -89,7 +89,7 @@ func (a API) SetMask(name string, mask *host.Array) {
 	q := a.Engine.Quant(name)
 	qArray := q.Array()
 	if !EqualSize(mask.Size3D, qArray.Size3D()) {
-		Log("auto-resampling ",q, "from", Size(mask.Size3D), "to", Size(qArray.Size3D()))
+		Log("auto-resampling ", q.Name(), "from", Size(mask.Size3D), "to", Size(qArray.Size3D()))
 		mask = Resample(mask, qArray.Size3D())
 	}
 	q.SetMask(mask)
