@@ -9,6 +9,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 
+Cahn's Axiom:
+	When all else fails, read the instructions.
 
 Known issues:
 
@@ -43,4 +45,4 @@ Acknowledgements:
 * reduce.cu is partly based on code from "The Regents of the University of California, Davis
 campus and NVIDIA Corporation.
 
-
+* Minor code snippets from the Go API have been copied and modified. Copyright the Go authors.
