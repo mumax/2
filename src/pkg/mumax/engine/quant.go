@@ -140,7 +140,6 @@ func zeros(n int) []float64 {
 
 //____________________________________________________________________ set
 
-
 // Set the multiplier of a MASK or the value of a VALUE
 func (q *Quant) SetValue(val []float64) {
 	Debug("SetValue", q.name, val)
@@ -151,7 +150,6 @@ func (q *Quant) SetValue(val []float64) {
 	}
 	q.Invalidate() //!
 }
-
 
 // Convenience method for SetValue([]float64{val})
 func (q *Quant) SetScalar(val float64) {
@@ -177,10 +175,16 @@ func (q *Quant) SetMask(field *host.Array) {
 	q.Invalidate() //!
 }
 
-
-
-
 //____________________________________________________________________ get
+
+
+// Assuming the quantity represent a scalar value, return it as a number.
+func (q *Quant) Scalar() float64 {
+	if q.IsSpaceDependent() {
+		panic(InputErr(q.Name() + " is space-dependent, can not return it as a scalar value"))
+	}
+	return q.multiplier[0]
+}
 
 // Gets the name
 func (q *Quant) Name() string {
@@ -223,14 +227,6 @@ func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr()[0] != 0
 }
 
-// Assuming the quantity represent a scalar value, return it as a number.
-func (q *Quant) Scalar() float64 {
-	if q.IsSpaceDependent() {
-		panic(InputErr(q.Name() + " is space-dependent, can not return it as a scalar value"))
-	}
-	return q.multiplier[0]
-}
-
 
 //____________________________________________________________________ tree walk
 
@@ -266,9 +262,7 @@ func (q *Quant) Invalidate() {
 	}
 }
 
-
 //___________________________________________________________ 
-
 
 // INTERNAL: in case of a MASK, make sure the underlying array is allocted.
 // Used, e.g., when a space-independent mask gets replaced by a space-dependent one.
@@ -299,12 +293,11 @@ func checkKinds(q *Quant, kind1, kind2 QuantKind) {
 
 // Checks if the quantity has ncomp components.
 // Panics if check fails.
-func checkComp(q *Quant, ncomp int){
+func checkComp(q *Quant, ncomp int) {
 	if ncomp != q.nComp {
 		panic(InputErr(fmt.Sprint(q.Name(), " has ", q.nComp, " components, but ", ncomp, " are provided.")))
 	}
 }
-
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.

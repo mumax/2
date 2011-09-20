@@ -75,7 +75,7 @@ func (a API) Step() {
 	a.Engine.Step()
 }
 
-//________________________________________________________________________________ quant
+//________________________________________________________________________________ set quantities
 
 // Sets the value of a quantity. The quantity must be of type VALUE or MASK.
 // If the quantity is a MASK, the value will be multiplied by a space-dependent mask
@@ -87,6 +87,10 @@ func (a API) SetValue(name string, value []float64) {
 	q.SetValue(value)
 }
 
+// Sets a space-dependent multiplier mask for the quantity.
+// The value of the quantity (set by SetValue), will be multiplied
+// by the mask value in each point of space. The mask is dimensionless
+// and typically contains values between 0 and 1.
 func (a API) SetMask(name string, mask *host.Array) {
 	q := a.Engine.Quant(name)
 	qArray := q.Array()
@@ -97,11 +101,29 @@ func (a API) SetMask(name string, mask *host.Array) {
 	q.SetMask(mask)
 }
 
-// Get the value of a space-independent quantity.
+
+// Sets a space-dependent field quantity, like the magnetization.
+func (a API) SetField(quant string, field *host.Array) {
+	q := a.Engine.Quant(quant)
+	qArray := q.Array()
+	if !EqualSize(field.Size3D, qArray.Size3D()) {
+		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
+		field = Resample(field, qArray.Size3D())
+	}
+	q.SetField(field)
+}
+
+
+//________________________________________________________________________________ get quantities
+
+
+
+// Get the value of a space-independent or masked quantity.
 // Returns an array with vector components or an
 // array with just one element in case of a scalar quantity.
 func (a API) GetValue(name string) []float64 {
 	q := a.Engine.Quant(name)
+	q.Update()//!
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
 	swapXYZ(value)
@@ -111,8 +133,30 @@ func (a API) GetValue(name string) []float64 {
 // Get the value of a scalar, space-independent quantity.
 // Similar to GetValue, but returns a single number.
 func (a API) GetScalar(name string) float64 {
-	return a.Engine.Quant(name).Scalar()
+	q := a.Engine.Quant(name)
+	q.Update()//!
+	return q.Scalar()
 }
+
+
+// Gets a space-dependent quantity. If the quantity uses a mask,
+// value*mask is returned.
+func (a API) GetField(quant string) *host.Array {
+	q := a.Engine.Quant(quant)
+	checkKinds(q, MASK, FIELD)
+	q.Update()//!
+	array := q.Array()
+	buffer := q.Buffer()
+	if array.IsNil(){
+		set ones	
+	}else{
+	array.CopyToHost(buffer)
+	}
+	mul with mul
+	return buffer
+}
+
+//________________________________________________________________________________ internal
 
 // INTERNAL: swaps the X-Z values of the array.
 func swapXYZ(array []float64) {
@@ -130,25 +174,7 @@ func swapXYZ(array []float64) {
 //}
 
 
-func (a API) SetField(quant string, field *host.Array) {
-	q := a.Engine.Quant(quant)
-	qArray := q.Array()
-	if !EqualSize(field.Size3D, qArray.Size3D()) {
-		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
-		field = Resample(field, qArray.Size3D())
-	}
-	q.SetField(field)
-}
 
-// 
-func (a API) GetField(quant string) *host.Array {
-	q := a.Engine.Quant(quant)
-	q.Update() //!
-	array := q.Array()
-	buffer := q.Buffer()
-	array.CopyToHost(buffer)
-	return buffer
-}
 
 // Get the value of a general quantity
 //func (a API) Get(name string) interface{} {
