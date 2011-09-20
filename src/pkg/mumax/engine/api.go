@@ -206,19 +206,27 @@ func (a API) GetArray(quant string) *host.Array {
 	return buffer
 }
 
-func (a API) ProbeCell(quant string, x, y, z int) []float64 {
+func (a API) GetCell(quant string, x, y, z int) []float64 {
 	q := a.Engine.Quant(quant)
 	q.Update() //!
-	ncomp := q.NComp()
-	value := make([]float64, ncomp)
+	value := make([]float64, q.NComp())
 	for c := range value {
-		value[c] = float64(q.Array().Get(c, z, y, x))                      // 
-		Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
+		value[c] = float64(q.Array().Get(c, z, y, x))                     
+		//Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
 	}
 	swapXYZ(value)
 	return value
 }
 
+func (a API) SetCell(quant string, x, y, z int, value []float64) {
+	q := a.Engine.Quant(quant)
+	swapXYZ(value)
+	for c := range value {
+		q.Array().Set(c, z, y, x, float32(value[c])                      ) 
+		//Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
+	}
+	q.Invalidate() //!
+}
 //________________________________________________________________________________ internal
 
 // INTERNAL: swaps the X-Z values of the array.

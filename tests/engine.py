@@ -20,6 +20,11 @@ print 'Msat', getvalue('Msat'), '\n'
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
 
+#setcell('m', 0,0,0, [0,0,7])
+print 'm', getfield('m'), '\n'
+print 'getcell', getcell('m', 2,3,0)
+
+
 Hx = 0 / mu0
 Hy = 0 / mu0
 Hz = 0.1 / mu0 #1T
@@ -35,9 +40,9 @@ setvalue('H_z', [Hx, Hy, Hz])
 
 setscalar('dt', 1e-12)
 f = open('ll', 'w')
-for i in range(1000):
+for i in range(100):
 	t = getscalar('t')
-	m = probecell('m', 0,0,0)
+	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
 	f.write(str(m[0]) + "\t")
 	f.write(str(m[1]) + "\t")
@@ -47,4 +52,6 @@ for i in range(1000):
 f.close()
 
 
-print 'm', getfield('m'), '\n'
+
+
+

@@ -204,15 +204,18 @@ func (a *Array) Size3D() []int {
 	return a.size3D
 }
 
-// Get a single value
-func (a *Array) Get(comp, x, y, z int) float32 {
+func(a*Array)checkBounds(comp,x,y,z int){
 	if comp < 0 || comp >= a.NComp() ||
-		x < 0 || x >= a._size[X] ||
-		y < 0 || y >= a._size[Y] ||
-		z < 0 || z >= a._size[Z] {
-		panic(InputErr("Array.Get out of range"))
+		x < 0 || x >= a.size3D[X] ||
+		y < 0 || y >= a.size3D[Y] ||
+		z < 0 || z >= a.size3D[Z] {
+		panic(InputErr("gpu.Array index out of range"))
+	}
 	}
 
+// Get a single value
+func (a *Array) Get(comp, x, y, z int) float32 {
+	a.checkBounds(comp,x,y,z)
 	var value float32
 	dev := (y * NDevice()) / a.size3D[Y] // the device on which the number resides
 	Debug("dev", dev)
@@ -223,8 +226,29 @@ func (a *Array) Get(comp, x, y, z int) float32 {
 	N2 := acomp.partSize[Z]
 	index := N0*N1*N2 + x*N1*N2 + y*N2 + z
 	Debug("index", index)
-	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)), cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), index)), 1*SIZEOF_FLOAT)
+	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)), 
+	cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)), 
+	1*SIZEOF_FLOAT)
 	return value
+}
+
+
+
+// Set a single value
+func (a *Array) Set(comp, x, y, z int, value float32)  {
+	a.checkBounds(comp,x,y,z)
+	dev := (y * NDevice()) / a.size3D[Y] // the device on which the number resides
+	Debug("dev", dev)
+	setDevice(dev)
+	acomp := a.Comp[comp]
+	N0 := acomp.partSize[X]
+	N1 := acomp.partSize[Y]
+	N2 := acomp.partSize[Z]
+	index := N0*N1*N2 + x*N1*N2 + y*N2 + z
+	Debug("index", index)
+	cu.MemcpyHtoD(cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
+	cu.HostPtr(unsafe.Pointer(&value)), 
+	1*SIZEOF_FLOAT)
 }
 
 // Copy from device array to device array.
