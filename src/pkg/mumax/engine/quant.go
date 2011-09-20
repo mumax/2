@@ -140,13 +140,16 @@ func zeros(n int) []float64 {
 
 //____________________________________________________________________ set
 
-//
+
+// Sets a space-dependent field.
 func (q *Quant) SetField(field *host.Array) {
 	checkKind(q, FIELD)
 	q.Array().CopyFromHost(field)
 	q.Invalidate() //!
 }
 
+// Sets the space-dependent mask array.
+// Allocates GPU storage when needed.
 func (q *Quant) SetMask(field *host.Array) {
 	checkKind(q, MASK)
 	q.assureAlloc()
@@ -179,6 +182,7 @@ func (q *Quant) SetMultiplier(val []float64) {
 	q.Invalidate() //!
 }
 
+// 
 func (q *Quant) SetScalar(val float64) {
 	checkKind(q, VALUE)
 	q.multiplier[0] = val
@@ -234,14 +238,6 @@ func (q *Quant) Unit() Unit {
 
 // Gets the GPU array.
 func (q *Quant) Array() *gpu.Array {
-	//	if q.array == nil {
-	//		if q.Size3D() == nil{
-	//			q.array = gpu.NilArray(q.NComp(), q.Size3D())
-	//		}else{
-	//			Debug("alloc ", q.Name(), q.NComp(), "x", q.Size3D())
-	//			q.array = gpu.NewArray(q.NComp(), q.Size3D())
-	//}
-	//	}
 	return q.array
 }
 
@@ -266,13 +262,6 @@ func (q *Quant) Scalar() float64 {
 	return q.multiplier[0]
 }
 
-// If the quantity represents a space-independent scalar, return its value.
-//func (q *Quant) ScalarValue() float32 {
-//if q.IsSpaceDependent() {
-//panic(Bug("not a scalar"))
-//}
-//return q.multiplier[0]
-//}
 
 //____________________________________________________________________ tree walk
 
