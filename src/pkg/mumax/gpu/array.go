@@ -68,8 +68,7 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initCompPtrs()
 }
 
-
-func(a *Array) initCompPtrs(){
+func (a *Array) initCompPtrs() {
 
 	for c := range a.Comp {
 		for j := range a.Comp[c].pointer {
@@ -77,7 +76,7 @@ func(a *Array) initCompPtrs(){
 			start := c * a.partLen3D
 			a.Comp[c].pointer[j] = cu.DevicePtr(offset(uintptr(a.pointer[j]), start*SIZEOF_FLOAT))
 		}
-}
+	}
 }
 
 func (a *Array) initSize(components int, size3D []int) {
