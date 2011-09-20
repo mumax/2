@@ -14,6 +14,7 @@ import (
 	. "mumax/common"
 	"mumax/host"
 	cu "cuda/driver"
+	"unsafe"
 	"sync"
 	"fmt"
 )
@@ -99,6 +100,7 @@ func (a *Array) initSize(components int, size3D []int) {
 	a._partSize[X] = a.size3D[X]
 	a._partSize[Y] = a.size3D[Y] / Ndev
 	a._partSize[Z] = a.size3D[Z]
+	a.partSize = a._partSize[:]
 
 }
 
@@ -197,6 +199,20 @@ func (a *Array) IsNil() bool {
 // Size of the vector field
 func (a *Array) Size3D() []int {
 	return a.size3D
+}
+
+
+// Get a single value
+func(a*Array)Get(comp,x,y,z int)float32{
+	var value float32
+	dev	:= (y*NDevice())/a.size3D[Y] // the device on which the number resides
+	setDevice(dev)
+	N0 := a.partSize[X]
+	N1 := a.partSize[Y]
+	N2 := a.partSize[Z]
+	index := comp * N0*N1*N2 + x * N1*N2 + y * N2 + z
+	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)), cu.DevicePtr(offset(uintptr(a.pointer[dev]), index)), 1*SIZEOF_FLOAT)
+	return value
 }
 
 // Copy from device array to device array.

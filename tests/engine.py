@@ -38,14 +38,11 @@ setscalar('dt', 1e-12)
 f = open('ll', 'w')
 for i in range(1000):
 	t = getscalar('t')
-	m = getfield('m')
-	mx = m[0][0][0][0]
-	my = m[1][0][0][0]
-	mz = m[2][0][0][0]
+	m = probecell('m', 0,0,0)
 	f.write(str(t) + "\t")
-	f.write(str(mx) + "\t")
-	f.write(str(my) + "\t")
-	f.write(str(mz) + "\n")
+	f.write(str(m[0]) + "\t")
+	f.write(str(m[1]) + "\t")
+	f.write(str(m[2]) + "\n")
 	step()
 
 f.close()
