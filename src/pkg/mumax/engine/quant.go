@@ -85,7 +85,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	// So it should not have a multiplier, but always have allocated storage.
 	case FIELD:
 		q.array = gpu.NewArray(nComp, size3D)
-		q.multiplier = zeros(nComp)
+		q.multiplier = ones(nComp)
 	// A MASK should always have a value (stored in the multiplier).
 	// We initialize it to zero. The space-dependent mask is optinal
 	// and not yet allocated.

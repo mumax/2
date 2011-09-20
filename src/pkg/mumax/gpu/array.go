@@ -234,7 +234,7 @@ func (dst *Array) CopyFromHost(srca *host.Array) {
 		start := 0
 		for i := range s {
 			length := dst.partLen3D
-			Debug("cu.MemcpyHtoD", cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
+			//Debug("cu.MemcpyHtoD", cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 			cu.MemcpyHtoD(cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
 			start += length
 		}

@@ -93,7 +93,6 @@ func (a API) SetScalar(name string, value float64) {
 	q.SetValue([]float64{value})
 }
 
-
 // Sets a space-dependent multiplier mask for the quantity.
 // The value of the quantity (set by SetValue), will be multiplied
 // by the mask value in each point of space. The mask is dimensionless
@@ -169,12 +168,11 @@ func (a API) GetField(quant string) *host.Array {
 	return buffer
 }
 
-
 // Gets the quantity's mask.
 // The mask is not not multiplied by the value,
 // like is the case with GetField().
 // Returns all ones if the mask was not explicitly set.
-func(a API)GetMask(quant string)*host.Array{
+func (a API) GetMask(quant string) *host.Array {
 	q := a.Engine.Quant(quant)
 	checkKind(q, MASK)
 	q.Update() //currently a nop, but might change later.
@@ -200,7 +198,6 @@ func swapXYZ(array []float64) {
 	}
 	return
 }
-
 
 //________________________________________________________________________________ misc
 

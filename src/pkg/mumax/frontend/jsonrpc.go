@@ -95,7 +95,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
 		argvals[i] = convertArg(args[i], f.Type().In(i))
-		Debug("convertArg", args[i], "=", argvals[i].Interface())
+		//Debug("convertArg", args[i], "=", argvals[i].Interface())
 	}
 	retVals := f.Call(argvals)
 
