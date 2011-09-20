@@ -206,6 +206,15 @@ func (a API) GetArray(quant string) *host.Array {
 	return buffer
 }
 
+
+func(a API) Probe(quant string, x,y,z int) []float64{
+		q := a.Engine.Quant(quant)
+		value := make([]float64, q.NComp())
+		for i:= range value{
+			value[i] = q.Array().Get(i, z, y, x)
+		}
+}
+
 //________________________________________________________________________________ internal
 
 // INTERNAL: swaps the X-Z values of the array.
