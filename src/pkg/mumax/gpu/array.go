@@ -254,7 +254,6 @@ func (src *Array) LocalCopy() *host.Array {
 	return dst
 }
 
-
 // Makes all elements zero.
 func (a *Array) Zero() {
 	slices := a.pointer
@@ -268,7 +267,6 @@ func (a *Array) Zero() {
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
 
-
 // Pointer arithmetic: returns ptr + bytes.
 // When ptr is NULL, NULL is returned.
 func offset(ptr uintptr, bytes int) uintptr {
@@ -278,7 +276,6 @@ func offset(ptr uintptr, bytes int) uintptr {
 	}
 	return ptr + uintptr(bytes)
 }
-
 
 // Human-readable string.
 func (a *Array) String() string {

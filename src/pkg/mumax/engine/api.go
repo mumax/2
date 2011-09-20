@@ -80,7 +80,26 @@ func (a API) Step() {
 // Sets the MULTIPLIER of a MASK quantity.
 func (a API) SetValue(name string, value []float64) {
 	q := a.Engine.Quant(name)
+	swapXYZ(value)
+	Debug("swapXYZ", value)
 	q.SetMultiplier(value)
+}
+
+
+func(a API) GetValue(name string) []float64{
+	q := a.Engine.Quant(name)
+	value := make([]float64, len(q.multiplier))
+	copy(value, q.multiplier)
+	swapXYZ(value)
+	return value
+}
+
+// swaps the X-Z values of the array.
+func swapXYZ(array []float64){
+	if len(array) == 3{
+		array[X], array[Z] = array[Z], array[X]
+	}
+	return
 }
 
 // Set the value of a scalar, space-independent quantity
