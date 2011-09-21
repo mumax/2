@@ -16,6 +16,7 @@ GOFILES=\
 	size.go\
 	ansi.go\
 	constants.go\
+	timer.go\
 
 CGOFILES=\
 

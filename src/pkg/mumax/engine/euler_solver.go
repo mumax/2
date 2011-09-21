@@ -29,7 +29,9 @@ func (s *EulerSolver) Step() {
 
 	t := s.t
 	dt := s.dt.Scalar()
-	if dt <= 0 {panic(InputErr(fmt.Sprint("dt=", dt)))}
+	if dt <= 0 {
+		panic(InputErr(fmt.Sprint("dt=", dt)))
+	}
 
 	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
 

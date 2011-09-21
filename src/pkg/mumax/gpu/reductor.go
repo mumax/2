@@ -11,14 +11,12 @@ import (
 	. "mumax/common"
 )
 
-
 type Reductor struct {
 	operation          int
 	devbuffer          uintptr
 	hostbuffer         []float32
 	blocks, threads, N int
 }
-
 
 // Reduces the data,
 // i.e., calucates the sum, maximum, ...
@@ -28,78 +26,68 @@ func (r *Reductor) Reduce(input *Array) float32 {
 	return r.reduce(r.operation, input.data, r.devbuffer, &(r.hostbuffer[0]), r.blocks, r.threads, r.N)
 }
 
-
 // Unsafe version of Reduce().
 func (r *Reductor) reduce(data uintptr) float32 {
 	return r.reduce(r.operation, data, r.devbuffer, &(r.hostbuffer[0]), r.blocks, r.threads, r.N)
 }
 
-
-func NewSum(b , N int) *Reductor {
+func NewSum(b, N int) *Reductor {
 	r := new(Reductor)
 	r.InitSum(b, N)
 	return r
 }
 
-
-func (r *Reductor) InitSum(b , N int) {
+func (r *Reductor) InitSum(b, N int) {
 	r.init(b, N)
 	r.operation = ADD
 }
 
-
-func NewSumAbs(b , N int) *Reductor {
+func NewSumAbs(b, N int) *Reductor {
 	r := new(Reductor)
 	r.InitSumAbs(b, N)
 	return r
 }
 
-func (r *Reductor) InitSumAbs(b , N int) {
+func (r *Reductor) InitSumAbs(b, N int) {
 	r.init(b, N)
 	r.operation = SUMABS
 }
 
-
-func NewMax(b , N int) *Reductor {
+func NewMax(b, N int) *Reductor {
 	r := new(Reductor)
 	r.InitMax(b, N)
 	return r
 }
 
-
-func (r *Reductor) InitMax(b , N int) {
+func (r *Reductor) InitMax(b, N int) {
 	r.init(b, N)
 	r.operation = MAX
 }
 
-
-func NewMin(b , N int) *Reductor {
+func NewMin(b, N int) *Reductor {
 	r := new(Reductor)
 	r.InitMin(b, N)
 	return r
 }
 
-
-func (r *Reductor) InitMin(b , N int) {
+func (r *Reductor) InitMin(b, N int) {
 	r.init(b, N)
 	r.operation = MIN
 }
 
-
-func NewMaxAbs(b , N int) *Reductor {
+func NewMaxAbs(b, N int) *Reductor {
 	r := new(Reductor)
 	r.InitMaxAbs(b, N)
 	return r
 }
 
-func (r *Reductor) InitMaxAbs(b , N int) {
+func (r *Reductor) InitMaxAbs(b, N int) {
 	r.init(b, N)
 	r.operation = MAXABS
 }
 
-
 // initiates the common pieces of all reductors
-func (r *Reductor) init(b , N int) {
+func (r *Reductor) init(b, N int) {
 	Assert(N > 1)
 	Assert(b != nil)
 
@@ -117,7 +105,6 @@ func (r *Reductor) init(b , N int) {
 	r.devbuffer = b.newArray(r.blocks)
 	r.hostbuffer = make([]float32, r.blocks)
 }
-
 
 // Integer division but rounded UP
 func divUp(x, y int) int {

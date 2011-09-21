@@ -49,6 +49,7 @@ type Quant struct {
 	kind        QuantKind         // VALUE, FIELD or MASK
 	updates     int               // Number of times the quantity has been updated (for debuggin)
 	invalidates int               // Number of times the quantity has been invalidated (for debuggin)
+	Timer
 }
 
 //____________________________________________________________________ init
@@ -248,7 +249,9 @@ func (q *Quant) Update() {
 
 	// now update self
 	//Debug("update " + q.Name())
+	q.StartTimer()
 	q.updater.Update()
+	q.StopTimer()
 	q.updates++
 
 	q.upToDate = true

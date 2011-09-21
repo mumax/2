@@ -199,7 +199,8 @@ func (e *Engine) Stats() string {
 		str += fmt.Sprintln(fill(v.Name()), "\t",
 			valid(v.upToDate),
 			" upd:", fill(v.updates),
-			" inv:", fill(v.invalidates))
+			" inv:", fill(v.invalidates),
+			" ", v.Seconds(), "s")
 	}
 	return str
 }
