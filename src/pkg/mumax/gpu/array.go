@@ -218,8 +218,22 @@ func (a *Array) checkBounds(comp, x, y, z int) {
 }
 
 // Get a single value
-func (a *Array) Get(comp, x, y, z int) float32 {
-	panic("unimpl")
+func (b *Array) Get(comp, x, y, z int) float32 {
+	b.checkBounds(comp, x, y, z)
+	var value float32
+	acomp := b.Comp[comp]
+	dev := y / acomp.size3D[Y] // the device on which the number resides
+	//Debug("dev", dev)
+	setDevice(dev)
+	//N0 := acomp.partSize[X]
+	N1 := acomp.partSize[Y]
+	N2 := acomp.partSize[Z]
+	index := x*N1*N2 + y*N2 + z
+	Debug("index", index)
+	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)),
+		cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
+		1*SIZEOF_FLOAT)
+	return value
 }
 
 // Set a single value
@@ -227,7 +241,7 @@ func (b *Array) Set(comp, x, y, z int, value float32) {
 	b.checkBounds(comp, x, y, z)
 	acomp := b.Comp[comp]
 	dev := y / acomp.size3D[Y] // the device on which the number resides
-	Debug("dev", dev)
+	//Debug("dev", dev)
 	setDevice(dev)
 	//N0 := acomp.partSize[X]
 	N1 := acomp.partSize[Y]

@@ -20,14 +20,14 @@ print 'Msat', getvalue('Msat'), '\n'
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setfield('m', m)
 
-i=0
-j=0
+i=3
+j=2
 k=1
-setcell('m', i,j,k, [0,0,7])
+setcell('m', i,j,k, [0,1,0])
 m=getfield('m')
 print 'm', m, '\n'
 print 'm', i, j, k,  '=', m[0][i][j][k], m[1][i][j][k] , m[2][i][j][k]
-#print 'getcell', getcell('m', 2,3,0)
+print 'getcell', getcell('m', i,j,k)
 
 
 Hx = 0 / mu0
