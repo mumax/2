@@ -8,11 +8,11 @@
 package engine
 
 import (
-	. "mumax/common"
+	//. "mumax/common"
 )
 
 func (e *Engine) Step() {
-	Debug("Engine.Step")
+	//Debug("Engine.Step")
 
 	// update input for ODE solver recursively
 	for _, ode := range e.ode {

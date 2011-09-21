@@ -229,7 +229,7 @@ func (b *Array) Get(comp, x, y, z int) float32 {
 	N1 := acomp.partSize[Y]
 	N2 := acomp.partSize[Z]
 	index := x*N1*N2 + y*N2 + z
-	Debug("index", index)
+	//Debug("index", index)
 	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)),
 		cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
 		1*SIZEOF_FLOAT)
@@ -247,7 +247,7 @@ func (b *Array) Set(comp, x, y, z int, value float32) {
 	N1 := acomp.partSize[Y]
 	N2 := acomp.partSize[Z]
 	index := x*N1*N2 + y*N2 + z
-	Debug("index", index)
+	//Debug("index", index)
 	cu.MemcpyHtoD(cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
 		cu.HostPtr(unsafe.Pointer(&value)),
 		1*SIZEOF_FLOAT)

@@ -47,6 +47,8 @@ type Quant struct {
 	desc       string            // Human-readable description
 	unit       Unit              // Unit of the multiplier value, e.g. A/m.
 	kind       QuantKind         // VALUE, FIELD or MASK
+	updates int // Number of times the quantity has been updated (for debuggin)
+	invalidates int // Number of times the quantity has been invalidated (for debuggin)
 }
 
 //____________________________________________________________________ init
@@ -244,8 +246,9 @@ func (q *Quant) Update() {
 	}
 
 	// now update self
-	Debug("update " + q.Name())
+	//Debug("update " + q.Name())
 	q.updater.Update()
+	q.updates++
 
 	q.upToDate = true
 }
@@ -253,8 +256,11 @@ func (q *Quant) Update() {
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
+	if !q.upToDate{return}
+
 	q.upToDate = false
-	Debug("invalidate " + q.Name())
+	q.invalidates++
+	//Debug("invalidate " + q.Name())
 	for _, c := range q.children {
 		c.Invalidate()
 	}

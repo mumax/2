@@ -28,7 +28,7 @@ func (s *EulerSolver) Step() {
 	checkUniform(dyMul)
 	dt := s.dt.Scalar()
 
-	Debug("dt intern: ", dt*dyMul[0])
+	//Debug("dt intern: ", dt*dyMul[0])
 	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
 
 }
