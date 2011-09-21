@@ -35,20 +35,20 @@ import (
 // Quantities are the nodes of an acyclic graph representing the differential
 // equation to be solved.
 type Quant struct {
-	name       string            // Unique identifier
-	array      *gpu.Array        // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
-	multiplier []float64         // Point-wise multiplication coefficients for array, dimensionfull.
-	nComp      int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
-	upToDate   bool              // Flags if this quantity needs to be updated
-	updater    Updater           // Called to update this quantity
-	children   map[string]*Quant // Quantities this one depends on, indexed by name
-	parents    map[string]*Quant // Quantities that depend on this one, indexed by name
-	buffer     *host.Array       // Host buffer for copying from/to the GPU array
-	desc       string            // Human-readable description
-	unit       Unit              // Unit of the multiplier value, e.g. A/m.
-	kind       QuantKind         // VALUE, FIELD or MASK
-	updates int // Number of times the quantity has been updated (for debuggin)
-	invalidates int // Number of times the quantity has been invalidated (for debuggin)
+	name        string            // Unique identifier
+	array       *gpu.Array        // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
+	multiplier  []float64         // Point-wise multiplication coefficients for array, dimensionfull.
+	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
+	upToDate    bool              // Flags if this quantity needs to be updated
+	updater     Updater           // Called to update this quantity
+	children    map[string]*Quant // Quantities this one depends on, indexed by name
+	parents     map[string]*Quant // Quantities that depend on this one, indexed by name
+	buffer      *host.Array       // Host buffer for copying from/to the GPU array
+	desc        string            // Human-readable description
+	unit        Unit              // Unit of the multiplier value, e.g. A/m.
+	kind        QuantKind         // VALUE, FIELD or MASK
+	updates     int               // Number of times the quantity has been updated (for debuggin)
+	invalidates int               // Number of times the quantity has been invalidated (for debuggin)
 }
 
 //____________________________________________________________________ init
@@ -256,7 +256,9 @@ func (q *Quant) Update() {
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
-	if !q.upToDate{return}
+	if !q.upToDate {
+		return
+	}
 
 	q.upToDate = false
 	q.invalidates++
