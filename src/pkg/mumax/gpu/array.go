@@ -204,51 +204,39 @@ func (a *Array) Size3D() []int {
 	return a.size3D
 }
 
-func(a*Array)checkBounds(comp,x,y,z int){
+// check if comp, x, y, z is inside the array's bounds.
+// panic if not.
+func (a *Array) checkBounds(comp, x, y, z int) {
 	if comp < 0 || comp >= a.NComp() ||
 		x < 0 || x >= a.size3D[X] ||
 		y < 0 || y >= a.size3D[Y] ||
 		z < 0 || z >= a.size3D[Z] {
-		panic(InputErr("gpu.Array index out of range"))
+		panic(InputErr(fmt.Sprint("gpu.Array index out of range. ",
+			"component:", comp, " index:", z, y, x,
+			" array size: ", a.NComp(), " components x ", a.size3D[Z], a.size3D[Y], a.size3D[X])))
 	}
-	}
+}
 
 // Get a single value
 func (a *Array) Get(comp, x, y, z int) float32 {
-	a.checkBounds(comp,x,y,z)
-	var value float32
-	dev := (y * NDevice()) / a.size3D[Y] // the device on which the number resides
-	Debug("dev", dev)
-	setDevice(dev)
-	acomp := a.Comp[comp]
-	N0 := acomp.partSize[X]
-	N1 := acomp.partSize[Y]
-	N2 := acomp.partSize[Z]
-	index := N0*N1*N2 + x*N1*N2 + y*N2 + z
-	Debug("index", index)
-	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)), 
-	cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)), 
-	1*SIZEOF_FLOAT)
-	return value
+	panic("unimpl")
 }
 
-
-
 // Set a single value
-func (a *Array) Set(comp, x, y, z int, value float32)  {
-	a.checkBounds(comp,x,y,z)
-	dev := (y * NDevice()) / a.size3D[Y] // the device on which the number resides
+func (b *Array) Set(comp, x, y, z int, value float32) {
+	b.checkBounds(comp, x, y, z)
+	acomp := b.Comp[comp]
+	dev := y / acomp.size3D[Y] // the device on which the number resides
 	Debug("dev", dev)
 	setDevice(dev)
-	acomp := a.Comp[comp]
-	N0 := acomp.partSize[X]
+	//N0 := acomp.partSize[X]
 	N1 := acomp.partSize[Y]
 	N2 := acomp.partSize[Z]
-	index := N0*N1*N2 + x*N1*N2 + y*N2 + z
+	index := x*N1*N2 + y*N2 + z
 	Debug("index", index)
 	cu.MemcpyHtoD(cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
-	cu.HostPtr(unsafe.Pointer(&value)), 
-	1*SIZEOF_FLOAT)
+		cu.HostPtr(unsafe.Pointer(&value)),
+		1*SIZEOF_FLOAT)
 }
 
 // Copy from device array to device array.

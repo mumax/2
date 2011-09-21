@@ -211,7 +211,7 @@ func (a API) GetCell(quant string, x, y, z int) []float64 {
 	q.Update() //!
 	value := make([]float64, q.NComp())
 	for c := range value {
-		value[c] = float64(q.Array().Get(c, z, y, x))                     
+		value[c] = float64(q.Array().Get(c, z, y, x))
 		//Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
 	}
 	swapXYZ(value)
@@ -222,7 +222,7 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	q := a.Engine.Quant(quant)
 	swapXYZ(value)
 	for c := range value {
-		q.Array().Set(c, z, y, x, float32(value[c])                      ) 
+		q.Array().Set(c, z, y, x, float32(value[c]))
 		//Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
 	}
 	q.Invalidate() //!
