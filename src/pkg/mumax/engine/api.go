@@ -247,3 +247,9 @@ func (a API) SaveGraph(file string) {
 	a.Engine.WriteDot(f)
 	Log("Wrote", file, "Run command: \"dot -Tpng", file, "> myfile.png\" to plot the physics graph (requires package graphviz).")
 }
+
+
+// DEBUG
+func (a API) PrintStats(){
+	Log(a.Engine.Stats())
+}

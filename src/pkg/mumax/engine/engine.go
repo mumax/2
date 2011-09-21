@@ -9,6 +9,7 @@ package engine
 
 import (
 	. "mumax/common"
+	"fmt"
 )
 
 // Engine is the heart of a multiphysics simulation.
@@ -187,5 +188,30 @@ func (e *Engine) String() string {
 	for _, ode := range e.ode {
 		str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
 	}
+	return str
+}
+
+
+// DEBUG: statistics
+func(e *Engine) Stats() string{
+	str := "engine stat\n"
+	quants := e.quantity
+	for _, v := range quants {
+			str += fmt.Sprintln(fill(v.Name()) , "\t" , 
+			valid(v.upToDate), 
+			" upd:", fill(v.updates), 
+			" inv:", fill(v.invalidates))
+	}
+	return str
+}
+
+func valid(b bool) string{
+	if b {return "  valid"}
+	return "invalid"
+}
+
+func fill(s interface{}) string{
+		str := fmt.Sprint(s)
+	for len(str) < 6 {str += " "}
 	return str
 }

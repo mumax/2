@@ -10,6 +10,8 @@ load('test')
 savegraph("graph.dot")
 
 setscalar('alpha', 0.05)
+#update()
+setscalar('alpha', 0.04)
 #print 'alpha', getvalue('alpha'), '\n'
 #print 'alphaMask', getmask('alpha'), '\n'
 #print 'alpha', getfield('alpha'), '\n'
@@ -45,7 +47,7 @@ print 'torque', torque , '\n'
 
 setscalar('dt', 2e-12)
 f = open('ll', 'w')
-for i in range(5000):
+for i in range(100):
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
@@ -55,6 +57,8 @@ for i in range(5000):
 	step()
 
 f.close()
+
+printstats()
 
 
 
