@@ -23,13 +23,10 @@ func (e *Engine) Step() {
 	for _, solver := range e.solver {
 		solver.Step()
 	}
-	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
 
 	// set new t, dt, m
 
 	// invalidate everything that depends on solver
-	e.dt.Invalidate()
-	e.time.Invalidate()
 	for _, ode := range e.ode {
 		ode[LHS].Invalidate()
 	}

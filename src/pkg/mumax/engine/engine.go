@@ -168,7 +168,7 @@ func (e *Engine) ODE1(y, diff string) {
 		}
 	}
 	e.ode = append(e.ode, [2]*Quant{yQ, dQ})
-	e.solver = append(e.solver, NewEuler(yQ, dQ, e.dt))
+	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt))
 }
 
 //__________________________________________________________________ output

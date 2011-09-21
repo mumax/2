@@ -181,6 +181,7 @@ func (q *Quant) SetMask(field *host.Array) {
 
 // Assuming the quantity represent a scalar value, return it as a number.
 func (q *Quant) Scalar() float64 {
+	q.Update()
 	if q.IsSpaceDependent() {
 		panic(InputErr(q.Name() + " is space-dependent, can not return it as a scalar value"))
 	}

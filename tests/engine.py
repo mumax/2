@@ -48,7 +48,7 @@ print 'torque', torque , '\n'
 
 setscalar('dt', 2e-12)
 f = open('ll', 'w')
-for i in range(100):
+for i in range(1000):
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
@@ -57,9 +57,10 @@ for i in range(100):
 	f.write(str(m[2]) + "\n")
 	step()
 
+printstats()
+
 f.close()
 
-printstats()
 
 
 

@@ -14,11 +14,11 @@ import (
 )
 
 type EulerSolver struct {
-	y, dy, dt *Quant
+	y, dy, t, dt *Quant
 }
 
-func NewEuler(y, dy, dt *Quant) *EulerSolver {
-	return &EulerSolver{y, dy, dt}
+func NewEuler(y, dy, t, dt *Quant) *EulerSolver {
+	return &EulerSolver{y, dy, t, dt}
 }
 
 func (s *EulerSolver) Step() {
@@ -26,11 +26,14 @@ func (s *EulerSolver) Step() {
 	dy := s.dy.Array()
 	dyMul := s.dy.multiplier
 	checkUniform(dyMul)
-	dt := s.dt.Scalar()
 
-	//Debug("dt intern: ", dt*dyMul[0])
+	t := s.t
+	dt := s.dt.Scalar()
+	if dt <= 0 {panic(InputErr(fmt.Sprint("dt=", dt)))}
+
 	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
 
+	t.SetScalar(t.Scalar() + dt) // do not use quant dt.Scalar, which might get updated
 }
 
 //DEBUG

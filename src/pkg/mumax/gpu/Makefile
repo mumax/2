@@ -15,6 +15,7 @@ GOFILES=\
 	module_ptxparse.go\
 	module_find.go\
 	math.go\
+	#reductor.go\
 
 CGOFILES=\
 	gpus.go\
