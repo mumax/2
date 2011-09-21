@@ -206,9 +206,9 @@ func (e *Engine) Stats() string {
 
 func valid(b bool) string {
 	if b {
-		return "  valid"
+		return "✓"
 	}
-	return "invalid"
+	return "✗"
 }
 
 func fill(s interface{}) string {

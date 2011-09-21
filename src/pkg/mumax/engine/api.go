@@ -254,6 +254,6 @@ func (a API) PrintStats() {
 }
 
 // DEBUG: manually update the quantity state
-func(a API) Update(quant string){
+func (a API) Update(quant string) {
 	a.Engine.Quant(quant).Update()
 }
