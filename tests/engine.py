@@ -10,8 +10,9 @@ load('test')
 savegraph("graph.dot")
 
 setscalar('alpha', 0.05)
-#update()
-setscalar('alpha', 0.04)
+getscalar('alpha')
+setscalar('alpha', 0.05)
+
 #print 'alpha', getvalue('alpha'), '\n'
 #print 'alphaMask', getmask('alpha'), '\n'
 #print 'alpha', getfield('alpha'), '\n'

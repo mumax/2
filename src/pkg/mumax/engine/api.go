@@ -248,8 +248,12 @@ func (a API) SaveGraph(file string) {
 	Log("Wrote", file, "Run command: \"dot -Tpng", file, "> myfile.png\" to plot the physics graph (requires package graphviz).")
 }
 
-
 // DEBUG
-func (a API) PrintStats(){
+func (a API) PrintStats() {
 	Log(a.Engine.Stats())
+}
+
+// DEBUG: manually update the quantity state
+func(a API) Update(quant string){
+	a.Engine.Quant(quant).Update()
 }
