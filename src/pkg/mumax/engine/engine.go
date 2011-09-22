@@ -26,6 +26,7 @@ type Engine struct {
 	solver    []Solver
 	time      *Quant // time quantity is always present
 	dt        *Quant // time step quantity is always present
+	Timer
 }
 
 // Left-hand side and right-hand side indices for Engine.ode[i]
@@ -49,6 +50,7 @@ func (e *Engine) init() {
 	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
+	e.StartTimer()
 }
 
 //__________________________________________________________________ set/get
@@ -193,14 +195,14 @@ func (e *Engine) String() string {
 
 // DEBUG: statistics
 func (e *Engine) Stats() string {
-	str := "engine stat\n"
+	str := "engine running" + e.Timer.String() + "\n"
 	quants := e.quantity
 	for _, v := range quants {
 		str += fmt.Sprintln(fill(v.Name()), "\t",
 			valid(v.upToDate),
 			" upd:", fill(v.updates),
 			" inv:", fill(v.invalidates),
-			" ", v.Seconds(), "s")
+			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/call")
 	}
 	return str
 }

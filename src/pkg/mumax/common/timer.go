@@ -13,29 +13,35 @@ import (
 	"fmt"
 )
 
+// Non-thread safe timer for debugging.
 type Timer struct {
 	StartNanos, TotalNanos int64 // StartTime == 0: not running
 	Count                  int
 }
 
-func (s *Timer) StartTimer() {
-	if s.StartNanos != 0 {
+func (t *Timer) StartTimer() {
+	if t.StartNanos != 0 {
 		panic(Bug("Timer.Start: already running"))
 	}
-	s.StartNanos = time.Nanoseconds()
+	t.StartNanos = time.Nanoseconds()
 }
 
-func (s *Timer) StopTimer() {
-	if s.StartNanos == 0 {
+func (t *Timer) StopTimer() {
+	if t.StartNanos == 0 {
 		panic(Bug("Timer.Stop: not running"))
 	}
-	s.TotalNanos += (time.Nanoseconds() - s.StartNanos)
-	s.Count++
-	s.StartNanos = 0
+	t.TotalNanos += (time.Nanoseconds() - t.StartNanos)
+	t.Count++
+	t.StartNanos = 0
 }
 
+// Returns the total number of seconds this timer has been running.
+// Correct even if the timer is running wh
 func (t *Timer) Seconds() float64 {
-	return float64(t.TotalNanos) / 1e9
+	if t.StartNanos == 0{//not running for the moment
+			return float64(t.TotalNanos)/1e9
+	}// running for the moment
+	return float64(t.TotalNanos + time.Nanoseconds() - t.StartNanos)/1e9
 }
 
 func (t *Timer) Average() float64 {
@@ -43,5 +49,7 @@ func (t *Timer) Average() float64 {
 }
 
 func (t *Timer) String() string {
-	return fmt.Sprintf("%4gms/invocation", t.Average()/1000)
+	return fmt.Sprint(t.Seconds(), "s")
 }
+
+
