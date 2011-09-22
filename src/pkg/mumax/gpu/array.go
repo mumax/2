@@ -225,35 +225,33 @@ func (b *Array) Get(comp, x, y, z int) float32 {
 	b.checkBounds(comp, x, y, z)
 	var value float32
 	acomp := b.Comp[comp]
-	dev := y / acomp.size3D[Y] // the device on which the number resides
-	//Debug("dev", dev)
-	setDevice(dev)
-	//N0 := acomp.partSize[X]
-	N1 := acomp.partSize[Y]
-	N2 := acomp.partSize[Z]
-	index := x*N1*N2 + y*N2 + z
-	//Debug("index", index)
+	dev, index := acomp.indexOf(x,y,z)
+	setDevice(getDevices()[dev])
 	cu.MemcpyDtoH(cu.HostPtr(unsafe.Pointer(&value)),
 		cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
 		1*SIZEOF_FLOAT)
 	return value
 }
 
+
 // Set a single value
 func (b *Array) Set(comp, x, y, z int, value float32) {
 	b.checkBounds(comp, x, y, z)
 	acomp := b.Comp[comp]
-	dev := y / acomp.size3D[Y] // the device on which the number resides
-	//Debug("dev", dev)
-	setDevice(dev)
-	//N0 := acomp.partSize[X]
-	N1 := acomp.partSize[Y]
-	N2 := acomp.partSize[Z]
-	index := x*N1*N2 + y*N2 + z
-	//Debug("index", index)
+	dev, index := acomp.indexOf(x,y,z)
+	setDevice(getDevices()[dev])
 	cu.MemcpyHtoD(cu.DevicePtr(offset(uintptr(acomp.pointer[dev]), SIZEOF_FLOAT*index)),
 		cu.HostPtr(unsafe.Pointer(&value)),
 		1*SIZEOF_FLOAT)
+}
+
+
+func(a *Array) indexOf(x,y,z int) (device, index int){
+	device = (y*NDevice()) / a.size3D[Y] // the device on which the number resides
+	N1 := a.partSize[Y]
+	N2 := a.partSize[Z]
+	index = x*N1*N2 + (y-device*N1)*N2 + z
+	return
 }
 
 // Copy from device array to device array.
