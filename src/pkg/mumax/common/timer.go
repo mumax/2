@@ -38,10 +38,10 @@ func (t *Timer) StopTimer() {
 // Returns the total number of seconds this timer has been running.
 // Correct even if the timer is running wh
 func (t *Timer) Seconds() float64 {
-	if t.StartNanos == 0{//not running for the moment
-			return float64(t.TotalNanos)/1e9
-	}// running for the moment
-	return float64(t.TotalNanos + time.Nanoseconds() - t.StartNanos)/1e9
+	if t.StartNanos == 0 { //not running for the moment
+		return float64(t.TotalNanos) / 1e9
+	} // running for the moment
+	return float64(t.TotalNanos+time.Nanoseconds()-t.StartNanos) / 1e9
 }
 
 func (t *Timer) Average() float64 {
@@ -51,5 +51,3 @@ func (t *Timer) Average() float64 {
 func (t *Timer) String() string {
 	return fmt.Sprint(t.Seconds(), "s")
 }
-
-

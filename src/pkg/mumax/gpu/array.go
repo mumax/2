@@ -90,7 +90,10 @@ func (a *Array) initSize(components int, size3D []int) {
 	Assert(length3D > 0)
 	a.partLen4D = components * length3D / Ndev
 	a.partLen3D = length3D / Ndev
-	Assert(size3D[Y]%Ndev == 0)
+	if size3D[Y]%Ndev != 0 {
+		panic(InputErr(fmt.Sprint("array size y (", size3D[Y],
+			") should be divisible by number of GPUs (", Ndev, ")")))
+	}
 
 	a._size[0] = components
 	for i := range size3D {

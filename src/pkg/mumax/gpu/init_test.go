@@ -30,7 +30,7 @@ func init() {
 
 // return a few array sizes for testing
 func sizes() [][]int {
-	return [][]int{{2, 4, 8}, {8, 2, 4}}
+	return [][]int{{2, 2 * NDevice(), 8}, {32, 8 * NDevice(), 4}}
 }
 
 // return a few numbers of components for testing
