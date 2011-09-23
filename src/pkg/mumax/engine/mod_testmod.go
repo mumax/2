@@ -16,6 +16,7 @@ func (e *Engine) LoadTest() {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
 	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")
+	e.Depends("m", "Msat")
 
 	m := e.Quant("m")
 	Msat := e.Quant("Msat")
@@ -28,7 +29,16 @@ func (e *Engine) LoadTest() {
 	e.AddQuant("H_z", VECTOR, MASK, Unit("A/m"), "zeeman field")
 	e.Depends("H_z", "t")
 
-	e.AddSumNode("H", "H_z")
+	e.AddQuant("Aexch", SCALAR, MASK, Unit("J/m"), "exchange coeff.")
+	e.AddQuant("H_e", VECTOR, FIELD, Unit("A/m"), "exchange field")
+	e.Depends("H_e", "m", "Aexch")
+
+	e.AddQuant("H_d", VECTOR, FIELD, Unit("A/m"), "demag field")
+	e.Depends("H_d", "Msat")
+
+	e.AddQuant("H_a", VECTOR, FIELD, Unit("A/m"), "anis. field")
+
+	e.AddSumNode("H", "H_z", "H_e", "H_d")
 
 	e.AddTorqueNode()
 

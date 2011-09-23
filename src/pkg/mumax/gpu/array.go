@@ -233,7 +233,6 @@ func (b *Array) Get(comp, x, y, z int) float32 {
 	return value
 }
 
-
 // Set a single value
 func (b *Array) Set(comp, x, y, z int, value float32) {
 	b.checkBounds(comp, x, y, z)
@@ -244,7 +243,6 @@ func (b *Array) Set(comp, x, y, z int, value float32) {
 		cu.HostPtr(unsafe.Pointer(&value)),
 		1*SIZEOF_FLOAT)
 }
-
 
 func (a *Array) indexOf(x, y, z int) (device, index int) {
 	device = (y * NDevice()) / a.size3D[Y] // the device on which the number resides

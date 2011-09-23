@@ -23,10 +23,10 @@ type Engine struct {
 	cellSize  []float64         // size of the FD cells, nil means not yet set
 	quantity  map[string]*Quant // maps quantity names onto their data structures
 	ode       [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
-	solver    []Solver
-	time      *Quant // time quantity is always present
-	dt        *Quant // time step quantity is always present
-	Timer
+	solver    []Solver          // solver[i] does the time stepping for ode[i]
+	time      *Quant            // time quantity is always present
+	dt        *Quant            // time step quantity is always present
+	Timer                       // For benchmarking
 }
 
 // Left-hand side and right-hand side indices for Engine.ode[i]
