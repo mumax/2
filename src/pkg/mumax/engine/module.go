@@ -19,6 +19,6 @@ var modules map[string]Module = make(map[string]Module)
 
 // Registers a module in the list of known modules.
 // Each module should register itself in its init() function.
-func RegisterModule(name string, mod Module){
+func RegisterModule(name string, mod Module) {
 	modules[name] = mod
 }

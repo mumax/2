@@ -27,10 +27,10 @@ GOFILES=\
 	normalize_updater.go\
 	solver.go\
 	euler_solver.go\
-	input.go\
-	output.go\
 	resample.go\
 	testapi.go\
+	#output.go\
+	#input.go\
 
 CGOFILES=\
 
