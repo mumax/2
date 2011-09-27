@@ -11,8 +11,15 @@ import (
 	. "mumax/common"
 )
 
+// Register this module
+func init(){
+	modules["test"]= TestModule{}
+}
+
+type TestModule struct{}
+
 // Loads a test module.
-func (e *Engine) LoadTest() {
+func (x TestModule) Load(e*Engine) {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
 	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")

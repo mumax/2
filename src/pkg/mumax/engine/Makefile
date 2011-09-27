@@ -11,6 +11,7 @@ GOFILES=\
 	engine_graphviz.go\
 	engine_step.go\
 	api.go\
+	module.go\
 	mod_micromag.go\
 	mod_micromagenergy.go\
 	mod_spintorque.go\
