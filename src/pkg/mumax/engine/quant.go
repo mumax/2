@@ -15,6 +15,7 @@ import (
 	. "mumax/common"
 	"mumax/gpu"
 	"mumax/host"
+	"sync"
 	"fmt"
 )
 
@@ -48,7 +49,10 @@ type Quant struct {
 	kind        QuantKind         // VALUE, FIELD or MASK
 	updates     int               // Number of times the quantity has been updated (for debuggin)
 	invalidates int               // Number of times the quantity has been invalidated (for debuggin)
-	buffer      Buffer            // Host buffer for output
+	buffer    *host.Array // Host buffer for copying from/to the GPU array
+	bufUpToDate bool        // Flags if the buffer (in RAM) needs to be updated
+	bufXfers int // Number of times it has been copied from GPU
+	bufMutex sync.RWMutex
 	Timer                         // Debug/benchmarking
 }
 
@@ -217,17 +221,27 @@ func (q *Quant) Array() *gpu.Array {
 	return q.array
 }
 
-// Gets a host array for buffering the GPU array, initializing it if necessary.
-func (q *Quant) Buffer() *host.Array {
-	if q.buffer.array == nil {
-		Debug("buffer ", q.Name(), q.NComp(), "x", q.Array().Size3D())
-		q.buffer.array = host.NewArray(q.NComp(), q.Array().Size3D())
-	}
-	return q.buffer.array
-}
 
 func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr()[0] != 0
+}
+
+
+// Transfers the quantity from GPU to host (if necessary).
+func(q *Quant) Buffer() *host.Array{
+	if q.buffer == nil {
+			Debug("buffer", q.Name(), q.NComp() , "x", q.Array().Size3D())
+		q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
+	}
+
+	q.bufMutex.Lock()
+	if q.bufUpToDate == false{
+		q.array.CopyToHost(q.buffer)
+		q.bufXfers++
+	}
+	q.bufUpToDate = true
+	q.bufMutex.Unlock()
+	return q.buffer
 }
 
 //____________________________________________________________________ tree walk
@@ -266,7 +280,7 @@ func (q *Quant) Invalidate() {
 	}
 
 	q.upToDate = false
-	q.buffer.Invalidate()
+	q.bufUpToDate = false
 	q.invalidates++
 	//Debug("invalidate " + q.Name())
 	for _, c := range q.children {

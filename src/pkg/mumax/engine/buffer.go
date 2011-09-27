@@ -7,17 +7,22 @@
 
 package engine
 
+// A host buffer for GPU quantities, used for output.
+
 import (
 	"mumax/host"
 	"sync"
 )
 
 type Buffer struct {
-	array    *host.Array // Host buffer for copying from/to the GPU array
-	upToDate bool        // Flags if the buffer (in RAM) needs to be updated
-	sync.RWMutex
 }
 
 func (b *Buffer) Invalidate() {
 	b.upToDate = false
+}
+
+
+
+// Gets a host array for buffering the GPU array, initializing it if necessary.
+func (buffer *Buffer) Update() *host.Array {
 }

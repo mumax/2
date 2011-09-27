@@ -202,7 +202,8 @@ func (e *Engine) Stats() string {
 			valid(v.upToDate),
 			" upd:", fill(v.updates),
 			" inv:", fill(v.invalidates),
-			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/call")
+			" xfer:", fill(v.bufXfers), valid(v.bufUpToDate),
+			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/upd")
 	}
 	return str
 }
