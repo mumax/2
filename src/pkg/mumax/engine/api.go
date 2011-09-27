@@ -54,13 +54,13 @@ func (a API) GetCellSize() (x, y, z float64) {
 // Load a physics module. Not aware of dependencies (yet)
 // TODO: cleaner management a la modprobe
 func (a API) Load(name string) {
-		module, ok := modules[name]
-		
-		if !ok{
-				opts := []string{}
-				for k,_ := range modules{
-					opts = append(opts, k)
-				}
+	module, ok := modules[name]
+
+	if !ok {
+		opts := []string{}
+		for k, _ := range modules {
+			opts = append(opts, k)
+		}
 		panic(InputErr(fmt.Sprint("Unknown module:", name, " Options: ", opts)))
 	}
 

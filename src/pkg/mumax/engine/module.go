@@ -7,10 +7,18 @@
 
 package engine
 
-import()
+import ()
 
+// A physics module. Loading it adds various quantity nodes to the engine.
+type Module interface {
+	Load(e *Engine) // Loads this module's quantities and dependencies into the engine
+}
+
+// Map with registered modules
 var modules map[string]Module = make(map[string]Module)
 
-type Module interface{
-	Load(e *Engine) // Loads this module into the engine
+// Registers a module in the list of known modules.
+// Each module should register itself in its init() function.
+func RegisterModule(name string, mod Module){
+	modules[name] = mod
 }

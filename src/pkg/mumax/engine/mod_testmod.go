@@ -12,14 +12,14 @@ import (
 )
 
 // Register this module
-func init(){
-	modules["test"]= TestModule{}
+func init() {
+	modules["test"] = TestModule{}
 }
 
 type TestModule struct{}
 
 // Loads a test module.
-func (x TestModule) Load(e*Engine) {
+func (x TestModule) Load(e *Engine) {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
 	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")
