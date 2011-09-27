@@ -226,6 +226,14 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	}
 	q.Invalidate() //!
 }
+
+// ________________________________________________________________________________ save quantities
+
+func (a API) Save(quant string,  format []string,  filename string){
+	a.Engine.Save(a.Engine.Quant(quant),  format, filename)
+}
+
+
 //________________________________________________________________________________ internal
 
 // INTERNAL: swaps the X-Z values of the array.

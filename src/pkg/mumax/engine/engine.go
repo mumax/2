@@ -175,6 +175,11 @@ func (e *Engine) ODE1(y, diff string) {
 
 //__________________________________________________________________ output
 
+
+func (e*Engine)Save(q*Quant, format []string, filename string){
+	
+}
+
 // String representation
 func (e *Engine) String() string {
 	str := "engine\n"

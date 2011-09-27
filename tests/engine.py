@@ -60,6 +60,7 @@ for i in range(10):
 torque=getfield('torque')
 printstats()
 
+save("m", "png", "m.png")
 f.close()
 
 
