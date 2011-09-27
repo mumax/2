@@ -176,7 +176,7 @@ func (e *Engine) ODE1(y, diff string) {
 //__________________________________________________________________ output
 
 
-func (e*Engine)Save(q*Quant, format []string, filename string){
+func (e*Engine)Save(q*Quant, format string, filename string){
 	
 }
 
