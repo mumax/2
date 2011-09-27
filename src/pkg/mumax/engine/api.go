@@ -229,10 +229,9 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 
 // ________________________________________________________________________________ save quantities
 
-func (a API) Save(quant string,  format string,  filename string){
-	a.Engine.Save(a.Engine.Quant(quant),  format, filename)
+func (a API) Save(quant string, format string, filename string) {
+	a.Engine.Save(a.Engine.Quant(quant), format, filename)
 }
-
 
 //________________________________________________________________________________ internal
 
