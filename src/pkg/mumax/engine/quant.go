@@ -43,13 +43,13 @@ type Quant struct {
 	updater     Updater           // Called to update this quantity
 	children    map[string]*Quant // Quantities this one depends on, indexed by name
 	parents     map[string]*Quant // Quantities that depend on this one, indexed by name
-	buffer      *host.Array       // Host buffer for copying from/to the GPU array
 	desc        string            // Human-readable description
 	unit        Unit              // Unit of the multiplier value, e.g. A/m.
 	kind        QuantKind         // VALUE, FIELD or MASK
 	updates     int               // Number of times the quantity has been updated (for debuggin)
 	invalidates int               // Number of times the quantity has been invalidated (for debuggin)
-	Timer
+	buffer      Buffer            // Host buffer for output
+	Timer                         // Debug/benchmarking
 }
 
 //____________________________________________________________________ init
@@ -63,10 +63,10 @@ func newQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, d
 
 // Number of components.
 const (
-	SCALAR   = 1
-	VECTOR   = 3
-	SYMMTENS = 6
-	TENS     = 9
+	SCALAR   = 1 // Number
+	VECTOR   = 3 // Vector
+	SYMMTENS = 6 // Symmetric tensor
+	TENS     = 9 // General tensor
 )
 
 // Initiates a field with nComp components and array size size3D.
@@ -219,11 +219,11 @@ func (q *Quant) Array() *gpu.Array {
 
 // Gets a host array for buffering the GPU array, initializing it if necessary.
 func (q *Quant) Buffer() *host.Array {
-	if q.buffer == nil {
+	if q.buffer.array == nil {
 		Debug("buffer ", q.Name(), q.NComp(), "x", q.Array().Size3D())
-		q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
+		q.buffer.array = host.NewArray(q.NComp(), q.Array().Size3D())
 	}
-	return q.buffer
+	return q.buffer.array
 }
 
 func (q *Quant) IsSpaceDependent() bool {
@@ -255,6 +255,7 @@ func (q *Quant) Update() {
 	q.updates++
 
 	q.upToDate = true
+	// Do not update buffer!
 }
 
 // Opposite of Update. Sets upToDate flag of this node and
@@ -265,6 +266,7 @@ func (q *Quant) Invalidate() {
 	}
 
 	q.upToDate = false
+	q.buffer.Invalidate()
 	q.invalidates++
 	//Debug("invalidate " + q.Name())
 	for _, c := range q.children {

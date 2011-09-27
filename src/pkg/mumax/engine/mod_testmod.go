@@ -34,11 +34,14 @@ func (e *Engine) LoadTest() {
 	e.Depends("H_e", "m", "Aexch")
 
 	e.AddQuant("H_d", VECTOR, FIELD, Unit("A/m"), "demag field")
-	e.Depends("H_d", "Msat")
+	e.Depends("H_d", "m", "Msat")
 
 	e.AddQuant("H_a", VECTOR, FIELD, Unit("A/m"), "anis. field")
+	e.AddQuant("k1", SCALAR, MASK, Unit("J/m3"), "anis. const")
+	e.AddQuant("k2", SCALAR, MASK, Unit("J/m3"), "anis. const")
+	e.Depends("H_a", "m", "k1", "k2")
 
-	e.AddSumNode("H", "H_z", "H_e", "H_d")
+	e.AddSumNode("H", "H_z", "H_e", "H_d", "H_a")
 
 	e.AddTorqueNode()
 
