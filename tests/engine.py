@@ -57,6 +57,7 @@ for i in range(10):
 	f.write(str(m[2]) + "\n")
 	step()
 
+torque=getfield('torque')
 printstats()
 
 f.close()

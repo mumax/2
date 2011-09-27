@@ -199,10 +199,9 @@ func (e *Engine) Stats() string {
 	quants := e.quantity
 	for _, v := range quants {
 		str += fmt.Sprintln(fill(v.Name()), "\t",
-			valid(v.upToDate),
-			" upd:", fill(v.updates),
+			valid(v.upToDate), " upd:", fill(v.updates),
 			" inv:", fill(v.invalidates),
-			" xfer:", fill(v.bufXfers), valid(v.bufUpToDate),
+			valid(v.bufUpToDate)," xfer:", fill(v.bufXfers), 
 			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/upd")
 	}
 	return str
