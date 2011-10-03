@@ -16,12 +16,7 @@ import (
 var engine Engine
 
 
-func init(){
-	(&engine).init()
-}
-
-
-func GetEngine() *Engine{
+func GetEngine() *Engine {
 	return &engine
 }
 
@@ -50,10 +45,15 @@ const (
 )
 
 // Make new engine.
-func NewEngine() *Engine {
-	e := new(Engine)
-	e.init()
-	return e
+//func NewEngine() *Engine {
+//	e := new(Engine)
+//	e.init()
+//	return e
+//}
+
+// Initializes the global simulation engine
+func Init(){
+	(&engine).init()
 }
 
 // initialize
@@ -115,7 +115,7 @@ func (e *Engine) Quant(name string) *Quant {
 	if q, ok := e.quantity[name]; ok {
 		return q
 	} else {
-		panic(InputErr("engine: undefined: " + name))
+		panic(InputErr("engine: undefined quantity: " + name))
 	}
 	return nil //silence gc
 }
@@ -243,7 +243,8 @@ func (e *Engine) Stats() string {
 			valid(v.upToDate), " upd:", fill(v.updates),
 			" inv:", fill(v.invalidates),
 			valid(v.bufUpToDate), " xfer:", fill(v.bufXfers),
-			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/upd")
+			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/upd ",
+			v.multiplier, v.unit)
 	}
 	return str
 }

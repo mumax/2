@@ -19,8 +19,8 @@ func init() {
 
 type ModLLG struct{}
 
-func (x ModLLG) Description() string    { return "Landau-Lifshitz-Gilbert equation" }
-func (x ModLLG) Name() string           { return "llg" }
+func (x ModLLG) Description() string { return "Landau-Lifshitz-Gilbert equation" }
+func (x ModLLG) Name() string        { return "llg" }
 
 // The torque array contains reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
 //	d m / d t = gamma0 * Msat * τ  
@@ -39,7 +39,6 @@ func (x ModLLG) Load(e *Engine) {
 	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
 	e.Quant("gamma").SetScalar(Gamma0)
 
-
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
@@ -53,8 +52,6 @@ func (x ModLLG) Load(e *Engine) {
 
 	e.ODE1("m", "torque")
 }
-
-
 
 type torqueUpdater struct {
 	τ, m, H, α, γ *Quant

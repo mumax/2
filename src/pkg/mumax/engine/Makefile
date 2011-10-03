@@ -14,6 +14,7 @@ GOFILES=\
 	module.go\
 	mod_magnetization.go\
 	mod_llg.go\
+	mod_zeeman.go\
 	mod_micromag.go\
 	mod_hfield.go\
 	mod_micromagenergy.go\

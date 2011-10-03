@@ -11,7 +11,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-		. "mumax/common"
+	. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -39,7 +39,6 @@ type SumUpdater struct {
 	parents []*Quant
 }
 
-
 func (u *SumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
@@ -58,15 +57,14 @@ func (u *SumUpdater) Update() {
 	}
 }
 
-
 // Adds a parent to the sum, i.e., its value will be added to the sum
-func(u*SumUpdater) AddParent(name string){
-	e:=GetEngine()
+func (u *SumUpdater) AddParent(name string) {
+	e := GetEngine()
 	parent := e.Quant(name)
 	sum := u.sum
-	if parent.unit != sum.unit{
-			panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parent.FullName()))
+	if parent.unit != sum.unit {
+		panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parent.FullName()))
 	}
-	u.parents = append(u.parents, parent)	
+	u.parents = append(u.parents, parent)
 	e.Depends(sum.Name(), name)
 }

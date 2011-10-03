@@ -26,10 +26,10 @@ type Client struct {
 	inputFile, outputDir string
 	ipc                  jsonRPC
 	//eng                  *engine.Engine
-	api                  engine.API
-	infifo, outfifo      *os.File
-	cleanfiles           []string // list of files to be deleted upon program exit
-	logWait              chan int // channel to wait for completion of go logStream()
+	api             engine.API
+	infifo, outfifo *os.File
+	cleanfiles      []string // list of files to be deleted upon program exit
+	logWait         chan int // channel to wait for completion of go logStream()
 }
 
 // Initializes the mumax client to parse infile, write output
@@ -40,6 +40,7 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 	//c.eng.InitMicromagnetism()
 	//Debug(c.eng.String())
 
+	engine.Init()
 	c.api = engine.API{engine.GetEngine()}
 	//c.ipc.Init(c.api)
 }

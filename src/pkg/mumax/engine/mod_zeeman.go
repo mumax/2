@@ -13,22 +13,24 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&Micromag{})
+	RegisterModule(&Zeeman{})
 }
 
-type Micromag struct{}
+type Zeeman struct{}
 
-func (x Micromag) Description() string {
-	return "standard micromagnetism"
+func (x Zeeman) Description() string {
+	return "H_ext: external field [A/m]"
 }
 
-func (x Micromag) Name() string {
-	return "micromagnetism"
+func (x Zeeman) Name() string {
+	return "zeeman"
 }
 
-func (x Micromag) Load(e *Engine) {
-	e.LoadModule("magnetization")
+func (x Zeeman) Load(e *Engine) {
 	e.LoadModule("hfield")
-	e.LoadModule("zeeman")
-	e.LoadModule("llg")
+	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
+	hfield := e.Quant("H")
+	//hext := e.Quant("H_ext")
+	sum := hfield.updater.(*SumUpdater)
+	sum.AddParent("H_ext")
 }

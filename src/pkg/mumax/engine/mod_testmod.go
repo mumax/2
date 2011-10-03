@@ -54,7 +54,6 @@ func (x TestModule) Load(e *Engine) {
 
 	e.AddSumNode("H", "H_z", "H_e", "H_d", "H_a")
 
-
 	e.ODE1("m", "torque")
 
 	e.AddQuant("rho", VECTOR, FIELD, Unit("C/m3"), "charge density")
