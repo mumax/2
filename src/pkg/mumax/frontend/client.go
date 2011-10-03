@@ -25,7 +25,7 @@ import (
 type Client struct {
 	inputFile, outputDir string
 	ipc                  jsonRPC
-	eng                  *engine.Engine
+	//eng                  *engine.Engine
 	api                  engine.API
 	infifo, outfifo      *os.File
 	cleanfiles           []string // list of files to be deleted upon program exit
@@ -37,11 +37,10 @@ type Client struct {
 func (c *Client) Init(inputFile, outputDir, command string) {
 	c.outputDir = outputDir
 	c.inputFile = inputFile
-	c.eng = engine.NewEngine()
 	//c.eng.InitMicromagnetism()
 	//Debug(c.eng.String())
 
-	c.api = engine.API{c.eng}
+	c.api = engine.API{engine.GetEngine()}
 	//c.ipc.Init(c.api)
 }
 

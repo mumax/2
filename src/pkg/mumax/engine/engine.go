@@ -12,6 +12,19 @@ import (
 	"fmt"
 )
 
+// The global simulation engine
+var engine Engine
+
+
+func init(){
+	(&engine).init()
+}
+
+
+func GetEngine() *Engine{
+	return &engine
+}
+
 // Engine is the heart of a multiphysics simulation.
 // The engine stores named quantities like "m", "B", "alpha", ...
 // An acyclic graph structure consisting of interconnected quantities

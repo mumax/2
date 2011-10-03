@@ -28,6 +28,6 @@ func (x Micromag) Name() string {
 
 func (x Micromag) Load(e *Engine) {
 		e.LoadModule("magnetization")
-		e.LoadModule("hfield")
-		e.LoadModule("llg")
+		//e.LoadModule("hfield")
+		//e.LoadModule("llg")
 }

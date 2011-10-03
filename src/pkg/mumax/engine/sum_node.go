@@ -30,15 +30,15 @@ func (e *Engine) AddSumNode(name string, args ...string) {
 		}
 	}
 	e.Depends(name, args...)
-	sum.updater = &sumUpdater{sum, parents}
+	sum.updater = &SumUpdater{sum, parents}
 }
 
-type sumUpdater struct {
+type SumUpdater struct {
 	sum     *Quant
 	parents []*Quant
 }
 
-func (u *sumUpdater) Update() {
+func (u *SumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
 	sum.array.Zero()
@@ -54,4 +54,9 @@ func (u *sumUpdater) Update() {
 			gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
 		}
 	}
+}
+
+
+func(u*SumUpdater) AddParent(q*Quant){
+
 }
