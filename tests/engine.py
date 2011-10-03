@@ -49,6 +49,8 @@ setscalar('dt', 2e-12)
 f = open('ll', 'w')
 for i in range(10):
 	#printstats()
+	print 'H_ext', getcell('H_ext', 0, 0, 0)
+	print 'H', getcell('H', 0, 0, 0)
 	print 'torque', getcell('torque', 0, 0, 0)
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)

@@ -199,9 +199,14 @@ func (a API) GetCell(quant string, x, y, z int) []float64 {
 	q := a.Engine.Quant(quant)
 	q.Update() //!
 	value := make([]float64, q.NComp())
-	for c := range value {
-		value[c] = float64(q.Array().Get(c, z, y, x))
-		//Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
+	if q.Array().IsNil() {
+		for c := range value {
+			value[c] = q.multiplier[c]
+		}
+	} else {
+		for c := range value {
+			value[c] = q.multiplier[c] * float64(q.Array().Get(c, z, y, x))
+		}
 	}
 	swapXYZ(value)
 	return value
