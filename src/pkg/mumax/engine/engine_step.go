@@ -8,14 +8,14 @@
 package engine
 
 import (
-. "mumax/common"
+	. "mumax/common"
 )
 
 func (e *Engine) Step() {
-	if len(e.ode) == 0{
-			panic(InputErr("engine.Step: no differential equations loaded."))
+	if len(e.ode) == 0 {
+		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
-	
+
 	// update input for ODE solver recursively
 	for _, ode := range e.ode {
 		ode[RHS].Update()

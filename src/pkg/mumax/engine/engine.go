@@ -15,7 +15,6 @@ import (
 // The global simulation engine
 var engine Engine
 
-
 func GetEngine() *Engine {
 	return &engine
 }
@@ -52,7 +51,7 @@ const (
 //}
 
 // Initializes the global simulation engine
-func Init(){
+func Init() {
 	(&engine).init()
 }
 
