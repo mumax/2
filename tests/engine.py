@@ -6,7 +6,7 @@ setgridsize(8, 4, 2)
 setcellsize(5e-9, 5e-9, 50e-9)
 #print 'cellsize', getcellsize()
 
-load('testmodule')
+load('micromagnetism')
 savegraph("graph.dot")
 
 setscalar('alpha', 0.05)

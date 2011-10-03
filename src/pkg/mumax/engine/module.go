@@ -14,10 +14,9 @@ import (
 
 // A physics module. Loading it adds various quantity nodes to the engine.
 type Module interface {
-	Load(e *Engine)         // Loads this module's quantities and dependencies into the engine
-	Dependencies() []string // Names of modules this one depends on
-	Name() string           // Name to identify to module to the machine
-	Description() string    // Human-readable description of what the module does
+	Load(e *Engine)      // Loads this module's quantities and dependencies into the engine
+	Name() string        // Name to identify to module to the machine
+	Description() string // Human-readable description of what the module does
 }
 
 // Map with registered modules
@@ -33,8 +32,7 @@ func RegisterModule(mod Module) {
 	modules[name] = mod
 }
 
-
-func GetModule(name string)Module{
+func GetModule(name string) Module {
 	module, ok := modules[name]
 
 	if !ok {

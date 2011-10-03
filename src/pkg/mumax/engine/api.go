@@ -54,7 +54,7 @@ func (a API) GetCellSize() (x, y, z float64) {
 // Load a physics module. Not aware of dependencies (yet)
 // TODO: cleaner management a la modprobe
 func (a API) Load(name string) {
-		a.Engine.Modprobe(name)
+	a.Engine.LoadModule(name)
 }
 
 //________________________________________________________________________________ run

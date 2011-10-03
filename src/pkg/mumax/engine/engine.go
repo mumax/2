@@ -109,7 +109,6 @@ func (e *Engine) Quant(name string) *Quant {
 
 //__________________________________________________________________ add
 
-
 // Returns true if the named module is already loaded.
 func (e *Engine) HasModule(name string) bool {
 	for _, m := range e.modules {
@@ -120,25 +119,15 @@ func (e *Engine) HasModule(name string) bool {
 	return false
 }
 
-
 // Low-level module load, not aware of dependencies
-func (e *Engine) Insmod(name string) {
+func (e *Engine) LoadModule(name string) {
+	if e.HasModule(name) {
+		return
+	}
 	module := GetModule(name)
 	Log("Loaded module", module.Name(), ":", module.Description())
 	module.Load(e)
 }
-
-
-// High-level module load, smart
-func(e*Engine) Modprobe(name string){
-	if e.HasModule(name){return}
-	mod := GetModule(name)
-	for _,s:=range mod.Dependencies(){
-		e.Modprobe(s)
-	}
-	e.Insmod(name)
-}
-
 
 // Add an arbitrary quantity
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {

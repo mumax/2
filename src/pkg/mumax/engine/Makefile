@@ -12,6 +12,7 @@ GOFILES=\
 	engine_step.go\
 	api.go\
 	module.go\
+	mod_magnetization.go\
 	mod_micromag.go\
 	mod_micromagenergy.go\
 	mod_spintorque.go\

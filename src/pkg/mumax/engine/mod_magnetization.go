@@ -13,19 +13,26 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&Micromag{})
+	RegisterModule(&Magnetization{})
 }
 
-type Micromag struct{}
+type Magnetization struct{}
 
-func (x Micromag) Description() string {
-	return "standard micromagnetism"
+func (x Magnetization) Description() string {
+	return "m: normalized magnetization, mSat: saturation magnetization [A/m]"
 }
 
-func (x Micromag) Name() string {
-	return "micromagnetism"
+func (x Magnetization) Name() string {
+	return "magnetization"
 }
 
-func (x Micromag) Load(e *Engine) {
-		e.LoadModule("magnetization")
+func (x Magnetization) Load(e *Engine) {
+
+	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
+	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")
+	e.Depends("m", "Msat")
+
+	m := e.Quant("m")
+	Msat := e.Quant("Msat")
+	m.updater = &normUpdater{m: m, Msat: Msat}
 }
