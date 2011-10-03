@@ -8,3 +8,13 @@
 package engine
 
 // Auhtor: Arne Vansteenkiste
+
+var outputformats map[string]OutputFormat
+
+type OutputFormat interface {
+
+}
+
+func RegisterOutputFormat(name string, format OutputFormat) {
+
+}

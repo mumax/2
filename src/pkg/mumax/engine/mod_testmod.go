@@ -18,6 +18,9 @@ func init() {
 
 type TestModule struct{}
 
+func (x TestModule) Description() string    { return "Test module" }
+func (x TestModule) Dependencies() []string { return []string{} }
+
 // Loads a test module.
 func (x TestModule) Load(e *Engine) {
 
@@ -53,4 +56,16 @@ func (x TestModule) Load(e *Engine) {
 	e.AddTorqueNode()
 
 	e.ODE1("m", "torque")
+
+	e.AddQuant("rho", VECTOR, FIELD, Unit("C/m3"), "charge density")
+	e.AddQuant("j", VECTOR, FIELD, Unit("A/m2"), "current density")
+	e.AddQuant("R", SCALAR, FIELD, Unit("mOhm"), "resistivity")
+	e.AddQuant("E", VECTOR, FIELD, Unit("V/m"), "electric field")
+
+	e.ODE1("rho", "j")
+	e.Depends("j", "E", "R")
+	e.Depends("R", "m")
+	e.Depends("E", "rho")
+	e.Depends("torque", "j")
+
 }
