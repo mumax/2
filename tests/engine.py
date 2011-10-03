@@ -40,14 +40,16 @@ setvalue('H_ext', [Hx, Hy, Hz])
 #mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
 #setmask('H_z', mask)
 print 'H_ext',getvalue('H_ext'), '\n'
-#print 'H', getfield('H'), '\n'
+print 'H', getfield('H'), '\n'
 torque=getfield('torque')
 #print 'torque', torque , '\n'
 #setfield('torque', m) # must fail
 
 setscalar('dt', 2e-12)
 f = open('ll', 'w')
-for i in range(2000):
+for i in range(10):
+	#printstats()
+	print 'torque', getcell('torque', 0, 0, 0)
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
@@ -56,7 +58,6 @@ for i in range(2000):
 	f.write(str(m[2]) + "\n")
 	step()
 
-torque=getfield('torque')
 printstats()
 
 save("m", "png", "m.png")
