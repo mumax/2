@@ -11,32 +11,34 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
+		. "mumax/common"
 	"mumax/gpu"
 )
 
-func (e *Engine) AddSumNode(name string, args ...string) {
-	parent0 := e.Quant(args[0])
-	nComp := parent0.NComp()
-	unit := parent0.Unit()
-	e.AddQuant(name, nComp, FIELD, unit)
-
-	sum := e.Quant(name)
-	parents := make([]*Quant, len(args))
-	for i := range parents {
-		parents[i] = e.Quant(args[i])
-		if parents[i].Unit() != sum.Unit() {
-			panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parents[i].FullName()))
-		}
-	}
-	e.Depends(name, args...)
-	sum.updater = &SumUpdater{sum, parents}
-}
+//func  AddSumNode(name string, args ...string) {
+//		e := GetEngine()
+//	parent0 := e.Quant(args[0])
+//	nComp := parent0.NComp()
+//	unit := parent0.Unit()
+//	e.AddQuant(name, nComp, FIELD, unit)
+//
+//	sum := e.Quant(name)
+//	parents := make([]*Quant, len(args))
+//	for i := range parents {
+//		parents[i] = e.Quant(args[i])
+//		if parents[i].Unit() != sum.Unit() {
+//			panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parents[i].FullName()))
+//		}
+//	}
+//	e.Depends(name, args...)
+//	sum.updater = &SumUpdater{sum, parents}
+//}
 
 type SumUpdater struct {
 	sum     *Quant
 	parents []*Quant
 }
+
 
 func (u *SumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
@@ -57,6 +59,14 @@ func (u *SumUpdater) Update() {
 }
 
 
-func(u*SumUpdater) AddParent(q*Quant){
-
+// Adds a parent to the sum, i.e., its value will be added to the sum
+func(u*SumUpdater) AddParent(name string){
+	e:=GetEngine()
+	parent := e.Quant(name)
+	sum := u.sum
+	if parent.unit != sum.unit{
+			panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parent.FullName()))
+	}
+	u.parents = append(u.parents, parent)	
+	e.Depends(sum.Name(), name)
 }

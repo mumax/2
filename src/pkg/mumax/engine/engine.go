@@ -140,6 +140,7 @@ func (e *Engine) LoadModule(name string) {
 	module := GetModule(name)
 	Log("Loaded module", module.Name(), ":", module.Description())
 	module.Load(e)
+	e.modules = append(e.modules, module)
 }
 
 // Add an arbitrary quantity

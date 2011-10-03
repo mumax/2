@@ -19,7 +19,7 @@ func init() {
 type ModHField struct{}
 
 func (x ModHField) Description() string {
-		return "H: total magnetic field"
+		return "H: total magnetic field [A/m]"
 }
 
 func (x ModHField) Name() string {
@@ -27,5 +27,7 @@ func (x ModHField) Name() string {
 }
 
 func (x ModHField) Load(e *Engine) {
-	e.AddSumNode("H")
+		e.AddQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
+		q:=e.Quant("H")
+		q.updater=&SumUpdater{sum:q,parents:[]*Quant{}}
 }

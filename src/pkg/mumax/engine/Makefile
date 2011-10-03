@@ -18,11 +18,10 @@ GOFILES=\
 	mod_hfield.go\
 	mod_micromagenergy.go\
 	mod_spintorque.go\
-	mod_testmod.go\
 	quant.go\
 	quantkind.go\
 	unit.go\
-	sum_node.go\
+	sum_updater.go\
 	updater.go\
 	nop_updater.go\
 	pointwise_updater.go\

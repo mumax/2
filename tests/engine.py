@@ -9,9 +9,9 @@ setcellsize(5e-9, 5e-9, 50e-9)
 load('micromagnetism')
 savegraph("graph.dot")
 
-setscalar('alpha', 0.05)
-getscalar('alpha')
-setscalar('alpha', 0.05)
+#setscalar('alpha', 0.05)
+#getscalar('alpha')
+#setscalar('alpha', 0.05)
 
 #print 'alpha', getvalue('alpha'), '\n'
 #print 'alphaMask', getmask('alpha'), '\n'
@@ -37,8 +37,8 @@ Hx = 0 / mu0
 Hy = 0 / mu0
 Hz = 0.1 / mu0 #1T
 
-setvalue('H_z', [Hx, Hy, Hz])
-mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
+#setvalue('H_z', [Hx, Hy, Hz])
+#mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
 #setmask('H_z', mask)
 #print 'H_z',getvalue('H_z'), '\n'
 #print 'H', getfield('H'), '\n'
