@@ -13,14 +13,15 @@ GOFILES=\
 	api.go\
 	module.go\
 	mod_magnetization.go\
+	mod_llg.go\
 	mod_micromag.go\
+	mod_hfield.go\
 	mod_micromagenergy.go\
 	mod_spintorque.go\
 	mod_testmod.go\
 	quant.go\
 	quantkind.go\
 	unit.go\
-	torque_node.go\
 	sum_node.go\
 	updater.go\
 	nop_updater.go\

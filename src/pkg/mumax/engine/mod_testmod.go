@@ -54,7 +54,6 @@ func (x TestModule) Load(e *Engine) {
 
 	e.AddSumNode("H", "H_z", "H_e", "H_d", "H_a")
 
-	e.AddTorqueNode()
 
 	e.ODE1("m", "torque")
 

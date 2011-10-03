@@ -7,15 +7,22 @@
 
 package engine
 
-// This file implements the Landau-Lifshitz torque Quantity.
-// Author: Arne Vansteenkiste
-
 import (
 	. "mumax/common"
 	"mumax/gpu"
 )
 
-// The array contains reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
+// Register this module
+func init() {
+	RegisterModule(&ModLLG{})
+}
+
+type ModLLG struct{}
+
+func (x ModLLG) Description() string    { return "Landau-Lifshitz-Gilbert equation" }
+func (x ModLLG) Name() string           { return "llg" }
+
+// The torque array contains reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
 //	d m / d t = gamma0 * Msat * τ  
 // which is dimensionless and of order 1. Thus the multiplier is gamma0*Msat
 // so that the this quantity (array*multiplier) has unit 1/s.
@@ -24,7 +31,15 @@ import (
 //	τ = (m x h) - α m  x (m x h)
 // with:
 //	h = H / Msat
-func (e *Engine) AddTorqueNode() {
+func (x ModLLG) Load(e *Engine) {
+
+	e.LoadModule("magnetization")
+
+	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
+	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
+	e.Quant("gamma").SetScalar(Gamma0)
+
+
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
@@ -35,7 +50,11 @@ func (e *Engine) AddTorqueNode() {
 		α: e.Quant("alpha"),
 		//Msat: e.Quant("Msat"),
 		γ: e.Quant("gamma")}
+
+	e.ODE1("m", "torque")
 }
+
+
 
 type torqueUpdater struct {
 	τ, m, H, α, γ *Quant
@@ -48,10 +67,6 @@ func (u *torqueUpdater) Update() {
 	if γ == 0 {
 		panic(InputErr("gamma should be non-zero"))
 	}
-	//Msat := u.Msat.Scalar()
-	//if Msat == 0 {
-	//	panic(InputErr("Msat should be non-zero"))
-	//}
 	for i := range multiplier {
 		multiplier[i] = γ
 	}

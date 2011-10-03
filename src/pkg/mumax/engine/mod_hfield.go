@@ -13,21 +13,19 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&Micromag{})
+	RegisterModule(&ModHField{})
 }
 
-type Micromag struct{}
+type ModHField struct{}
 
-func (x Micromag) Description() string {
-	return "standard micromagnetism"
+func (x ModHField) Description() string {
+		return "H: total magnetic field"
 }
 
-func (x Micromag) Name() string {
-	return "micromagnetism"
+func (x ModHField) Name() string {
+	return "hfield"
 }
 
-func (x Micromag) Load(e *Engine) {
-		e.LoadModule("magnetization")
-		e.LoadModule("hfield")
-		e.LoadModule("llg")
+func (x ModHField) Load(e *Engine) {
+	e.AddSumNode("H")
 }
