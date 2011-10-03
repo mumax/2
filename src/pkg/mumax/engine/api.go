@@ -127,6 +127,12 @@ func (a API) GetValue(name string) []float64 {
 	return value
 }
 
+
+// Gets the quantities unit.
+func (a API)Unit(quant string)string{
+	return string(a.Engine.Quant(quant).unit)
+}
+
 // Get the value of a scalar, space-independent quantity.
 // Similar to GetValue, but returns a single number.
 func (a API) GetScalar(name string) float64 {
