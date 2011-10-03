@@ -27,6 +27,7 @@ type Engine struct {
 	time      *Quant            // time quantity is always present
 	dt        *Quant            // time step quantity is always present
 	Timer                       // For benchmarking
+	modules   []Module          // loaded modules 
 }
 
 // Left-hand side and right-hand side indices for Engine.ode[i]
@@ -50,6 +51,7 @@ func (e *Engine) init() {
 	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
+	e.modules = make([]Module, 0)
 	e.StartTimer()
 }
 
@@ -106,6 +108,37 @@ func (e *Engine) Quant(name string) *Quant {
 }
 
 //__________________________________________________________________ add
+
+
+// Returns true if the named module is already loaded.
+func (e *Engine) HasModule(name string) bool {
+	for _, m := range e.modules {
+		if m.Name() == name {
+			return true
+		}
+	}
+	return false
+}
+
+
+// Low-level module load, not aware of dependencies
+func (e *Engine) Insmod(name string) {
+	module := GetModule(name)
+	Log("Loaded module", module.Name(), ":", module.Description())
+	module.Load(e)
+}
+
+
+// High-level module load, smart
+func(e*Engine) Modprobe(name string){
+	if e.HasModule(name){return}
+	mod := GetModule(name)
+	for _,s:=range mod.Dependencies(){
+		e.Modprobe(s)
+	}
+	e.Insmod(name)
+}
+
 
 // Add an arbitrary quantity
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {

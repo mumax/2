@@ -13,12 +13,13 @@ import (
 
 // Register this module
 func init() {
-	modules["test"] = TestModule{}
+	RegisterModule(&TestModule{})
 }
 
 type TestModule struct{}
 
 func (x TestModule) Description() string    { return "Test module" }
+func (x TestModule) Name() string           { return "testmodule" }
 func (x TestModule) Dependencies() []string { return []string{} }
 
 // Loads a test module.

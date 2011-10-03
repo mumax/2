@@ -9,12 +9,14 @@ package engine
 
 import (
 	. "mumax/common"
+	"fmt"
 )
 
 // A physics module. Loading it adds various quantity nodes to the engine.
 type Module interface {
 	Load(e *Engine)         // Loads this module's quantities and dependencies into the engine
 	Dependencies() []string // Names of modules this one depends on
+	Name() string           // Name to identify to module to the machine
 	Description() string    // Human-readable description of what the module does
 }
 
@@ -23,9 +25,24 @@ var modules map[string]Module = make(map[string]Module)
 
 // Registers a module in the list of known modules.
 // Each module should register itself in its init() function.
-func RegisterModule(name string, mod Module) {
+func RegisterModule(mod Module) {
+	name := mod.Name()
 	if _, ok := modules[name]; ok {
 		panic(InputErr("module " + name + "already registered"))
 	}
 	modules[name] = mod
+}
+
+
+func GetModule(name string)Module{
+	module, ok := modules[name]
+
+	if !ok {
+		opts := []string{}
+		for k, _ := range modules {
+			opts = append(opts, k)
+		}
+		panic(InputErr(fmt.Sprint("Unknown module:", name, " Options: ", opts)))
+	}
+	return module
 }
