@@ -234,12 +234,12 @@ func (q *Quant) Buffer() *host.Array {
 		return q.buffer
 	}
 
-	q.bufMutex.Lock()
+	//q.bufMutex.Lock()
 
 	// allocate if needed
 	array := q.Array()
 	if q.buffer == nil {
-		Debug("buffer", q.Name(), q.NComp(), "x", q.Array().Size3D())
+		//Debug("buffer", q.Name(), q.NComp(), "x", q.Array().Size3D())
 		q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
 	}
 
@@ -265,7 +265,7 @@ func (q *Quant) Buffer() *host.Array {
 		}
 	}
 	q.bufUpToDate = true
-	q.bufMutex.Unlock()
+	//q.bufMutex.Unlock()
 	return q.buffer
 }
 
@@ -277,10 +277,10 @@ func (q *Quant) Buffer() *host.Array {
 // upToDate is set true.
 // See: Invalidate()
 func (q *Quant) Update() {
-	Log("update", q.Name(), valid(!q.upToDate))
-	if q.upToDate {
-		return
-	}
+	//Log("update", q.Name(), valid(!q.upToDate))
+	//if q.upToDate {
+	//	return
+	//}
 
 	// update parents first
 	for _, p := range q.parents {
@@ -288,11 +288,13 @@ func (q *Quant) Update() {
 	}
 
 	// now update self
-	Log("actually update " + q.Name())
+	//Log("actually update " + q.Name())
+	//if !q.upToDate{
 	q.StartTimer()
 	q.updater.Update()
 	q.StopTimer()
 	q.updates++
+	//}
 
 	q.upToDate = true
 	// Do not update buffer!
@@ -301,16 +303,18 @@ func (q *Quant) Update() {
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
-	Log("invalidate", q.Name(), valid(q.upToDate))
-	if !q.upToDate {
-		return
-	}
+	//Log("invalidate", q.Name(), valid(q.upToDate))
+	//if !q.upToDate {
+	//	return
+	//}
 
+	if q.upToDate{
+			q.invalidates++
+	}
 	q.upToDate = false
 	q.bufUpToDate = false
-	q.invalidates++
 	Debug("invalidate " + q.Name())
-	Log("actually invalidate " + q.Name())
+	//Log("actually invalidate " + q.Name())
 	for _, c := range q.children {
 		c.Invalidate()
 	}
@@ -351,6 +355,11 @@ func checkComp(q *Quant, ncomp int) {
 	if ncomp != q.nComp {
 		panic(InputErr(fmt.Sprint(q.Name(), " has ", q.nComp, " components, but ", ncomp, " are provided.")))
 	}
+}
+
+
+func (q*Quant)String()string{
+	return fmt.Sprint(q.Name(), q.Buffer().Array)
 }
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.

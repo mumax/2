@@ -48,6 +48,6 @@ func (t *Timer) Average() float64 {
 	return t.Seconds() / (float64(t.Count))
 }
 
-func (t *Timer) String() string {
+func (t *Timer) TimerString() string {
 	return fmt.Sprint(t.Seconds(), "s")
 }

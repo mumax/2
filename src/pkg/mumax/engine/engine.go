@@ -236,7 +236,7 @@ func (e *Engine) String() string {
 
 // DEBUG: statistics
 func (e *Engine) Stats() string {
-	str := "engine running " + e.Timer.String() + "\n"
+	str := "engine running " + e.Timer.TimerString() + "\n"
 	quants := e.quantity
 	for _, v := range quants {
 		str += fmt.Sprintln(fill(v.Name()), "\t",

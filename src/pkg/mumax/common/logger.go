@@ -90,7 +90,9 @@ func Debug(msg ...interface{}) {
 		fmt.Fprintln(os.Stderr, msgcol...)
 	}
 	if logger.ShowDebug {
+		debugHook()
 		logger.Screen.Println(msgcol...)
+		debugHook()
 	}
 }
 
@@ -145,4 +147,14 @@ func LogFile(msg ...interface{}) {
 	if logger.File != nil {
 		logger.File.Println(msg...)
 	}
+}
+
+
+func nop(){}
+
+var debugHook func() = nop
+
+// DEBUG: calls f before and after every Debug()
+func SetDebugHook(f func()){
+	debugHook = f
 }

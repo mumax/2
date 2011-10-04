@@ -172,22 +172,14 @@ func (a API) DebugField(quant string) *host.Array {
 // The mask is not not multiplied by the value,
 // like is the case with GetField().
 // Returns all ones if the mask was not explicitly set.
-func (a API) GetMask(quant string) *host.Array {
-	q := a.Engine.Quant(quant)
-	checkKind(q, MASK)
-	q.Update() //currently a nop, but might change later.
-	array := q.Array()
-	buffer := q.Buffer()
-	// NULL array is interpreted as all ones.
-	if array.IsNil() {
-		for i := range buffer.List {
-			buffer.List[i] = 1
-		}
-	} else {
-		array.CopyToHost(buffer)
-	}
-	return buffer
-}
+//func (a API) GetMask(quant string) *host.Array {
+//	q := a.Engine.Quant(quant)
+//	checkKind(q, MASK)
+//	q.Update() //currently a nop, but might change later.
+//	buffer := q.Buffer()
+//  todo: buffer is pre-multiplied
+//	return buffer
+//}
 
 // FOR DEBUG ONLY.
 // Gets the quantity's array, raw.
