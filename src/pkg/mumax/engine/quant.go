@@ -226,16 +226,42 @@ func (q *Quant) IsSpaceDependent() bool {
 }
 
 // Transfers the quantity from GPU to host (if necessary).
+// Multiplies by the multiplier.
+// Handles masks correctly.
 func (q *Quant) Buffer() *host.Array {
+	if q.bufUpToDate {
+		return q.buffer
+	}
+
+	q.bufMutex.Lock()
+
+	// allocate if needed
+	array := q.Array()
 	if q.buffer == nil {
 		Debug("buffer", q.Name(), q.NComp(), "x", q.Array().Size3D())
 		q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
 	}
 
-	q.bufMutex.Lock()
-	if q.bufUpToDate == false {
+	// copy
+	buffer := q.buffer
+	if array.IsNil() {
+		for c := range buffer.Comp {
+			comp := buffer.Comp[c]
+			for i := range comp {
+				comp[i] = float32(q.multiplier[c])
+			}
+		}
+	} else {
 		q.array.CopyToHost(q.buffer)
 		q.bufXfers++
+		for c := range buffer.Comp {
+			if q.multiplier[c] != 1 {
+				comp := buffer.Comp[c]
+				for i := range comp {
+					comp[i] *= float32(q.multiplier[c]) // multiply by multiplier if not 1
+				}
+			}
+		}
 	}
 	q.bufUpToDate = true
 	q.bufMutex.Unlock()
