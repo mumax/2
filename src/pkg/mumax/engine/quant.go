@@ -289,11 +289,11 @@ func (q *Quant) Update() {
 
 	// now update self
 	//Log("actually update " + q.Name())
-	if !q.upToDate{
-	q.StartTimer()
-	q.updater.Update()
-	q.StopTimer()
-	q.updates++
+	if !q.upToDate {
+		q.StartTimer()
+		q.updater.Update()
+		q.StopTimer()
+		q.updates++
 	}
 
 	q.upToDate = true
