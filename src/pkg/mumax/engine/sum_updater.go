@@ -36,14 +36,14 @@ import (
 
 type SumUpdater struct {
 	sum     *Quant
-	parents []*Quant
+	//parents []*Quant
 }
 
 func (u *SumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
 	sum.array.Zero()
-	parents := u.parents
+	parents := u.sum.parents
 	for i := range parents {
 		parent := parents[i]
 		for c := 0; c < sum.NComp(); c++ {
@@ -51,7 +51,7 @@ func (u *SumUpdater) Update() {
 			parMul := parent.multiplier[c]
 			sumMul := sum.multiplier[c]
 			sumComp := sum.array.Component(c)
-			//Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul))
+			Debug("gpu.Madd",sumComp, sumComp, parComp, float32(parMul/sumMul))
 			gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
 		}
 	}
@@ -65,6 +65,6 @@ func (u *SumUpdater) AddParent(name string) {
 	if parent.unit != sum.unit {
 		panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parent.FullName()))
 	}
-	u.parents = append(u.parents, parent)
+	//u.parents = append(u.parents, parent) done by engine
 	e.Depends(sum.Name(), name)
 }

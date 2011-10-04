@@ -128,8 +128,18 @@ func (a API) GetValue(name string) []float64 {
 }
 
 
+// DEBUG: Does not update.
+func (a API) DebugValue(name string) []float64{
+	q := a.Engine.Quant(name)
+	//q.Update() //!
+	value := make([]float64, len(q.multiplier))
+	copy(value, q.multiplier)
+	swapXYZ(value)
+	return value
+}
+
 // Gets the quantities unit.
-func (a API)Unit(quant string)string{
+func (a API) Unit(quant string) string {
 	return string(a.Engine.Quant(quant).unit)
 }
 
@@ -168,6 +178,35 @@ func (a API) GetField(quant string) *host.Array {
 	}
 	return buffer
 }
+
+
+// DEBUG: does not update
+func (a API) DebugField(quant string) *host.Array {
+	q := a.Engine.Quant(quant)
+	checkKinds(q, MASK, FIELD)
+	//q.Update() //!
+	array := q.Array()
+	buffer := q.Buffer()
+	// NULL array is interpreted as all ones.
+	if array.IsNil() {
+		for i := range buffer.List {
+			buffer.List[i] = 1
+		}
+	} else {
+		array.CopyToHost(buffer)
+	}
+	// multiply by multiplier if not 1
+	for c := range buffer.Comp {
+		comp := buffer.Comp[c]
+		if q.multiplier[c] != 1 {
+			for i := range comp {
+				comp[i] *= float32(q.multiplier[c])
+			}
+		}
+	}
+	return buffer
+}
+
 
 // Gets the quantity's mask.
 // The mask is not not multiplied by the value,

@@ -47,11 +47,11 @@ torque=getfield('torque')
 
 setscalar('dt', 2e-12)
 f = open('ll', 'w')
-for i in range(10):
+for i in range(300):
 	#printstats()
-	print 'H_ext', getcell('H_ext', 0, 0, 0), unit('H_ext')
-	print 'H', getcell('H', 0, 0, 0), unit('H')
-	print 'torque', getcell('torque', 0, 0, 0), unit('torque')
+	#print 'H_ext', debugfield('H_ext')
+	print 'H', debugfield('H'), '\n'
+	print 'torque', debugfield('torque'), '\n'
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")

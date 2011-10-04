@@ -260,7 +260,7 @@ func (q *Quant) Update() {
 	}
 
 	// now update self
-	//Debug("update " + q.Name())
+	Debug("update " + q.Name())
 	q.StartTimer()
 	q.updater.Update()
 	q.StopTimer()
@@ -280,7 +280,7 @@ func (q *Quant) Invalidate() {
 	q.upToDate = false
 	q.bufUpToDate = false
 	q.invalidates++
-	//Debug("invalidate " + q.Name())
+	Debug("invalidate " + q.Name())
 	for _, c := range q.children {
 		c.Invalidate()
 	}
