@@ -47,19 +47,20 @@ setvalue('H_ext', [Hx, Hy, Hz])
 
 setscalar('dt', 2e-12)
 f = open('ll', 'w')
-for i in range(40):
+for i in range(30):
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
 	f.write(str(m[0]) + "\t")
 	f.write(str(m[1]) + "\t")
 	f.write(str(m[2]) + "\n")
+	echo('H: ' + str(debugfield('H')))
 	step()
-	invalidate('H')
+	invalidate('H_ext')
 
 
 
-#printstats()
+printstats()
 
 
 f.close()

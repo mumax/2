@@ -264,7 +264,6 @@ func (a API) Update(quant string) {
 	a.Engine.Quant(quant).Update()
 }
 
-
 // DEBUG: manually update the quantity state
 func (a API) Invalidate(quant string) {
 	a.Engine.Quant(quant).Invalidate()
