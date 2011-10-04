@@ -225,9 +225,10 @@ func (q *Quant) IsSpaceDependent() bool {
 	return q.array != nil && q.array.DevicePtr()[0] != 0
 }
 
-// Transfers the quantity from GPU to host (if necessary).
-// Multiplies by the multiplier.
-// Handles masks correctly.
+// Transfers the quantity from GPU to host. The quantities host buffer
+// is allocated when needed. The transfer is only done when needed, i.e.,
+// when bufferUpToDate == false. Multiplies by the multiplier and handles masks correctly.
+// Does not Update().
 func (q *Quant) Buffer() *host.Array {
 	if q.bufUpToDate {
 		return q.buffer
