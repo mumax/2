@@ -20,11 +20,13 @@ func init() {
 // Landau-Lifshitz-Gilbert module.
 type ModLLG struct{}
 
-func (x ModLLG) Description() string { 
-		return "Landau-Lifshitz-Gilbert equation" }
+func (x ModLLG) Description() string {
+	return "Landau-Lifshitz-Gilbert equation"
+}
 
-func (x ModLLG) Name() string        { 
-		return "llg" }
+func (x ModLLG) Name() string {
+	return "llg"
+}
 
 // The torque array contains reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
 //	d m / d t = gamma0 * Msat * τ  
@@ -60,7 +62,6 @@ func (x ModLLG) Load(e *Engine) {
 type torqueUpdater struct {
 	τ, m, H, α, γ *Quant
 }
-
 
 func (u *torqueUpdater) Update() {
 	//Debug("************** H before update torque", u.H.Buffer().Comp[X][0])
