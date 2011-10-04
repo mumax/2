@@ -30,11 +30,6 @@ func (api API) Version() int {
 }
 
 // For testing purposes.
-func (api API) Echo(i int) int {
-	return i
-}
-
-// For testing purposes.
 func (api API) Sink(b bool, i int, f float32, d float64, s string) {
 	return
 }

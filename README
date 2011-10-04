@@ -9,16 +9,17 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 
+
 Cahn's Axiom:
 	When all else fails, read the instructions.
 
+
+
 Known issues:
 
-* MuMax and Python output is generated asynchronously. More specifically, output preceded by [python] may appear later than expected. This is not a bug but a side-effect of running the Python process in parallel to MuMax. 
+* MuMax and Python output is generated asynchronously. More specifically, output preceded by [python] may appear later than expected. This is not a bug but a side-effect of running the Python process in parallel to MuMax. Use the API's echo() function for synchronous output (which will also be written to the log file).
 
-* Long Python output may be displayed in separate pieces, possibly interleaved with MuMax output. This is not a bug but a side-effect of running the Python process in parallel to MuMax. For performance reasons, MuMax does not wait for the (possibly slow) output of Python to complete but continues the simulation in parallel.
-
-* Long Python output to stdout (e.g. by print) may be truncated when MuMax exits. This is due to buffering on the Python side. When the Python output is indispensable, it should be written to file so it is guaranteed to persist.
+* Long Python output may be displayed in separate pieces, possibly interleaved with MuMax output. Long python output may also be truncated when MuMax exits. This is not a bug but a side-effect of running the Python process in parallel to MuMax. For performance reasons, MuMax does not wait for the (possibly slow) output of Python to complete but continues the simulation in parallel. Use the API's echo() function for synchronous output (which will also be written to the log file).
 
 * Auto-saving a file in both binary and ascii OMF format will cause only one of the two to appear. This is because they have the same file names causing the first format to be overwritten by the second.
 
@@ -51,3 +52,4 @@ Acknowledgements:
 campus and NVIDIA Corporation.
 
 * Minor code snippets from the Go API have been copied and modified. Copyright the Go authors.
+

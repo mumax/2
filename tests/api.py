@@ -6,7 +6,6 @@ from mumax2 import *
 setgridsize(1,1,1) # must be called
 
 print "version", version()
-print "echo 123", echo(123)
 print "sink"
 sink(True, 1, 1.1, 1.233454345434543, "hi there")
 print "getfloat", getfloat()
