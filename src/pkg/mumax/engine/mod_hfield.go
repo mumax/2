@@ -16,6 +16,8 @@ func init() {
 	RegisterModule(&ModHField{})
 }
 
+// Module for the total field H. Other modules like H_demag, H_anis, H_ext have
+// to add their field to the sum make by H.
 type ModHField struct{}
 
 func (x ModHField) Description() string {

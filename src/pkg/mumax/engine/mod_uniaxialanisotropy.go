@@ -13,21 +13,21 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&UniaxialAnisotropy{})
+	RegisterModule(&ModUniaxialAnisotropy{})
 }
 
-// Anisotropy module
-type UniaxialAnisotropy struct{}
+// Uniaxial anisotropy module
+type ModUniaxialAnisotropy struct{}
 
-func (x UniaxialAnisotropy) Description() string {
+func (x ModUniaxialAnisotropy) Description() string {
 	return ""
 }
 
-func (x UniaxialAnisotropy) Name() string {
+func (x ModUniaxialAnisotropy) Name() string {
 	return "anisotropy-uniaxial"
 }
 
-func (x UniaxialAnisotropy) Load(e *Engine) {
+func (x ModUniaxialAnisotropy) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
 	e.AddQuant("k1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1")

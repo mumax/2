@@ -13,20 +13,21 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&Micromag{})
+	RegisterModule(&ModMicromag{})
 }
 
-type Micromag struct{}
+// Micromagnetism meta-module.
+type ModMicromag struct{}
 
-func (x Micromag) Description() string {
+func (x ModMicromag) Description() string {
 	return "standard micromagnetism"
 }
 
-func (x Micromag) Name() string {
+func (x ModMicromag) Name() string {
 	return "micromagnetism"
 }
 
-func (x Micromag) Load(e *Engine) {
+func (x ModMicromag) Load(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("hfield")
 	e.LoadModule("zeeman")

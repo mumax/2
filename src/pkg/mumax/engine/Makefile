@@ -17,9 +17,7 @@ GOFILES=\
 	mod_zeeman.go\
 	mod_micromag.go\
 	mod_hfield.go\
-	mod_micromagenergy.go\
 	mod_uniaxialanisotropy.go\
-	mod_spintorque.go\
 	quant.go\
 	quantkind.go\
 	unit.go\

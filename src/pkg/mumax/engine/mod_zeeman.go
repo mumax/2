@@ -13,20 +13,20 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&Zeeman{})
+	RegisterModule(&ModZeeman{})
 }
 
-type Zeeman struct{}
+type ModZeeman struct{}
 
-func (x Zeeman) Description() string {
+func (x ModZeeman) Description() string {
 	return "H_ext: external field [A/m]"
 }
 
-func (x Zeeman) Name() string {
+func (x ModZeeman) Name() string {
 	return "zeeman"
 }
 
-func (x Zeeman) Load(e *Engine) {
+func (x ModZeeman) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
 	hfield := e.Quant("H")
