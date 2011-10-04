@@ -54,9 +54,13 @@ for i in range(30):
 	f.write(str(m[0]) + "\t")
 	f.write(str(m[1]) + "\t")
 	f.write(str(m[2]) + "\n")
-	echo('H: ' + str(debugfield('H')))
-	step()
+	#echo('H: ' + str(debugfield('H')))
 	invalidate('H_ext')
+	update('H_ext')
+	update('torque')
+	invalidate('torque')
+	update('torque')
+	step()
 
 
 

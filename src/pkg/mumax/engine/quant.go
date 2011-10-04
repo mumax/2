@@ -277,6 +277,7 @@ func (q *Quant) Buffer() *host.Array {
 // upToDate is set true.
 // See: Invalidate()
 func (q *Quant) Update() {
+	Log("update", q.Name(), valid(!q.upToDate))
 	if q.upToDate {
 		return
 	}
@@ -287,7 +288,7 @@ func (q *Quant) Update() {
 	}
 
 	// now update self
-	Debug("update " + q.Name())
+	Log("actually update " + q.Name())
 	q.StartTimer()
 	q.updater.Update()
 	q.StopTimer()
@@ -300,6 +301,7 @@ func (q *Quant) Update() {
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
+	Log("invalidate", q.Name(), valid(q.upToDate))
 	if !q.upToDate {
 		return
 	}
@@ -308,6 +310,7 @@ func (q *Quant) Invalidate() {
 	q.bufUpToDate = false
 	q.invalidates++
 	Debug("invalidate " + q.Name())
+	Log("actually invalidate " + q.Name())
 	for _, c := range q.children {
 		c.Invalidate()
 	}

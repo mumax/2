@@ -47,7 +47,6 @@ func (x ModLLG) Load(e *Engine) {
 		m: e.Quant("m"),
 		H: e.Quant("H"),
 		α: e.Quant("alpha"),
-		//Msat: e.Quant("Msat"),
 		γ: e.Quant("gamma")}
 
 	e.ODE1("m", "torque")
@@ -58,7 +57,7 @@ type torqueUpdater struct {
 }
 
 func (u *torqueUpdater) Update() {
-	Debug("************** H before update torque", u.H.Buffer().Comp[X][0])	
+	//Debug("************** H before update torque", u.H.Buffer().Comp[X][0])
 	multiplier := u.τ.multiplier
 	// must set ALL multiplier components
 	γ := u.γ.Scalar()
@@ -69,5 +68,5 @@ func (u *torqueUpdater) Update() {
 		multiplier[i] = γ
 	}
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
-	Debug("************** H after update torque", u.H.Buffer().Comp[X][0])	
+	//Debug("************** H after update torque", u.H.Buffer().Comp[X][0])
 }
