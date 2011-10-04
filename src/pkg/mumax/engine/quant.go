@@ -289,12 +289,12 @@ func (q *Quant) Update() {
 
 	// now update self
 	//Log("actually update " + q.Name())
-	//if !q.upToDate{
+	if !q.upToDate{
 	q.StartTimer()
 	q.updater.Update()
 	q.StopTimer()
 	q.updates++
-	//}
+	}
 
 	q.upToDate = true
 	// Do not update buffer!
@@ -308,8 +308,8 @@ func (q *Quant) Invalidate() {
 	//	return
 	//}
 
-	if q.upToDate{
-			q.invalidates++
+	if q.upToDate {
+		q.invalidates++
 	}
 	q.upToDate = false
 	q.bufUpToDate = false
@@ -357,8 +357,7 @@ func checkComp(q *Quant, ncomp int) {
 	}
 }
 
-
-func (q*Quant)String()string{
+func (q *Quant) String() string {
 	return fmt.Sprint(q.Name(), q.Buffer().Array)
 }
 

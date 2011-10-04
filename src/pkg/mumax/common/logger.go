@@ -149,12 +149,11 @@ func LogFile(msg ...interface{}) {
 	}
 }
 
-
-func nop(){}
+func nop() {}
 
 var debugHook func() = nop
 
 // DEBUG: calls f before and after every Debug()
-func SetDebugHook(f func()){
+func SetDebugHook(f func()) {
 	debugHook = f
 }
