@@ -33,5 +33,5 @@ func (x Zeeman) Load(e *Engine) {
 	//hext := e.Quant("H_ext")
 	sum := hfield.updater.(*SumUpdater)
 	sum.AddParent("H_ext")
-	e.Depends("H_ext", "t")
+	//e.Depends("H_ext", "t")
 }

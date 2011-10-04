@@ -47,11 +47,7 @@ setvalue('H_ext', [Hx, Hy, Hz])
 
 setscalar('dt', 2e-12)
 f = open('ll', 'w')
-for i in range(4):
-	printstats()
-	#print 'H_ext', debugfield('H_ext')
-	echo('H' + str(debugfield('H')))
-	#print 'torque', debugfield('torque'), '\n'
+for i in range(40):
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
@@ -59,12 +55,13 @@ for i in range(4):
 	f.write(str(m[1]) + "\t")
 	f.write(str(m[2]) + "\n")
 	step()
+	invalidate('H')
+
+
 
 #printstats()
 
-print 'H_ext',getfield('H_ext'), '\n'
 
-save("m", "png", "m.png")
 f.close()
 
 

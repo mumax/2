@@ -264,6 +264,12 @@ func (a API) Update(quant string) {
 	a.Engine.Quant(quant).Update()
 }
 
+
+// DEBUG: manually update the quantity state
+func (a API) Invalidate(quant string) {
+	a.Engine.Quant(quant).Invalidate()
+}
+
 // DEBUG: echos a string, can be used for synchronous output
 func (a API) Echo(str string) {
 	Log(str)
