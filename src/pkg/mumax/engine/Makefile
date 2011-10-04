@@ -29,8 +29,7 @@ GOFILES=\
 	solver.go\
 	euler_solver.go\
 	resample.go\
-	testapi.go\
-	output.go\
+	#output.go\
 	#input.go\
 
 CGOFILES=\
