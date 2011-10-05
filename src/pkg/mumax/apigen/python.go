@@ -34,7 +34,7 @@ outfifo = 0
 initialized = 0
 outputdir = ""
 
-## Initializes the communication with mumax2.
+## @internal Initializes the communication with mumax2.
 def init():
 	global infifo
 	global outfifo
@@ -49,7 +49,7 @@ def init():
 	outfifo=open(outputdir + 'in.fifo', 'w') # mumax's in is our out
 	initialized = 1
 
-## Calls a mumax2 command and returns the result as string.
+## @internal Calls a mumax2 command and returns the result as string.
 def call(command, args):
 	if (initialized == 0):
 		init()
@@ -106,13 +106,14 @@ var (
 		"":        ""}
 )
 
+// Puts python doc comment tokens in front of the comment lines.
 func pyDocComment(lines []string) string {
 	if len(lines) == 0 {
 		return ""
 	}
 	str := "#"
 	for _, l := range lines {
-		str += "#" + l + "\n"
+		str += "# " + l + "\n"
 	}
 	return str
 }
