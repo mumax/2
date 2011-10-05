@@ -64,7 +64,7 @@ func (p *Python) WriteFooter(out io.Writer) {
 
 }
 
-func (p *Python) WriteFunc(out io.Writer, name string, argTypes []reflect.Type, returnTypes []reflect.Type) {
+func (p *Python) WriteFunc(out io.Writer, name string, comment []string, argNames []string, argTypes []reflect.Type, returnTypes []reflect.Type) {
 	fmt.Fprintln(out)
 	fmt.Fprint(out, "def ", name, "(")
 

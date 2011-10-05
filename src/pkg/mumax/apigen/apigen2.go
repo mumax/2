@@ -21,14 +21,14 @@ import (
 	"os"
 )
 
-type header struct{
+type header struct {
 	funcname string
-	comment []string
-	args []string
+	comment  []string
+	args     []string
 }
 
 // Auto-generate API libraries for all languages.
-func parseSource() map[string]header{
+func parseSource() map[string]header {
 	headers := make(map[string]header)
 
 	// Read api.go
@@ -38,10 +38,10 @@ func parseSource() map[string]header{
 
 	// 
 	lines := strings.Split(file, "\n")
-	for i,line := range lines {
+	for i, line := range lines {
 		if strings.HasPrefix(line, "func") {
 			var head header
-			head.comment=[]string{}
+			head.comment = []string{}
 			funcline := lines[i] // line that starts with func...
 			j := i - 1
 			for strings.HasPrefix(lines[j], "//") {
@@ -49,17 +49,16 @@ func parseSource() map[string]header{
 				j--
 			}
 			head.funcname, head.args = parseFunc(funcline)
-			headers[head.funcname]=head
+			headers[head.funcname] = head
 		}
 	}
 	return headers
 }
 
-
 func parseFunc(line string) (name string, args []string) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			debug("not parsing", line)
 			name = ""
 			args = nil
@@ -68,34 +67,36 @@ func parseFunc(line string) (name string, args []string) {
 
 	//func (a API) Name (args) {
 
-	name = line[index(line,')',1)+1:index(line,'(',2)]
+	name = line[index(line, ')', 1)+1 : index(line, '(', 2)]
 	name = strings.Trim(name, " ")
-	argl := line[index(line,'(',2)+1:index(line,')',2)]
+	argl := line[index(line, '(', 2)+1 : index(line, ')', 2)]
 	args = parseArgs(argl)
-	return 
+	return
 }
 
-
-func parseArgs(line string) (args []string){
-		args = strings.Split(line, ",")
-		for i:=range args{
-				args[i] = strings.Trim(args[i], " ")
-				words := strings.Split(args[i], " ")
-				args[i] =  words[0]
-		}
-		return 
+func parseArgs(line string) (args []string) {
+	args = strings.Split(line, ",")
+	for i := range args {
+		args[i] = strings.Trim(args[i], " ")
+		words := strings.Split(args[i], " ")
+		args[i] = words[0]
+	}
+	return
 }
 
-func debug(msg ...interface{}){
+func debug(msg ...interface{}) {
 	fmt.Fprintln(os.Stderr, msg...)
 }
 
-
 // index of nth occurrence of sep in s.
-func index(s string, sep uint8, n int) int{
-	for i := range s{
-			if s[i] == sep{n--}
-			if n==0{return i}
+func index(s string, sep uint8, n int) int {
+	for i := range s {
+		if s[i] == sep {
+			n--
+		}
+		if n == 0 {
+			return i
+		}
 	}
 	return -1
 }

@@ -28,7 +28,7 @@ const pkg = "mumax2"
 // Auto-generate API libraries for all languages.
 func APIGen() {
 
-		headers := parseSource()
+	headers := parseSource()
 
 	// interpreter can extract the methods
 
