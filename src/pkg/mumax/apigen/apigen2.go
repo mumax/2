@@ -49,9 +49,10 @@ func parseSource() map[string]header {
 				j--
 			}
 			head.funcname, head.args = parseFunc(funcline)
-			headers[head.funcname] = head
+			headers[strings.ToLower(head.funcname)] = head
 		}
 	}
+	//fmt.Println(headers)
 	return headers
 }
 

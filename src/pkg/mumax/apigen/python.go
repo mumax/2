@@ -65,6 +65,12 @@ func (p *Python) WriteFooter(out io.Writer) {
 }
 
 func (p *Python) WriteFunc(out io.Writer, name string, comment []string, argNames []string, argTypes []reflect.Type, returnTypes []reflect.Type) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			//fmt.Println("WriteFunc ", name, comment, argNames, err)
+		}
+	}()
 	fmt.Fprintln(out)
 	fmt.Fprint(out, "def ", name, "(")
 
@@ -73,7 +79,7 @@ func (p *Python) WriteFunc(out io.Writer, name string, comment []string, argName
 		if i != 0 {
 			args += ", "
 		}
-		args += "arg" + fmt.Sprint(i+1)
+		args += argNames[i]
 	}
 	fmt.Fprintln(out, args, "):")
 
