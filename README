@@ -1,7 +1,8 @@
-MuMax 2
+** @mainpage MuMax² multi-GPU multiphysics engine
  
-Copyright (C) 2011 Arne Vansteenkiste & Ben Van de Wiele,
-Dynamat/EELAB Ghent University.
+@section License
+
+Copyright (C) 2011 Arne Vansteenkiste <Arne.Vansteenkiste@UGent.be> & Ben Van de Wiele <Ben.VandeWiele@UGent.be>, Dynamat/EELAB, Ghent University, Belgium.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,13 +10,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 
-
-Cahn's Axiom:
-	When all else fails, read the instructions.
+@section Getting_Started
 
 
 
-Known issues:
+@section Known_Issues
 
 * MuMax and Python output is generated asynchronously. More specifically, output preceded by [python] may appear later than expected. This is not a bug but a side-effect of running the Python process in parallel to MuMax. Use the API's echo() function for synchronous output (which will also be written to the log file).
 
@@ -26,15 +25,18 @@ Known issues:
 * PNG images may sometimes contain black pixels when they should have been full red. This is purely an issue of the rendering and does not imply something is wrong with e.g. the magnetization.
 
 
-
-Files:
+@section Files
 
 src/		Source files
+
 src/pkg/	Go package sources
+
 src/ptx/	CUDA sources for PTX assembly files
+
 src/lib/	CUDA and C sources for C libraries
 
 bin/		Executables, useful to put in $PATH
+
 lib/		Executables used internally, not useful in $PATH, and libraries
 
 tests/		Test files
@@ -46,10 +48,11 @@ misc/		Miscellaneous scripts
 
 
 
-Acknowledgements:
+@section Acknowledgements
 
 * reduce.cu is partly based on code from "The Regents of the University of California, Davis
 campus and NVIDIA Corporation.
 
 * Minor code snippets from the Go API have been copied and modified. Copyright the Go authors.
 
+*/
