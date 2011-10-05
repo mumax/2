@@ -8,6 +8,7 @@ TARG=mumax/apigen
 
 GOFILES=\
 	apigen.go\
+	apigen2.go\
 	c.go\
 	java.go\
 	lang.go\
