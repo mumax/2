@@ -65,13 +65,14 @@ func (p *Python) WriteFooter(out io.Writer) {
 }
 
 func (p *Python) WriteFunc(out io.Writer, name string, comment []string, argNames []string, argTypes []reflect.Type, returnTypes []reflect.Type) {
-	defer func(){
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			//fmt.Println("WriteFunc ", name, comment, argNames, err)
 		}
 	}()
 	fmt.Fprintln(out)
+	fmt.Fprintf(out, pyDocComment(comment))
 	fmt.Fprint(out, "def ", name, "(")
 
 	args := ""
@@ -104,3 +105,11 @@ var (
 		"bool":    "bool",
 		"":        ""}
 )
+
+func pyDocComment(lines []string) string {
+	str := "#"
+	for _, l := range lines {
+		str += "#" + l + "\n"
+	}
+	return str
+}

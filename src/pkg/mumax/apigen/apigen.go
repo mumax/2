@@ -50,8 +50,10 @@ func APIGen() {
 		lang.WriteHeader(out)
 
 		for name, meth := range method {
-			header,ok := headers[name]
-			if !ok {panic(name)}
+			header, ok := headers[name]
+			if !ok {
+				panic(name)
+			}
 			returnTypes := make([]reflect.Type, meth.Type().NumOut())
 			for i := range returnTypes {
 				returnTypes[i] = meth.Type().Out(i)

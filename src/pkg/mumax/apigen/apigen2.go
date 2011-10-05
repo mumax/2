@@ -80,7 +80,7 @@ func parseArgs(line string) (args []string) {
 	for i := range args {
 		args[i] = strings.Trim(args[i], " ")
 		words := strings.Split(args[i], " ")
-		args[i] = words[0]
+		args[i] = strings.Trim(words[0], " ") // remove type, if any
 	}
 	return
 }
