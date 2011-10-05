@@ -14,12 +14,13 @@
 package apigen
 
 import (
-	."mumax/common"
+	. "mumax/common"
 	"io/ioutil"
 )
 
 // Auto-generate API libraries for all languages.
 func APIGen2() {
-	_, err := ioutil.ReadFile(GetExecDir()+"../src/pkg/mumax/engine/api.go")
+	buf, err := ioutil.ReadFile(GetExecDir() + "../src/pkg/mumax/engine/api.go")
 	CheckIO(err)
+	Debug(string(buf))
 }
