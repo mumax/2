@@ -11,7 +11,7 @@ all: doxygen
 # $(godirs)
 
 doxygen:
-	doxygen Doxyfile
+	doxygen Doxyfile||echo 
 
 .PHONY: $(godirs)
 $(godirs):

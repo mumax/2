@@ -45,7 +45,7 @@ func parseSource() map[string]header {
 			funcline := lines[i] // line that starts with func...
 			j := i - 1
 			for strings.HasPrefix(lines[j], "//") {
-				head.comment = append(head.comment, lines[j][2:])
+				head.comment = append([]string{lines[j][2:]}, head.comment...)
 				j--
 			}
 			head.funcname, head.args = parseFunc(funcline)

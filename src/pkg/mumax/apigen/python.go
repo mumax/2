@@ -107,6 +107,7 @@ var (
 )
 
 func pyDocComment(lines []string) string {
+	if len(lines) == 0{return ""}
 	str := "#"
 	for _, l := range lines {
 		str += "#" + l + "\n"
