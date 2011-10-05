@@ -27,6 +27,9 @@ const pkg = "mumax2"
 
 // Auto-generate API libraries for all languages.
 func APIGen() {
+
+		headers := parseSource()
+
 	// interpreter can extract the methods
 
 	method := make(map[string]reflect.Value)
@@ -51,7 +54,9 @@ func APIGen() {
 			for i := range returnTypes {
 				returnTypes[i] = meth.Type().Out(i)
 			}
-			lang.WriteFunc(out, frontend.ConvertCase(name), argTypes(meth), returnTypes)
+			comment := headers[name].comment
+			argnames := headers[name].args
+			lang.WriteFunc(out, frontend.ConvertCase(name), comment, argnames, argTypes(meth), returnTypes)
 		}
 
 		lang.WriteFooter(out)

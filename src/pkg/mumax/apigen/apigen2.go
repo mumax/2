@@ -21,8 +21,16 @@ import (
 	"os"
 )
 
+type header struct{
+	funcname string
+	comment []string
+	args []string
+}
+
 // Auto-generate API libraries for all languages.
-func APIGen2() {
+func parseSource() map[string]header{
+	headers := make(map[string]header)
+
 	// Read api.go
 	buf, err := ioutil.ReadFile(GetExecDir() + "../src/pkg/mumax/engine/api.go")
 	CheckIO(err)
@@ -32,52 +40,50 @@ func APIGen2() {
 	lines := strings.Split(file, "\n")
 	for i,line := range lines {
 		if strings.HasPrefix(line, "func") {
+			var head header
+			head.comment=[]string{}
 			funcline := lines[i] // line that starts with func...
-			comment := "#" // comments above func, with python doc comment ##
 			j := i - 1
 			for strings.HasPrefix(lines[j], "//") {
-				comment += "#" + lines[j][2:] + "\n"
+				head.comment = append(head.comment, lines[j][2:])
 				j--
 			}
-			if j==i-1{ // no comment string
-					comment = "##\n"
-			}
-			fmt.Println(comment + parseFunc(funcline), "\n")
+			head.funcname, head.args = parseFunc(funcline)
+			headers[head.funcname]=head
 		}
 	}
+	return headers
 }
 
 
-func parseFunc(line string) (str string) {
+func parseFunc(line string) (name string, args []string) {
 	defer func(){
 		err := recover()
 		if err != nil{
 			debug("not parsing", line)
-			str = ""
+			name = ""
+			args = nil
 		}
 	}()
 
 	//func (a API) Name (args) {
 
-	name := line[index(line,')',1)+1:index(line,'(',2)]
+	name = line[index(line,')',1)+1:index(line,'(',2)]
 	name = strings.Trim(name, " ")
-	args := line[index(line,'(',2)+1:index(line,')',2)]
-	args = parseArgs(args)
-	str = name + "(" + args + "):"
+	argl := line[index(line,'(',2)+1:index(line,')',2)]
+	args = parseArgs(argl)
 	return 
 }
 
 
-func parseArgs(line string) string{
-		parsed := ""
-		args := strings.Split(line, ",")
+func parseArgs(line string) (args []string){
+		args = strings.Split(line, ",")
 		for i:=range args{
 				args[i] = strings.Trim(args[i], " ")
 				words := strings.Split(args[i], " ")
-				if i !=0 {parsed += ", "}
-				parsed +=  words[0]
+				args[i] =  words[0]
 		}
-		return parsed
+		return 
 }
 
 func debug(msg ...interface{}){
