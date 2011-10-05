@@ -16,11 +16,66 @@ package apigen
 import (
 	. "mumax/common"
 	"io/ioutil"
+	"strings"
+	"fmt"
+	"os"
 )
 
 // Auto-generate API libraries for all languages.
 func APIGen2() {
+	// Read api.go
 	buf, err := ioutil.ReadFile(GetExecDir() + "../src/pkg/mumax/engine/api.go")
 	CheckIO(err)
-	Debug(string(buf))
+	file := string(buf)
+
+	// 
+	lines := strings.Split(file, "\n")
+	for i,line := range lines {
+		if strings.HasPrefix(line, "func") {
+			funcline := lines[i] // line that starts with func...
+			comment := "#" // comments above func, with python doc comment ##
+			j := i - 1
+			for strings.HasPrefix(lines[j], "//") {
+				comment += "#" + lines[j][2:] + "\n"
+				j--
+			}
+			if j==i-1{ // no comment string
+					comment = "##\n"
+			}
+			fmt.Println(comment + parseFunc(funcline), "\n")
+		}
+	}
+}
+
+
+func parseFunc(line string) (str string) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			debug("not parsing", line)
+			str = ""
+		}
+	}()
+
+	//func (a API) Name (args) {
+
+	name := line[index(line,')',1)+1:index(line,'(',2)]
+	name = strings.Trim(name, " ")
+	args := line[index(line,'(',2)+1:index(line,')',2)]
+	str = name + "(" + args + "):"
+	return 
+}
+
+func debug(msg ...interface{}){
+	fmt.Fprintln(os.Stderr, msg...)
+}
+
+
+// index of nth occurrence of sep in s.
+func index(s string, sep uint8, n int) int{
+	for i := range s{
+			if s[i] == sep{n--}
+			if n==0{return i}
+	}
+	return -1
 }
