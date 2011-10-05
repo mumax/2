@@ -62,8 +62,22 @@ func parseFunc(line string) (str string) {
 	name := line[index(line,')',1)+1:index(line,'(',2)]
 	name = strings.Trim(name, " ")
 	args := line[index(line,'(',2)+1:index(line,')',2)]
+	args = parseArgs(args)
 	str = name + "(" + args + "):"
 	return 
+}
+
+
+func parseArgs(line string) string{
+		parsed := ""
+		args := strings.Split(line, ",")
+		for i:=range args{
+				args[i] = strings.Trim(args[i], " ")
+				words := strings.Split(args[i], " ")
+				if i !=0 {parsed += ", "}
+				parsed +=  words[0]
+		}
+		return parsed
 }
 
 func debug(msg ...interface{}){
