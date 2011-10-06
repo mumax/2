@@ -11,6 +11,8 @@ package common
 // Errors are wrapped in mumax IOErr's and cause a panic.
 
 import (
+	"io"
+	"bufio"
 	"os"
 	"path"
 )
@@ -28,6 +30,17 @@ import (
 //	}
 //	return file
 //}
+
+
+// Makes sure the Writer is buffered.
+// If it is already a bufio.Writer, just return it.
+// Otherwise, wrap it into a bufio.Writer
+func Buffer(out io.Writer)*bufio.Writer{
+		if buf, ok := out.(*bufio.Writer); ok{
+			return buf
+		}
+		return bufio.NewWriter(out)
+}
 
 // Makes a directory.
 // The permission is the same as the parent directory.

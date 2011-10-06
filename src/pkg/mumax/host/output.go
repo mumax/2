@@ -5,25 +5,34 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
-
-import(
-		"io")
+package host
 
 // Auhtor: Arne Vansteenkiste
 
-func init() {
-	RegisterOutputFormat(&FormatAscii{})
+import(
+		. "mumax/common"
+		"fmt"
+		"io"
+)
+
+
+func (tens *Array) WriteAscii(out io.Writer){
+	data := tens.Array
+	gridsize := tens.Size3D
+
+	// Here we loop over X,Y,Z, not Z,Y,X, because
+	// internal in C-order == external in Fortran-order
+	for i := 0; i < gridsize[X]; i++ {
+		for j := 0; j < gridsize[Y]; j++ {
+			for k := 0; k < gridsize[Z]; k++ {
+				for c := Z; c >= X; c-- {
+					fmt.Fprint(out, data[c][i][j][k], " ")
+				}
+				fmt.Fprint(out, "\t")
+			}
+			fmt.Fprint(out, "\n")
+		}
+		fmt.Fprint(out, "\n")
+	}
 }
 
-// Ascii output format
-type FormatAscii struct{}
-
-func (f *FormatAscii) Name() string {
-	return "ascii"
-}
-
-
-func (f *FormatAscii) Write(out io.Writer, q *Quant) {
-		q.Buffer().WriteAscii(out)
-}
