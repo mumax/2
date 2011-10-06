@@ -265,3 +265,10 @@ func (a API) Invalidate(quant string) {
 func (a API) Echo(str string) {
 	Log(str)
 }
+
+// Returns the output ID corresponding to the current simulation time.
+// All automatic output uses this number to identify the time corresponding
+// to the saved quantity.
+func (a API) OutputID() int {
+	return a.Engine.OutputID()
+}

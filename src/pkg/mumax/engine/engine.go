@@ -24,17 +24,29 @@ func GetEngine() *Engine {
 // An acyclic graph structure consisting of interconnected quantities
 // determines what should be calculated and when.
 type Engine struct {
-	size3D_   [3]int            // INTENRAL
-	size3D    []int             // size of the FD grid, nil means not yet set
-	cellSize_ [3]float64        // INTENRAL
-	cellSize  []float64         // size of the FD cells, nil means not yet set
-	quantity  map[string]*Quant // maps quantity names onto their data structures
-	ode       [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
-	solver    []Solver          // solver[i] does the time stepping for ode[i]
-	time      *Quant            // time quantity is always present
-	dt        *Quant            // time step quantity is always present
-	timer Timer                       // For benchmarking
-	modules   []Module          // loaded modules 
+	size3D_      [3]int            // INTENRAL
+	size3D       []int             // size of the FD grid, nil means not yet set
+	cellSize_    [3]float64        // INTENRAL
+	cellSize     []float64         // size of the FD cells, nil means not yet set
+	quantity     map[string]*Quant // maps quantity names onto their data structures
+	ode          [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
+	solver       []Solver          // solver[i] does the time stepping for ode[i]
+	time         *Quant            // time quantity is always present
+	dt           *Quant            // time step quantity is always present
+	timer        Timer             // For benchmarking
+	modules      []Module          // loaded modules 
+	crontabs     []Crontab         // periodical jobs
+	_outputID    int               // index for output numbering
+	_lastOutputT float64           // time of last output ID increment
+}
+
+func (e *Engine) OutputID() int {
+	t := e.time.Scalar()
+	if t != e._lastOutputT {
+		e._lastOutputT = t
+		e._outputID++
+	}
+	return e._outputID
 }
 
 // Left-hand side and right-hand side indices for Engine.ode[i]

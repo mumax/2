@@ -29,6 +29,7 @@ GOFILES=\
 	solver.go\
 	euler_solver.go\
 	resample.go\
+	crontab.go\
 	#output.go\
 	#input.go\
 

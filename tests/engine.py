@@ -51,6 +51,7 @@ invalidate('H_ext')
 update('H_ext')
 invalidate('H_ext')
 for i in range(30):
+	echo("id " + str(outputid()))
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
@@ -60,7 +61,7 @@ for i in range(30):
 	#invalidate('H_ext')
 	#echo('H: ' + str(debugfield('H')))
 	step()
-	printstats()
+	#printstats()
 
 
 
