@@ -31,6 +31,7 @@ GOFILES=\
 	notifier.go\
 	outputformat.go\
 	format_ascii.go\
+	format_omf.go\
 	#input.go\
 
 CGOFILES=\

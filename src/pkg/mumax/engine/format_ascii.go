@@ -7,11 +7,11 @@
 
 package engine
 
+// Author: Arne Vansteenkiste
+
 import (
 	"io"
 )
-
-// Auhtor: Arne Vansteenkiste
 
 func init() {
 	RegisterOutputFormat(&FormatAscii{})
