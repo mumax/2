@@ -53,7 +53,7 @@ type Quant struct {
 	bufUpToDate bool              // Flags if the buffer (in RAM) needs to be updated
 	bufXfers    int               // Number of times it has been copied from GPU
 	bufMutex    sync.RWMutex
-	Timer       // Debug/benchmarking
+	timer Timer       // Debug/benchmarking
 }
 
 //____________________________________________________________________ init
@@ -290,9 +290,9 @@ func (q *Quant) Update() {
 	// now update self
 	//Log("actually update " + q.Name())
 	if !q.upToDate {
-		q.StartTimer()
+		q.timer.Start()
 		q.updater.Update()
-		q.StopTimer()
+		q.timer.Stop()
 		q.updates++
 	}
 

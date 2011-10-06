@@ -33,7 +33,7 @@ type Engine struct {
 	solver    []Solver          // solver[i] does the time stepping for ode[i]
 	time      *Quant            // time quantity is always present
 	dt        *Quant            // time step quantity is always present
-	Timer                       // For benchmarking
+	timer Timer                       // For benchmarking
 	modules   []Module          // loaded modules 
 }
 
@@ -64,7 +64,7 @@ func (e *Engine) init() {
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
 	e.modules = make([]Module, 0)
-	e.StartTimer()
+	e.timer.Start()
 }
 
 //__________________________________________________________________ set/get
@@ -235,14 +235,14 @@ func (e *Engine) String() string {
 
 // DEBUG: statistics
 func (e *Engine) Stats() string {
-	str := "engine running " + e.Timer.TimerString() + "\n"
+	str := "engine running " + e.timer.String() + "\n"
 	quants := e.quantity
 	for _, v := range quants {
 		str += fmt.Sprintln(fill(v.Name()), "\t",
 			valid(v.upToDate), " upd:", fill(v.updates),
 			" inv:", fill(v.invalidates),
 			valid(v.bufUpToDate), " xfer:", fill(v.bufXfers),
-			" ", fmt.Sprintf("%f", v.Average()*1000), "ms/upd ",
+			" ", fmt.Sprintf("%f", v.timer.Average()*1000), "ms/upd ",
 			v.multiplier, v.unit)
 	}
 	return str

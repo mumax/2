@@ -19,14 +19,14 @@ type Timer struct {
 	Count                  int
 }
 
-func (t *Timer) StartTimer() {
+func (t *Timer) Start() {
 	if t.StartNanos != 0 {
 		panic(Bug("Timer.Start: already running"))
 	}
 	t.StartNanos = time.Nanoseconds()
 }
 
-func (t *Timer) StopTimer() {
+func (t *Timer) Stop() {
 	if t.StartNanos == 0 {
 		panic(Bug("Timer.Stop: not running"))
 	}
@@ -48,6 +48,6 @@ func (t *Timer) Average() float64 {
 	return t.Seconds() / (float64(t.Count))
 }
 
-func (t *Timer) TimerString() string {
+func (t *Timer) String() string {
 	return fmt.Sprint(t.Seconds(), "s")
 }
