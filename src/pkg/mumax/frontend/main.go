@@ -77,6 +77,12 @@ func Main() {
 		return
 	}
 
+	if flag.NArg() == 0 {
+		Log("No input files, starting interactive mode")
+		engineMain()
+		return
+	}
+
 	// else...
 	clientMain()
 }

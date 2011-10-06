@@ -68,7 +68,11 @@ func initOutputDir(outputDir string) {
 		}
 	}
 	errOut := os.Mkdir(outputDir, 0777)
-	CheckErr(errOut, ERR_IO)
+	if outputDir != "." {
+		CheckIO(errOut)
+	} else {
+		Log(errOut)
+	}
 
 }
 

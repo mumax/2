@@ -10,6 +10,7 @@ GOFILES=\
 	main.go\
 	client.go\
 	client_main.go\
+	engine_main.go\
 	test_main.go\
 	jsonrpc.go\
 	io.go\

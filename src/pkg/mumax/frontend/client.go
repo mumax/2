@@ -45,6 +45,7 @@ func (c *Client) Init(inputFile, outputDir, command string) {
 	//c.ipc.Init(c.api)
 }
 
+// Start interpreter sub-command and communicate over fifos in the output dir.
 func (c *Client) Run() {
 	c.makeFifos() // make the FIFOs but do not yet try to open them
 	c.logWait = make(chan int)
