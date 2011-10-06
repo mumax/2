@@ -34,7 +34,8 @@ outfifo = 0
 initialized = 0
 outputdir = ""
 
-## @internal Initializes the communication with mumax2.
+## Initializes the communication with mumax2.
+# @note Internal use only
 def init():
 	global infifo
 	global outfifo
@@ -49,7 +50,8 @@ def init():
 	outfifo=open(outputdir + 'in.fifo', 'w') # mumax's in is our out
 	initialized = 1
 
-## @internal Calls a mumax2 command and returns the result as string.
+## Calls a mumax2 command and returns the result as string.
+# @note Internal use only.
 def call(command, args):
 	if (initialized == 0):
 		init()
