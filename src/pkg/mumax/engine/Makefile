@@ -28,7 +28,7 @@ GOFILES=\
 	solver.go\
 	euler_solver.go\
 	resample.go\
-	crontab.go\
+	notifier.go\
 	#output.go\
 	#input.go\
 

@@ -11,6 +11,6 @@ package engine
 
 import ()
 
-type Crontab interface {
+type Notifier interface {
 	Notify(e *Engine) // Notifies the crontab that a step has been taken, so it can take action if needed
 }

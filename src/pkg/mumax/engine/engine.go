@@ -35,7 +35,7 @@ type Engine struct {
 	dt           *Quant            // time step quantity is always present
 	timer        Timer             // For benchmarking
 	modules      []Module          // loaded modules 
-	crontabs     []Crontab         // periodical jobs
+	crontabs     []Notifier         // periodical jobs
 	_outputID    int               // index for output numbering
 	_lastOutputT float64           // time of last output ID increment
 }
@@ -220,7 +220,6 @@ func (e *Engine) ODE1(y, diff string) {
 	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt))
 }
 
-
 //________________________________________________________________________________ step
 
 // Takes one ODE step
@@ -239,15 +238,20 @@ func (e *Engine) Step() {
 		solver.Step() // sets new t, dt
 	}
 
-
 	// invalidate everything that depends on solver
 	for _, ode := range e.ode {
 		ode[LHS].Invalidate()
 	}
-
+	e.NotifyAll()
 }
 //__________________________________________________________________ output
 
+
+func(e*Engine)NotifyAll(){
+	for _,tab:=range e.crontabs{
+		tab.Notify(e)
+	}
+}
 
 func (e *Engine) Save(q *Quant, format string, filename string) {
 
