@@ -69,16 +69,16 @@ func (a API) Step() {
 // Sets the value of a quantity. The quantity must be of type VALUE or MASK.
 // If the quantity is a MASK, the value will be multiplied by a space-dependent mask
 // which typically contains dimensionless numbers between 0 and 1.
-func (a API) SetValue(name string, value []float64) {
-	q := a.Engine.Quant(name)
+func (a API) SetValue(quantity string, value []float64) {
+	q := a.Engine.Quant(quantity)
 	swapXYZ(value)
 	//Debug("swapXYZ", value)
 	q.SetValue(value)
 }
 
 // Convenience method for SetValue() with only one number.
-func (a API) SetScalar(name string, value float64) {
-	q := a.Engine.Quant(name)
+func (a API) SetScalar(quantity string, value float64) {
+	q := a.Engine.Quant(quantity)
 	q.SetValue([]float64{value})
 }
 
@@ -86,8 +86,8 @@ func (a API) SetScalar(name string, value float64) {
 // The value of the quantity (set by SetValue), will be multiplied
 // by the mask value in each point of space. The mask is dimensionless
 // and typically contains values between 0 and 1.
-func (a API) SetMask(name string, mask *host.Array) {
-	q := a.Engine.Quant(name)
+func (a API) SetMask(quantity string, mask *host.Array) {
+	q := a.Engine.Quant(quantity)
 	qArray := q.Array()
 	if !EqualSize(mask.Size3D, qArray.Size3D()) {
 		Log("auto-resampling ", q.Name(), "from", Size(mask.Size3D), "to", Size(qArray.Size3D()))
@@ -97,11 +97,11 @@ func (a API) SetMask(name string, mask *host.Array) {
 }
 
 // Sets a space-dependent field quantity, like the magnetization.
-func (a API) SetField(quant string, field *host.Array) {
-	q := a.Engine.Quant(quant)
+func (a API) SetField(quantity string, field *host.Array) {
+	q := a.Engine.Quant(quantity)
 	qArray := q.Array()
 	if !EqualSize(field.Size3D, qArray.Size3D()) {
-		Log("auto-resampling ", quant, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
+		Log("auto-resampling ", quantity, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
 		field = Resample(field, qArray.Size3D())
 	}
 	// setting a field when there is a non-1 multiplier is too confusing to allow
@@ -118,8 +118,8 @@ func (a API) SetField(quant string, field *host.Array) {
 // Get the value of a space-independent or masked quantity.
 // Returns an array with vector components or an
 // array with just one element in case of a scalar quantity.
-func (a API) GetValue(name string) []float64 {
-	q := a.Engine.Quant(name)
+func (a API) GetValue(quantity string) []float64 {
+	q := a.Engine.Quant(quantity)
 	q.Update() //!
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
@@ -128,8 +128,8 @@ func (a API) GetValue(name string) []float64 {
 }
 
 // DEBUG: Does not update.
-func (a API) DebugValue(name string) []float64 {
-	q := a.Engine.Quant(name)
+func (a API) DebugValue(quantity string) []float64 {
+	q := a.Engine.Quant(quantity)
 	//q.Update() //!
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
@@ -138,30 +138,30 @@ func (a API) DebugValue(name string) []float64 {
 }
 
 // Gets the quantities unit.
-func (a API) Unit(quant string) string {
-	return string(a.Engine.Quant(quant).unit)
+func (a API) Unit(quantity string) string {
+	return string(a.Engine.Quant(quantity).unit)
 }
 
 // Get the value of a scalar, space-independent quantity.
 // Similar to GetValue, but returns a single number.
-func (a API) GetScalar(name string) float64 {
-	q := a.Engine.Quant(name)
+func (a API) GetScalar(quantity string) float64 {
+	q := a.Engine.Quant(quantity)
 	q.Update() //!
 	return q.Scalar()
 }
 
 // Gets a space-dependent quantity. If the quantity uses a mask,
 // the result is equal to GetMask() * GetValue()
-func (a API) GetField(quant string) *host.Array {
-	q := a.Engine.Quant(quant)
+func (a API) GetField(quantity string) *host.Array {
+	q := a.Engine.Quant(quantity)
 	checkKinds(q, MASK, FIELD)
 	q.Update() //!
 	return q.Buffer()
 }
 
 // DEBUG: does not update
-func (a API) DebugField(quant string) *host.Array {
-	q := a.Engine.Quant(quant)
+func (a API) DebugField(quantity string) *host.Array {
+	q := a.Engine.Quant(quantity)
 	checkKinds(q, MASK, FIELD)
 	//q.Update() //!
 	buffer := q.Buffer()
@@ -221,8 +221,9 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 
 // ________________________________________________________________________________ save quantities
 
-func (a API) Save(quant string, format string, filename string) {
-	a.Engine.Save(a.Engine.Quant(quant), format, filename)
+// Saves the quantity
+func (a API) Save(quantity string, format string, filename string) {
+	a.Engine.Save(a.Engine.Quant(quantity), format, filename)
 }
 
 //________________________________________________________________________________ internal
@@ -252,13 +253,13 @@ func (a API) PrintStats() {
 }
 
 // DEBUG: manually update the quantity state
-func (a API) Update(quant string) {
-	a.Engine.Quant(quant).Update()
+func (a API) Update(quantity string) {
+	a.Engine.Quant(quantity).Update()
 }
 
 // DEBUG: manually update the quantity state
-func (a API) Invalidate(quant string) {
-	a.Engine.Quant(quant).Invalidate()
+func (a API) Invalidate(quantity string) {
+	a.Engine.Quant(quantity).Invalidate()
 }
 
 // DEBUG: echos a string, can be used for synchronous output
