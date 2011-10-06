@@ -24,7 +24,7 @@ setfield('m', m)
 save("m", "ascii", [], "m.txt")
 save("m", "omf", "text", "mt.omf")
 save("m", "omf", "binary 4", "mb.omf")
-#save("m", "omf", [], "m.omf")
+save("m", "omf", [], "m.omf")
 
 i=3
 j=2
