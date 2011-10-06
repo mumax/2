@@ -21,6 +21,7 @@ setscalar('Msat', 800e3)
 
 m=[ [[[0.01]]], [[[0]]], [[[-1]]] ]
 setfield('m', m)
+save("m", "ascii", "m.txt")
 
 i=3
 j=2

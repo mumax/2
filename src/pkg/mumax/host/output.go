@@ -25,12 +25,24 @@ func (tens *Array) WriteAscii(out io.Writer) {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
 				for c := Z; c >= X; c-- {
-					fmt.Fprint(out, data[c][i][j][k], " ")
+					_, err := fmt.Fprint(out, data[c][i][j][k], " ")
+					if err != nil {
+						panic(IOErr(err.String()))
+					}
 				}
-				fmt.Fprint(out, "\t")
+				_, err := fmt.Fprint(out, "\t")
+				if err != nil {
+					panic(IOErr(err.String()))
+				}
 			}
-			fmt.Fprint(out, "\n")
+			_, err := fmt.Fprint(out, "\n")
+			if err != nil {
+				panic(IOErr(err.String()))
+			}
 		}
-		fmt.Fprint(out, "\n")
+		_, err := fmt.Fprint(out, "\n")
+		if err != nil {
+			panic(IOErr(err.String()))
+		}
 	}
 }

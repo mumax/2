@@ -31,6 +31,14 @@ import (
 //	return file
 //}
 
+
+// Opens the file, panics on error
+func OpenWRONLY(filename string)*os.File{
+	f,err := os.OpenFile(filename, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
+	CheckIO(err)
+	return f
+}
+
 // Makes sure the Writer is buffered.
 // If it is already a bufio.Writer, just return it.
 // Otherwise, wrap it into a bufio.Writer

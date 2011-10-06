@@ -230,11 +230,12 @@ func (q *Quant) IsSpaceDependent() bool {
 // when bufferUpToDate == false. Multiplies by the multiplier and handles masks correctly.
 // Does not Update().
 func (q *Quant) Buffer() *host.Array {
+	q.Update()
 	if q.bufUpToDate {
 		return q.buffer
 	}
 
-	//q.bufMutex.Lock()
+	q.bufMutex.Lock()
 
 	// allocate if needed
 	array := q.Array()
@@ -265,7 +266,7 @@ func (q *Quant) Buffer() *host.Array {
 		}
 	}
 	q.bufUpToDate = true
-	//q.bufMutex.Unlock()
+	q.bufMutex.Unlock()
 	return q.buffer
 }
 

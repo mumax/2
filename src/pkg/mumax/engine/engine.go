@@ -253,8 +253,13 @@ func (e *Engine) NotifyAll() {
 	}
 }
 
+// Saves the quantity once in the specified format and file name
 func (e *Engine) Save(q *Quant, format string, filename string) {
-
+		out := OpenWRONLY(filename)
+		defer out.Close()
+		bufout := Buffer(out)
+		defer bufout.Flush()
+		GetOutputFormat(format).Write(bufout, q)
 }
 
 // String representation
