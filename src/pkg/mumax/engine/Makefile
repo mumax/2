@@ -29,7 +29,8 @@ GOFILES=\
 	euler_solver.go\
 	resample.go\
 	notifier.go\
-	#output.go\
+	outputformat.go\
+	format_ascii.go\
 	#input.go\
 
 CGOFILES=\

@@ -9,12 +9,13 @@ package engine
 
 // Auhtor: Arne Vansteenkiste
 
-var outputformats map[string]OutputFormat
-
-type OutputFormat interface {
-
+func init() {
+	RegisterOutputFormat(&FormatAscii{})
 }
 
-func RegisterOutputFormat(name string, format OutputFormat) {
+// Ascii output format
+type FormatAscii struct{}
 
+func (f *FormatAscii) Name() string {
+	return "ascii"
 }

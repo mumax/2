@@ -35,7 +35,7 @@ type Engine struct {
 	dt           *Quant            // time step quantity is always present
 	timer        Timer             // For benchmarking
 	modules      []Module          // loaded modules 
-	crontabs     []Notifier         // periodical jobs
+	crontabs     []Notifier        // periodical jobs
 	_outputID    int               // index for output numbering
 	_lastOutputT float64           // time of last output ID increment
 }
@@ -247,8 +247,8 @@ func (e *Engine) Step() {
 //__________________________________________________________________ output
 
 
-func(e*Engine)NotifyAll(){
-	for _,tab:=range e.crontabs{
+func (e *Engine) NotifyAll() {
+	for _, tab := range e.crontabs {
 		tab.Notify(e)
 	}
 }
