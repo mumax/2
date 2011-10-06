@@ -28,7 +28,6 @@ func (f *FormatOmf) Name() string {
 	return "omf"
 }
 
-
 func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
 	dataformat := ""
 	switch len(options) {
@@ -101,13 +100,6 @@ func writeOmfHeader(out io.Writer, q *Quant) {
 	hdr(out, "End", "Header")
 }
 
-// Encodes the vector field in omf format.
-// The swap from ZYX (internal) to XYZ (external) is made here.
-// func (c *OmfCodec) Encode(out_ io.Writer, f Interface) {
-// 	Encode(out_, f)
-// }
-
-
 func writeOmfBinary4(out io.Writer, array *host.Array) {
 	data := array.Array
 	gridsize := array.Size3D
@@ -139,14 +131,7 @@ func writeOmfBinary4(out io.Writer, array *host.Array) {
 	}
 }
 
-func writeDesc(out io.Writer, desc map[string]interface{}) {
-	for k, v := range desc {
-		hdr(out, "Desc", k, ": ", v)
-	}
-}
-
 func floats2bytes(floats []float32) []byte {
-	// 	l := len(floats)
 	return (*[4]byte)(unsafe.Pointer(&floats[0]))[:]
 }
 
