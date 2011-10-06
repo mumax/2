@@ -9,14 +9,13 @@ package host
 
 // Auhtor: Arne Vansteenkiste
 
-import(
-		. "mumax/common"
-		"fmt"
-		"io"
+import (
+	. "mumax/common"
+	"fmt"
+	"io"
 )
 
-
-func (tens *Array) WriteAscii(out io.Writer){
+func (tens *Array) WriteAscii(out io.Writer) {
 	data := tens.Array
 	gridsize := tens.Size3D
 
@@ -35,4 +34,3 @@ func (tens *Array) WriteAscii(out io.Writer){
 		fmt.Fprint(out, "\n")
 	}
 }
-

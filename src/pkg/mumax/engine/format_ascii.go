@@ -7,8 +7,9 @@
 
 package engine
 
-import(
-		"io")
+import (
+	"io"
+)
 
 // Auhtor: Arne Vansteenkiste
 
@@ -23,7 +24,6 @@ func (f *FormatAscii) Name() string {
 	return "ascii"
 }
 
-
 func (f *FormatAscii) Write(out io.Writer, q *Quant) {
-		q.Buffer().WriteAscii(out)
+	q.Buffer().WriteAscii(out)
 }

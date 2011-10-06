@@ -254,7 +254,7 @@ func (e *Engine) NotifyAll() {
 }
 
 func (e *Engine) Save(q *Quant, format string, filename string) {
-	
+
 }
 
 // String representation
