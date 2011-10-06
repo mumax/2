@@ -14,6 +14,12 @@ import (
 	"io"
 )
 
+// A general output format for space-dependent quantities.
+type OutputFormat interface {
+	Name() string                  // Name to register the format under. E.g. "ascii"
+	Write(out io.Writer, q *Quant, options []string) // Writes the quantity buffer to out
+}
+
 func init() {
 	outputformats = make(map[string]OutputFormat)
 }
@@ -21,17 +27,12 @@ func init() {
 // global map of registered output formats
 var outputformats map[string]OutputFormat
 
-type OutputFormat interface {
-	Name() string // Name to register the format under. E.g. "ascii"
-	Write(out io.Writer, q *Quant)
-}
-
 // registers an output format
 func RegisterOutputFormat(format OutputFormat) {
 	outputformats[format.Name()] = format
 }
 
-// Retrieves an output format from its name. E.g. "ascii"
+// Retrieves an output format from its name. E.g. "ascii", "omf/text"
 func GetOutputFormat(name string) OutputFormat {
 	f, ok := outputformats[name]
 	if !ok {

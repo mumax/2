@@ -11,29 +11,67 @@ package engine
 
 import (
 	. "mumax/common"
-	//"mumax/host"
+	"mumax/host"
 	"unsafe"
 	"io"
 	"fmt"
 )
 
 func init() {
-	RegisterOutputFormat(&FormatOmfAscii{})
+	RegisterOutputFormat(&FormatOmf{})
 }
 
 // OMF 1.0 Ascii output format
-type FormatOmfAscii struct{}
+type FormatOmf struct {
+	dataformat string // "text" or "binary 4"
+}
+
+func (f *FormatOmf) Name() string {
+	return "omf"
+}
+
+func (f *FormatOmf) SetOptions(options []string) {
+}
+
+func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
+		dataformat := ""
+	switch len(options) {
+	case 0:
+		dataformat = "binary 4"
+	case 1:
+		dataformat = options[0]
+	default:
+			panic(InputErr(fmt.Sprint("Illegal OMF options:", options)))
+	}
+
+
+	writeOmfHeader(out, q)
+	writeOmfData(out, q, dataformat)
+	hdr(out, "End", "Segment")
+}
 
 const (
 	OMF_CONTROL_NUMBER = 1234567.0 // The omf format requires the first encoded number in the binary data section to be this control number
 )
 
-func (f *FormatOmfAscii) Name() string {
-	return "omf/text"
+func writeOmfData(out io.Writer, q *Quant, dataformat string) {
+
+
+
+	hdr(out, "Begin", "Data "+dataformat)
+	switch dataformat {
+	case "text":
+		q.Buffer().WriteAscii(out)
+	case "binary 4":
+		writeOmfBinary4(out, q.Buffer())
+default:
+		panic(InputErr("Illegal OMF data format " + dataformat + ". Options are: text, binary 4"))
+	}
+	hdr(out, "End", "Data "+dataformat)
 }
 
-func (f *FormatOmfAscii) Write(out io.Writer, q *Quant) {
-
+// Writes the OMF header
+func writeOmfHeader(out io.Writer, q *Quant) {
 	gridsize := GetEngine().GridSize()
 
 	hdr(out, "OOMMF", "rectangular mesh v1.0")
@@ -68,13 +106,6 @@ func (f *FormatOmfAscii) Write(out io.Writer, q *Quant) {
 	hdr(out, "valuemultiplier", 1)
 
 	hdr(out, "End", "Header")
-
-	hdr(out, "Begin", "Data text")
-	q.Buffer().WriteAscii(out)
-	hdr(out, "End", "Data text")
-
-	hdr(out, "End", "Segment")
-
 }
 
 // Encodes the vector field in omf format.
@@ -83,68 +114,37 @@ func (f *FormatOmfAscii) Write(out io.Writer, q *Quant) {
 // 	Encode(out_, f)
 // }
 
-//func writeDataText(out io.Writer, tens *host.Array) {
-//	data := (tensor.ToT4(tens)).Array()
-//	vecsize := tens.Size()
-//	gridsize := vecsize[1:]
-//
-//	format := "Text"
-//	hdr(out, "Begin", "Data "+format)
-//
-//	// Here we loop over X,Y,Z, not Z,Y,X, because
-//	// internal in C-order == external in Fortran-order
-//	for i := 0; i < gridsize[X]; i++ {
-//		for j := 0; j < gridsize[Y]; j++ {
-//			for k := 0; k < gridsize[Z]; k++ {
-//				for c := Z; c >= X; c-- {
-//					fmt.Fprint(out, data[c][i][j][k], " ")
-//				}
-//				fmt.Fprint(out, "\t")
-//			}
-//			fmt.Fprint(out, "\n")
-//		}
-//		fmt.Fprint(out, "\n")
-//	}
-//
-//	hdr(out, "End", "Data "+format)
-//}
 
-//func writeDataBinary4(out io.Writer, tens tensor.Interface) {
-//	data := (tensor.ToT4(tens)).Array()
-//	vecsize := tens.Size()
-//	gridsize := vecsize[1:]
-//
-//	format := "Binary 4"
-//	hdr(out, "Begin", "Data "+format)
-//
-//	var bytes []byte
-//
-//	// OOMMF requires this number to be first to check the format
-//	var controlnumber float32 = CONTROL_NUMBER
-//	// Wicked conversion form float32 [4]byte in big-endian
-//	// encoding/binary is too slow
-//	// Inlined for performance, terabytes of data will pass here...
-//	bytes = (*[4]byte)(unsafe.Pointer(&controlnumber))[:]
-//	bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0] // swap endianess
-//	out.Write(bytes)
-//
-//	// Here we loop over X,Y,Z, not Z,Y,X, because
-//	// internal in C-order == external in Fortran-order
-//	for i := 0; i < gridsize[X]; i++ {
-//		for j := 0; j < gridsize[Y]; j++ {
-//			for k := 0; k < gridsize[Z]; k++ {
-//				for c := Z; c >= X; c-- {
-//					// dirty conversion from float32 to [4]byte
-//					bytes = (*[4]byte)(unsafe.Pointer(&data[c][i][j][k]))[:]
-//					bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0]
-//					out.Write(bytes)
-//				}
-//			}
-//		}
-//	}
-//
-//	hdr(out, "End", "Data "+format)
-//}
+func writeOmfBinary4(out io.Writer, array *host.Array) {
+	data := array.Array
+	gridsize := array.Size3D
+
+	var bytes []byte
+
+	// OOMMF requires this number to be first to check the format
+	var controlnumber float32 = OMF_CONTROL_NUMBER
+	// Conversion form float32 [4]byte in big-endian
+	// encoding/binary is too slow
+	// Inlined for performance, terabytes of data will pass here...
+	bytes = (*[4]byte)(unsafe.Pointer(&controlnumber))[:]
+	bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0] // swap endianess
+	out.Write(bytes)
+
+	// Here we loop over X,Y,Z, not Z,Y,X, because
+	// internal in C-order == external in Fortran-order
+	for i := 0; i < gridsize[X]; i++ {
+		for j := 0; j < gridsize[Y]; j++ {
+			for k := 0; k < gridsize[Z]; k++ {
+				for c := Z; c >= X; c-- {
+					// dirty conversion from float32 to [4]byte
+					bytes = (*[4]byte)(unsafe.Pointer(&data[c][i][j][k]))[:]
+					bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0]
+					out.Write(bytes)
+				}
+			}
+		}
+	}
+}
 
 func writeDesc(out io.Writer, desc map[string]interface{}) {
 	for k, v := range desc {

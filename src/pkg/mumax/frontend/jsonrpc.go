@@ -126,9 +126,40 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 		return reflect.ValueOf(jsonToFloat32Array(v))
 	case "[]float64":
 		return reflect.ValueOf(jsonToFloat64Array(v))
+	case "[]string":
+		return reflect.ValueOf(jsonToStringArray(v))
 	}
 	return reflect.ValueOf(v) // do not convert
 }
+
+
+
+
+// Converts []interface{} array to []string.
+// Also, converts a single string to a 1-element array.
+func jsonToStringArray(v interface{}) []string {
+	defer func() {
+		err := recover()
+		if err != nil {
+			panic(IOErr(fmt.Sprint("Error parsing json array: ", ShortPrint(v), "\ncause: ", err)))
+		}
+	}()
+
+	switch v.(type) {
+	case string:
+		return []string{v.(string)}
+	case []interface{}:
+		varray := v.([]interface{})
+		array := make([]string, len(varray))
+		for i := range array {
+			array[i] = varray[i].(string)
+		}
+		return array
+	}
+	panic(IOErr("Expected string or string array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
+	return nil //silence 6g
+}
+
 
 // Converts []interface{} array to []float32.
 // Also, converts a single float32 to a 1-element array.

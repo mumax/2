@@ -10,6 +10,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+		."mumax/common"
 	"io"
 )
 
@@ -24,6 +25,10 @@ func (f *FormatAscii) Name() string {
 	return "ascii"
 }
 
-func (f *FormatAscii) Write(out io.Writer, q *Quant) {
+
+func (f *FormatAscii) Write(out io.Writer, q *Quant, options []string) {
+	if len(options)>0{
+		panic(InputErr("Ascii output format does not take options"))
+	}
 	q.Buffer().WriteAscii(out)
 }
