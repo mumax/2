@@ -220,6 +220,32 @@ func (e *Engine) ODE1(y, diff string) {
 	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt))
 }
 
+
+//________________________________________________________________________________ step
+
+// Takes one ODE step
+func (e *Engine) Step() {
+	if len(e.ode) == 0 {
+		panic(InputErr("engine.Step: no differential equations loaded."))
+	}
+
+	// update input for ODE solver recursively
+	for _, ode := range e.ode {
+		ode[RHS].Update()
+	}
+
+	// step
+	for _, solver := range e.solver {
+		solver.Step() // sets new t, dt
+	}
+
+
+	// invalidate everything that depends on solver
+	for _, ode := range e.ode {
+		ode[LHS].Invalidate()
+	}
+
+}
 //__________________________________________________________________ output
 
 

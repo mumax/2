@@ -9,7 +9,6 @@ TARG=mumax/engine
 GOFILES=\
 	engine.go\
 	engine_graphviz.go\
-	engine_step.go\
 	api.go\
 	module.go\
 	mod_magnetization.go\

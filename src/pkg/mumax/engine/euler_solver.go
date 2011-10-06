@@ -7,12 +7,15 @@
 
 package engine
 
+// Author: Arne Vansteenkiste
+
 import (
 	. "mumax/common"
 	"mumax/gpu"
 	"fmt"
 )
 
+// Euler solver
 type EulerSolver struct {
 	y, dy, t, dt *Quant
 }
