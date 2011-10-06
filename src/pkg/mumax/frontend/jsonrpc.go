@@ -132,9 +132,6 @@ func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	return reflect.ValueOf(v) // do not convert
 }
 
-
-
-
 // Converts []interface{} array to []string.
 // Also, converts a single string to a 1-element array.
 func jsonToStringArray(v interface{}) []string {
@@ -159,7 +156,6 @@ func jsonToStringArray(v interface{}) []string {
 	panic(IOErr("Expected string or string array, got: " + ShortPrint(v) + " of type: " + reflect.TypeOf(v).String()))
 	return nil //silence 6g
 }
-
 
 // Converts []interface{} array to []float32.
 // Also, converts a single float32 to a 1-element array.

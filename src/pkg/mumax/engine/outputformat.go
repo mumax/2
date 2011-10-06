@@ -16,7 +16,7 @@ import (
 
 // A general output format for space-dependent quantities.
 type OutputFormat interface {
-	Name() string                  // Name to register the format under. E.g. "ascii"
+	Name() string                                    // Name to register the format under. E.g. "ascii"
 	Write(out io.Writer, q *Quant, options []string) // Writes the quantity buffer to out
 }
 

@@ -22,28 +22,23 @@ func init() {
 }
 
 // OMF 1.0 Ascii output format
-type FormatOmf struct {
-	dataformat string // "text" or "binary 4"
-}
+type FormatOmf struct{}
 
 func (f *FormatOmf) Name() string {
 	return "omf"
 }
 
-func (f *FormatOmf) SetOptions(options []string) {
-}
 
 func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
-		dataformat := ""
+	dataformat := ""
 	switch len(options) {
 	case 0:
 		dataformat = "binary 4"
 	case 1:
 		dataformat = options[0]
 	default:
-			panic(InputErr(fmt.Sprint("Illegal OMF options:", options)))
+		panic(InputErr(fmt.Sprint("Illegal OMF options:", options)))
 	}
-
 
 	writeOmfHeader(out, q)
 	writeOmfData(out, q, dataformat)
@@ -56,15 +51,13 @@ const (
 
 func writeOmfData(out io.Writer, q *Quant, dataformat string) {
 
-
-
 	hdr(out, "Begin", "Data "+dataformat)
 	switch dataformat {
 	case "text":
 		q.Buffer().WriteAscii(out)
 	case "binary 4":
 		writeOmfBinary4(out, q.Buffer())
-default:
+	default:
 		panic(InputErr("Illegal OMF data format " + dataformat + ". Options are: text, binary 4"))
 	}
 	hdr(out, "End", "Data "+dataformat)
