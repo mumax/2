@@ -13,7 +13,6 @@ GNU General Public License for more details.
 @section Getting_Started
 
 
-
 @section Known_Issues
 
 * MuMax and Python output is generated asynchronously. More specifically, output preceded by [python] may appear later than expected. This is not a bug but a side-effect of running the Python process in parallel to MuMax. Use the API's echo() function for synchronous output (which will also be written to the log file).
