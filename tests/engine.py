@@ -54,7 +54,8 @@ f = open('ll', 'w')
 invalidate('H_ext')
 update('H_ext')
 invalidate('H_ext')
-for i in range(30):
+autosave("m", "omf", [], 4e-12)
+for i in range(300):
 	echo("id " + str(outputid()))
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)

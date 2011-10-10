@@ -31,7 +31,7 @@ GOFILES=\
 	notifier.go\
 	notify_autosave.go\
 	outputformat.go\
-	format_ascii.go\
+	format_txt.go\
 	format_omf.go\
 	#input.go\
 

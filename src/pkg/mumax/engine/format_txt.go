@@ -15,19 +15,19 @@ import (
 )
 
 func init() {
-	RegisterOutputFormat(&FormatAscii{})
+	RegisterOutputFormat(&FormatTxt{})
 }
 
 // Ascii output format
-type FormatAscii struct{}
+type FormatTxt struct{}
 
-func (f *FormatAscii) Name() string {
-	return "ascii"
+func (f *FormatTxt) Name() string {
+	return "txt"
 }
 
-func (f *FormatAscii) Write(out io.Writer, q *Quant, options []string) {
+func (f *FormatTxt) Write(out io.Writer, q *Quant, options []string) {
 	if len(options) > 0 {
-		panic(InputErr("Ascii output format does not take options"))
+		panic(InputErr("txt output format does not take options"))
 	}
 	q.Buffer().WriteAscii(out)
 }

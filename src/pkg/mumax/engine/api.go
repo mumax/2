@@ -226,6 +226,11 @@ func (a API) Save(quantity string, format string, options []string, filename str
 	a.Engine.Save(a.Engine.Quant(quantity), format, options, filename)
 }
 
+// Saves the quantity periodically.
+func (a API) AutoSave(quantity string, format string, options []string, period float64) (handle int) {
+	return a.Engine.AutoSave(quantity, format, options, period)
+}
+
 //________________________________________________________________________________ internal
 
 // INTERNAL: swaps the X-Z values of the array.

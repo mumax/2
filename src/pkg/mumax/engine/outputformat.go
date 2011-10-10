@@ -16,7 +16,7 @@ import (
 
 // A general output format for space-dependent quantities.
 type OutputFormat interface {
-	Name() string                                    // Name to register the format under. E.g. "ascii"
+	Name() string                                    // Name to register the format under. E.g. "txt". Also used as file extension
 	Write(out io.Writer, q *Quant, options []string) // Writes the quantity buffer to out
 }
 
@@ -32,7 +32,7 @@ func RegisterOutputFormat(format OutputFormat) {
 	outputformats[format.Name()] = format
 }
 
-// Retrieves an output format from its name. E.g. "ascii", "omf/text"
+// Retrieves an output format from its name. E.g. "txt", "omf"
 func GetOutputFormat(name string) OutputFormat {
 	f, ok := outputformats[name]
 	if !ok {

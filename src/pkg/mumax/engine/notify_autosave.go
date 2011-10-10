@@ -10,18 +10,17 @@ package engine
 // Auhtor: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 )
 
 // Saves a field (scalar field, vector field, etc) periodically.
-type AutoSave struct{
-	quant string // What to save. E.g. "m" for magnetization
+type AutoSave struct {
+	quant  string       // What to save. E.g. "m" for magnetization
 	format OutputFormat // Format to save in
-	period float64 // How often to save
-	last float64// Time of last save
+	period float64      // How often to save
+	last   float64      // Time of last save
 }
 
 // Called by the eninge
-func(a*AutoSave)Notify(e*Engine){
-	Debug("notify autosave")
+func (a *AutoSave) Notify(e *Engine) {
+
 }

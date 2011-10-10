@@ -35,11 +35,13 @@ type Engine struct {
 	dt           *Quant            // time step quantity is always present
 	timer        Timer             // For benchmarking
 	modules      []Module          // loaded modules 
-	crontabs     []Notifier        // periodical jobs
+	crontabs     map[int]Notifier  // periodical jobs, indexed by handle
 	_outputID    int               // index for output numbering
 	_lastOutputT float64           // time of last output ID increment
+	_handleCount int               // used to generate unique handle IDs for various object passed out
 }
 
+// Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time. 
 func (e *Engine) OutputID() int {
 	t := e.time.Scalar()
 	if t != e._lastOutputT {
@@ -47,6 +49,12 @@ func (e *Engine) OutputID() int {
 		e._outputID++
 	}
 	return e._outputID
+}
+
+// Returns ++_handleCount. Used to identify objects like crontabs so they can later by manipulated through this ID.
+func (e *Engine) NewHandle() int {
+	e._handleCount++ // Let's not use 0 as a valid handle.
+	return e._handleCount
 }
 
 // Left-hand side and right-hand side indices for Engine.ode[i]
@@ -76,6 +84,7 @@ func (e *Engine) init() {
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
 	e.modules = make([]Module, 0)
+	e.crontabs=make(map[int]Notifier)
 	e.timer.Start()
 }
 
@@ -260,6 +269,13 @@ func (e *Engine) Save(q *Quant, format string, options []string, filename string
 	bufout := Buffer(out)
 	defer bufout.Flush()
 	GetOutputFormat(format).Write(bufout, q, options)
+}
+
+// Saves the quantity periodically.
+func (e *Engine) AutoSave(quant string, format string, options []string, period float64) (handle int) {
+	handle = e.NewHandle()
+	e.crontabs[handle] = &AutoSave{quant, GetOutputFormat(format), period, -1}
+	return handle
 }
 
 // String representation
