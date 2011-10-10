@@ -22,7 +22,7 @@ type AutoSave struct {
 
 // Called by the eninge
 func (a *AutoSave) Notify(e *Engine) {
-	if e.time.Scalar()-float64(a.count)-a.period >= a.period {
+	if e.time.Scalar()-float64(a.count)*a.period >= a.period {
 		e.Save(e.Quant(a.quant), a.format, a.options, e.AutoFilename(a.quant, a.format))
 		a.count++
 	}

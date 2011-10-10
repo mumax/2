@@ -55,16 +55,14 @@ invalidate('H_ext')
 update('H_ext')
 invalidate('H_ext')
 autosave("m", "omf", [], 4e-12)
-for i in range(300):
-	echo("id " + str(outputid()))
+filenumberformat("%08d")
+for i in range(100):
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
 	f.write(str(m[0]) + "\t")
 	f.write(str(m[1]) + "\t")
 	f.write(str(m[2]) + "\n")
-	#invalidate('H_ext')
-	#echo('H: ' + str(debugfield('H')))
 	step()
 	#printstats()
 

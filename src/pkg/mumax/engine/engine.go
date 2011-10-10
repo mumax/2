@@ -279,7 +279,8 @@ func (e *Engine) Save(q *Quant, format string, options []string, filename string
 // Saves the quantity periodically.
 func (e *Engine) AutoSave(quant string, format string, options []string, period float64) (handle int) {
 	handle = e.NewHandle()
-	e.crontabs[handle] = &AutoSave{quant, format, options, period, -1}
+	e.crontabs[handle] = &AutoSave{quant, format, options, period, 0}
+	Log("Auto-save", quant, "every", period, "s", "(handle ", handle, ")")
 	return handle
 }
 
@@ -294,6 +295,11 @@ func (e *Engine) AutoFilename(quant, format string) string {
 		dir = e.outputDir + "/"
 	}
 	return dir + filename
+}
+
+// INTERNAL: Used by frontend to set the output dir
+func(e*Engine)SetOutputDirectory(dir string){
+	e.outputDir = dir
 }
 
 // String representation
