@@ -26,22 +26,23 @@ func GetEngine() *Engine {
 // An acyclic graph structure consisting of interconnected quantities
 // determines what should be calculated and when.
 type Engine struct {
-	size3D_      [3]int            // INTENRAL
-	size3D       []int             // size of the FD grid, nil means not yet set
-	cellSize_    [3]float64        // INTENRAL
-	cellSize     []float64         // size of the FD cells, nil means not yet set
-	quantity     map[string]*Quant // maps quantity names onto their data structures
-	ode          [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
-	solver       []Solver          // solver[i] does the time stepping for ode[i]
-	time         *Quant            // time quantity is always present
-	dt           *Quant            // time step quantity is always present
-	timer        Timer             // For benchmarking
-	modules      []Module          // loaded modules 
-	crontabs     map[int]Notifier  // periodical jobs, indexed by handle
-	_outputID    int               // index for output numbering
-	_lastOutputT float64           // time of last output ID increment
-	_handleCount int               // used to generate unique handle IDs for various object passed out
-	filenameFormat string // Printf format string for file name numbering. Must consume one integer.
+	size3D_        [3]int            // INTENRAL
+	size3D         []int             // size of the FD grid, nil means not yet set
+	cellSize_      [3]float64        // INTENRAL
+	cellSize       []float64         // size of the FD cells, nil means not yet set
+	quantity       map[string]*Quant // maps quantity names onto their data structures
+	ode            [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
+	solver         []Solver          // solver[i] does the time stepping for ode[i]
+	time           *Quant            // time quantity is always present
+	dt             *Quant            // time step quantity is always present
+	timer          Timer             // For benchmarking
+	modules        []Module          // loaded modules 
+	crontabs       map[int]Notifier  // periodical jobs, indexed by handle
+	_outputID      int               // index for output numbering
+	_lastOutputT   float64           // time of last output ID increment
+	_handleCount   int               // used to generate unique handle IDs for various object passed out
+	outputDir      string            // output directory
+	filenameFormat string            // Printf format string for file name numbering. Must consume one integer.
 }
 
 // Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time. 
@@ -87,7 +88,7 @@ func (e *Engine) init() {
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
 	e.modules = make([]Module, 0)
-	e.crontabs=make(map[int]Notifier)
+	e.crontabs = make(map[int]Notifier)
 	e.filenameFormat = "%06d"
 	e.timer.Start()
 }
@@ -255,12 +256,12 @@ func (e *Engine) Step() {
 	for _, ode := range e.ode {
 		ode[LHS].Invalidate()
 	}
-	e.NotifyAll()
+	e.notifyAll()
 }
 //__________________________________________________________________ output
 
-
-func (e *Engine) NotifyAll() {
+// Notifies all crontabs that a step has been taken.
+func (e *Engine) notifyAll() {
 	for _, tab := range e.crontabs {
 		tab.Notify(e)
 	}
@@ -280,6 +281,19 @@ func (e *Engine) AutoSave(quant string, format string, options []string, period 
 	handle = e.NewHandle()
 	e.crontabs[handle] = &AutoSave{quant, format, options, period, -1}
 	return handle
+}
+
+// Generates an automatic file name for the quantity, given the output format.
+// E.g., "dir.out/m000007.omf"
+// see: outputDir, filenameFormat
+func (e *Engine) AutoFilename(quant, format string) string {
+	filenum := fmt.Sprintf(e.filenameFormat, e.OutputID())
+	filename := quant + filenum + "." + GetOutputFormat(format).Name()
+	dir := ""
+	if e.outputDir != "" {
+		dir = e.outputDir + "/"
+	}
+	return dir + filename
 }
 
 // String representation

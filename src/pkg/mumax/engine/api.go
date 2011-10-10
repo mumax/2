@@ -226,18 +226,15 @@ func (a API) Save(quantity string, format string, options []string, filename str
 	a.Engine.Save(a.Engine.Quant(quantity), format, options, filename)
 }
 
-
-
 // Saves the quantity periodically.
 // @see filenumberfomat
 func (a API) AutoSave(quantity string, format string, options []string, period float64) (handle int) {
 	return a.Engine.AutoSave(quantity, format, options, period)
 }
 
-
 // Sets a global C-style printf format string used to generate file names for automatically saved files.
 // The default "%06d" generates, e.g., "m000001.txt". "%d" would generate, e.g., "m1.txt".
-func(a API) FileNumberFormat(format string){
+func (a API) FileNumberFormat(format string) {
 	a.Engine.filenameFormat = format
 	Log("Using", format, "to number automatically saved files.")
 }
