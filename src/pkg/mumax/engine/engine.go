@@ -7,6 +7,8 @@
 
 package engine
 
+// Author: Arne Vansteenkiste
+
 import (
 	. "mumax/common"
 	"fmt"
@@ -39,6 +41,7 @@ type Engine struct {
 	_outputID    int               // index for output numbering
 	_lastOutputT float64           // time of last output ID increment
 	_handleCount int               // used to generate unique handle IDs for various object passed out
+	filenameFormat string // Printf format string for file name numbering. Must consume one integer.
 }
 
 // Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time. 
@@ -85,6 +88,7 @@ func (e *Engine) init() {
 	e.dt = e.Quant("dt")
 	e.modules = make([]Module, 0)
 	e.crontabs=make(map[int]Notifier)
+	e.filenameFormat = "%06d"
 	e.timer.Start()
 }
 
@@ -274,7 +278,7 @@ func (e *Engine) Save(q *Quant, format string, options []string, filename string
 // Saves the quantity periodically.
 func (e *Engine) AutoSave(quant string, format string, options []string, period float64) (handle int) {
 	handle = e.NewHandle()
-	e.crontabs[handle] = &AutoSave{quant, GetOutputFormat(format), period, -1}
+	e.crontabs[handle] = &AutoSave{quant, format, options, period, -1}
 	return handle
 }
 

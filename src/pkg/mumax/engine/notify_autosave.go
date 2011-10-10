@@ -10,17 +10,21 @@ package engine
 // Auhtor: Arne Vansteenkiste
 
 import (
+		"fmt"
 )
 
 // Saves a field (scalar field, vector field, etc) periodically.
 type AutoSave struct {
 	quant  string       // What to save. E.g. "m" for magnetization
-	format OutputFormat // Format to save in
+	format string // Format to save in
+	options []string // Output format options
 	period float64      // How often to save
 	last   float64      // Time of last save
 }
 
 // Called by the eninge
 func (a *AutoSave) Notify(e *Engine) {
-
+	filenum := fmt.Sprintf(e.filenameFormat, e.OutputID())
+	filename := a.quant + filenum + "." + GetOutputFormat(a.format).Name()
+	e.Save(e.Quant(a.quant), a.format, a.options, filename)
 }
