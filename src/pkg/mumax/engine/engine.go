@@ -298,7 +298,7 @@ func (e *Engine) AutoFilename(quant, format string) string {
 }
 
 // INTERNAL: Used by frontend to set the output dir
-func(e*Engine)SetOutputDirectory(dir string){
+func (e *Engine) SetOutputDirectory(dir string) {
 	e.outputDir = dir
 }
 

@@ -25,10 +25,10 @@ import (
 type Client struct {
 	inputFile, outputDir string
 	ipc                  jsonRPC
-	api             engine.API
-	infifo, outfifo *os.File
-	cleanfiles      []string // list of files to be deleted upon program exit
-	logWait         chan int // channel to wait for completion of go logStream()
+	api                  engine.API
+	infifo, outfifo      *os.File
+	cleanfiles           []string // list of files to be deleted upon program exit
+	logWait              chan int // channel to wait for completion of go logStream()
 }
 
 // Initializes the mumax client to parse infile, write output
