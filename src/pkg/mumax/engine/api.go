@@ -226,10 +226,21 @@ func (a API) Save(quantity string, format string, options []string, filename str
 	a.Engine.Save(a.Engine.Quant(quantity), format, options, filename)
 }
 
-// Saves the quantity periodically.
+// Saves the quantity periodically, every period (expressed in seconds).
+// Returns an integer handle that can be used to manipulate the auto-save entry. 
+// E.g. remove(handle) stops auto-saving it.
 // @see filenumberfomat
 func (a API) AutoSave(quantity string, format string, options []string, period float64) (handle int) {
 	return a.Engine.AutoSave(quantity, format, options, period)
+}
+
+
+// Removes the object with given handle.
+// E.g.:
+//	handle = autosave(...)
+//	remove(handle) # stops auto-saving
+func(a API)Remove(handle int){
+	a.Engine.RemoveHandle(handle)
 }
 
 // Sets a global C-style printf format string used to generate file names for automatically saved files.

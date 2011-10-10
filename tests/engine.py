@@ -54,9 +54,11 @@ f = open('ll', 'w')
 invalidate('H_ext')
 update('H_ext')
 invalidate('H_ext')
-autosave("m", "omf", [], 50e-12)
+autosave=autosave("m", "omf", [], 50e-12)
 filenumberformat("%08d")
 for i in range(1000):
+	if i == 500:
+			remove(autosave)
 	t = getscalar('t')
 	m = getcell('m', 0,0,0)
 	f.write(str(t) + "\t")
