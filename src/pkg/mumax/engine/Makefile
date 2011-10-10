@@ -22,13 +22,14 @@ GOFILES=\
 	unit.go\
 	sum_updater.go\
 	updater.go\
-	nop_updater.go\
-	pointwise_updater.go\
-	normalize_updater.go\
+	update_nop.go\
+	update_pointwise.go\
+	update_norm.go\
 	solver.go\
-	euler_solver.go\
+	solve_euler.go\
 	resample.go\
 	notifier.go\
+	notify_autosave.go\
 	outputformat.go\
 	format_ascii.go\
 	format_omf.go\
