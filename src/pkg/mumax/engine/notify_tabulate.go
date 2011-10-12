@@ -13,9 +13,9 @@ import ()
 
 // Saves a value (scalar field, vector field, etc) periodically.
 type Tabulate struct {
-	quant   string   // What to save. E.g. "t" for time
-	period  float64  // How often to save
-	count   int      // Number of times it has been saved
+	quant  string  // What to save. E.g. "t" for time
+	period float64 // How often to save
+	count  int     // Number of times it has been saved
 }
 
 // Called by the eninge

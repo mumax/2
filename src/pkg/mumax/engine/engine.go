@@ -286,14 +286,13 @@ func (e *Engine) AutoSave(quant string, format string, options []string, period 
 	return handle
 }
 
-func(e*Engine)Tabulate(quant, filename string){
+func (e *Engine) Tabulate(quant, filename string) {
 
 }
 
-func(e*Engine)AutoTabulate(quant, filename string, period float64) (handle int) {
-return 0
+func (e *Engine) AutoTabulate(quant, filename string, period float64) (handle int) {
+	return 0
 }
-
 
 // Generates an automatic file name for the quantity, given the output format.
 // E.g., "dir.out/m000007.omf"
