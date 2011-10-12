@@ -20,11 +20,11 @@ GOFILES=\
 	quant.go\
 	quantkind.go\
 	unit.go\
-	sum_updater.go\
 	updater.go\
 	update_nop.go\
 	update_pointwise.go\
 	update_norm.go\
+	update_sum.go\
 	solver.go\
 	solve_euler.go\
 	resample.go\
