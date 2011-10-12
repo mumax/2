@@ -31,5 +31,6 @@ func (x ModHField) Name() string {
 func (x ModHField) Load(e *Engine) {
 	e.AddQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
 	q := e.Quant("H")
+	// multiplier ??
 	q.updater = &SumUpdater{q}
 }

@@ -43,7 +43,7 @@ func Madd(dst, a, b *Array, mulB float32) {
 }
 
 // Reduced Landau-Lifshitz torque
-func Torque(τ, m, H, αMap *Array, αMul float32) {
+func Torque(τ, m, h, αMap *Array, αMul float32) {
 	C.torqueAsync(
 		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))),
@@ -53,9 +53,9 @@ func Torque(τ, m, H, αMap *Array, αMul float32) {
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
 
-		(**C.float)(unsafe.Pointer(&(H.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(H.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(H.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
 
 		(**C.float)(unsafe.Pointer(&(αMap.pointer[0]))),
 		(C.float)(αMul),
