@@ -221,18 +221,35 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 
 // ________________________________________________________________________________ save quantities
 
-// Saves the quantity once, using the specified format and file name.
+// Saves a space-dependent quantity, once. Uses the specified format and file name.
 func (a API) Save(quantity string, format string, options []string, filename string) {
 	a.Engine.Save(a.Engine.Quant(quantity), format, options, filename)
 }
 
-// Saves the quantity periodically, every period (expressed in seconds).
+// Saves a space-dependent quantity periodically, every period (expressed in seconds).
+// Output appears in the output directory with automatically generated file names.
+// E.g., for a quantity named "m", and format "txt" the generated files will be:
+//	m00000.txt m00001.txt m00002.txt...
+// See FilenameFormat() for setting the number of zeros.
 // Returns an integer handle that can be used to manipulate the auto-save entry. 
 // E.g. remove(handle) stops auto-saving it.
 // @see filenumberfomat
 func (a API) AutoSave(quantity string, format string, options []string, period float64) (handle int) {
 	return a.Engine.AutoSave(quantity, format, options, period)
 }
+
+// Saves a space-independent quantity, once. The value is appended to the file.
+func(a API) Tabulate(quantity string, filename string){
+	a.Engine.AutoTabulate(quantity, filename)
+}
+
+// Saves a space-independent quantity periodically, every period (expressed in seconds).
+// The value is appended to the file.
+func(a API) AutoTabulate(quantity string, filename string, period float64) (handle int){
+	return a.Engine.AutoTabulate(quantity, filename, period)
+}
+
+
 
 // Removes the object with given handle.
 // E.g.:
