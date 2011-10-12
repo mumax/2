@@ -234,12 +234,11 @@ func (a API) AutoSave(quantity string, format string, options []string, period f
 	return a.Engine.AutoSave(quantity, format, options, period)
 }
 
-
 // Removes the object with given handle.
 // E.g.:
 //	handle = autosave(...)
 //	remove(handle) # stops auto-saving
-func(a API)Remove(handle int){
+func (a API) Remove(handle int) {
 	a.Engine.RemoveHandle(handle)
 }
 

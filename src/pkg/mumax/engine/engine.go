@@ -297,19 +297,18 @@ func (e *Engine) AutoFilename(quant, format string) string {
 	return dir + filename
 }
 
-
 // Looks for an object with the handle number and removes it.
 // Currently only looks in the crontabs.
-func(e*Engine)RemoveHandle(handle int){
+func (e *Engine) RemoveHandle(handle int) {
 	found := false
-	if _,ok:=e.crontabs[handle]; ok{
+	if _, ok := e.crontabs[handle]; ok {
 		e.crontabs[handle] = nil, false
 		found = true
 	}
 	// TODO: if handles are used by other objects than crontabs, find them here
-	if !found{
-			Log(e.crontabs)
-			panic(IOErr(fmt.Sprint("handle does not exist:", handle)))
+	if !found {
+		Log(e.crontabs)
+		panic(IOErr(fmt.Sprint("handle does not exist:", handle)))
 	}
 }
 
