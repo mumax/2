@@ -269,6 +269,7 @@ func (e *Engine) notifyAll() {
 
 // Saves the quantity once in the specified format and file name
 func (e *Engine) Save(q *Quant, format string, options []string, filename string) {
+	checkKinds(q, MASK, FIELD)
 	out := OpenWRONLY(filename)
 	defer out.Close()
 	bufout := Buffer(out)
@@ -278,11 +279,21 @@ func (e *Engine) Save(q *Quant, format string, options []string, filename string
 
 // Saves the quantity periodically.
 func (e *Engine) AutoSave(quant string, format string, options []string, period float64) (handle int) {
+	checkKinds(e.Quant(quant), MASK, FIELD)
 	handle = e.NewHandle()
 	e.crontabs[handle] = &AutoSave{quant, format, options, period, 0}
 	Log("Auto-save", quant, "every", period, "s", "(handle ", handle, ")")
 	return handle
 }
+
+func(e*Engine)Tabulate(quant, filename string){
+
+}
+
+func(e*Engine)AutoTabulate(quant, filename string, period float64) (handle int) {
+return 0
+}
+
 
 // Generates an automatic file name for the quantity, given the output format.
 // E.g., "dir.out/m000007.omf"
