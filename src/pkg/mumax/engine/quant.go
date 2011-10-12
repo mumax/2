@@ -326,7 +326,7 @@ func (q *Quant) Invalidate() {
 // INTERNAL: in case of a MASK, make sure the underlying array is allocted.
 // Used, e.g., when a space-independent mask gets replaced by a space-dependent one.
 func (q *Quant) assureAlloc() {
-	pointers := q.Array().Pointers()
+	pointers := q.Array().DevicePtr()
 	if pointers[0] == 0 {
 		Debug("assureAlloc: " + q.Name())
 		q.Array().Alloc()

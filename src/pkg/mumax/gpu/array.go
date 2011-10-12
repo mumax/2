@@ -192,9 +192,9 @@ func (a *Array) Component(i int) *Array {
 }
 
 // Array of pointers to parts, one per GPU.
-func (a *Array) Pointers() []cu.DevicePtr {
-	return a.pointer
-}
+//func (a *Array) Pointers() []cu.DevicePtr {
+	//return a.pointer
+	//}
 
 // True if the array has no underlying GPU storage.
 // E.g., when created by NilArray()
