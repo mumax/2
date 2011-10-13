@@ -42,7 +42,9 @@ func Madd(dst, a, b *Array, mulB float32) {
 	dst.Stream.Sync()
 }
 
-// Reduced Landau-Lifshitz torque
+// Calculates:
+//	τ = (m x h) - α m  x (m x h)
+// If h = H/Msat, then τ = 1/gamma*dm/dt
 func Torque(τ, m, h, αMap *Array, αMul float32) {
 	C.torqueAsync(
 		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),

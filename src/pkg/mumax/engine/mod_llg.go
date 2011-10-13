@@ -28,15 +28,16 @@ func (x ModLLG) Name() string {
 	return "llg"
 }
 
-// The torque array contains reduced Landau-Lifshitz torque τ, in units gamma0*Msat:
-//	d m / d t = gamma0 * Msat * τ  
-// which is dimensionless and of order 1. Thus the multiplier is gamma0*Msat
-// so that the this quantity (array*multiplier) has unit 1/s.
-// Note: the unit of gamma0 * Msat is 1/time.
+// The torque quant contains the reduced Landau-Lifshitz torque τ
+//	d m / d t =  τ  
+// with unit
+//	[τ] = 1/s
 // Thus:
-//	τ = (m x h) - α m  x (m x h)
+//	τ = gamma[ (m x h) - α m  x (m x h) ]
 // with:
 //	h = H / Msat
+// To keep numbers from getting extremely large or small, 
+// the multiplier is set to gamma, so the array stores τ/gamma
 func (x ModLLG) Load(e *Engine) {
 
 	e.LoadModule("magnetization")
