@@ -28,7 +28,7 @@ func (x ModLLG) Name() string {
 	return "llg"
 }
 
-// The torque quant contains the reduced Landau-Lifshitz torque τ
+// The torque quant contains the Landau-Lifshitz torque τ acting on the reduced magnetization m = M/Msat.
 //	d m / d t =  τ  
 // with unit
 //	[τ] = 1/s
