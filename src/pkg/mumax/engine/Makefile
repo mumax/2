@@ -33,6 +33,7 @@ GOFILES=\
 	outputformat.go\
 	format_txt.go\
 	format_omf.go\
+	output_table.go\
 	#input.go\
 
 CGOFILES=\

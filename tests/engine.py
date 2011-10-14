@@ -9,7 +9,7 @@ setcellsize(5e-9, 5e-9, 50e-9)
 load('micromagnetism')
 savegraph("graph.dot")
 
-setscalar('alpha', 0.05)
+setscalar('alpha', 0.1)
 getscalar('alpha')
 
 #print 'alpha', getvalue('alpha'), '\n'
@@ -49,7 +49,7 @@ setvalue('H_ext', [Hx, Hy, Hz])
 #print 'torque', torque , '\n'
 #setfield('torque', m) # must fail
 
-setscalar('dt', 2e-12)
+setscalar('dt', 1e-12)
 f = open('ll', 'w')
 invalidate('H_ext')
 update('H_ext')

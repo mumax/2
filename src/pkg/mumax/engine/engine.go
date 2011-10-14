@@ -38,6 +38,7 @@ type Engine struct {
 	timer          Timer             // For benchmarking
 	modules        []Module          // loaded modules 
 	crontabs       map[int]Notifier  // periodical jobs, indexed by handle
+	outputTables   map[string]Table  // open output table files, indexed by file name
 	_outputID      int               // index for output numbering
 	_lastOutputT   float64           // time of last output ID increment
 	_handleCount   int               // used to generate unique handle IDs for various object passed out

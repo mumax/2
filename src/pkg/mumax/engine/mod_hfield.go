@@ -18,6 +18,7 @@ func init() {
 
 // Module for the total field H. Other modules like H_demag, H_anis, H_ext have
 // to add their field to the sum make by H.
+// H is in units A/m and does not have a multiplier. I.e., is not normalized to Msat.
 type ModHField struct{}
 
 func (x ModHField) Description() string {
@@ -31,6 +32,5 @@ func (x ModHField) Name() string {
 func (x ModHField) Load(e *Engine) {
 	e.AddQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
 	q := e.Quant("H")
-	panic("need to set multiplier here? somewhere else?")
 	q.updater = &SumUpdater{q}
 }
