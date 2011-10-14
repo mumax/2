@@ -54,19 +54,11 @@ f = open('ll', 'w')
 invalidate('H_ext')
 update('H_ext')
 invalidate('H_ext')
-autosave=autosave("m", "omf", [], 50e-12)
+autosave1=autosave("m", "omf", [], 100e-12)
 filenumberformat("%08d")
 for i in range(1000):
-	if i == 500:
-			remove(autosave)
-	t = getscalar('t')
-	m = getcell('m', 0,0,0)
-	f.write(str(t) + "\t")
-	f.write(str(m[0]) + "\t")
-	f.write(str(m[1]) + "\t")
-	f.write(str(m[2]) + "\n")
+	tabulate("t", "t.txt")
 	step()
-	#printstats()
 
 
 

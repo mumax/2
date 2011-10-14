@@ -38,7 +38,7 @@ type Engine struct {
 	timer          Timer             // For benchmarking
 	modules        []Module          // loaded modules 
 	crontabs       map[int]Notifier  // periodical jobs, indexed by handle
-	outputTables   map[string]*Table  // open output table files, indexed by file name
+	outputTables   map[string]*Table // open output table files, indexed by file name
 	_outputID      int               // index for output numbering
 	_lastOutputT   float64           // time of last output ID increment
 	_handleCount   int               // used to generate unique handle IDs for various object passed out
@@ -90,6 +90,7 @@ func (e *Engine) init() {
 	e.dt = e.Quant("dt")
 	e.modules = make([]Module, 0)
 	e.crontabs = make(map[int]Notifier)
+	e.outputTables = make(map[string]*Table)
 	e.filenameFormat = "%06d"
 	e.timer.Start()
 }
@@ -287,15 +288,15 @@ func (e *Engine) AutoSave(quant string, format string, options []string, period 
 	return handle
 }
 
-func (e *Engine) Tabulate(quant, filename string) {
-	if _,ok := e.outputTables[filename]; !ok{ // table not yet open
-		e.outputTables[filename] = NewTable(filename)	
-	}	
-	table:=e.outputTables[filename]
-	table.Tabulate(e.Quant(quant))
+func (e *Engine) Tabulate(quants []string, filename string) {
+	if _, ok := e.outputTables[filename]; !ok { // table not yet open
+		e.outputTables[filename] = NewTable(filename)
+	}
+	table := e.outputTables[filename]
+	table.Tabulate(quants)
 }
 
-func (e *Engine) AutoTabulate(quant, filename string, period float64) (handle int) {
+func (e *Engine) AutoTabulate(quants []string, filename string, period float64) (handle int) {
 	return 0
 }
 

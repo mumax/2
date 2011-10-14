@@ -9,18 +9,30 @@ package engine
 
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+		. "mumax/common"
+	"io"
+)
 
+// Table refers to an open data table 
+// to which space-independent output is appended during the simulation.
 type Table struct {
-
+	out io.Writer
 }
 
-func NewTable(fname string)*Table{
-	table:=new(Table)
-
-	return table
+// New table that will write in the file.
+func NewTable(fname string) *Table {
+	t := new(Table)
+	t.out = OpenWRONLY(fname)
+	return t
 }
 
-func(t*Table)Tabulate(q *Quant){
-
+// Append the quantities value to the table.
+func (t *Table) Tabulate(quants []string){
+	//	e := GetEngine()
+	//for _,q:= range quants{
+	//	quant := 	e.Quant(q)
+	//	v := quant.Value()
+	//	for _,num:=range
+	//}
 }
