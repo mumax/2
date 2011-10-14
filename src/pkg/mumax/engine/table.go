@@ -18,26 +18,53 @@ import (
 // Table refers to an open data table 
 // to which space-independent output is appended during the simulation.
 type Table struct {
-	out io.Writer
+	out   io.WriteCloser
+	fname string
 }
 
 // New table that will write in the file.
 func NewTable(fname string) *Table {
 	t := new(Table)
-	t.out = OpenWRONLY(fname)
+	t.fname = fname
 	return t
 }
 
 // Append the quantities value to the table.
 func (t *Table) Tabulate(quants []string) {
+	if t.out == nil {
+		t.out = OpenWRONLY(t.fname)
+		writeTableHeader(t.out, quants)
+	}
 	e := GetEngine()
 	for _, q := range quants {
 		quant := e.Quant(q)
-		checkKinds(quant, VALUE, MASK)
 		v := quant.multiplier
-		for _, num := range v {
-			fmt.Fprint(t.out, num, "\t")
+		n := len(v)
+		for i := n - 1; i >= 0; i-- { // Swap XYZ -> ZYX
+			fmt.Fprint(t.out, v[i], "\t")
 		}
 	}
 	fmt.Fprintln(t.out)
+}
+
+func (t *Table) Close() {
+	t.out.Close()
+}
+
+func writeTableHeader(out io.Writer, quants []string) {
+	e := GetEngine()
+	fmt.Fprint(out, "#")
+	for _, q := range quants {
+		quant := e.Quant(q)
+		checkKinds(quant, VALUE, MASK)
+		n := quant.NComp()
+		for i := 0; i < n; i++ {
+			comp := ""
+			if n > 1 {
+				comp = "_" + string('z'-i)
+			}
+			fmt.Fprint(out, quant.Name()+comp, " (", quant.Unit(), ")\t")
+		}
+	}
+	fmt.Fprintln(out)
 }

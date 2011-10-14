@@ -95,6 +95,13 @@ func (e *Engine) init() {
 	e.timer.Start()
 }
 
+// Shuts down the engine. Closes all open files, etc.
+func (e *Engine) Close() {
+	for _, t := range e.outputTables {
+		t.Close()
+	}
+}
+
 //__________________________________________________________________ set/get
 
 // Sets the FD grid size
