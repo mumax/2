@@ -297,7 +297,13 @@ func (e *Engine) Tabulate(quants []string, filename string) {
 }
 
 func (e *Engine) AutoTabulate(quants []string, filename string, period float64) (handle int) {
-	return 0
+	for _,q := range quants{
+		checkKinds(e.Quant(q), MASK, VALUE)
+	}
+	handle = e.NewHandle()
+	e.crontabs[handle] = &AutoTabulate{quants, filename, period, 0}
+	Log("Auto-tabulate", quants, "every", period, "s", "(handle ", handle, ")")
+	return handle
 }
 
 // Generates an automatic file name for the quantity, given the output format.

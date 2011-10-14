@@ -30,6 +30,7 @@ GOFILES=\
 	resample.go\
 	notifier.go\
 	notify_autosave.go\
+	notify_tabulate.go\
 	outputformat.go\
 	format_txt.go\
 	format_omf.go\
