@@ -10,7 +10,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-		. "mumax/common"
+	. "mumax/common"
 	"io"
 )
 
@@ -28,7 +28,7 @@ func NewTable(fname string) *Table {
 }
 
 // Append the quantities value to the table.
-func (t *Table) Tabulate(quants []string){
+func (t *Table) Tabulate(quants []string) {
 	//	e := GetEngine()
 	//for _,q:= range quants{
 	//	quant := 	e.Quant(q)
