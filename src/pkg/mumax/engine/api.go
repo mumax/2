@@ -238,7 +238,7 @@ func (a API) AutoSave(quantity string, format string, options []string, period f
 	return a.Engine.AutoSave(quantity, format, options, period)
 }
 
-// Saves these space-independent quantity, once. 
+// Saves these space-independent quantities, once. 
 // Their values are appended to the file, on one line.
 func (a API) Tabulate(quantities []string, filename string) {
 	a.Engine.Tabulate(quantities, filename)
