@@ -14,3 +14,13 @@ import ()
 type Table struct {
 
 }
+
+func NewTable(fname string)*Table{
+	table:=new(Table)
+
+	return table
+}
+
+func(t*Table)Tabulate(q *Quant){
+
+}

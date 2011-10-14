@@ -38,7 +38,7 @@ type Engine struct {
 	timer          Timer             // For benchmarking
 	modules        []Module          // loaded modules 
 	crontabs       map[int]Notifier  // periodical jobs, indexed by handle
-	outputTables   map[string]Table  // open output table files, indexed by file name
+	outputTables   map[string]*Table  // open output table files, indexed by file name
 	_outputID      int               // index for output numbering
 	_lastOutputT   float64           // time of last output ID increment
 	_handleCount   int               // used to generate unique handle IDs for various object passed out
@@ -288,7 +288,11 @@ func (e *Engine) AutoSave(quant string, format string, options []string, period 
 }
 
 func (e *Engine) Tabulate(quant, filename string) {
-
+	if _,ok := e.outputTables[filename]; !ok{ // table not yet open
+		e.outputTables[filename] = NewTable(filename)	
+	}	
+	table:=e.outputTables[filename]
+	table.Tabulate(e.Quant(quant))
 }
 
 func (e *Engine) AutoTabulate(quant, filename string, period float64) (handle int) {
