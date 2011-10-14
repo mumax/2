@@ -57,7 +57,7 @@ invalidate('H_ext')
 autosave1=autosave("m", "omf", [], 100e-12)
 filenumberformat("%08d")
 autosave2=autotabulate(["t", "H_ext"], "t.txt", 10e-12)
-for i in range(100):
+for i in range(1000):
 	step()
 
 

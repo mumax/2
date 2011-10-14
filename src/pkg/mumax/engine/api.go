@@ -244,8 +244,11 @@ func (a API) Tabulate(quantities []string, filename string) {
 	a.Engine.Tabulate(quantities, filename)
 }
 
-// Saves a space-independent quantity periodically, every period (expressed in seconds).
-// The value is appended to the file.
+// Saves any number of space-independent quantities periodically, 
+// every period (expressed in seconds).
+// The values are appended to the file.
+// Returns an integer handle that can be used to manipulate the auto-save entry. 
+// E.g. remove(handle) stops auto-saving it.
 func (a API) AutoTabulate(quantities []string, filename string, period float64) (handle int) {
 	return a.Engine.AutoTabulate(quantities, filename, period)
 }

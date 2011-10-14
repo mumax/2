@@ -13,16 +13,16 @@ import ()
 
 // Saves a value (scalar field, vector field, etc) periodically.
 type AutoTabulate struct {
-	quants  []string  // What to save. E.g. "t" for time
-	filename string // File to append to
-	period float64 // How often to save
-	count  int     // Number of times it has been saved
+	quants   []string // What to save. E.g. "t" for time
+	filename string   // File to append to
+	period   float64  // How often to save
+	count    int      // Number of times it has been saved
 }
 
 // Called by the eninge
 func (a *AutoTabulate) Notify(e *Engine) {
 	if e.time.Scalar()-float64(a.count)*a.period >= a.period {
-		e.Tabulate(a.quants,  a.filename)
+		e.Tabulate(a.quants, a.filename)
 		a.count++
 	}
 }

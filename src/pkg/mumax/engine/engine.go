@@ -297,7 +297,7 @@ func (e *Engine) Tabulate(quants []string, filename string) {
 }
 
 func (e *Engine) AutoTabulate(quants []string, filename string, period float64) (handle int) {
-	for _,q := range quants{
+	for _, q := range quants {
 		checkKinds(e.Quant(q), MASK, VALUE)
 	}
 	handle = e.NewHandle()
