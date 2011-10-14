@@ -12,6 +12,7 @@ package engine
 import (
 	. "mumax/common"
 	"io"
+	"fmt"
 )
 
 // Table refers to an open data table 
@@ -29,10 +30,14 @@ func NewTable(fname string) *Table {
 
 // Append the quantities value to the table.
 func (t *Table) Tabulate(quants []string) {
-	//	e := GetEngine()
-	//for _,q:= range quants{
-	//	quant := 	e.Quant(q)
-	//	v := quant.Value()
-	//	for _,num:=range
-	//}
+	e := GetEngine()
+	for _, q := range quants {
+		quant := e.Quant(q)
+		checkKinds(quant, VALUE, MASK)
+		v := quant.multiplier
+		for _, num := range v {
+			fmt.Fprint(t.out, num, "\t")
+		}
+	}
+	fmt.Fprintln(t.out)
 }

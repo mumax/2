@@ -56,8 +56,8 @@ update('H_ext')
 invalidate('H_ext')
 autosave1=autosave("m", "omf", [], 100e-12)
 filenumberformat("%08d")
-for i in range(1000):
-	tabulate("t", "t.txt")
+for i in range(100):
+	tabulate(["t", "H_ext"], "t.txt")
 	step()
 
 
