@@ -156,6 +156,7 @@ func (q *Quant) SetValue(val []float64) {
 	for i, v := range val {
 		q.multiplier[i] = v
 	}
+	q.Verify()
 	q.Invalidate() //!
 }
 
