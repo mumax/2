@@ -295,13 +295,21 @@ func (a API) PrintStats() {
 }
 
 // DEBUG: manually update the quantity state
-func (a API) Update(quantity string) {
+func (a API) Debug_Update(quantity string) {
 	a.Engine.Quant(quantity).Update()
 }
 
 // DEBUG: manually update the quantity state
-func (a API) Invalidate(quantity string) {
+func (a API) Debug_Invalidate(quantity string) {
 	a.Engine.Quant(quantity).Invalidate()
+}
+
+// DEBUG: verify all quanties' values
+func (a API) Debug_VerifyAll() {
+	e := a.Engine
+	for _, q := range e.quants {
+		q.Verify()
+	}
 }
 
 // DEBUG: echos a string, can be used for synchronous output
