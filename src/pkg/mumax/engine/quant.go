@@ -42,6 +42,7 @@ type Quant struct {
 	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate    bool              // Flags if this quantity needs to be updated
 	updater     Updater           // Called to update this quantity
+	verifier  func(q *Quant) // Called to verify user input
 	children    map[string]*Quant // Quantities this one depends on, indexed by name
 	parents     map[string]*Quant // Quantities that depend on this one, indexed by name
 	desc        string            // Human-readable description
@@ -108,7 +109,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		panic(Bug("Quant.init kind"))
 	}
 
-	q.updater = new(NopUpdater)
+	q.updater = nil//new(NopUpdater)
 
 	const CAP = 2
 	q.children = make(map[string]*Quant)
@@ -292,7 +293,7 @@ func (q *Quant) Update() {
 	//Log("actually update " + q.Name())
 	if !q.upToDate {
 		q.timer.Start()
-		q.updater.Update()
+		if q.updater != nil{q.updater.Update()}
 		q.timer.Stop()
 		q.updates++
 	}
@@ -319,6 +320,12 @@ func (q *Quant) Invalidate() {
 	for _, c := range q.children {
 		c.Invalidate()
 	}
+}
+
+// Verifies if the quantity's value makes sense.
+// Called, e.g., after the user set a value.
+func(q*Quant)Verify{
+	if q.verifier!=nil{q.verifier(q)}
 }
 
 //___________________________________________________________ 
