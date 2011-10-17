@@ -307,7 +307,7 @@ func (a API) Debug_Invalidate(quantity string) {
 // DEBUG: verify all quanties' values
 func (a API) Debug_VerifyAll() {
 	e := a.Engine
-	for _, q := range e.quants {
+	for _, q := range e.quantity {
 		q.Verify()
 	}
 }
