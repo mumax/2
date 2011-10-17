@@ -45,6 +45,7 @@ func (x ModLLG) Load(e *Engine) {
 	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
 	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
 	e.Quant("gamma").SetScalar(Gamma0)
+	e.Quant("gamma").SetVerifier(NonZero)
 
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")

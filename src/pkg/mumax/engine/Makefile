@@ -25,6 +25,7 @@ GOFILES=\
 	update_pointwise.go\
 	update_norm.go\
 	update_sum.go\
+	verify.go\
 	solver.go\
 	solve_euler.go\
 	resample.go\

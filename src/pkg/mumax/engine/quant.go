@@ -333,6 +333,15 @@ func (q *Quant) Verify() {
 	}
 }
 
+// Sets a verifier func, called each time the
+// user attempts to set the quantity.
+func (q *Quant) SetVerifier(f func(*Quant)) {
+	if q.verifier != nil {
+		panic(Bug(q.Name() + " verifier already set"))
+	}
+	q.verifier = f
+}
+
 //___________________________________________________________ 
 
 // INTERNAL: in case of a MASK, make sure the underlying array is allocted.

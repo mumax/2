@@ -19,6 +19,8 @@ getscalar('alpha')
 setscalar('Msat', 800e3)
 #print 'Msat', getvalue('Msat'), '\n'
 
+setscalar('gamma', 1)
+
 m=[ [[[0.01]]], [[[0]]], [[[-1]]] ]
 setfield('m', m)
 save("m", "txt", [], "m.txt")
