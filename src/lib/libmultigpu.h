@@ -23,6 +23,7 @@ extern "C" {
 #include "add.h"
 #include "torque.h"
 #include "normalize.h"
+#include "reduce.h"
 
 
 #ifdef __cplusplus

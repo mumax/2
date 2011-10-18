@@ -4,11 +4,11 @@ OFILES=\
 	gpu_safe.o\
 	gpu_conf.o\
 	gpu_properties.o\
+	multigpu.o\
+	reduce.o\
 	add.o\
 	torque.o\
-	reduce.o\
 	normalize.o\
-	multigpu.o\
 
 all: libmultigpu.so
 

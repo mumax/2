@@ -344,7 +344,7 @@ extern "C" {
 #endif
 
 // single-GPU
-void partialSumsAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+void partialSumAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -386,10 +386,10 @@ void partialSumsAsync1(float* d_idata, float* d_odata, int blocks, int threads, 
   }
 }
 
-void partialSumsAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+void partialSumAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
 	for (int i = 0; i < nDevice(); i++) {
 		gpu_safe(cudaSetDevice(deviceId(i)));
-		partialSumsAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+		partialSumAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
 	}
 }
 
