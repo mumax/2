@@ -27,7 +27,7 @@ void partialSumsAsync(float** input,      ///< input data. size = N
                     int blocks,          ///< patially reduce in X blocks, partial results in output. blocks = divUp(N, threadsPerBlock*2)
                     int threadsPerBlock, ///< use X threads per block: @warning must be < N
                     int N,               ///< size of input data, must be > threadsPerBlock
-					CUstream** stream    ///< cuda stream for async execution
+					CUstream* stream    ///< array of cuda streams on each device for async execution
                     );
 
 
