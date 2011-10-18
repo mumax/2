@@ -89,6 +89,7 @@ void GLWidget::initializeGL()
   logo->setColor(qtGreen.dark());
 
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+  glColorMaterial ( GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glShadeModel(GL_SMOOTH);
@@ -118,19 +119,23 @@ void GLWidget::paintGL()
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-  logo->draw();
+  //logo->draw();
+  testColor = {0.0f, 1.0f, 0.4f, 1.0f};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
+  //glColor3f(0.0f, 1.0f, 0.2f);
   glCallList(cone);
 }
 
 void GLWidget::resizeGL(int width, int height)
 {
   int side = qMin(width, height);
-  glViewport((width - side) / 2, (height - side) / 2, side, side);
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
+  //glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
+  gluPerspective(60.0, (float)width / (float)height, 0.1, 80.0);
   glMatrixMode(GL_MODELVIEW);
+  //glViewport((width - side) / 2, (height - side) / 2, side, side);
+  glViewport(0, 0, width, height);
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
