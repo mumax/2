@@ -78,9 +78,9 @@ DIST          = /usr/share/qt4/mkspecs/common/g++.conf \
 		/usr/share/qt4/mkspecs/features/lex.prf \
 		/usr/share/qt4/mkspecs/features/include_source_dir.prf \
 		muview.pro
-QMAKE_TARGET  = overpainting
+QMAKE_TARGET  = muview
 DESTDIR       = 
-TARGET        = overpainting
+TARGET        = muview
 
 first: all
 ####### Implicit rules
