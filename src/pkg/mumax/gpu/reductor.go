@@ -18,8 +18,6 @@ type Reductor struct {
 	blocks, threads, N int
 }
 
-
-
 // initiates the common pieces of all reductors
 func (r *Reductor) Init(N int) {
 	Assert(N > 1)
@@ -36,7 +34,6 @@ func (r *Reductor) Init(N int) {
 	r.devbuffer.Init(1, size, true)
 	r.hostbuffer.Init(1, size)
 }
-
 
 //// Reduces the data,
 //// i.e., calucates the sum, maximum, ...
