@@ -82,12 +82,12 @@ func Normalize(m, normMap *Array) {
 }
 
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
-	//	C.normalizeAsync(
-	//		(**C.float)(unsafe.Pointer(&in.pointer[0])),
-	//		(**C.float)(unsafe.Pointer(&out.pointer[0])),
-	//		C.int(blocks),
-	//		C.int(threadsPerBlock),
-	//		C.int(N),
-	//		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
-	//	out.Stream.Sync()
+		C.partialSum(
+			(**C.float)(unsafe.Pointer(&in.pointer[0])),
+			(**C.float)(unsafe.Pointer(&out.pointer[0])),
+			C.int(blocks),
+			C.int(threadsPerBlock),
+			C.int(N),
+			(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+		out.Stream.Sync()
 }

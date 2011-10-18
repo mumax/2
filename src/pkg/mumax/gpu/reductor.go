@@ -18,7 +18,7 @@ type Reductor struct {
 	blocks, threads, N int
 }
 
-// initiates the common pieces of all reductors
+// Initiate to reduce N elements
 func (r *Reductor) Init(N int) {
 	Assert(N > 1)
 
@@ -31,8 +31,13 @@ func (r *Reductor) Init(N int) {
 	r.N = N
 
 	size := []int{1, 1, r.blocks}
-	r.devbuffer.Init(1, size, true)
+	r.devbuffer.Init(1, size, true) // true=do alloc
 	r.hostbuffer.Init(1, size)
+}
+
+func(r*Reductor) Sum(in *Array) float32{
+	//PartialSum(in, &(r.devbuffer), r.blocks, r.threads, r.N)
+	//(&r.devbuffer).CopyToHost(&r.hostbuffer)
 }
 
 //// Reduces the data,
