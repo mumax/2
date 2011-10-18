@@ -15,16 +15,19 @@
 #ifndef REDUCE_H
 #define REDUCE_H
 
+#include <cuda.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/// Partial sum function.
-void gpu_partial_sums(float* input,      ///< input data. size = N 
-                    float* output,       ///< partially reduced data, usually reduced further on CPU. size = blocks
+/// multi-GPU Partial sum function.
+void partialSumsAsync(float** input,      ///< input data. size = N 
+                    float** output,       ///< partially reduced data, usually reduced further on CPU. size = blocks
                     int blocks,          ///< patially reduce in X blocks, partial results in output. blocks = divUp(N, threadsPerBlock*2)
                     int threadsPerBlock, ///< use X threads per block: @warning must be < N
-                    int N                ///< size of input data, must be > threadsPerBlock
+                    int N,               ///< size of input data, must be > threadsPerBlock
+					CUstream** stream    ///< cuda stream for async execution
                     );
 
 

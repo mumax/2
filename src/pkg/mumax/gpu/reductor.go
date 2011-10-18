@@ -13,7 +13,7 @@ import (
 
 type Reductor struct {
 	operation          int
-	devbuffer          uintptr
+	devbuffer          Array
 	hostbuffer         []float32
 	blocks, threads, N int
 }
@@ -105,35 +105,3 @@ func (r *Reductor) init(b, N int) {
 	r.devbuffer = b.newArray(r.blocks)
 	r.hostbuffer = make([]float32, r.blocks)
 }
-
-// Integer division but rounded UP
-func divUp(x, y int) int {
-	return ((x - 1) / y) + 1
-}
-
-// OBSOLETE now done in C code.
-// Reduce data locally, i.e., not on the GPU.
-// This is usually the last step after a partial reduction on the GPU.
-// When there are only a few numbers left, it becomes more efficient
-// to reduce them on the CPU (we need a copy from the device anyway,
-// so why not copy a few numbers).
-// func local_reduce(operation int, data []float32) float32 {
-// 	fmt.Println(data)
-// 	result := float32(0.)
-// 	switch operation {
-// 	default:
-// 		panic("bug")
-// 	case ADD:
-// 		for i := range data {
-// 			result += data[i]
-// 		}
-// 	case MAX:
-// 		result = data[0]
-// 		for i := range data {
-// 			if result < data[i] {
-// 				result = data[i]
-// 			}
-// 		}
-// 	}
-// 	return result
-// }

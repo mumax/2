@@ -28,9 +28,10 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// This code has been significantly modified from its original version:
+// This code has been significantly modified from its original version by Arne Vansteenkiste, 2011.
 //  - restricted to use only floats
 //  - more reduction operations than the original "sum" have been added (min, max, maxabs, ...)
+//  - added streams for asynchronous execution
 // Note that you have to comply with both the above BSD and GPL licences.
 
 //  This file is part of MuMax, a high-performance micromagnetic simulator.
@@ -41,14 +42,17 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 #include "reduce.h"
+#include "multigpu.h"
+#include "gpu_safe.h"
 
 extern "C"
 bool isPow2(unsigned int x){
   return ((x&(x-1))==0);
 }
 
-// Utility class used to avoid linker errors with extern
-// unsized shared memory arrays with templated type
+/// @internal
+/// Utility class used to avoid linker errors with extern
+/// unsized shared memory arrays with templated type
 template<class T>
 struct SharedMemory {
   __device__ inline operator       T*()
@@ -64,6 +68,7 @@ struct SharedMemory {
   }
 };
 
+//________________________________________________________________________________________________________________ kernels
 
 /// This kernel takes a partial sum of absolute values
 template <unsigned int blockSize, bool nIsPow2>
@@ -182,7 +187,7 @@ __global__ void _gpu_max_kernel(float* g_idata, float* g_odata, unsigned int n) 
   unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
   unsigned int gridSize = blockSize*2*gridDim.x;
 
-  float myMax = -1E37;
+  float myMax = -6E38;
 
   // we reduce multiple elements per thread.  The number is determined by the
   // number of active thread blocks (via gridDim).  More blocks will result
@@ -236,7 +241,7 @@ __global__ void _gpu_min_kernel(float* g_idata, float* g_odata, unsigned int n) 
   unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
   unsigned int gridSize = blockSize*2*gridDim.x;
 
-  float myMin = 1E37;
+  float myMin = 6E38;
 
   // we reduce multiple elements per thread.  The number is determined by the
   // number of active thread blocks (via gridDim).  More blocks will result
@@ -332,11 +337,14 @@ __global__ void _gpu_maxabs_kernel(float* g_idata, float* g_odata, unsigned int 
       g_odata[blockIdx.x] = sdata[0];
 }
 
+//________________________________________________________________________________________________________________ kernel wrappers
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void gpu_partial_sums(float* d_idata, float* d_odata, int blocks, int threads, int size) {
+// single-GPU
+void partialSumsAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream* stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -376,6 +384,13 @@ void gpu_partial_sums(float* d_idata, float* d_odata, int blocks, int threads, i
       case   1: _gpu_sum_kernel<  1, false><<< dimGrid, dimBlock, smemSize >>>(d_idata, d_odata, size); break;
     }
   }
+}
+
+void partialSumsAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream** stream){
+	for (int i = 0; i < nDevice(); i++) {
+		gpu_safe(cudaSetDevice(deviceId(i)));
+		partialSumsAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+	}
 }
 
 void gpu_partial_sumabs(float* d_idata, float* d_odata, int blocks, int threads, int size) {
