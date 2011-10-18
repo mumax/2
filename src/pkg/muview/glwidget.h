@@ -41,7 +41,9 @@ private:
   QPoint lastPos;
   QColor qtGreen;
   QColor qtPurple;
+
   GLuint cone;
+  GLfloat testColor[4];
 };
 
 #endif
