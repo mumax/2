@@ -46,6 +46,9 @@ func (e *Engine) WriteDot(out io.Writer) {
 		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
 	}
 	fmt.Fprintln(out, "}")
+	fmt.Fprintln(out, "solver0 -> dt;")
+	fmt.Fprintln(out, "dt -> solver0;")
+	fmt.Fprintln(out, "{rank=same;", "dt", ";", "solver0", "};")
 
 	// Add ODE node
 	for i, ode := range e.solver {
