@@ -5,6 +5,7 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include "glwidget.h"
+#include <iostream>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -96,13 +97,34 @@ void GLWidget::initializeGL()
 
   // Display List for cone
   cone = glGenLists(1);
-  // Draw a cone pointing along the x axis
+  // Draw a cone pointing along the z axis
   glNewList(cone, GL_COMPILE);
     glPushMatrix();
-    glRotatef(90.0f,0.0f,1.0f,0.0f);
+    glRotatef(0.0f,0.0f,0.0f,0.0f);
     glutSolidCone(0.2f, 0.7f, 5, 1);
     glPopMatrix();
   glEndList();
+
+  // Fill the list of locations and spins
+  numSpins=1000;
+  int sx = 100;
+  int sy = 5;
+  int sz = 2;
+
+  for(int i=0; i<sx; i++)
+    {
+      for(int j=0; j<sy; j++)
+	{
+	  for(int k=0; k<sz; k++)
+	    {
+	      int ind = k + j*sz + i*sy*sz;
+	      locations[ind][0] = (float)i;
+	      locations[ind][1] = (float)j;
+	      locations[ind][2] = (float)k;
+	      //std::cout << i << "\t" << j << "\t" << k << "\t" << ind << std::endl;
+	    }
+	}
+    }
   
 }
 
@@ -114,10 +136,16 @@ void GLWidget::paintGL()
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-
   GLfloat testColor[] = {0.0f, 0.8f, 0.6f, 1.0f};
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
-  glCallList(cone);
+  
+    // Loop over numSpins and draw each
+  for (int i=0; i<numSpins; i++) {
+    glPushMatrix();
+    glTranslatef(locations[i][0], locations[i][1], locations[i][2]);
+    glCallList(cone);
+    glPopMatrix();
+  }
 }
 
 void GLWidget::resizeGL(int width, int height)

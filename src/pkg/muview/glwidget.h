@@ -42,7 +42,15 @@ private:
   QColor qtPurple;
 
   GLuint cone;
-  GLfloat testColor[4];
+
+  // For storing the magnetization vectors
+  // we only need float32 since double precision
+  // is not necessary for rendering
+
+  int   numSpins;
+  float locations[1000][3];
+  float spins[1000][3];
+
 };
 
 #endif
