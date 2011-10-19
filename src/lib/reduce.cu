@@ -41,6 +41,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+///@todo case 1024 should be added to take advantage of modern GPUs
+
 #include "reduce.h"
 #include "multigpu.h"
 #include "gpu_safe.h"

@@ -45,7 +45,7 @@ func TestReduceSum(test *testing.T) {
 	defer red.Free()
 	gpusum := red.Sum(a)
 
-	if gpusum != float32(cpusum) {
+	if !close(gpusum, float32(cpusum)) {
 		test.Error("Reduce sum cpu=", cpusum, "gpu=", gpusum)
 	}
 }
