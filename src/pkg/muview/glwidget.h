@@ -19,11 +19,11 @@ public slots:
   void setYRotation(int angle);
   void setZRotation(int angle);
   void setXSliceLow(int low);
-  //void setYSliceLow(int low);
-  //void setZSliceLow(int low);
+  void setYSliceLow(int low);
+  void setZSliceLow(int low);
   void setXSliceHigh(int high);
-  //void setYSliceHigh(int high);
-  //void setZSliceHigh(int high);
+  void setYSliceHigh(int high);
+  void setZSliceHigh(int high);
 
 signals:
   void xRotationChanged(int angle);

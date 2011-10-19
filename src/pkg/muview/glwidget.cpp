@@ -90,6 +90,38 @@ void GLWidget::setXSliceHigh(int high)
   }
 }
 
+void GLWidget::setYSliceLow(int low)
+{
+  if (ySliceLow != low) {
+    ySliceLow = low;
+    updateGL();
+  }
+}
+
+void GLWidget::setYSliceHigh(int high)
+{
+  if (ySliceLow != high) {
+    ySliceHigh = high;
+    updateGL();
+  }
+}
+
+void GLWidget::setZSliceLow(int low)
+{
+  if (zSliceLow != low) {
+    zSliceLow = low;
+    updateGL();
+  }
+}
+
+void GLWidget::setZSliceHigh(int high)
+{
+  if (zSliceLow != high) {
+    zSliceHigh = high;
+    updateGL();
+  }
+}
+
 void GLWidget::initializeGL()
 {
   // GLUT wants argc and argv... qt obscures these in the class
@@ -138,7 +170,6 @@ void GLWidget::initializeGL()
 	      locations[ind][0] = (float)i;
 	      locations[ind][1] = (float)j;
 	      locations[ind][2] = (float)k;
-	      //std::cout << i << "\t" << j << "\t" << k << "\t" << ind << std::endl;
 	    }
 	}
     }
@@ -155,8 +186,8 @@ void GLWidget::initializeGL()
   zcom = zcom/numSpins;
 
   // Set the slice initial conditions
-  xSliceLow=0;
-  xSliceHigh=16*100;
+  xSliceLow=ySliceLow=zSliceLow=0;
+  xSliceHigh=ySliceHigh=zSliceHigh=16*100;
 }
 
 void GLWidget::paintGL()
@@ -173,14 +204,22 @@ void GLWidget::paintGL()
   // Loop over numSpins and draw each
   for (int i=0; i<numSpins; i++) {
     // Check the xSlice conditions
-    if (locations[i][0] > (float)xSliceLow/16.0 && \
-	locations[i][0] < (float)xSliceHigh/16.0)
+    if (locations[i][0] >= (float)xSliceLow/16.0 && \
+	locations[i][0] <= (float)xSliceHigh/16.0)
       {
-	glPushMatrix();
-	glTranslatef(locations[i][0]-xcom, locations[i][1]-ycom, locations[i][2]-zcom);
-	glColor3f(sin(locations[i][0]),cos(locations[i][0]), cos(locations[i][0]+1.0f));
-	glCallList(cone);
-	glPopMatrix();
+	if (locations[i][1] >= (float)ySliceLow/16.0 &&	\
+	    locations[i][1] <= (float)ySliceHigh/16.0)
+	  {
+	    if (locations[i][2] >= (float)zSliceLow/16.0 &&	\
+		locations[i][2] <= (float)zSliceHigh/16.0)
+	      {
+		glPushMatrix();
+		glTranslatef(locations[i][0]-xcom, locations[i][1]-ycom, locations[i][2]-zcom);
+		glColor3f(sin(locations[i][0]),cos(locations[i][0]), cos(locations[i][0]+1.0f));
+		glCallList(cone);
+		glPopMatrix();
+	      }
+	  }
       }
   }
 }
