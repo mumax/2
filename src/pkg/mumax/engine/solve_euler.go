@@ -25,6 +25,9 @@ func NewEuler(y, dy, t, dt *Quant) *EulerSolver {
 }
 
 func (s *EulerSolver) Step() {
+	s.dy.Update()
+	s.dt.Update()
+
 	y := s.y.Array()
 	dy := s.dy.Array()
 	dyMul := s.dy.multiplier
@@ -38,7 +41,9 @@ func (s *EulerSolver) Step() {
 
 	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
 
-	t.SetScalar(t.Scalar() + dt) // do not use quant dt.Scalar, which might get updated
+	s.y.Invalidate()
+	t.SetScalar(t.Scalar() + dt) // TODO: to engine, for multiple solvers. do not use quant dt.Scalar, which might get updated
+	t.Invalidate()
 }
 
 func (e *EulerSolver) Deps() (in, out []*Quant) {

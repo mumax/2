@@ -87,6 +87,7 @@ func (e *Engine) init() {
 	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
+	e.dt.SetVerifier(Positive)
 	e.modules = make([]Module, 0)
 	e.crontabs = make(map[int]Notifier)
 	e.outputTables = make(map[string]*Table)

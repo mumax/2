@@ -23,10 +23,10 @@ setscalar('gamma', 1)
 
 m=[ [[[0.01]]], [[[0]]], [[[-1]]] ]
 setfield('m', m)
-save("m", "txt", [], "m.txt")
-save("m", "omf", "text", "mt.omf")
-save("m", "omf", "binary 4", "mb.omf")
-save("m", "omf", [], "m.omf")
+#save("m", "txt", [], "m.txt")
+#save("m", "omf", "text", "mt.omf")
+#save("m", "omf", "binary 4", "mb.omf")
+#save("m", "omf", [], "m.omf")
 
 i=3
 j=2
@@ -56,11 +56,13 @@ f = open('ll', 'w')
 debug_invalidate('H_ext')
 debug_update('H_ext')
 debug_invalidate('H_ext')
-autosave1=autosave("m", "omf", [], 100e-12)
+autosave1=autosave("m", "omf", [], 10e-12)
 filenumberformat("%08d")
 autosave2=autotabulate(["t", "H_ext"], "t.txt", 10e-12)
 for i in range(1000):
 	step()
+	m = getcell('m', 0, 0, 0)
+	f.write(str(getscalar('t')) + " " + str(m[0]) + " " + str(m[1]) + " " + str(m[2])  + "\n")
 
 
 
