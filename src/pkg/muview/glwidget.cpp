@@ -5,7 +5,6 @@
 #include <QtGui>
 #include <QtOpenGL>
 #include "glwidget.h"
-#include "qtlogo.h"
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -14,7 +13,6 @@
 GLWidget::GLWidget(QWidget *parent)
   : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
-  logo = 0;
   xRot = 0;
   yRot = 0;
   zRot = 0;
@@ -84,9 +82,6 @@ void GLWidget::initializeGL()
   glutInit(&argc, (char**)argv);
 
   qglClearColor(qtPurple.dark());
-  
-  logo = new QtLogo(this, 64);
-  logo->setColor(qtGreen.dark());
 
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glColorMaterial ( GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -119,8 +114,8 @@ void GLWidget::paintGL()
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-  //logo->draw();
-  testColor = {0.0f, 1.0f, 0.4f, 1.0f};
+
+  testColor = {0.0f, 0.8f, 0.6f, 1.0f};
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
   //glColor3f(0.0f, 1.0f, 0.2f);
   glCallList(cone);
