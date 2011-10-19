@@ -129,7 +129,6 @@ func PartialMaxAbs(in, out *Array, blocks, threadsPerBlock, N int) {
 	out.Stream.Sync()
 }
 
-
 // Partial maximum difference between arrays (see reduce.h)
 func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialMaxDiffAsync(

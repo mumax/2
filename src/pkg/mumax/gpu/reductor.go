@@ -120,10 +120,10 @@ func (r *Reductor) MaxAbs(in *Array) float32 {
 }
 
 // Takes the maximum absolute difference between the elements of a and b
-func (r *Reductor) MaxDiff(a,b *Array) float32 {
+func (r *Reductor) MaxDiff(a, b *Array) float32 {
 	r.checkSize(a)
 	r.checkSize(b)
-	PartialMaxDiff(a,b, &(r.devbuffer), r.blocks, r.threads, r.N)
+	PartialMaxDiff(a, b, &(r.devbuffer), r.blocks, r.threads, r.N)
 	// reduce further on CPU
 	(&r.devbuffer).CopyToHost(&r.hostbuffer)
 	max := r.hostbuffer.List[0] // all values are already positive

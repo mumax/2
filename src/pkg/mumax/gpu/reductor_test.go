@@ -178,13 +178,13 @@ func TestReduceMaxDiff(test *testing.T) {
 	cpumax := float32(0)
 	for i, _ := range ah.List {
 		if Abs32(ah.List[i]-bh.List[i]) > cpumax {
-			cpumax = Abs32(ah.List[i]-bh.List[i])
+			cpumax = Abs32(ah.List[i] - bh.List[i])
 		}
 	}
 
 	red := NewReductor(a.NComp(), a.Size3D())
 	defer red.Free()
-	gpumax := red.MaxDiff(a,b)
+	gpumax := red.MaxDiff(a, b)
 
 	if gpumax != cpumax {
 		test.Error("Reduce maxabs cpu=", cpumax, "gpu=", gpumax)
@@ -221,5 +221,22 @@ func BenchmarkReduceSumCPU(b *testing.B) {
 			cpusum += float64(num)
 		}
 
+	}
+}
+
+func BenchmarkReduceMaxDiff(b *testing.B) {
+	b.StopTimer()
+
+	size := bigsize()
+	a := NewArray(3, size)
+	a2 := NewArray(3, size)
+	b.SetBytes(2 * int64(a.Len()) * SIZEOF_FLOAT)
+	defer a.Free()
+	defer a2.Free()
+	red := NewReductor(a.NComp(), a.Size3D())
+	defer red.Free()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		red.MaxDiff(a2, a)
 	}
 }
