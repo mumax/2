@@ -19,7 +19,8 @@ type Reductor struct {
 }
 
 // Initiate to reduce N elements
-func (r *Reductor) Init(N int) {
+func (r *Reductor) Init(nComp int, size []int) {
+	N := (nComp * Prod(size)) / NDevice() // N floats per device
 	Assert(N > 1)
 
 	r.threads = maxThreadsPerBlock / 2 // does not work up to maxthreads
@@ -30,14 +31,32 @@ func (r *Reductor) Init(N int) {
 	r.blocks = DivUp(N, r.threads*2)
 	r.N = N
 
-	size := []int{1, 1, r.blocks}
-	r.devbuffer.Init(1, size, true) // true=do alloc
-	r.hostbuffer.Init(1, size)
+	bufsize := []int{1, NDevice(), r.blocks}
+	r.devbuffer.Init(1, bufsize, true) // true=do alloc
+	r.hostbuffer.Init(1, bufsize)
 }
 
-func(r*Reductor) Sum(in *Array) float32{
-	//PartialSum(in, &(r.devbuffer), r.blocks, r.threads, r.N)
-	//(&r.devbuffer).CopyToHost(&r.hostbuffer)
+func NewReductor(nComp int, size []int) *Reductor {
+	r := new(Reductor)
+	r.Init(nComp, size)
+	return r
+}
+
+func (r *Reductor) Free() {
+	(&(r.devbuffer)).Free()
+	r.blocks = 0
+	r.threads = 0
+	r.N = 0
+}
+
+func (r *Reductor) Sum(in *Array) float32 {
+	PartialSum(in, &(r.devbuffer), r.blocks, r.threads, r.N)
+	(&r.devbuffer).CopyToHost(&r.hostbuffer)
+	var sum float32
+	for _, num := range r.hostbuffer.List {
+		sum += num
+	}
+	return sum
 }
 
 //// Reduces the data,
