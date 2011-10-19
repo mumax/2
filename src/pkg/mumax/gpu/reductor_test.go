@@ -70,7 +70,9 @@ func TestReduceMax(test *testing.T) {
 
 	cpumax := ah.List[0]
 	for _, num := range ah.List {
-			if num > cpumax{cpumax = num}
+		if num > cpumax {
+			cpumax = num
+		}
 	}
 
 	red := NewReductor(a.NComp(), a.Size3D())
@@ -102,7 +104,9 @@ func TestReduceMin(test *testing.T) {
 
 	cpumin := ah.List[0]
 	for _, num := range ah.List {
-			if num < cpumin{cpumin = num}
+		if num < cpumin {
+			cpumin = num
+		}
 	}
 
 	red := NewReductor(a.NComp(), a.Size3D())
@@ -128,18 +132,59 @@ func TestReduceMaxAbs(test *testing.T) {
 	ah := a.LocalCopy()
 
 	for i := range ah.List {
-		ah.List[i] = - rand.Float32()
+		ah.List[i] = -rand.Float32()
 	}
 	a.CopyFromHost(ah)
 
 	cpumax := ah.List[0]
 	for _, num := range ah.List {
-			if Abs32(num) > cpumax{cpumax = Abs32(num)}
+		if Abs32(num) > cpumax {
+			cpumax = Abs32(num)
+		}
 	}
 
 	red := NewReductor(a.NComp(), a.Size3D())
 	defer red.Free()
 	gpumax := red.MaxAbs(a)
+
+	if gpumax != cpumax {
+		test.Error("Reduce maxabs cpu=", cpumax, "gpu=", gpumax)
+	}
+}
+
+func TestReduceMaxDiff(test *testing.T) {
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
+
+	size := []int{8, 16, 32}
+	a := NewArray(3, size)
+	defer a.Free()
+	ah := a.LocalCopy()
+	b := NewArray(3, size)
+	defer b.Free()
+	bh := b.LocalCopy()
+
+	for i := range ah.List {
+		ah.List[i] = rand.Float32()
+		bh.List[i] = rand.Float32()
+	}
+	a.CopyFromHost(ah)
+	b.CopyFromHost(bh)
+
+	cpumax := float32(0)
+	for i, _ := range ah.List {
+		if Abs32(ah.List[i]-bh.List[i]) > cpumax {
+			cpumax = Abs32(ah.List[i]-bh.List[i])
+		}
+	}
+
+	red := NewReductor(a.NComp(), a.Size3D())
+	defer red.Free()
+	gpumax := red.MaxDiff(a,b)
 
 	if gpumax != cpumax {
 		test.Error("Reduce maxabs cpu=", cpumax, "gpu=", gpumax)

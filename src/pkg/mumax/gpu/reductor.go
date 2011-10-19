@@ -13,21 +13,20 @@ import (
 	"fmt"
 )
 
-
 // A Reductor stores the necessary buffers to reduce data on the multi-GPU.
 // It can be used to sum data, take minima, maxima, etc...
 type Reductor struct {
 	devbuffer          Array
 	hostbuffer         host.Array
 	blocks, threads, N int
-		size4D [4]int
+	size4D             [4]int
 }
 
 // Initiate buffers to reduce an array of given size
 func (r *Reductor) Init(nComp int, size []int) {
 	N := (nComp * Prod(size)) / NDevice() // N floats per device
 	Assert(N > 1)
-	Assert(len(size)==3)
+	Assert(len(size) == 3)
 
 	r.threads = maxThreadsPerBlock / 2 // does not work up to maxthreads
 
@@ -38,7 +37,7 @@ func (r *Reductor) Init(nComp int, size []int) {
 	r.N = N
 
 	bufsize := []int{1, NDevice(), r.blocks}
-	(&(r.devbuffer)).Free() // Re-initialization should not leak memory
+	(&(r.devbuffer)).Free()            // Re-initialization should not leak memory
 	r.devbuffer.Init(1, bufsize, true) // true=do alloc
 	r.hostbuffer.Init(1, bufsize)
 	r.size4D[0] = nComp
@@ -62,7 +61,6 @@ func (r *Reductor) Free() {
 	r.N = 0
 }
 
-
 // Takes the sum of all elements of the array.
 func (r *Reductor) Sum(in *Array) float32 {
 	r.checkSize(in)
@@ -76,7 +74,6 @@ func (r *Reductor) Sum(in *Array) float32 {
 	return sum
 }
 
-
 // Takes the maximum of all elements of the array.
 func (r *Reductor) Max(in *Array) float32 {
 	r.checkSize(in)
@@ -85,7 +82,9 @@ func (r *Reductor) Max(in *Array) float32 {
 	(&r.devbuffer).CopyToHost(&r.hostbuffer)
 	max := r.hostbuffer.List[0]
 	for _, num := range r.hostbuffer.List {
-		if num > max{max=num}
+		if num > max {
+			max = num
+		}
 	}
 	return max
 }
@@ -98,7 +97,9 @@ func (r *Reductor) Min(in *Array) float32 {
 	(&r.devbuffer).CopyToHost(&r.hostbuffer)
 	min := r.hostbuffer.List[0]
 	for _, num := range r.hostbuffer.List {
-		if num < min{min=num}
+		if num < min {
+			min = num
+		}
 	}
 	return min
 }
@@ -111,18 +112,35 @@ func (r *Reductor) MaxAbs(in *Array) float32 {
 	(&r.devbuffer).CopyToHost(&r.hostbuffer)
 	max := r.hostbuffer.List[0] // all values are already positive
 	for _, num := range r.hostbuffer.List {
-		if num > max{max=num}
+		if num > max {
+			max = num
+		}
+	}
+	return max
+}
+
+// Takes the maximum absolute difference between the elements of a and b
+func (r *Reductor) MaxDiff(a,b *Array) float32 {
+	r.checkSize(a)
+	r.checkSize(b)
+	PartialMaxDiff(a,b, &(r.devbuffer), r.blocks, r.threads, r.N)
+	// reduce further on CPU
+	(&r.devbuffer).CopyToHost(&r.hostbuffer)
+	max := r.hostbuffer.List[0] // all values are already positive
+	for _, num := range r.hostbuffer.List {
+		if num > max {
+			max = num
+		}
 	}
 	return max
 }
 
 // INTERNAL: Make sure in has the right size for this reductor
-func (r*Reductor) checkSize(in *Array){
-	for i,s:= range r.size4D{
-		if s != in.size4D[i]{
-			panic(Bug(fmt.Sprint("Reductor size mismatch", in.size4D , "!=", r.size4D)))	
+func (r *Reductor) checkSize(in *Array) {
+	for i, s := range r.size4D {
+		if s != in.size4D[i] {
+			panic(Bug(fmt.Sprint("Reductor size mismatch", in.size4D, "!=", r.size4D)))
 		}
 	}
 
 }
-

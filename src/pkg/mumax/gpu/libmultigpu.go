@@ -117,7 +117,6 @@ func PartialMin(in, out *Array, blocks, threadsPerBlock, N int) {
 	out.Stream.Sync()
 }
 
-
 // Partial maxima of absolute values (see reduce.h)
 func PartialMaxAbs(in, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialMaxAbsAsync(
@@ -130,3 +129,16 @@ func PartialMaxAbs(in, out *Array, blocks, threadsPerBlock, N int) {
 	out.Stream.Sync()
 }
 
+
+// Partial maximum difference between arrays (see reduce.h)
+func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
+	C.partialMaxDiffAsync(
+		(**C.float)(unsafe.Pointer(&a.pointer[0])),
+		(**C.float)(unsafe.Pointer(&b.pointer[0])),
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		C.int(blocks),
+		C.int(threadsPerBlock),
+		C.int(N),
+		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+	out.Stream.Sync()
+}
