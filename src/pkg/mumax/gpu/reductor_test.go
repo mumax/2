@@ -18,7 +18,7 @@ import (
 	"rand"
 )
 
-func TestReduce(test *testing.T) {
+func TestReduceSum(test *testing.T) {
 	// fail test on panic, do not crash
 	defer func() {
 		if err := recover(); err != nil {
@@ -27,7 +27,6 @@ func TestReduce(test *testing.T) {
 	}()
 
 	size := []int{8, 16, 32}
-
 	a := NewArray(3, size)
 	defer a.Free()
 	ah := a.LocalCopy()
@@ -35,7 +34,6 @@ func TestReduce(test *testing.T) {
 	for i := range ah.List {
 		ah.List[i] = rand.Float32()
 	}
-
 	a.CopyFromHost(ah)
 
 	var cpusum float64
@@ -45,10 +43,106 @@ func TestReduce(test *testing.T) {
 
 	red := NewReductor(a.NComp(), a.Size3D())
 	defer red.Free()
-
 	gpusum := red.Sum(a)
+
 	if gpusum != float32(cpusum) {
 		test.Error("Reduce sum cpu=", cpusum, "gpu=", gpusum)
+	}
+}
+
+func TestReduceMax(test *testing.T) {
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
+
+	size := []int{8, 16, 32}
+	a := NewArray(3, size)
+	defer a.Free()
+	ah := a.LocalCopy()
+
+	for i := range ah.List {
+		ah.List[i] = rand.Float32()
+	}
+	a.CopyFromHost(ah)
+
+	cpumax := ah.List[0]
+	for _, num := range ah.List {
+			if num > cpumax{cpumax = num}
+	}
+
+	red := NewReductor(a.NComp(), a.Size3D())
+	defer red.Free()
+	gpumax := red.Max(a)
+
+	if gpumax != cpumax {
+		test.Error("Reduce max cpu=", cpumax, "gpu=", gpumax)
+	}
+}
+
+func TestReduceMin(test *testing.T) {
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
+
+	size := []int{8, 16, 32}
+	a := NewArray(3, size)
+	defer a.Free()
+	ah := a.LocalCopy()
+
+	for i := range ah.List {
+		ah.List[i] = rand.Float32()
+	}
+	a.CopyFromHost(ah)
+
+	cpumin := ah.List[0]
+	for _, num := range ah.List {
+			if num < cpumin{cpumin = num}
+	}
+
+	red := NewReductor(a.NComp(), a.Size3D())
+	defer red.Free()
+	gpumin := red.Min(a)
+
+	if gpumin != cpumin {
+		test.Error("Reduce min cpu=", cpumin, "gpu=", gpumin)
+	}
+}
+
+func TestReduceMaxAbs(test *testing.T) {
+	// fail test on panic, do not crash
+	defer func() {
+		if err := recover(); err != nil {
+			test.Error(err)
+		}
+	}()
+
+	size := []int{8, 16, 32}
+	a := NewArray(3, size)
+	defer a.Free()
+	ah := a.LocalCopy()
+
+	for i := range ah.List {
+		ah.List[i] = - rand.Float32()
+	}
+	a.CopyFromHost(ah)
+
+	cpumax := ah.List[0]
+	for _, num := range ah.List {
+			if Abs32(num) > cpumax{cpumax = Abs32(num)}
+	}
+
+	red := NewReductor(a.NComp(), a.Size3D())
+	defer red.Free()
+	gpumax := red.MaxAbs(a)
+
+	if gpumax != cpumax {
+		test.Error("Reduce maxabs cpu=", cpumax, "gpu=", gpumax)
 	}
 }
 
