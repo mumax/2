@@ -246,26 +246,22 @@ func (e *Engine) ODE1(y, diff string) {
 //________________________________________________________________________________ step
 
 // Takes one ODE step.
-// It is the solver's
+// It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
 	if len(e.solver) == 0 {
 		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
-
-	//	// update input for ODE solver recursively
-	//	for _, ode := range e.ode {
-	//		ode[RHS].Update()
-	//	}
 
 	// step
 	for _, solver := range e.solver {
 		solver.Step() // sets new t, dt
 	}
 
-	//	// invalidate everything that depends on solver
-	//	for _, ode := range e.ode {
-	//		ode[LHS].Invalidate()
-	//	}
+	// advance time
+	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
+	//e.time.Invalidate()
+
+	// check if output needs to be saved
 	e.notifyAll()
 }
 //__________________________________________________________________ output

@@ -1,10 +1,8 @@
 from mumax2 import *
 
 setgridsize(8, 4, 2)
-#print 'gridsize', getgridsize()
 
 setcellsize(5e-9, 5e-9, 50e-9)
-#print 'cellsize', getcellsize()
 
 load('micromagnetism')
 savegraph("graph.dot")
@@ -18,8 +16,6 @@ getscalar('alpha')
 
 setscalar('Msat', 800e3)
 #print 'Msat', getvalue('Msat'), '\n'
-
-setscalar('gamma', 1)
 
 m=[ [[[0.01]]], [[[0]]], [[[-1]]] ]
 setfield('m', m)
@@ -40,7 +36,7 @@ setcell('m', i,j,k, [0,1,0])
 
 Hx = 0 / mu0
 Hy = 0 / mu0
-Hz = 0.1 / mu0 #1T
+Hz = 0.1 / mu0 
 
 setvalue('H_ext', [Hx, Hy, Hz])
 #mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
@@ -59,7 +55,7 @@ debug_invalidate('H_ext')
 autosave1=autosave("m", "omf", [], 10e-12)
 filenumberformat("%08d")
 autosave2=autotabulate(["t", "H_ext"], "t.txt", 10e-12)
-for i in range(1000):
+for i in range(100):
 	step()
 	m = getcell('m', 0, 0, 0)
 	f.write(str(getscalar('t')) + " " + str(m[0]) + " " + str(m[1]) + " " + str(m[2])  + "\n")
