@@ -33,6 +33,10 @@ func sizes() [][]int {
 	return [][]int{{2, 2 * NDevice(), 8}, {32, 8 * NDevice(), 4}}
 }
 
+func bigsize() []int{
+	return []int{8, 256*NDevice(), 1024}
+}
+
 // return a few numbers of components for testing
 func comps() []int {
 	return []int{1, 3}
