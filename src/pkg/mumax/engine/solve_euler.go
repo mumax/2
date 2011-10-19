@@ -17,14 +17,15 @@ import (
 
 // Euler solver
 type EulerSolver struct {
-	y, dy, t, dt *Quant
+	y, ybuf, dy, t, dt *Quant
 }
 
-func NewEuler(y, dy, t, dt *Quant) *EulerSolver {
-	return &EulerSolver{y, dy, t, dt}
+func NewEuler(e*Engine, y, dy*Quant) *EulerSolver {
+	buffer := newQuant("eulerBuffer", y.NComp(), e.size3D, FIELD, y.Unit(), "hidden buffer to cache output quant")
+	return &EulerSolver{y, buffer, dy, e.time, e.dt}
 }
 
-func (s *EulerSolver) Step() {
+func (s *EulerSolver) AdvanceBuffer() {
 	s.dy.Update()
 
 	y := s.y.Array()
@@ -33,9 +34,17 @@ func (s *EulerSolver) Step() {
 	checkUniform(dyMul)
 	dt := s.dt.Scalar()
 
-	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
+	gpu.Madd(s.ybuf.Array(), y, dy, float32(dt*dyMul[0]))
 
 	s.y.Invalidate()
+}
+
+func(s*EulerSolver)CopyBuffer(){
+	s.y.Array().CopyFromDevice(s.ybuf.Array())
+}
+
+func(s*EulerSolver)ProposeDt()float64{
+	return 0 // this is not an adaptive step solver
 }
 
 func (e *EulerSolver) Deps() (in, out []*Quant) {

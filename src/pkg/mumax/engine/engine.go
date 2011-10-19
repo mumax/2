@@ -189,6 +189,8 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, des
 	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
 }
 
+
+
 // AddQuant(name, nComp, VALUE)
 func (e *Engine) AddValue(name string, nComp int, unit Unit) {
 	e.AddQuant(name, nComp, VALUE, unit)
@@ -230,17 +232,19 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 func (e *Engine) ODE1(y, diff string) {
 	yQ := e.Quant(y)
 	dQ := e.Quant(diff)
-	//if e.ode != nil {
-	//	for _, ode := range e.ode {
-	//		for _, q := range ode {
-	//			if q.Name() == y || q.Name() == diff {
-	//				panic(Bug("Already in ODE: " + y + ", " + diff))
-	//			}
-	//		}
-	//	}
-	//}
-	//e.ode = append(e.ode, [2]*Quant{yQ, dQ})
-	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt)) // TODO: choose solver type here
+
+	// check that two solvers are not trying to update the same output quantity
+	if e.solver != nil {
+		for _, solver := range e.solver {
+			_, out := solver.Deps()
+			for _, q := range out {
+				if q.Name() == y {
+					panic(Bug("Already in ODE: " + y))
+				}
+			}
+		}
+	}
+	e.solver = append(e.solver, NewEuler(e, yQ, dQ)) // TODO: choose solver type here
 }
 
 //________________________________________________________________________________ step
@@ -252,14 +256,18 @@ func (e *Engine) Step() {
 		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
 
-	// step
+	// step, but hide result in buffer so we don't interfere with other solvers depending on the result
 	for _, solver := range e.solver {
-		solver.Step() // sets new t, dt
+		solver.AdvanceBuffer()
+	}
+	// now that all solvers have updated behind the screens, we can make the result visible.
+	for _, solver := range e.solver {
+		solver.CopyBuffer()
 	}
 
 	// advance time
 	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
-	//e.time.Invalidate()
+	//e.time.Invalidate() // automatically
 
 	// check if output needs to be saved
 	e.notifyAll()

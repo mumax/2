@@ -55,7 +55,7 @@ debug_invalidate('H_ext')
 autosave1=autosave("m", "omf", [], 10e-12)
 filenumberformat("%08d")
 autosave2=autotabulate(["t", "H_ext"], "t.txt", 10e-12)
-for i in range(100):
+for i in range(1000):
 	step()
 	m = getcell('m', 0, 0, 0)
 	f.write(str(getscalar('t')) + " " + str(m[0]) + " " + str(m[1]) + " " + str(m[2])  + "\n")

@@ -11,7 +11,17 @@ import (
 //. "mumax/common"
 )
 
+// A Solver is a method to advance a quantity in time.
+// Multiple solvers may be active at the same time.
+// Therefore all solvers are first asked to AdvanceBuffer(),
+// which time-steps but hides the result in a buffer. The result
+// has to be hidden because other solvers may take the output quantity
+// as input and they should not receive its value "from the future".
+// When all solvers have buffered their output, they are asked to 
+// CopyBuffer(), which copies their output buffer to the output quantity.
 type Solver interface {
-	Step()                    // Takes one time step
+	AdvanceBuffer()           // Takes one time step but hides the result in a buffer
+	CopyBuffer()              // Overwrite the output quantity with the previously calculated buffer
+	ProposeDt() float64       // Propose a new time step based on error estimate. May be 0 (ignored)
 	Deps() (in, out []*Quant) // Input/Output quantities (not including time step dt)
 }
