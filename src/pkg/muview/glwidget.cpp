@@ -28,12 +28,12 @@ GLWidget::~GLWidget()
 
 QSize GLWidget::minimumSizeHint() const
 {
-  return QSize(50, 50);
+  return QSize(200, 200);
 }
 
 QSize GLWidget::sizeHint() const
 {
-  return QSize(400, 400);
+  return QSize(800, 400);
 }
 
 static void qNormalizeAngle(int &angle)
@@ -122,6 +122,45 @@ void GLWidget::setZSliceHigh(int high)
   }
 }
 
+void GLWidget::updateCOM()
+{
+  // Find the center of mass of the object
+  for(int i=0; i<numSpins; i++)
+    {
+      xcom += locations[i][0];
+      ycom += locations[i][1];
+      zcom += locations[i][2];
+    }
+  xcom = xcom/numSpins;
+  ycom = ycom/numSpins;
+  zcom = zcom/numSpins;
+}
+
+void GLWidget::updateExtent() 
+{
+  for(int i=0; i<numSpins; i++)
+    {
+      if (locations[i][0]>xmax) {
+	xmax = locations[i][0];
+      }
+      if (locations[i][0]<xmin) {
+	xmin = locations[i][0];
+      }
+      if (locations[i][1]>ymax) {
+	ymax = locations[i][1];
+      }
+      if (locations[i][1]<ymin) {
+	ymin = locations[i][1];
+      }
+      if (locations[i][2]>zmax) {
+	zmax = locations[i][2];
+      }
+      if (locations[i][2]<zmin) {
+	zmin = locations[i][2];
+      }
+    }
+}
+
 void GLWidget::initializeGL()
 {
   // GLUT wants argc and argv... qt obscures these in the class
@@ -141,7 +180,7 @@ void GLWidget::initializeGL()
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_MULTISAMPLE);
-  static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
+  static GLfloat lightPosition[4] = { 0.5, 10.0, 7.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
   // Display List for cone
@@ -174,44 +213,40 @@ void GLWidget::initializeGL()
 	}
     }
   
-  // Find the center of mass of the object
-  for(int i=0; i<numSpins; i++)
-    {
-      xcom += locations[i][0];
-      ycom += locations[i][1];
-      zcom += locations[i][2];
-    }
-  xcom = xcom/numSpins;
-  ycom = ycom/numSpins;
-  zcom = zcom/numSpins;
+  updateCOM();
+  updateExtent();
 
   // Set the slice initial conditions
   xSliceLow=ySliceLow=zSliceLow=0;
   xSliceHigh=ySliceHigh=zSliceHigh=16*100;
+
+  // Initial view
+  zoom=1.0;
 }
 
 void GLWidget::paintGL()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-  glTranslatef(0.0, 0.0, -10.0);
+  glTranslatef(0.0, 0.0, -10.0 + zoom);
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-  //GLfloat testColor[] = {0.0f, 0.8f, 0.6f, 1.0f};
-  //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
-  
+  //std::cout << "Zoom: " << zoom << std::endl;
   // Loop over numSpins and draw each
   for (int i=0; i<numSpins; i++) {
+    // If the magnetization is non-zero
+    // future check here
+
     // Check the xSlice conditions
-    if (locations[i][0] >= (float)xSliceLow/16.0 && \
-	locations[i][0] <= (float)xSliceHigh/16.0)
+    if (locations[i][0] >= (xmax-xmin)*(float)xSliceLow/1600.0 &&	\
+	locations[i][0] <= (xmax-xmin)*(float)xSliceHigh/1600.0)
       {
-	if (locations[i][1] >= (float)ySliceLow/16.0 &&	\
-	    locations[i][1] <= (float)ySliceHigh/16.0)
+	if (locations[i][1] >= (ymax-ymin)*(float)ySliceLow/1600.0 &&	\
+	    locations[i][1] <= (ymax-ymin)*(float)ySliceHigh/1600.0)
 	  {
-	    if (locations[i][2] >= (float)zSliceLow/16.0 &&	\
-		locations[i][2] <= (float)zSliceHigh/16.0)
+	    if (locations[i][2] >= (zmax-zmin)*(float)zSliceLow/1600.0 && \
+		locations[i][2] <= (zmax-zmin)*(float)zSliceHigh/1600.0)
 	      {
 		glPushMatrix();
 		glTranslatef(locations[i][0]-xcom, locations[i][1]-ycom, locations[i][2]-zcom);
@@ -251,4 +286,13 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     setZRotation(zRot + 8 * dx);
   }
   lastPos = event->pos();
+}
+
+void GLWidget::wheelEvent(QWheelEvent *event)
+{
+    if(event->orientation() == Qt::Vertical)
+      {
+	zoom += (float)(event->delta()) / 100;
+	updateGL();
+      }
 }

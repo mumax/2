@@ -31,7 +31,7 @@ Window::Window()
   QHBoxLayout *mainLayout = new QHBoxLayout;
 
   sliceGroupBox = new QGroupBox(tr("XYZ Slicing"));
-  rotGroupBox   = new QGroupBox(tr("Euler Rotation"));
+  rotGroupBox   = new QGroupBox(tr("Rotation"));
   sliceGroupBox->setAlignment(Qt::AlignHCenter);
   rotGroupBox->setAlignment(Qt::AlignHCenter);
 

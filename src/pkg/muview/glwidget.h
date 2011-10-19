@@ -24,6 +24,8 @@ public slots:
   void setXSliceHigh(int high);
   void setYSliceHigh(int high);
   void setZSliceHigh(int high);
+  void updateCOM();
+  void updateExtent();
 
 signals:
   void xRotationChanged(int angle);
@@ -36,12 +38,13 @@ protected:
   void resizeGL(int width, int height);
   void mousePressEvent(QMouseEvent *event);
   void mouseMoveEvent(QMouseEvent *event);
+  void wheelEvent(QWheelEvent *event);
 
 private:
   int xRot;
   int yRot;
   int zRot;
-  int zoom;
+  float zoom;
 
   QPoint lastPos;
   QColor qtGreen;
@@ -62,11 +65,16 @@ private:
   float ycom;
   float zcom;
 
+  // max extent
+  float xmax, xmin;
+  float ymax, ymin;
+  float zmax, zmin;
+
   // slice variables
   int xSliceLow, xSliceHigh;
   int ySliceLow, ySliceHigh;
   int zSliceLow, zSliceHigh;
-
+  
 };
 
 #endif
