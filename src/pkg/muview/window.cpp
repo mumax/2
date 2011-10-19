@@ -21,6 +21,9 @@ Window::Window()
   connect(zSlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setZRotation(int)));
   connect(glWidget, SIGNAL(zRotationChanged(int)), zSlider, SLOT(setValue(int)));
 
+  connect(xSpanSlider, SIGNAL(lowerValueChanged(int)), glWidget, SLOT(setXSliceLow(int)));
+  connect(xSpanSlider, SIGNAL(upperValueChanged(int)), glWidget, SLOT(setXSliceHigh(int)));
+ 
   QHBoxLayout *mainLayout = new QHBoxLayout;
 
   sliceGroupBox = new QGroupBox(tr("XYZ Slicing"));
@@ -52,18 +55,20 @@ Window::Window()
   xSlider->setValue(15 * 16);
   ySlider->setValue(345 * 16);
   zSlider->setValue(0 * 16);
-  setWindowTitle(tr("Hello GL"));
+  setWindowTitle(tr("MuView: Mumax2 Viewer"));
 }
 
 QxtSpanSlider *Window::createSpanSlider()
 {
   QxtSpanSlider *spanSlider = new QxtSpanSlider(Qt::Vertical);
-  spanSlider->setRange(0, 360 * 16);
+  spanSlider->setRange(0 *16, 100 * 16);
   spanSlider->setSingleStep(16);
   spanSlider->setPageStep(15 * 16);
   spanSlider->setTickInterval(15 * 16);
   spanSlider->setTickPosition(QSlider::TicksRight);
   spanSlider->setHandleMovementMode(QxtSpanSlider::NoOverlapping);
+  spanSlider->setLowerValue(0*16);
+  spanSlider->setUpperValue(100*16);
   return spanSlider;
 }
 

@@ -74,6 +74,22 @@ void GLWidget::setZRotation(int angle)
   }
 }
 
+void GLWidget::setXSliceLow(int low)
+{
+  if (xSliceLow != low) {
+    xSliceLow = low;
+    updateGL();
+  }
+}
+
+void GLWidget::setXSliceHigh(int high)
+{
+  if (xSliceLow != high) {
+    xSliceHigh = high;
+    updateGL();
+  }
+}
+
 void GLWidget::initializeGL()
 {
   // GLUT wants argc and argv... qt obscures these in the class
@@ -86,6 +102,7 @@ void GLWidget::initializeGL()
 
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glColorMaterial ( GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glShadeModel(GL_SMOOTH);
@@ -100,8 +117,8 @@ void GLWidget::initializeGL()
   // Draw a cone pointing along the z axis
   glNewList(cone, GL_COMPILE);
     glPushMatrix();
-    glRotatef(0.0f,0.0f,0.0f,0.0f);
-    glutSolidCone(0.2f, 0.7f, 5, 1);
+    //glRotatef(0.0f,0.0f,0.0f,0.0f);
+    glutSolidCone(0.2f, 0.7f, 10, 1);
     glPopMatrix();
   glEndList();
 
@@ -126,6 +143,20 @@ void GLWidget::initializeGL()
 	}
     }
   
+  // Find the center of mass of the object
+  for(int i=0; i<numSpins; i++)
+    {
+      xcom += locations[i][0];
+      ycom += locations[i][1];
+      zcom += locations[i][2];
+    }
+  xcom = xcom/numSpins;
+  ycom = ycom/numSpins;
+  zcom = zcom/numSpins;
+
+  // Set the slice initial conditions
+  xSliceLow=0;
+  xSliceHigh=16*100;
 }
 
 void GLWidget::paintGL()
@@ -136,15 +167,21 @@ void GLWidget::paintGL()
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-  GLfloat testColor[] = {0.0f, 0.8f, 0.6f, 1.0f};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
+  //GLfloat testColor[] = {0.0f, 0.8f, 0.6f, 1.0f};
+  //glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
   
-    // Loop over numSpins and draw each
+  // Loop over numSpins and draw each
   for (int i=0; i<numSpins; i++) {
-    glPushMatrix();
-    glTranslatef(locations[i][0], locations[i][1], locations[i][2]);
-    glCallList(cone);
-    glPopMatrix();
+    // Check the xSlice conditions
+    if (locations[i][0] > (float)xSliceLow/16.0 && \
+	locations[i][0] < (float)xSliceHigh/16.0)
+      {
+	glPushMatrix();
+	glTranslatef(locations[i][0]-xcom, locations[i][1]-ycom, locations[i][2]-zcom);
+	glColor3f(sin(locations[i][0]),cos(locations[i][0]), cos(locations[i][0]+1.0f));
+	glCallList(cone);
+	glPopMatrix();
+      }
   }
 }
 

@@ -18,6 +18,12 @@ public slots:
   void setXRotation(int angle);
   void setYRotation(int angle);
   void setZRotation(int angle);
+  void setXSliceLow(int low);
+  //void setYSliceLow(int low);
+  //void setZSliceLow(int low);
+  void setXSliceHigh(int high);
+  //void setYSliceHigh(int high);
+  //void setZSliceHigh(int high);
 
 signals:
   void xRotationChanged(int angle);
@@ -50,6 +56,16 @@ private:
   int   numSpins;
   float locations[1000][3];
   float spins[1000][3];
+
+  // center of mass coordinates
+  float xcom;
+  float ycom;
+  float zcom;
+
+  // slice variables
+  int xSliceLow, xSliceHigh;
+  int ySliceLow, ySliceHigh;
+  int zSliceLow, zSliceHigh;
 
 };
 
