@@ -31,8 +31,7 @@ type Engine struct {
 	cellSize_      [3]float64        // INTENRAL
 	cellSize       []float64         // size of the FD cells, nil means not yet set
 	quantity       map[string]*Quant // maps quantity names onto their data structures
-	ode            [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
-	solver         []Solver          // solver[i] does the time stepping for ode[i]
+	solver         []Solver          // each solver does the time stepping for its own quantities
 	time           *Quant            // time quantity is always present
 	dt             *Quant            // time step quantity is always present
 	timer          Timer             // For benchmarking
@@ -230,41 +229,42 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 func (e *Engine) ODE1(y, diff string) {
 	yQ := e.Quant(y)
 	dQ := e.Quant(diff)
-	if e.ode != nil {
-		for _, ode := range e.ode {
-			for _, q := range ode {
-				if q.Name() == y || q.Name() == diff {
-					panic(Bug("Already in ODE: " + y + ", " + diff))
-				}
-			}
-		}
-	}
-	e.ode = append(e.ode, [2]*Quant{yQ, dQ})
-	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt))
+	//if e.ode != nil {
+	//	for _, ode := range e.ode {
+	//		for _, q := range ode {
+	//			if q.Name() == y || q.Name() == diff {
+	//				panic(Bug("Already in ODE: " + y + ", " + diff))
+	//			}
+	//		}
+	//	}
+	//}
+	//e.ode = append(e.ode, [2]*Quant{yQ, dQ})
+	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt)) // TODO: choose solver type here
 }
 
 //________________________________________________________________________________ step
 
-// Takes one ODE step
+// Takes one ODE step.
+// It is the solver's
 func (e *Engine) Step() {
-	if len(e.ode) == 0 {
+	if len(e.solver) == 0 {
 		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
 
-	// update input for ODE solver recursively
-	for _, ode := range e.ode {
-		ode[RHS].Update()
-	}
+	//	// update input for ODE solver recursively
+	//	for _, ode := range e.ode {
+	//		ode[RHS].Update()
+	//	}
 
 	// step
 	for _, solver := range e.solver {
 		solver.Step() // sets new t, dt
 	}
 
-	// invalidate everything that depends on solver
-	for _, ode := range e.ode {
-		ode[LHS].Invalidate()
-	}
+	//	// invalidate everything that depends on solver
+	//	for _, ode := range e.ode {
+	//		ode[LHS].Invalidate()
+	//	}
 	e.notifyAll()
 }
 //__________________________________________________________________ output
@@ -357,10 +357,10 @@ func (e *Engine) String() string {
 		}
 		str += ")\n"
 	}
-	str += "ODEs:\n"
-	for _, ode := range e.ode {
-		str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
-	}
+	//str += "ODEs:\n"
+	//for _, ode := range e.ode {
+	//	str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
+	//}
 	return str
 }
 

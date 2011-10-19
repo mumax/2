@@ -15,16 +15,17 @@ import (
 	"fmt"
 )
 
-// Euler solver
-type EulerSolver struct {
+// Heun solver
+// TODO: implement
+type HeunSolver struct {
 	y, dy, t, dt *Quant
 }
 
-func NewEuler(y, dy, t, dt *Quant) *EulerSolver {
+func NewHeun(y, dy, t, dt *Quant) *HeunSolver {
 	return &EulerSolver{y, dy, t, dt}
 }
 
-func (s *EulerSolver) Step() {
+func (s *HeunSolver) Step() {
 	y := s.y.Array()
 	dy := s.dy.Array()
 	dyMul := s.dy.multiplier
@@ -39,12 +40,6 @@ func (s *EulerSolver) Step() {
 	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
 
 	t.SetScalar(t.Scalar() + dt) // do not use quant dt.Scalar, which might get updated
-}
-
-func (e *EulerSolver) Deps() (in, out []*Quant) {
-	in = []*Quant{e.dy}
-	out = []*Quant{e.y}
-	return
 }
 
 //DEBUG

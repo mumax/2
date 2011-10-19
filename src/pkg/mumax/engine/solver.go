@@ -12,5 +12,6 @@ import (
 )
 
 type Solver interface {
-	Step()
+	Step()                    // Takes one time step
+	Deps() (in, out []*Quant) // Input/Output quantities (not including time step dt)
 }
