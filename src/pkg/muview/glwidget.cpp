@@ -195,8 +195,8 @@ void GLWidget::initializeGL()
 
   // Fill the list of locations and spins
   numSpins=1000;
-  int sx = 100;
-  int sy = 5;
+  int sx = 20;
+  int sy = 25;
   int sz = 2;
 
   for(int i=0; i<sx; i++)
