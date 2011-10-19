@@ -49,12 +49,11 @@ OBJECTS_DIR   = ./
 SOURCES       = glwidget.cpp \
 		main.cpp \
 		window.cpp \
-		qtlogo.cpp moc_glwidget.cpp \
+		moc_glwidget.cpp \
 		moc_window.cpp
 OBJECTS       = glwidget.o \
 		main.o \
 		window.o \
-		qtlogo.o \
 		moc_glwidget.o \
 		moc_window.o
 DIST          = /usr/share/qt4/mkspecs/common/g++.conf \
@@ -164,7 +163,7 @@ qmake:  FORCE
 
 dist: 
 	@$(CHK_DIR_EXISTS) .tmp/overpainting1.0.0 || $(MKDIR) .tmp/overpainting1.0.0 
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/overpainting1.0.0/ && $(COPY_FILE) --parents glwidget.h qtlogo.h window.h .tmp/overpainting1.0.0/ && $(COPY_FILE) --parents glwidget.cpp main.cpp window.cpp qtlogo.cpp .tmp/overpainting1.0.0/ && (cd `dirname .tmp/overpainting1.0.0` && $(TAR) overpainting1.0.0.tar overpainting1.0.0 && $(COMPRESS) overpainting1.0.0.tar) && $(MOVE) `dirname .tmp/overpainting1.0.0`/overpainting1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/overpainting1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/overpainting1.0.0/ && $(COPY_FILE) --parents glwidget.h window.h .tmp/overpainting1.0.0/ && $(COPY_FILE) --parents glwidget.cpp main.cpp window.cpp .tmp/overpainting1.0.0/ && (cd `dirname .tmp/overpainting1.0.0` && $(TAR) overpainting1.0.0.tar overpainting1.0.0 && $(COMPRESS) overpainting1.0.0.tar) && $(MOVE) `dirname .tmp/overpainting1.0.0`/overpainting1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/overpainting1.0.0
 
 
 clean:compiler_clean 
@@ -213,8 +212,7 @@ compiler_clean: compiler_moc_header_clean
 
 ####### Compile
 
-glwidget.o: glwidget.cpp glwidget.h \
-		qtlogo.h
+glwidget.o: glwidget.cpp glwidget.h 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget.o glwidget.cpp
 
 main.o: main.cpp window.h
@@ -223,9 +221,6 @@ main.o: main.cpp window.h
 window.o: window.cpp glwidget.h \
 		window.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o window.o window.cpp
-
-qtlogo.o: qtlogo.cpp qtlogo.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qtlogo.o qtlogo.cpp
 
 moc_glwidget.o: moc_glwidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_glwidget.o moc_glwidget.cpp

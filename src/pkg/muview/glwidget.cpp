@@ -115,21 +115,17 @@ void GLWidget::paintGL()
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
 
-  testColor = {0.0f, 0.8f, 0.6f, 1.0f};
+  GLfloat testColor[] = {0.0f, 0.8f, 0.6f, 1.0f};
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, testColor);
-  //glColor3f(0.0f, 1.0f, 0.2f);
   glCallList(cone);
 }
 
 void GLWidget::resizeGL(int width, int height)
 {
-  int side = qMin(width, height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  //glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
   gluPerspective(60.0, (float)width / (float)height, 0.1, 80.0);
   glMatrixMode(GL_MODELVIEW);
-  //glViewport((width - side) / 2, (height - side) / 2, side, side);
   glViewport(0, 0, width, height);
 }
 
