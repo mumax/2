@@ -20,7 +20,7 @@ type EulerSolver struct {
 	y, ybuf, dy, t, dt *Quant
 }
 
-func NewEuler(e*Engine, y, dy*Quant) *EulerSolver {
+func NewEuler(e *Engine, y, dy *Quant) *EulerSolver {
 	buffer := newQuant("eulerBuffer", y.NComp(), e.size3D, FIELD, y.Unit(), "hidden buffer to cache output quant")
 	return &EulerSolver{y, buffer, dy, e.time, e.dt}
 }
@@ -39,11 +39,11 @@ func (s *EulerSolver) AdvanceBuffer() {
 	s.y.Invalidate()
 }
 
-func(s*EulerSolver)CopyBuffer(){
+func (s *EulerSolver) CopyBuffer() {
 	s.y.Array().CopyFromDevice(s.ybuf.Array())
 }
 
-func(s*EulerSolver)ProposeDt()float64{
+func (s *EulerSolver) ProposeDt() float64 {
 	return 0 // this is not an adaptive step solver
 }
 

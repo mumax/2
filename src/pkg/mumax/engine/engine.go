@@ -189,8 +189,6 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, des
 	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
 }
 
-
-
 // AddQuant(name, nComp, VALUE)
 func (e *Engine) AddValue(name string, nComp int, unit Unit) {
 	e.AddQuant(name, nComp, VALUE, unit)
