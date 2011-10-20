@@ -13,24 +13,35 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModZeeman{})
+	RegisterModule(&ModExch6{})
 }
 
-type ModZeeman struct{}
+type ModExch6 struct{}
 
-func (x ModZeeman) Description() string {
-	return "externally applied field (A/m)"
+func (x ModExch6) Description() string {
+	return "6-neighbor ferromagnetic exchange interaction"
 }
 
-func (x ModZeeman) Name() string {
-	return "zeeman"
+func (x ModExch6) Name() string {
+	return "exchange"
 }
 
-func (x ModZeeman) Load(e *Engine) {
+func (x ModExch6) Load(e *Engine) {
 	e.LoadModule("hfield")
-	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
+	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
+	e.AddQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)
-	sum.AddParent("H_ext")
-	e.Depends("H_ext", "t") // EVEN IF H_ext IS NOT REALLY TIME-DEPENDENT, THINGS BREAK IF THIS IS NOT HERE. NEED TO DEBUG
+	sum.AddParent("H_ex")
+	e.Depends("H_ex", "Aex", "m")
+	Hex := e.Quant("H_ex")
+	Hex.updater = &exch6Updater{m: e.Quant("m"), Aex: e.Quant("Aex"), Hex: Hex}
+}
+
+type exch6Updater struct {
+	m, Aex, Hex *Quant
+}
+
+func (u *exch6Updater) Update() {
+
 }

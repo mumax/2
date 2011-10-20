@@ -31,5 +31,6 @@ func (x ModMicromag) Load(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("hfield")
 	e.LoadModule("zeeman")
+	e.LoadModule("exchange")
 	e.LoadModule("llg")
 }

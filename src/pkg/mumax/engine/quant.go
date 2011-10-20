@@ -318,7 +318,7 @@ func (q *Quant) Invalidate() {
 	}
 	q.upToDate = false
 	q.bufUpToDate = false
-	Debug("invalidate " + q.Name())
+	//Debug("invalidate " + q.Name())
 	//Log("actually invalidate " + q.Name())
 	for _, c := range q.children {
 		c.Invalidate()

@@ -17,6 +17,7 @@ GOFILES=\
 	mod_micromag.go\
 	mod_hfield.go\
 	mod_uniaxialanisotropy.go\
+	mod_exchange6.go\
 	quant.go\
 	quantkind.go\
 	unit.go\
