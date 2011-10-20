@@ -12,13 +12,13 @@ getscalar('alpha')
 
 #print 'alpha', getvalue('alpha'), '\n'
 #print 'alphaMask', getmask('alpha'), '\n'
-#print 'alpha', getfield('alpha'), '\n'
+#print 'alpha', getarray('alpha'), '\n'
 
 setscalar('Msat', 800e3)
 #print 'Msat', getvalue('Msat'), '\n'
 
 m=[ [[[0.01]]], [[[0]]], [[[-1]]] ]
-setfield('m', m)
+setarray('m', m)
 #save("m", "txt", [], "m.txt")
 #save("m", "omf", "text", "mt.omf")
 #save("m", "omf", "binary 4", "mb.omf")
@@ -28,7 +28,7 @@ i=3
 j=2
 k=1
 setcell('m', i,j,k, [0,1,0])
-#m=getfield('m')
+#m=getarray('m')
 #print 'm', m, '\n'
 #print 'm', i, j, k,  '=', m[0][i][j][k], m[1][i][j][k] , m[2][i][j][k]
 #print 'getcell', getcell('m', i,j,k)
@@ -42,10 +42,10 @@ setvalue('H_ext', [Hx, Hy, Hz])
 #mask = [ [ [[0]],[[0]] ], [ [[0]], [[0]] ], [ [[1]], [[0]] ] ]
 #setmask('H_z', mask)
 #print 'H_ext',getvalue('H_ext'), '\n'
-#print 'H', getfield('H'), '\n'
-#torque=getfield('torque')
+#print 'H', getarray('H'), '\n'
+#torque=getarray('torque')
 #print 'torque', torque , '\n'
-#setfield('torque', m) # must fail
+#setarray('torque', m) # must fail
 
 setscalar('dt', 1e-12)
 f = open('ll', 'w')

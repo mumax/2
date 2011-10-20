@@ -97,7 +97,7 @@ func (a API) SetMask(quantity string, mask *host.Array) {
 }
 
 // Sets a space-dependent field quantity, like the magnetization.
-func (a API) SetField(quantity string, field *host.Array) {
+func (a API) SetArray(quantity string, field *host.Array) {
 	q := a.Engine.Quant(quantity)
 	qArray := q.Array()
 	if !EqualSize(field.Size3D, qArray.Size3D()) {
@@ -152,7 +152,7 @@ func (a API) GetScalar(quantity string) float64 {
 
 // Gets a space-dependent quantity. If the quantity uses a mask,
 // the result is equal to GetMask() * GetValue()
-func (a API) GetField(quantity string) *host.Array {
+func (a API) GetArray(quantity string) *host.Array {
 	q := a.Engine.Quant(quantity)
 	checkKinds(q, MASK, FIELD)
 	q.Update() //!
@@ -183,7 +183,7 @@ func (a API) DebugField(quantity string) *host.Array {
 
 // FOR DEBUG ONLY.
 // Gets the quantity's array, raw.
-func (a API) GetArray(quant string) *host.Array {
+func (a API) Debug_GetArray(quant string) *host.Array {
 	q := a.Engine.Quant(quant)
 	q.Update() //!
 	array := q.Array()
