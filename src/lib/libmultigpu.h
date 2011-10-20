@@ -24,6 +24,7 @@ extern "C" {
 #include "torque.h"
 #include "normalize.h"
 #include "reduce.h"
+#include "exchange6.h"
 
 
 #ifdef __cplusplus
