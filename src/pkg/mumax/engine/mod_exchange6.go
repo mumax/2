@@ -28,6 +28,7 @@ func (x ModExch6) Name() string {
 
 func (x ModExch6) Load(e *Engine) {
 	e.LoadModule("hfield")
+	e.LoadModule("magnetization")
 	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
 	e.AddQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
 	hfield := e.Quant("H")
@@ -43,5 +44,5 @@ type exch6Updater struct {
 }
 
 func (u *exch6Updater) Update() {
-
+	println("To be implemented")
 }
