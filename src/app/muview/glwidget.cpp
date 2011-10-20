@@ -1,7 +1,5 @@
 #include <math.h>
-#include <GL/glew.h>
 #include <GL/glut.h>
-
 #include <QtGui>
 #include <QtOpenGL>
 #include "glwidget.h"
