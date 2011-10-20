@@ -51,8 +51,7 @@ func (a API) GetCellSize() (x, y, z float64) {
 	return size[Z], size[Y], size[X] // convert to internal axes
 }
 
-// Load a physics module. Not aware of dependencies (yet)
-// TODO: cleaner management a la modprobe
+// Load a physics module.
 func (a API) Load(name string) {
 	a.Engine.LoadModule(name)
 }
@@ -62,6 +61,22 @@ func (a API) Load(name string) {
 // Take one solver step
 func (a API) Step() {
 	a.Engine.Step()
+}
+
+// Takes N solver steps
+func (a API) Steps(N int) {
+	for i := 0; i < N; i++ {
+		a.Engine.Step()
+	}
+}
+
+// Runs for a duration given in seconds.
+func (a API) Run(duration float64) {
+	time := a.Engine.time
+	start := time.Scalar()
+	for time.Scalar() < (start + duration) {
+		a.Engine.Step()
+	}
 }
 
 //________________________________________________________________________________ set quantities
@@ -97,7 +112,7 @@ func (a API) SetMask(quantity string, mask *host.Array) {
 }
 
 // Sets a space-dependent field quantity, like the magnetization.
-func (a API) SetField(quantity string, field *host.Array) {
+func (a API) SetArray(quantity string, field *host.Array) {
 	q := a.Engine.Quant(quantity)
 	qArray := q.Array()
 	if !EqualSize(field.Size3D, qArray.Size3D()) {
@@ -152,7 +167,7 @@ func (a API) GetScalar(quantity string) float64 {
 
 // Gets a space-dependent quantity. If the quantity uses a mask,
 // the result is equal to GetMask() * GetValue()
-func (a API) GetField(quantity string) *host.Array {
+func (a API) GetArray(quantity string) *host.Array {
 	q := a.Engine.Quant(quantity)
 	checkKinds(q, MASK, FIELD)
 	q.Update() //!
@@ -183,7 +198,7 @@ func (a API) DebugField(quantity string) *host.Array {
 
 // FOR DEBUG ONLY.
 // Gets the quantity's array, raw.
-func (a API) GetArray(quant string) *host.Array {
+func (a API) Debug_GetArray(quant string) *host.Array {
 	q := a.Engine.Quant(quant)
 	q.Update() //!
 	array := q.Array()
@@ -192,6 +207,7 @@ func (a API) GetArray(quant string) *host.Array {
 	return buffer
 }
 
+// Gets the value of the quantity at cell position x,y,z
 func (a API) GetCell(quant string, x, y, z int) []float64 {
 	q := a.Engine.Quant(quant)
 	q.Update() //!
@@ -209,6 +225,7 @@ func (a API) GetCell(quant string, x, y, z int) []float64 {
 	return value
 }
 
+// Sets the value of the quantity at cell position x,y,z
 func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	q := a.Engine.Quant(quant)
 	swapXYZ(value)

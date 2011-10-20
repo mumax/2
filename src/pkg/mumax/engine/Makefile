@@ -21,7 +21,6 @@ GOFILES=\
 	quantkind.go\
 	unit.go\
 	updater.go\
-	update_nop.go\
 	update_pointwise.go\
 	update_norm.go\
 	update_sum.go\

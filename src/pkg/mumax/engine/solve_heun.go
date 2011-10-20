@@ -15,42 +15,31 @@ import (
 	"fmt"
 )
 
-// Euler solver
-type EulerSolver struct {
-	y, ybuf, dy, t, dt *Quant
+// Heun solver
+// TODO: implement
+type HeunSolver struct {
+	y, dy, t, dt *Quant
 }
 
-func NewEuler(e *Engine, y, dy *Quant) *EulerSolver {
-	buffer := newQuant("eulerBuffer", y.NComp(), e.size3D, FIELD, y.Unit(), "hidden buffer to cache output quant")
-	return &EulerSolver{y, buffer, dy, e.time, e.dt}
+func NewHeun(y, dy, t, dt *Quant) *HeunSolver {
+	return &EulerSolver{y, dy, t, dt}
 }
 
-func (s *EulerSolver) AdvanceBuffer() {
-	s.dy.Update()
-
+func (s *HeunSolver) Step() {
 	y := s.y.Array()
 	dy := s.dy.Array()
 	dyMul := s.dy.multiplier
 	checkUniform(dyMul)
+
+	t := s.t
 	dt := s.dt.Scalar()
+	if dt <= 0 {
+		panic(InputErr(fmt.Sprint("dt=", dt)))
+	}
 
-	gpu.Madd(s.ybuf.Array(), y, dy, float32(dt*dyMul[0]))
+	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
 
-	s.y.Invalidate()
-}
-
-func (s *EulerSolver) CopyBuffer() {
-	s.y.Array().CopyFromDevice(s.ybuf.Array())
-}
-
-func (s *EulerSolver) ProposeDt() float64 {
-	return 0 // this is not an adaptive step solver
-}
-
-func (e *EulerSolver) Deps() (in, out []*Quant) {
-	in = []*Quant{e.dy}
-	out = []*Quant{e.y}
-	return
+	t.SetScalar(t.Scalar() + dt) // do not use quant dt.Scalar, which might get updated
 }
 
 //DEBUG

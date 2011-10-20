@@ -7,12 +7,15 @@
 
 package engine
 
+// This file provides a number of func(*Quant)'s that can be used as input verifiers.
+
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
 )
 
+// Panics if a multiplier is zero
 func NonZero(q *Quant) {
 	nonzero := false
 	for _, v := range q.multiplier {
@@ -23,5 +26,14 @@ func NonZero(q *Quant) {
 	}
 	if !nonzero {
 		panic(InputErr(q.Name() + " should be non-zero"))
+	}
+}
+
+// Panics if a multiplier is <= 0
+func Positive(q *Quant) {
+	for _, v := range q.multiplier {
+		if v <= 0 {
+			panic(InputErr(q.Name() + " should be positive"))
+		}
 	}
 }

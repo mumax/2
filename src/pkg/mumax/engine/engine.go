@@ -31,8 +31,7 @@ type Engine struct {
 	cellSize_      [3]float64        // INTENRAL
 	cellSize       []float64         // size of the FD cells, nil means not yet set
 	quantity       map[string]*Quant // maps quantity names onto their data structures
-	ode            [][2]*Quant       // quantities coupled by differential equations: d ode[i][0] / d t = ode[i][1]
-	solver         []Solver          // solver[i] does the time stepping for ode[i]
+	solver         []Solver          // each solver does the time stepping for its own quantities
 	time           *Quant            // time quantity is always present
 	dt             *Quant            // time step quantity is always present
 	timer          Timer             // For benchmarking
@@ -88,6 +87,7 @@ func (e *Engine) init() {
 	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
+	e.dt.SetVerifier(Positive)
 	e.modules = make([]Module, 0)
 	e.crontabs = make(map[int]Notifier)
 	e.outputTables = make(map[string]*Table)
@@ -230,41 +230,44 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 func (e *Engine) ODE1(y, diff string) {
 	yQ := e.Quant(y)
 	dQ := e.Quant(diff)
-	if e.ode != nil {
-		for _, ode := range e.ode {
-			for _, q := range ode {
-				if q.Name() == y || q.Name() == diff {
-					panic(Bug("Already in ODE: " + y + ", " + diff))
+
+	// check that two solvers are not trying to update the same output quantity
+	if e.solver != nil {
+		for _, solver := range e.solver {
+			_, out := solver.Deps()
+			for _, q := range out {
+				if q.Name() == y {
+					panic(Bug("Already in ODE: " + y))
 				}
 			}
 		}
 	}
-	e.ode = append(e.ode, [2]*Quant{yQ, dQ})
-	e.solver = append(e.solver, NewEuler(yQ, dQ, e.time, e.dt))
+	e.solver = append(e.solver, NewEuler(e, yQ, dQ)) // TODO: choose solver type here
 }
 
 //________________________________________________________________________________ step
 
-// Takes one ODE step
+// Takes one ODE step.
+// It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
-	if len(e.ode) == 0 {
+	if len(e.solver) == 0 {
 		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
 
-	// update input for ODE solver recursively
-	for _, ode := range e.ode {
-		ode[RHS].Update()
-	}
-
-	// step
+	// step, but hide result in buffer so we don't interfere with other solvers depending on the result
 	for _, solver := range e.solver {
-		solver.Step() // sets new t, dt
+		solver.AdvanceBuffer()
+	}
+	// now that all solvers have updated behind the screens, we can make the result visible.
+	for _, solver := range e.solver {
+		solver.CopyBuffer()
 	}
 
-	// invalidate everything that depends on solver
-	for _, ode := range e.ode {
-		ode[LHS].Invalidate()
-	}
+	// advance time
+	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
+	//e.time.Invalidate() // automatically
+
+	// check if output needs to be saved
 	e.notifyAll()
 }
 //__________________________________________________________________ output
@@ -357,10 +360,10 @@ func (e *Engine) String() string {
 		}
 		str += ")\n"
 	}
-	str += "ODEs:\n"
-	for _, ode := range e.ode {
-		str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
-	}
+	//str += "ODEs:\n"
+	//for _, ode := range e.ode {
+	//	str += "d " + ode[0].Name() + " / d t = " + ode[1].Name() + "\n"
+	//}
 	return str
 }
 

@@ -21,14 +21,55 @@
 extern "C" {
 #endif
 
-/// multi-GPU Partial sum function.
-void partialSumAsync(float** input,      ///< input data. size = N 
-                    float** output,       ///< partially reduced data, usually reduced further on CPU. size = blocks
-                    int blocks,          ///< patially reduce in X blocks, partial results in output. blocks = divUp(N, threadsPerBlock*2)
-                    int threadsPerBlock, ///< use X threads per block: @warning must be < N
-                    int N,               ///< size of input data, must be > threadsPerBlock
-					CUstream* stream    ///< array of cuda streams on each device for async execution
-                    );
+
+/// Multi-GPU partial sum.
+/// @param input input data parts for each GPU. each array size is NPerGPU
+/// @param output partially summed data for each GPU, usually copied and reduced further on the CPU. size of each array = blocksPerGPU
+/// @param blocksPerGPU number of thread blocks per GPU. blocksPerGPU = divUp(NPerGPU, threadsPerBlockPerGPU*2)
+/// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
+/// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
+/// @param streams array of cuda streams on each device for async execution                                         
+void partialSumAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+
+
+/// Multi-GPU partial maximum.
+/// @param input input data parts for each GPU. each array size is NPerGPU
+/// @param output partially summed data for each GPU, usually copied and reduced further on the CPU. size of each array = blocksPerGPU
+/// @param blocksPerGPU number of thread blocks per GPU. blocksPerGPU = divUp(NPerGPU, threadsPerBlockPerGPU*2)
+/// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
+/// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
+/// @param streams array of cuda streams on each device for async execution                                         
+void partialMaxAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+
+
+/// Multi-GPU partial minimum.
+/// @param input input data parts for each GPU. each array size is NPerGPU
+/// @param output partially summed data for each GPU, usually copied and reduced further on the CPU. size of each array = blocksPerGPU
+/// @param blocksPerGPU number of thread blocks per GPU. blocksPerGPU = divUp(NPerGPU, threadsPerBlockPerGPU*2)
+/// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
+/// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
+/// @param streams array of cuda streams on each device for async execution                                         
+void partialMinAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+
+
+/// Multi-GPU partial maximum of absolute values.
+/// @param input input data parts for each GPU. each array size is NPerGPU
+/// @param output partially summed data for each GPU, usually copied and reduced further on the CPU. size of each array = blocksPerGPU
+/// @param blocksPerGPU number of thread blocks per GPU. blocksPerGPU = divUp(NPerGPU, threadsPerBlockPerGPU*2)
+/// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
+/// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
+/// @param streams array of cuda streams on each device for async execution                                         
+void partialMaxAbsAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+
+
+/// Multi-GPU partial maximum difference between arrays (max(abs(a[i]-b[i]))).
+/// @param input input data parts for each GPU. each array size is NPerGPU
+/// @param output partially summed data for each GPU, usually copied and reduced further on the CPU. size of each array = blocksPerGPU
+/// @param blocksPerGPU number of thread blocks per GPU. blocksPerGPU = divUp(NPerGPU, threadsPerBlockPerGPU*2)
+/// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
+/// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
+/// @param streams array of cuda streams on each device for async execution                                         
+void partialMaxDiffAsync(float** a, float** b, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 #ifdef __cplusplus
