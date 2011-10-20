@@ -13,13 +13,15 @@ CXX           = g++
 DEFINES       = -DQT_WEBKIT -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED
 CFLAGS        = -m64 -pipe -O2 -Wall -W -D_REENTRANT $(DEFINES)
 CXXFLAGS      = -m64 -pipe -O2 -Wall -W -D_REENTRANT $(DEFINES)
-INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I. -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui -I/usr/include/qt4/QtOpenGL \
-	-I/usr/include/qt4 -I/usr/X11R6/include -I.\
-	-I/usr/include/qxt/QxtGui -I/usr/include/qxt/QxtCore \
-	-I/usr/include/GL
+INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I. -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui \
+		-I/usr/include/qt4/QtOpenGL \
+		-I/usr/include/qt4 -I/usr/X11R6/include -I.\
+		-I/usr/include/qxt/QxtGui -I/usr/include/qxt/QxtCore \
+		-I/usr/include/GL
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1
-LIBS          = $(SUBLIBS)  -L/usr/lib/x86_64-linux-gnu -L/usr/X11R6/lib64 -lQtOpenGL -lQtGui -lQtCore -lGLU -lGL -lglut -lpthread -lQxtGui
+LIBS          = $(SUBLIBS)  -L/usr/lib/x86_64-linux-gnu -L/usr/X11R6/lib64 \
+		-lQtOpenGL -lQtGui -lQtCore -lGLU -lGL -lglut -lpthread -lQxtGui
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/bin/qmake
