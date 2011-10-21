@@ -1,6 +1,7 @@
 dirs=\
 	driver\
 	runtime\
+	fft\
 
 all:$(dirs)
 
