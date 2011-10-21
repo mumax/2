@@ -26,7 +26,7 @@ func TestCopyPadZ(test *testing.T) {
 	}()
 
 	size1 := []int{1, 4, 8}
-	size2 := []int{1, 4, 8+2}
+	size2 := []int{1, 4, 8 + 2}
 
 	a := NewArray(1, size1)
 	defer a.Free()
@@ -47,23 +47,21 @@ func TestCopyPadZ(test *testing.T) {
 
 	fmt.Println("CopyPadZ", bh.Array)
 
-//	for i := range sum.List {
-//		if sum.List[i] != ah.List[i]+bh.List[i] {
-//			if !test.Failed() {
-//				test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
-//			}
-//		}
-//	}
+	//	for i := range sum.List {
+	//		if sum.List[i] != ah.List[i]+bh.List[i] {
+	//			if !test.Failed() {
+	//				test.Error(sum.List[i], "!=", ah.List[i], "+", bh.List[i])
+	//			}
+	//		}
+	//	}
 }
-
-
 
 func BenchmarkCopyPadZ(b *testing.B) {
 	b.StopTimer()
 
 	size := bigsize()
 	a := NewArray(3, size)
-	a2 := NewArray(3, []int{size[0], size[1], size[2]+2})
+	a2 := NewArray(3, []int{size[0], size[1], size[2] + 2})
 	b.SetBytes(int64(a.Len()) * SIZEOF_FLOAT)
 	defer a.Free()
 	defer a2.Free()

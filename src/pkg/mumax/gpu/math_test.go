@@ -14,7 +14,7 @@ package gpu
 import (
 	"testing"
 	"rand"
-"fmt"
+	"fmt"
 )
 
 func TestAddClosure(test *testing.T) {
@@ -54,7 +54,6 @@ func TestAddClosure(test *testing.T) {
 		}
 	}
 }
-
 
 func TestAddCgo(test *testing.T) {
 	// fail test on panic, do not crash

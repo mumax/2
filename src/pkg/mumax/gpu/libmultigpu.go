@@ -144,6 +144,7 @@ func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
 
 //void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams){
 func CopyPadZ(dst, src *Array) {
+	dst.Zero()//TODO: remove once the cuda function fills zeros
 	D2 := dst.size3D[2]
 	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
 	S1Part := src.partSize[1]
