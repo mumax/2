@@ -1,7 +1,9 @@
 #include <QtGui>
 #include <QxtSpanSlider>
+#include <QKeySequence>
 #include "glwidget.h"
 #include "window.h"
+#include <iostream>
 
 Window::Window()
 {
@@ -89,8 +91,19 @@ QSlider *Window::createSlider()
 
 void Window::keyPressEvent(QKeyEvent *e)
 {
-  if (e->key() == Qt::Key_Escape)
-    close();
-  else
-    QWidget::keyPressEvent(e);
+  if (e->modifiers() == Qt::CTRL) {
+    // Close on Ctrl-Q or Ctrl-W
+    if (e->key() == Qt::Key_Q || e->key() == Qt::Key_W )
+      close();
+  } else if (e->modifiers() == Qt::SHIFT) {
+    if (e->key() == Qt::Key_Q || e->key() == Qt::Key_W )
+      close();
+  } else {
+    if (e->key() == Qt::Key_Escape)
+      close();
+    else
+      QWidget::keyPressEvent(e);
+  }
 }
+
+
