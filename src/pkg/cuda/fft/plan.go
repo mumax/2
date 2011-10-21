@@ -40,7 +40,7 @@ func (plan Handle) ExecC2C(idata, odata uintptr, direction int) {
 }
 
 // Execute Real-to-Complex plan
-func (plan Handle) ExecR2C(idata, odata uintptr){
+func (plan Handle) ExecR2C(idata, odata uintptr) {
 	err := Result(C.cufftExecR2C(
 		C.cufftHandle(plan),
 		(*C.cufftReal)(unsafe.Pointer(idata)),
@@ -51,7 +51,7 @@ func (plan Handle) ExecR2C(idata, odata uintptr){
 }
 
 // Execute Complex-to-Real plan
-func (plan Handle) ExecC2R(idata, odata uintptr){
+func (plan Handle) ExecC2R(idata, odata uintptr) {
 	err := Result(C.cufftExecC2R(
 		C.cufftHandle(plan),
 		(*C.cufftComplex)(unsafe.Pointer(idata)),
