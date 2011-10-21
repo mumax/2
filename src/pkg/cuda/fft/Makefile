@@ -5,12 +5,12 @@ TARG=cuda/fft
 
 CGOFILES=\
 	plan1d.go\
+	type.go\
 	result.go\
 
 GOFILES=\
 	doc.go\
 	handle.go\
-	type.go\
 
 CGO_CFLAGS+=-I/usr/local/cuda/include/
 CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia-current/ -lcuda -lcudart -lcufft
