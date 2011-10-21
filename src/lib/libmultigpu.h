@@ -25,6 +25,7 @@ extern "C" {
 #include "normalize.h"
 #include "reduce.h"
 #include "exchange6.h"
+#include "fft.h"
 
 
 #ifdef __cplusplus

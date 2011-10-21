@@ -20,7 +20,7 @@ extern "C" {
 /// @param S0: source X size, same as dst X size
 /// @param S1: source Y size per GPU, same as dst Y size
 /// @param S2: source Z size , <= D2
-void copyPadZ(float** dst, int D2, float** src, int S0, int S1Part, int S2);
+void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
 #ifdef __cplusplus
 }

@@ -141,3 +141,20 @@ func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
 		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
 	out.Stream.Sync()
 }
+
+//void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams){
+func CopyPadZ(dst, src *Array) {
+	D2 := dst.size3D[2]
+	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
+	S1Part := src.partSize[1]
+	S2 := src.size3D[2]
+	C.copyPadZAsync(
+		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
+		C.int(D2),
+		(**C.float)(unsafe.Pointer(&src.pointer[0])),
+		C.int(S0),
+		C.int(S1Part),
+		C.int(S2),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
+	dst.Stream.Sync()
+}
