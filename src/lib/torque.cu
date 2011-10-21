@@ -54,19 +54,19 @@ __global__ void torqueKern(float* tx, float* ty, float* tz,
 void torqueAsync(float** tx, float** ty, float** tz, float** mx, float** my, float** mz, float** hx, float** hy, float** hz, float** alpha_map, float alpha_mul, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
-	for (int i = 0; i < nDevice(); i++) {
-		assert(tx[i] != NULL);
-		assert(ty[i] != NULL);
-		assert(tz[i] != NULL);
-		assert(mx[i] != NULL);
-		assert(my[i] != NULL);
-		assert(mz[i] != NULL);
-		assert(hx[i] != NULL);
-		assert(hy[i] != NULL);
-		assert(hz[i] != NULL);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		assert(tx[dev] != NULL);
+		assert(ty[dev] != NULL);
+		assert(tz[dev] != NULL);
+		assert(mx[dev] != NULL);
+		assert(my[dev] != NULL);
+		assert(mz[dev] != NULL);
+		assert(hx[dev] != NULL);
+		assert(hy[dev] != NULL);
+		assert(hz[dev] != NULL);
 		// alphaMap may be null
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		torqueKern <<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>> (tx[i],ty[i],tz[i],  mx[i],my[i],mz[i], hx[i],hy[i],hz[i], alpha_map[i], alpha_mul, Npart);
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		torqueKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev],ty[dev],tz[dev],  mx[dev],my[dev],mz[dev], hx[dev],hy[dev],hz[dev], alpha_map[dev], alpha_mul, Npart);
 	}
 }
 

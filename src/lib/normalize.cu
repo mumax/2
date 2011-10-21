@@ -41,13 +41,13 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 void normalizeAsync(float** mx, float** my, float** mz, float** norm_map, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
-	for (int i = 0; i < nDevice(); i++) {
-		assert(mx[i] != NULL);
-		assert(my[i] != NULL);
-		assert(mz[i] != NULL);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		assert(mx[dev] != NULL);
+		assert(my[dev] != NULL);
+		assert(mz[dev] != NULL);
 		// normMap may be null
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		normalizeKern <<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>> (mx[i],my[i],mz[i], norm_map[i], Npart);
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		normalizeKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (mx[dev],my[dev],mz[dev], norm_map[dev], Npart);
 	}
 }
 

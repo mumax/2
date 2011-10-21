@@ -92,7 +92,7 @@ void check1dconf(int gridsize, ///< 1D size of the thread grid
    }
  * @endcode
  */
-void make1dconf(int N,          ///< size of array to span (number of floats)
+void make1dconf(int N,           ///< size of array to span (number of floats)
                 dim3* gridSize,  ///< grid size is returned here
                 dim3* blockSize  ///< block size is returned here
                 );

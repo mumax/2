@@ -392,9 +392,9 @@ void partialSumAsync1(float* d_idata, float* d_odata, int blocks, int threads, i
 }
 
 void partialSumAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		partialSumAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialSumAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
 	}
 }
 
@@ -447,9 +447,9 @@ void partialMaxAsync1(float* d_idata, float* d_odata, int blocks, int threads, i
 
 
 void partialMaxAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		partialMaxAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialMaxAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
 	}
 }
 
@@ -501,9 +501,9 @@ void partialMinAsync1(float* d_idata, float* d_odata, int blocks, int threads, i
 
 
 void partialMinAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		partialMinAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialMinAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
 	}
 }
 
@@ -555,9 +555,9 @@ void partialMaxAbsAsync1(float* d_idata, float* d_odata, int blocks, int threads
 
 
 void partialMaxAbsAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		partialMaxAbsAsync1(input[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialMaxAbsAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
 	}
 }
 
@@ -608,9 +608,9 @@ void partialMaxDiffAsync1(float* a, float* b, float* d_odata, int blocks, int th
 
 
 void partialMaxDiffAsync(float** a, float** b, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		partialMaxDiffAsync1(a[i], b[i], output[i], blocks, threadsPerBlock, N, stream[i]);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialMaxDiffAsync1(a[dev], b[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
 	}
 }
 

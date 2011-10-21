@@ -22,9 +22,9 @@ __global__ void addKern(float* dst, float* a, float* b, int Npart) {
 void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		addKern <<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>> (dst[i], a[i], b[i], Npart);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		addKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], Npart);
 	}
 }
 
@@ -48,9 +48,9 @@ __global__ void maddKern(float* dst, float* a, float* b, float mulB, int Npart) 
 void maddAsync(float** dst, float** a, float** b, float mulB, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
-	for (int i = 0; i < nDevice(); i++) {
-		gpu_safe(cudaSetDevice(deviceId(i)));
-		maddKern <<<gridSize, blockSize, 0, cudaStream_t(stream[i])>>> (dst[i], a[i], b[i], mulB, Npart);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		maddKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], mulB, Npart);
 	}
 }
 
