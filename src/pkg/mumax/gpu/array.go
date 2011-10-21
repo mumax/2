@@ -15,6 +15,7 @@ import (
 	"mumax/host"
 	cu "cuda/driver"
 	"unsafe"
+	"math"
 	"fmt"
 )
 
@@ -327,10 +328,14 @@ func (src *Array) LocalCopy() *host.Array {
 
 // Makes all elements zero.
 func (a *Array) Zero() {
+	a.MemSet(0)
+}
+
+func (a *Array) MemSet(num float32) {
 	slices := a.pointer
 	for i := range slices {
 		setDevice(_useDevice[i])
-		cu.MemsetD32Async(slices[i], 0, int64(a.partLen4D), a.Stream[i])
+		cu.MemsetD32Async(slices[i], math.Float32bits(num), int64(a.partLen4D), a.Stream[i])
 	}
 	a.Stream.Sync()
 }
