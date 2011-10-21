@@ -34,8 +34,8 @@ __global__ void copyPad2dKern(float* dst, int D2, float* src, int S1, int S2){
 void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
-  int M2 = max(S2,D2); // largest dimension
-  dim3 gridSize(divUp(M2, BLOCKSIZE), divUp(S1Part, BLOCKSIZE), 1);
+  //int M2 = max(S2,D2); // largest dimension
+  dim3 gridSize(divUp(D2, BLOCKSIZE), divUp(S1Part, BLOCKSIZE), 1); // range over destination size
   dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
   check3dconf(gridSize, blockSize);
 
