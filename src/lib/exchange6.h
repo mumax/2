@@ -2,6 +2,7 @@
   * @file
   * This file implements 6-neighbor exchange
   *
+  * @todo: implement
   * @author Arne Vansteenkiste
   */
 
