@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+/// @author Arne Vansteenkiste, okt 2011
 
 /// @internal Does Z-padding and unpadding of a 2D matrix.
 __global__ void copyPad2dKern(float* dst, int D2, float* src, int S1, int S2){
@@ -20,6 +21,7 @@ __global__ void copyPad2dKern(float* dst, int D2, float* src, int S1, int S2){
 	// this check makes it work for padding as well as for unpadding.
 	// 2 separate functions are probably not more efficient
 	// due to memory bandwidth limitations
+    /// @todo: zero-fill here!
    if (i<S1 && j<S2 && j<D2){  // && i<D1: always true
 		dst[i*D2 + j] = src[i*S2 + j];
    }
@@ -35,9 +37,11 @@ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2,
 
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
-		//for  
-			//&source[i*S1*S2],
-		copyPad2dKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst[dev], D2, src[dev], S1Part, S2);
+		for(int i=0; i<S0; i++){
+			float* src2D = &(src[dev][i*S1Part*S2]);
+			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
+			copyPad2dKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src2D, S1Part, S2);///@todo stream
+		}
 	}
 }
 
