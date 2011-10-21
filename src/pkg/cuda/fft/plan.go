@@ -7,7 +7,7 @@ package fft
 //#include <cufft.h>
 import "C"
 
-import(
+import (
 	"unsafe"
 )
 
@@ -18,8 +18,8 @@ type Handle uintptr
 func Plan1d(nx int, typ Type, batch int) Handle {
 	var handle C.cufftHandle
 	err := Result(C.cufftPlan1d(
-		&handle, C.int(nx), 
-		C.cufftType(typ), 
+		&handle, C.int(nx),
+		C.cufftType(typ),
 		C.int(batch)))
 	if err != SUCCESS {
 		panic(err)
@@ -27,14 +27,35 @@ func Plan1d(nx int, typ Type, batch int) Handle {
 	return Handle(handle)
 }
 
-
 // Execute Complex-to-Complex plan
-func (plan Handle)ExecC2C(idata, odata uintptr, direction int){
+func (plan Handle) ExecC2C(idata, odata uintptr, direction int) {
 	err := Result(C.cufftExecC2C(
 		C.cufftHandle(plan),
 		(*C.cufftComplex)(unsafe.Pointer(idata)),
-	    (*C.cufftComplex)(unsafe.Pointer(odata)),
-		 C.int(direction)))
+		(*C.cufftComplex)(unsafe.Pointer(odata)),
+		C.int(direction)))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Execute Real-to-Complex plan
+func (plan Handle) ExecR2C(idata, odata uintptr){
+	err := Result(C.cufftExecR2C(
+		C.cufftHandle(plan),
+		(*C.cufftReal)(unsafe.Pointer(idata)),
+		(*C.cufftComplex)(unsafe.Pointer(odata))))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Execute Complex-to-Real plan
+func (plan Handle) ExecC2R(idata, odata uintptr){
+	err := Result(C.cufftExecC2R(
+		C.cufftHandle(plan),
+		(*C.cufftComplex)(unsafe.Pointer(idata)),
+		(*C.cufftReal)(unsafe.Pointer(odata))))
 	if err != SUCCESS {
 		panic(err)
 	}

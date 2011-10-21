@@ -23,10 +23,9 @@ const (
 	Z2Z Type = C.CUFFT_Z2Z // Double-Complex to Double-Complex
 )
 
-
-const(
-FORWARD = -1 // Forward FFT
-INVERSE = 1 // Inverse FFT
+const (
+	FORWARD = -1 // Forward FFT
+	INVERSE = 1  // Inverse FFT
 )
 
 func (t Type) String() string {
