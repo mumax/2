@@ -18,7 +18,8 @@ type Handle uintptr
 func Plan1d(nx int, typ Type, batch int) Handle {
 	var handle C.cufftHandle
 	err := Result(C.cufftPlan1d(
-		&handle, C.int(nx),
+		&handle,
+		C.int(nx),
 		C.cufftType(typ),
 		C.int(batch)))
 	if err != SUCCESS {
@@ -26,6 +27,66 @@ func Plan1d(nx int, typ Type, batch int) Handle {
 	}
 	return Handle(handle)
 }
+
+// 2D FFT plan
+func Plan2d(nx, ny int, typ Type) Handle {
+	var handle C.cufftHandle
+	err := Result(C.cufftPlan2d(
+		&handle,
+		C.int(nx),
+		C.int(ny),
+		C.cufftType(typ)))
+	if err != SUCCESS {
+		panic(err)
+	}
+	return Handle(handle)
+}
+
+// 3D FFT plan
+func Plan3d(nx, ny, nz int, typ Type) Handle {
+	var handle C.cufftHandle
+	err := Result(C.cufftPlan3d(
+		&handle,
+		C.int(nx),
+		C.int(ny),
+		C.int(nz),
+		C.cufftType(typ)))
+	if err != SUCCESS {
+		panic(err)
+	}
+	return Handle(handle)
+}
+
+//cufftPlanMany(
+//    cufftHandle *plan, int rank, int *n, int *inembed,
+//    int istride, int idist, int *onembed, int ostride,
+//    int odist, cufftType type, int batch );
+// 1D,2D or 3D FFT plan
+//func PlanMany(n []int, inembed[]int, istride int, oembed[]int, ostride int,typ Type,batch int) Handle {
+//	var handle C.cufftHandle
+//
+//	NULL := (*C.int)(unsafe.Pointer(uintptr(0)))
+//
+//	inembedptr := NULL
+//	if inembed != nil{
+//		inembedptr := (*C.int)(unsafe.Pointer(&inembed[0]))
+//	}
+//
+//	oembedptr := NULL
+//	if oembed  != nil{
+//		oembed := (*C.int)(unsafe.Pointer(&oembed[0]))
+//	}
+//
+//	err := Result(C.cufftPlanMany(
+//		&handle,
+//		C.int(len(n)), // rank
+//		inembedptr,
+//		
+//	if err != SUCCESS {
+//		panic(err)
+//	}
+//	return Handle(handle)
+//}
 
 // Execute Complex-to-Complex plan
 func (plan Handle) ExecC2C(idata, odata uintptr, direction int) {
@@ -60,3 +121,77 @@ func (plan Handle) ExecC2R(idata, odata uintptr) {
 		panic(err)
 	}
 }
+
+// Execute Double Complex-to-Complex plan
+func (plan Handle) ExecZ2Z(idata, odata uintptr, direction int) {
+	err := Result(C.cufftExecZ2Z(
+		C.cufftHandle(plan),
+		(*C.cufftDoubleComplex)(unsafe.Pointer(idata)),
+		(*C.cufftDoubleComplex)(unsafe.Pointer(odata)),
+		C.int(direction)))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Execute Double Real-to-Complex plan
+func (plan Handle) ExecD2Z(idata, odata uintptr) {
+	err := Result(C.cufftExecD2Z(
+		C.cufftHandle(plan),
+		(*C.cufftDoubleReal)(unsafe.Pointer(idata)),
+		(*C.cufftDoubleComplex)(unsafe.Pointer(odata))))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Execute Double Complex-to-Real plan
+func (plan Handle) ExecZ2D(idata, odata uintptr) {
+	err := Result(C.cufftExecZ2D(
+		C.cufftHandle(plan),
+		(*C.cufftDoubleComplex)(unsafe.Pointer(idata)),
+		(*C.cufftDoubleReal)(unsafe.Pointer(odata))))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Destroys the plan.
+func (plan *Handle) Destroy() {
+	err := Result(C.cufftDestroy(C.cufftHandle(*plan)))
+	*plan = 0 // make sure plan is not used anymore
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Sets the cuda stream for this plan
+func (plan Handle) SetStream(stream uintptr) {
+	err := Result(C.cufftSetStream(
+		C.cufftHandle(plan),
+		C.cudaStream_t(unsafe.Pointer(stream))))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// Sets the FFTW compatibility mode
+func (plan Handle) SetCompatibilityMode(mode CompatibilityMode) {
+	err := Result(C.cufftSetCompatibilityMode(
+		C.cufftHandle(plan),
+		C.cufftCompatibility(mode)))
+	if err != SUCCESS {
+		panic(err)
+	}
+}
+
+// FFTW compatibility mode
+type CompatibilityMode int
+
+// FFTW compatibility mode
+const (
+	COMPATIBILITY_NATIVE          CompatibilityMode = C.CUFFT_COMPATIBILITY_NATIVE
+	COMPATIBILITY_FFTW_PADDING    CompatibilityMode = C.CUFFT_COMPATIBILITY_FFTW_PADDING
+	COMPATIBILITY_FFTW_ASYMMETRIC CompatibilityMode = C.CUFFT_COMPATIBILITY_FFTW_ASYMMETRIC
+	COMPATIBILITY_FFTW_ALL        CompatibilityMode = C.CUFFT_COMPATIBILITY_FFTW_ALL
+)
