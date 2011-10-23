@@ -2,7 +2,7 @@
 // Use of this source code is governed by a freeBSD
 // license that can be found in the LICENSE.txt file.
 
-package fft
+package cufft
 
 //#include <cufft.h>
 import "C"
@@ -184,14 +184,3 @@ func (plan Handle) SetCompatibilityMode(mode CompatibilityMode) {
 		panic(err)
 	}
 }
-
-// FFTW compatibility mode
-type CompatibilityMode int
-
-// FFTW compatibility mode
-const (
-	COMPATIBILITY_NATIVE          CompatibilityMode = C.CUFFT_COMPATIBILITY_NATIVE
-	COMPATIBILITY_FFTW_PADDING    CompatibilityMode = C.CUFFT_COMPATIBILITY_FFTW_PADDING
-	COMPATIBILITY_FFTW_ASYMMETRIC CompatibilityMode = C.CUFFT_COMPATIBILITY_FFTW_ASYMMETRIC
-	COMPATIBILITY_FFTW_ALL        CompatibilityMode = C.CUFFT_COMPATIBILITY_FFTW_ALL
-)

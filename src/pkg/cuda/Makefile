@@ -1,7 +1,7 @@
 dirs=\
 	driver\
 	runtime\
-	fft\
+	cufft\
 
 all:$(dirs)
 

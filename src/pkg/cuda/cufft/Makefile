@@ -1,11 +1,12 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=cuda/fft
+TARG=cuda/cufft
 
 CGOFILES=\
 	plan.go\
 	type.go\
+	mode.go\
 	result.go\
 
 GOFILES=\

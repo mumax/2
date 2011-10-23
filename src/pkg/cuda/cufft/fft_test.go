@@ -2,6 +2,6 @@
 // Use of this source code is governed by a freeBSD
 // license that can be found in the LICENSE.txt file.
 
-package fft
+package cufft
 
 import ()

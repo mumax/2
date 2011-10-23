@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE.txt file.
 
 // Go bindings for the CUDA CUFFT API.
-package fft
+package cufft
