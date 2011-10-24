@@ -1,6 +1,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H
-
+#include <QMainWindow>
 #include <QWidget>
 
 class QSlider;

@@ -3,6 +3,7 @@
 #include <QKeySequence>
 #include "glwidget.h"
 #include "window.h"
+//#include "OMFImport.h"
 #include <iostream>
 
 Window::Window()
