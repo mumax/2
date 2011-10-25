@@ -28,7 +28,9 @@ protected:
   //void contextMenuEvent(QContextMenuEvent *event);
 
 private slots:
-  void open();
+  void openFiles();
+  void openDir();
+
   //void settings();
   void about();
 
@@ -41,7 +43,9 @@ private:
   QMenu *settingsMenu;
   QMenu *helpMenu;
   
-  QAction *openAct;
+  QAction *openFilesAct;
+  QAction *openDirAct;
+  QAction *attachToMumax;
   QAction *settingsAct;
   QAction *aboutAct;
   //QAction *webAct;
@@ -54,9 +58,14 @@ private:
   QGroupBox *rotGroupBox;
 
   GLWidget *glWidget;
+
   QSlider *xSlider;
   QSlider *ySlider;
   QSlider *zSlider;
+
+  QSlider *animSlider;
+  QLabel *animLabel;
+
   QxtSpanSlider *xSpanSlider;
   QxtSpanSlider *ySpanSlider;
   QxtSpanSlider *zSpanSlider;
