@@ -1,14 +1,22 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
 #include <QMainWindow>
 #include <QWidget>
 
+// General widget stuff 
 class QSlider;
 class GLWidget;
 class QxtSpanSlider;
 class QGroupBox;
 
-class Window : public QWidget
+// Main Window Stuff
+class QAction;
+class QActionGroup;
+class QLabel;
+class QMenu;
+
+class Window : public QMainWindow
 {
   Q_OBJECT
 
@@ -17,8 +25,28 @@ class Window : public QWidget
 
 protected:
   void keyPressEvent(QKeyEvent *event);
+  //void contextMenuEvent(QContextMenuEvent *event);
+
+private slots:
+  void open();
+  //void settings();
+  void about();
 
 private:
+  // Main Window Stuff
+  void createActions();
+  void createMenus();
+
+  QMenu *fileMenu;
+  QMenu *settingsMenu;
+  QMenu *helpMenu;
+  
+  QAction *openAct;
+  QAction *settingsAct;
+  QAction *aboutAct;
+  //QAction *webAct;
+
+  // Other Stuff
   QSlider *createSlider();
   QxtSpanSlider *createSpanSlider();
 
