@@ -42,28 +42,46 @@ Window::Window()
   sliceGroupBox->setAlignment(Qt::AlignHCenter);
   rotGroupBox->setAlignment(Qt::AlignHCenter);
 
-  QHBoxLayout *sliceLayout = new QHBoxLayout;
-  QHBoxLayout *rotLayout   = new QHBoxLayout;
+  QVBoxLayout *displayLayout = new QVBoxLayout;
+  QHBoxLayout *sliceLayout   = new QHBoxLayout;
+  QHBoxLayout *rotLayout     = new QHBoxLayout;
 
+  // Center display and animation bar
+  animLabel  = new QLabel(tr("<i>Animation</i> timeline"));
+  animLabel->setAlignment(Qt::AlignCenter);
+  animSlider = new QSlider(Qt::Horizontal);
+  animSlider->setRange(0, 10);
+  animSlider->setSingleStep(1);
+  animSlider->setPageStep(10);
+  animSlider->setTickInterval(2);
+  animSlider->setTickPosition(QSlider::TicksRight);
+  animSlider->setEnabled(FALSE);
+  animLabel->setFixedHeight(animLabel->sizeHint().height());
+  displayLayout->addWidget(glWidget);
+  displayLayout->addWidget(animLabel);
+  displayLayout->addWidget(animSlider);
+
+  // Slicing
   sliceLayout->addWidget(xSpanSlider);
   sliceLayout->addWidget(ySpanSlider);
   sliceLayout->addWidget(zSpanSlider);
+  sliceGroupBox->setLayout(sliceLayout);
+  sliceGroupBox->setFixedWidth(120);
 
+  // Rotation
   rotLayout->addWidget(xSlider);
   rotLayout->addWidget(ySlider);
   rotLayout->addWidget(zSlider);
-
-  sliceGroupBox->setLayout(sliceLayout);
   rotGroupBox->setLayout(rotLayout);
-  sliceGroupBox->setFixedWidth(120);
   rotGroupBox->setFixedWidth(120);
 
+  // Overall Layout
   mainLayout->addWidget(rotGroupBox);
-  mainLayout->addWidget(glWidget);
+  mainLayout->addLayout(displayLayout);
   mainLayout->addWidget(sliceGroupBox);
-  //setLayout(mainLayout);
   widget->setLayout(mainLayout);
-  
+
+  // Main Window Related
   createActions();
   createMenus();
 
@@ -118,7 +136,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 void Window::createMenus()
 {
   fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(openAct);
+  fileMenu->addAction(openFilesAct);
+  fileMenu->addAction(openDirAct);
   fileMenu->addSeparator();
 
   settingsMenu = menuBar()->addMenu(tr("&Settings"));
@@ -140,11 +159,19 @@ void Window::about()
 			"<br>Created by Graham Rowlands 2011."));
 }
 
-void Window::open()
+void Window::openFiles()
 {
   QString fileName;
   fileName = QFileDialog::getOpenFileName(this,
 	     tr("Open .omf File"), "/home/grahamr", tr("OMF Files (*.omf)"));
+}
+
+void Window::openDir()
+{
+  QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                 "/home",
+                                                 QFileDialog::ShowDirsOnly
+                                                 | QFileDialog::DontResolveSymlinks);
 }
 
 
@@ -154,9 +181,13 @@ void Window::createActions()
   //aboutAct->setStatusTip(tr("Show the application's About box"));
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-  openAct  = new QAction(tr("&Open File(s)"), this);
-  openAct->setShortcuts(QKeySequence::Open);
+  openFilesAct  = new QAction(tr("&Open File(s)"), this);
+  openFilesAct->setShortcuts(QKeySequence::Open);
   //openAct->setStatusTip(tr("Open an existing file"));
-  connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+  connect(openFilesAct, SIGNAL(triggered()), this, SLOT(openFiles()));
+
+  openDirAct  = new QAction(tr("&Open Dir"), this);
+  //openAct->setStatusTip(tr("Open all files in a directory"));
+  connect(openDirAct, SIGNAL(triggered()), this, SLOT(openDir()));
 }
 
