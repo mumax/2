@@ -6,8 +6,8 @@ TARG=cuda/cufft
 CGOFILES=\
 	plan.go\
 	type.go\
-	mode.go\
 	result.go\
+	mode.go\
 
 GOFILES=\
 	doc.go\

@@ -1,7 +1,7 @@
 dirs=\
-	ptx\
 	lib\
 	pkg\
+	ptx\
 	
 all: $(dirs)
 
