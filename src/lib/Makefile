@@ -10,6 +10,7 @@ OFILES=\
 	torque.o\
 	normalize.o\
 	pad.o\
+	transpose.o\
 	exchange6.o\
 
 all: libmultigpu.so
