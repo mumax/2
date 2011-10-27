@@ -4,8 +4,8 @@
   * @author Arne Vansteenkiste
   */
 
-#ifndef _FFT_H_
-#define _FFT_H_
+#ifndef _PAD_H_
+#define _PAD_H_
 
 #include <cuda.h>
 
