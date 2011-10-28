@@ -1,13 +1,14 @@
-// This part was originally created and released into the public
-// domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
-
 #ifndef ENDIAN_H
 #define ENDIAN_H
 
-#include <config.h>
+//#include <config.h>
 
 #include <stdint.h>
 #include <cassert>
+
+/** @file 
+ * Miscellanous functions as well as the RESTRICT macro.
+ */ 
 
 /**
  * Swaps the endianness (byte order) of a value.
@@ -68,3 +69,4 @@ T fromBigEndian(T value)
 }
 
 #endif
+

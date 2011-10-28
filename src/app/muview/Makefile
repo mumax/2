@@ -8,6 +8,7 @@
 
 ####### Compiler, tools and options
 
+MUMAXROOT     = ../../../../mumax2
 CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_WEBKIT -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED
@@ -17,7 +18,8 @@ INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I. -I/usr/include/qt4/QtC
 		-I/usr/include/qt4/QtOpenGL \
 		-I/usr/include/qt4 -I/usr/X11R6/include -I.\
 		-I/usr/include/qxt/QxtGui -I/usr/include/qxt/QxtCore \
-		-I/usr/include/GL
+		-I/usr/include/GL \
+		-I$(MUMAXROOT)/src/misc
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1
 LIBS          = $(SUBLIBS)  -L/usr/lib/x86_64-linux-gnu -L/usr/X11R6/lib64 \

@@ -4,7 +4,7 @@
 #include <QFileDialog>
 #include "glwidget.h"
 #include "window.h"
-//#include "OMFImport.h"
+#include "OMFImport.h"
 #include <iostream>
 
 Window::Window()

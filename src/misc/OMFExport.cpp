@@ -1,9 +1,7 @@
-// This part was originally created and released into the public
-// domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
-
 #include "OMFExport.h"
 
-#include "matrix/matty.h"
+#include "matrix/Vector3d.h"
+#include "matrix/VectorMatrix.h"
 
 #include "endian.h"
 
@@ -115,8 +113,8 @@ static void writeAsciiValues(std::ostream &out, const VectorMatrix &field)
 	out.precision(16); // print the significant 52 digital digits (which is ~16 decimal digits)
 
 	VectorMatrix::const_accessor field_acc(field);
-	for (size_t i=0; i<field.size(); ++i) {
-		const Vector3d vec = field_acc.get(i);
+	for (size_t i=0; i<field.numElements(); ++i) {
+		const Vector3d vec = vector_get(field_acc, i);
 		out << vec.x << " " << vec.y << " " << vec.z << '\n'; // <-- no std::endl because endl implies flushing (= slowdown)
 	}
 }
@@ -127,13 +125,11 @@ static void writeBinary4Values(std::ostream &out, const VectorMatrix &field)
 
 	VectorMatrix::const_accessor field_acc(field);
 
-	const int num_cells = field.size();
+	const int num_cells = field.numElements();
 	float *buffer = new float [3*num_cells];
 	for (int i=0; i<num_cells; ++i) {
-		Vector3d vec = field_acc.get(i);
-		buffer[i*3+0] = toBigEndian(static_cast<float>(vec.x));
-		buffer[i*3+1] = toBigEndian(static_cast<float>(vec.y));
-		buffer[i*3+2] = toBigEndian(static_cast<float>(vec.z));
+		for (int j=0; j<3; ++j)
+			buffer[i*3+j] = toBigEndian(static_cast<float>(field_acc.linearGet(i,j)));
 	}
 
 	const float magic = toBigEndian<float>(1234567.0f);
@@ -150,13 +146,11 @@ static void writeBinary8Values(std::ostream &out, const VectorMatrix &field)
 
 	VectorMatrix::const_accessor field_acc(field);
 
-	const int num_cells = field.size();
+	const int num_cells = field.numElements();
 	double *buffer = new double [3*num_cells];
 	for (int i=0; i<num_cells; ++i) {
-		Vector3d vec = field_acc.get(i);
-		buffer[i*3+0] = vec.x;
-		buffer[i*3+1] = vec.y;
-		buffer[i*3+2] = vec.z;
+		for (int j=0; j<3; ++j)
+			buffer[i*3+j] = toBigEndian(field_acc.linearGet(i,j));
 	}
 
 	const double magic = toBigEndian<double>(123456789012345.0);
@@ -174,9 +168,9 @@ static void getMinMaxValueRange(const VectorMatrix &field, double &min, double &
 
 	VectorMatrix::const_accessor field_acc(field);
 
-	const size_t total_nodes = field.size();
+	const size_t total_nodes = field.numElements();
 	for (size_t i=0; i<total_nodes; ++i) {
-		const double len = field_acc.get(i).abs();
+		const double len = vector_get(field_acc, i).abs();
 		if (len < min) min = len;
 		if (len > max) max = len;
 	}

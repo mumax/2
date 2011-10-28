@@ -1,6 +1,3 @@
-// This part was originally created and released into the public
-// domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
-
 #include "OMFHeader.h"
 
 OMFHeader::OMFHeader()

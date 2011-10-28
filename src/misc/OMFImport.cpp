@@ -1,10 +1,7 @@
-// This part was originally created and released into the public
-// domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
-
 #include "OMFImport.h"
 
 #include "endian.h"
-
+#include "container.h"
 #include <stdlib.h>
 
 #include <algorithm>
@@ -12,34 +9,36 @@
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
-#include <memory>
-using namespace std;
+
+
+//using namespace std;
 
 struct OMFImport
 {
-	void read(std::istream &input);
+  void read(std::istream &input);
 
-	void parse();
-	void parseSegment();
-	void parseHeader();
-	void parseDataAscii();
-	void parseDataBinary4();
-	void parseDataBinary8();
+  void parse();
+  void parseSegment();
+  void parseHeader();
+  void parseDataAscii();
+  // void parseDataBinary4();
+  //void parseDataBinary8();
 
-	OMFHeader header;
-	std::istream *input;
-	int lineno;
-	std::string line;
-	bool eof;
-	char next_char;
+  OMFHeader header;
+  std::istream *input;
+  int lineno;
+  std::string line;
+  bool eof;
+  char next_char;
 
-	std::auto_ptr<VectorMatrix> field;
+  //std::auto_ptr<VectorMatrix> field;
+  array_ptr field;
 
-	void acceptLine();
+  void acceptLine();
 };
 
 
-VectorMatrix readOMF(const std::string &path, OMFHeader &header)
+array_ptr readOMF(const std::string &path, OMFHeader &header)
 {
 	std::ifstream in(path.c_str());
 	if (!in.good()) {
@@ -49,15 +48,17 @@ VectorMatrix readOMF(const std::string &path, OMFHeader &header)
 	OMFImport omf;
 	omf.read(in);
 	header = omf.header;
-	return VectorMatrix(*(omf.field));
+	return array_ptr(omf.field);
+	//return VectorMatrix(*(omf.field));
 }
 
-VectorMatrix readOMF(std::istream &in, OMFHeader &header)
+array_ptr readOMF(std::istream &in, OMFHeader &header)
 {
 	OMFImport omf;
 	omf.read(in);
 	header = omf.header;
-	return VectorMatrix(*(omf.field));
+	return array_ptr(omf.field);
+	//return VectorMatrix(*(omf.field));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,9 +181,11 @@ void OMFImport::parseSegment()
 	if (value == "Data Text") {
 		parseDataAscii();
 	} else if (value == "Data Binary 4") {
-		parseDataBinary4();
+	  std::cout << "Binary 4" << std::endl;
+	  //parseDataBinary4();
 	} else if (value == "Data Binary 8") {
-		parseDataBinary8();
+	  std::cout << "Binary 8" << std::endl;
+	  //parseDataBinary8();
 	} else {
 		throw std::runtime_error("Expected either 'Text', 'Binary 4' or 'Binary 8' chunk type");
 	}
@@ -209,8 +212,8 @@ void OMFImport::parseHeader()
 	while (!done) {
 		ok = parseCommentLine(line, key, value);
 		if (!ok) {
-			cout << "Skipped line." << endl;
-			continue;
+		  std::cout << "Skipped line." << std::endl;
+		  continue;
 		}
 
 		if (key == "End" && value == "Header") {
@@ -263,7 +266,7 @@ void OMFImport::parseHeader()
 		} else if (key == "znodes") {
 			header.znodes = str2int(value);
 		} else {
-			clog << "OMFImport::parseHeader: Unknown key: " << key << "/" << value << endl;
+		  std::clog << "OMFImport::parseHeader: Unknown key: " << key << "/" << value << std::endl;
 		}
 		acceptLine();
 	}
@@ -287,26 +290,33 @@ void OMFImport::parseDataAscii()
 	acceptLine();
 
 	// Create field matrix object
-	field.reset(new VectorMatrix(Shape(header.xnodes, header.ynodes, header.znodes)));
-	field->clear();
-
-	VectorMatrix::accessor field_acc(*field);
+	//field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
+	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
+	
+	//VectorMatrix::accessor field_acc(*field);
 
 	for (int z=0; z<header.znodes; ++z)
-	for (int y=0; y<header.ynodes; ++y)
-	for (int x=0; x<header.xnodes; ++x) {
-		std::stringstream ss;
-		ss << line;
+	  for (int y=0; y<header.ynodes; ++y)
+	    for (int x=0; x<header.xnodes; ++x) {
+	      std::stringstream ss;
+	      ss << line;
+	      
+	      double v1, v2, v3;
+	      ss >> v1 >> v2 >> v3;
+	      //Vector3d vec(v1, v2, v3);
+	      
+	      //vec = vec * header.valuemultiplier;
+	      //vector_set(field_acc, x, y, z, vec);
+	      v1 = v1*header.valuemultiplier;
+	      v2 = v2*header.valuemultiplier;
+	      v3 = v3*header.valuemultiplier;
 
-		double v1, v2, v3;
-		ss >> v1 >> v2 >> v3;
-		Vector3d vec(v1, v2, v3);
-		
-		vec = vec * header.valuemultiplier;
-		field_acc.set(x, y, z, vec);
+	      (*field)[x][y][z][0] = v1;
+	      (*field)[x][y][z][1] = v2;
+	      (*field)[x][y][z][2] = v3;
 
-		acceptLine();
-	}
+	      acceptLine();
+	    }
 
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "End" || value != "Data Text") {
@@ -315,117 +325,109 @@ void OMFImport::parseDataAscii()
 	acceptLine();
 }
 
-void OMFImport::parseDataBinary4()
-{
-	assert(sizeof(float) == 4);
-
-	bool ok;
-	std::string key, value;
-
-	// Parse "Begin: Data Binary 4"
-	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "Begin" || value != "Data Binary 4") {
-		throw std::runtime_error("Expected 'Begin Binary 4'");
-	}
-
-	// Create field matrix object
-	field.reset(new VectorMatrix(Shape(header.xnodes, header.ynodes, header.znodes)));
-	field->clear();
-
-	const int num_cells = field->size();
-
-	// Read magic value and field contents from file
-	float magic; 
-	((char*)&magic)[0] = next_char; next_char = -1;
-	input->read((char*)&magic+1, sizeof(char)); 
-	input->read((char*)&magic+2, sizeof(char)); 
-	input->read((char*)&magic+3, sizeof(char)); 
-	magic = fromBigEndian(magic);
-
-	if (magic != 1234567.0f) throw std::runtime_error("Wrong magic number (binary 4 format)");
-
-	float *buffer = new float [3*num_cells];
-	input->read((char*)buffer, 3*num_cells*sizeof(float));
-
-	VectorMatrix::accessor field_acc(*field);
-
-	for (int i=0; i<num_cells; ++i) {
-		Vector3d vec;
-		vec.x = fromBigEndian(buffer[i*3+0]);
-		vec.y = fromBigEndian(buffer[i*3+1]);
-		vec.z = fromBigEndian(buffer[i*3+2]);
-		field_acc.set(i, vec * header.valuemultiplier);
-	}
-
-	delete [] buffer;
-
-	acceptLine(); // read trailing newline character
-	acceptLine(); // read next line...
-
-	// Parse "End: Data Binary 4"
-	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "End" || value != "Data Binary 4") {
-		throw std::runtime_error("Expected 'End Data Binary 4'");
-	}
-	acceptLine();
-}
-
-void OMFImport::parseDataBinary8()
-{
-	assert(sizeof(double) == 8);
-
-	bool ok;
-	std::string key, value;
-
-	// Parse "Begin: Data Binary 8"
-	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "Begin" || value != "Data Binary 8") {
-		throw std::runtime_error("Expected 'Begin Binary 8'");
-	}
-
-	// Create field matrix object
-	field.reset(new VectorMatrix(Shape(header.xnodes, header.ynodes, header.znodes)));
-	field->clear();
-
-	const int num_cells = field->size();
-
-	// Read magic value and field contents from file
-	double magic;
-	((char*)&magic)[0] = next_char; next_char = -1;
-	input->read((char*)&magic+1, sizeof(char)); 
-	input->read((char*)&magic+2, sizeof(char)); 
-	input->read((char*)&magic+3, sizeof(char)); 
-	input->read((char*)&magic+4, sizeof(char)); 
-	input->read((char*)&magic+5, sizeof(char)); 
-	input->read((char*)&magic+6, sizeof(char)); 
-	input->read((char*)&magic+7, sizeof(char)); 
-	magic = fromBigEndian(magic);
-
-	if (magic != 123456789012345.0) throw std::runtime_error("Wrong magic number (binary 8 format)");
-
-	double *buffer = new double [3*num_cells];
-	input->read((char*)buffer, 3*num_cells*sizeof(double));
-
-	VectorMatrix::accessor field_acc(*field);
-
-	for (int i=0; i<num_cells; ++i) {
-		Vector3d vec;
-		vec.x = fromBigEndian(buffer[i*3+0]);
-		vec.y = fromBigEndian(buffer[i*3+1]);
-		vec.z = fromBigEndian(buffer[i*3+2]);
-		field_acc.set(i, vec * header.valuemultiplier);
-	}
-
-	delete [] buffer;
-
-	acceptLine(); // read trailing newline character
-	acceptLine(); // read next line...
-
-	// Parse "End: Data Binary 8"
-	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "End" || value != "Data Binary 8") {
-		throw std::runtime_error("Expected 'End Data Binary 8'");
-	}
-	acceptLine();
-}
+//void OMFImport::parseDataBinary4()
+//{
+//	assert(sizeof(float) == 4);
+//
+//	bool ok;
+//	std::string key, value;
+//
+//	// Parse "Begin: Data Binary 4"
+//	ok = parseCommentLine(line, key, value);
+//	if (!ok || key != "Begin" || value != "Data Binary 4") {
+//		throw std::runtime_error("Expected 'Begin Binary 4'");
+//	}
+//
+//	// Create field matrix object
+//	field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
+//
+//	const int num_cells = field->numElements();
+//
+//	// Read magic value and field contents from file
+//	float magic; 
+//	((char*)&magic)[0] = next_char; next_char = -1;
+//	input->read((char*)&magic+1, sizeof(char)); 
+//	input->read((char*)&magic+2, sizeof(char)); 
+//	input->read((char*)&magic+3, sizeof(char)); 
+//	magic = fromBigEndian(magic);
+//
+//	if (magic != 1234567.0f) throw std::runtime_error("Wrong magic number (binary 4 format)");
+//
+//	float *buffer = new float [3*num_cells];
+//	input->read((char*)buffer, 3*num_cells*sizeof(float));
+//
+//	VectorMatrix::accessor field_acc(*field);
+//
+//	for (int i=0; i<num_cells; ++i) {
+//		for (int j=0; j<3; ++j) 
+//			field_acc.linearSet(i,j,fromBigEndian(buffer[i*3+j]) * header.valuemultiplier);
+//	}
+//
+//	delete [] buffer;
+//
+//	acceptLine(); // read trailing newline character
+//	acceptLine(); // read next line...
+//
+//	// Parse "End: Data Binary 4"
+//	ok = parseCommentLine(line, key, value);
+//	if (!ok || key != "End" || value != "Data Binary 4") {
+//		throw std::runtime_error("Expected 'End Data Binary 4'");
+//	}
+//	acceptLine();
+//}
+//
+//void OMFImport::parseDataBinary8()
+//{
+//	assert(sizeof(double) == 8);
+//
+//	bool ok;
+//	std::string key, value;
+//
+//	// Parse "Begin: Data Binary 8"
+//	ok = parseCommentLine(line, key, value);
+//	if (!ok || key != "Begin" || value != "Data Binary 8") {
+//		throw std::runtime_error("Expected 'Begin Binary 8'");
+//	}
+//
+//	// Create field matrix object
+//	field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
+//
+//	const int num_cells = field->numElements();
+//
+//	// Read magic value and field contents from file
+//	double magic;
+//	((char*)&magic)[0] = next_char; next_char = -1;
+//	input->read((char*)&magic+1, sizeof(char)); 
+//	input->read((char*)&magic+2, sizeof(char)); 
+//	input->read((char*)&magic+3, sizeof(char)); 
+//	input->read((char*)&magic+4, sizeof(char)); 
+//	input->read((char*)&magic+5, sizeof(char)); 
+//	input->read((char*)&magic+6, sizeof(char)); 
+//	input->read((char*)&magic+7, sizeof(char)); 
+//	magic = fromBigEndian(magic);
+//
+//	if (magic != 123456789012345.0) throw std::runtime_error("Wrong magic number (binary 8 format)");
+//
+//	double *buffer = new double [3*num_cells];
+//	input->read((char*)buffer, 3*num_cells*sizeof(double));
+//
+//	VectorMatrix::accessor field_acc(*field);
+//
+//	for (int i=0; i<num_cells; ++i) {
+//		for (int j=0; j<3; ++j) 
+//			field_acc.linearSet(i,j,fromBigEndian(buffer[i*3+j]) * header.valuemultiplier);
+//	}
+//
+//	delete [] buffer;
+//
+//	acceptLine(); // read trailing newline character
+//	acceptLine(); // read next line...
+//
+//	// Parse "End: Data Binary 8"
+//	ok = parseCommentLine(line, key, value);
+//	if (!ok || key != "End" || value != "Data Binary 8") {
+//		throw std::runtime_error("Expected 'End Data Binary 8'");
+//	}
+//	acceptLine();
+//}
 
