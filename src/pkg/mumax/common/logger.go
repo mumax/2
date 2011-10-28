@@ -49,7 +49,7 @@ const (
 )
 
 const (
-	LOG_DEBUG_COL  = BLUE
+	LOG_DEBUG_COL  = GREEN
 	LOG_WARN_COL   = RED
 	LOG_ERR_COL    = BOLD + RED
 	LOG_NORMAL_COL = RESET

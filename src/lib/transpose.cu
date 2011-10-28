@@ -60,7 +60,7 @@ __global__ void transposeComplexYZKernel(complex* output, complex* input, int N1
 }
 
 void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, int N2, CUstream* stream){
-    N2 /= 2;
+    N2 /= 2; // number of complex
     dim3 gridsize((N2-1) / BLOCKSIZE + 1, (N1-1) / BLOCKSIZE + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
     dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
 	for (int dev = 0; dev < nDevice(); dev++) {

@@ -19,8 +19,8 @@ extern "C" {
 
 
 /// Per-GPU 2D complex matrix partial transpose. 
-/// Input size: N1 x N2/2 complex numbers per GPU.
-///	Output size: N2/2 x N1 complex numbers per GPU.
+/// Input size: N0xN1xN2 reals (N1 x N2/2 complex) numbers per GPU.
+///	Output size:N0xN2/2xN1*2 reals (N2/2 x N1 complex) numbers per GPU.
 /// @note The result is not yet the transposed full matrix, data still has to be exchanged between GPUs.
 void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, int N2, CUstream* stream);
 

@@ -18,7 +18,7 @@ GOFILES=\
 	reductor.go\
 
 CGOFILES=\
-	gpus.go\
+	multigpu.go\
 	libmultigpu.go\
 
 GC+=\
