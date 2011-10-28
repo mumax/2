@@ -16,6 +16,7 @@ GOFILES=\
 	module_find.go\
 	math.go\
 	reductor.go\
+	fftplan.go\
 
 CGOFILES=\
 	multigpu.go\

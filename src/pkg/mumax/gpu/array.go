@@ -68,6 +68,13 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initCompPtrs()
 }
 
+
+// Parameters for Array.Init()
+const(
+DO_ALLOC = true
+DONT_ALLOC = false
+)
+
 // INTERNAL
 // initialize pointers to the component arrays.
 // called after the GPU storage has been changed.
@@ -113,7 +120,7 @@ func (a *Array) initSize(components int, size3D []int) {
 // Returns an array which holds a field with the number of components and given size.
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
-	t.Init(components, size3D, true)
+	t.Init(components, size3D, DO_ALLOC)
 	return t
 }
 
@@ -125,7 +132,7 @@ func NewArray(components int, size3D []int) *Array {
 // See: Alloc()
 func NilArray(components int, size3D []int) *Array {
 	t := new(Array)
-	t.Init(components, size3D, false)
+	t.Init(components, size3D, DONT_ALLOC)
 	return t
 }
 

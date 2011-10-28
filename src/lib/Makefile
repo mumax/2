@@ -19,6 +19,7 @@ $(OFILES): %.o: %.cu %.h
 	 $(NVCC) -c $(@:.o=.cu)
 
 libmultigpu.so: $(OFILES) libmultigpu.h
+	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) -shared $(OFILES) -o libmultigpu.so
 	cp -f $(CURDIR)/libmultigpu.so $(CURDIR)/../../lib
 	ln -sf $(CURDIR)/libmultigpu.so ../pkg/mumax/gpu
