@@ -111,7 +111,7 @@ func BenchmarkCopyPadZ(b *testing.B) {
 
 func TestTransposePart(test *testing.T) {
 
-	if NDevice() == 1{
+	if NDevice() > 1 {
 		println("Skipping TestTransposePart on >1 GPU")
 		return
 	}
