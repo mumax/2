@@ -58,11 +58,11 @@ __global__ void transposeComplexYZKernel(complex* input, complex* output, int N1
   return;
 }
 
-void TransposeComplexYZ1(float* input, float* output, int N0, int N1, int N2){
+void TransposeComplexYZAsync1(float* input, float* output, int N0, int N1, int N2, CUstream stream){
     N2 /= 2;
     dim3 gridsize((N2-1) / BLOCKSIZE + 1, (N1-1) / BLOCKSIZE + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
     dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
-    transposeComplexYZKernel<<<gridsize, blocksize>>>((complex*)input, (complex*)output, N2, N1, N0);
+    transposeComplexYZKernel<<<gridsize, blocksize, 0, stream>>>((complex*)input, (complex*)output, N2, N1, N0);
 }
 
 

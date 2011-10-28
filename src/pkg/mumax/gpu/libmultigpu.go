@@ -164,3 +164,6 @@ func CopyPadZ(dst, src *Array) {
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
 	dst.Stream.Sync()
 }
+
+// 
+//func TransposeComplexYZ1
