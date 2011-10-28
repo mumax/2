@@ -68,11 +68,10 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initCompPtrs()
 }
 
-
 // Parameters for Array.Init()
-const(
-DO_ALLOC = true
-DONT_ALLOC = false
+const (
+	DO_ALLOC   = true
+	DONT_ALLOC = false
 )
 
 // INTERNAL
