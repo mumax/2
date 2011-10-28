@@ -74,6 +74,7 @@ func (fft *FFTPlan) Exec(in, out *Array) {
 	for dev := range _useDevice {
 		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev]))
 	}
+	fft.Sync()
 
 	fmt.Println("fftZ:", padZ.LocalCopy().Array)
 

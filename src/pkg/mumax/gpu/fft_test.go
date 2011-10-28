@@ -28,7 +28,7 @@ func TestFFT(test *testing.T) {
 	for i := range inh.List {
 		inh.List[i] = 0
 	}
-	inh.List[0]=1
+	inh.List[0] = 1
 	in.CopyFromHost(inh)
 
 	fft.Exec(in, nil)
