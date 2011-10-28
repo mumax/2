@@ -55,7 +55,7 @@ func (fft *FFTPlan) Init(nComp int, dataSize, fftSize []int) {
 
 	// init transp2
 	t2N0 := dataSize[0]
-	t2N1 := ((fftSize[2]/NDevice())+2) * NDevice()
+	t2N1 := ((fftSize[2] / NDevice()) + 2) * NDevice()
 	t2N2 := dataSize[1]
 	fft.transp2.Init(nComp, []int{t2N0, t2N1, t2N2}, DO_ALLOC)
 }
