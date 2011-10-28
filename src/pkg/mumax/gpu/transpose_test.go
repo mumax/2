@@ -13,7 +13,53 @@ package gpu
 
 import (
 	"testing"
+	"fmt"
 )
+
+
+func TestTranspose(test *testing.T) {
+
+	size1 := []int{1, 4, 8 * 2}
+	size2 := []int{1, 8, 4 * 2}
+
+	const nComp = 1
+	a := NewArray(nComp, size1)
+	defer a.Free()
+	ah := a.LocalCopy()
+
+	b := NewArray(nComp, size2)
+	b.MemSet(42)
+	defer b.Free()
+
+	for i := range ah.List {
+		ah.List[i] = float32(i)
+	}
+
+	a.CopyFromHost(ah)
+
+	fmt.Println("A", a.LocalCopy().List)
+	TransposeComplexYZPart(b, a)
+	bh := b.LocalCopy()
+	fmt.Println("B", bh.List)
+
+	A := ah.Array
+	B := bh.Array
+	for c := range B {
+		for i := range B[c] {
+			for j := range B[c][i] {
+				for k := 0; k < len(B[c][i][j])/2; k++ {
+					if A[c][i][k][2*j] != B[c][i][j][2*k] {
+						test.Fail()
+					}
+					if A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
+						test.Fail()
+					}
+				}
+			}
+		}
+	}
+}
+
 
 func TestTransposePart(test *testing.T) {
 

@@ -166,11 +166,10 @@ func CopyPadZ(dst, src *Array) {
 	dst.Stream.Sync()
 }
 
-
 // Cross-device YZ transpose + pad.
-func TransposeComplexYZ(dst, src *Array){
+func TransposeComplexYZ(dst, src *Array) {
 	N0 := src.size4D[0] * src.size3D[0]
-	N1Part := src.size3D[1]/NDevice()
+	N1Part := src.size3D[1] / NDevice()
 	N2 := src.size3D[2]
 
 	C.transposePadYZAsync(
