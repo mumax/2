@@ -19,18 +19,18 @@ type FFTPlan struct {
 	dataSize [3]int         // Size of the (non-zero) input data block
 	fftSize  [3]int         // Transform size including zero-padding. >= dataSize
 	padZ     Array          // Buffer for Z-padding and +2 elements
-	planZ    []cufft.Handle // In-place transform of padZ parts, 1/GPU
-	transp1  Array // Buffer for partial transpose per GPU
-	Stream
-	// ... from outer space ... //
+	planZ    []cufft.Handle // In-place transform of padZ parts, 1/GPU /// ... from outer space
+	transp1  Array          // Buffer for partial transpose per GPU
+	transp2  Array          // Buffer for full transpose+padY, incl. inter-GPU swaps
+	Stream                  //
 }
 
-func (fft *FFTPlan) Init(nComp int, dataSize3D, fftSize3D []int) {
+func (fft *FFTPlan) Init(nComp int, dataSize, fftSize []int) {
 	// init size
 	fft.nComp = nComp
 	for i := range fft.dataSize {
-		fft.dataSize[i] = dataSize3D[i]
-		fft.fftSize[i] = fftSize3D[i]
+		fft.dataSize[i] = dataSize[i]
+		fft.fftSize[i] = fftSize[i]
 	}
 
 	// init stream
@@ -52,11 +52,17 @@ func (fft *FFTPlan) Init(nComp int, dataSize3D, fftSize3D []int) {
 
 	// init transp1
 	fft.transp1.Init(nComp, fft.padZ.size3D, DO_ALLOC)
+
+	// init transp2
+	t2N0 := dataSize[0]
+	t2N1 := ((fftSize[2]/NDevice())+2) * NDevice()
+	t2N2 := dataSize[1]
+	fft.transp2.Init(nComp, []int{t2N0, t2N1, t2N2}, DO_ALLOC)
 }
 
-func NewFFTPlan(nComp int, dataSize3D, fftSize3D []int) *FFTPlan {
+func NewFFTPlan(nComp int, dataSize, fftSize []int) *FFTPlan {
 	fft := new(FFTPlan)
-	fft.Init(nComp, dataSize3D, fftSize3D)
+	fft.Init(nComp, dataSize, fftSize)
 	return fft
 }
 
