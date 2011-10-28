@@ -19,10 +19,10 @@ import (
 
 func TestTranspose(test *testing.T) {
 
-	size1 := []int{1, 4, 8 * 2}
-	size2 := []int{1, 8, 4 * 2}
+	size1 := []int{2, 4, 8 * 2}
+	size2 := []int{2, 8, 4 * 2}
 
-	const nComp = 1
+	const nComp = 3
 	a := NewArray(nComp, size1)
 	defer a.Free()
 	ah := a.LocalCopy()

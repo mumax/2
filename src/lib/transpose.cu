@@ -21,11 +21,11 @@ typedef struct{
 #define BLOCKSIZE 16
 
 // cross-device complex transpose-pad, aka. the dragon kernel.
-__global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, int N2){
+__global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, int N2, int N0){
 
   	__shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];
 
-	int x = 0; // for...
+	for(int x=0; x<N0; x++){ // could take this out of kernel if we stream over planes...
 
     // index of the block inside the blockmatrix
     int BI = blockIdx.x;
@@ -55,6 +55,8 @@ __global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, 
     }
     
     __syncthreads();
+
+	}
 }
 
 
@@ -79,7 +81,7 @@ void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int 
 			float* src = input[dev];
 			float* dst = output[chunk];
 
-    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part);
+    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part, N0);
 		
 		}
 	}
