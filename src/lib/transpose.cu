@@ -21,7 +21,7 @@ typedef struct{
 #define BLOCKSIZE 16
 
 // cross-device complex transpose-pad, aka. the dragon kernel.
-__global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, int N2, int N0){
+__global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, int N2, int N0, int chunkN2){
 
   	__shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];
 
@@ -39,8 +39,8 @@ __global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, 
     int I = BI * BLOCKSIZE + i;
     int J = BJ * BLOCKSIZE + j;
 
-    if((I < N1) && (J < N2)){
-      block[j][i] = input[x*N1*N2 + J * N1 + I];
+    if((I < N1) && (J < chunkN2)){ // must be within this device's chunk (chunkN2)
+      block[j][i] = input[x*N1*N2 + J * N1 + I]; // but indexes in total data (N2)
     }
     
     __syncthreads();
@@ -50,7 +50,7 @@ __global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, 
     int It = BJ * BLOCKSIZE + i;
     int Jt = BI * BLOCKSIZE + j;
 
-    if((It < N2) && (Jt < N1)){
+    if((It < chunkN2) && (Jt < N1)){
       output[x*N1*N2 + Jt * N2 + It] = block[i][j];
     }
     
@@ -81,7 +81,7 @@ void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int 
 			float* src = &(input[dev][chunk]); // offset device pointer to start of chunk
 			float* dst = &(output[chunk][chunk]); // offset device pointer to start of chunk
 
-    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part, N0);
+    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part, N0, chunkN2); // yes N1-N2 are reversed.
 		
 		}
 	}
