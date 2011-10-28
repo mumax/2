@@ -16,7 +16,6 @@ import (
 	"fmt"
 )
 
-
 func TestTranspose(test *testing.T) {
 
 	size1 := []int{2, 4, 8 * 2}
@@ -59,7 +58,6 @@ func TestTranspose(test *testing.T) {
 		}
 	}
 }
-
 
 func TestTransposePart(test *testing.T) {
 
