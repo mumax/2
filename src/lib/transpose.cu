@@ -5,6 +5,7 @@
 
 #include "gpu_safe.h"
 #include "gpu_conf.h"
+#include "multigpu.h"
 #include <assert.h>
 
 #ifdef __cplusplus
@@ -19,7 +20,7 @@ typedef struct{
 /// The size of matrix blocks to be loaded into shared memory.
 #define BLOCKSIZE 16
 
-__global__ void transposeComplexYZKernel(complex* input, complex* output, int N1, int N2, int N)
+__global__ void transposeComplexYZKernel(complex* output, complex* input, int N1, int N2, int N)
 {
   __shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];
 
@@ -58,11 +59,14 @@ __global__ void transposeComplexYZKernel(complex* input, complex* output, int N1
   return;
 }
 
-void TransposeComplexYZAsync1(float* input, float* output, int N0, int N1, int N2, CUstream stream){
+void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, int N2, CUstream* stream){
     N2 /= 2;
     dim3 gridsize((N2-1) / BLOCKSIZE + 1, (N1-1) / BLOCKSIZE + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
     dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
-    transposeComplexYZKernel<<<gridsize, blocksize, 0, stream>>>((complex*)input, (complex*)output, N2, N1, N0);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+    	transposeComplexYZKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)output[dev], (complex*)input[dev], N2, N1, N0);
+	}
 }
 
 

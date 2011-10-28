@@ -148,8 +148,9 @@ func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
 func CopyPadZ(dst, src *Array) {
 	Assert(
 		dst.size4D[0] == src.size4D[0] &&
-			dst.size3D[0] == src.size3D[0] &&
-			dst.size3D[1] == src.size3D[1])
+		dst.size3D[0] == src.size3D[0] &&
+		dst.size3D[1] == src.size3D[1])
+
 	D2 := dst.size3D[2]
 	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
 	S1Part := src.partSize[1]
@@ -165,5 +166,19 @@ func CopyPadZ(dst, src *Array) {
 	dst.Stream.Sync()
 }
 
-// 
-//func TransposeComplexYZ1
+func TransposeComplexYZPart(out, in *Array){
+	Assert(
+		out.size4D[0] == in.size4D[0] &&
+		out.size3D[0] == in.size3D[0] &&
+		out.size3D[1] == in.size3D[2]/2 &&
+		out.size3D[2] == in.size3D[1]*2 )
+
+	C.transposeComplexYZAsyncPart(
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		(**C.float)(unsafe.Pointer(&in.pointer[0])),
+		C.int(out.size4D[0]*out.size3D[0]), // nComp * N0
+		C.int(in.size3D[1]),
+		C.int(in.size3D[2]/2),
+		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+	out.Stream.Sync()
+}

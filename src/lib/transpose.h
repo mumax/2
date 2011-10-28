@@ -18,10 +18,11 @@ extern "C" {
 #endif
 
 
-/// Single-GPU 2D complex matrix transpose. 
-/// Input size: N1 x N2/2 complex numbers.
-///	Output size: N2/2 x N1 complex numbers.
-void transposeComplexYZAsync1(float* input, float* output, int N0, int N1, int N2, CUstream stream);
+/// Per-GPU 2D complex matrix partial transpose. 
+/// Input size: N1 x N2/2 complex numbers per GPU.
+///	Output size: N2/2 x N1 complex numbers per GPU.
+/// @note The result is not yet the transposed full matrix, data still has to be exchanged between GPUs.
+void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, int N2, CUstream* stream);
 
 /// Swaps the Y and Z dimension of an array of complex numbers in interleaved format
 //void transposeComplexXZ(float *input, float *output, int N0, int N1, int N2);

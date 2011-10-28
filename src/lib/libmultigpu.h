@@ -26,6 +26,7 @@ extern "C" {
 #include "reduce.h"
 #include "exchange6.h"
 #include "pad.h"
+#include "transpose.h"
 
 
 #ifdef __cplusplus
