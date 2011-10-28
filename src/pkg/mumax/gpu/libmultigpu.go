@@ -167,11 +167,11 @@ func CopyPadZ(dst, src *Array) {
 }
 
 func TransposeComplexYZPart(out, in *Array) {
-//	Assert(
-//		out.size4D[0] == in.size4D[0] &&
-//			out.size3D[0] == in.size3D[0] &&
-//			out.size3D[1] == in.size3D[2]/2 &&
-//			out.size3D[2] == in.size3D[1]*2)
+	//	Assert(
+	//		out.size4D[0] == in.size4D[0] &&
+	//			out.size3D[0] == in.size3D[0] &&
+	//			out.size3D[1] == in.size3D[2]/2 &&
+	//			out.size3D[2] == in.size3D[1]*2)
 
 	C.transposeComplexYZAsyncPart(
 		(**C.float)(unsafe.Pointer(&out.pointer[0])),

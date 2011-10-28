@@ -14,7 +14,6 @@ package gpu
 import (
 	. "mumax/common"
 	"testing"
-		"fmt"
 )
 
 func TestCopyPadZ(test *testing.T) {
@@ -110,17 +109,16 @@ func BenchmarkCopyPadZ(b *testing.B) {
 	}
 }
 
+func TestTranspose(test *testing.T) {
 
-func TestTranspose(test *testing.T){
+	size1 := []int{2, 4, 8 * 2}
+	size2 := []int{2, 8, 4 * 2}
 
-	size1 := []int{1, 2, 4*2}
-	size2 := []int{1, 4, 2*2}
-
-	a := NewArray(1, size1)
+	a := NewArray(3, size1)
 	defer a.Free()
 	ah := a.LocalCopy()
 
-	b := NewArray(1, size2)
+	b := NewArray(3, size2)
 	b.MemSet(42)
 	defer b.Free()
 
@@ -130,30 +128,25 @@ func TestTranspose(test *testing.T){
 
 	a.CopyFromHost(ah)
 
-	fmt.Println("A", a.LocalCopy().List)
+	//fmt.Println("A", a.LocalCopy().List)
 	TransposeComplexYZPart(b, a)
 	bh := b.LocalCopy()
-	fmt.Println("B", bh.List)
+	//fmt.Println("B", bh.List)
 
-	//A := ah.Array
-	//S0, S1, S2 := ah.Size3D[0], ah.Size3D[1], ah.Size3D[2]
-	//B := bh.Array
-	//for c := range B {
-	//	for i := range B[c] {
-	//		for j := range B[c][i] {
-	//			for k := range B[c][i][j] {
-	//				if i < S0 && j < S1 && k < S2 {
-	//					if A[c][i][j][k] != B[c][i][j][k] {
-	//						test.Fail()
-	//					}
-	//				} else {
-	//					if B[c][i][j][k] != 0 {
-	//						test.Fail()
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-
+	A := ah.Array
+	B := bh.Array
+	for c := range B {
+		for i := range B[c] {
+			for j := range B[c][i] {
+				for k := 0; k < len(B[c][i][j])/2; k++ {
+					if A[c][i][k][2*j] != B[c][i][j][2*k] {
+						test.Fail()
+					}
+					if A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
+						test.Fail()
+					}
+				}
+			}
+		}
+	}
 }
