@@ -14,6 +14,7 @@ GC+=\
 	-I../apigen/_obj\
 	-I../queue/_obj\
 	-I../../cuda/driver/_obj\
+	-I../../cuda/cufft/_obj\
 	-I../../cuda/runtime/_obj\
 	
 LD+=\
@@ -25,6 +26,7 @@ LD+=\
 	-L../apigen/_obj\
 	-L../queue/_obj\
 	-L../../cuda/driver/_obj\
+	-L../../cuda/cufft/_obj\
 	-L../../cuda/runtime/_obj\
 
 all: $(executables)

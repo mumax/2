@@ -20,6 +20,75 @@ typedef struct{
 /// The size of matrix blocks to be loaded into shared memory.
 #define BLOCKSIZE 16
 
+// cross-device complex transpose-pad, aka. the dragon kernel.
+__global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, int N2){
+
+  	__shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];
+
+	int x = 0; // for...
+
+    // index of the block inside the blockmatrix
+    int BI = blockIdx.x;
+    int BJ = blockIdx.y;
+
+    // "minor" indices inside the tile
+    int i = threadIdx.x;
+    int j = threadIdx.y;
+    
+    // "major" indices inside the entire matrix
+    int I = BI * BLOCKSIZE + i;
+    int J = BJ * BLOCKSIZE + j;
+
+    if((I < N1) && (J < N2)){
+      block[j][i] = input[x*N1*N2 + J * N1 + I];
+    }
+    
+    __syncthreads();
+
+    
+    // Major indices with transposed blocks but not transposed minor indices
+    int It = BJ * BLOCKSIZE + i;
+    int Jt = BI * BLOCKSIZE + j;
+
+    if((It < N2) && (Jt < N1)){
+      output[x*N1*N2 + Jt * N2 + It] = block[i][j];
+    }
+    
+    __syncthreads();
+}
+
+
+void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int N2, int N2Pad, CUstream* stream){
+	int nDev = nDevice();
+	N2 /= 2; // number of complexes
+
+	// each chunk has a different destination device
+	int chunkN2 = divUp(N2, nDev);
+	int chunkN1 = N1Part;  // *N0;
+
+	// divide each chunk in shmem blocks
+    dim3 gridsize(divUp(chunkN2, BLOCKSIZE), divUp(chunkN1, BLOCKSIZE), 1);
+    dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
+	
+	for (int dev = 0; dev < nDev; dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+	
+		for(int chunk = 0; chunk < nDev; chunk++){
+			// source device = dev
+			// target device = chunk
+			float* src = input[dev];
+			float* dst = output[chunk];
+
+    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part);
+		
+		}
+	}
+	
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 __global__ void transposeComplexYZKernel(complex* output, complex* input, int N1, int N2, int N)
 {
   __shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];

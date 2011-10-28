@@ -17,6 +17,7 @@
 extern "C" {
 #endif
 
+void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int N2, int N2Pad, CUstream* stream);
 
 /// Per-GPU 2D complex matrix partial transpose. 
 /// Input size: N0xN1xN2 reals (N1 x N2/2 complex) numbers per GPU.

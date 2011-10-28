@@ -4,7 +4,7 @@ dirs=\
 	src\
 	lib\
 	tests\
-	doc\
+	#doc\
 
 CLEANFILES+=*.log
 
