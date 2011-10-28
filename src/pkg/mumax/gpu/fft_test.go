@@ -17,8 +17,8 @@ import (
 
 func TestFFT(test *testing.T) {
 	nComp := 1
-	dataSize := []int{1, 1, 8}
-	fftSize := []int{1, 1, 8}
+	dataSize := []int{1, 2, 8}
+	fftSize := []int{1, 2, 8}
 	fft := NewFFTPlan(nComp, dataSize, fftSize)
 	defer fft.Free()
 
@@ -26,8 +26,9 @@ func TestFFT(test *testing.T) {
 	defer in.Free()
 	inh := in.LocalCopy()
 	for i := range inh.List {
-		inh.List[i] = float32(i)
+		inh.List[i] = 0
 	}
+	inh.List[0]=1
 	in.CopyFromHost(inh)
 
 	fft.Exec(in, nil)

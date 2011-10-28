@@ -16,10 +16,10 @@ import (
 
 type FFTPlan struct {
 	nComp    int
-	dataSize [3]int // Size of the (non-zero) input data block
-	fftSize  [3]int // Transform size including zero-padding. >= dataSize
-	padZ     Array // Buffer for Z-padding and +2 elements
-	planZ []cufft.Handle // In-place transform of padZ parts, 1/GPU
+	dataSize [3]int         // Size of the (non-zero) input data block
+	fftSize  [3]int         // Transform size including zero-padding. >= dataSize
+	padZ     Array          // Buffer for Z-padding and +2 elements
+	planZ    []cufft.Handle // In-place transform of padZ parts, 1/GPU
 	Stream
 	// ... from outer space ... //
 }
@@ -33,15 +33,15 @@ func (fft *FFTPlan) Init(nComp int, dataSize3D, fftSize3D []int) {
 
 	fft.Stream = NewStream()
 
-	padZN0 :=fft.dataSize[0]
-	padZN1 :=fft.dataSize[1]
+	padZN0 := fft.dataSize[0]
+	padZN1 := fft.dataSize[1]
 	padZN2 := fft.fftSize[2] + 2
 	fft.padZ.Init(nComp, []int{padZN0, padZN1, padZN2}, DO_ALLOC)
 
 	fft.planZ = make([]cufft.Handle, NDevice())
-	for dev:=range _useDevice{
+	for dev := range _useDevice {
 		setDevice(_useDevice[dev])
-		fft.planZ[dev] = cufft.Plan1d(padZN2, cufft.R2C, (nComp*padZN0*padZN1)/NDevice())
+		fft.planZ[dev] = cufft.Plan1d(fft.fftSize[2], cufft.R2C, (nComp*padZN0*padZN1)/NDevice())
 		fft.planZ[dev].SetStream(uintptr(fft.Stream[dev]))
 	}
 }
@@ -71,10 +71,10 @@ func (fft *FFTPlan) Exec(in, out *Array) {
 	CopyPadZ(&(padZ), in)
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
-	for dev:=range _useDevice{
+	for dev := range _useDevice {
 		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev]))
-	}	
+	}
 
 	fmt.Println("fftZ:", padZ.LocalCopy().Array)
-	
+
 }
