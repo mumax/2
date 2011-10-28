@@ -26,11 +26,11 @@ func TestFFT(test *testing.T) {
 	defer in.Free()
 	inh := in.LocalCopy()
 	for i := range inh.List {
-		inh.List[i] = 0
+		inh.List[i] = float32(i)
 	}
-	inh.List[0] = 1
+	//inh.List[0] = 1
 	in.CopyFromHost(inh)
 
-	fft.Exec(in, nil)
+	fft.Forward(in, nil)
 
 }

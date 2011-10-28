@@ -20,30 +20,38 @@ type FFTPlan struct {
 	fftSize  [3]int         // Transform size including zero-padding. >= dataSize
 	padZ     Array          // Buffer for Z-padding and +2 elements
 	planZ    []cufft.Handle // In-place transform of padZ parts, 1/GPU
+	transp1  Array // Buffer for partial transpose per GPU
 	Stream
 	// ... from outer space ... //
 }
 
 func (fft *FFTPlan) Init(nComp int, dataSize3D, fftSize3D []int) {
+	// init size
 	fft.nComp = nComp
 	for i := range fft.dataSize {
 		fft.dataSize[i] = dataSize3D[i]
 		fft.fftSize[i] = fftSize3D[i]
 	}
 
+	// init stream
 	fft.Stream = NewStream()
 
+	// init padZ
 	padZN0 := fft.dataSize[0]
 	padZN1 := fft.dataSize[1]
 	padZN2 := fft.fftSize[2] + 2
 	fft.padZ.Init(nComp, []int{padZN0, padZN1, padZN2}, DO_ALLOC)
 
+	// init planZ
 	fft.planZ = make([]cufft.Handle, NDevice())
 	for dev := range _useDevice {
 		setDevice(_useDevice[dev])
 		fft.planZ[dev] = cufft.Plan1d(fft.fftSize[2], cufft.R2C, (nComp*padZN0*padZN1)/NDevice())
 		fft.planZ[dev].SetStream(uintptr(fft.Stream[dev]))
 	}
+
+	// init transp1
+	fft.transp1.Init(nComp, fft.padZ.size3D, DO_ALLOC)
 }
 
 func NewFFTPlan(nComp int, dataSize3D, fftSize3D []int) *FFTPlan {
@@ -63,19 +71,21 @@ func (fft *FFTPlan) Free() {
 	// TODO destroy
 }
 
-func (fft *FFTPlan) Exec(in, out *Array) {
+func (fft *FFTPlan) Forward(in, out *Array) {
 	padZ := fft.padZ
+	transp1 := fft.transp1
 
 	fmt.Println("in:", in.LocalCopy().Array)
 
 	CopyPadZ(&(padZ), in)
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
-	for dev := range _useDevice {
-		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev]))
-	}
-	fft.Sync()
-
+	//for dev := range _useDevice {
+	//	fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
+	//}
+	//fft.Sync()
 	fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
+	TransposeComplexYZPart(&transp1, &padZ)
+	fmt.Println("transp1:", transp1.LocalCopy().Array)
 }
