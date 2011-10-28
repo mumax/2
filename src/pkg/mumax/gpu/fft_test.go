@@ -15,6 +15,22 @@ import (
 	"testing"
 )
 
-func TestFFT(test *testing.T){
+func TestFFT(test *testing.T) {
+	nComp := 1
+	dataSize := []int{1, 1, 8}
+	fftSize := []int{1, 1, 8}
+	fft := NewFFTPlan(nComp, dataSize, fftSize)
+	defer fft.Free()
+
+	in := NewArray(nComp, dataSize)
+	defer in.Free()
+	inh := in.LocalCopy()
+	for i := range inh.List {
+		inh.List[i] = float32(i)
+	}
+	in.CopyFromHost(inh)
+
+	
+	fft.Exec(in, nil)
 
 }

@@ -31,6 +31,23 @@ func (fft *FFTPlan) Init(nComp int, dataSize3D, fftSize3D []int) {
 	fft.padZ.Init(nComp, padZSize, DO_ALLOC)
 }
 
+func NewFFTPlan(nComp int, dataSize3D, fftSize3D []int) *FFTPlan{
+	fft:=new(FFTPlan)
+	fft.Init(nComp, dataSize3D, fftSize3D)
+	return fft
+}
+
+func(fft*FFTPlan)Free(){
+	fft.nComp=0
+	for i := range fft.dataSize {
+		fft.dataSize[i] = 0
+		fft.fftSize[i] = 0
+	}
+	(&(fft.padZ)).Free()
+
+	// TODO destroy
+}
+
 func (fft *FFTPlan) Exec(in, out *Array) {
 	fmt.Println("in:", in.LocalCopy().Array)
 	CopyPadZ(&(fft.padZ), in)
