@@ -30,7 +30,6 @@ func TestFFT(test *testing.T) {
 	}
 	in.CopyFromHost(inh)
 
-	
 	fft.Exec(in, nil)
 
 }
