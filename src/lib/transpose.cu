@@ -78,8 +78,8 @@ void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int 
 		for(int chunk = 0; chunk < nDev; chunk++){
 			// source device = dev
 			// target device = chunk
-			float* src = &(input[dev][chunk]); // offset device pointer to start of chunk
-			float* dst = &(output[chunk][chunk]); // offset device pointer to start of chunk
+			float* src = &(input[dev][chunk*chunkN2]); // offset device pointer to start of chunk
+			float* dst = &(output[chunk][chunk*chunkN2]); // offset device pointer to start of chunk
 
     		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part, N0, chunkN2); // yes N1-N2 are reversed.
 		
