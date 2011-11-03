@@ -20,7 +20,9 @@ typedef struct{
 /// The size of matrix blocks to be loaded into shared memory.
 #define BLOCKSIZE 16
 
+
 // cross-device complex transpose-pad, aka. the dragon kernel.
+// note: N1,N2 are already reversed in the arguments.
 __global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, int N2, int N0, int chunkN1){
 
   	__shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];
@@ -120,7 +122,7 @@ void transposePadYZAsync(float** output_f, float** input_f, int N0, int N1Part, 
 			// source device = dev
 			// target device = chunk
 			complex* src = &(input[dev][chunk*chunkN2]); // offset device pointer to start of chunk
-			complex* dst = &(output[chunk][dev*chunkN2]); // ??? offset device pointer to start of chunk
+			complex* dst = &(output[chunk][dev*chunkN1]); // ??? offset device pointer to start of chunk
 
     		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>(dst, src, N2, N1Part, N0, chunkN2); // yes N1-N2 are reversed.
 			gpu_safe(cudaGetLastError());
