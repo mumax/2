@@ -47,11 +47,9 @@ func TestTranspose(test *testing.T) {
 		for i := range B[c] {
 			for j := range B[c][i] {
 				for k := 0; k < len(B[c][i][j])/2; k++ {
-					if A[c][i][k][2*j] != B[c][i][j][2*k] {
-						test.Fail()
-					}
-					if A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
-						test.Fail()
+					if A[c][i][k][2*j] != B[c][i][j][2*k] ||
+						A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
+						test.Error(A[c][i][k][2*j+0], A[c][i][k][2*j+1], "!=", B[c][i][j][2*k+0], B[c][i][j][2*k+1])
 					}
 				}
 			}
@@ -94,11 +92,9 @@ func TestTransposePart(test *testing.T) {
 		for i := range B[c] {
 			for j := range B[c][i] {
 				for k := 0; k < len(B[c][i][j])/2; k++ {
-					if A[c][i][k][2*j] != B[c][i][j][2*k] {
-						test.Fail()
-					}
-					if A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
-						test.Fail()
+					if A[c][i][k][2*j] != B[c][i][j][2*k] ||
+						A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
+						test.Error(A[c][i][k][2*j+0], A[c][i][k][2*j+1], "!=", B[c][i][j][2*k+0], B[c][i][j][2*k+1])
 					}
 				}
 			}
