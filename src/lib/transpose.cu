@@ -25,38 +25,72 @@ __global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, 
 
   	__shared__ complex block[BLOCKSIZE][BLOCKSIZE+1];
 
-	for(int x=0; x<N0; x++){ // could take this out of kernel if we stream over planes...
+  for (int x=0; x<N0; x++){
+    // index of the block inside the blockmatrix
+    int BI = blockIdx.x;
+    int BJ = blockIdx.y;
 
-   		 // index of the block inside the blockmatrix
-   		 int BI = blockIdx.x;
-   		 int BJ = blockIdx.y;
+    // "minor" indices inside the tile
+    int i = threadIdx.x;
+    int j = threadIdx.y;
 
-   		 // "minor" indices inside the tile
-   		 int i = threadIdx.x;
-   		 int j = threadIdx.y;
-   		 
-   		 // "major" indices inside the entire matrix
-   		 int I = BI * BLOCKSIZE + i;
-   		 int J = BJ * BLOCKSIZE + j;
+    {
+      // "major" indices inside the entire matrix
+      int I = BI * BLOCKSIZE + i;
+      int J = BJ * BLOCKSIZE + j;
 
-   		 if((I < N1) && (J < chunkN2)){ // must be within this device's chunk (chunkN2)
-   		   block[j][i] = input[x*N1*N2 + J * N1 + I]; // but indexes in total data (N2)
-   		 }
-   		 
-   		 __syncthreads();
+      if((I < N1) && (J < N2)){
+        block[j][i] = input[x*N1*N2 + J * N1 + I];
+      }
+    }
+    __syncthreads();
 
-   		 
-   		 // Major indices with transposed blocks but not transposed minor indices
-   		 int It = BJ * BLOCKSIZE + i;
-   		 int Jt = BI * BLOCKSIZE + j;
+    {
+      // Major indices with transposed blocks but not transposed minor indices
+      int It = BJ * BLOCKSIZE + i;
+      int Jt = BI * BLOCKSIZE + j;
 
-   		 if((It < chunkN2) && (Jt < N1)){
-   		   output[x*N1*N2 + Jt * N2 + It] = block[i][j];
-   		 }
-    
-   		 __syncthreads();
-
-	}
+      if((It < N2) && (Jt < N1)){
+        output[x*N1*N2 + Jt * N2 + It] = block[i][j];
+      }
+    }
+    __syncthreads();
+  }
+  
+  return;
+//
+//	for(int x=0; x<N0; x++){ // could take this out of kernel if we stream over planes...
+//
+//   		 // index of the block inside the blockmatrix
+//   		 int BI = blockIdx.x;
+//   		 int BJ = blockIdx.y;
+//
+//   		 // "minor" indices inside the tile
+//   		 int i = threadIdx.x;
+//   		 int j = threadIdx.y;
+//   		 
+//   		 // "major" indices inside the entire matrix
+//   		 int I = BI * BLOCKSIZE + i;
+//   		 int J = BJ * BLOCKSIZE + j;
+//
+//   		 if((I < N1) && (J < chunkN2)){ // must be within this device's chunk (chunkN2)
+//   		   block[j][i] = input[x*N1*N2 + J * N1 + I]; // but indexes in total data (N2)
+//   		 }
+//   		 
+//   		 __syncthreads();
+//
+//   		 
+//   		 // Major indices with transposed blocks but not transposed minor indices
+//   		 int It = BJ * BLOCKSIZE + i;
+//   		 int Jt = BI * BLOCKSIZE + j;
+//
+//   		 if((It < chunkN2) && (Jt < N1)){
+//   		   output[x*N1*N2 + Jt * N2 + It] = block[i][j];
+//   		 }
+//    
+//   		 __syncthreads();
+//
+//	}
 }
 
 
