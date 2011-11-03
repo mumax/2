@@ -18,8 +18,10 @@ import (
 
 func TestTranspose(test *testing.T) {
 
-	size1 := []int{1, 4, 8 * 2}
-	size2 := []int{1, 8, 4 * 2}
+	N1 := 8
+	N2 := 16
+	size1 := []int{1, N1, N2 * 2}
+	size2 := []int{1, N2, N1 * 2}
 
 	const nComp = 1
 	a := NewArray(nComp, size1)
