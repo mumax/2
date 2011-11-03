@@ -18,16 +18,16 @@ import (
 
 func TestTranspose(test *testing.T) {
 
-	size1 := []int{2, 4, 8 * 2}
-	size2 := []int{2, 8, 4 * 2}
+	size1 := []int{1, 4, 8 * 2}
+	size2 := []int{1, 8, 4 * 2}
 
-	const nComp = 3
+	const nComp = 1
 	a := NewArray(nComp, size1)
 	defer a.Free()
 	ah := a.LocalCopy()
 
 	b := NewArray(nComp, size2)
-	b.MemSet(42)
+	//b.MemSet(42)
 	defer b.Free()
 
 	for i := range ah.List {
@@ -37,7 +37,7 @@ func TestTranspose(test *testing.T) {
 	a.CopyFromHost(ah)
 
 	fmt.Println("A", a.LocalCopy().List)
-	TransposeComplexYZPart(b, a)
+	TransposeComplexYZ(b, a)
 	bh := b.LocalCopy()
 	fmt.Println("B", bh.List)
 

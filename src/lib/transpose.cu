@@ -60,13 +60,16 @@ __global__ void xdevTransposePadKernel(complex* output, complex* input, int N1, 
 }
 
 
-void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int N2, int N2Pad, CUstream* stream){
+void transposePadYZAsync(float** output_f, float** input_f, int N0, int N1Part, int N2, int N2Pad, CUstream* stream){
 	int nDev = nDevice();
 	N2 /= 2; // number of complexes
+	complex** input = (complex**)input_f;
+	complex** output = (complex**)output_f;
 
 	// each chunk has a different destination device
 	int chunkN2 = divUp(N2, nDev);
 	int chunkN1 = N1Part;  // *N0;
+	// chunkN0 = N0
 
 	// divide each chunk in shmem blocks
     dim3 gridsize(divUp(chunkN2, BLOCKSIZE), divUp(chunkN1, BLOCKSIZE), 1);
@@ -78,10 +81,10 @@ void transposePadYZAsync(float** output, float** input, int N0, int N1Part, int 
 		for(int chunk = 0; chunk < nDev; chunk++){
 			// source device = dev
 			// target device = chunk
-			float* src = &(input[dev][chunk*chunkN2]); // offset device pointer to start of chunk
-			float* dst = &(output[chunk][chunk*chunkN2]); // offset device pointer to start of chunk
+			complex* src = &(input[dev][chunk*chunkN2]); // offset device pointer to start of chunk
+			complex* dst = &(output[chunk][chunk*chunkN2]); // offset device pointer to start of chunk
 
-    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)dst, (complex*)src, N2, N1Part, N0, chunkN2); // yes N1-N2 are reversed.
+    		xdevTransposePadKernel<<<gridsize, blocksize, 0, stream[dev]>>>(dst, src, N2, N1Part, N0, chunkN2); // yes N1-N2 are reversed.
 		
 		}
 	}
