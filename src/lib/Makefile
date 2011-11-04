@@ -9,7 +9,7 @@ OFILES=\
 	add.o\
 	torque.o\
 	normalize.o\
-	pad.o\
+	copypad.o\
 	transpose.o\
 	exchange6.o\
 

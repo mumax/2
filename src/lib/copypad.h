@@ -4,8 +4,8 @@
   * @author Arne Vansteenkiste
   */
 
-#ifndef _PAD_H_
-#define _PAD_H_
+#ifndef _COPYPAD_H_
+#define _COPYPAD_H_
 
 #include <cuda.h>
 

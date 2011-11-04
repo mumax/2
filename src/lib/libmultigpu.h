@@ -25,7 +25,7 @@ extern "C" {
 #include "normalize.h"
 #include "reduce.h"
 #include "exchange6.h"
-#include "pad.h"
+#include "copypad.h"
 #include "transpose.h"
 
 

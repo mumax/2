@@ -1,4 +1,4 @@
-#include "pad.h"
+#include "copypad.h"
 
 #include "multigpu.h"
 #include <cuda.h>
