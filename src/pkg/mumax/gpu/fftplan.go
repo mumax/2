@@ -113,7 +113,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// source device = dev
 			// target device = chunk
 
-			offset := c*((fft.dataSize[1]/NDevice()) * (fft.fftSize[2]/NDevice()))
+			offset := c * ((fft.dataSize[1] / NDevice()) * (fft.fftSize[2] / NDevice()))
 			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), offset))
 			fmt.Println("fft.dataSize[1]=", fft.dataSize[1])
 			fmt.Println("fft.fftSize[2]=", fft.fftSize[2])

@@ -165,7 +165,7 @@ func InitDebugGPUs() {
 	}
 	if N == 1 {
 		println("WARING: using only one GPU")
-		//use = append(use, 0) // Use the same device twice.
+		use = append(use, 0) // Use the same device twice.
 	}
 	InitMultiGPU(use, 0)
 }
