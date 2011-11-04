@@ -22,6 +22,8 @@ extern "C" {
 /// @param S2: source Z size , <= D2
 void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
+void interleaveZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams);
+
 #ifdef __cplusplus
 }
 #endif
