@@ -43,45 +43,45 @@ void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S
 
 
 
-__global__ void combineZKern(float* dst, int D2, float* src1, float* src2, int S1, int S2){
-  
-   int i = blockIdx.y * blockDim.y + threadIdx.y;
-   int j = blockIdx.x * blockDim.x + threadIdx.x;
-   int D1 = S1; ///@todo:rm
-
-	// this check makes it work for padding as well as for unpadding.
-	// 2 separate functions are probably not more efficient
-	// due to memory bandwidth limitations
-   if (i<D1 && j<D2){ // if we are in the destination array we should write something
-		if(i<S1){ // probably redundant
-			if(j<S2){ 	// we are in the source1 array
-		   		dst[i*D2 + j] = src1[i*S2 + j];
-			} else if(j<2*S2){ // we are in the source2 array
-				dst[i*D2 + j] = src2[i*S2 + (j-S2)];
-			}
-		}
-   }
-}
-
-
-void combineZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams){
-
-#define BLOCKSIZE 16 ///@todo use device properties
-
-  dim3 gridSize(divUp(D2, BLOCKSIZE), divUp(S1Part, BLOCKSIZE), 1); // range over destination size
-  dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
-  check3dconf(gridSize, blockSize);
-
-	for (int dev = 0; dev < nDevice(); dev++) {
-		gpu_safe(cudaSetDevice(deviceId(dev)));
-		for(int i=0; i<S0; i++){
-			float* src1_2D = &(src1[dev][i*S1Part*S2]);
-			float* src2_2D = &(src2[dev][i*S1Part*S2]);
-			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
-			combineZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src1_2D, src2_2D, S1Part, S2);///@todo stream or loop in kernel
-		}
-	}
-}
+//__global__ void combineZKern(float* dst, int D2, float* src1, float* src2, int S1, int S2){
+//  
+//   int i = blockIdx.y * blockDim.y + threadIdx.y;
+//   int j = blockIdx.x * blockDim.x + threadIdx.x;
+//   int D1 = S1; ///@todo:rm
+//
+//	// this check makes it work for padding as well as for unpadding.
+//	// 2 separate functions are probably not more efficient
+//	// due to memory bandwidth limitations
+//   if (i<D1 && j<D2){ // if we are in the destination array we should write something
+//		if(i<S1){ // probably redundant
+//			if(j<S2){ 	// we are in the source1 array
+//		   		dst[i*D2 + j] = src1[i*S2 + j];
+//			} else if(j<2*S2){ // we are in the source2 array
+//				dst[i*D2 + j] = src2[i*S2 + (j-S2)];
+//			}
+//		}
+//   }
+//}
+//
+//
+//void combineZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams){
+//
+//#define BLOCKSIZE 16 ///@todo use device properties
+//
+//  dim3 gridSize(divUp(D2, BLOCKSIZE), divUp(S1Part, BLOCKSIZE), 1); // range over destination size
+//  dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
+//  check3dconf(gridSize, blockSize);
+//
+//	for (int dev = 0; dev < nDevice(); dev++) {
+//		gpu_safe(cudaSetDevice(deviceId(dev)));
+//		for(int i=0; i<S0; i++){
+//			float* src1_2D = &(src1[dev][i*S1Part*S2]);
+//			float* src2_2D = &(src2[dev][i*S1Part*S2]);
+//			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
+//			combineZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src1_2D, src2_2D, S1Part, S2);///@todo stream or loop in kernel
+//		}
+//	}
+//}
 
 
 

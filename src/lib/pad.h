@@ -23,6 +23,11 @@ extern "C" {
 void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
 
+/// Copy from src into a block in dst
+/// E.g.:
+///	2x2 source, block = 1, 2x6 dst:
+///	[ 0 0  S1 S2  0 0 ]
+///	[ 0 0  S3 S4  0 0 ]
 void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
 
 
@@ -38,7 +43,7 @@ void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S
 /// @param S0: source X size, same as dst X size
 /// @param S1: source Y size per GPU, same as dst Y size
 /// @param S2: source Z size , <= D2
-void combineZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams);
+//void combineZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams);
 
 #ifdef __cplusplus
 }

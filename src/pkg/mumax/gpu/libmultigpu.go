@@ -166,11 +166,14 @@ func CopyPadZ(dst, src *Array) {
 	dst.Stream.Sync()
 }
 
-// Copy from src to dst, which have different size3D[Z].
-
+// Copy from src into a block in dst
+// E.g.:
+// 	2x2 source, block = 1, 2x6 dst:
+//	[ 0 0  S1 S2  0 0 ]
+//	[ 0 0  S3 S4  0 0 ]
 func CopyBlockZ(dst, src *Array, block int) {
 	Assert(
-			dst.size4D[0] == src.size4D[0] &&
+		dst.size4D[0] == src.size4D[0] &&
 			dst.size3D[0] == src.size3D[0] &&
 			dst.size3D[1] == src.size3D[1] &&
 			dst.size3D[2] >= src.size3D[2]*(block+1))
