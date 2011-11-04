@@ -227,7 +227,7 @@ func TransposeComplexYZPart(out, in *Array) {
 		(**C.float)(unsafe.Pointer(&out.pointer[0])),
 		(**C.float)(unsafe.Pointer(&in.pointer[0])),
 		C.int(out.size4D[0]*out.size3D[0]), // nComp * N0
-		C.int(in.size3D[1]),
+		C.int(in.partSize[1]), //!
 		C.int(in.size3D[2]), // not / 2 !
 		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
 	out.Stream.Sync()

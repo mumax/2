@@ -113,9 +113,12 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// source device = dev
 			// target device = chunk
 
-			src := cu.DevicePtr(ArrayOffset(
-				uintptr(transp1.pointer[dev]),
-				c*(fft.fftSize[1]*fft.fftSize[2]*2/NDevice()))) // *2: complex
+			offset := c*((fft.dataSize[1]/NDevice()) * (fft.fftSize[2]/NDevice()))
+			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), offset))
+			fmt.Println("fft.dataSize[1]=", fft.dataSize[1])
+			fmt.Println("fft.fftSize[2]=", fft.fftSize[2])
+			fmt.Println("offset=", offset)
+			fmt.Println("src=", src)
 			dst := chunks[dev].pointer[c]
 			// must be done plane by plane
 			cu.MemcpyDtoD(dst, src, chunkBytes)
