@@ -217,18 +217,18 @@ func CopyBlockZ(dst, src *Array, block int) {
 //}
 
 func TransposeComplexYZPart(out, in *Array) {
-		Assert(
-			out.size4D[0] == in.size4D[0] &&
-				out.size3D[0] == in.size3D[0] &&
-				out.size3D[1] * out.size3D[2] == in.size3D[2] * in.size3D[1])
+	Assert(
+		out.size4D[0] == in.size4D[0] &&
+			out.size3D[0] == in.size3D[0] &&
+			out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
 
-		//Debug("in.partSize[1]", in.partSize[1])
+	//Debug("in.partSize[1]", in.partSize[1])
 	C.transposeComplexYZAsyncPart(
 		(**C.float)(unsafe.Pointer(&out.pointer[0])),
 		(**C.float)(unsafe.Pointer(&in.pointer[0])),
 		C.int(in.size4D[0]*in.size3D[0]), // nComp * N0
-		C.int(in.partSize[1]),              //!
-		C.int(in.size3D[2]),                // not / 2 !
+		C.int(in.partSize[1]),            //!
+		C.int(in.size3D[2]),              // not / 2 !
 		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
 	out.Stream.Sync()
 }
