@@ -12,7 +12,7 @@ extern "C" {
 /// @author Arne Vansteenkiste, okt 2011
 
 
-__global__ void interleaveZKern(float* dst, int D2, float* src1, float* src2, int S1, int S2){
+__global__ void combineZKern(float* dst, int D2, float* src1, float* src2, int S1, int S2){
   
    int i = blockIdx.y * blockDim.y + threadIdx.y;
    int j = blockIdx.x * blockDim.x + threadIdx.x;
@@ -33,7 +33,7 @@ __global__ void interleaveZKern(float* dst, int D2, float* src1, float* src2, in
 }
 
 
-void interleaveZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams){
+void combineZAsync(float** dst, int D2, float** src1, float** src2, int S0, int S1Part, int S2, CUstream* streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
@@ -47,7 +47,7 @@ void interleaveZAsync(float** dst, int D2, float** src1, float** src2, int S0, i
 			float* src1_2D = &(src1[dev][i*S1Part*S2]);
 			float* src2_2D = &(src2[dev][i*S1Part*S2]);
 			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
-			interleaveZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src1_2D, src2_2D, S1Part, S2);///@todo stream or loop in kernel
+			combineZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src1_2D, src2_2D, S1Part, S2);///@todo stream or loop in kernel
 		}
 	}
 }

@@ -17,9 +17,7 @@ import (
 	"fmt"
 )
 
-
-
-func TestInterleaveZ(test *testing.T) {
+func TestCombineZ(test *testing.T) {
 	// fail test on panic, do not crash
 	defer func() {
 		if err := recover(); err != nil {
@@ -29,7 +27,7 @@ func TestInterleaveZ(test *testing.T) {
 
 	Nc := 3
 	size1 := []int{1, 4, 8}
-	size2 := []int{1, 4, 8*2}
+	size2 := []int{1, 4, 8 * 2}
 
 	a := NewArray(Nc, size1)
 	defer a.Free()
@@ -51,61 +49,58 @@ func TestInterleaveZ(test *testing.T) {
 	c := NewArray(Nc, size2)
 	defer c.Free()
 
-
 	fmt.Println("a", a.LocalCopy().Array)
 	fmt.Println("b", b.LocalCopy().Array)
-	InterleaveZ(c, a, b)
+	CombineZ(c, a, b)
 	fmt.Println("c", c.LocalCopy().Array)
 
-//	A := ah.Array
-//	S0, S1, S2 := ah.Size3D[0], ah.Size3D[1], ah.Size3D[2]
-//	B := bh.Array
-//	for c := range B {
-//		for i := range B[c] {
-//			for j := range B[c][i] {
-//				for k := range B[c][i][j] {
-//					if i < S0 && j < S1 && k < S2 {
-//						if A[c][i][j][k] != B[c][i][j][k] {
-//							test.Fail()
-//						}
-//					} else {
-//						if B[c][i][j][k] != 0 {
-//							test.Fail()
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	c := NewArray(3, size1)
-//	c.MemSet(42)
-//	CopyPadZ(c, b)
-//	//	fmt.Println("CopyPadZ", c.LocalCopy().Array)
-//
-//
-//	C := c.LocalCopy().Array
-//	for c := range B {
-//		for i := range B[c] {
-//			for j := range B[c][i] {
-//				for k := range B[c][i][j] {
-//					if i < S0 && j < S1 && k < S2 {
-//						if C[c][i][j][k] != B[c][i][j][k] {
-//							test.Fail()
-//						}
-//					} else {
-//						if B[c][i][j][k] != 0 {
-//							test.Fail()
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
+	//	A := ah.Array
+	//	S0, S1, S2 := ah.Size3D[0], ah.Size3D[1], ah.Size3D[2]
+	//	B := bh.Array
+	//	for c := range B {
+	//		for i := range B[c] {
+	//			for j := range B[c][i] {
+	//				for k := range B[c][i][j] {
+	//					if i < S0 && j < S1 && k < S2 {
+	//						if A[c][i][j][k] != B[c][i][j][k] {
+	//							test.Fail()
+	//						}
+	//					} else {
+	//						if B[c][i][j][k] != 0 {
+	//							test.Fail()
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//
+	//	c := NewArray(3, size1)
+	//	c.MemSet(42)
+	//	CopyPadZ(c, b)
+	//	//	fmt.Println("CopyPadZ", c.LocalCopy().Array)
+	//
+	//
+	//	C := c.LocalCopy().Array
+	//	for c := range B {
+	//		for i := range B[c] {
+	//			for j := range B[c][i] {
+	//				for k := range B[c][i][j] {
+	//					if i < S0 && j < S1 && k < S2 {
+	//						if C[c][i][j][k] != B[c][i][j][k] {
+	//							test.Fail()
+	//						}
+	//					} else {
+	//						if B[c][i][j][k] != 0 {
+	//							test.Fail()
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
 
 }
-
-
 
 func TestCopyPadZ(test *testing.T) {
 	// fail test on panic, do not crash
