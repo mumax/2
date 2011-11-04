@@ -22,6 +22,10 @@ extern "C" {
 /// @param S2: source Z size , <= D2
 void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
+
+void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
+
+
 /// Concatenate two matrices in Z-direction (user X)
 /// @code
 /// 	src1[0,0]  src1[0,1]  src2[0,0]  src2[0,1]

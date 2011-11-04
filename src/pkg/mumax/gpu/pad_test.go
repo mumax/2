@@ -51,7 +51,10 @@ func TestCombineZ(test *testing.T) {
 
 	//fmt.Println("a", a.LocalCopy().Array)
 	//fmt.Println("b", b.LocalCopy().Array)
-	CombineZ(c, a, b)
+
+	CopyBlockZ(c,a,0)
+	CopyBlockZ(c,b,1)
+
 	//fmt.Println("c", c.LocalCopy().Array)
 
 	A := a.LocalCopy().Array
