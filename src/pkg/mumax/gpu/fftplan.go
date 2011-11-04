@@ -90,8 +90,9 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	//	fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
 	//}
 	//fft.Sync()
-	fmt.Println("fftZ:", padZ.LocalCopy().Array)
+	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
-	TransposeComplexYZPart(&transp1, &padZ)
+
+	TransposeComplexYZPart(&transp1, &padZ) // fftZ!
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 }

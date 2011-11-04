@@ -14,7 +14,7 @@ package gpu
 import (
 	. "mumax/common"
 	"testing"
-	"fmt"
+	//"fmt"
 )
 
 func TestCombineZ(test *testing.T) {
@@ -49,10 +49,10 @@ func TestCombineZ(test *testing.T) {
 	c := NewArray(Nc, size2)
 	defer c.Free()
 
-	fmt.Println("a", a.LocalCopy().Array)
-	fmt.Println("b", b.LocalCopy().Array)
+	//fmt.Println("a", a.LocalCopy().Array)
+	//fmt.Println("b", b.LocalCopy().Array)
 	CombineZ(c, a, b)
-	fmt.Println("c", c.LocalCopy().Array)
+	//fmt.Println("c", c.LocalCopy().Array)
 
 	A := a.LocalCopy().Array
 	B := b.LocalCopy().Array
