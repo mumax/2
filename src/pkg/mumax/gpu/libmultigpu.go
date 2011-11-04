@@ -213,8 +213,6 @@ func CopyBlockZ(dst, src *Array, block int) {
 //	out.Stream.Sync()
 //}
 
-
-
 //// Cross-device YZ transpose + pad.
 //func TransposeComplexYZ(dst, src *Array) {
 //	N0 := src.size4D[0] * src.size3D[0]
@@ -231,7 +229,6 @@ func CopyBlockZ(dst, src *Array, block int) {
 //		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
 //	dst.Stream.Sync()
 //}
-
 
 //func CombineZ(dst, src1, src2 *Array) {
 //	AssertEqual(src1.size4D, src2.size4D)

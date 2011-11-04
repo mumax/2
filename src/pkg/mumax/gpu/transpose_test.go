@@ -12,8 +12,8 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-	//"testing"
-	//"fmt"
+//"testing"
+//"fmt"
 )
 
 //func TestTranspose(test *testing.T) {
