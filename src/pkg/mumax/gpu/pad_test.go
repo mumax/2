@@ -26,8 +26,8 @@ func TestCombineZ(test *testing.T) {
 	}()
 
 	Nc := 3
-	size1 := []int{1, 4, 8}
-	size2 := []int{1, 4, 8 * 2}
+	size1 := []int{2, 4, 8}
+	size2 := []int{2, 4, 8 * 2}
 
 	a := NewArray(Nc, size1)
 	defer a.Free()
@@ -54,52 +54,27 @@ func TestCombineZ(test *testing.T) {
 	CombineZ(c, a, b)
 	fmt.Println("c", c.LocalCopy().Array)
 
-	//	A := ah.Array
-	//	S0, S1, S2 := ah.Size3D[0], ah.Size3D[1], ah.Size3D[2]
-	//	B := bh.Array
-	//	for c := range B {
-	//		for i := range B[c] {
-	//			for j := range B[c][i] {
-	//				for k := range B[c][i][j] {
-	//					if i < S0 && j < S1 && k < S2 {
-	//						if A[c][i][j][k] != B[c][i][j][k] {
-	//							test.Fail()
-	//						}
-	//					} else {
-	//						if B[c][i][j][k] != 0 {
-	//							test.Fail()
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//
-	//	c := NewArray(3, size1)
-	//	c.MemSet(42)
-	//	CopyPadZ(c, b)
-	//	//	fmt.Println("CopyPadZ", c.LocalCopy().Array)
-	//
-	//
-	//	C := c.LocalCopy().Array
-	//	for c := range B {
-	//		for i := range B[c] {
-	//			for j := range B[c][i] {
-	//				for k := range B[c][i][j] {
-	//					if i < S0 && j < S1 && k < S2 {
-	//						if C[c][i][j][k] != B[c][i][j][k] {
-	//							test.Fail()
-	//						}
-	//					} else {
-	//						if B[c][i][j][k] != 0 {
-	//							test.Fail()
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-
+	A := a.LocalCopy().Array
+	B := b.LocalCopy().Array
+	S0, S1, S2 := ah.Size3D[0], ah.Size3D[1], ah.Size3D[2]
+	C := c.LocalCopy().Array
+	for cmp := range C {
+		for i := range C[cmp] {
+			for j := range C[cmp][i] {
+				for k := range C[cmp][i][j] {
+					if i < S0 && j < S1 && k < S2 {
+						if A[cmp][i][j][k] != C[cmp][i][j][k] {
+							test.Fail()
+						}
+					} else {
+						if B[cmp][i][j][k-S2] != C[cmp][i][j][k] {
+							test.Fail()
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 func TestCopyPadZ(test *testing.T) {
