@@ -13,51 +13,51 @@ package gpu
 
 import (
 	"testing"
-	"fmt"
+	//"fmt"
 )
 
-func TestTranspose(test *testing.T) {
-
-	N1 := 8
-	N2 := 16
-	size1 := []int{1, N1, N2 * 2}
-	size2 := []int{1, N2, N1 * 2}
-
-	const nComp = 1
-	a := NewArray(nComp, size1)
-	defer a.Free()
-	ah := a.LocalCopy()
-
-	b := NewArray(nComp, size2)
-	//b.MemSet(42)
-	defer b.Free()
-
-	for i := range ah.List {
-		ah.List[i] = float32(i)
-	}
-
-	a.CopyFromHost(ah)
-
-	fmt.Println("A", a.LocalCopy().List)
-	TransposeComplexYZ(b, a)
-	bh := b.LocalCopy()
-	fmt.Println("B", bh.List)
-
-	A := ah.Array
-	B := bh.Array
-	for c := range B {
-		for i := range B[c] {
-			for j := range B[c][i] {
-				for k := 0; k < len(B[c][i][j])/2; k++ {
-					if A[c][i][k][2*j] != B[c][i][j][2*k] ||
-						A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
-						test.Error(A[c][i][k][2*j+0], A[c][i][k][2*j+1], "!=", B[c][i][j][2*k+0], B[c][i][j][2*k+1])
-					}
-				}
-			}
-		}
-	}
-}
+//func TestTranspose(test *testing.T) {
+//
+//	N1 := 8
+//	N2 := 16
+//	size1 := []int{1, N1, N2 * 2}
+//	size2 := []int{1, N2, N1 * 2}
+//
+//	const nComp = 1
+//	a := NewArray(nComp, size1)
+//	defer a.Free()
+//	ah := a.LocalCopy()
+//
+//	b := NewArray(nComp, size2)
+//	//b.MemSet(42)
+//	defer b.Free()
+//
+//	for i := range ah.List {
+//		ah.List[i] = float32(i)
+//	}
+//
+//	a.CopyFromHost(ah)
+//
+//	fmt.Println("A", a.LocalCopy().List)
+//	TransposeComplexYZ(b, a)
+//	bh := b.LocalCopy()
+//	fmt.Println("B", bh.List)
+//
+//	A := ah.Array
+//	B := bh.Array
+//	for c := range B {
+//		for i := range B[c] {
+//			for j := range B[c][i] {
+//				for k := 0; k < len(B[c][i][j])/2; k++ {
+//					if A[c][i][k][2*j] != B[c][i][j][2*k] ||
+//						A[c][i][k][2*j+1] != B[c][i][j][2*k+1] {
+//						test.Error(A[c][i][k][2*j+0], A[c][i][k][2*j+1], "!=", B[c][i][j][2*k+0], B[c][i][j][2*k+1])
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
 func TestTransposePart(test *testing.T) {
 
