@@ -242,11 +242,10 @@ func CopyPadZ(dst, src *Array) {
 //	[ 0 0  S1 S2  0 0 ]
 //	[ 0 0  S3 S4  0 0 ]
 func CopyBlockZ(dst, src *Array, block int) {
-	Assert(
-		dst.size4D[0] == src.size4D[0] &&
-			dst.size3D[0] == src.size3D[0] &&
-			dst.size3D[1] == src.size3D[1] &&
-			dst.size3D[2] >= src.size3D[2]*(block+1))
+//	AssertMsg(dst.size4D[0] == src.size4D[0], "1")
+//	AssertMsg(dst.size3D[0] == src.size3D[0], "2")
+//	AssertMsg(dst.size3D[1] == src.size3D[1], "3")
+//	AssertMsg(dst.size3D[2] >= src.size3D[2]*(block+1), "4")
 
 	D2 := dst.size3D[2]
 	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0

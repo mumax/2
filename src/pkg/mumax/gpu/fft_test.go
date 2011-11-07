@@ -21,7 +21,7 @@ func TestFFT(test *testing.T) {
 	nComp := 1
 	dataSize := []int{1, 2 * 4, 8}
 	fftSize := []int{1, 2 * 4, 8}
-	fft := NewFFTPlan(nComp, dataSize, fftSize)
+	fft := NewFFTPlan(dataSize, fftSize)
 	defer fft.Free()
 
 	in := NewArray(nComp, dataSize)
