@@ -1,11 +1,18 @@
+#include <vector>
+#include <iostream>
+
 #include <QtGui>
 #include <QxtSpanSlider>
 #include <QKeySequence>
 #include <QFileDialog>
 #include "glwidget.h"
 #include "window.h"
-#include "OMFImport.h"
-#include <iostream>
+
+#include "misc/OMFImport.h"
+#include "misc/OMFHeader.h"
+#include "misc/container.h"
+
+struct OMFImport;
 
 Window::Window()
 {
@@ -21,6 +28,7 @@ Window::Window()
   ySpanSlider = createSpanSlider();
   zSpanSlider = createSpanSlider();
 
+  // Rotation
   connect(xSlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setXRotation(int)));
   connect(glWidget, SIGNAL(xRotationChanged(int)), xSlider, SLOT(setValue(int)));
   connect(ySlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setYRotation(int)));
@@ -28,12 +36,15 @@ Window::Window()
   connect(zSlider, SIGNAL(valueChanged(int)), glWidget, SLOT(setZRotation(int)));
   connect(glWidget, SIGNAL(zRotationChanged(int)), zSlider, SLOT(setValue(int)));
 
+  // Slicing
   connect(xSpanSlider, SIGNAL(lowerValueChanged(int)), glWidget, SLOT(setXSliceLow(int)));
   connect(xSpanSlider, SIGNAL(upperValueChanged(int)), glWidget, SLOT(setXSliceHigh(int)));
   connect(ySpanSlider, SIGNAL(lowerValueChanged(int)), glWidget, SLOT(setYSliceLow(int)));
   connect(ySpanSlider, SIGNAL(upperValueChanged(int)), glWidget, SLOT(setYSliceHigh(int)));
   connect(zSpanSlider, SIGNAL(lowerValueChanged(int)), glWidget, SLOT(setZSliceLow(int)));
   connect(zSpanSlider, SIGNAL(upperValueChanged(int)), glWidget, SLOT(setZSliceHigh(int)));
+
+  // Data
  
   QHBoxLayout *mainLayout = new QHBoxLayout;
 
@@ -164,6 +175,12 @@ void Window::openFiles()
   QString fileName;
   fileName = QFileDialog::getOpenFileName(this,
 	     tr("Open .omf File"), "/home/grahamr", tr("OMF Files (*.omf)"));
+  
+  OMFHeader tempHeader = OMFHeader();
+  omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
+
+  // Update the Display with the first element
+  glWidget->updateData(omfCache[0]);
 }
 
 void Window::openDir()

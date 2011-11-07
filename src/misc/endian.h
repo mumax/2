@@ -2,7 +2,6 @@
 #define ENDIAN_H
 
 //#include <config.h>
-
 #include <stdint.h>
 #include <cassert>
 

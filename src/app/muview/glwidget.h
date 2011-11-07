@@ -2,6 +2,7 @@
 #define GLWIDGET_H
 
 #include <QGLWidget>
+#include "misc/container.h"
 
 class GLWidget : public QGLWidget
 {
@@ -26,6 +27,7 @@ public slots:
   void setZSliceHigh(int high);
   void updateCOM();
   void updateExtent();
+  void updateData(array_ptr data);
 
 signals:
   void xRotationChanged(int angle);
@@ -75,6 +77,9 @@ private:
   int ySliceLow, ySliceHigh;
   int zSliceLow, zSliceHigh;
   
+  // pointer to relevant data
+  array_ptr dataPtr;
+  bool usePtr;
 };
 
 #endif

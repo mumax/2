@@ -4,6 +4,10 @@
 #include <QMainWindow>
 #include <QWidget>
 
+// For reading OMF files
+#include "misc/container.h"
+#include <vector>
+
 // General widget stuff 
 class QSlider;
 class GLWidget;
@@ -69,6 +73,9 @@ private:
   QxtSpanSlider *xSpanSlider;
   QxtSpanSlider *ySpanSlider;
   QxtSpanSlider *zSpanSlider;
+  
+  // Storage and caching
+  std::vector<array_ptr> omfCache;
 
 };
 
