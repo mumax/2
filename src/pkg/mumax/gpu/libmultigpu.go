@@ -151,7 +151,6 @@ func Normalize(m, normMap *Array) {
 // }
 
 
-
 // Partial sums (see reduce.h)
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialSumAsync(
@@ -270,8 +269,8 @@ func CopyBlockZ(dst, src *Array, block int) {
 func TransposeComplexYZPart(out, in *Array) {
 	Assert(
 		out.size4D[0] == in.size4D[0] &&
-		out.size3D[0] == in.size3D[0] &&
-		out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
+			out.size3D[0] == in.size3D[0] &&
+			out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
 
 	//Debug("in.partSize[1]", in.partSize[1])
 	C.transposeComplexYZAsyncPart(
