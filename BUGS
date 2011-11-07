@@ -9,3 +9,4 @@ Space in path to input file breaks simulation
 
 [0034]
 Long python output gets truncated when mumax finishes. Should wait for pipe goroutines...
+

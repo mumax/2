@@ -81,7 +81,6 @@ func Normalize(m, normMap *Array) {
 	m.Stream.Sync()
 }
 
-
 // add uniaxial anisotropy to h, in units [mSat]
 // func AddHaniUniaxial(h, m, kuMap *Array, kuMul float32, anisUMap *Array, anisUMul []float64) {
 //   C.addHaniUniaxialAsync(
@@ -149,7 +148,6 @@ func Normalize(m, normMap *Array) {
 //   h.Stream.Sync()
 // 
 // }
-
 
 // Partial sums (see reduce.h)
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
