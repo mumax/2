@@ -59,8 +59,8 @@ func (fft *FFTPlan) Init(nComp int, dataSize, fftSize []int) {
 
 	// init chunks
 	chunkN0 := dataSize[0]
-	chunkN1 := ((fftSize[2] / NDev) + 2)
-	chunkN2 := dataSize[1]
+	chunkN1 := dataSize[1]
+	chunkN2 := (fftSize[2] / NDev) + 2
 	fft.chunks = make([]Array, NDev)
 	for dev := range _useDevice {
 		fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DO_ALLOC)
@@ -101,7 +101,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 
-	TransposeComplexYZPart(&transp1, &padZ) // fftZ!
+	//TransposeComplexYZPart(&transp1, &padZ) // fftZ!
+	(&transp1).CopyFromDevice(&padZ)
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
@@ -113,12 +114,15 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// source device = dev
 			// target device = chunk
 
+			// source offset
 			offset := c * ((fft.dataSize[1] / NDevice()) * (fft.fftSize[2] / NDevice()))
 			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), offset))
-			fmt.Println("fft.dataSize[1]=", fft.dataSize[1])
-			fmt.Println("fft.fftSize[2]=", fft.fftSize[2])
-			fmt.Println("offset=", offset)
-			fmt.Println("src=", src)
+
+			//fmt.Println("fft.dataSize[1]=", fft.dataSize[1])
+			//fmt.Println("fft.fftSize[2]=", fft.fftSize[2])
+			//fmt.Println("offset=", offset)
+			//fmt.Println("src=", src)
+
 			dst := chunks[dev].pointer[c]
 			// must be done plane by plane
 			cu.MemcpyDtoD(dst, src, chunkBytes)
