@@ -67,7 +67,7 @@ void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, 
     dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
-    	transposeComplexYZKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)output[dev], (complex*)input[dev], N2, N1, N0);
+  	transposeComplexYZKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)output[dev], (complex*)input[dev], N2, N1, N0);
 	}
 }
 

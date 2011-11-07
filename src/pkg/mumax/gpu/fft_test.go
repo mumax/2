@@ -13,12 +13,14 @@ package gpu
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestFFT(test *testing.T) {
+	fmt.Println("FFT Test")
 	nComp := 1
-	dataSize := []int{1, 4, 8}
-	fftSize := []int{1, 4, 8}
+	dataSize := []int{1, 2*4, 8}
+	fftSize := []int{1, 2*4, 8}
 	fft := NewFFTPlan(nComp, dataSize, fftSize)
 	defer fft.Free()
 
