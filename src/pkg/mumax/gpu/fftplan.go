@@ -63,8 +63,10 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 
 	// init chunks
 	chunkN0 := dataSize[0]
-	chunkN1 := dataSize[1]  // or reversed ...
-	chunkN2 := (fftSize[2] / NDev) + 2
+	chunkN1 := ((fftSize[2]/2)/NDev + 1) * NDev  // or reversed ...
+	chunkN2 := (dataSize[1]/NDev) *2//(fftSize[2] / NDev) + 2
+	//chunkN1 := dataSize[1] // or reversed ...
+	//chunkN2 := (fftSize[2] / NDev) + 2
 	fft.chunks = make([]Array, NDev)
 	for dev := range _useDevice {
 		fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DO_ALLOC)
@@ -107,8 +109,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	//fft.Sync()
 	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
-	//TransposeComplexYZPart(&transp1, &padZ) // fftZ!
-	(&transp1).CopyFromDevice(&padZ)
+	TransposeComplexYZPart(&transp1, &padZ) // fftZ!
+	//(&transp1).CopyFromDevice(&padZ)
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
