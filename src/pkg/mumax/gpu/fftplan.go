@@ -63,8 +63,8 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 
 	// init chunks
 	chunkN0 := dataSize[0]
-	chunkN1 := ((fftSize[2]/2)/NDev + 1) * NDev  // or reversed ...
-	chunkN2 := (dataSize[1]/NDev) *2//(fftSize[2] / NDev) + 2
+	chunkN1 := ((fftSize[2]/2)/NDev + 1) * NDev // or reversed ...
+	chunkN2 := (dataSize[1] / NDev) * 2         //(fftSize[2] / NDev) + 2
 	//chunkN1 := dataSize[1] // or reversed ...
 	//chunkN2 := (fftSize[2] / NDev) + 2
 	fft.chunks = make([]Array, NDev)
