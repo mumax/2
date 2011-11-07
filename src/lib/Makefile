@@ -12,6 +12,7 @@ OFILES=\
 	copypad.o\
 	transpose.o\
 	exchange6.o\
+# 	addHani.o\
 
 all: libmultigpu.so
 

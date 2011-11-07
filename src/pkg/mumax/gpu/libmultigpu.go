@@ -81,6 +81,77 @@ func Normalize(m, normMap *Array) {
 	m.Stream.Sync()
 }
 
+
+// add uniaxial anisotropy to h, in units [mSat]
+// func AddHaniUniaxial(h, m, kuMap *Array, kuMul float32, anisUMap *Array, anisUMul []float64) {
+//   C.addHaniUniaxialAsync(
+//     (**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+// 
+//     (**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+// 
+//     (**C.float)(unsafe.Pointer(&(kuMap.pointer[0]))),
+//     (C.float)(kuMul),
+// 
+//     (**C.float)(unsafe.Pointer(&(anisUMap.Comp[X].pointer[0]))),
+//     (C.float)(anisUMul[0]),
+//     (**C.float)(unsafe.Pointer(&(anisUMap.Comp[Y].pointer[0]))),
+//     (C.float)(anisUMul[1]),
+//     (**C.float)(unsafe.Pointer(&(anisUMap.Comp[Z].pointer[0]))),
+//     (C.float)(anisUMul[2]),
+// 
+//     (*C.CUstream)(unsafe.Pointer(&(h.Stream[0]))),
+// 
+//     (C.int)(m.partLen3D))
+//   h.Stream.Sync()
+// 
+// }
+
+// add cubic anisotropy to h, in units [mSat]
+// func AddHaniCubic(h, m,
+//     k1Map *Array, k1Mul float32,
+//     k2Map *Array, k2Mul float32,
+// anisU1Map *Array, anisU1Mul []float64,
+// anisU2Map *Array, anisU2Mul []float64) {
+//   C.addHaniCubicAsync(
+//     (**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+// 
+//     (**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+//     (**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+// 
+//     (**C.float)(unsafe.Pointer(&(k1Map.pointer[0]))),
+//     (C.float)(k1Mul),
+//     (**C.float)(unsafe.Pointer(&(k2Map.pointer[0]))),
+//     (C.float)(k2Mul),
+// 
+//     (**C.float)(unsafe.Pointer(&(anisU1Map.Comp[X].pointer[0]))),
+//     (C.float)(anisU1Mul[0]),
+//     (**C.float)(unsafe.Pointer(&(anisU1Map.Comp[Y].pointer[0]))),
+//     (C.float)(anisU1Mul[1]),
+//     (**C.float)(unsafe.Pointer(&(anisU1Map.Comp[Z].pointer[0]))),
+//     (C.float)(anisU1Mul[2]),
+//     (**C.float)(unsafe.Pointer(&(anisU2Map.Comp[X].pointer[0]))),
+//     (C.float)(anisU2Mul[0]),
+//     (**C.float)(unsafe.Pointer(&(anisU2Map.Comp[Y].pointer[0]))),
+//     (C.float)(anisU2Mul[1]),
+//     (**C.float)(unsafe.Pointer(&(anisU2Map.Comp[Z].pointer[0]))),
+//     (C.float)(anisU2Mul[2]),
+// 
+//     (*C.CUstream)(unsafe.Pointer(&(h.Stream[0]))),
+// 
+//     (C.int)(m.partLen3D))
+//   h.Stream.Sync()
+// 
+// }
+
+
+
 // Partial sums (see reduce.h)
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialSumAsync(
