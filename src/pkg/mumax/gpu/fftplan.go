@@ -71,8 +71,8 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 	}
 
 	transp2N0 := dataSize[0] // make this fftSize[0] when copyblock can handle it
-	transp2N1 := fftSize[2] + 2*NDev
-	transp2N2 := fftSize[1]
+	transp2N1 := (fftSize[2] + 2*NDev) / 2
+	transp2N2 := fftSize[1] * 2
 	fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DO_ALLOC)
 }
 
@@ -107,8 +107,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	//fft.Sync()
 	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
-	TransposeComplexYZPart(&transp1, &padZ) // fftZ!
-	//(&transp1).CopyFromDevice(&padZ)
+	//TransposeComplexYZPart(&transp1, &padZ) // fftZ!
+	(&transp1).CopyFromDevice(&padZ)
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
@@ -146,7 +146,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 	for c := range chunks {
 		CopyBlockZ(&transp2, &(chunks[c]), c)
+		fmt.Println("transp2:", transp2.LocalCopy().Array)
 	}
 
-	fmt.Println("transp2:", transp2.LocalCopy().Array)
+	//fmt.Println("transp2:", transp2.LocalCopy().Array)
 }
