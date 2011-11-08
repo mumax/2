@@ -19,6 +19,7 @@ GLWidget::GLWidget(QWidget *parent)
   yRot = 0;
   zRot = 0;
   usePtr = false;
+  displayOn = false;
 
   qtGreen  = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
   qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
@@ -30,28 +31,12 @@ GLWidget::~GLWidget()
 
 void GLWidget::updateData(array_ptr data)
 {
-  dataPtr = data;
-  const long unsigned int *size = dataPtr->shape();
-  int xnodes = size[0];
-  int ynodes = size[1];
-  int znodes = size[2];
+  dataPtr    = data;
+  displayOn  = true;
   
-  std::cout << "In glwidget:\t" << xnodes << "\t" << ynodes << "\t" << znodes << std::endl;
-  usePtr=true;
-  //or(int i=0; i<xnodes; i++)
-  // {
-  //   for(int j=0; j<ynodes; j++)
-  //	{
-  //	  for(int k=0; k<znodes; k++)
-  //	    {
-  //	      int ind = k + j*sz + i*sy*sz;
-  //	      locations[ind][0] = (*dataPtr);
-  //	      locations[ind][1] = (*dataPtr);
-  //	      locations[ind][2] = (*dataPtr);
-  //	    }
-  //	}
-  // }
-
+  // Update the display
+  updateCOM();
+  updateExtent();
 }
 
 QSize GLWidget::minimumSizeHint() const
@@ -152,41 +137,21 @@ void GLWidget::setZSliceHigh(int high)
 
 void GLWidget::updateCOM()
 {
-  // Find the center of mass of the object
-  for(int i=0; i<numSpins; i++)
-    {
-      xcom += locations[i][0];
-      ycom += locations[i][1];
-      zcom += locations[i][2];
-    }
-  xcom = xcom/numSpins;
-  ycom = ycom/numSpins;
-  zcom = zcom/numSpins;
+  const long unsigned int *size = dataPtr->shape();
+  xcom = (float)size[0]*0.5;
+  ycom = (float)size[1]*0.5;
+  zcom = (float)size[2]*0.5;
 }
 
 void GLWidget::updateExtent() 
 {
-  for(int i=0; i<numSpins; i++)
-    {
-      if (locations[i][0]>xmax) {
-	xmax = locations[i][0];
-      }
-      if (locations[i][0]<xmin) {
-	xmin = locations[i][0];
-      }
-      if (locations[i][1]>ymax) {
-	ymax = locations[i][1];
-      }
-      if (locations[i][1]<ymin) {
-	ymin = locations[i][1];
-      }
-      if (locations[i][2]>zmax) {
-	zmax = locations[i][2];
-      }
-      if (locations[i][2]<zmin) {
-	zmin = locations[i][2];
-      }
-    }
+  const long unsigned int *size = dataPtr->shape();
+  xmax = size[0];
+  ymax = size[1];
+  zmax = size[2];
+  xmin = 0.0;
+  ymin = 0.0;
+  zmin = 0.0;
 }
 
 void GLWidget::initializeGL()
@@ -221,35 +186,12 @@ void GLWidget::initializeGL()
     glPopMatrix();
   glEndList();
 
-  // Fill the list of locations and spins
-  numSpins=1000;
-  int sx = 20;
-  int sy = 25;
-  int sz = 2;
-
-  for(int i=0; i<sx; i++)
-    {
-      for(int j=0; j<sy; j++)
-	{
-	  for(int k=0; k<sz; k++)
-	    {
-	      int ind = k + j*sz + i*sy*sz;
-	      locations[ind][0] = (float)i;
-	      locations[ind][1] = (float)j;
-	      locations[ind][2] = (float)k;
-	    }
-	}
-    }
-  
-  updateCOM();
-  updateExtent();
-
   // Set the slice initial conditions
   xSliceLow=ySliceLow=zSliceLow=0;
   xSliceHigh=ySliceHigh=zSliceHigh=16*100;
 
   // Initial view
-  zoom=1.0;
+  zoom=0.5;
 }
 
 void GLWidget::paintGL()
@@ -262,7 +204,7 @@ void GLWidget::paintGL()
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
   //std::cout << "Zoom: " << zoom << std::endl;
 
-  if (usePtr) {
+  if (displayOn) {
     const long unsigned int *size = dataPtr->shape();
     int xnodes = size[0];
     int ynodes = size[1];
@@ -275,52 +217,35 @@ void GLWidget::paintGL()
 	  {
 	    for(int k=0; k<znodes; k++)
 	      {
-		mag   = sqrt( (*dataPtr)[i][j][k][0]*(*dataPtr)[i][j][k][0] +
-			      (*dataPtr)[i][j][k][1]*(*dataPtr)[i][j][k][1] +
-			      (*dataPtr)[i][j][k][2]*(*dataPtr)[i][j][k][2]);
-
-		theta = acos(  (*dataPtr)[i][j][k][2]/mag);
-		phi   = atan2( (*dataPtr)[i][j][k][1],  (*dataPtr)[i][j][k][0]);
-		
-		glPushMatrix();
-		glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
-		glColor3f(sin(phi), cos(phi), cos(phi+1.0f));
-		
-		glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
-		glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
-
-		glCallList(cone);
-		glPopMatrix();
+		mag = sqrt( (*dataPtr)[i][j][k][0] * (*dataPtr)[i][j][k][0] +
+			    (*dataPtr)[i][j][k][1] * (*dataPtr)[i][j][k][1] +
+			    (*dataPtr)[i][j][k][2] * (*dataPtr)[i][j][k][2]);
+		if (mag > 1.0 &&
+		    i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
+		    i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
+		    j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&
+		    j <= (ymax-ymin)*(float)ySliceHigh/1600.0 &&
+		    k >= (zmax-zmin)*(float)zSliceLow/1600.0 &&
+		    k <= (zmax-zmin)*(float)zSliceHigh/1600.0) 
+		  {
+		    
+		    theta = acos(  (*dataPtr)[i][j][k][2]/mag);
+		    phi   = atan2( (*dataPtr)[i][j][k][1],  (*dataPtr)[i][j][k][0]);
+		    
+		    glPushMatrix();
+		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
+		    glColor3f(sin(phi), cos(phi), cos(phi+1.0f));
+		    
+		    glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
+		    glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
+		    
+		    glCallList(cone);
+		    glPopMatrix();
+		  }
 	      }
 	  }
       }
-  } else {
-    
-    // Loop over numSpins and draw each
-    for (int i=0; i<numSpins; i++) {
-      // If the magnetization is non-zero
-      // future check here
-      
-      // Check the xSlice conditions
-      if (locations[i][0] >= (xmax-xmin)*(float)xSliceLow/1600.0 &&	\
-	  locations[i][0] <= (xmax-xmin)*(float)xSliceHigh/1600.0)
-	{
-	  if (locations[i][1] >= (ymax-ymin)*(float)ySliceLow/1600.0 &&	\
-	      locations[i][1] <= (ymax-ymin)*(float)ySliceHigh/1600.0)
-	    {
-	      if (locations[i][2] >= (zmax-zmin)*(float)zSliceLow/1600.0 && \
-		  locations[i][2] <= (zmax-zmin)*(float)zSliceHigh/1600.0)
-		{
-		  glPushMatrix();
-		  glTranslatef(locations[i][0]-xcom, locations[i][1]-ycom, locations[i][2]-zcom);
-		  glColor3f(sin(locations[i][0]),cos(locations[i][0]), cos(locations[i][0]+1.0f));
-		  glCallList(cone);
-		  glPopMatrix();
-		}
-	    }
-	}
-    }
-  }
+  } 
 }
 
 void GLWidget::resizeGL(int width, int height)
