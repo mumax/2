@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <QtGui>
+#include <QDir>
 #include <QxtSpanSlider>
 #include <QKeySequence>
 #include <QFileDialog>
@@ -177,10 +178,17 @@ void Window::openFiles()
 	     tr("Open .omf File"), "/home/grahamr", tr("OMF Files (*.omf)"));
   
   OMFHeader tempHeader = OMFHeader();
+
+  // Remove the last element if not empty
+  if (!omfCache.empty()) {
+    omfCache.pop_back();
+  }
+
+  // Push our file data
   omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
 
   // Update the Display with the first element
-  glWidget->updateData(omfCache[0]);
+  glWidget->updateData(omfCache.back());
 }
 
 void Window::openDir()
@@ -189,6 +197,30 @@ void Window::openDir()
                                                  "/home",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
+  
+  QDir chosenDir(dir);
+  QStringList filters;
+  filters << "*.omf";
+  chosenDir.setNameFilters(filters);
+  QStringList dirFiles = chosenDir.entryList();
+
+  // Clear the cache of pre-existing elements
+  while (!omfCache.empty()) {
+    omfCache.pop_back();
+  }
+
+  // Qt macro for looping over files
+  OMFHeader tempHeader = OMFHeader();
+  foreach (QString file, dirFiles)
+    {
+      std::cout << file.toStdString() << std::endl;
+      // Push our new content...
+      omfCache.push_back(readOMF(file.toStdString(), tempHeader));
+    }
+
+  // Update the Display with the first element
+  glWidget->updateData(omfCache.front());
+
 }
 
 
