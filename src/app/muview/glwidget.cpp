@@ -4,7 +4,7 @@
 #include <QtOpenGL>
 #include "glwidget.h"
 #include <iostream>
-#include "misc/container.h"
+#include "container.h"
 
 #define PI (3.141592653589793)
 

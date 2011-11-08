@@ -2,7 +2,7 @@
 #define GLWIDGET_H
 
 #include <QGLWidget>
-#include "misc/container.h"
+#include "container.h"
 
 class GLWidget : public QGLWidget
 {

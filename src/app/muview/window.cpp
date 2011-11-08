@@ -9,9 +9,9 @@
 #include "glwidget.h"
 #include "window.h"
 
-#include "misc/OMFImport.h"
-#include "misc/OMFHeader.h"
-#include "misc/container.h"
+#include "OMFImport.h"
+#include "OMFHeader.h"
+#include "container.h"
 
 struct OMFImport;
 
@@ -100,7 +100,7 @@ Window::Window()
   zSlider->setValue(0 * 16);
   setWindowTitle(tr("MuView: Mumax2 Viewer"));
 
-  // Data, don't start connect this until the data exists...
+  // Data, don't connect until we are ready (probably still not ready here)...
   connect(animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
  
 }

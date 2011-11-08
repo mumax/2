@@ -12,7 +12,10 @@ OFILES=\
 	fft.o\
 	exchange6.o\
 
-all: libmultigpu.so
+OMFSOURCES=OMFHeader.cpp OMFImport.cpp
+OMFSTATICLIBS=$(OMFSOURCES:.cpp=.a)
+
+all: libmultigpu.so omflibs
 
 $(OFILES): %.o: %.cu %.h
 	 $(NVCC) -c $(@:.o=.cu)
@@ -22,6 +25,13 @@ libmultigpu.so: $(OFILES) libmultigpu.h
 	cp -f $(CURDIR)/libmultigpu.so $(CURDIR)/../../lib
 	ln -sf $(CURDIR)/libmultigpu.so ../pkg/mumax/gpu
 
+omflibs: $(OMFSTATICLIBS)
+	cp $(CURDIR)/libOMFImport.a $(CURDIR)/../../lib
+	cp $(CURDIR)/libOMFHeader.a $(CURDIR)/../../lib
+
+%.a: %.o
+	$(CC) $(CFLAGS) $(<:.o=.cpp) -o $(@:.a=.o)
+	ar -cvq lib$@ $<
 
 .PHONY: clean
 clean:

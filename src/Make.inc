@@ -10,3 +10,6 @@ NVCC+=\
   -G\
 #--use_fast_math\
 
+# flags for the gcc compiler
+CC=g++
+CFLAGS=-c -Wall

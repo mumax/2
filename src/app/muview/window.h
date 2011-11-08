@@ -5,7 +5,7 @@
 #include <QWidget>
 
 // For reading OMF files
-#include "misc/container.h"
+#include "container.h"
 #include <vector>
 
 // General widget stuff 
