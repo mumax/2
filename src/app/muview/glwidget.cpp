@@ -37,6 +37,7 @@ void GLWidget::updateData(array_ptr data)
   // Update the display
   updateCOM();
   updateExtent();
+  updateGL();
 }
 
 QSize GLWidget::minimumSizeHint() const

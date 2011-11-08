@@ -45,8 +45,6 @@ Window::Window()
   connect(zSpanSlider, SIGNAL(lowerValueChanged(int)), glWidget, SLOT(setZSliceLow(int)));
   connect(zSpanSlider, SIGNAL(upperValueChanged(int)), glWidget, SLOT(setZSliceHigh(int)));
 
-  // Data
- 
   QHBoxLayout *mainLayout = new QHBoxLayout;
 
   sliceGroupBox = new QGroupBox(tr("XYZ Slicing"));
@@ -101,6 +99,10 @@ Window::Window()
   ySlider->setValue(345 * 16);
   zSlider->setValue(0 * 16);
   setWindowTitle(tr("MuView: Mumax2 Viewer"));
+
+  // Data, don't start connect this until the data exists...
+  connect(animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
+ 
 }
 
 QxtSpanSlider *Window::createSpanSlider()
@@ -126,6 +128,24 @@ QSlider *Window::createSlider()
   slider->setTickInterval(15 * 16);
   slider->setTickPosition(QSlider::TicksRight);
   return slider;
+}
+
+void Window::adjustAnimSlider()
+{
+  int cacheSize = (int)omfCache.size();
+  std::cout << "Cache size is:\t" << cacheSize << std::endl;
+
+  if (cacheSize > 1) {
+    animSlider->setRange(0, cacheSize-1);
+    animSlider->setSingleStep(1);
+    animSlider->setPageStep(10);
+    animSlider->setTickInterval(2);
+    animSlider->setTickPosition(QSlider::TicksRight);
+    animSlider->setEnabled(TRUE);
+  } else {
+    animSlider->setEnabled(FALSE);
+  }
+
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -189,6 +209,21 @@ void Window::openFiles()
 
   // Update the Display with the first element
   glWidget->updateData(omfCache.back());
+
+  // Refresh the animation bar
+  adjustAnimSlider();
+
+}
+
+void Window::updateDisplayData(int index)
+{
+  if (!omfCache.empty()) {
+    int cacheSize = (int)omfCache.size();
+    if (index < cacheSize) {
+      // Update the Display with the first element
+      glWidget->updateData(omfCache.at(index));
+    }
+  }
 }
 
 void Window::openDir()
@@ -220,7 +255,9 @@ void Window::openDir()
 
   // Update the Display with the first element
   glWidget->updateData(omfCache.front());
-
+  
+  // Refresh the animation bar
+  adjustAnimSlider();
 }
 
 

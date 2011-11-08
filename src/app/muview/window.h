@@ -37,11 +37,13 @@ private slots:
 
   //void settings();
   void about();
-
+  void updateDisplayData(int index);
+  
 private:
   // Main Window Stuff
   void createActions();
   void createMenus();
+  void adjustAnimSlider();
 
   QMenu *fileMenu;
   QMenu *settingsMenu;
