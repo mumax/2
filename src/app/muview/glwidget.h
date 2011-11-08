@@ -80,6 +80,7 @@ private:
   // pointer to relevant data
   array_ptr dataPtr;
   bool usePtr;
+  bool displayOn;
 };
 
 #endif
