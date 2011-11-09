@@ -19,10 +19,10 @@ all: libmumax2.so
 $(OFILES): %.o: %.cu %.h
 	 $(NVCC) -c $(@:.o=.cu)
 
-libmumax2.so: $(OFILES) libmumax2.h
+libmumax2.so: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
-	cp -f $(CURDIR)/libmumax2.so $(CURDIR)/../../../lib
+	cp -f $(CURDIR)/libmumax2.so $(CURDIR)/..
 	ln -sf $(CURDIR)/libmumax2.so ../../pkg/mumax/gpu
 
 

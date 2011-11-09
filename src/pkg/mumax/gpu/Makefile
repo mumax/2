@@ -2,7 +2,7 @@ include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
 # to make tests run
-LD_LIBRARY_PATH+=:../../../../../lib
+LD_LIBRARY_PATH+=:../../../../lib
 
 TARG=mumax/gpu
 
@@ -21,7 +21,7 @@ GOFILES=\
 
 CGOFILES=\
 	multigpu.go\
-	libmultigpu.go\
+	libmumax2.go\
 
 GC+=\
 	-I../../cuda/driver/_obj\
@@ -31,19 +31,20 @@ GC+=\
 	-I../host/_obj\
 
 CGO_CFLAGS+=\
-	-I/usr/local/cuda/include/\
+	-I/usr/local/cuda/include\
 	-I../../../lib/libmumax2\
 
 CGO_LDFLAGS+=\
 	-L/usr/local/cuda/lib\
    	-L/usr/local/cuda/lib64\
-	-L/usr/lib/nvidia-current/\
-   	-L../../../../../lib\
+	-L/usr/lib/nvidia-current\
+	-L/usr/lib/nvidia\
+   	-L../../../../lib\
 
 CGO_LDFLAGS+=\
 	-lcuda\
    	-lcudart\
-	libmultigpu.so\
+	libmumax2.so\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	

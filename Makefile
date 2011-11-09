@@ -2,7 +2,6 @@ include src/Make.inc
 
 dirs=\
 	src\
-	lib\
 	tests\
 	#doc\
 
@@ -12,7 +11,6 @@ all: $(dirs) githooks
 
 tests: src lib
 test: src lib
-lib: src
 
 .PHONY: githooks
 githooks:

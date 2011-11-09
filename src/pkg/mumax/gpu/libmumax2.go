@@ -10,7 +10,7 @@
 
 package gpu
 
-//#include "libmultigpu.h"
+//#include "libmumax2.h"
 import "C"
 
 import (
