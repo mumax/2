@@ -1,7 +1,3 @@
-#include "OMFImport.h"
-
-#include "endian.h"
-#include "container.h"
 #include <stdlib.h>
 
 #include <algorithm>
@@ -10,7 +6,9 @@
 #include <stdexcept>
 #include <sstream>
 
-
+#include "OMFImport.h"
+#include "container.h"
+#include "OMFendian.h"
 //using namespace std;
 
 struct OMFImport

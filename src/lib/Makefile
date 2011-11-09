@@ -30,7 +30,7 @@ omflibs: $(OMFSTATICLIBS)
 	cp $(CURDIR)/libOMFHeader.a $(CURDIR)/../../lib
 
 %.a: %.o
-	$(CC) $(CFLAGS) $(<:.o=.cpp) -o $(@:.a=.o)
+	$(CC) $(CFLAGS) $(<:.o=.cpp) -o $(@:.a=.o) -I.
 	ar -cvq lib$@ $<
 
 .PHONY: clean
