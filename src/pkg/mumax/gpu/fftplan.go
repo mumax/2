@@ -17,7 +17,6 @@ import (
 )
 
 type FFTPlan struct {
-	//nComp    int            // Number of components
 	dataSize [3]int         // Size of the (non-zero) input data block
 	fftSize  [3]int         // Transform size including zero-padding. >= dataSize
 	padZ     Array          // Buffer for Z-zeropadding and +2 elements for R2C
@@ -35,7 +34,6 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 	const nComp = 1
 
 	// init size
-	//fft.nComp = nComp
 	for i := range fft.dataSize {
 		fft.dataSize[i] = dataSize[i]
 		fft.fftSize[i] = fftSize[i]
@@ -63,10 +61,8 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 
 	// init chunks
 	chunkN0 := dataSize[0]
-	chunkN1 := ((fftSize[2]/2)/NDev + 1) * NDev // or reversed ...
-	chunkN2 := (dataSize[1] / NDev) * 2         //(fftSize[2] / NDev) + 2
-	//chunkN1 := dataSize[1] // or reversed ...
-	//chunkN2 := (fftSize[2] / NDev) + 2
+	chunkN1 := ((fftSize[2]/2)/NDev + 1) * NDev // (complex numbers)
+	chunkN2 := (dataSize[1] / NDev) * 2         // (complex numbers)
 	fft.chunks = make([]Array, NDev)
 	for dev := range _useDevice {
 		fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DO_ALLOC)
@@ -126,21 +122,10 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			offset := c * ((fft.dataSize[1] / NDevice()) * (fft.fftSize[2] / NDevice()))
 			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), offset))
 
-			//fmt.Println("fft.dataSize[1]=", fft.dataSize[1])
-			//fmt.Println("fft.fftSize[2]=", fft.fftSize[2])
-			//fmt.Println("offset=", offset)
-			//fmt.Println("src=", src)
-
 			dst := chunks[dev].pointer[c]
 			// must be done plane by plane
 			cu.MemcpyDtoD(dst, src, chunkBytes)
 		}
-	}
-
-	// debug
-
-	for c := range chunks {
-		fmt.Println("chunk ", c, ":", chunks[c].LocalCopy().Array)
 	}
 
 	transp2 := fft.transp2
@@ -148,8 +133,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 	for c := range chunks {
 		CopyBlockZ(&transp2, &(chunks[c]), c)
-		fmt.Println("transp2:", transp2.LocalCopy().Array)
 	}
 
-	//fmt.Println("transp2:", transp2.LocalCopy().Array)
+	fmt.Println("transp2:", transp2.LocalCopy().Array)
 }
