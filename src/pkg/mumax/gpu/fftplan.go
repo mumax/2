@@ -22,7 +22,7 @@ type FFTPlan struct {
 	padZ     Array          // Buffer for Z-zeropadding and +2 elements for R2C
 	planZ    []cufft.Handle // In-place transform of padZ parts, 1/GPU /// ... from outer space
 	transp1  Array          // Buffer for partial transpose per GPU
-	chunks   []Array        // 
+	chunks   []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
 	transp2  Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
 	Stream                  //
 }
@@ -105,19 +105,19 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	CopyPadZ(padZ, in)
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
-	//for dev := range _useDevice {
-	//	fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
-	//}
-	//fft.Sync()
-	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
+	for dev := range _useDevice {
+		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
+	}
+	fft.Sync()
+	fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	//(&transp1).CopyFromDevice(&padZ)
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
-	//chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk 
-	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane
+	//chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk  	
+	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
 
 	for dev := range _useDevice { // source device
 		for c := range chunks { // source chunk
@@ -125,11 +125,11 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// target device = chunk
 
 			for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
-				srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
+				srcPlaneN := transp1.partSize[1] * transp1.partSize[2] //fmt.Println("srcPlaneN:", srcPlaneN)//seems OK
 				srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(fftSize[2]/NDev))
 				src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
-				dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
+				dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2] //fmt.Println("dstPlaneN:", dstPlaneN)//seems OK
 				dstOffset := i * dstPlaneN
 				dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
 				// must be done plane by plane
