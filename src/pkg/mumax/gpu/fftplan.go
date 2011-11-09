@@ -124,11 +124,11 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// source device = dev
 			// target device = chunk
 
-			// source offset
-			offset := c * ((dataSize[1] / NDev) * (fftSize[2] / NDev))
-			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), offset))
+			srcOffset := c * ((dataSize[1] / NDev) * (fftSize[2] / NDev))
+			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
-			dst := chunks[dev].pointer[c]
+			dstOffset := 0
+			dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
 			// must be done plane by plane
 			cu.MemcpyDtoD(dst, src, chunkBytes) // chunkPlaneBytes for plane-by-plane
 		}
@@ -137,7 +137,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	transp2.Zero()
 
 	for c := range chunks {
-		CopyBlockZ(transp2, &(chunks[c]), c)
+		CopyBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
 
 	fmt.Println("transp2:", transp2.LocalCopy().Array)
