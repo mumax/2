@@ -84,12 +84,15 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 	for dev := range _useDevice {
 		setDevice(_useDevice[dev])
 		if fft.fftSize[0] == 1 { // 2D
-			// ... fft.planYX[dev] = cufft.Plan1d(fft.fftSize[2], cufft.R2C, (nComp*padZN0*padZN1)/NDev)
+			batch := (fft.transp2.size3D[0]*fft.transp2.size3D[1])/NDev
+			fmt.Println("batch=",batch)
+			fft.planYX[dev] = cufft.PlanMany([]int{fft.fftSize[1]}, nil, 1, nil, 1, cufft.C2C, batch)
 		} else { //3D
-
+			panic("3D?")
 		}
 		fft.planYX[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change 
 	}
+
 }
 
 func NewFFTPlan(dataSize, fftSize []int) *FFTPlan {
@@ -123,6 +126,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	CopyPadZ(padZ, in)
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
+	// fft Z
 	for dev := range _useDevice {
 		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
 	}
@@ -164,5 +168,13 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 		CopyBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
 
+	fmt.Println("transp2:", transp2.LocalCopy().Array)
+
+	
+	// FFT Y(X)
+	for dev := range _useDevice {
+		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.FORWARD) // is this really async?
+	}
+	fft.Sync()
 	fmt.Println("transp2:", transp2.LocalCopy().Array)
 }
