@@ -24,7 +24,7 @@ type FFTPlan struct {
 	transp1  Array          // Buffer for partial transpose per GPU
 	chunks   []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
 	transp2  Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
-	planYX	 []cufft.Handle // In-place transform of transp2 parts. Is just a Y transform for 2D.
+	planYX   []cufft.Handle // In-place transform of transp2 parts. Is just a Y transform for 2D.
 	Stream                  //
 }
 
@@ -63,10 +63,10 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 
 	// init chunks
 	chunkN0 := dataSize[0]
-	Assert((fftSize[2]/2)%NDev==0)
+	Assert((fftSize[2]/2)%NDev == 0)
 	chunkN1 := ((fftSize[2]/2)/NDev + 1) * NDev // (complex numbers)
-	Assert(dataSize[1] % NDev == 0)
-	chunkN2 := (dataSize[1] / NDev) * 2         // (complex numbers)
+	Assert(dataSize[1]%NDev == 0)
+	chunkN2 := (dataSize[1] / NDev) * 2 // (complex numbers)
 	fft.chunks = make([]Array, NDev)
 	for dev := range _useDevice {
 		fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DO_ALLOC)
@@ -74,7 +74,7 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 
 	// init transp2
 	transp2N0 := dataSize[0] // make this fftSize[0] when copyblock can handle it
-	Assert((fftSize[2] + 2*NDev) % 2 == 0)
+	Assert((fftSize[2]+2*NDev)%2 == 0)
 	transp2N1 := (fftSize[2] + 2*NDev) / 2
 	transp2N2 := fftSize[1] * 2
 	fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DO_ALLOC)
@@ -83,9 +83,9 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 	fft.planYX = make([]cufft.Handle, NDev)
 	for dev := range _useDevice {
 		setDevice(_useDevice[dev])
-		if fft.fftSize[0] == 1{ // 2D
+		if fft.fftSize[0] == 1 { // 2D
 			// ... fft.planYX[dev] = cufft.Plan1d(fft.fftSize[2], cufft.R2C, (nComp*padZN0*padZN1)/NDev)
-		}else{ //3D
+		} else { //3D
 
 		}
 		fft.planYX[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change 
