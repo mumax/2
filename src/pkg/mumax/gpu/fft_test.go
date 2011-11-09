@@ -50,3 +50,27 @@ func TestFFT(test *testing.T) {
 	fft.Forward(in, nil)
 
 }
+
+
+
+
+func BenchmarkFFT(b *testing.B) {
+	b.StopTimer()
+
+	nComp := 1
+	N := 2048
+	N0, N1, N2 := 1, N, N
+	dataSize := []int{N0, N1, N2}
+	fftSize := []int{N0, N1, N2}
+	fft := NewFFTPlan(dataSize, fftSize)
+	defer fft.Free()
+
+	in := NewArray(nComp, dataSize)
+	defer in.Free()
+
+	b.StartTimer()
+	for i:=0;i<b.N;i++{
+	fft.Forward(in, nil)
+	}
+
+}

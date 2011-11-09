@@ -121,21 +121,21 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	chunks := fft.chunks // not sure if chunks[0] copies the struct...
 	transp2 := &(fft.transp2)
 
-	fmt.Println("in:", in.LocalCopy().Array)
+	//fmt.Println("in:", in.LocalCopy().Array)
 
 	CopyPadZ(padZ, in)
-	fmt.Println("padZ:", padZ.LocalCopy().Array)
+	//fmt.Println("padZ:", padZ.LocalCopy().Array)
 
 	// fft Z
 	for dev := range _useDevice {
 		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
 	}
 	fft.Sync()
-	fmt.Println("fftZ:", padZ.LocalCopy().Array)
+	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	//(&transp1).CopyFromDevice(&padZ)
-	fmt.Println("transp1:", transp1.LocalCopy().Array)
+	//fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
@@ -166,14 +166,14 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 		CopyBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
 
-	fmt.Println("transp2:", transp2.LocalCopy().Array)
+	//fmt.Println("transp2:", transp2.LocalCopy().Array)
 
 	// FFT Y(X)
 	for dev := range _useDevice {
 		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.FORWARD) // is this really async?
 	}
 	fft.Sync()
-	fmt.Println("transp2:", transp2.LocalCopy().Array)
+	//fmt.Println("transp2:", transp2.LocalCopy().Array)
 }
 
 // DOES NOT WORK YET
