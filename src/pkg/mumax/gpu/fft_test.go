@@ -42,7 +42,7 @@ func TestFFT(test *testing.T) {
 	//		}
 	//	}
 	//}
-	inh.List[0]=1
+	inh.List[0] = 1
 
 	//inh.List[0] = 1
 	in.CopyFromHost(inh)
