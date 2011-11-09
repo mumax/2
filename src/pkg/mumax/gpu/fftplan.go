@@ -98,6 +98,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	fftSize := fft.fftSize
 	NDev := NDevice()
 	chunks := fft.chunks // not sure if chunks[0] copies the struct...
+	transp2 := &(fft.transp2)
 
 	fmt.Println("in:", in.LocalCopy().Array)
 
@@ -133,11 +134,10 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 		}
 	}
 
-	transp2 := fft.transp2
 	transp2.Zero()
 
 	for c := range chunks {
-		CopyBlockZ(&transp2, &(chunks[c]), c)
+		CopyBlockZ(transp2, &(chunks[c]), c)
 	}
 
 	fmt.Println("transp2:", transp2.LocalCopy().Array)
