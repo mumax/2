@@ -84,8 +84,8 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 	for dev := range _useDevice {
 		setDevice(_useDevice[dev])
 		if fft.fftSize[0] == 1 { // 2D
-			batch := (fft.transp2.size3D[0]*fft.transp2.size3D[1])/NDev
-			fmt.Println("batch=",batch)
+			batch := (fft.transp2.size3D[0] * fft.transp2.size3D[1]) / NDev
+			fmt.Println("batch=", batch)
 			fft.planYX[dev] = cufft.PlanMany([]int{fft.fftSize[1]}, nil, 1, nil, 1, cufft.C2C, batch)
 		} else { //3D
 			panic("3D?")
@@ -138,9 +138,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
-	//chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk  	
 	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
-
 	Assert(dataSize[1]%NDev == 0)
 	Assert(fftSize[2]%NDev == 0)
 	for dev := range _useDevice { // source device
@@ -170,11 +168,71 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 	fmt.Println("transp2:", transp2.LocalCopy().Array)
 
-	
 	// FFT Y(X)
 	for dev := range _useDevice {
 		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.FORWARD) // is this really async?
 	}
 	fft.Sync()
 	fmt.Println("transp2:", transp2.LocalCopy().Array)
+}
+
+// DOES NOT WORK YET
+func (fft *FFTPlan) Inverse(in, out *Array) {
+	// shorthand
+	padZ := &(fft.padZ)
+	transp1 := &(fft.transp1)
+	dataSize := fft.dataSize
+	fftSize := fft.fftSize
+	NDev := NDevice()
+	chunks := fft.chunks // not sure if chunks[0] copies the struct...
+	transp2 := &(fft.transp2)
+
+	fmt.Println("transp2:", transp2.LocalCopy().Array)
+	// FFT Y(X)
+	for dev := range _useDevice {
+		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.INVERSE) // is this really async?
+	}
+	fft.Sync()
+
+	for c := range chunks {
+		CopyBlockZ(transp2, &(chunks[c]), c) // UNBLOCK
+	}
+
+	fmt.Println("transp2:", transp2.LocalCopy().Array)
+
+	// copy chunks, cross-device
+	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
+	for dev := range _useDevice {                                                        // source device
+		for c := range chunks { // source chunk
+			// source device = dev
+			// target device = chunk
+
+			for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
+				srcPlaneN := transp1.partSize[1] * transp1.partSize[2] //fmt.Println("srcPlaneN:", srcPlaneN)//seems OK
+				srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(fftSize[2]/NDev))
+				src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
+
+				dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2] //fmt.Println("dstPlaneN:", dstPlaneN)//seems OK
+				dstOffset := i * dstPlaneN
+				dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
+				// must be done plane by plane
+				cu.MemcpyDtoD(dst, src, chunkPlaneBytes) // chunkPlaneBytes for plane-by-plane
+			}
+		}
+	}
+
+	TransposeComplexYZPart(transp1, padZ) // fftZ!
+	//(&transp1).CopyFromDevice(&padZ)
+	fmt.Println("transp1:", transp1.LocalCopy().Array)
+
+	// fft Z
+	for dev := range _useDevice {
+		fft.planZ[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
+	}
+	fft.Sync()
+	fmt.Println("fftZ:", padZ.LocalCopy().Array)
+
+	CopyPadZ(padZ, in)
+	fmt.Println("padZ:", padZ.LocalCopy().Array)
+
 }
