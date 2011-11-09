@@ -111,7 +111,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 	// copy chunks, cross-device
 	chunks := fft.chunks
-	chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT
+	chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk
+	//chunkPlaneBytes := int64(chunks[0].partLen4D/chunks[0].size3D[0]) * SIZEOF_FLOAT // one plane
 
 	for dev := range _useDevice { // source device
 		for c := range chunks { // source chunk
@@ -124,7 +125,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 			dst := chunks[dev].pointer[c]
 			// must be done plane by plane
-			cu.MemcpyDtoD(dst, src, chunkBytes)
+			cu.MemcpyDtoD(dst, src, chunkBytes) // chunkPlaneBytes for plane-by-plane
 		}
 	}
 
