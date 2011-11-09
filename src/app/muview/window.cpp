@@ -234,6 +234,7 @@ void Window::openDir()
                                                  | QFileDialog::DontResolveSymlinks);
   
   QDir chosenDir(dir);
+  QString dirString = chosenDir.path()+"/";
   QStringList filters;
   filters << "*.omf";
   chosenDir.setNameFilters(filters);
@@ -248,9 +249,9 @@ void Window::openDir()
   OMFHeader tempHeader = OMFHeader();
   foreach (QString file, dirFiles)
     {
-      std::cout << file.toStdString() << std::endl;
+      std::cout << (dirString+file).toStdString() << std::endl;
       // Push our new content...
-      omfCache.push_back(readOMF(file.toStdString(), tempHeader));
+      omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
     }
 
   // Update the Display with the first element
