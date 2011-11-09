@@ -1,40 +1,6 @@
-include ../Make.inc
+dirs=\
+	libmumax2\
+	
+all: $(dirs)
 
-OFILES=\
-	gpu_safe.o\
-	gpu_conf.o\
-	gpu_properties.o\
-	multigpu.o\
-	reduce.o\
-	add.o\
-	torque.o\
-	normalize.o\
-	copypad.o\
-	transpose.o\
-	exchange6.o\
-# 	addHani.o\
-
-all: libmultigpu.so
-
-$(OFILES): %.o: %.cu %.h
-	 $(NVCC) -c $(@:.o=.cu)
-
-libmultigpu.so: $(OFILES) libmultigpu.h
-	echo " *** USING DEBUG FLAGS *** "
-	$(NVCC) -shared $(OFILES) -o libmultigpu.so
-	cp -f $(CURDIR)/libmultigpu.so $(CURDIR)/../../lib
-	ln -sf $(CURDIR)/libmultigpu.so ../pkg/mumax/gpu
-
-
-.PHONY: clean
-clean:
-	rm -f *.o *.so
-
-install: all
-
-.PHONY: test
-test:
-
-.PHONY: bench
-bench:
-
+include ../Dirs.pkg

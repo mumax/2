@@ -51,9 +51,6 @@ func TestFFT(test *testing.T) {
 
 }
 
-
-
-
 func BenchmarkFFT(b *testing.B) {
 	b.StopTimer()
 
@@ -69,8 +66,8 @@ func BenchmarkFFT(b *testing.B) {
 	defer in.Free()
 
 	b.StartTimer()
-	for i:=0;i<b.N;i++{
-	fft.Forward(in, nil)
+	for i := 0; i < b.N; i++ {
+		fft.Forward(in, nil)
 	}
 
 }
