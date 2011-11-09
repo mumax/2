@@ -116,21 +116,25 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
-	chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk 
-	//chunkPlaneBytes := int64(chunks[0].partLen4D/chunks[0].size3D[0]) * SIZEOF_FLOAT // one plane
+	//chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk 
+	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane
 
 	for dev := range _useDevice { // source device
 		for c := range chunks { // source chunk
 			// source device = dev
 			// target device = chunk
 
-			srcOffset := c * ((dataSize[1] / NDev) * (fftSize[2] / NDev))
-			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
+			for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
+				srcPlaneN :=transp1.partSize[1] * transp1.partSize[2] 
+				srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(fftSize[2]/NDev))
+				src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
-			dstOffset := 0
-			dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
-			// must be done plane by plane
-			cu.MemcpyDtoD(dst, src, chunkBytes) // chunkPlaneBytes for plane-by-plane
+				dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
+				dstOffset := i * dstPlaneN
+				dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
+				// must be done plane by plane
+				cu.MemcpyDtoD(dst, src, chunkPlaneBytes) // chunkPlaneBytes for plane-by-plane
+			}
 		}
 	}
 
