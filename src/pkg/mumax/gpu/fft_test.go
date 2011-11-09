@@ -19,18 +19,28 @@ import (
 func TestFFT(test *testing.T) {
 	fmt.Println("FFT Test")
 	nComp := 1
-	N0:=2
-	dataSize := []int{N0, 12, 8}
-	fftSize := []int{N0, 12, 8}
+	N0, N1, N2 := 2, 4, 4
+	dataSize := []int{N0, N1, N2}
+	fftSize := []int{N0, N1, N2}
 	fft := NewFFTPlan(dataSize, fftSize)
 	defer fft.Free()
 
 	in := NewArray(nComp, dataSize)
 	defer in.Free()
 	inh := in.LocalCopy()
-	for i := range inh.List {
-		inh.List[i] = float32(i)
+
+	a := inh.Array[0]
+	n := 0
+	for i := 0; i < N0; i++ {
+		//n := 0
+		for j := 0; j < N1; j++ {
+			for k := 0; k < N2; k++ {
+				if i==i{a[i][j][k] = float32(n)}
+				n++
+			}
+		}
 	}
+
 	//inh.List[0] = 1
 	in.CopyFromHost(inh)
 

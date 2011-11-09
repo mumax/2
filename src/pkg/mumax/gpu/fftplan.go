@@ -125,7 +125,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// target device = chunk
 
 			for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
-				srcPlaneN :=transp1.partSize[1] * transp1.partSize[2] 
+				srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
 				srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(fftSize[2]/NDev))
 				src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
