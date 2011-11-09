@@ -91,12 +91,17 @@ func (fft *FFTPlan) Free() {
 }
 
 func (fft *FFTPlan) Forward(in, out *Array) {
-	padZ := fft.padZ
-	transp1 := fft.transp1
+	// shorthand
+	padZ := &(fft.padZ)
+	transp1 := &(fft.transp1)
+	dataSize := fft.dataSize
+	fftSize := fft.fftSize
+	NDev := NDevice()
+	chunks := fft.chunks // not sure if chunks[0] copies the struct...
 
 	fmt.Println("in:", in.LocalCopy().Array)
 
-	CopyPadZ(&(padZ), in)
+	CopyPadZ(padZ, in)
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
 	//for dev := range _useDevice {
@@ -105,13 +110,12 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	//fft.Sync()
 	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
-	TransposeComplexYZPart(&transp1, &padZ) // fftZ!
+	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	//(&transp1).CopyFromDevice(&padZ)
 	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
-	chunks := fft.chunks
-	chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk
+	chunkBytes := int64(chunks[0].partLen4D) * SIZEOF_FLOAT // entire chunk 
 	//chunkPlaneBytes := int64(chunks[0].partLen4D/chunks[0].size3D[0]) * SIZEOF_FLOAT // one plane
 
 	for dev := range _useDevice { // source device
@@ -120,7 +124,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 			// target device = chunk
 
 			// source offset
-			offset := c * ((fft.dataSize[1] / NDevice()) * (fft.fftSize[2] / NDevice()))
+			offset := c * ((dataSize[1] / NDev) * (fftSize[2] / NDev))
 			src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), offset))
 
 			dst := chunks[dev].pointer[c]
