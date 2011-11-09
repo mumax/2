@@ -174,8 +174,12 @@ void GLWidget::initializeGL()
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_MULTISAMPLE);
-  static GLfloat lightPosition[4] = { 0.5, 10.0, 7.0, 1.0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+
+  // Lights
+  static GLfloat lightPosition1[4] = { 4.0,  1.0, 10.0, 0.0 };
+  static GLfloat lightPosition2[4] = { -4.0, -1.0, 10.0, 0.0 };
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
+  glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
 
   // Display List for cone
   cone = glGenLists(1);
@@ -235,7 +239,11 @@ void GLWidget::paintGL()
 		    
 		    glPushMatrix();
 		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
-		    glColor3f(sin(phi), cos(phi), cos(phi+1.0f));
+
+		    GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
+		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
+		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
+		    glColor3fv(color);
 		    
 		    glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
 		    glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
