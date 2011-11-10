@@ -349,5 +349,10 @@ void GLWidget::drawInstructions(QPainter *painter)
 
 void GLWidget::updateTopOverlay(QString newstring)
 {
-  topOverlayText = newstring;
+  if (newstring != "") {
+    topOverlayOn = true;
+    topOverlayText = newstring;
+  } else {
+    topOverlayOn = false;
+  }
 }

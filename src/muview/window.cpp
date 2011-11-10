@@ -214,6 +214,9 @@ void Window::openFiles()
       
       // Refresh the animation bar
       adjustAnimSlider();
+
+      // Refresh the overlay
+      glWidget->updateTopOverlay("");
     }
 }
 
