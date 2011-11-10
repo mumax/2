@@ -7,7 +7,7 @@ OFILES=\
 all: libomf.a
 
 $(OFILES): %.o: %.cpp %.h
-	 g++ -c $(@:.o=.cpp)
+	 $(CC) -c $(@:.o=.cpp)
 
 libomf.a: $(OFILES) 
 	ar -cvq libomf.a $(OFILES) 

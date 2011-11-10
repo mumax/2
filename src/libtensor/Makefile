@@ -6,7 +6,7 @@ OFILES=\
 all: libtensor.a
 
 $(OFILES): %.o: %.cpp %.h
-	 g++ -c $(@:.o=.cpp)
+	 $(CC) -c $(@:.o=.cpp)
 
 libtensor.a: $(OFILES) 
 	ar -cvq libtensor.a $(OFILES) 

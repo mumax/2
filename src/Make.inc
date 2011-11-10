@@ -12,4 +12,6 @@ NVCC+=\
 
 # flags for the gcc compiler
 CC=g++
-CFLAGS=-c -Wall
+CC+=\
+ -Wall\
+ -g\
