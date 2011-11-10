@@ -197,22 +197,24 @@ void Window::openFiles()
   fileName = QFileDialog::getOpenFileName(this,
 	     tr("Open .omf File"), "/home/grahamr", tr("OMF Files (*.omf)"));
   
-  OMFHeader tempHeader = OMFHeader();
-
-  // Remove the last element if not empty
-  if (!omfCache.empty()) {
-    omfCache.pop_back();
-  }
-
-  // Push our file data
-  omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
-
-  // Update the Display with the first element
-  glWidget->updateData(omfCache.back());
-
-  // Refresh the animation bar
-  adjustAnimSlider();
-
+  if (fileName != "") 
+    {
+      OMFHeader tempHeader = OMFHeader();
+      
+      // Remove the last element if not empty
+      if (!omfCache.empty()) {
+	omfCache.pop_back();
+      }
+      
+      // Push our file data
+      omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
+      
+      // Update the Display with the first element
+      glWidget->updateData(omfCache.back());
+      
+      // Refresh the animation bar
+      adjustAnimSlider();
+    }
 }
 
 void Window::updateDisplayData(int index)
@@ -235,38 +237,41 @@ void Window::openDir()
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
   
-  QDir chosenDir(dir);
-  QString dirString = chosenDir.path()+"/";
-  QStringList filters;
-  filters << "*.omf";
-  chosenDir.setNameFilters(filters);
-  QStringList dirFiles = chosenDir.entryList();
-
-  // persistent storage of filenames for top overlay
-  filenames = dirFiles;
-
-  // Clear the cache of pre-existing elements
-  while (!omfCache.empty()) {
-    omfCache.pop_back();
-  }
-
-  // Qt macro for looping over files
-  OMFHeader tempHeader = OMFHeader();
-  foreach (QString file, dirFiles)
+  if (dir != "") 
     {
-      std::cout << (dirString+file).toStdString() << std::endl;
-      // Push our new content...
-      omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
-    }
+      QDir chosenDir(dir);
+      QString dirString = chosenDir.path()+"/";
+      QStringList filters;
+      filters << "*.omf";
+      chosenDir.setNameFilters(filters);
+      QStringList dirFiles = chosenDir.entryList();
 
-  // Update the Display with the first element
-  glWidget->updateData(omfCache.front());
+      // persistent storage of filenames for top overlay
+      filenames = dirFiles;
+
+      // Clear the cache of pre-existing elements
+      while (!omfCache.empty()) {
+	omfCache.pop_back();
+      }
+
+      // Qt macro for looping over files
+      OMFHeader tempHeader = OMFHeader();
+      foreach (QString file, dirFiles)
+	{
+	  std::cout << (dirString+file).toStdString() << std::endl;
+	  // Push our new content...
+	  omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+	}
+
+      // Update the Display with the first element
+      glWidget->updateData(omfCache.front());
   
-  // Update the top overlay
-  glWidget->updateTopOverlay(filenames.front());
+      // Update the top overlay
+      glWidget->updateTopOverlay(filenames.front());
 
-  // Refresh the animation bar
-  adjustAnimSlider();
+      // Refresh the animation bar
+      adjustAnimSlider();
+    }
 }
 
 

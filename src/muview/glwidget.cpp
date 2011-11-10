@@ -246,20 +246,21 @@ void GLWidget::paintGL()
 		  {
 		    
 		    theta = acos(  (*dataPtr)[i][j][k][2]/mag);
-		    phi   = atan2( (*dataPtr)[i][j][k][1],  (*dataPtr)[i][j][k][0]);
+		    phi   = atan2( (*dataPtr)[i][j][k][1]/mag,  (*dataPtr)[i][j][k][0]/mag);
 		    
 		    glPushMatrix();
+		    
 		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
 
 		    GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
-		    
-		    glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
-		    glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
+		    glRotatef(180.0*(phi+90.0)/PI, 0.0, 0.0, 1.0);
+		    glRotatef(180.0*theta/PI,  1.0, 0.0, 0.0);
 		    
 		    glCallList(cone);
+
 		    glPopMatrix();
 		  }
 	      }
