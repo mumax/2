@@ -1,0 +1,11 @@
+#! /bin/bash
+
+# This is a wrapper script for the muview binary
+
+
+MUMAX2BIN=$(dirname $(readlink -f $0)) # path to this script
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MUMAX2BIN/../src/libmumax2
+#echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
+#export PYTHONPATH=$PYTHONPATH:$MUMAX2BIN/../src/python
+#echo PYTHONPATH: $PYTHONPATH
+exec $MUMAX2BIN/../src/muview/muview $@
