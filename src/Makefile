@@ -1,5 +1,6 @@
 dirs=\
 	libmumax2\
+	libomf\
 	pkg\
 	mumax2\
 	python\
