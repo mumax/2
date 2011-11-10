@@ -5,7 +5,7 @@
 #include <QWidget>
 
 // For reading OMF files
-#include "misc/container.h"
+#include "container.h"
 #include <vector>
 
 // General widget stuff 
@@ -37,11 +37,13 @@ private slots:
 
   //void settings();
   void about();
-
+  void updateDisplayData(int index);
+  
 private:
   // Main Window Stuff
   void createActions();
   void createMenus();
+  void adjustAnimSlider();
 
   QMenu *fileMenu;
   QMenu *settingsMenu;
@@ -76,7 +78,7 @@ private:
   
   // Storage and caching
   std::vector<array_ptr> omfCache;
-
+  QStringList filenames;
 };
 
 #endif

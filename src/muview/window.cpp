@@ -2,15 +2,16 @@
 #include <iostream>
 
 #include <QtGui>
+#include <QDir>
 #include <QxtSpanSlider>
 #include <QKeySequence>
 #include <QFileDialog>
 #include "glwidget.h"
 #include "window.h"
 
-#include "misc/OMFImport.h"
-#include "misc/OMFHeader.h"
-#include "misc/container.h"
+#include "OMFImport.h"
+#include "OMFHeader.h"
+#include "container.h"
 
 struct OMFImport;
 
@@ -44,8 +45,6 @@ Window::Window()
   connect(zSpanSlider, SIGNAL(lowerValueChanged(int)), glWidget, SLOT(setZSliceLow(int)));
   connect(zSpanSlider, SIGNAL(upperValueChanged(int)), glWidget, SLOT(setZSliceHigh(int)));
 
-  // Data
- 
   QHBoxLayout *mainLayout = new QHBoxLayout;
 
   sliceGroupBox = new QGroupBox(tr("XYZ Slicing"));
@@ -100,6 +99,10 @@ Window::Window()
   ySlider->setValue(345 * 16);
   zSlider->setValue(0 * 16);
   setWindowTitle(tr("MuView: Mumax2 Viewer"));
+
+  // Data, don't connect until we are ready (probably still not ready here)...
+  connect(animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
+ 
 }
 
 QxtSpanSlider *Window::createSpanSlider()
@@ -125,6 +128,24 @@ QSlider *Window::createSlider()
   slider->setTickInterval(15 * 16);
   slider->setTickPosition(QSlider::TicksRight);
   return slider;
+}
+
+void Window::adjustAnimSlider()
+{
+  int cacheSize = (int)omfCache.size();
+  std::cout << "Cache size is:\t" << cacheSize << std::endl;
+
+  if (cacheSize > 1) {
+    animSlider->setRange(0, cacheSize-1);
+    animSlider->setSingleStep(1);
+    animSlider->setPageStep(10);
+    animSlider->setTickInterval(2);
+    animSlider->setTickPosition(QSlider::TicksRight);
+    animSlider->setEnabled(TRUE);
+  } else {
+    animSlider->setEnabled(FALSE);
+  }
+
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -177,10 +198,34 @@ void Window::openFiles()
 	     tr("Open .omf File"), "/home/grahamr", tr("OMF Files (*.omf)"));
   
   OMFHeader tempHeader = OMFHeader();
+
+  // Remove the last element if not empty
+  if (!omfCache.empty()) {
+    omfCache.pop_back();
+  }
+
+  // Push our file data
   omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
 
   // Update the Display with the first element
-  glWidget->updateData(omfCache[0]);
+  glWidget->updateData(omfCache.back());
+
+  // Refresh the animation bar
+  adjustAnimSlider();
+
+}
+
+void Window::updateDisplayData(int index)
+{
+  if (!omfCache.empty()) {
+    int cacheSize = (int)omfCache.size();
+    if (index < cacheSize) {
+      // Update the top overlay
+      glWidget->updateTopOverlay(filenames[index]);
+      // Update the Display
+      glWidget->updateData(omfCache.at(index));
+    }
+  }
 }
 
 void Window::openDir()
@@ -189,6 +234,39 @@ void Window::openDir()
                                                  "/home",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
+  
+  QDir chosenDir(dir);
+  QString dirString = chosenDir.path()+"/";
+  QStringList filters;
+  filters << "*.omf";
+  chosenDir.setNameFilters(filters);
+  QStringList dirFiles = chosenDir.entryList();
+
+  // persistent storage of filenames for top overlay
+  filenames = dirFiles;
+
+  // Clear the cache of pre-existing elements
+  while (!omfCache.empty()) {
+    omfCache.pop_back();
+  }
+
+  // Qt macro for looping over files
+  OMFHeader tempHeader = OMFHeader();
+  foreach (QString file, dirFiles)
+    {
+      std::cout << (dirString+file).toStdString() << std::endl;
+      // Push our new content...
+      omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+    }
+
+  // Update the Display with the first element
+  glWidget->updateData(omfCache.front());
+  
+  // Update the top overlay
+  glWidget->updateTopOverlay(filenames.front());
+
+  // Refresh the animation bar
+  adjustAnimSlider();
 }
 
 
