@@ -9,8 +9,6 @@ CLEANFILES+=*.log
 
 all: $(dirs) githooks
 
-tests: src
-test: src
 
 .PHONY: githooks
 githooks:

@@ -11,7 +11,7 @@ all: doxygen
 # $(godirs)
 
 doxygen:
-	doxygen Doxyfile||echo 
+	doxygen Doxyfile||echo "make doc requires package doxygen, graphviz"
 
 .PHONY: $(godirs)
 $(godirs):
