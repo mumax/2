@@ -20,7 +20,7 @@ struct OMFImport
   void parseHeader();
   void parseDataAscii();
   void parseDataBinary4();
-  //void parseDataBinary8();
+  void parseDataBinary8();
 
   OMFHeader header;
   std::istream *input;
@@ -183,7 +183,7 @@ void OMFImport::parseSegment()
 	  parseDataBinary4();
 	} else if (value == "Data Binary 8") {
 	  std::cout << "Binary 8" << std::endl;
-	  //parseDataBinary8();
+	  parseDataBinary8();
 	} else {
 		throw std::runtime_error("Expected either 'Text', 'Binary 4' or 'Binary 8' chunk type");
 	}
@@ -355,9 +355,6 @@ void OMFImport::parseDataBinary4()
   const int stridez = header.ynodes*header.xnodes;
   const int stridey = header.xnodes;
   int z,y,x;
-  std::cout << "Dims:\t" << header.xnodes << "\t" << header.ynodes << "\t" << header.znodes << std::endl;
-  std::cout <<"Number of cells" << num_cells << "\t" << 5678/stridez << std::endl;
-
 
   for (int i=0; i<num_cells; ++i) {
     for (int j=0; j<3; ++j) {
@@ -381,58 +378,67 @@ void OMFImport::parseDataBinary4()
   }
   acceptLine();
 }
-//
-//void OMFImport::parseDataBinary8()
-//{
-//	assert(sizeof(double) == 8);
-//
-//	bool ok;
-//	std::string key, value;
-//
-//	// Parse "Begin: Data Binary 8"
-//	ok = parseCommentLine(line, key, value);
-//	if (!ok || key != "Begin" || value != "Data Binary 8") {
-//		throw std::runtime_error("Expected 'Begin Binary 8'");
-//	}
-//
-//	// Create field matrix object
-//	field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
-//
-//	const int num_cells = field->numElements();
-//
-//	// Read magic value and field contents from file
-//	double magic;
-//	((char*)&magic)[0] = next_char; next_char = -1;
-//	input->read((char*)&magic+1, sizeof(char)); 
-//	input->read((char*)&magic+2, sizeof(char)); 
-//	input->read((char*)&magic+3, sizeof(char)); 
-//	input->read((char*)&magic+4, sizeof(char)); 
-//	input->read((char*)&magic+5, sizeof(char)); 
-//	input->read((char*)&magic+6, sizeof(char)); 
-//	input->read((char*)&magic+7, sizeof(char)); 
-//	magic = fromBigEndian(magic);
-//
-//	if (magic != 123456789012345.0) throw std::runtime_error("Wrong magic number (binary 8 format)");
-//
-//	double *buffer = new double [3*num_cells];
-//	input->read((char*)buffer, 3*num_cells*sizeof(double));
-//
-//	VectorMatrix::accessor field_acc(*field);
-//
-//	for (int i=0; i<num_cells; ++i) {
-//		for (int j=0; j<3; ++j) 
-//			field_acc.linearSet(i,j,fromBigEndian(buffer[i*3+j]) * header.valuemultiplier);
-//	}
-//
-//	delete [] buffer;
-//
-//	acceptLine(); // read trailing newline character
-//	acceptLine(); // read next line...
-//
-//	// Parse "End: Data Binary 8"
-//	ok = parseCommentLine(line, key, value);
-//	if (!ok || key != "End" || value != "Data Binary 8") {
-//		throw std::runtime_error("Expected 'End Data Binary 8'");
-//	}
-//	acceptLine();
-//}
+
+void OMFImport::parseDataBinary8()
+{
+  assert(sizeof(double) == 8);
+
+  bool ok;
+  std::string key, value;
+
+  // Parse "Begin: Data Binary 8"
+  ok = parseCommentLine(line, key, value);
+  if (!ok || key != "Begin" || value != "Data Binary 8") {
+    throw std::runtime_error("Expected 'Begin Binary 8'");
+  }
+
+  // Create field matrix object
+  //field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
+  field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
+
+  //const int num_cells = field->numElements();
+  const int num_cells = field->num_elements()/3;
+
+  // Read magic value and field contents from file
+  double magic;
+  ((char*)&magic)[0] = next_char; next_char = -1;
+  input->read((char*)&magic+1, sizeof(char)); 
+  input->read((char*)&magic+2, sizeof(char)); 
+  input->read((char*)&magic+3, sizeof(char)); 
+  input->read((char*)&magic+4, sizeof(char)); 
+  input->read((char*)&magic+5, sizeof(char)); 
+  input->read((char*)&magic+6, sizeof(char)); 
+  input->read((char*)&magic+7, sizeof(char)); 
+  magic = fromBigEndian(magic);
+
+  if (magic != 123456789012345.0) throw std::runtime_error("Wrong magic number (binary 8 format)");
+
+  double *buffer = new double [3*num_cells];
+  input->read((char*)buffer, 3*num_cells*sizeof(double));
+
+  const int stridez = header.ynodes*header.xnodes;
+  const int stridey = header.xnodes;
+  int z,y,x;
+
+  for (int i=0; i<num_cells; ++i) {
+    for (int j=0; j<3; ++j) {
+      //field_acc.linearSet(i,j,fromBigEndian(buffer[i*3+j]) * header.valuemultiplier);
+      x = i%stridey;
+      z = i/stridez;
+      y = (i - x -  z*stridez)/stridey;
+      (*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
+    }
+  }
+
+  delete [] buffer;
+
+  acceptLine(); // read trailing newline character
+  acceptLine(); // read next line...
+
+  // Parse "End: Data Binary 8"
+  ok = parseCommentLine(line, key, value);
+  if (!ok || key != "End" || value != "Data Binary 8") {
+    throw std::runtime_error("Expected 'End Data Binary 8'");
+  }
+  acceptLine();
+}
