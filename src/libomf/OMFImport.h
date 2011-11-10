@@ -2,7 +2,7 @@
 #define OMF_IMPORT_H
 
 //#include "matrix/VectorMatrix.h"
-#include "container.h"
+#include "OMFContainer.h"
 
 #include <string>
 #include <istream>

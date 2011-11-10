@@ -11,7 +11,7 @@
 
 #include "OMFImport.h"
 #include "OMFHeader.h"
-#include "container.h"
+#include "OMFContainer.h"
 
 struct OMFImport;
 

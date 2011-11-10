@@ -2,11 +2,7 @@
 #define GLWIDGET_H
 
 #include <QGLWidget>
-<<<<<<< HEAD
-#include "misc/container.h"
-=======
-#include "container.h"
->>>>>>> graham
+#include "OMFContainer.h"
 
 class GLWidget : public QGLWidget
 {
@@ -32,10 +28,7 @@ public slots:
   void updateCOM();
   void updateExtent();
   void updateData(array_ptr data);
-<<<<<<< HEAD
-=======
   void updateTopOverlay(QString newstring);
->>>>>>> graham
 
 signals:
   void xRotationChanged(int angle);
@@ -89,14 +82,11 @@ private:
   array_ptr dataPtr;
   bool usePtr;
   bool displayOn;
-<<<<<<< HEAD
-=======
   bool topOverlayOn;
 
   // Overpainting
   void drawInstructions(QPainter *painter);
   QString topOverlayText;
->>>>>>> graham
 };
 
 #endif

@@ -5,8 +5,10 @@
 QT      += opengl
 CONFIG  += qxt
 QXT     += core gui
-LIBS    += -lglut -L../../../lib -lOMFImport -lOMFHeader
-INCLUDEPATH += ../../lib
+
+LIBS    += -lglut -L../libomf -lomf
+
+INCLUDEPATH += ../libomf
 
 # Files and Targets
 HEADERS = glwidget.h window.h

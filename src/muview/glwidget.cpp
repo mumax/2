@@ -4,11 +4,7 @@
 #include <QtOpenGL>
 #include "glwidget.h"
 #include <iostream>
-<<<<<<< HEAD
-#include "misc/container.h"
-=======
-#include "container.h"
->>>>>>> graham
+#include "OMFContainer.h"
 
 #define PI (3.141592653589793)
 
@@ -24,11 +20,8 @@ GLWidget::GLWidget(QWidget *parent)
   zRot = 0;
   usePtr = false;
   displayOn = false;
-<<<<<<< HEAD
-=======
   topOverlayOn = true;
   topOverlayText = tr("Open files using the \"File\" menu above");
->>>>>>> graham
 
   qtGreen  = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
   qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
@@ -48,10 +41,7 @@ void GLWidget::updateData(array_ptr data)
   // Update the display
   updateCOM();
   updateExtent();
-<<<<<<< HEAD
-=======
   updateGL();
->>>>>>> graham
 }
 
 QSize GLWidget::minimumSizeHint() const
@@ -255,15 +245,11 @@ void GLWidget::paintGL()
 		    
 		    glPushMatrix();
 		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
-<<<<<<< HEAD
-		    glColor3f(sin(phi), cos(phi), cos(phi+1.0f));
-=======
 
 		    GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
->>>>>>> graham
 		    
 		    glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
 		    glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
@@ -275,8 +261,7 @@ void GLWidget::paintGL()
 	  }
       }
   } 
-<<<<<<< HEAD
-=======
+
   if (topOverlayOn) {
     glShadeModel(GL_FLAT);
     glDisable(GL_CULL_FACE);
@@ -291,7 +276,6 @@ void GLWidget::paintGL()
     drawInstructions(&painter);
     painter.end();
   }
->>>>>>> graham
 }
 
 void GLWidget::resizeGL(int width, int height)

@@ -7,8 +7,8 @@
 #include <sstream>
 
 #include "OMFImport.h"
-#include "container.h"
-#include "OMFendian.h"
+#include "OMFContainer.h"
+#include "OMFEndian.h"
 //using namespace std;
 
 struct OMFImport
