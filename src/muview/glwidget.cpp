@@ -4,7 +4,11 @@
 #include <QtOpenGL>
 #include "glwidget.h"
 #include <iostream>
+<<<<<<< HEAD
 #include "misc/container.h"
+=======
+#include "container.h"
+>>>>>>> graham
 
 #define PI (3.141592653589793)
 
@@ -20,9 +24,16 @@ GLWidget::GLWidget(QWidget *parent)
   zRot = 0;
   usePtr = false;
   displayOn = false;
+<<<<<<< HEAD
+=======
+  topOverlayOn = true;
+  topOverlayText = tr("Open files using the \"File\" menu above");
+>>>>>>> graham
 
   qtGreen  = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
   qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
+
+  setAutoFillBackground(false);
 }
 
 GLWidget::~GLWidget()
@@ -37,6 +48,10 @@ void GLWidget::updateData(array_ptr data)
   // Update the display
   updateCOM();
   updateExtent();
+<<<<<<< HEAD
+=======
+  updateGL();
+>>>>>>> graham
 }
 
 QSize GLWidget::minimumSizeHint() const
@@ -173,8 +188,12 @@ void GLWidget::initializeGL()
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_MULTISAMPLE);
-  static GLfloat lightPosition[4] = { 0.5, 10.0, 7.0, 1.0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+
+  // Lights
+  static GLfloat lightPosition1[4] = { 4.0,  1.0, 10.0, 0.0 };
+  static GLfloat lightPosition2[4] = { -4.0, -1.0, 10.0, 0.0 };
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
+  glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
 
   // Display List for cone
   cone = glGenLists(1);
@@ -196,6 +215,8 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
+  qglClearColor(qtPurple.dark());
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
   glTranslatef(0.0, 0.0, -10.0 + zoom);
@@ -234,7 +255,15 @@ void GLWidget::paintGL()
 		    
 		    glPushMatrix();
 		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
+<<<<<<< HEAD
 		    glColor3f(sin(phi), cos(phi), cos(phi+1.0f));
+=======
+
+		    GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
+		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
+		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
+		    glColor3fv(color);
+>>>>>>> graham
 		    
 		    glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
 		    glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
@@ -246,6 +275,23 @@ void GLWidget::paintGL()
 	  }
       }
   } 
+<<<<<<< HEAD
+=======
+  if (topOverlayOn) {
+    glShadeModel(GL_FLAT);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    drawInstructions(&painter);
+    painter.end();
+  }
+>>>>>>> graham
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -284,4 +330,34 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 	zoom += (float)(event->delta()) / 100;
 	updateGL();
       }
+}
+
+void GLWidget::drawInstructions(QPainter *painter)
+{
+  //QString text = tr("Hello OpenGL World");
+  QString text = topOverlayText;
+  QFontMetrics metrics = QFontMetrics(font());
+  int border = qMax(4, metrics.leading());
+
+  QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125),
+				    Qt::AlignCenter | Qt::TextWordWrap, text);
+
+  //std::cout << width() << "\t" << rect.height()+2*border << std::endl;
+    
+  painter->setRenderHint(QPainter::TextAntialiasing);
+  painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
+		    QColor(0, 0, 0, 127));
+  painter->setPen(Qt::white);
+  //painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
+  //                  QColor(0, 0, 0, 127));
+  painter->drawText((width() - rect.width())/2, border,
+		    rect.width(), rect.height(),
+		    Qt::AlignLeft | Qt::TextWordWrap, text);
+}
+
+
+
+void GLWidget::updateTopOverlay(QString newstring)
+{
+  topOverlayText = newstring;
 }

@@ -24,6 +24,13 @@ libmumax2.so: $(OFILES)
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
 	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
 
+omflibs: $(OMFSTATICLIBS)
+	cp $(CURDIR)/libOMFImport.a $(CURDIR)/../../lib
+	cp $(CURDIR)/libOMFHeader.a $(CURDIR)/../../lib
+
+%.a: %.o
+	$(CC) $(CFLAGS) $(<:.o=.cpp) -o $(@:.a=.o) -I.
+	ar -cvq lib$@ $<
 
 .PHONY: clean
 clean:
