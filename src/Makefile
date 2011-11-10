@@ -1,6 +1,7 @@
 dirs=\
 	libmumax2\
 	libomf\
+	libtensor\
 	pkg\
 	mumax2\
 	python\
