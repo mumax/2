@@ -3,7 +3,7 @@ include src/Make.inc
 dirs=\
 	src\
 	tests\
-	#doc\
+	doc\
 
 CLEANFILES+=*.log
 
