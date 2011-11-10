@@ -1,10 +1,11 @@
 dirs=\
-	lib\
+	libmumax2\
 	pkg\
 	ptx\
 	
 all: $(dirs)
 
-pkg: lib
+pkg: libmumax2
+app: libmumax2 pkg
 
 include Dirs.pkg

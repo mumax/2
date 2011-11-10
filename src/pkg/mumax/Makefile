@@ -6,7 +6,6 @@ dirs=\
 	frontend\
 	apigen\
 	queue\
-	main\
 
 CLEANFILES+=*.log
 
@@ -18,8 +17,6 @@ engine: common gpu host
 frontend: common engine gpu
 apigen: common engine frontend
 queue: common
-main: $(dirs)
 
 include ../../Dirs.pkg
-
 

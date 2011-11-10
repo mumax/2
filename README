@@ -29,13 +29,15 @@ src/		Source files
 
 src/pkg/	Go package sources
 
-src/ptx/	CUDA sources for PTX assembly files
+src/libmumax2/	CUDA and C sources for C libraries
 
-src/lib/	CUDA and C sources for C libraries
+src/ptx/	CUDA sources for PTX assembly files (obsolete)
+
+src/mumax2/	mumax executable
+
+src/muview/	GUI executable
 
 bin/		Executables, useful to put in $PATH
-
-lib/		Executables used internally, not useful in $PATH, and libraries
 
 tests/		Test files
 
@@ -48,6 +50,8 @@ misc/		Miscellaneous scripts
 @section Acknowledgements
 
 * Financial support is provided by the Flanders Research Foundation (FWO).
+
+* muview is contributed by Graham Rowlands
 
 * reduce.cu is partly based on code from "The Regents of the University of California, Davis
 campus and NVIDIA Corporation.

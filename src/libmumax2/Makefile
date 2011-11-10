@@ -1,4 +1,4 @@
-include ../../Make.inc
+include ../Make.inc
 
 OFILES=\
 	gpu_safe.o\
@@ -22,8 +22,7 @@ $(OFILES): %.o: %.cu %.h
 libmumax2.so: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
-	cp -f $(CURDIR)/libmumax2.so $(CURDIR)/..
-	ln -sf $(CURDIR)/libmumax2.so ../../pkg/mumax/gpu
+	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
 
 
 .PHONY: clean
