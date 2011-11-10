@@ -203,6 +203,8 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
+  qglClearColor(qtPurple.dark());
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
   glTranslatef(0.0, 0.0, -10.0 + zoom);
@@ -257,6 +259,14 @@ void GLWidget::paintGL()
 	  }
       }
   } 
+  glShadeModel(GL_FLAT);
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+  
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   drawInstructions(&painter);
@@ -309,14 +319,20 @@ void GLWidget::drawInstructions(QPainter *painter)
 
     QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125),
                                       Qt::AlignCenter | Qt::TextWordWrap, text);
+
+    //std::cout << width() << "\t" << rect.height()+2*border << std::endl;
+    
     painter->setRenderHint(QPainter::TextAntialiasing);
-    //painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
-    //                 QColor(0, 0, 0, 127));
+
+    painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
+                     QColor(255, 255, 255, 200));
+    painter->fillRect(rect,
+                     QColor(255, 255, 255, 200));
     painter->setPen(Qt::white);
-    //painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
-    //                  QColor(0, 0, 0, 127));
+    painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
+                      QColor(0, 0, 0, 127));
     painter->drawText((width() - rect.width())/2, border,
                       rect.width(), rect.height(),
-                      Qt::AlignCenter | Qt::TextWordWrap, text);
+                      Qt::AlignLeft | Qt::TextWordWrap, text);
 }
 
