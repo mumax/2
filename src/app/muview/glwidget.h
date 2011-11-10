@@ -81,6 +81,9 @@ private:
   array_ptr dataPtr;
   bool usePtr;
   bool displayOn;
+
+  // Overpainting
+  void drawInstructions(QPainter *painter);
 };
 
 #endif
