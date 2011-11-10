@@ -183,7 +183,7 @@ void OMFImport::parseSegment()
 	  parseDataBinary4();
 	} else if (value == "Data Binary 8") {
 	  std::cout << "Binary 8" << std::endl;
-	  //parseDataBinary8();
+	  parseDataBinary8();
 	} else {
 		throw std::runtime_error("Expected either 'Text', 'Binary 4' or 'Binary 8' chunk type");
 	}
@@ -355,9 +355,6 @@ void OMFImport::parseDataBinary4()
   const int stridez = header.ynodes*header.xnodes;
   const int stridey = header.xnodes;
   int z,y,x;
-  std::cout << "Dims:\t" << header.xnodes << "\t" << header.ynodes << "\t" << header.znodes << std::endl;
-  std::cout <<"Number of cells" << num_cells << "\t" << 5678/stridez << std::endl;
-
 
   for (int i=0; i<num_cells; ++i) {
     for (int j=0; j<3; ++j) {
