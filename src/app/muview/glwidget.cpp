@@ -20,6 +20,8 @@ GLWidget::GLWidget(QWidget *parent)
   zRot = 0;
   usePtr = false;
   displayOn = false;
+  topOverlayOn = true;
+  topOverlayText = tr("Open files using the \"File\" menu above");
 
   qtGreen  = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
   qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
@@ -259,18 +261,20 @@ void GLWidget::paintGL()
 	  }
       }
   } 
-  glShadeModel(GL_FLAT);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
-  
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  
-  QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing);
-  drawInstructions(&painter);
-  painter.end();
+  if (topOverlayOn) {
+    glShadeModel(GL_FLAT);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    drawInstructions(&painter);
+    painter.end();
+  }
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -313,26 +317,30 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::drawInstructions(QPainter *painter)
 {
-    QString text = tr("Hello OpenGL World");
-    QFontMetrics metrics = QFontMetrics(font());
-    int border = qMax(4, metrics.leading());
+  //QString text = tr("Hello OpenGL World");
+  QString text = topOverlayText;
+  QFontMetrics metrics = QFontMetrics(font());
+  int border = qMax(4, metrics.leading());
 
-    QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125),
-                                      Qt::AlignCenter | Qt::TextWordWrap, text);
+  QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125),
+				    Qt::AlignCenter | Qt::TextWordWrap, text);
 
-    //std::cout << width() << "\t" << rect.height()+2*border << std::endl;
+  //std::cout << width() << "\t" << rect.height()+2*border << std::endl;
     
-    painter->setRenderHint(QPainter::TextAntialiasing);
-
-    painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
-                     QColor(255, 255, 255, 200));
-    painter->fillRect(rect,
-                     QColor(255, 255, 255, 200));
-    painter->setPen(Qt::white);
-    painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
-                      QColor(0, 0, 0, 127));
-    painter->drawText((width() - rect.width())/2, border,
-                      rect.width(), rect.height(),
-                      Qt::AlignLeft | Qt::TextWordWrap, text);
+  painter->setRenderHint(QPainter::TextAntialiasing);
+  painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
+		    QColor(0, 0, 0, 127));
+  painter->setPen(Qt::white);
+  //painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
+  //                  QColor(0, 0, 0, 127));
+  painter->drawText((width() - rect.width())/2, border,
+		    rect.width(), rect.height(),
+		    Qt::AlignLeft | Qt::TextWordWrap, text);
 }
 
+
+
+void GLWidget::updateTopOverlay(QString newstring)
+{
+  topOverlayText = newstring;
+}

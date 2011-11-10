@@ -220,7 +220,9 @@ void Window::updateDisplayData(int index)
   if (!omfCache.empty()) {
     int cacheSize = (int)omfCache.size();
     if (index < cacheSize) {
-      // Update the Display with the first element
+      // Update the top overlay
+      glWidget->updateTopOverlay(filenames[index]);
+      // Update the Display
       glWidget->updateData(omfCache.at(index));
     }
   }
@@ -240,6 +242,9 @@ void Window::openDir()
   chosenDir.setNameFilters(filters);
   QStringList dirFiles = chosenDir.entryList();
 
+  // persistent storage of filenames for top overlay
+  filenames = dirFiles;
+
   // Clear the cache of pre-existing elements
   while (!omfCache.empty()) {
     omfCache.pop_back();
@@ -257,6 +262,9 @@ void Window::openDir()
   // Update the Display with the first element
   glWidget->updateData(omfCache.front());
   
+  // Update the top overlay
+  glWidget->updateTopOverlay(filenames.front());
+
   // Refresh the animation bar
   adjustAnimSlider();
 }

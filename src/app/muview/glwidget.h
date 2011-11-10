@@ -28,6 +28,7 @@ public slots:
   void updateCOM();
   void updateExtent();
   void updateData(array_ptr data);
+  void updateTopOverlay(QString newstring);
 
 signals:
   void xRotationChanged(int angle);
@@ -81,9 +82,11 @@ private:
   array_ptr dataPtr;
   bool usePtr;
   bool displayOn;
+  bool topOverlayOn;
 
   // Overpainting
   void drawInstructions(QPainter *painter);
+  QString topOverlayText;
 };
 
 #endif

@@ -78,7 +78,7 @@ private:
   
   // Storage and caching
   std::vector<array_ptr> omfCache;
-
+  QStringList filenames;
 };
 
 #endif
