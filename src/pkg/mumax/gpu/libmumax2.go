@@ -262,14 +262,12 @@ func CopyBlockZ(dst, src *Array, block int) {
 }
 
 //// Transpose parts on each GPU individually.
-//// BUG: does not do anything with > 1 GPU.
 func TransposeComplexYZPart(out, in *Array) {
 	Assert(
 		out.size4D[0] == in.size4D[0] &&
 			out.size3D[0] == in.size3D[0] &&
 			out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
 
-	//Debug("in.partSize[1]", in.partSize[1])
 	C.transposeComplexYZAsyncPart(
 		(**C.float)(unsafe.Pointer(&out.pointer[0])),
 		(**C.float)(unsafe.Pointer(&in.pointer[0])),
@@ -279,43 +277,3 @@ func TransposeComplexYZPart(out, in *Array) {
 		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
 	out.Stream.Sync()
 }
-
-//// Cross-device YZ transpose + pad.
-//func TransposeComplexYZ(dst, src *Array) {
-//	N0 := src.size4D[0] * src.size3D[0]
-//	N1Part := src.size3D[1] / NDevice()
-//	N2 := src.size3D[2]
-//
-//	C.transposePadYZAsync(
-//		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
-//		(**C.float)(unsafe.Pointer(&src.pointer[0])),
-//		C.int(N0),
-//		C.int(N1Part),
-//		C.int(N2),
-//		C.int(N2), //N2Pad
-//		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
-//	dst.Stream.Sync()
-//}
-
-//func CombineZ(dst, src1, src2 *Array) {
-//	AssertEqual(src1.size4D, src2.size4D)
-//	Assert(dst.size4D[0] == src1.size4D[0] &&
-//		dst.size3D[0] == src1.size3D[0] &&
-//		dst.size3D[1] == src1.size3D[1] &&
-//		dst.size3D[2] == src1.size3D[2]*2)
-//
-//	D2 := dst.size3D[2]
-//	S0 := src1.size4D[0] * src1.size3D[0] // NComp * Size0
-//	S1Part := src1.partSize[1]
-//	S2 := src1.size3D[2]
-//	C.combineZAsync(
-//		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
-//		C.int(D2),
-//		(**C.float)(unsafe.Pointer(&src1.pointer[0])),
-//		(**C.float)(unsafe.Pointer(&src2.pointer[0])),
-//		C.int(S0),
-//		C.int(S1Part),
-//		C.int(S2),
-//		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
-//	dst.Stream.Sync()
-//}
