@@ -8,6 +8,7 @@ dirs=\
 all: $(dirs)
 
 pkg: libmumax2
-mumax2: libmumax2 pkg
+mumax2: pkg
+python: mumax2 
 
 include Dirs.pkg

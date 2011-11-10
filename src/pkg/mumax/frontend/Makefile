@@ -2,7 +2,7 @@ include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
 # to make tests run
-LD_LIBRARY_PATH+=:../../../../lib
+LD_LIBRARY_PATH+=:../../../libmumax2
 
 TARG=mumax/frontend
 

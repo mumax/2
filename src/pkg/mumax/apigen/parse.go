@@ -28,11 +28,11 @@ type header struct {
 }
 
 // Auto-generate API libraries for all languages.
-func parseSource() map[string]header {
+func parseSource(srcfile string) map[string]header {
 	headers := make(map[string]header)
 
 	// Read api.go
-	buf, err := ioutil.ReadFile(GetExecDir() + "../src/pkg/mumax/engine/api.go")
+	buf, err := ioutil.ReadFile(srcfile)
 	CheckIO(err)
 	file := string(buf)
 

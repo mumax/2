@@ -17,6 +17,7 @@ import (
 	. "mumax/common"
 	"mumax/engine"
 	"mumax/frontend"
+	"flag"
 	"reflect"
 	"fmt"
 	"os"
@@ -28,7 +29,9 @@ const pkg = "mumax2"
 // Auto-generate API libraries for all languages.
 func APIGen() {
 
-	headers := parseSource()
+	flag.Parse()
+
+	headers := parseSource(flag.Arg(0))
 
 	// interpreter can extract the methods
 
