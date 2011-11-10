@@ -12,5 +12,5 @@ import (
 )
 
 func main() {
-	apigen.Main()
+	apigen.APIGen()
 }

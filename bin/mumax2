@@ -1,0 +1,14 @@
+#! /bin/bash
+
+# This is a wrapper script for the mumax2 binary.
+
+
+# 1) set up environment
+MUMAX2BIN=$(dirname $(readlink -f $0)) # path to this script
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MUMAX2BIN/../lib
+#echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
+export PYTHONPATH=$PYTHONPATH:$MUMAX2BIN/../lib
+#echo PYTHONPATH: $PYTHONPATH
+
+# 2) run mumax
+exec $MUMAX2BIN/../src/mumax2/mumax2 $@
