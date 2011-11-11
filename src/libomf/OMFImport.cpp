@@ -20,7 +20,7 @@ struct OMFImport
   void parseHeader();
   void parseDataAscii();
   void parseDataBinary4();
-  //void parseDataBinary8();
+  void parseDataBinary8();
 
   OMFHeader header;
   std::istream *input;
