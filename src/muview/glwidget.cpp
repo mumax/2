@@ -205,6 +205,11 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_LIGHTING);
+
   qglClearColor(qtPurple.dark());
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -241,20 +246,21 @@ void GLWidget::paintGL()
 		  {
 		    
 		    theta = acos(  (*dataPtr)[i][j][k][2]/mag);
-		    phi   = atan2( (*dataPtr)[i][j][k][1],  (*dataPtr)[i][j][k][0]);
+		    phi   = atan2( (*dataPtr)[i][j][k][1]/mag,  (*dataPtr)[i][j][k][0]/mag);
 		    
 		    glPushMatrix();
+		    
 		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
 
 		    GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
-		    
-		    glRotatef(180.0*theta/PI, 0.0, 1.0, 0.0);
-		    glRotatef(180.0*phi/PI,   0.0, 0.0, 1.0);
+		    glRotatef(180.0*(phi+90.0)/PI, 0.0, 0.0, 1.0);
+		    glRotatef(180.0*theta/PI,  1.0, 0.0, 0.0);
 		    
 		    glCallList(cone);
+
 		    glPopMatrix();
 		  }
 	      }
@@ -343,5 +349,10 @@ void GLWidget::drawInstructions(QPainter *painter)
 
 void GLWidget::updateTopOverlay(QString newstring)
 {
-  topOverlayText = newstring;
+  if (newstring != "") {
+    topOverlayOn = true;
+    topOverlayText = newstring;
+  } else {
+    topOverlayOn = false;
+  }
 }
