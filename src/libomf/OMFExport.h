@@ -1,3 +1,6 @@
+// This part is originally created and released into the public
+// domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
+
 #ifndef OMF_EXPORT_H
 #define OMF_EXPORT_H
 

@@ -1,3 +1,6 @@
+// This part is originally created and released into the public
+// domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
+
 #include "OMFExport.h"
 
 #include "matrix/Vector3d.h"

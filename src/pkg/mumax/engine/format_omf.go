@@ -15,6 +15,7 @@ import (
 	"unsafe"
 	"io"
 	"fmt"
+	"strings"
 )
 
 func init() {
@@ -31,7 +32,7 @@ func (f *FormatOmf) Name() string {
 func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
 	dataformat := ""
 	switch len(options) {
-	case 0:
+	case 0: // No options: default=Binary 4
 		dataformat = "Binary 4"
 	case 1:
 		dataformat = options[0]
@@ -51,13 +52,13 @@ const (
 func writeOmfData(out io.Writer, q *Quant, dataformat string) {
 
 	hdr(out, "Begin", "Data "+dataformat)
-	switch dataformat {
+	switch strings.ToLower(dataformat) {
 	case "text":
 		q.Buffer().WriteAscii(out)
-	case "Binary 4":
+	case "binary 4":
 		writeOmfBinary4(out, q.Buffer())
 	default:
-		panic(InputErr("Illegal OMF data format " + dataformat + ". Options are: text, binary 4"))
+		panic(InputErr("Illegal OMF data format " + dataformat + ". Options are: Text, Binary 4"))
 	}
 	hdr(out, "End", "Data "+dataformat)
 }
