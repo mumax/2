@@ -35,6 +35,7 @@ GOFILES=\
 	outputformat.go\
 	format_txt.go\
 	format_omf.go\
+	format_ovf2.go\
 	table.go\
 	#input.go\
 
