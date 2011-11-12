@@ -6,7 +6,6 @@ dirs=\
 	mumax2\
 	muview\
 	python\
-	ptx\
 	
 all: $(dirs)
 

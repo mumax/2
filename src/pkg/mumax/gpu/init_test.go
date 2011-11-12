@@ -25,7 +25,6 @@ func init() {
 	//println("		*****  u s i n g    1    g p u  *******  ")
 	//InitMultiGPU([]int{0}, 0)
 	InitDebugGPUs()
-	SetPTXLookPath("../../../ptx")
 }
 
 // return a few array sizes for testing

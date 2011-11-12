@@ -31,8 +31,6 @@ src/pkg/	Go package sources
 
 src/libmumax2/	CUDA and C sources for C libraries
 
-src/ptx/	CUDA sources for PTX assembly files (obsolete)
-
 src/mumax2/	mumax executable
 
 src/muview/	GUI executable

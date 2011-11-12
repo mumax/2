@@ -10,14 +10,14 @@ GOFILES=\
 	doc.go\
 	array.go\
 	stream.go\
-	module.go\
-	module_load.go\
-	module_ptxparse.go\
-	module_find.go\
-	math.go\
 	reductor.go\
 	fftplan1gpu.go\
 	fftplan.go\
+#	math.go\
+#	module.go\
+#	module_load.go\
+#	module_ptxparse.go\
+#	module_find.go\
 
 CGOFILES=\
 	multigpu.go\
