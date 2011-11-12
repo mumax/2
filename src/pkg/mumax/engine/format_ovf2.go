@@ -88,11 +88,11 @@ func writeOvf2Header(out io.Writer, q *Quant) {
 
 	name := q.Name()
 	var labels []interface{}
-	if q.NComp() == 1{
-		labels = []interface{}{name} 
-	}else{
-		for i:=0; i<q.NComp(); i++{
-			labels = append(labels, name + "_" + string('x'+i))
+	if q.NComp() == 1 {
+		labels = []interface{}{name}
+	} else {
+		for i := 0; i < q.NComp(); i++ {
+			labels = append(labels, name+"_"+string('x'+i))
 		}
 	}
 	hdr(out, "valuedim", q.NComp())
