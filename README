@@ -37,7 +37,7 @@ src/mumax2/	mumax executable
 
 src/muview/	GUI executable
 
-bin/		Executables, useful to put in $PATH
+bin/		Wrapper scripts for executables, useful to put in $PATH
 
 tests/		Test files
 
@@ -52,6 +52,10 @@ misc/		Miscellaneous scripts
 * Financial support is provided by the Flanders Research Foundation (FWO).
 
 * muview is contributed by Graham Rowlands
+
+* libomf is based on the code by Gunnar Selke
+
+* OVF 2.0 support is contributed by Mykola Dvornik
 
 * reduce.cu is partly based on code from "The Regents of the University of California, Davis
 campus and NVIDIA Corporation.
