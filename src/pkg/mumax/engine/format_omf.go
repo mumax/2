@@ -48,7 +48,6 @@ func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
 	hdr(out, "End", "Segment")
 }
 
-
 const (
 	OMF_CONTROL_NUMBER = 1234567.0 // The omf format requires the first encoded number in the binary data section to be this control number
 )
@@ -66,7 +65,6 @@ func writeOmfData(out io.Writer, q *Quant, dataformat string) {
 	}
 	hdr(out, "End", "Data "+dataformat)
 }
-
 
 // Writes the OMF header
 func writeOmfHeader(out io.Writer, q *Quant) {

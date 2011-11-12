@@ -48,7 +48,6 @@ func (f *FormatOvf2) Write(out io.Writer, q *Quant, options []string) {
 	hdr(out, "End", "Segment")
 }
 
-
 func writeOvf2Data(out io.Writer, q *Quant, dataformat string) {
 
 	hdr(out, "Begin", "Data "+dataformat)
@@ -87,9 +86,17 @@ func writeOvf2Header(out io.Writer, q *Quant) {
 	hdr(out, "ymax", cellsize[Y]*float64(gridsize[Y]))
 	hdr(out, "zmax", cellsize[X]*float64(gridsize[X]))
 
-	// TODO: quant
-	hdr(out, "valuedim", 3)
-	hdr(out, "valuelabels", "Val_x", "Val_y", "Val_z") // TODO
+	name := q.Name()
+	var labels []interface{}
+	if q.NComp() == 1{
+		labels = []interface{}{name} 
+	}else{
+		for i:=0; i<q.NComp(); i++{
+			labels = append(labels, name + "_" + string('x'+i))
+		}
+	}
+	hdr(out, "valuedim", q.NComp())
+	hdr(out, "valuelabels", labels...) // TODO
 	unit := q.Unit()
 	if unit == "" {
 		unit = "1"
@@ -147,4 +154,3 @@ func writeOvf2Binary4(out io.Writer, array *host.Array) {
 		}
 	}
 }
-
