@@ -467,7 +467,14 @@ void OMFImport::parseDataBinary8()
   input->read((char*)&magic+5, sizeof(char)); 
   input->read((char*)&magic+6, sizeof(char)); 
   input->read((char*)&magic+7, sizeof(char)); 
-  magic = fromBigEndian(magic);
+  if (header.version==1) {
+    magic = fromBigEndian(magic);
+  } else if (header.version==2) {
+    magic = fromLittleEndian(magic);
+  } else {
+    magic = 0;
+    throw std::runtime_error("Wrong version number detected.");
+  }
 
   if (magic != 123456789012345.0) throw std::runtime_error("Wrong magic number (binary 8 format)");
 
@@ -484,7 +491,11 @@ void OMFImport::parseDataBinary8()
       x = i%stridey;
       z = i/stridez;
       y = (i - x -  z*stridez)/stridey;
-      (*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
+      if (header.version==1) {
+	(*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
+      } else {
+	(*field)[x][y][z][j] = fromLittleEndian(buffer[i*3+j]);
+      }
     }
   }
 
