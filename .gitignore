@@ -10,3 +10,4 @@ _testmain.go
 *.mprofi
 *.project
 *.pydevproject
+.DS_Store
