@@ -70,5 +70,15 @@ T fromBigEndian(T value)
 	return swapEndianness(value);
 }
 
+/**
+ * Converts a value in little-endian byte order to host-byte-order.
+ */
+template <typename T>
+T fromLittleEndian(T value)
+{
+	if (!isBigEndian()) return value;
+	return swapEndianness(value);
+}
+
 #endif
 

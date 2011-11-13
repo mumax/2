@@ -16,21 +16,25 @@ enum OMFFormat
 
 struct OMFHeader 
 {
-	OMFHeader();
-	~OMFHeader();
+  OMFHeader();
+  ~OMFHeader();
 
-	std::string Title;
-	std::vector<std::string> Desc;
-	std::string meshunit; // e.g. "m"
-	std::string valueunit; // e.g. "A/m"
-	double valuemultiplier;
-	double xmin, ymin, zmin;
-	double xmax, ymax, zmax;
-	double ValueRangeMaxMag, ValueRangeMinMag;
-	std::string meshtype; // "rectangular"
-	double xbase, ybase, zbase;
-	double xstepsize, ystepsize, zstepsize;
-	int xnodes, ynodes, znodes;
+  std::string Title;
+  std::vector<std::string> Desc;
+  std::vector<std::string> valueunits;  // OVF 2.0
+  std::vector<std::string> valuelabels; // OVF 2.0
+  std::string meshunit;  // e.g. "m"
+  std::string valueunit; // e.g. "A/m"
+  double valuemultiplier;
+  double xmin, ymin, zmin;
+  double xmax, ymax, zmax;
+  double ValueRangeMaxMag, ValueRangeMinMag;
+  std::string meshtype; // "rectangular"
+  double xbase, ybase, zbase;
+  double xstepsize, ystepsize, zstepsize;
+  int xnodes, ynodes, znodes;
+  int valuedim; // OVF 2.0
+  int version;
 };
 
 #endif

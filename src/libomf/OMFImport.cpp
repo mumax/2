@@ -41,16 +41,16 @@ struct OMFImport
 
 array_ptr readOMF(const std::string &path, OMFHeader &header)
 {
-	std::ifstream in(path.c_str());
-	if (!in.good()) {
-		throw std::runtime_error(std::string("Could not open file: ") + path);
-	}
+  std::ifstream in(path.c_str());
+  if (!in.good()) {
+    throw std::runtime_error(std::string("Could not open file: ") + path);
+  }
 
-	OMFImport omf;
-	omf.read(in);
-	header = omf.header;
-	return array_ptr(omf.field);
-	//return VectorMatrix(*(omf.field));
+  OMFImport omf;
+  omf.read(in);
+  header = omf.header;
+  return array_ptr(omf.field);
+  //return VectorMatrix(*(omf.field));
 }
 
 array_ptr readOMF(std::istream &in, OMFHeader &header)
@@ -74,16 +74,51 @@ static double str2dbl(const std::string &value)
 	return strtod(value.c_str(), 0);
 }
 
+static bool parseFirstLine(const std::string &line, std::string &key, std::string &value,
+			   int &version)
+{
+  if (line=="# OOMMF: OVF 2.0") {
+    key="oommf";
+    value="ovf 2.0";
+    version=2;
+    return true;
+  } else if (line=="# OOMMF: rectangular mesh v1.0") {
+    key="oommf";
+    value="rectangular mesh v1.0";
+    version=1;
+    return true;
+  } else if (line=="# OOMMF OVF 2.0") {
+    key="oommf";
+    value="ovf 2.0";
+    version=2;
+    return true;
+  } else {
+    return false;
+  }
+  return false;
+}
+
 static bool parseCommentLine(const std::string &line, std::string &key, std::string &value)
 {
-	if (line[0] == '#') {
-		const int sep = line.find(':');
-		key = std::string(line.begin()+2, line.begin()+sep);
-		value = std::string(line.begin()+sep+2, line.end());
-		return true;
-	} else {
-		return false;
-	}
+  // ::tolower is unreliable...
+  if (line[0] == '#') {
+    //if (line == "#") {
+    //  std::cout << "Blank!" << std::endl;
+    //  key = "blank";
+    //  value = "blank";
+    //  return true;
+    //} else {
+      const int sep = line.find(':');
+      key = std::string(line.begin()+2, line.begin()+sep);
+      std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+      value = std::string(line.begin()+sep+2, line.end());
+      std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+      //std::cout << "Header:\t" << key << "\t" << value << std::endl;
+      return true;
+      //}
+  } else {
+    return false;
+  }
 }
 
 void OMFImport::read(std::istream &in)
@@ -104,34 +139,33 @@ void OMFImport::acceptLine()
 	static const char CR = 0x0D;
 
 	// Accept LF (Unix), CR, CR+LF (Dos) and LF+CR as line terminators.
-	line = "";
-
-	bool done = false;
-	while (!done) {
-		if (next_char == LF) {
-			done = true;
-			input->read(&next_char, sizeof(char));
-			if (next_char == CR) input->read(&next_char, sizeof(char));
-		} else if (next_char == CR) {
-			done = true;
-			input->read(&next_char, sizeof(char));
-			if (next_char == LF) input->read(&next_char, sizeof(char));
-		} else {
-			line += next_char;
-			input->read(&next_char, sizeof(char));
-		}
+	bool reallydone = false;
+	while(!reallydone) {
+	  line = "";
+	  bool done = false;
+	  while (!done) {
+	    if (next_char == LF) {
+	      done = true;
+	      input->read(&next_char, sizeof(char));
+	      if (next_char == CR) input->read(&next_char, sizeof(char));
+	    } else if (next_char == CR) {
+	      done = true;
+	      input->read(&next_char, sizeof(char));
+	      if (next_char == LF) input->read(&next_char, sizeof(char));
+	    } else {
+	      line += next_char;
+	      input->read(&next_char, sizeof(char));
+	    }
+	  }
+	  if (line=="#") {
+	    reallydone=false;
+	  } else if (line=="") {
+	    reallydone=true;
+	  } else {
+	    reallydone=true;
+	  }
 	}
-/*
-	input->getline(buffer, 1000);
-	if (input->fail()) {
-		line = "<EOF>";
-		eof = true;
-		return;
-	}
-
-	line = buffer;
-	lineno += 1;
-*/
+	
 }
 
 // OMF file parser /////////////////////////////////////////////////////////////////////////////
@@ -140,23 +174,23 @@ void OMFImport::parse()
 {
 	bool ok;
 	std::string key, value;
-	
-	ok = parseCommentLine(line, key, value);
-	if (ok && key == "OOMMF") {
-		acceptLine();
+
+	ok = parseFirstLine(line, key, value, header.version);
+	if (ok && key == "oommf") {
+	  acceptLine();
 	} else {
 		throw std::runtime_error("Expected 'OOMMF' at line 1");
 	}
 
 	ok = parseCommentLine(line, key, value);
-	if (ok && key == "Segment count") {
+	if (ok && key == "segment count") {
 		acceptLine();
 	} else {
 		throw std::runtime_error("Expected 'Segment count' at line 2");
 	}
 
 	ok = parseCommentLine(line, key, value);
-	if (ok && key == "Begin" && value == "Segment") {
+	if (ok && key == "begin" && value == "segment") {
 		parseSegment();
 	} else {
 		throw std::runtime_error("Expected begin of segment");
@@ -169,30 +203,28 @@ void OMFImport::parseSegment()
 	std::string key, value;
 
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "Begin" || value != "Segment") {
+	if (!ok || key != "begin" || value != "segment") {
 		throw std::runtime_error("Parse error. Expected 'Begin Segment'");
 	}
 	acceptLine();
 
 	parseHeader();
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "Begin") {
+	if (!ok || key != "begin") {
 		throw std::runtime_error("Parse error. Expected 'Begin Data <type>'");
 	}
-	if (value == "Data Text") {
-		parseDataAscii();
-	} else if (value == "Data Binary 4") {
-	  std::cout << "Binary 4 damnit" << std::endl;
+	if (value == "data text") {
+	  parseDataAscii();
+	} else if (value == "data binary 4") {
 	  parseDataBinary4();
-	} else if (value == "Data Binary 8") {
-	  std::cout << "Binary 8" << std::endl;
+	} else if (value == "data binary 8") {
 	  parseDataBinary8();
 	} else {
 		throw std::runtime_error("Expected either 'Text', 'Binary 4' or 'Binary 8' chunk type");
 	}
 
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "End" || value != "Segment") {
+	if (!ok || key != "end" || value != "segment") {
 		throw std::runtime_error("Expected 'End Segment'");
 	}
 	acceptLine();
@@ -204,7 +236,7 @@ void OMFImport::parseHeader()
 	std::string key, value;
 
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "Begin" || value != "Header") {
+	if (!ok || key != "begin" || value != "header") {
 		throw std::runtime_error("Expected 'Begin Header'");
 	}
 	acceptLine();
@@ -217,12 +249,12 @@ void OMFImport::parseHeader()
 		  continue;
 		}
 
-		if (key == "End" && value == "Header") {
+		if (key == "end" && value == "header") {
 			done = true;
 			break;
-		} else if (key == "Title") {
+		} else if (key == "title") {
 			header.Title = value;
-		} else if (key == "Desc") {
+		} else if (key == "desc") {
 			header.Desc.push_back(value);
 		} else if (key == "meshunit") {
 			header.meshunit = value;
@@ -242,9 +274,15 @@ void OMFImport::parseHeader()
 			header.ymax = str2dbl(value);
 		} else if (key == "zmax") {
 			header.zmax = str2dbl(value);
-		} else if (key == "ValueRangeMinMag") {
+		} else if (key == "valuedim") {   // OVF 2.0
+		  header.valuedim = str2int(value);
+		} else if (key == "valueunits") { // OVF 2.0
+		  header.valueunits.push_back(value);
+		} else if (key == "valuelabels") { // OVF 2.0
+		  header.valuelabels.push_back(value);
+		} else if (key == "valuerangeminmag") {
 			header.ValueRangeMinMag = str2dbl(value);
-		} else if (key == "ValueRangeMaxMag") {
+		} else if (key == "valuerangemaxmag") {
 			header.ValueRangeMaxMag = str2dbl(value);
 		} else if (key == "meshtype") {
 			header.meshtype = value;
@@ -273,7 +311,7 @@ void OMFImport::parseHeader()
 	}
 
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "End" || value != "Header") {
+	if (!ok || key != "end" || value != "header") {
 		throw std::runtime_error("Expected 'End Header'");
 	}
 	acceptLine();
@@ -285,7 +323,7 @@ void OMFImport::parseDataAscii()
 	std::string key, value;
 	
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "Begin" || value != "Data Text") {
+	if (!ok || key != "begin" || value != "data text") {
 		throw std::runtime_error("Expected 'Begin DataText'");
 	}
 	acceptLine();
@@ -314,7 +352,7 @@ void OMFImport::parseDataAscii()
 	    }
 
 	ok = parseCommentLine(line, key, value);
-	if (!ok || key != "End" || value != "Data Text") {
+	if (!ok || key != "end" || value != "data text") {
 		throw std::runtime_error("Expected 'End Data Text'");
 	}
 	acceptLine();
@@ -329,7 +367,7 @@ void OMFImport::parseDataBinary4()
 
   // Parse "Begin: Data Binary 4"
   ok = parseCommentLine(line, key, value);
-  if (!ok || key != "Begin" || value != "Data Binary 4") {
+  if (!ok || key != "begin" || value != "data binary 4") {
     throw std::runtime_error("Expected 'Begin Binary 4'");
   }
 
@@ -346,8 +384,15 @@ void OMFImport::parseDataBinary4()
   input->read((char*)&magic+1, sizeof(char)); 
   input->read((char*)&magic+2, sizeof(char)); 
   input->read((char*)&magic+3, sizeof(char)); 
-  magic = fromBigEndian(magic);
-
+  if (header.version==1) {
+    magic = fromBigEndian(magic);
+  } else if (header.version==2) {
+    magic = fromLittleEndian(magic);
+  } else {
+    magic = 0;
+    throw std::runtime_error("Wrong version number detected.");
+  }
+  
   if (magic != 1234567.0f) throw std::runtime_error("Wrong magic number (binary 4 format)");
 
   float *buffer = new float [3*num_cells];
@@ -365,21 +410,31 @@ void OMFImport::parseDataBinary4()
       x = i%stridey;
       z = i/stridez;
       y = (i - x -  z*stridez)/stridey;
-      (*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
+      if (header.version==1) {
+	(*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
+      } else {
+	(*field)[x][y][z][j] = fromLittleEndian(buffer[i*3+j]);
+      }
     }
   }
 
   delete [] buffer;
 
-  acceptLine(); // read trailing newline character
+  if (header.version==1) {
+    acceptLine(); // read trailing newline character
+  }
   acceptLine(); // read next line...
 
   // Parse "End: Data Binary 4"
-  ok = parseCommentLine(line, key, value);
-  if (!ok || key != "End" || value != "Data Binary 4") {
-    throw std::runtime_error("Expected 'End Data Binary 4'");
+  if (header.version==1) {
+    ok = parseCommentLine(line, key, value);
+    if (!ok || key != "end" || value != "data binary 4") {
+      throw std::runtime_error("Expected 'End Data Binary 4'");
+    }
+    acceptLine();
+  } else {
+    acceptLine();
   }
-  acceptLine();
 }
 
 void OMFImport::parseDataBinary8()
@@ -391,7 +446,7 @@ void OMFImport::parseDataBinary8()
 
   // Parse "Begin: Data Binary 8"
   ok = parseCommentLine(line, key, value);
-  if (!ok || key != "Begin" || value != "Data Binary 8") {
+  if (!ok || key != "begin" || value != "data binary 8") {
     throw std::runtime_error("Expected 'Begin Binary 8'");
   }
 
@@ -440,7 +495,7 @@ void OMFImport::parseDataBinary8()
 
   // Parse "End: Data Binary 8"
   ok = parseCommentLine(line, key, value);
-  if (!ok || key != "End" || value != "Data Binary 8") {
+  if (!ok || key != "end" || value != "data binary 8") {
     throw std::runtime_error("Expected 'End Data Binary 8'");
   }
   acceptLine();

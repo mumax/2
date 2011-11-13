@@ -195,20 +195,22 @@ void Window::openFiles()
 {
   QString fileName;
   fileName = QFileDialog::getOpenFileName(this,
-	     tr("Open .omf File"), "/home/grahamr", tr("OMF Files (*.omf)"));
+					  tr("Open File"), QDir::currentPath(),
+					  tr("OVF Files (*.omf *.ovf)"));
   
   if (fileName != "") 
     {
+      std::cout << fileName.toStdString() << std::endl;
       OMFHeader tempHeader = OMFHeader();
-      
+      std::cout << "After header"  << std::endl;
       // Remove the last element if not empty
       if (!omfCache.empty()) {
 	omfCache.pop_back();
       }
-      
+      std::cout << "Before push"  << std::endl;
       // Push our file data
       omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
-      
+      std::cout << "After push"  << std::endl;
       // Update the Display with the first element
       glWidget->updateData(omfCache.back());
       
