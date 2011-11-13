@@ -7,4 +7,6 @@
 *.out
 _testmain.go
 *.prof
-*.mprof
+*.mprofi
+*.project
+*.pydevproject
