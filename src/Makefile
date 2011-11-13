@@ -19,7 +19,7 @@ else # Linux and other Unix based systems
 		mumax2\
 		muview\
 		python\
-
+	
 endif
 
 all: $(dirs)
