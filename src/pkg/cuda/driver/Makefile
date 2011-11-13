@@ -23,7 +23,14 @@ GOFILES=\
 	doc.go\
 
 CGO_CFLAGS+=-I/usr/local/cuda/include/
-CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia-current/ -lcuda -lcudart 
+
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Darwin) # Os X
+CGO_LDFLAGS+=-L/usr/local/cuda/lib -lcuda -lcudart
+else # Linux and other Unix based systems
+CGO_LDFLAGS+=-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia-current/ -lcuda -lcudart
+endif
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	

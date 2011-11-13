@@ -34,12 +34,22 @@ CGO_CFLAGS+=\
 	-I/usr/local/cuda/include\
 	-I../../../libmumax2\
 
+
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Darwin) # Os X
+CGO_LDFLAGS+=\
+	-L/usr/local/cuda/lib\
+   	-L../../../libmumax2
+else # Linux and other Unix based systems
 CGO_LDFLAGS+=\
 	-L/usr/local/cuda/lib\
    	-L/usr/local/cuda/lib64\
 	-L/usr/lib/nvidia-current\
 	-L/usr/lib/nvidia\
-   	-L../../../libmumax2\
+   	-L../../../libmumax2
+endif
+
 
 CGO_LDFLAGS+=\
 	-lcuda\
