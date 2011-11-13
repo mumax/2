@@ -11,8 +11,6 @@ CGOFILES=\
 	thread.go\
 	execution.go\
 	peer.go\
-	#safe_launch.go\
-	#safe_memory.go\
 
 GOFILES=\
 	array.go\
