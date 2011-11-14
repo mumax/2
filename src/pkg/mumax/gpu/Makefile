@@ -13,11 +13,6 @@ GOFILES=\
 	reductor.go\
 	fftplan1gpu.go\
 	fftplan.go\
-#	math.go\
-#	module.go\
-#	module_load.go\
-#	module_ptxparse.go\
-#	module_find.go\
 
 CGOFILES=\
 	multigpu.go\
@@ -37,7 +32,7 @@ CGO_CFLAGS+=\
 
 UNAME := $(shell uname)
 
-ifeq ($(UNAME), Darwin) # Os X
+ifeq ($(UNAME), Darwin) # OS X
 CGO_LDFLAGS+=\
 	-L/usr/local/cuda/lib\
    	-L../../../libmumax2
