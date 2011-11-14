@@ -66,7 +66,7 @@ func writeOvf2Header(out io.Writer, q *Quant) {
 	gridsize := GetEngine().GridSize()
 	cellsize := engine.CellSize()
 
-	hdr(out, "OOMMF", "OVF 2.0")
+	fmt.Fprintln(out, "# OOMMF OVF 2.0")
 	fmt.Fprintln(out, "#")
 	hdr(out, "Segment count", "1")
 	fmt.Fprintln(out, "#")
@@ -74,7 +74,7 @@ func writeOvf2Header(out io.Writer, q *Quant) {
 	hdr(out, "Begin", "Header")
 	fmt.Fprintln(out, "#")
 
-	hdr(out, "title", "mumax data") // TODO
+	hdr(out, "Title", "mumax data") // TODO
 	hdr(out, "meshtype", "rectangular")
 	hdr(out, "meshunit", "m")
 
@@ -105,8 +105,8 @@ func writeOvf2Header(out io.Writer, q *Quant) {
 
 	totaltime := GetEngine().time.Scalar()
 	// We don't really have stages
-	fmt.Fprintln(out, "# desc: Stage simulation time: ", totaltime, " s")
-	fmt.Fprintln(out, "# desc: Total simulation time: ", totaltime, " s")
+	fmt.Fprintln(out, "# Desc: Stage simulation time: ", totaltime, " s")
+	fmt.Fprintln(out, "# Desc: Total simulation time: ", totaltime, " s")
 
 	hdr(out, "xbase", cellsize[Z]/2)
 	hdr(out, "ybase", cellsize[Y]/2)
