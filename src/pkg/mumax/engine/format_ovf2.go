@@ -53,7 +53,7 @@ func writeOvf2Data(out io.Writer, q *Quant, dataformat string) {
 	hdr(out, "Begin", "Data "+dataformat)
 	switch strings.ToLower(dataformat) {
 	case "text":
-		q.Buffer().WriteAscii(out)
+		writeOmfText(out, q.Buffer())
 	case "binary 4":
 		writeOvf2Binary4(out, q.Buffer())
 	default:
