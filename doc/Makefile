@@ -23,7 +23,7 @@ cu:
 
 .PHONY: clean
 clean:
-	rm -rf html
+	rm -rf html latex
 
 .PHONY: install
 test:
