@@ -247,7 +247,7 @@ void Window::openDir()
       QDir chosenDir(dir);
       QString dirString = chosenDir.path()+"/";
       QStringList filters;
-      filters << "*.omf";
+      filters << "*.omf" << "*.ovf";
       chosenDir.setNameFilters(filters);
       QStringList dirFiles = chosenDir.entryList();
 

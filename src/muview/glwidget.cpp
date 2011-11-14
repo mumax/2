@@ -221,12 +221,13 @@ void GLWidget::paintGL()
   //std::cout << "Zoom: " << zoom << std::endl;
 
   if (displayOn) {
+    //std::cout << "DISPLAY!" << std::endl;
     const long unsigned int *size = dataPtr->shape();
     int xnodes = size[0];
     int ynodes = size[1];
     int znodes = size[2];
     float theta, phi, mag;
-
+    //std::cout << xnodes << ynodes << znodes <<  std::endl;
     for(int i=0; i<xnodes; i++)
       {
 	for(int j=0; j<ynodes; j++)
@@ -236,7 +237,7 @@ void GLWidget::paintGL()
 		mag = sqrt( (*dataPtr)[i][j][k][0] * (*dataPtr)[i][j][k][0] +
 			    (*dataPtr)[i][j][k][1] * (*dataPtr)[i][j][k][1] +
 			    (*dataPtr)[i][j][k][2] * (*dataPtr)[i][j][k][2]);
-		if (mag > 1.0 &&
+		if (mag > 0.001 &&
 		    i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
 		    i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
 		    j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&

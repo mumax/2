@@ -100,20 +100,13 @@ static bool parseFirstLine(const std::string &line, std::string &key, std::strin
 
 static bool parseCommentLine(const std::string &line, std::string &key, std::string &value)
 {
-  // ::tolower is unreliable...
   if (line[0] == '#') {
-    //if (line == "#") {
-    //  std::cout << "Blank!" << std::endl;
-    //  key = "blank";
-    //  value = "blank";
-    //  return true;
-    //} else {
       const int sep = line.find(':');
       key = std::string(line.begin()+2, line.begin()+sep);
       std::transform(key.begin(), key.end(), key.begin(), ::tolower);
       value = std::string(line.begin()+sep+2, line.end());
       std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-      //std::cout << "Header:\t" << key << "\t" << value << std::endl;
+      std::cout << "Header:\t" << key << "\t" << value << std::endl;
       return true;
       //}
   } else {
@@ -331,6 +324,8 @@ void OMFImport::parseDataAscii()
 	// Create field matrix object
 	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
 
+	std::cout << "Loading!" << std::endl;
+
 	for (int z=0; z<header.znodes; ++z)
 	  for (int y=0; y<header.ynodes; ++y)
 	    for (int x=0; x<header.xnodes; ++x) {
@@ -340,13 +335,17 @@ void OMFImport::parseDataAscii()
 	      double v1, v2, v3;
 	      ss >> v1 >> v2 >> v3;
 	      
-	      v1 = v1*header.valuemultiplier;
-	      v2 = v2*header.valuemultiplier;
-	      v3 = v3*header.valuemultiplier;
+	      if (header.version==1) {
+		v1 = v1*header.valuemultiplier;
+		v2 = v2*header.valuemultiplier;
+		v3 = v3*header.valuemultiplier;
+	      }
 
-	      (*field)[x][y][z][0] = v1;
-	      (*field)[x][y][z][1] = v2;
-	      (*field)[x][y][z][2] = v3;
+	      //std::cout << v1 << "\t" << v2 << "\t" << v3 << std::endl;
+
+	      (*field)[x][y][z][0] = (float)v1;
+	      (*field)[x][y][z][1] = (float)v2;
+	      (*field)[x][y][z][2] = (float)v3;
 
 	      acceptLine();
 	    }
