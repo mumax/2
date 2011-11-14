@@ -106,7 +106,7 @@ static bool parseCommentLine(const std::string &line, std::string &key, std::str
       std::transform(key.begin(), key.end(), key.begin(), ::tolower);
       value = std::string(line.begin()+sep+2, line.end());
       std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-      std::cout << "Header:\t" << key << "\t" << value << std::endl;
+      //std::cout << "Header:\t" << key << "\t" << value << std::endl;
       return true;
       //}
   } else {
@@ -324,7 +324,7 @@ void OMFImport::parseDataAscii()
 	// Create field matrix object
 	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
 
-	std::cout << "Loading!" << std::endl;
+	//std::cout << "Loading!" << std::endl;
 
 	for (int z=0; z<header.znodes; ++z)
 	  for (int y=0; y<header.ynodes; ++y)

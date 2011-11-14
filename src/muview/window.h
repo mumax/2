@@ -25,7 +25,7 @@ class Window : public QMainWindow
   Q_OBJECT
 
   public:
-  Window();
+  Window(int argc, char *argv[]);
 
 protected:
   void keyPressEvent(QKeyEvent *event);

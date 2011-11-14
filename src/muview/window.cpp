@@ -6,6 +6,7 @@
 #include <QxtSpanSlider>
 #include <QKeySequence>
 #include <QFileDialog>
+#include <QFileInfo>
 #include "glwidget.h"
 #include "window.h"
 
@@ -15,7 +16,7 @@
 
 struct OMFImport;
 
-Window::Window()
+Window::Window(int argc, char *argv[])
 {
   QWidget *widget = new QWidget;
   setCentralWidget(widget);
@@ -102,7 +103,54 @@ Window::Window()
 
   // Data, don't connect until we are ready (probably still not ready here)...
   connect(animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
- 
+  
+  // Load files from command line if supplied
+  if (argc > 1) {
+    QStringList rawList;
+    for (int i=1; i<argc; i++) {
+      rawList << argv[i];
+    }
+
+    QStringList allLoadedFiles;
+    foreach (QString item, rawList)
+      {
+	QFileInfo info(item);
+	if (!info.exists()) {
+	  std::cout << "File " << item.toStdString() << " does not exist" << std::endl;
+	} else {
+	  // Push our new content...
+	  if (info.isDir()) {
+	    QDir chosenDir(item);
+	    QString dirString = chosenDir.path()+"/";
+	    QStringList filters;
+	    filters << "*.omf" << "*.ovf";
+	    chosenDir.setNameFilters(filters);
+	    QStringList dirFiles = chosenDir.entryList();
+
+	    OMFHeader tempHeader = OMFHeader();
+	    foreach (QString file, dirFiles)
+	      {  
+		allLoadedFiles << file;
+		omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+	      }
+
+	  } else {
+	    // just a normal file
+	    OMFHeader tempHeader = OMFHeader();
+	    allLoadedFiles << item;
+	    omfCache.push_back(readOMF(item.toStdString(), tempHeader));
+	  }
+	}
+      }
+    // persistent storage of filenames for top overlay
+    filenames = allLoadedFiles;
+    // Update the Display with the first element
+    glWidget->updateData(omfCache.front());
+    // Update the top overlay
+    glWidget->updateTopOverlay(filenames.front());
+    // Refresh the animation bar
+    adjustAnimSlider();
+  }
 }
 
 QxtSpanSlider *Window::createSpanSlider()
@@ -200,17 +248,15 @@ void Window::openFiles()
   
   if (fileName != "") 
     {
-      std::cout << fileName.toStdString() << std::endl;
       OMFHeader tempHeader = OMFHeader();
-      std::cout << "After header"  << std::endl;
+
       // Remove the last element if not empty
-      if (!omfCache.empty()) {
+      while (!omfCache.empty()) {
 	omfCache.pop_back();
       }
-      std::cout << "Before push"  << std::endl;
+
       // Push our file data
       omfCache.push_back(readOMF(fileName.toStdString(), tempHeader));
-      std::cout << "After push"  << std::endl;
       // Update the Display with the first element
       glWidget->updateData(omfCache.back());
       
@@ -263,7 +309,7 @@ void Window::openDir()
       OMFHeader tempHeader = OMFHeader();
       foreach (QString file, dirFiles)
 	{
-	  std::cout << (dirString+file).toStdString() << std::endl;
+	  //std::cout << (dirString+file).toStdString() << std::endl;
 	  // Push our new content...
 	  omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
 	}
