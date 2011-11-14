@@ -11,6 +11,7 @@ package host
 
 import (
 	. "mumax/common"
+	"unsafe"
 	"fmt"
 	"io"
 )
@@ -45,4 +46,29 @@ func (tens *Array) WriteAscii(out io.Writer) {
 			panic(IOErr(err.String()))
 		}
 	}
+}
+
+func (t *Array) WriteBinary(out io.Writer) {
+	out.Write(intToBytes(T_MAGIC))
+	out.Write(intToBytes(4)) // Rank is always 4
+	for _, s := range t.Size4D {
+		out.Write(intToBytes(s))
+	}
+	for _, f := range t.List {
+		out.Write((*[4]byte)(unsafe.Pointer(&f))[:]) // FloatToBytes() inlined for performance.
+	}
+}
+
+const (
+	T_MAGIC = 0x0A317423 // First 32-bit word of tensor blob. Identifies the format. Little-endian ASCII for "#t1\n"
+)
+
+// Converts the raw int data to a slice of 4 bytes
+func intToBytes(i int) []byte {
+	return (*[4]byte)(unsafe.Pointer(&i))[:]
+}
+
+// Converts the raw float data to a slice of 4 bytes
+func floatToBytes(f float32) []byte {
+	return (*[4]byte)(unsafe.Pointer(&f))[:]
 }

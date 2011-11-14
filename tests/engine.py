@@ -21,6 +21,7 @@ setvalue('H_ext', [Hx, Hy, Hz])
 
 setscalar('dt', 1e-12)
 autosave("m", "omf", ["Text"], 10e-12)
+autosave("m", "bin", [], 10e-12)
 autotabulate(["t", "H_ext"], "t.txt", 10e-12)
 for i in range(100):
 	step()
