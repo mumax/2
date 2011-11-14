@@ -136,7 +136,6 @@ func writeOmfBinary4(out io.Writer, array *host.Array) {
 	}
 }
 
-
 // Writes data in OMF Text format
 func writeOmfText(out io.Writer, array *host.Array) {
 	data := array.Array
@@ -153,9 +152,8 @@ func writeOmfText(out io.Writer, array *host.Array) {
 			}
 		}
 	}
-					fmt.Fprintln(out)
+	fmt.Fprintln(out)
 }
-
 
 func floats2bytes(floats []float32) []byte {
 	return (*[4]byte)(unsafe.Pointer(&floats[0]))[:]
