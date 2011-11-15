@@ -7,9 +7,11 @@
 
 package engine
 
+// The methods in this file will be automatically exposed in the mumax API
+// through the apigen program.
 //
-//	Here the user input (X,Y,Z) is changed to internal input (Z,Y,X)
-//
+//	NOTE: Here the user input (X,Y,Z) is changed to internal input (Z,Y,X)
+
 
 import (
 	. "mumax/common"
@@ -182,19 +184,6 @@ func (a API) DebugField(quantity string) *host.Array {
 	buffer := q.Buffer()
 	return buffer
 }
-
-// Gets the quantity's mask.
-// The mask is not not multiplied by the value,
-// like is the case with GetField().
-// Returns all ones if the mask was not explicitly set.
-//func (a API) GetMask(quant string) *host.Array {
-//	q := a.Engine.Quant(quant)
-//	checkKind(q, MASK)
-//	q.Update() //currently a nop, but might change later.
-//	buffer := q.Buffer()
-//  todo: buffer is pre-multiplied
-//	return buffer
-//}
 
 // FOR DEBUG ONLY.
 // Gets the quantity's array, raw.

@@ -17,6 +17,7 @@ import (
 // The global simulation engine
 var engine Engine
 
+// Returns the global simulation engine
 func GetEngine() *Engine {
 	return &engine
 }
