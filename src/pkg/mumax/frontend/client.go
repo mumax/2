@@ -27,7 +27,6 @@ type Client struct {
 	ipc                  jsonRPC
 	api                  engine.API
 	infifo, outfifo      *os.File
-	//cleanfiles           []string // list of files to be deleted upon program exit
 	logWait              chan int // channel to wait for completion of go logStream()
 }
 
@@ -52,7 +51,6 @@ func (c *Client) Run() {
 		panic(InputErr(fmt.Sprint("subcommand ", command, " exited without calling any mumax function")))
 	}
 	c.openFifos()
-	//c.interpretCommands()
 	c.ipc.Init(c.infifo, c.outfifo, c.api)
 	c.ipc.Run()
 
@@ -69,8 +67,6 @@ func (c *Client) Run() {
 	<-c.logWait // stderr
 	<-c.logWait // stdout (or the other way around ;-)
 }
-
-//type VoidArgs struct{}
 
 // run the sub-command (e.g. python) to interpret the script file
 // it will first hang while trying to open the FIFOs
@@ -190,7 +186,6 @@ const BUFSIZE = 4096
 func (c *Client) makeFifos() {
 	outfname := c.outputDir + "/" + OUTFIFO
 	infname := c.outputDir + "/" + INFIFO
-	//c.cleanfiles = append(c.cleanfiles, infname, outfname)
 	mkFifo(infname)
 	mkFifo(outfname)
 }

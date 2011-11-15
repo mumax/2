@@ -292,4 +292,3 @@ func convertXYZ(arr *host.Array) *host.Array {
 	}
 	return transp
 }
-

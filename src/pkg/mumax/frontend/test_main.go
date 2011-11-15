@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+// Mumax2 self-test function.
+// Benchmarks cuda memcpyDtoD
 func testMain() {
 	size := []int{10, 1024, 1024}
 	a := gpu.NewArray(1, size)
@@ -23,7 +25,6 @@ func testMain() {
 	defer b.Free()
 
 	Log("Testing CUDA")
-	//println("start")
 	N := 1000
 	start := time.Nanoseconds()
 
@@ -34,6 +35,5 @@ func testMain() {
 	t := float64(time.Nanoseconds()-start) / 1e9
 	bw := float64(int64(Prod(size))*int64(N)*SIZEOF_FLOAT) / t
 	bw /= 1e9
-	//println("stop")
 	Log("Multi-GPU bandwidth:", float32(bw), "GB/s")
 }
