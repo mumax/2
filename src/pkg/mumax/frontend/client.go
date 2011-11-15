@@ -76,8 +76,6 @@ func (c *Client) Run() {
 // it will first hang while trying to open the FIFOs
 func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 
-	//CheckErr(os.Setenv("PYTHONPATH", os.Getenv("PYTHONPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
-	//CheckErr(os.Setenv("CLASSPATH", os.Getenv("CLASSPATH")+":"+path.Clean(GetExecDir())), ERR_IO)
 	CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", c.outputDir), ERR_IO)
 
 	var args []string
@@ -133,30 +131,10 @@ func (c *Client) openFifos() {
 	return
 }
 
-// read text commands from infifo, execute them and return the result to outfifo
-// stop when a fifo gets closed by the other end
-//func (c *Client) interpretCommands() {
-//
-//	// interpreter executes commands from subprocess
-//	for line, eof := parseLine(c.infifo); !eof; line, eof = parseLine(c.infifo) {
-//		// call locally
-//		ret := c.ipc.Call(line[0], line[1:])
-//		// pass return value to subprocess
-//		switch len(ret) {
-//		default:
-//			panic(Bug("Method returned too many values"))
-//		case 0:
-//			fmt.Fprintln(c.outfifo)
-//		case 1:
-//			fmt.Fprintln(c.outfifo, ret[0])
-//		}
-//	}
-//}
-
 // wait until the subcommand creates the handshake file,
-// indicating that it will open the fifos. however, if the
+// indicating that it will open the fifos. However, if 
 // the subprocess exits before creating the handshake file,
-// return not OK. in that case we should not attempt to ope
+// return not OK. In that case we should not attempt to open
 // the fifos because they will block forever.
 func (c *Client) handshake(procwaiter chan (int)) (ok bool) {
 	Debug("waiting for handshake")

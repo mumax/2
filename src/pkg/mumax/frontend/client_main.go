@@ -7,7 +7,8 @@
 
 package frontend
 
-// This file implements the mumax2's main routines for client mode.
+// This file implements the mumax2's main function.
+// Arne Vansteenkiste
 
 import (
 	. "mumax/common"
@@ -111,12 +112,12 @@ func commandForFile(file string) (command string, args []string) {
 		panic(InputErr("Cannot handle files with extension " + path.Ext(file)))
 	case ".py":
 		return "python", []string{file}
-	case ".java":
-		return GetExecDir() + "javaint", []string{file}
-	case ".class":
-		return "java", []string{ReplaceExt(file, "")}
-	case ".lua":
-		return "lua", []string{file}
+	//case ".java":
+	//	return GetExecDir() + "javaint", []string{file}
+	//case ".class":
+	//	return "java", []string{ReplaceExt(file, "")}
+	//case ".lua":
+	//	return "lua", []string{file}
 	}
 	panic(Bug("unreachable"))
 	return "", nil
