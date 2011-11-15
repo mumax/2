@@ -8,7 +8,6 @@
 package frontend
 
 import (
-	//. "mumax/common"
 	"reflect"
 	"unicode"
 	"strings"

@@ -87,7 +87,7 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 
 	f, ok := j.method[funcName]
 	if !ok {
-		panic(fmt.Sprintf(msg_no_such_method, funcName))
+		panic(InputErr(fmt.Sprint("rpc: no such method:", funcName)))
 	}
 
 	// call
@@ -293,11 +293,3 @@ func convertXYZ(arr *host.Array) *host.Array {
 	return transp
 }
 
-// error message
-const (
-	//msg_already_defined = "interpreter: %s already defined"
-	msg_no_such_method = "interpreter: no such method: %s"
-	//msg_no_such_command = "interpreter: no such command: %s. options: %v"
-	//msg_cant_parse      = "interpreter: do not know how to parse %s"
-	//msg_arg_mismatch    = "interpreter: %v needs %v arguments, but %v provided"
-)

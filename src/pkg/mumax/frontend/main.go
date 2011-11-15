@@ -24,7 +24,7 @@ import (
 // command-line flags (more in engine/main.go)
 var (
 	flag_outputdir *string = flag.String("o", "", "Specify output directory")
-	flag_force     *bool   = flag.Bool("f", false, "Remove previous output directory if present")
+	flag_force     *bool   = flag.Bool("f", false, "Force start, remove existing output directory")
 	flag_logfile   *string = flag.String("log", "", "Specify log file")
 	flag_command   *string = flag.String("command", "", "Override interpreter command")
 	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
@@ -178,16 +178,7 @@ func cleanup() {
 		pprof.StopCPUProfile()
 	}
 
-	// remove neccesary files
-	//for i := range cleanfiles {
-	//	Debug("rm", cleanfiles[i])
-	//	err := os.Remove(cleanfiles[i])
-	//	if err != nil {
-	//		Debug(err)
-	//	} // ignore errors, there's nothing we can do about it during cleanup
-	//}
-
-	// kill subprocess
+	// kill subprocess?
 }
 
 func crashreport(err interface{}) {

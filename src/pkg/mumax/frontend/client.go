@@ -27,7 +27,7 @@ type Client struct {
 	ipc                  jsonRPC
 	api                  engine.API
 	infifo, outfifo      *os.File
-	cleanfiles           []string // list of files to be deleted upon program exit
+	//cleanfiles           []string // list of files to be deleted upon program exit
 	logWait              chan int // channel to wait for completion of go logStream()
 }
 
@@ -190,7 +190,7 @@ const BUFSIZE = 4096
 func (c *Client) makeFifos() {
 	outfname := c.outputDir + "/" + OUTFIFO
 	infname := c.outputDir + "/" + INFIFO
-	c.cleanfiles = append(c.cleanfiles, infname, outfname)
+	//c.cleanfiles = append(c.cleanfiles, infname, outfname)
 	mkFifo(infname)
 	mkFifo(outfname)
 }
