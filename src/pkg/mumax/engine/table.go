@@ -58,7 +58,7 @@ func writeTableHeader(out io.Writer, quants []string) {
 		quant := e.Quant(q)
 		checkKinds(quant, VALUE, MASK)
 		n := quant.NComp()
-		for i := n-1;i >= 0; i-- {
+		for i := n - 1; i >= 0; i-- {
 			comp := ""
 			if n > 1 {
 				comp = "_" + string('z'-i)

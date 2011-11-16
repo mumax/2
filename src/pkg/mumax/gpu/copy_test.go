@@ -22,8 +22,7 @@ func BenchmarkCopyDtoD1M(bench *testing.B) {
 	benchmarkCopyDtoD(bench, 1024)
 }
 
-
-func benchmarkCopyDtoD(bench *testing.B, N int){
+func benchmarkCopyDtoD(bench *testing.B, N int) {
 	if NDevice() < 2 {
 		fmt.Println("Skipping BenchmarkCopyDtoD")
 		return
