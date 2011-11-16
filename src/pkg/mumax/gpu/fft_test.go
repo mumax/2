@@ -65,6 +65,8 @@ func BenchmarkFFT(b *testing.B) {
 	in := NewArray(nComp, dataSize)
 	defer in.Free()
 
+	// warmup
+	fft.Forward(in, nil)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		fft.Forward(in, nil)
