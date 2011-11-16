@@ -12,20 +12,34 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-//"testing"
-//"fmt"
+. "mumax/common"
+cu "cuda/driver"
+"testing"
+"fmt"
 )
 
-//func BenchmarkCopyDtoD(b *testing.B) {
-//	b.StopTimer()
-//	N1 := 1024
-//	N2 := 1024 
-//	size := []int{1, N1, N2}
-//
-//	a := NewArray(1, size)
-//	b := NewArray(1, size)
-//	defer a.Free()
-//
-//	
-//}
+func BenchmarkCopyDtoD(bench *testing.B) {
 
+	if NDevice() < 2 {
+		fmt.Println("Skipping BenchmarkCopyDtoD")
+	}
+
+	bench.StopTimer()
+	N1 := 1024
+	N2 := 1024 
+	size := []int{1, N1, N2}
+
+	a := NewArray(1, size)
+	defer a.Free()
+
+	ptr1 := a.pointer[0]
+	ptr2 := a.pointer[1]
+
+	bytes:=SIZEOF_FLOAT*int64(a.PartLen3D())
+	cu.MemcpyDtoD(ptr2, ptr1, bytes)
+	bench.SetBytes(bytes)
+	bench.StartTimer()
+	for i:=0; i<bench.N; i++{
+		cu.MemcpyDtoD(ptr2, ptr1, SIZEOF_FLOAT*int64(a.PartLen3D()))
+	}
+}
