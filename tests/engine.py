@@ -25,7 +25,7 @@ autosave("m", "ovf", ["Text"], 10e-12)
 autosave("m", "bin", [], 10e-12)
 autotabulate(["t", "H_ext"], "t.txt", 10e-12)
 for i in range(100):
-	step()
+	steps(100)
 
 printstats()
 
