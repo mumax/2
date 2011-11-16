@@ -51,7 +51,7 @@ func (u *SumUpdater) Update() {
 			parMul := parent.multiplier[c]
 			sumMul := sum.multiplier[c]
 			sumComp := sum.array.Component(c)
-			Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul/sumMul))
+			//Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul/sumMul))
 			gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
 		}
 	}

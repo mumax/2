@@ -13,7 +13,6 @@ import (
 	"fmt"
 )
 
-
 // Non-thread safe timer for debugging.
 // The zero value is usable without initialization.
 type Timer struct {
@@ -57,31 +56,48 @@ func (t *Timer) String() string {
 	return fmt.Sprint(1000*t.Average(), "ms/call")
 }
 
-
 // Global timers indexed by a tag string
 var timers map[string]Timer
 
-func init(){
+// should we enable global timers?
+var enableTimers bool
+
+func init() {
 	timers = make(map[string]Timer)
 }
 
+// enable/disable global timers
+func EnableTimers(enable bool) {
+	enableTimers = enable
+}
+
 // Start a global timer with tag name
-func Start(tag string){
+func Start(tag string) {
+	if !enableTimers {
+		return
+	}
 	timer := timers[tag]
-	timer.Start() // usable zero value if timer was not yet defined
-	timers[tag]=timer // have to write back modified value to map
+	timer.Start()       // usable zero value if timer was not yet defined
+	timers[tag] = timer // have to write back modified value to map
 }
 
 // Stop a global timer with tag name
-func Stop(tag string){
+func Stop(tag string) {
+	if !enableTimers {
+		return
+	}
 	timer := timers[tag]
 	timer.Stop()
-	timers[tag]=timer
+	timers[tag] = timer
 }
 
 // Print names and runtime of all global timers
-func PrintTimers(){
-	for tag, timer := range timers{
+func PrintTimers() {
+	if !enableTimers {
+		return
+	}
+	Debug("timers:")
+	for tag, timer := range timers {
 		Debug(tag, timer.String())
 	}
 }

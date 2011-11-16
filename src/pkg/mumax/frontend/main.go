@@ -28,6 +28,7 @@ var (
 	flag_logfile   *string = flag.String("log", "", "Specify log file")
 	flag_command   *string = flag.String("command", "", "Override interpreter command")
 	flag_debug     *bool   = flag.Bool("g", true, "Show debug output")
+	flag_timing    *bool   = flag.Bool("t", true, "Enable timers for benchmarking")
 	flag_cpuprof   *string = flag.String("cpuprof", "", "Write gopprof CPU profile to file")
 	flag_memprof   *string = flag.String("memprof", "", "Write gopprof memory profile to file")
 	flag_silent    *bool   = flag.Bool("s", false, "Be silent")
@@ -64,6 +65,8 @@ func Main() {
 		pprof.StartCPUProfile(f)
 		// will be flushed on cleanup
 	}
+
+	EnableTimers(*flag_timing)
 
 	if *flag_help {
 		fmt.Fprintln(os.Stderr, "Usage:")
@@ -179,7 +182,7 @@ func cleanup() {
 	}
 
 	// print timers
-	if *flag_debug{
+	if *flag_debug {
 		PrintTimers()
 	}
 
