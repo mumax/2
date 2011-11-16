@@ -178,6 +178,11 @@ func cleanup() {
 		pprof.StopCPUProfile()
 	}
 
+	// print timers
+	if *flag_debug{
+		PrintTimers()
+	}
+
 	// kill subprocess?
 }
 

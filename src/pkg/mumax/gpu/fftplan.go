@@ -123,7 +123,10 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 	//fmt.Println("in:", in.LocalCopy().Array)
 
+	Start("copypadz")
 	CopyPadZ(padZ, in)
+	Stop("copypadz")
+
 	//fmt.Println("padZ:", padZ.LocalCopy().Array)
 
 	// fft Z

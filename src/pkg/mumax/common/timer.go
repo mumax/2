@@ -13,12 +13,15 @@ import (
 	"fmt"
 )
 
+
 // Non-thread safe timer for debugging.
+// The zero value is usable without initialization.
 type Timer struct {
 	StartNanos, TotalNanos int64 // StartTime == 0: not running
 	Count                  int
 }
 
+// Start the timer
 func (t *Timer) Start() {
 	if t.StartNanos != 0 {
 		panic(Bug("Timer.Start: already running"))
@@ -26,6 +29,7 @@ func (t *Timer) Start() {
 	t.StartNanos = time.Nanoseconds()
 }
 
+// Stop the timer
 func (t *Timer) Stop() {
 	if t.StartNanos == 0 {
 		panic(Bug("Timer.Stop: not running"))
@@ -36,7 +40,7 @@ func (t *Timer) Stop() {
 }
 
 // Returns the total number of seconds this timer has been running.
-// Correct even if the timer is running wh
+// Correct even if the timer is running when this function is called.
 func (t *Timer) Seconds() float64 {
 	if t.StartNanos == 0 { //not running for the moment
 		return float64(t.TotalNanos) / 1e9
@@ -44,10 +48,40 @@ func (t *Timer) Seconds() float64 {
 	return float64(t.TotalNanos+time.Nanoseconds()-t.StartNanos) / 1e9
 }
 
+// Average number of seconds per call.
 func (t *Timer) Average() float64 {
 	return t.Seconds() / (float64(t.Count))
 }
 
 func (t *Timer) String() string {
-	return fmt.Sprint(t.Seconds(), "s")
+	return fmt.Sprint(1000*t.Average(), "ms/call")
+}
+
+
+// Global timers indexed by a tag string
+var timers map[string]Timer
+
+func init(){
+	timers = make(map[string]Timer)
+}
+
+// Start a global timer with tag name
+func Start(tag string){
+	timer := timers[tag]
+	timer.Start() // usable zero value if timer was not yet defined
+	timers[tag]=timer // have to write back modified value to map
+}
+
+// Stop a global timer with tag name
+func Stop(tag string){
+	timer := timers[tag]
+	timer.Stop()
+	timers[tag]=timer
+}
+
+// Print names and runtime of all global timers
+func PrintTimers(){
+	for tag, timer := range timers{
+		Debug(tag, timer.String())
+	}
 }
