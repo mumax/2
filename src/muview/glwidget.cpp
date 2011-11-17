@@ -253,7 +253,9 @@ void GLWidget::paintGL()
 		    
 		    glTranslatef((float)i-xcom,(float)j-ycom, (float)k-zcom);
 
-		    GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
+		    //GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
+		    GLfloat color[3];
+		    angleToRGB(phi, color);
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
@@ -356,4 +358,43 @@ void GLWidget::updateTopOverlay(QString newstring)
   } else {
     topOverlayOn = false;
   }
+}
+
+void angleToRGB(float angle, GLfloat *color)
+{
+  // starting from Hue = angle (in radians)
+  float piOverThree = PI/3.0;
+  float h = fabs((angle+PI)/piOverThree);
+  float x = (1.0-fabs(fmodf(h,2.0)-1.0));
+
+  if (h <= 1.0) {
+    color[0] = 1.0;
+    color[1] = x;
+    color[2] = 0.0;
+  } else if (h <= 2.0) {
+    color[0] = x;
+    color[1] = 1.0;
+    color[2] = 0.0;
+  } else if (h <= 3.0) {
+    color[0] = 0.0;
+    color[1] = 1.0;
+    color[2] = x;
+  } else if (h <= 4.0) {
+    color[0] = 0.0;
+    color[1] = x;
+    color[2] = 1.0;
+  } else if (h <= 5.0) {
+    color[0] = x;
+    color[1] = 0.0;
+    color[2] = 1.0;
+  } else if (h <= 6.0) {
+    color[0] = 1.0;
+    color[1] = 0.0;
+    color[2] = x;
+  } else {
+    color[0] = 0.0;
+    color[1] = 0.0;
+    color[2] = 0.0;
+  }
+
 }
