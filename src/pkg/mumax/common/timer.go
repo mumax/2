@@ -93,7 +93,7 @@ func Stop(tag string) {
 
 // Print names and runtime of all global timers
 func PrintTimers() {
-	if !enableTimers || len(timers) == 0{
+	if !enableTimers || len(timers) == 0 {
 		return
 	}
 	Debug(" ---- timers ----")
