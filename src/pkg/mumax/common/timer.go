@@ -53,7 +53,7 @@ func (t *Timer) Average() float64 {
 }
 
 func (t *Timer) String() string {
-	return fmt.Sprint(1000*t.Average(), "ms/call")
+	return fmt.Sprint(t.Count, "\t", float32(1000*t.Average()), " ms/call")
 }
 
 // Global timers indexed by a tag string
@@ -96,8 +96,9 @@ func PrintTimers() {
 	if !enableTimers {
 		return
 	}
-	Debug("timers:")
+	Debug(" ---- timers ----")
 	for tag, timer := range timers {
-		Debug(tag, timer.String())
+		Debug(tag, ":\t", timer.String())
 	}
+	Debug(" ----------------")
 }

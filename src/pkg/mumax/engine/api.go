@@ -16,6 +16,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/host"
+	"mumax/gpu"
 	"fmt"
 	"os"
 )
@@ -89,7 +90,6 @@ func (a API) Run(duration float64) {
 func (a API) SetValue(quantity string, value []float64) {
 	q := a.Engine.Quant(quantity)
 	swapXYZ(value)
-	//Debug("swapXYZ", value)
 	q.SetValue(value)
 }
 
@@ -315,6 +315,24 @@ func (a API) Debug_VerifyAll() {
 	e := a.Engine
 	for _, q := range e.quantity {
 		q.Verify()
+	}
+}
+
+//DEBUG: Benchmark FFT
+func(a API) Debug_BenchmarkFFT(){
+	e:=a.Engine
+	EnableTimers(true)
+
+	datasize := e.GridSize()
+	fftsize := []int{datasize[0], 2*datasize[1], 2*datasize[2]}
+	plan := gpu.NewFFTPlan(datasize, fftsize)
+	defer plan.Free()
+
+	in := gpu.NewArray(1, datasize)
+	defer in.Free()
+
+	for i:=0; i<100;i++{
+	plan.Forward(in, in)
 	}
 }
 
