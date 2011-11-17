@@ -259,6 +259,7 @@ func (a *Array) indexOf(x, y, z int) (device, index int) {
 	return
 }
 
+// TODO(a) does not work correctly for 3D !!!!!!!!
 // Copy from device array to device array.
 func (dst *Array) CopyFromDevice(src *Array) {
 	CheckSize(dst.size4D, src.size4D)
@@ -277,6 +278,7 @@ func (dst *Array) CopyFromDevice(src *Array) {
 
 }
 
+// TODO(a) does not work correctly for 3D !!!!!!!!
 // Copy from host array to device array.
 func (dst *Array) CopyFromHost(srca *host.Array) {
 	CheckSize(dst.size4D, srca.Size4D)
@@ -330,6 +332,17 @@ func (src *Array) LocalCopy() *host.Array {
 	dst := host.NewArray(src.NComp(), src.Size3D())
 	src.CopyToHost(dst)
 	return dst
+}
+
+//DEBUG: copy of parts as stored on each gpu
+func (src *Array) RawCopy() [][]float32 {
+	cpy := make([][]float32, NDevice())
+	partlen := src.NComp() * src.partLen3D
+	for dev := range cpy {
+		cpy[dev] = make([]float32, partlen)
+		cu.MemcpyDtoH(cu.HostPtr(&cpy[dev][0]), src.pointer[dev], SIZEOF_FLOAT*int64(partlen))
+	}
+	return cpy
 }
 
 // Makes all elements zero.

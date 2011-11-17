@@ -109,3 +109,19 @@ func TestArrayCopy(test *testing.T) {
 		}
 	}
 }
+
+func TestArrayCopyHost(test *testing.T) {
+	size := []int{2, 4, 8}
+	a := NewArray(1, size)
+	defer a.Free()
+
+	ah := a.LocalCopy()
+	for i := range ah.List {
+		ah.List[i] = float32(i)
+	}
+
+	a.CopyFromHost(ah)
+
+	raw := a.RawCopy()
+	fmt.Println(raw)
+}
