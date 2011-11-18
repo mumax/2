@@ -27,6 +27,7 @@ extern "C" {
 #include "exchange6.h"
 #include "copypad.h"
 #include "transpose.h"
+#include "kernelmul_micromag.h"
 
 
 #ifdef __cplusplus

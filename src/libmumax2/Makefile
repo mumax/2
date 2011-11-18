@@ -12,6 +12,7 @@ OFILES=\
 	copypad.o\
 	transpose.o\
 	exchange6.o\
+	kernelmul_micromag.o\
 # 	addHani.o\
 
 all: libmumax2.so

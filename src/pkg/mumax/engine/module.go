@@ -27,7 +27,7 @@ var modules map[string]Module = make(map[string]Module)
 func RegisterModule(mod Module) {
 	name := mod.Name()
 	if _, ok := modules[name]; ok {
-		panic(InputErr("module " + name + "already registered"))
+		panic(InputErr("module " + name + " already registered"))
 	}
 	modules[name] = mod
 }

@@ -17,6 +17,8 @@ GOFILES=\
 	mod_micromag.go\
 	mod_hfield.go\
 	mod_uniaxialanisotropy.go\
+	mod_aexchange.go\
+	mod_demagexchange.go\
 	mod_exchange6.go\
 	quant.go\
 	quantkind.go\
@@ -25,6 +27,7 @@ GOFILES=\
 	update_pointwise.go\
 	update_norm.go\
 	update_sum.go\
+	zeropad.go\
 	verify.go\
 	solver.go\
 	solve_euler.go\

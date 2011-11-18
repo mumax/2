@@ -7,42 +7,44 @@
 
 package engine
 
+// Combined demag+exchange module
 // Author: Arne Vansteenkiste
 
 import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModExch6{})
+	RegisterModule(&ModDemagExch{})
 }
 
-type ModExch6 struct{}
+type ModDemagExch struct{}
 
-func (x ModExch6) Description() string {
-	return "6-neighbor ferromagnetic exchange interaction"
+func (x ModDemagExch) Description() string {
+	return "combined magnetostatic + exchange field"
 }
 
-func (x ModExch6) Name() string {
-	return "exchange"
+func (x ModDemagExch) Name() string {
+	return "demagexch"
 }
 
-func (x ModExch6) Load(e *Engine) {
+func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
-	e.LoadModule("aexchange")
-	e.AddQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
+
+	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
+	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)
-	sum.AddParent("H_ex")
-	e.Depends("H_ex", "Aex", "m")
-	Hex := e.Quant("H_ex")
-	Hex.updater = &exch6Updater{m: e.Quant("m"), Aex: e.Quant("Aex"), Hex: Hex}
+	sum.AddParent("H_dex")
+	e.Depends("H_dex", "Aex", "m")
+	Hdex := e.Quant("H_dex")
+	Hdex.updater = &demagexchUpdater{m: e.Quant("m"), Aex: e.Quant("Aex"), Hdex: Hdex}
 }
 
-type exch6Updater struct {
-	m, Aex, Hex *Quant
+type demagexchUpdater struct {
+	m, Aex, Hdex *Quant
 }
 
-func (u *exch6Updater) Update() {
+func (u *demagexchUpdater) Update() {
 	println("To be implemented")
 }
