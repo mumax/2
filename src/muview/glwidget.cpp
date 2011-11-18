@@ -261,7 +261,7 @@ void GLWidget::paintGL()
 		    glColor3fv(color);
 		    glRotatef(180.0*(phi+90.0)/PI, 0.0, 0.0, 1.0);
 		    glRotatef(180.0*theta/PI,  1.0, 0.0, 0.0);
-		    
+
 		    glCallList(cone);
 
 		    glPopMatrix();
