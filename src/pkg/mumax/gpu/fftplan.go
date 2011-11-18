@@ -17,15 +17,15 @@ import (
 )
 
 type FFTPlan struct {
-	dataSize [3]int         // Size of the (non-zero) input data block
-	logicSize  [3]int         // Transform size including zero-padding. >= dataSize
-	padZ     Array          // Buffer for Z-zeropadding and +2 elements for R2C
-	planZ    []cufft.Handle // In-place transform of padZ parts, 1/GPU /// ... from outer space
-	transp1  Array          // Buffer for partial transpose per GPU
-	chunks   []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
-	transp2  Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
-	planYX   []cufft.Handle // In-place transform of transp2 parts. Is just a Y transform for 2D.
-	Stream                  //
+	dataSize  [3]int         // Size of the (non-zero) input data block
+	logicSize [3]int         // Transform size including zero-padding. >= dataSize
+	padZ      Array          // Buffer for Z-zeropadding and +2 elements for R2C
+	planZ     []cufft.Handle // In-place transform of padZ parts, 1/GPU /// ... from outer space
+	transp1   Array          // Buffer for partial transpose per GPU
+	chunks    []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
+	transp2   Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
+	planYX    []cufft.Handle // In-place transform of transp2 parts. Is just a Y transform for 2D.
+	Stream                   //
 }
 
 func (fft *FFTPlan) Init(dataSize, logicSize []int) {
