@@ -7,7 +7,7 @@
 
 package gpu
 
-// Author: Arne Vansteenkiste
+// Author: Arne Vansteenkiste and Ben Van de Wiele
 
 import (
 	. "mumax/common"

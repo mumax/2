@@ -86,6 +86,41 @@ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2,
 
 
 
+/// @internal Does padding and unpadding, not necessarily by a factor 2
+__global__ void _gpu_copy_pad2(int N0, float* source, float* dest, 
+                               int S1, int S2,                  ///< source sizes Y and Z
+                               int D1, int D2                   ///< destination size Y and Z
+                               ){
+
+  ///x-index is always running the fastest.
+  int j = blockIdx.y * blockDim.y + threadIdx.y;
+  int k = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if(j<S1 && k<S2){
+    for (int i=0; i<N0; i++)
+      dest[(i*D1 + j)*D2 + k] = source[(i*S1 + j)*S2 + k];
+  }
+ return;
+}
+
+//void copyToPadZAsync(float **dest, float **source, int *unpad_size, int *pad_size){          //for padding of the tensor, 2d and 3d applicable
+void copyToPadZAsync(float **dest, int D2, float **source, int S0, int S1Part, int S2){          //for padding of the tensor, 2d and 3d applicable
+  
+  
+  dim3 gridSize(divUp(S2, BLOCKSIZE), divUp(S1Part, BLOCKSIZE), 1);
+  dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
+  check3dconf(gridSize, blockSize);
+
+  if ( pad_size[0]!=unpad_size[0] || pad_size[1]!=unpad_size[1])
+    _gpu_copy_pad2<<<gridSize, blockSize>>>(S0, source, dest, S1, S2, S1, pad_size[2]-2);      // for out of place forward FFTs in z-direction, contiguous data arrays
+  else{
+    _gpu_copy_pad2<<<gridSize, blockSize>>>(S0, source, dest, S1, S2, S1, pad_size[2]);        // for in place forward FFTs in z-direction, contiguous data arrays
+  }
+  gpu_sync();
+  
+  return;
+}
+
 #ifdef __cplusplus
 }
 #endif
