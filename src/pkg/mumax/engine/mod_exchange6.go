@@ -29,7 +29,7 @@ func (x ModExch6) Name() string {
 func (x ModExch6) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
-	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
+	e.LoadModule("aexchange")
 	e.AddQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)
