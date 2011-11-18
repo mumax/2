@@ -27,7 +27,7 @@ func TestFFT(test *testing.T) {
 
 	in := NewArray(nComp, dataSize)
 	defer in.Free()
-	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2]+2})
+	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2] + 2})
 	inh := in.LocalCopy()
 
 	//a := inh.Array[0]

@@ -20,9 +20,9 @@ type ConvPlan struct {
 	dataSize  [3]int   // Size of the (non-zero) input data block
 	logicSize [3]int   // Non-transformed kernel size >= dataSize
 	fftKern   [6]Array // transformed kernel components, unused ones are nil.
-	fftIn Array // transformed input data
+	fftIn     Array    // transformed input data
+	fft       FFTPlan  // transforms input/output data
 }
-
 
 func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 	Assert(len(dataSize) == 3)
@@ -44,8 +44,9 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 		//conv.storeSize[i] = kernSize[i]
 	}
 
-	// init fftIn
+	// init fft
 	conv.fftIn.Init(1, []int{logicSize[0], logicSize[1], logicSize[2] + 2}, DO_ALLOC)
+	conv.fft.Init(dataSize, logicSize)
 
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
 
@@ -143,9 +144,10 @@ func (conv *ConvPlan) Free() {
 }
 
 func (conv *ConvPlan) Convolve(in, out *Array) {
-
+	for c := range in.Comp {
+		conv.fft.Forward(&in.Comp[c], &conv.fftIn)
+	}
 }
-
 
 // indices for (anti-)symmetric kernel when only 6 of the 9 components are stored.
 const (
