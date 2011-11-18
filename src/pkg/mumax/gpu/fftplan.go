@@ -85,7 +85,7 @@ func (fft *FFTPlan) Init(dataSize, fftSize []int) {
 		setDevice(_useDevice[dev])
 		if fft.fftSize[0] == 1 { // 2D
 			batch := (fft.transp2.size3D[0] * fft.transp2.size3D[1]) / NDev
-			fmt.Println("batch=", batch)
+			//fmt.Println("batch=", batch)
 			fft.planYX[dev] = cufft.PlanMany([]int{fft.fftSize[1]}, nil, 1, nil, 1, cufft.C2C, batch)
 		} else { //3D
 			panic("3D?")

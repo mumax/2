@@ -13,15 +13,13 @@ package gpu
 import (
 	. "mumax/common"
 	"mumax/host"
-	//	cu "cuda/driver"
-	//	"cuda/cufft"
-	//	"fmt"
+	"fmt"
 )
 
 type ConvPlan struct {
-	dataSize  [3]int // Size of the (non-zero) input data block
-	logicSize [3]int // Non-transformed kernel size >= dataSize
-	fftKern [6]Array // transformed kernel components, unused ones are nil.
+	dataSize  [3]int   // Size of the (non-zero) input data block
+	logicSize [3]int   // Non-transformed kernel size >= dataSize
+	fftKern   [6]Array // transformed kernel components, unused ones are nil.
 }
 
 // indices for (anti-)symmetric kernel when only 6 of the 9 components are stored.
@@ -92,7 +90,6 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	var fft FFTPlan
 	defer fft.Free()
 	fft.Init(conv.logicSize[:], conv.logicSize[:])
-	//norm := 1 / float64(fft.Normalization())
 
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
@@ -102,61 +99,51 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 
 	for i, k := range kernel {
 		if k != nil {
+			fmt.Println("kern", kernString[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
-			extractReal(&conv.fftKern[i], devOut)
+			scaleRealParts(&conv.fftKern[i], devOut, 1/float32(fft.Normalization()))
+			fmt.Println("fftKern", kernString[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}
 
-	//	hostOut := tensor.NewT3(fft.PhysicSize())
-	//
-	//	//   allocCount := 0
-	//
-	//	for i := range conv.kernel {
-	//		if conv.needKernComp(i) { // the zero components are not stored
-	//			//       allocCount++
-	//			TensorCopyTo(kernel[i], devIn)
-	//			fft.Forward(devIn, devOut)
-	//			TensorCopyFrom(devOut, hostOut)
-	//			listOut := hostOut.List()
-	//
-	//			// Normally, the FFT'ed kernel is purely real because of symmetry,
-	//			// so we only store the real parts...
-	//			maximg := float32(0.)
-	//			for j := 0; j < len(listOut)/2; j++ {
-	//				listOut[j] = listOut[2*j] * norm
-	//				if abs32(listOut[2*j+1]) > maximg {
-	//					maximg = abs32(listOut[2*j+1])
-	//				}
-	//			}
-	//			// ...however, we check that the imaginary parts are nearly zero,
-	//			// just to be sure we did not make a mistake during kernel creation.
-	//			if maximg > 1e-4 {
-	//				fmt.Fprintln(os.Stderr, "Warning: FFT Kernel max imaginary part=", maximg)
-	//			}
-	//
-	//			conv.kernel[i] = NewTensor(conv.Backend, conv.KernelSize())
-	//			conv.memcpyTo(&listOut[0], conv.kernel[i].data, Len(conv.kernel[i].Size()))
-	//		}
-	//	}
-	//
-	//	//   fmt.Println(allocCount, " non-zero kernel components.")
-	//	fft.Free()
-	//	devIn.Free()
-	//	devOut.Free()
-
 }
+
 //func NewConvPlan(dataSize,  []int) *ConvPlan {
 //	conv := new(ConvPlan)
 //	conv.Init(dataSize, kernSize)
 //	return conv
 //}
 
-
-func extractReal(dst, src *Array) {
+// Extract real parts, copy them from src to dst.
+// In the meanwhile, check if imaginary parts are nearly zero.
+func scaleRealParts(dst, src *Array, scale float32) {
 	Assert(dst.size3D[0] == src.size3D[0] &&
 		dst.size3D[1] == src.size3D[1] &&
 		dst.size3D[2] == src.size3D[2]/2)
+
+	dstHost := dst.LocalCopy()
+	srcHost := src.LocalCopy()
+	dstList := dstHost.List
+	srcList := srcHost.List
+
+	// Normally, the FFT'ed kernel is purely real because of symmetry,
+	// so we only store the real parts...
+	maximg := float32(0.)
+	for i := range dstList {
+		dstList[i] = srcList[2*i] * scale
+		if Abs32(srcList[2*i+1]) > maximg {
+			maximg = Abs32(srcList[2*i+1])
+		}
+	}
+	// ...however, we check that the imaginary parts are nearly zero,
+	// just to be sure we did not make a mistake during kernel creation.
+	Debug("FFT Kernel max imaginary part=", maximg)
+	if maximg*scale > 1e-5 { // TODO: is this reasonable? How about 
+		Warn("FFT Kernel max imaginary part=", maximg)
+	}
+
+	dst.CopyFromHost(dstHost)
 }
 
 func (conv *ConvPlan) Free() {
