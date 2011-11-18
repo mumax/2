@@ -169,12 +169,12 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	}
 	Stop("MemcpyDtoD")
 
-	Start("CopyBlockZ")
+	Start("InsertBlockZ")
 	transp2.Zero()
 	for c := range chunks {
-		CopyBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
+		InsertBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
-	Stop("CopyBlockZ")
+	Stop("InsertBlockZ")
 	//fmt.Println("transp2:", transp2.LocalCopy().Array)
 
 	// FFT Y(X)
@@ -206,7 +206,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 	fft.Sync()
 
 	for c := range chunks {
-		CopyBlockZ(transp2, &(chunks[c]), c) // UNBLOCK
+		InsertBlockZ(transp2, &(chunks[c]), c) // UNBLOCK
 	}
 
 	fmt.Println("transp2:", transp2.LocalCopy().Array)

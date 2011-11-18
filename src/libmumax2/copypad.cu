@@ -9,13 +9,13 @@
 extern "C" {
 #endif
 
-/// @author Arne Vansteenkiste, okt 2011
+/// @author Arne Vansteenkiste & Ben Van de Wiele
 
 
 
 /// @internal Copies a matrix ("block") into dst, a larger matrix
 /// The position of of the block in dst is block*S2 along the N2 direction.
-__global__ void copyBlockZKern(float* dst, int D2, float* src, int S1, int S2, int block){
+__global__ void insertBlockZKern(float* dst, int D2, float* src, int S1, int S2, int block){
   
    int i = blockIdx.y * blockDim.y + threadIdx.y;
    int j = blockIdx.x * blockDim.x + threadIdx.x;
@@ -26,7 +26,7 @@ __global__ void copyBlockZKern(float* dst, int D2, float* src, int S1, int S2, i
 }
 
 
-void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams){
+void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
@@ -39,10 +39,44 @@ void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S
 		for(int i=0; i<S0; i++){
 			float* src2D = &(src[dev][i*S1Part*S2]);
 			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
-			copyBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src2D, S1Part, S2, block);///@todo stream or loop in kernel
+			insertBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src2D, S1Part, S2, block);///@todo stream or loop in kernel
 		}
 	}
 }
+
+
+/// @internal Extracts a matrix ("block") from src, a larger matrix
+/// The position of of the block in src is block*D2 along the N2 direction.
+__global__ void extractBlockZKern(float* dst, int D1, int D2, float *src, int S2, int block){
+  
+  int i = blockIdx.y * blockDim.y + threadIdx.y;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if(i<D1 && j<D2){ // we are in the destination array
+     dst[i*D2 + j] = src[i*S2 + block*D2 + j];
+    }
+}
+
+
+void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams){
+
+#define BLOCKSIZE 16 ///@todo use device properties
+
+  dim3 gridSize(divUp(D2, BLOCKSIZE), divUp(D1Part, BLOCKSIZE), 1); // range over destination size
+  dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
+  check3dconf(gridSize, blockSize);
+
+  for (int dev = 0; dev < nDevice(); dev++) {
+    gpu_safe(cudaSetDevice(deviceId(dev)));
+    for(int i=0; i<D0; i++){
+      float* src2D = &(src[dev][i*D1Part*S2]);
+      float* dst2D = &(dst[dev][i*D1Part*D2]); //D1==S1
+      extractBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D1Part, D2, src2D, S2, block);///@todo stream or loop in kernel
+    }
+  }
+}
+
+
 
 
 
@@ -84,42 +118,6 @@ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2,
 	}
 }
 
-
-
-/// @internal Does padding and unpadding, not necessarily by a factor 2
-__global__ void _gpu_copy_pad2(int N0, float* source, float* dest, 
-                               int S1, int S2,                  ///< source sizes Y and Z
-                               int D1, int D2                   ///< destination size Y and Z
-                               ){
-
-  ///x-index is always running the fastest.
-  int j = blockIdx.y * blockDim.y + threadIdx.y;
-  int k = blockIdx.x * blockDim.x + threadIdx.x;
-
-  if(j<S1 && k<S2){
-    for (int i=0; i<N0; i++)
-      dest[(i*D1 + j)*D2 + k] = source[(i*S1 + j)*S2 + k];
-  }
- return;
-}
-
-//void copyToPadZAsync(float **dest, float **source, int *unpad_size, int *pad_size){          //for padding of the tensor, 2d and 3d applicable
-void copyToPadZAsync(float **dest, int D2, float **source, int S0, int S1Part, int S2){          //for padding of the tensor, 2d and 3d applicable
-  
-  
-  dim3 gridSize(divUp(S2, BLOCKSIZE), divUp(S1Part, BLOCKSIZE), 1);
-  dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
-  check3dconf(gridSize, blockSize);
-
-  if ( pad_size[0]!=unpad_size[0] || pad_size[1]!=unpad_size[1])
-    _gpu_copy_pad2<<<gridSize, blockSize>>>(S0, source, dest, S1, S2, S1, pad_size[2]-2);      // for out of place forward FFTs in z-direction, contiguous data arrays
-  else{
-    _gpu_copy_pad2<<<gridSize, blockSize>>>(S0, source, dest, S1, S2, S1, pad_size[2]);        // for in place forward FFTs in z-direction, contiguous data arrays
-  }
-  gpu_sync();
-  
-  return;
-}
 
 #ifdef __cplusplus
 }

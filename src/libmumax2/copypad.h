@@ -23,13 +23,20 @@ extern "C" {
 void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
 
-/// Copy from src into a block in dst
+/// Insert from src into a block in dst
 /// E.g.:
-///	2x2 source, block = 1, 2x6 dst:
+///	2x2 src, block = 1, 2x6 dst:
 ///	[ 0 0  S1 S2  0 0 ]
 ///	[ 0 0  S3 S4  0 0 ]
-void copyBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
+void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
 
+
+/// Extract from src a block to dst
+/// E.g.:
+/// 2x2 dst, block = 1, 2x6 src:
+/// [ 0 0  D1 D2  0 0 ]
+/// [ 0 0  D3 D4  0 0 ]
+void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams);
 
 #ifdef __cplusplus
 }

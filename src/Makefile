@@ -13,12 +13,12 @@ ifeq ($(UNAME), Darwin) # Os X
 else # Linux and other Unix based systems
 	dirs=\
 		libmumax2\
-		libomf\
 		libtensor\
 		pkg\
 		mumax2\
-		muview\
 		python\
+#		libomf\
+# 		muview\
 	
 endif
 

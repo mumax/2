@@ -234,12 +234,12 @@ func CopyPadZ(dst, src *Array) {
 	dst.Stream.Sync()
 }
 
-// Copy from src into a block in dst
+// Insert from src into a block in dst
 // E.g.:
-// 	2x2 source, block = 1, 2x6 dst:
-//	[ 0 0  S1 S2  0 0 ]
-//	[ 0 0  S3 S4  0 0 ]
-func CopyBlockZ(dst, src *Array, block int) {
+// 2x2 src, block = 1, 2x6 dst:
+// [ 0 0  S1 S2  0 0 ]
+// [ 0 0  S3 S4  0 0 ]
+func InsertBlockZ(dst, src *Array, block int) {
 	//	AssertMsg(dst.size4D[0] == src.size4D[0], "1")
 	//	AssertMsg(dst.size3D[0] == src.size3D[0], "2")
 	//	AssertMsg(dst.size3D[1] == src.size3D[1], "3")
@@ -249,17 +249,47 @@ func CopyBlockZ(dst, src *Array, block int) {
 	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
 	S1Part := src.partSize[1]
 	S2 := src.size3D[2]
-	C.copyBlockZAsync(
-		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
-		C.int(D2),
-		(**C.float)(unsafe.Pointer(&src.pointer[0])),
-		C.int(S0),
-		C.int(S1Part),
-		C.int(S2),
-		C.int(block),
-		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
+	C.insertBlockZAsync(
+    (**C.float)(unsafe.Pointer(&dst.pointer[0])),
+    C.int(D2),
+    (**C.float)(unsafe.Pointer(&src.pointer[0])),
+    C.int(S0),
+    C.int(S1Part),
+    C.int(S2),
+    C.int(block),
+    (*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
 	dst.Stream.Sync()
 }
+
+
+// Extract from src a block to dst
+// E.g.:
+// 2x2 dst, block = 1, 2x6 src:
+// [ 0 0  D1 D2  0 0 ]
+// [ 0 0  D3 D4  0 0 ]
+func ExtractBlockZ(dst, src *Array, block int) {
+  //  AssertMsg(dst.size4D[0] == src.size4D[0], "1")
+  //  AssertMsg(dst.size3D[0] == src.size3D[0], "2")
+  //  AssertMsg(dst.size3D[1] == src.size3D[1], "3")
+  //  AssertMsg(dst.size3D[2]*(block+1) >= src.size3D[2], "4")
+
+  D0 := dst.size4D[0] * dst.size3D[0] // NComp * Size0
+  D1Part := dst.partSize[1]
+  D2 := dst.size3D[2]
+  S2 := src.size3D[2]
+  C.extractBlockZAsync(
+    (**C.float)(unsafe.Pointer(&dst.pointer[0])),
+    C.int(D0),
+    C.int(D1Part),
+    C.int(D2),
+    (**C.float)(unsafe.Pointer(&src.pointer[0])),
+    C.int(S2),
+    C.int(block),
+    (*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
+  dst.Stream.Sync()
+}
+
+
 
 //// Transpose parts on each GPU individually.
 func TransposeComplexYZPart(out, in *Array) {
