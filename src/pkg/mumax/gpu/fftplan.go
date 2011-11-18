@@ -111,6 +111,10 @@ func (fft *FFTPlan) Free() {
 	// TODO destroy
 }
 
+func (fft *FFTPlan) Normalization() int {
+	return (fft.fftSize[X] * fft.fftSize[Y] * fft.fftSize[Z])
+}
+
 func (fft *FFTPlan) Forward(in, out *Array) {
 	// shorthand
 	padZ := &(fft.padZ)
