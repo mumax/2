@@ -23,8 +23,8 @@ extern "C" {
 /// |Hy| = |Kxy Kyy Kyz| * |My|
 /// |Hz|   |Kxz Kyz Kzz|   |Mz|
 __global__ void kernelMulMicromag3DKern(float* fftMx,  float* fftMy,  float* fftMz,
-                                float* fftKxx, float* fftKyy, float* fftKzz,
-                                float* fftKyz, float* fftKxz, float* fftKxy, int N){
+                                        float* fftKxx, float* fftKyy, float* fftKzz,
+                                        float* fftKyz, float* fftKxz, float* fftKxy, int N){
   int i = threadindex;
   int e = 2 * i;
 
@@ -61,10 +61,10 @@ __global__ void kernelMulMicromag3DKern(float* fftMx,  float* fftMy,  float* fft
   return;
 }
 
-void kernelMulMicromag3DAsync(float* fftMx,  float* fftMy,  float* fftMz,
-                    float* fftKxx, float* fftKyy, float* fftKzz,
-                    float* fftKyz, float* fftKxz, float* fftKxy,
-                    CUstream* stream, int nRealNumbers){
+void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
+                              float** fftKxx, float** fftKyy, float** fftKzz,
+                              float** fftKyz, float** fftKxz, float** fftKxy,
+                              CUstream* stream, int nRealNumbers){
 
   assert(nRealNumbers > 0);
   assert(nRealNumbers % 2 == 0);
@@ -74,9 +74,9 @@ void kernelMulMicromag3DAsync(float* fftMx,  float* fftMy,  float* fftMz,
 
   for (int dev = 0; dev < nDevice(); dev++) {
 	gpu_safe(cudaSetDevice(deviceId(dev)));
-    kernelMulMicromag3DKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>>(fftMx,  fftMy,  fftMz,
-                                           fftKxx, fftKyy, fftKzz,
-                                           fftKyz, fftKxz, fftKxy, nRealNumbers/2);
+    kernelMulMicromag3DKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>>( fftMx[dev],  fftMy[dev],  fftMz[dev],
+                                                                                   fftKxx[dev], fftKyy[dev], fftKzz[dev],
+                                                                                   fftKyz[dev], fftKxz[dev], fftKxy[dev], nRealNumbers/2);
 	}
 }
 
