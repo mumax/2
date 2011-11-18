@@ -11,8 +11,9 @@ GOFILES=\
 	array.go\
 	stream.go\
 	reductor.go\
-	fftplan1gpu.go\
+	convplan.go\
 	fftplan.go\
+	#fftplan1gpu.go\
 
 CGOFILES=\
 	multigpu.go\
