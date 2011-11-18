@@ -27,6 +27,7 @@ GOFILES=\
 	update_pointwise.go\
 	update_norm.go\
 	update_sum.go\
+	zeropad.go\
 	verify.go\
 	solver.go\
 	solve_euler.go\
