@@ -121,13 +121,13 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	chunks := fft.chunks // not sure if chunks[0] copies the struct...
 	transp2 := &(fft.transp2)
 
-	//fmt.Println("in:", in.LocalCopy().Array)
+	fmt.Println("in:", in.LocalCopy().Array)
 
 	Start("CopyPadZ")
 	CopyPadZ(padZ, in)
 	Stop("CopyPadZ")
 
-	//fmt.Println("padZ:", padZ.LocalCopy().Array)
+	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
 	// fft Z
 	Start("fftZ")
@@ -136,13 +136,12 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	}
 	fft.Sync()
 	Stop("fftZ")
-	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
+	fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 	Start("Transpose1")
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	Stop("Transpose1")
-	//(&transp1).CopyFromDevice(&padZ)
-	//fmt.Println("transp1:", transp1.LocalCopy().Array)
+	fmt.Println("transp1:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	Start("MemcpyDtoD")
@@ -162,7 +161,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 				dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2] //fmt.Println("dstPlaneN:", dstPlaneN)//seems OK
 				dstOffset := i * dstPlaneN
 				dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
-				// must be done plane by plane
+
 				cu.MemcpyDtoD(dst, src, chunkPlaneBytes) // chunkPlaneBytes for plane-by-plane
 			}
 		}
@@ -175,7 +174,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 		CopyBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
 	Stop("CopyBlockZ")
-	//fmt.Println("transp2:", transp2.LocalCopy().Array)
+	fmt.Println("transp2:", transp2.LocalCopy().Array)
 
 	// FFT Y(X)
 	Start("fftYX")
@@ -184,7 +183,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	}
 	fft.Sync()
 	Stop("fftYX")
-	//fmt.Println("transp2:", transp2.LocalCopy().Array)
+	fmt.Println("transp2(fft):", transp2.LocalCopy().Array)
 }
 
 // DOES NOT WORK YET
