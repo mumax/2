@@ -282,17 +282,17 @@ func (dst *Array) CopyFromHost(src *host.Array) {
 	CheckSize(dst.size4D, src.Size4D)
 
 	NDev := NDevice()
-	partPlaneN := dst.partSize[1] * dst.partSize[2] // floats per YZ plane per GPU
-	planeN := dst.size3D[1] * dst.size3D[2] // total floats per YZ plane
-	NPlane := dst.size4D[0] * dst.size3D[0] // total YZ planes (NComp * X size)
+	partPlaneN := dst.partSize[1] * dst.partSize[2]    // floats per YZ plane per GPU
+	planeN := dst.size3D[1] * dst.size3D[2]            // total floats per YZ plane
+	NPlane := dst.size4D[0] * dst.size3D[0]            // total YZ planes (NComp * X size)
 	partPlaneBytes := SIZEOF_FLOAT * int64(partPlaneN) // bytes per YZ plane per GPU
 
-	for i := 0; i<NPlane; i++{
-		for dev := 0; dev < NDev; dev++{
+	for i := 0; i < NPlane; i++ {
+		for dev := 0; dev < NDev; dev++ {
 			dstOffset := i * partPlaneN
-			dstPtr := ArrayOffset(uintptr(dst.pointer[dev]), dstOffset)	
+			dstPtr := ArrayOffset(uintptr(dst.pointer[dev]), dstOffset)
 
-			srcOffset := i * planeN + dev * partPlaneN
+			srcOffset := i*planeN + dev*partPlaneN
 
 			cu.MemcpyHtoD(cu.DevicePtr(dstPtr), cu.HostPtr(&src.List[srcOffset]), partPlaneBytes)
 		}
@@ -304,19 +304,19 @@ func (src *Array) CopyToHost(dst *host.Array) {
 	CheckSize(dst.Size4D, src.size4D)
 
 	NDev := NDevice()
-	partPlaneN := src.partSize[1] * src.partSize[2] // floats per YZ plane per GPU
-	planeN := src.size3D[1] * src.size3D[2] // total floats per YZ plane
-	NPlane := src.size4D[0] * src.size3D[0] // total YZ planes (NComp * X size)
+	partPlaneN := src.partSize[1] * src.partSize[2]    // floats per YZ plane per GPU
+	planeN := src.size3D[1] * src.size3D[2]            // total floats per YZ plane
+	NPlane := src.size4D[0] * src.size3D[0]            // total YZ planes (NComp * X size)
 	partPlaneBytes := SIZEOF_FLOAT * int64(partPlaneN) // bytes per YZ plane per GPU
 
-	for i := 0; i<NPlane; i++{
-		for dev := 0; dev < NDev; dev++{
+	for i := 0; i < NPlane; i++ {
+		for dev := 0; dev < NDev; dev++ {
 			srcOffset := i * partPlaneN
-			srcPtr := ArrayOffset(uintptr(src.pointer[dev]), srcOffset)	
+			srcPtr := ArrayOffset(uintptr(src.pointer[dev]), srcOffset)
 
-			dstOffset := i * planeN + dev * partPlaneN
+			dstOffset := i*planeN + dev*partPlaneN
 
-			cu.MemcpyDtoH(cu.HostPtr(&dst.List[dstOffset]), cu.DevicePtr(srcPtr),  partPlaneBytes)
+			cu.MemcpyDtoH(cu.HostPtr(&dst.List[dstOffset]), cu.DevicePtr(srcPtr), partPlaneBytes)
 		}
 	}
 
