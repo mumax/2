@@ -259,7 +259,6 @@ func (a *Array) indexOf(x, y, z int) (device, index int) {
 	return
 }
 
-// TODO(a) does not work correctly for 3D !!!!!!!!
 // Copy from device array to device array.
 func (dst *Array) CopyFromDevice(src *Array) {
 	CheckSize(dst.size4D, src.size4D)
@@ -278,51 +277,47 @@ func (dst *Array) CopyFromDevice(src *Array) {
 
 }
 
-// TODO(a) does not work correctly for 3D !!!!!!!!
 // Copy from host array to device array.
-func (dst *Array) CopyFromHost(srca *host.Array) {
-	CheckSize(dst.size4D, srca.Size4D)
+func (dst *Array) CopyFromHost(src *host.Array) {
+	CheckSize(dst.size4D, src.Size4D)
 
-	src := srca.Comp
-	//Assert(dst.NComp() == len(src))
-	// we have to work component-wise because of the data layout on the devices
-	for i := range src {
-		//Assert(len(dst.Comp[i]) == len(src[i])) // TODO(a): redundant
-		//dst.Comp[i].CopyFromHost(src[i])
+	NDev := NDevice()
+	partPlaneN := dst.partSize[1] * dst.partSize[2] // floats per YZ plane per GPU
+	planeN := dst.size3D[1] * dst.size3D[2] // total floats per YZ plane
+	NPlane := dst.size4D[0] * dst.size3D[0] // total YZ planes (NComp * X size)
+	partPlaneBytes := SIZEOF_FLOAT * int64(partPlaneN) // bytes per YZ plane per GPU
 
-		h := src[i]
-		s := dst.Comp[i].pointer
-		//Assert(len(h) == len(s)) // in principle redundant
-		start := 0
-		for i := range s {
-			length := dst.partLen3D
-			//Debug("cu.MemcpyHtoD", cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
-			cu.MemcpyHtoD(cu.DevicePtr(s[i]), cu.HostPtr(&h[start]), SIZEOF_FLOAT*int64(length))
-			start += length
+	for i := 0; i<NPlane; i++{
+		for dev := 0; dev < NDev; dev++{
+			dstOffset := i * partPlaneN
+			dstPtr := ArrayOffset(uintptr(dst.pointer[dev]), dstOffset)	
+
+			srcOffset := i * planeN + dev * partPlaneN
+
+			cu.MemcpyHtoD(cu.DevicePtr(dstPtr), cu.HostPtr(&src.List[srcOffset]), partPlaneBytes)
 		}
 	}
 }
 
 // Copy from device array to host array.
-func (src *Array) CopyToHost(dsta *host.Array) {
-	CheckSize(dsta.Size4D, src.size4D)
+func (src *Array) CopyToHost(dst *host.Array) {
+	CheckSize(dst.Size4D, src.size4D)
 
-	dst := dsta.Comp
-	//Assert(src.NComp() == len(dst))
-	for i := range dst {
-		//Assert(len(src.Comp[i]) == len(dst[i])) // TODO(a): redundant
-		//src.Comp[i].CopyToHost(dst[i])
+	NDev := NDevice()
+	partPlaneN := src.partSize[1] * src.partSize[2] // floats per YZ plane per GPU
+	planeN := src.size3D[1] * src.size3D[2] // total floats per YZ plane
+	NPlane := src.size4D[0] * src.size3D[0] // total YZ planes (NComp * X size)
+	partPlaneBytes := SIZEOF_FLOAT * int64(partPlaneN) // bytes per YZ plane per GPU
 
-		h := dst[i]
-		s := src.Comp[i].pointer
-		//Assert(len(h) == len(s)) // in principle redundant
-		start := 0
-		for i := range s {
-			length := src.partLen3D //s[i].length
-			cu.MemcpyDtoH(cu.HostPtr(&h[start]), cu.DevicePtr(s[i]), SIZEOF_FLOAT*int64(length))
-			start += length
+	for i := 0; i<NPlane; i++{
+		for dev := 0; dev < NDev; dev++{
+			srcOffset := i * partPlaneN
+			srcPtr := ArrayOffset(uintptr(src.pointer[dev]), srcOffset)	
+
+			dstOffset := i * planeN + dev * partPlaneN
+
+			cu.MemcpyDtoH(cu.HostPtr(&dst.List[dstOffset]), cu.DevicePtr(srcPtr),  partPlaneBytes)
 		}
-
 	}
 
 }
