@@ -20,19 +20,9 @@ type ConvPlan struct {
 	dataSize  [3]int   // Size of the (non-zero) input data block
 	logicSize [3]int   // Non-transformed kernel size >= dataSize
 	fftKern   [6]Array // transformed kernel components, unused ones are nil.
+	fftIn Array // transformed input data
 }
 
-// indices for (anti-)symmetric kernel when only 6 of the 9 components are stored.
-const (
-	XX = 0
-	YY = 1
-	ZZ = 2
-	YZ = 3
-	XZ = 4
-	XY = 5
-)
-
-var kernString map[int]string = map[int]string{XX: "XX", YY: "YY", ZZ: "ZZ", YZ: "YZ", XZ: "XZ", XY: "XY"}
 
 func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 	Assert(len(dataSize) == 3)
@@ -53,7 +43,9 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 		conv.logicSize[i] = logicSize[i]
 		//conv.storeSize[i] = kernSize[i]
 	}
-	//conv.storeSize[Z] += 2 // 2 extra elements due to R2C FFT
+
+	// init fftIn
+	conv.fftIn.Init(1, []int{logicSize[0], logicSize[1], logicSize[2] + 2}, DO_ALLOC)
 
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
 
@@ -153,3 +145,16 @@ func (conv *ConvPlan) Free() {
 func (conv *ConvPlan) Convolve(in, out *Array) {
 
 }
+
+
+// indices for (anti-)symmetric kernel when only 6 of the 9 components are stored.
+const (
+	XX = 0
+	YY = 1
+	ZZ = 2
+	YZ = 3
+	XZ = 4
+	XY = 5
+)
+
+var kernString map[int]string = map[int]string{XX: "XX", YY: "YY", ZZ: "ZZ", YZ: "YZ", XZ: "XZ", XY: "XY"}

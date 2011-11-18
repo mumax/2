@@ -116,6 +116,12 @@ func (fft *FFTPlan) Normalization() int {
 }
 
 func (fft *FFTPlan) Forward(in, out *Array) {
+	Assert(in.size4D[0] == 1 &&
+		out.size4D[0] == 1 &&
+		in.size3D[0] == out.size3D[0] &&
+		in.size3D[1] == out.size3D[1] &&
+		in.size3D[2]+2 == out.size3D[2])
+
 	// shorthand
 	padZ := &(fft.padZ)
 	transp1 := &(fft.transp1)
@@ -183,11 +189,11 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	// FFT Y(X)
 	Start("fftYX")
 	for dev := range _useDevice {
-		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.FORWARD) // is this really async?
+		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) // is this really async?
 	}
 	fft.Sync()
 	Stop("fftYX")
-	fmt.Println("transp2(fft):", transp2.LocalCopy().Array)
+	fmt.Println("out:", out.LocalCopy().Array)
 }
 
 // DOES NOT WORK YET
