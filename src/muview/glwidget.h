@@ -2,7 +2,10 @@
 #define GLWIDGET_H
 
 #include <QGLWidget>
+#include <QtOpenGL>
 #include "OMFContainer.h"
+
+void angleToRGB(float angle, GLfloat *color);
 
 class GLWidget : public QGLWidget
 {
