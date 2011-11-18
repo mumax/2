@@ -278,8 +278,7 @@ func TransposeComplexYZPart(out, in *Array) {
 	out.Stream.Sync()
 }
 
-
-func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream, nRealNumbers int){
+func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream, nRealNumbers int) {
 	CheckSize(fftMx.size4D, fftKxx.size4D) // the rest should hopefully be ok...
 	C.kernelMulMicromag3DAsync(
 		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
