@@ -12,15 +12,15 @@ package gpu
 
 import (
 	. "mumax/common"
-//	cu "cuda/driver"
-//	"cuda/cufft"
-//	"fmt"
+	//	cu "cuda/driver"
+	//	"cuda/cufft"
+	//	"fmt"
 )
 
 type ConvPlan struct {
-	dataSize [3]int         // Size of the (non-zero) input data block
-	kernSize  [3]int        // Kernel size >= dataSize
-	kernel [9]*Array	 //kernel components 
+	dataSize [3]int    // Size of the (non-zero) input data block
+	kernSize [3]int    // Kernel size >= dataSize
+	kernel   [9]*Array //kernel components 
 }
 
 func (conv *ConvPlan) Init(dataSize, kernSize []int) {
@@ -45,10 +45,6 @@ func (conv *ConvPlan) Free() {
 	// TODO
 }
 
-
-func (conv *ConvPlan) Convolve(in, out *Array){
+func (conv *ConvPlan) Convolve(in, out *Array) {
 
 }
-
-
-
