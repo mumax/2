@@ -59,15 +59,19 @@ def setVortex( fieldName, center, axis, polarity, chirality, region = 'all', max
 				#print >> sys.stderr, '%d\t%d\t%d :\t%g\t%g\t:\t%g\t%g\t%g\t:\t%g\t%g\t%g' % (X, Y, Z, vScalaru, d, v1[0], v1[1], v1[2], v[0], v[1], v[2])
 				if maxRadius == 0. or d <= maxRadius:
 					print >> sys.stderr, 'set M' 
+					#Ms = getcell('Msat',X,Y,Z)
 					## set field to vortex
-					if d < 5e-9:
-						m = [ u[2] * polarity , u[1] * polarity , u[0] * polarity ]
+					if d < 2e-8:
+						m = [ u[0] * polarity ,
+							  u[1] * polarity ,
+							  u[2] * polarity ]
 						setcell(fieldName,X,Y,Z,m)
 						m = getcell('m',X,Y,Z)
 						print >> sys.stderr, 'core :\t%d\t%d\t%d :\t%g\t:\t%g\t%g\t%g' % (X, Y, Z, d, m[0], m[1], m[2])
 					else:
-						#m = [ - chirality * ( u[1] * v[2] - u[2] * v[1]) , - chirality * ( u[2] * v[0] - u[0] * v[2]) , - chirality * ( u[0] * v[1] - u[1] * v[0] ) ]
-						m = [ - chirality * ( u[1] * v[2] - u[2] * v[1])/d , - chirality * ( u[2] * v[0] - u[0] * v[2])/d , - chirality * ( u[0] * v[1] - u[1] * v[0] )/d ]
+						m = [ - chirality * ( u[1] * v[2] - u[2] * v[1])/d ,
+							  - chirality * ( u[2] * v[0] - u[0] * v[2])/d ,
+							  - chirality * ( u[0] * v[1] - u[1] * v[0])/d ]
 						print >> sys.stderr, 'out :\t%g\t%g\t%g :\t%g\t:\t%g\t%g\t%g' % (coordinateX, coordinateY, coordinateZ, d, m[0], m[1], m[2])
 						setcell(fieldName,X,Y,Z,[float(m[0]),float(m[1]),float(m[2])])
 						m = getcell('m',X,Y,Z)
