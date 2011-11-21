@@ -233,6 +233,7 @@ func (a API) GetCell(quant string, x, y, z int) []float64 {
 	} else {
 		for c := range value {
 			value[c] = q.multiplier[c] * float64(q.Array().Get(c, z, y, x))
+			Debug("probecell value = ", c, z, y, x, value[c])
 		}
 	}
 	swapXYZ(value)
@@ -245,7 +246,7 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	swapXYZ(value)
 	for c := range value {
 		q.Array().Set(c, z, y, x, float32(value[c]))
-		//Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x)) // 
+		Debug("probecell value = ", c, z, y, x, q.Array().Get(c, z, y, x))
 	}
 	q.Invalidate() //!
 }

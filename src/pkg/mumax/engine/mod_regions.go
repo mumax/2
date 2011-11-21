@@ -7,31 +7,30 @@
 
 package engine
 
-// Author: Arne Vansteenkiste
+// Author: Rémy Lassalle-Balier
 
 import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModMicromag{})
+	RegisterModule(&ModRegions{})
 }
 
-// Micromagnetism meta-module.
-type ModMicromag struct{}
+// Magnetization module.
+type ModRegions struct{}
 
-func (x ModMicromag) Description() string {
-	return "standard micromagnetism"
+func (x ModRegions) Description() string {
+	return "regionDefinition: regions"
 }
 
-func (x ModMicromag) Name() string {
-	return "micromagnetism"
+func (x ModRegions) Name() string {
+	return "regions"
 }
 
-func (x ModMicromag) Load(e *Engine) {
-	e.LoadModule("magnetization")
-	e.LoadModule("hfield")
-	e.LoadModule("zeeman")
-	e.LoadModule("demagexch")
-	e.LoadModule("llg")
-	e.LoadModule("regions")
+func (x ModRegions) Load(e *Engine) {
+
+	e.AddQuant("regionDefinition", SCALAR, MASK, Unit(""), "regions")
+
+	//Regions := e.Quant("regionDefinition")
+	//m.updater = &normUpdater{m: m, Msat: Msat}
 }

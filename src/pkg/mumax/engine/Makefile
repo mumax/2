@@ -21,6 +21,7 @@ GOFILES=\
 	mod_aexchange.go\
 	mod_demagexchange.go\
 	mod_exchange6.go\
+	mod_regions.go\
 	quant.go\
 	quantkind.go\
 	unit.go\

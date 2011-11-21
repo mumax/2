@@ -11,3 +11,7 @@ _testmain.go
 *.project
 *.pydevproject
 .DS_Store
+graph.dot
+*.pro.user
+*.pyc
+t.txt
