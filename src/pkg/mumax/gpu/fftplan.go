@@ -25,6 +25,8 @@ type FFTPlan struct {
 	chunks    []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
 	transp2   Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
 	planYX    []cufft.Handle // In-place transform of transp2 parts. Is just a Y transform for 2D.
+	planY     []cufft.Handle // In-place transform of transp2 parts, in y-direction
+	planX     []cufft.Handle // In-place transform of transp2 parts, in x-direction (strided)
 	Stream                   //
 }
 
@@ -84,11 +86,16 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 	for dev := range _useDevice {
 		setDevice(_useDevice[dev])
 		if fft.logicSize[0] == 1 { // 2D
-			batch := (fft.transp2.size3D[0] * fft.transp2.size3D[1]) / NDev
+//			batch := (fft.transp2.size3D[0] * fft.transp2.size3D[1]) / NDev
+      batchY := (fft.logicSize[2])/2/NDev + 1
 			//fmt.Println("batch=", batch)
-			fft.planYX[dev] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batch)
+			fft.planYX[dev] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
 		} else { //3D
-			panic("3D?")
+//			panic("3D?")
+      batchY := ( (fft.logicSize[2])/2/NDev + 1 ) * fft.logicSize[0]
+			fft.planY[dev] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
+			batchX := ( (fft.logicSize[2])/2/NDev + 1 ) * fft.logicSize[1];
+      fft.planX[dev] = cufft.PlanMany([]int{fft.logicSize[0]}, nil, fft.logicSize[0], nil, fft.logicSize[0], cufft.C2C, batchX)
 		}
 		fft.planYX[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change 
 	}
@@ -191,9 +198,19 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 	// FFT Y(X)
 	Start("fftYX")
-	for dev := range _useDevice {
-		fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) // is this really async?
-	}
+	if logicSize[0] == 1 { //2D
+    for dev := range _useDevice {
+      fft.planYX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) // is this really async?
+    }
+  } else{ //3D
+    for dev := range _useDevice {
+      fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
+    }
+    fft.Sync()   
+    for dev := range _useDevice {
+      fft.planX[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in x-direction
+    }
+  }
 	fft.Sync()
 	Stop("fftYX")
 	fmt.Println("out:", out.LocalCopy().Array)
