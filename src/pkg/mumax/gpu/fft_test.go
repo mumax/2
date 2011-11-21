@@ -19,7 +19,7 @@ import (
 func TestFFT(test *testing.T) {
 	fmt.Println("FFT Test")
 	nComp := 1
-	N0, N1, N2 := 1, 8, 8
+	N0, N1, N2 := 4, 8, 8
 	dataSize := []int{N0, N1, N2}
 	fftSize := []int{N0, N1, N2}
 	fft := NewFFTPlan(dataSize, fftSize)

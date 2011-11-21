@@ -15,7 +15,8 @@ import (
 	"flag"
 )
 
-const BIG = 16 * 1024 * 1024
+//const BIG = 16 * 1024 * 1024
+const BIG = 16 * 128 * 512
 
 func init() {
 	flag.Parse()
