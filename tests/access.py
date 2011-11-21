@@ -28,7 +28,7 @@ if getscalar('Msat') != 800e3:
 
 setscalar('Aex', 12e-13)
 
-m=[ [[[0]]], [[[0]]], [[[1]]] ]
+m=[ [[[0]]], [[[0]]], [[[2]]] ]
 setarray('m', m)
 
 X=3
@@ -43,6 +43,9 @@ for i in m:
 	if m[i] != mnorm[i]:
 		fail(str(i) + " " + str(m[i]))
 
+m=getcell('m', 0,0,0)
+if m != [0.,0.,1.]:
+		fail(str(m))
 
 printstats()
 
