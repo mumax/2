@@ -1,6 +1,7 @@
 mumax2=../bin/mumax2
 
 TESTFILES=\
+		  access.py\
 		  engine.py.out\
 		  micromag.py.out\
 		  #Test.java.out\
