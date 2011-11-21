@@ -1,5 +1,5 @@
+## @package mumax2_cmp
 # This file contains function to set initial field given a array (with grid-size and cell-size already set up)
-
 
 import os
 import json
@@ -9,18 +9,17 @@ import sys
 import math
 from mumax2 import *
 
-##  Sets field (e.g. magnetization) as vortex (local or global) in the selected region.
-## ARGUMENTS:
-##		- fieldName (string) is the name of the field we should write to
-##		- center (tuple 3 floats) is the center of the vortex
-##		- axis (tuple 3 floats) is the direction of the core
-##		- polarity (int) is the sense of the core (-1 for against the axis or +1 for along the axis)
-##		- chirality (int) is the chirality of the vortex (-1 for CCW or +1 for CW)
-##		- region (string) is the region name that should contain the vortex. 'all' means all regions
-## TODO:
-##		- take into account Aex for setting the size of the core
-##		- use gaussian function for the core
-def setVortex( fieldName, center, axis, polarity, chirality, region = 'all', maxRadius = 0. ):
+##  Sets field (E.g. magnetization) as vortex (local or global) in the selected region.
+# @param fieldName (string) the name of the field we should write to
+# @param center (tuple 3 floats) the center of the vortex
+# @param axis (tuple 3 floats) the direction of the core
+# @param polarity (int) the sense of the core (-1 for against the axis or +1 for along the axis)
+# @param chirality (int) the chirality of the vortex (-1 for CCW or +1 for CW)
+# @param region (string) the region name that should contain the vortex. 'all' means all regions
+# @param maxRadius (float) the maximum radius of the vortex. Could be used for vortex domain wall else use the default value 0. 
+# @todo take into account Aex for setting the size of the core
+# @todo use gaussian function for the core
+def setVortex( fieldName , center , axis , polarity , chirality , region = 'all' , maxRadius = 0. ):
 	## we assume that the engine return vectors as (z,y,x)
 	## we assume that user will enter vector and center as (x,y,z)
 	gridSize = getgridsize()
@@ -34,18 +33,11 @@ def setVortex( fieldName, center, axis, polarity, chirality, region = 'all', max
 	for X in range(0,gridSize[0]):
 		for Y in range(0,gridSize[1]):
 			for Z in range(0,gridSize[2]):
-			#for i, cell in enumerate(field):
-				## if all region selected and not in empty, or if in selected region
-				#print >> sys.stderr, 'i =%d' % i
-				## coordinate of the current p	oint
-				#Z = i / ( gridSize[1] * gridSize[2] )
-				#Y = ( i - Z * ( gridSize[1] * gridSize[2] ) ) / gridSize[2]
-				#X = i % gridSize[2]	
 				cellRegion = getcell('regionDefinition', X,Y,Z)
 				#if ( region == 'all' and cellRegion != 0. ) or cellRegion == region:
-				coordinateZ = float(Z) * cellSize[2]
-				coordinateY = float(Y) * cellSize[1]
-				coordinateX = float(X) * cellSize[0]	
+				coordinateZ = ( float(Z) + 0.5 ) * cellSize[2]
+				coordinateY = ( float(Y) + 0.5 ) * cellSize[1]
+				coordinateX = ( float(X) + 0.5 ) * cellSize[0]	
 				## component of v the shortest vector going from the line (passing by center and direction axis) and the current point
 				v1 = [center[0] - coordinateX, center[1] - coordinateY, center[2] - coordinateZ]
 				## scalar product v.u
@@ -78,9 +70,9 @@ def setVortex( fieldName, center, axis, polarity, chirality, region = 'all', max
 						print >> sys.stderr, 'out :\t%g\t%g\t%g :\t%g\t:\t%g\t%g\t%g' % (coordinateX, coordinateY, coordinateZ, d, m[0], m[1], m[2])
 	return
 
-## set up an array of the size of the grid filled with zeros and return it
-## set up a dictionary of the regions name
-def setupRegionSystem():# regionArrayName = 'region' ):
+## Set up the region system
+# Set up an array of the size of the grid filled with zeros and return it set up a dictionary of the regions name
+def setupRegionSystem():
 	tmp = [ [[[0]]] ]
 	setscalar('regionDefinition', 1.)
 	#setmask( 'regionDefinition', tmp )
@@ -89,12 +81,11 @@ def setupRegionSystem():# regionArrayName = 'region' ):
 	##setarray( regionArrayName, regionDefinition )
 	return
 
-## set up regions given a script that return a region index for each voxel
-## ARGUMENTS:
-##		- script is a function that will be called for each voxel. It should return a string to identify each region or 'empty'
-##		  Its arguments should be three ints and a dictionary (x, y, z, parameters)
-##		- parameters to pass to script 
-def initRegions( script, parameters):
+## Set up and initialize the region system corresponding to a given script
+# Set up regions given a script that return a region index for each voxel
+# @param script (function) a function that will be called for each voxel. It should return a string to identify each region or 'empty' if the voxel does not correspond to any region. Its arguments should be three ints and a dictionary for any additional parameters (x, y, z, parameters)
+# @param parameters (tuple) parameters to pass to the script 
+def initRegions( script , parameters):
 	global regionNameDictionary
 	regionDefinition = getarray('regionDefinition')
 	regionNameList = regionNameDictionary.values()
@@ -113,18 +104,15 @@ def initRegions( script, parameters):
 		del tmp
 	return
 
-## set up regions given q png imqge by extruding it perpendicularly to the plane given in variable plane
-## ARGUMENTS:
-##		- imageName (string) is the name of the PNG image to use
-##		- regionList (dictionary string=>string) associate a color to each region.
-##		  The color could be either named if it is part of the standart html color (see http://www.w3schools.com/html/html_colornames.asp)
-##		  or a string coding the color in the HTML hexadecimal format : '#XXXXXX' where X are between 0 and F
-##		- plane (string) defines the plane to which the picture will be applied. By default the plan xy
-##		  the first axis will be matched with the width of the image and the second axis with the height
-##		- thickness (float) defines the extruded thickness. 0 means across the whole volume.
-##		- origin (float) if thickness is not 0, then origin defines the starting point of the extrusion.
-##		  It will happen along the increasing value of the extrusion axis.
-def extrudeImage( imageName, regionList, plane = 'xy'):#, thickness = 0., origin = 0 ):
+## Set up and initialize region system given a png imqge
+# Set up regions by applying a png picture on a plane and extruding it perpendicularly to it
+# @param imageName (string) is the name of the PNG image to use
+# @param regionList (dictionary string=>string) associate a color to each region. The color could be either named if it is part of the <a href="http://www.w3schools.com/html/html_colornames.asp">standard html colors</a> or a string coding the color in the HTML hexadecimal format : "#XXXXXX" where X are between 0 and F
+# @param plane (string) defines the plane to which the picture will be applied (default the plane xy). The first axis will be matched with the width of the image and the second axis with the height.
+# @todo thickness (float) defines the extruded thickness. 0 means "through all".
+# @todo origin (float) if thickness is not 0, then origin defines the starting point of the extrusion. It will happen along the increasing value of the extrusion axis.
+# @note names of the colors allowed. @htmlinclude mumax2_cmp.py.html
+def extrudeImage( imageName , regionList , plane = 'xy'):
 	global regionNameDictionary
 	#test plane argument validity
 	planeValidity = re.compile('[x-z]{2}',re.IGNORECASE)
@@ -262,3 +250,4 @@ def extrudeImage( imageName, regionList, plane = 'xy'):#, thickness = 0., origin
 			j1 = (j * gridSize[v]) / imageHeight
 			for k in range(0,gridSize[w]):
 				setCell('regionDefinition',i,j,k,[rawRegionData[i1][j1]])
+	return
