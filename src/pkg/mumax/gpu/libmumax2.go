@@ -77,7 +77,7 @@ func Normalize(m, normMap *Array) {
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(normMap.pointer[0]))),
 		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))),
-		C.int(m.partLen4D))
+		C.int(m.partLen3D))
 	m.Stream.Sync()
 }
 
