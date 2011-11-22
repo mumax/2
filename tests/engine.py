@@ -1,5 +1,7 @@
 from mumax2 import *
 
+# test file for basic engine api
+
 setgridsize(8, 8, 1)
 setcellsize(5e-9, 5e-9, 50e-9)
 
@@ -24,8 +26,7 @@ autosave("m", "omf", ["Text"], 10e-12)
 autosave("m", "ovf", ["Text"], 10e-12)
 autosave("m", "bin", [], 10e-12)
 autotabulate(["t", "H_ext"], "t.txt", 10e-12)
-for i in range(0):
-	steps(10)
+steps(10)
 
 printstats()
 

@@ -12,6 +12,7 @@ package engine
 import (
 	. "mumax/common"
 	"fmt"
+	"strings"
 )
 
 // The global simulation engine
@@ -145,8 +146,10 @@ func (e *Engine) CellSize() []float64 {
 	return e.cellSize
 }
 
-// retrieve a quantity by its name
+// Retrieve a quantity by its name.
+// Lookup is case-independent
 func (e *Engine) Quant(name string) *Quant {
+	name = strings.ToLower(name)
 	if q, ok := e.quantity[name]; ok {
 		return q
 	} else {
@@ -178,16 +181,17 @@ func (e *Engine) LoadModule(name string) {
 	e.modules = append(e.modules, module)
 }
 
-// Add an arbitrary quantity
+// Add an arbitrary quantity. Name tag is case-independent.
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {
 	Debug("engine.Add", name, nComp, e.size3D, kind)
+	lname := strings.ToLower(name)
 
 	// quantity should not yet be defined
-	if _, ok := e.quantity[name]; ok {
+	if _, ok := e.quantity[lname]; ok {
 		panic(Bug("engine: Already defined: " + name))
 	}
 
-	e.quantity[name] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
+	e.quantity[lname] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
 }
 
 // AddQuant(name, nComp, VALUE)

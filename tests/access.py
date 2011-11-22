@@ -1,6 +1,8 @@
 from mumax2 import *
 from sys import exit 
 
+# test file for get/set API
+
 def fail(msg):
 		echo("FAIL:" + str(msg))
 		exit(42)

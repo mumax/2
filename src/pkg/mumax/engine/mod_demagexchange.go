@@ -30,8 +30,8 @@ func (x ModDemagExch) Name() string {
 func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
+	e.LoadModule("aexchange")
 
-	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)
