@@ -96,8 +96,10 @@ func (e *Engine) NewHandle() int {
 
 // Resolves a file name relative to the output directory,
 // unless the name begins with a /.
-func(e*Engine)Relative(filename string)string{
-	if filename[0] == '/' {return filename}
+func (e *Engine) Relative(filename string) string {
+	if filename[0] == '/' {
+		return filename
+	}
 	return path.Clean(e.outputDir + "/" + filename)
 }
 
