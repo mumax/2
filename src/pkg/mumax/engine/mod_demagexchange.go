@@ -46,5 +46,5 @@ type demagexchUpdater struct {
 }
 
 func (u *demagexchUpdater) Update() {
-	//println("To be implemented")
+
 }

@@ -243,6 +243,13 @@ func (e *Engine) HasModule(name string) bool {
 
 // Low-level module load, not aware of dependencies
 func (e *Engine) LoadModule(name string) {
+	if e.size3D == nil{
+		panic(InputErr("Grid size should be set before loading modules"))
+	}
+	if e.cellSize == nil{
+		panic(InputErr("Cell size should be set before loading modules"))
+	}
+
 	if e.HasModule(name) {
 		return
 	}
