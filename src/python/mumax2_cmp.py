@@ -19,6 +19,7 @@ from mumax2 import *
 # @param maxRadius (float) the maximum radius of the vortex. Could be used for vortex domain wall else use the default value 0. 
 # @todo take into account Aex for setting the size of the core
 # @todo use gaussian function for the core
+# @todo add region support
 def setVortex( fieldName , center , axis , polarity , chirality , region = 'all' , maxRadius = 0. ):
 	## we assume that the engine return vectors as (z,y,x)
 	## we assume that user will enter vector and center as (x,y,z)
@@ -48,10 +49,7 @@ def setVortex( fieldName , center , axis , polarity , chirality , region = 'all'
 				v[2] = v1[2] - u[2] * vScalaru
 				## v norm
 				d = math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
-				#print >> sys.stderr, '%d\t%d\t%d :\t%g\t%g\t:\t%g\t%g\t%g\t:\t%g\t%g\t%g' % (X, Y, Z, vScalaru, d, v1[0], v1[1], v1[2], v[0], v[1], v[2])
 				if maxRadius == 0. or d <= maxRadius:
-					print >> sys.stderr, 'set M' 
-					#Ms = getcell('Msat',X,Y,Z)
 					## set field to vortex
 					if d < 2e-8:
 						m = [ u[0] * polarity ,
@@ -59,26 +57,21 @@ def setVortex( fieldName , center , axis , polarity , chirality , region = 'all'
 							  u[2] * polarity ]
 						setcell(fieldName,X,Y,Z,m)
 						m = getcell('m',X,Y,Z)
-						print >> sys.stderr, 'core :\t%d\t%d\t%d :\t%g\t:\t%g\t%g\t%g' % (X, Y, Z, d, m[0], m[1], m[2])
 					else:
 						m = [ - chirality * ( u[1] * v[2] - u[2] * v[1])/d ,
 							  - chirality * ( u[2] * v[0] - u[0] * v[2])/d ,
 							  - chirality * ( u[0] * v[1] - u[1] * v[0])/d ]
-						print >> sys.stderr, 'out :\t%g\t%g\t%g :\t%g\t:\t%g\t%g\t%g' % (coordinateX, coordinateY, coordinateZ, d, m[0], m[1], m[2])
 						setcell(fieldName,X,Y,Z,[float(m[0]),float(m[1]),float(m[2])])
 						m = getcell('m',X,Y,Z)
-						print >> sys.stderr, 'out :\t%g\t%g\t%g :\t%g\t:\t%g\t%g\t%g' % (coordinateX, coordinateY, coordinateZ, d, m[0], m[1], m[2])
 	return
 
 ## Set up the region system
 # Set up an array of the size of the grid filled with zeros and return it set up a dictionary of the regions name
 def setupRegionSystem():
-	tmp = [ [[[0]]] ]
+	global regionDefinition
 	setscalar('regionDefinition', 1.)
-	#setmask( 'regionDefinition', tmp )
 	global regionNameDictionary
-	regionNameDictionary = {'empty':0}
-	##setarray( regionArrayName, regionDefinition )
+	regionNameDictionary = {'empty':0.}
 	return
 
 ## Set up and initialize the region system corresponding to a given script
@@ -107,16 +100,16 @@ def initRegions( script , parameters):
 ## Set up and initialize region system given a png imqge
 # Set up regions by applying a png picture on a plane and extruding it perpendicularly to it
 # @param imageName (string) is the name of the PNG image to use
-# @param regionList (dictionary string=>string) associate a color to each region. The color could be either named if it is part of the <a href="http://www.w3schools.com/html/html_colornames.asp">standard html colors</a> or a string coding the color in the HTML hexadecimal format : "#XXXXXX" where X are between 0 and F
+# @param regionList (dictionary string (region name)=>string (color name or code)) associate a color to each region. The color could be either named if it is part of the <a href="http://www.w3schools.com/html/html_colornames.asp">standard html colors</a> or a string coding the color in the HTML hexadecimal format : "#XXXXXX" where X are between 0 and F
 # @param plane (string) defines the plane to which the picture will be applied (default the plane xy). The first axis will be matched with the width of the image and the second axis with the height.
 # @todo thickness (float) defines the extruded thickness. 0 means "through all".
 # @todo origin (float) if thickness is not 0, then origin defines the starting point of the extrusion. It will happen along the increasing value of the extrusion axis.
 # @note names of the colors allowed. @htmlinclude mumax2_cmp.py.html
 def extrudeImage( imageName , regionList , plane = 'xy'):
+	setupRegionSystem()
 	global regionNameDictionary
 	#test plane argument validity
-	planeValidity = re.compile('[x-z]{2}',re.IGNORECASE)
-	if not re.match(regionList[i]) or plane[0] == plane[1]:
+	if not re.match('[x-z]{2}',plane,re.IGNORECASE) or plane[0] == plane[1]:
 		print >> sys.stderr, 'extrudeImage plane cannot be %s' % plane
 		sys.exit()
 	htmlColorName = {
@@ -197,27 +190,31 @@ def extrudeImage( imageName , regionList , plane = 'xy'):
 					}
 	#first convert regionList to be fully coded in color hex code and fill regionNameDictionanry
 	htmlCodeRE = re.compile('\#[a-f\d]{6}',re.IGNORECASE)
-	colorToHexCode = {}
+	colorToRegion = {}
 	regionNameListLen = float(len(regionNameDictionary))
-	for i, cell in enumerate(regionList):
+	for i, cell in regionList.items():
 		if cell[0] != '#':
 			regionList[i] = htmlColorName[cell]
-		if re.match(regionList[i]):
+		if htmlCodeRE.match(regionList[i]):
 			regionNameDictionary[i] = regionNameListLen
-			colorToHexCode[cell] = regionNameListLen
+			colorToRegion[regionList[i]] = regionNameListLen
 			regionNameListLen += 1.
 	setupRegionSystem()
 	#Read picture
 	imageReader = png.Reader( filename = imageName )
-	imageWidth, imageHeight, pngData, _ = png.read()
-	rawRegionData = [[0.]]
-	for rowIndex, row in enumerate(pngdata):
-		for columnIndex, pixel in enumerate(row):
+	imageWidth, imageHeight, pngData, meta = imageReader.read()
+	rawRegionData = [[]]
+	for rowIndex, row in enumerate(pngData):
+		rawRegionData.append([])
+		for columnIndex in range(0,imageWidth):
+			pixel = [0,0,0,0]
+			for comp in range(0,meta['planes']):
+				pixel[comp] = row[columnIndex*meta['planes']+comp]
 			colorCode = "#%02X%02X%02X" % (pixel[0],pixel[1],pixel[2])
-			if colorCode in colorToHexCode:
-				rawRegionData[rowIndex][columnIndex] = colorToHexCode[colorCode]
+			if colorCode in colorToRegion:
+				rawRegionData[rowIndex].append(colorToRegion[colorCode])
 			else:
-				rawRegionData[rowIndex][columnIndex] = regionNameDictionary['empty']
+				rawRegionData[rowIndex].append(regionNameDictionary['empty'])
 	
 	#Apply rawRegionData to regionDefinition mask by stretching in plane and extruding out of plane
 	#rawRegionData
@@ -243,11 +240,17 @@ def extrudeImage( imageName , regionList , plane = 'xy'):
 		w = 1
 	else:
 		w = 0
-	stretchedRegionData = [[0.]]
+	global regionDefinition
+	regionDefinition = [[]]
 	for i in range(0,gridSize[u]):
-		i1 = (i * gridSize[u]) / imageWidth
+		regionDefinition[0].append([])
+		i1 = (i *imageWidth / gridSize[u])
 		for j in range(0,gridSize[v]):
-			j1 = (j * gridSize[v]) / imageHeight
+			regionDefinition[0][i].append([])
+			j1 = imageHeight -1 - j * imageHeight / gridSize[v]
 			for k in range(0,gridSize[w]):
-				setCell('regionDefinition',i,j,k,[rawRegionData[i1][j1]])
+				regionDefinition[0][i][j].append(rawRegionData[j1][i1])
+	
+	setmask('regionDefinition', regionDefinition)
+	
 	return
