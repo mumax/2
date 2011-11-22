@@ -37,7 +37,7 @@ import (
 // equation to be solved.
 type Quant struct {
 	name        string            // Unique identifier
-	array       *gpu.Array        // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
+	array       gpu.Array        // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
 	multiplier  []float64         // Point-wise multiplication coefficients for array, dimensionfull.
 	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate    bool              // Flags if this quantity needs to be updated
@@ -77,7 +77,6 @@ const (
 // Initiates a field with nComp components and array size size3D.
 // When size3D == nil, the field is space-independent (homogeneous) and the array will
 // hold NULL pointers for each of the GPU parts.
-// When multiply == false no multiplier will be allocated,
 // indicating this quantity should not be post-multiplied.
 // multiply = true
 func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit Unit, desc ...string) {
@@ -92,18 +91,18 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	// A FIELD is calculated by mumax itself, not settable by the user.
 	// So it should not have a multiplier, but always have allocated storage.
 	case FIELD:
-		q.array = gpu.NewArray(nComp, size3D)
+		q.array.Init(nComp, size3D,true)
 		q.multiplier = ones(nComp)
 	// A MASK should always have a value (stored in the multiplier).
 	// We initialize it to zero. The space-dependent mask is optinal
 	// and not yet allocated.
 	case MASK:
-		q.array = gpu.NilArray(nComp, size3D)
+		q.array.Init(nComp, size3D, false)
 		q.multiplier = zeros(nComp)
 	// A VALUE is space-independent and thus does not have allocated storage.
 	// The value is stored in the multiplier and initialized to zero.
 	case VALUE:
-		q.array = nil
+		//q.array = nil
 		q.multiplier = zeros(nComp)
 	default:
 		panic(Bug("Quant.init kind"))
@@ -127,6 +126,11 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	}
 	q.desc = buf
 }
+
+
+//func(q*Quant)Component(comp int)*Quant{
+//		
+//}
 
 // array with n 1's.
 func ones(n int) []float64 {
@@ -227,11 +231,11 @@ func (q *Quant) Unit() Unit {
 
 // Gets the GPU array.
 func (q *Quant) Array() *gpu.Array {
-	return q.array
+	return &(q.array)
 }
 
 func (q *Quant) IsSpaceDependent() bool {
-	return q.array != nil && q.array.DevicePtr()[0] != 0
+	return q.kind == VALUE || q.kind==MASK && q.array.IsNil()
 }
 
 // Transfers the quantity from GPU to host. The quantities host buffer
