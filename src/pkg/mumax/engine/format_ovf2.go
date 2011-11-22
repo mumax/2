@@ -102,7 +102,11 @@ func writeOvf2Header(out io.Writer, q *Quant) {
 	if unit == "" {
 		unit = "1"
 	}
-	hdr(out, "valueunits", unit, unit, unit)
+	if q.NComp() == 1 {
+		hdr(out, "valueunits", unit)
+	} else {
+		hdr(out, "valueunits", unit, unit, unit)
+	}
 
 	totaltime := GetEngine().time.Scalar()
 	// We don't really have stages

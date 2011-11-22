@@ -25,7 +25,7 @@ func (tens *Array) WriteAscii(out io.Writer) {
 	for i := 0; i < gridsize[X]; i++ {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
-				for c := Z; c >= X; c-- {
+				for c := tens.NComp()-1; c >= X; c-- {
 					_, err := fmt.Fprint(out, data[c][i][j][k], " ")
 					if err != nil {
 						panic(IOErr(err.String()))
