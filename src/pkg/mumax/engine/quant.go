@@ -37,7 +37,7 @@ import (
 // equation to be solved.
 type Quant struct {
 	name        string            // Unique identifier
-	array       gpu.Array        // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
+	array       gpu.Array         // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
 	multiplier  []float64         // Point-wise multiplication coefficients for array, dimensionfull.
 	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate    bool              // Flags if this quantity needs to be updated
@@ -91,7 +91,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	// A FIELD is calculated by mumax itself, not settable by the user.
 	// So it should not have a multiplier, but always have allocated storage.
 	case FIELD:
-		q.array.Init(nComp, size3D,true)
+		q.array.Init(nComp, size3D, true)
 		q.multiplier = ones(nComp)
 	// A MASK should always have a value (stored in the multiplier).
 	// We initialize it to zero. The space-dependent mask is optinal
@@ -126,7 +126,6 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	}
 	q.desc = buf
 }
-
 
 //func(q*Quant)Component(comp int)*Quant{
 //		
@@ -235,7 +234,7 @@ func (q *Quant) Array() *gpu.Array {
 }
 
 func (q *Quant) IsSpaceDependent() bool {
-	return q.kind == VALUE || q.kind==MASK && q.array.IsNil()
+	return q.kind == VALUE || q.kind == MASK && q.array.IsNil()
 }
 
 // Transfers the quantity from GPU to host. The quantities host buffer

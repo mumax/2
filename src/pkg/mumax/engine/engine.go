@@ -182,18 +182,18 @@ func (e *Engine) addDerivedQuant(name string) {
 		return
 	}
 	// component
-//	if strings.Contains(name, "."){
-//		split := strings.Split(name, ".")
-//		if len(split)!=2{break}
-//		origname,comp:=split[0],split[1]
-//		original := e.Quant(origname)
-//
-//		e.AddQuant(name, 1, original.kind, original.unit)
-//		derived := e.Quant(name)
-//		derived.name = name//original.name + ".avg" // hack, graphviz can't handle "<>"
-//		e.Depends(name, origname)
-//		return
-//	}
+	//	if strings.Contains(name, "."){
+	//		split := strings.Split(name, ".")
+	//		if len(split)!=2{break}
+	//		origname,comp:=split[0],split[1]
+	//		original := e.Quant(origname)
+	//
+	//		e.AddQuant(name, 1, original.kind, original.unit)
+	//		derived := e.Quant(name)
+	//		derived.name = name//original.name + ".avg" // hack, graphviz can't handle "<>"
+	//		e.Depends(name, origname)
+	//		return
+	//	}
 	panic(InputErr("engine: undefined quantity: " + name))
 }
 
@@ -232,9 +232,6 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, des
 
 	e.quantity[lname] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
 }
-
-
-
 
 // AddQuant(name, nComp, VALUE)
 func (e *Engine) AddValue(name string, nComp int, unit Unit) {
