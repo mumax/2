@@ -54,6 +54,25 @@ func (a API) GetCellSize() (x, y, z float64) {
 	return size[Z], size[Y], size[X] // convert to internal axes
 }
 
+// Set periodic boundary conditions in each direction.
+// A value of 0 means no periodicity in that direction (the default).
+// A nonzero value means the system is infinitely reproduced in that direction.
+// The magnitude of the nonzero value is a hint of how accurately the
+// infinite character should be approached, if applicable.
+// E.g.: for the ferromagnetic exchange interaction,  
+// any nonzero value will give the same result: perfect infinite periodicity.
+// But for the magnetostatic interaction, the magnitude of the nonzero value
+// may be used as a hint where to cut off the magnetic field.
+func (a API) SetPeriodic(x, y, z int) {
+	a.Engine.SetPeriodic([]int{z, y, x})
+}
+
+// Get the periodicity
+// WARNING: convert to ZYX, internal units
+func (a API) GetPeriodic() (x, y, z int) {
+	p := a.Engine.Periodic()
+	return p[Z], p[Y], p[X] // convert to internal axes
+}
 // Load a physics module.
 func (a API) Load(name string) {
 	a.Engine.LoadModule(name)

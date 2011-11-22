@@ -33,6 +33,9 @@ type Engine struct {
 	size3D         []int             // size of the FD grid, nil means not yet set
 	cellSize_      [3]float64        // INTENRAL
 	cellSize       []float64         // size of the FD cells, nil means not yet set
+	periodic_      [3]int            // INTERNAL
+	periodic       []int             // periodicity in each dimension
+	set_periodic_  bool              // INTERNAL: periodic already set?
 	quantity       map[string]*Quant // maps quantity names onto their data structures
 	solver         []Solver          // each solver does the time stepping for its own quantities
 	time           *Quant            // time quantity is always present
@@ -55,6 +58,7 @@ func Init() {
 
 // initialize
 func (e *Engine) init() {
+	e.periodic = e.periodic_[:]
 	e.quantity = make(map[string]*Quant)
 	// special quantities time and dt are always present
 	e.AddQuant("t", SCALAR, VALUE, Unit("s"))
@@ -143,6 +147,24 @@ func (e *Engine) CellSize() []float64 {
 		panic(InputErr("Cell size should be set first"))
 	}
 	return e.cellSize
+}
+
+// Sets the periodicity in each dimension
+func (e *Engine) SetPeriodic(p []int) {
+	Debug("Engine.SetPeriodic", p)
+	if e.set_periodic_ {
+		panic(InputErr("Periodicity already set"))
+	}
+	Assert(len(p) == 3)
+	copy(e.periodic, p)
+	e.set_periodic_ = true
+}
+
+// Gets the FD grid size
+func (e *Engine) Periodic() []int {
+	// OK if not yet set
+	e.set_periodic_ = true // but should not be changed once used.
+	return e.periodic
 }
 
 // Gets the total number of FD cells
@@ -243,10 +265,10 @@ func (e *Engine) HasModule(name string) bool {
 
 // Low-level module load, not aware of dependencies
 func (e *Engine) LoadModule(name string) {
-	if e.size3D == nil{
+	if e.size3D == nil {
 		panic(InputErr("Grid size should be set before loading modules"))
 	}
-	if e.cellSize == nil{
+	if e.cellSize == nil {
 		panic(InputErr("Cell size should be set before loading modules"))
 	}
 
@@ -479,7 +501,7 @@ func valid(b bool) string {
 
 func fill(s interface{}) string {
 	str := fmt.Sprint(s)
-	for len(str) < 6 {
+	for len(str) < 8 {
 		str += " "
 	}
 	return str
