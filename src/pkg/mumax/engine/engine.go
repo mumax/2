@@ -197,15 +197,25 @@ func (e *Engine) addDerivedQuant(name string) {
 			panic(InputErr(orig.Name() + " has no component " + compname))
 		case 3:
 			comp, ok = VectorIndex[strings.ToUpper(compname)]
-		case 6, 9:
+			comp = 2 - comp // userspace
+		case 6:
 			comp, ok = TensorIndex[strings.ToUpper(compname)]
+			if comp < 3 {
+				comp = 2 - comp
+			} // userspace
+			if comp == YZ {
+				comp = XY
+			}
+			if comp == XY {
+				comp = YZ
+			}
 		}
 		if !ok {
 			panic(InputErr("invalid component:" + compname))
 		}
 
 		derived := orig.Component(comp)
-		derived.name = orig.name + "." + strings.ToLower(compname)// hack, graphviz can't handle "."
+		derived.name = orig.name + "." + strings.ToLower(compname) // hack, graphviz can't handle "."
 		e.addQuant(derived)
 		e.Depends(derived.name, origname)
 		return
@@ -241,7 +251,7 @@ func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, des
 	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, desc...))
 }
 
-func(e*Engine)addQuant(q*Quant){
+func (e *Engine) addQuant(q *Quant) {
 	lname := strings.ToLower(q.name)
 
 	// quantity should not yet be defined

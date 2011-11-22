@@ -31,14 +31,14 @@ func NewAverageUpdater(in, out *Quant) Updater {
 func (this *AverageUpdater) Update() {
 	var sum float32 = 666
 
-	if this.in.nComp == 1{
+	if this.in.nComp == 1 {
 		sum = this.reduce.Sum(this.in.Array())
-		this.out.SetScalar(float64(sum)*this.in.multiplier[0]/float64(GetEngine().NCell()))
-	}else{	
-	for c := 0; c < this.in.nComp; c++ {
-		sum := this.reduce.Sum(&(this.in.Array().Comp[c]))
-		this.out.SetComponent(c, float64(sum)*this.in.multiplier[c]/float64(GetEngine().NCell()))
+		this.out.SetScalar(float64(sum) * this.in.multiplier[0] / float64(GetEngine().NCell()))
+	} else {
+		for c := 0; c < this.in.nComp; c++ {
+			sum := this.reduce.Sum(&(this.in.Array().Comp[c]))
+			this.out.SetComponent(c, float64(sum)*this.in.multiplier[c]/float64(GetEngine().NCell()))
+		}
 	}
-}
 
 }
