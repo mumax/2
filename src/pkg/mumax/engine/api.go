@@ -326,24 +326,6 @@ func (a API) Debug_VerifyAll() {
 	}
 }
 
-//DEBUG: Benchmark FFT
-//func (a API) Debug_BenchmarkFFT() {
-//	e := a.Engine
-//	EnableTimers(true)
-//
-//	datasize := e.GridSize()
-//	fftsize := []int{datasize[0], 2 * datasize[1], 2 * datasize[2]}
-//	plan := gpu.NewFFTPlan(datasize, fftsize)
-//	defer plan.Free()
-//
-//	in := gpu.NewArray(1, datasize)
-//	defer in.Free()
-//
-//	for i := 0; i < 100; i++ {
-//		plan.Forward(in, in)
-//	}
-//}
-
 // DEBUG: echos a string, can be used for synchronous output
 func (a API) Echo(str string) {
 	Log(str)
