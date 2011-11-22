@@ -27,14 +27,14 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for _, v := range quants {
-		k:=v.Name()
+		k := v.Name()
 		label := "label=" + `"` + v.FullName()
 		//if v.desc != "" {
 		//	label += "\\n(" + v.desc + `)"`
 		//} else {
 		label += `"`
 		//}
-		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
+		fmt.Fprintln(out, `"`+k+`"`, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
 		// Add dependencies
 		for _, c := range v.children {
 			fmt.Fprintln(out, k, "->", c.name, ";")

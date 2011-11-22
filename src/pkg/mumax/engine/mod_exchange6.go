@@ -44,5 +44,5 @@ type exch6Updater struct {
 }
 
 func (u *exch6Updater) Update() {
-	println("To be implemented")
+	//println("To be implemented")
 }

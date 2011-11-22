@@ -38,6 +38,7 @@ func (t *Table) Tabulate(quants []string) {
 	e := GetEngine()
 	for _, q := range quants {
 		quant := e.Quant(q)
+		quant.Update() //!!
 		v := quant.multiplier
 		n := len(v)
 		for i := n - 1; i >= 0; i-- { // Swap XYZ -> ZYX

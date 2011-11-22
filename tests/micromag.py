@@ -7,7 +7,6 @@ setgridsize(16, 8, 2)
 setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')
-savegraph("graph.png")
 
 setscalar('alpha', 0.01)
 setscalar('msat', 800e3)
@@ -30,5 +29,5 @@ autotabulate(["t", "H_ext"], "t.txt", 10e-12)
 steps(100)
 
 printstats()
-
+savegraph("graph.png")
 

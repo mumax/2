@@ -69,13 +69,6 @@ const (
 	RHS = 1
 )
 
-// Make new engine.
-//func NewEngine() *Engine {
-//	e := new(Engine)
-//	e.init()
-//	return e
-//}
-
 // Initializes the global simulation engine
 func Init() {
 	(&engine).init()
@@ -146,16 +139,47 @@ func (e *Engine) CellSize() []float64 {
 	return e.cellSize
 }
 
+// Gets the total number of FD cells
+func (e *Engine) NCell() int {
+	return e.size3D_[0] * e.size3D_[1] * e.size3D_[2]
+}
+
 // Retrieve a quantity by its name.
 // Lookup is case-independent
 func (e *Engine) Quant(name string) *Quant {
-	name = strings.ToLower(name)
-	if q, ok := e.quantity[name]; ok {
+	lname := strings.ToLower(name)
+	if q, ok := e.quantity[lname]; ok {
 		return q
 	} else {
-		panic(InputErr("engine: undefined quantity: " + name))
+		e.addDerivedQuant(name)
+		if q, ok := e.quantity[lname]; ok {
+			return q
+		} else {
+			panic(Bug("engine.Quant()"))
+		}
 	}
 	return nil //silence gc
+}
+
+// Derived quantities are averages, components, etc. of existing quantities.
+// They are added to the engine on-demand.
+// Syntax:
+//	"<q>" : average of q
+//	"q.x" : x-component of q, must be vector
+//	"q.xx": xx-component of q, must be tensor
+func (e *Engine) addDerivedQuant(name string) {
+	if strings.HasPrefix(name, "<") && strings.HasSuffix(name, ">") {
+		origname := name[1 : len(name)-1]
+		original := e.Quant(origname)
+
+		e.AddQuant(name, original.nComp, VALUE, original.unit)
+		derived := e.Quant(name)
+		derived.name = original.name + "_avg" // hack, graphviz can't handle "<>"
+		e.Depends(name, origname)
+		derived.updater = NewAverageUpdater(original, derived)
+		return
+	}
+	panic(InputErr("engine: undefined quantity: " + name))
 }
 
 //__________________________________________________________________ add

@@ -167,6 +167,13 @@ func (q *Quant) SetScalar(val float64) {
 	q.Invalidate() //!
 }
 
+// Sets one component of a VALUE quantity.
+func (q *Quant) SetComponent(comp int, val float64) {
+	checkKind(q, VALUE)
+	q.multiplier[comp] = val
+	q.Invalidate() //!
+}
+
 // Sets a space-dependent field.
 func (q *Quant) SetField(field *host.Array) {
 	checkKind(q, FIELD)
