@@ -92,8 +92,8 @@ func RunDot(infile, format string) {
 		Warn("could not find dot in PATH", err)
 		return
 	}
-	Debug("exec", dot, "-T"+format, "-O", infile) //:= subprocess(command, args)
-	proc := exec.Command(dot, "-T"+format, "-O", infile) //:= subprocess(command, args)
+	Debug("exec", dot, "-T"+format, "-O", infile)
+	proc := exec.Command(dot, "-T"+format, "-O", infile)
 	out, err2 := proc.CombinedOutput()
 	if err2 != nil {
 		Warn(dot, infile, "failed:", err2, string(out))

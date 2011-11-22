@@ -299,8 +299,7 @@ func (a API) SaveGraph(file string) {
 	defer f.Close()
 	CheckIO(err)
 	a.Engine.WriteDot(f)
-	Log("Wrote", dotfile) //, "Run command: \"dot -O -Tpng ", file, "\" to plot the physics graph (requires package graphviz).")
-
+	Log("Wrote", dotfile)
 	RunDot(dotfile, path.Ext(file)[1:]) // rm .
 }
 
