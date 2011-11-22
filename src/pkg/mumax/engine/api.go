@@ -292,6 +292,7 @@ func swapXYZ(array []float64) {
 // Rendering requires the package "graphviz" to be installed.
 func (a API) SaveGraph(file string) {
 
+	file = a.Engine.Relative(file)
 	dotfile := ReplaceExt(file, ".dot")
 
 	f, err := os.Create(dotfile)

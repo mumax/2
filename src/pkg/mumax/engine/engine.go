@@ -12,6 +12,7 @@ package engine
 import (
 	. "mumax/common"
 	"fmt"
+	"path"
 	"strings"
 )
 
@@ -91,6 +92,13 @@ func (e *Engine) OutputID() int {
 func (e *Engine) NewHandle() int {
 	e._handleCount++ // Let's not use 0 as a valid handle.
 	return e._handleCount
+}
+
+// Resolves a file name relative to the output directory,
+// unless the name begins with a /.
+func(e*Engine)Relative(filename string)string{
+	if filename[0] == '/' {return filename}
+	return path.Clean(e.outputDir + "/" + filename)
 }
 
 //__________________________________________________________________ set/get
@@ -367,14 +375,16 @@ func (e *Engine) AutoSave(quant string, format string, options []string, period 
 	return handle
 }
 
+// See api.go 
 func (e *Engine) Tabulate(quants []string, filename string) {
 	if _, ok := e.outputTables[filename]; !ok { // table not yet open
-		e.outputTables[filename] = NewTable(filename)
+		e.outputTables[filename] = NewTable(e.Relative(filename))
 	}
 	table := e.outputTables[filename]
 	table.Tabulate(quants)
 }
 
+// See api.go
 func (e *Engine) AutoTabulate(quants []string, filename string, period float64) (handle int) {
 	for _, q := range quants {
 		checkKinds(e.Quant(q), MASK, VALUE)
