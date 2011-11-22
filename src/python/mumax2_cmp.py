@@ -78,23 +78,26 @@ def setupRegionSystem():
 # Set up regions given a script that return a region index for each voxel
 # @param script (function) a function that will be called for each voxel. It should return a string to identify each region or 'empty' if the voxel does not correspond to any region. Its arguments should be three ints and a dictionary for any additional parameters (x, y, z, parameters)
 # @param parameters (tuple) parameters to pass to the script 
-def initRegions( script , parameters):
+def initRegionsScript( script , parameters):
+	setupRegionSystem()
 	global regionNameDictionary
-	regionDefinition = getarray('regionDefinition')
+	global regionDefinition
+	regionDefinition = [[]]
+	gridSize = getgridsize()
 	regionNameList = regionNameDictionary.values()
 	regionNameListLen = float(len(regionNameList))
-	for i, cell in enumerate(regionDefinition):
-		## coordinate of the current point
-		Z = i / ( gridSize[1] * gridSize[2] )
-		Y = ( i - Z * ( gridSize[1] * gridSize[2] ) ) / gridSize[2]
-		X = i % gridSize[2]
-		result = script(X, Y, Z, parameters)
-		tmp = regionNameDictionary.get(result,regionNameListLen)
-		setcell('regionDefinition',X,Y,Z,[ tmp ])
-		if tmp == regionNameListLen:
-			regionNameDictionary[result] = regionNameListLen
-			regionNameListLen += 1.
-		del tmp
+	for i in range(0,gridSize[0]):
+		regionDefinition[0].append([])
+		for j in range(0,gridSize[1]):
+			regionDefinition[0][i].append([])
+			for k in range(0,gridSize[2]):
+				result = script(i, j, k, parameters)
+				regionDefinition[0][i][j].append(regionNameDictionary.get(result,regionNameListLen))
+				if regionDefinition[0][i][j][k] == regionNameListLen:
+					regionNameDictionary[result] = regionNameListLen
+					regionNameListLen += 1.
+	
+	setmask('regionDefinition', regionDefinition)
 	return
 
 ## Set up and initialize region system given a png imqge
