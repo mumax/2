@@ -26,7 +26,8 @@ func (e *Engine) WriteDot(out io.Writer) {
 
 	// Add quantities
 	quants := e.quantity
-	for k, v := range quants {
+	for _, v := range quants {
+		k:=v.Name()
 		label := "label=" + `"` + v.FullName()
 		//if v.desc != "" {
 		//	label += "\\n(" + v.desc + `)"`
