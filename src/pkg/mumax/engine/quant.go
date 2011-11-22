@@ -108,9 +108,8 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		panic(Bug("Quant.init kind"))
 	}
 
-	q.updater = nil //new(NopUpdater)
+	q.updater = nil
 
-	const CAP = 2
 	q.children = make(map[string]*Quant)
 	q.parents = make(map[string]*Quant)
 
@@ -127,9 +126,24 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	q.desc = buf
 }
 
-//func(q*Quant)Component(comp int)*Quant{
-//		
-//}
+// Quantity representing a single component of the original,
+// with shared underlying storage. 
+// The returned Quant's name and dependencies still have to be set.
+func (orig *Quant) Component(comp int) *Quant {
+	q := new(Quant)
+
+	q.nComp = 1
+	q.kind = orig.kind
+
+	q.array.Assign(&(orig.array.Comp[comp]))
+	q.multiplier = orig.multiplier[comp : comp+1]
+
+	q.children = make(map[string]*Quant)
+	q.parents = make(map[string]*Quant)
+
+	q.unit = orig.unit
+	return q
+}
 
 // array with n 1's.
 func ones(n int) []float64 {
@@ -234,7 +248,7 @@ func (q *Quant) Array() *gpu.Array {
 }
 
 func (q *Quant) IsSpaceDependent() bool {
-	return q.kind == VALUE || q.kind == MASK && q.array.IsNil()
+	return q.kind == FIELD || q.kind == MASK && !q.array.IsNil()
 }
 
 // Transfers the quantity from GPU to host. The quantities host buffer

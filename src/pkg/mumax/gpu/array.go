@@ -68,6 +68,21 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initCompPtrs()
 }
 
+// a = other
+// (accessible from packages where Array is not assignable)
+func (a *Array) Assign(other *Array) {
+	a.pointer = other.pointer
+	a._size = other._size
+	a.size4D = other.size4D
+	a.size3D = other.size3D
+	a._partSize = other._partSize
+	a.partSize = other.partSize
+	a.partLen4D = other.partLen4D
+	a.partLen3D = other.partLen3D
+	a.Stream = other.Stream
+	a.Comp = other.Comp
+}
+
 // Parameters for Array.Init()
 const (
 	DO_ALLOC   = true

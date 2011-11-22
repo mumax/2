@@ -176,24 +176,40 @@ func (e *Engine) addDerivedQuant(name string) {
 
 		e.AddQuant(name, original.nComp, VALUE, original.unit)
 		derived := e.Quant(name)
-		derived.name = original.name + "_avg" // hack, graphviz can't handle "<>"
 		e.Depends(name, origname)
 		derived.updater = NewAverageUpdater(original, derived)
 		return
 	}
 	// component
-	//	if strings.Contains(name, "."){
-	//		split := strings.Split(name, ".")
-	//		if len(split)!=2{break}
-	//		origname,comp:=split[0],split[1]
-	//		original := e.Quant(origname)
-	//
-	//		e.AddQuant(name, 1, original.kind, original.unit)
-	//		derived := e.Quant(name)
-	//		derived.name = name//original.name + ".avg" // hack, graphviz can't handle "<>"
-	//		e.Depends(name, origname)
-	//		return
-	//	}
+	if strings.Contains(name, ".") {
+		split := strings.Split(name, ".")
+		if len(split) != 2 {
+			panic(InputErr("engine: undefined quantity: " + name))
+		}
+		origname, compname := split[0], strings.ToLower(split[1])
+		orig := e.Quant(origname)
+
+		// parse component string ("X" -> 0)
+		comp := -1
+		ok := false
+		switch orig.nComp {
+		default:
+			panic(InputErr(orig.Name() + " has no component " + compname))
+		case 3:
+			comp, ok = VectorIndex[strings.ToUpper(compname)]
+		case 6, 9:
+			comp, ok = TensorIndex[strings.ToUpper(compname)]
+		}
+		if !ok {
+			panic(InputErr("invalid component:" + compname))
+		}
+
+		derived := orig.Component(comp)
+		derived.name = orig.name + "." + strings.ToLower(compname)// hack, graphviz can't handle "."
+		e.addQuant(derived)
+		e.Depends(derived.name, origname)
+		return
+	}
 	panic(InputErr("engine: undefined quantity: " + name))
 }
 
@@ -222,15 +238,18 @@ func (e *Engine) LoadModule(name string) {
 
 // Add an arbitrary quantity. Name tag is case-independent.
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {
-	Debug("engine.Add", name, nComp, e.size3D, kind)
-	lname := strings.ToLower(name)
+	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, desc...))
+}
+
+func(e*Engine)addQuant(q*Quant){
+	lname := strings.ToLower(q.name)
 
 	// quantity should not yet be defined
 	if _, ok := e.quantity[lname]; ok {
-		panic(Bug("engine: Already defined: " + name))
+		panic(Bug("engine: Already defined: " + q.name))
 	}
 
-	e.quantity[lname] = newQuant(name, nComp, e.size3D, kind, unit, desc...)
+	e.quantity[lname] = q
 }
 
 // AddQuant(name, nComp, VALUE)

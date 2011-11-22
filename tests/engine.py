@@ -25,6 +25,7 @@ autosave("m", "omf", ["Text"], 10e-12)
 autosave("m", "ovf", ["Text"], 10e-12)
 autosave("m", "bin", [], 10e-12)
 autotabulate(["t", "H_ext"], "h.txt", 10e-12)
+autotabulate(["t", "<m.x>"], "mx.txt", 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
 steps(100)
 

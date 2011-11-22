@@ -8,6 +8,7 @@
 package gpu
 
 import (
+	. "mumax/common"
 	"testing"
 	"mumax/host"
 	"fmt"

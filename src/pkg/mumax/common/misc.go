@@ -16,12 +16,35 @@ import (
 	"fmt"
 )
 
-// Array component.
+// Indices for vector components
 const (
 	X = 0
 	Y = 1
 	Z = 2
 )
+
+// Indices for (anti-)symmetric kernel components
+// when only 6 of the 9 components are stored.
+const (
+	XX = 0
+	YY = 1
+	ZZ = 2
+	YZ = 3
+	XZ = 4
+	XY = 5
+)
+
+// Maps string to tensor index
+var TensorIndex map[string]int = map[string]int{"XX": XX, "YY": YY, "ZZ": ZZ, "YZ": YZ, "XZ": XZ, "XY": XY}
+
+// Maps sting to vector index
+var VectorIndex map[string]int = map[string]int{"X": X, "Y": Y, "Z": Z}
+
+// Maps tensor index to string
+var TensorIndexStr map[int]string = map[int]string{XX: "XX", YY: "YY", ZZ: "ZZ", YZ: "YZ", XZ: "XZ", XY: "XY"}
+
+// Maps vector index to string
+var VectorIndexStr map[int]string = map[int]string{X: "X", Y: "Y", Z: "Z"}
 
 // Check if array sizes are equal. Panics if arrays a and b are different. 
 func CheckSize(a, b []int) {

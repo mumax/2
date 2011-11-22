@@ -53,7 +53,7 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 	// init fftKern
 	for i, k := range kernel {
 		if k != nil {
-			Debug("ConvPlan.init", "alloc:", kernString[i])
+			Debug("ConvPlan.init", "alloc:", TensorIndexStr[i])
 			conv.fftKern[i].Init(1, []int{logicSize[0], logicSize[1], logicSize[2]/2 + 1}, DO_ALLOC) // not so aligned..
 		}
 	}
@@ -75,7 +75,7 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	for i, k := range kernel {
 		if k != nil {
 			for _, e := range k.List {
-				AssertMsg(IsReal(e), "K", kernString[i], "=", e)
+				AssertMsg(IsReal(e), "K", TensorIndexStr[i], "=", e)
 			}
 		}
 	}
@@ -92,11 +92,11 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 
 	for i, k := range kernel {
 		if k != nil {
-			fmt.Println("kern", kernString[i], kernel[i].Array)
+			fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
 			scaleRealParts(&conv.fftKern[i], devOut, 1/float32(fft.Normalization()))
-			fmt.Println("fftKern", kernString[i], conv.fftKern[i].LocalCopy().Array)
+			fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}
 
@@ -148,15 +148,3 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 		conv.fft.Forward(&in.Comp[c], &conv.fftIn)
 	}
 }
-
-// indices for (anti-)symmetric kernel when only 6 of the 9 components are stored.
-const (
-	XX = 0
-	YY = 1
-	ZZ = 2
-	YZ = 3
-	XZ = 4
-	XY = 5
-)
-
-var kernString map[int]string = map[int]string{XX: "XX", YY: "YY", ZZ: "ZZ", YZ: "YZ", XZ: "XZ", XY: "XY"}
