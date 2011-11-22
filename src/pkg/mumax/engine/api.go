@@ -17,6 +17,7 @@ import (
 	. "mumax/common"
 	"mumax/host"
 	"mumax/gpu"
+	"path"
 	"fmt"
 	"os"
 )
@@ -286,13 +287,21 @@ func swapXYZ(array []float64) {
 
 //________________________________________________________________________________ misc
 
-// Save .dot file with the physics graph for plotting with graphviz.
+// Saves an image file of the physics graph using the given file name.
+// The extension determines the output format. E.g.: .png, .svg, ...
+// A file with a .dot extension will be written as well.
+// Rendering requires the package "graphviz" to be installed.
 func (a API) SaveGraph(file string) {
-	f, err := os.Create(file)
+
+	dotfile := ReplaceExt(file, ".dot")
+
+	f, err := os.Create(dotfile)
 	defer f.Close()
 	CheckIO(err)
 	a.Engine.WriteDot(f)
-	Log("Wrote", file, "Run command: \"dot -Tpng", file, "> myfile.png\" to plot the physics graph (requires package graphviz).")
+	Log("Wrote", dotfile) //, "Run command: \"dot -O -Tpng ", file, "\" to plot the physics graph (requires package graphviz).")
+
+	RunDot(dotfile, path.Ext(file)[1:]) // rm .
 }
 
 // DEBUG

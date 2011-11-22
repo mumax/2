@@ -12,6 +12,8 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
+	"exec"
 	"fmt"
 	"io"
 )
@@ -80,6 +82,22 @@ func (e *Engine) WriteDot(out io.Writer) {
 	}
 
 	fmt.Fprintln(out, "}")
+}
+
+// Executes dot -Tformat -O infile
+// rendering the dot input file.
+func RunDot(infile, format string) {
+	dot, err := exec.LookPath("dot")
+	if err != nil {
+		Warn("could not find dot in PATH", err)
+		return
+	}
+	Debug("exec", dot, "-T"+format, "-O", infile) //:= subprocess(command, args)
+	proc := exec.Command(dot, "-T"+format, "-O", infile) //:= subprocess(command, args)
+	out, err2 := proc.CombinedOutput()
+	if err2 != nil {
+		Warn(dot, infile, "failed:", err2, string(out))
+	}
 }
 
 // true if a and b are similar names, to be equally ranked in the dot graph.

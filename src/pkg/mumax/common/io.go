@@ -59,6 +59,7 @@ func Mkdir(filename string) {
 }
 
 // Checks if the file exists.
+// TODO: use Stat() instead of Open()
 func FileExists(file string) bool {
 	f, err := os.Open(file)
 	if err != nil {
