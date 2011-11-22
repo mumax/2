@@ -47,28 +47,6 @@ type Engine struct {
 	filenameFormat string            // Printf format string for file name numbering. Must consume one integer.
 }
 
-// Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time. 
-func (e *Engine) OutputID() int {
-	t := e.time.Scalar()
-	if t != e._lastOutputT {
-		e._lastOutputT = t
-		e._outputID++
-	}
-	return e._outputID
-}
-
-// Returns ++_handleCount. Used to identify objects like crontabs so they can later by manipulated through this ID.
-func (e *Engine) NewHandle() int {
-	e._handleCount++ // Let's not use 0 as a valid handle.
-	return e._handleCount
-}
-
-// Left-hand side and right-hand side indices for Engine.ode[i]
-const (
-	LHS = 0
-	RHS = 1
-)
-
 // Initializes the global simulation engine
 func Init() {
 	(&engine).init()
@@ -95,6 +73,24 @@ func (e *Engine) Close() {
 	for _, t := range e.outputTables {
 		t.Close()
 	}
+}
+
+//__________________________________________________________________ I/O
+
+// Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time. 
+func (e *Engine) OutputID() int {
+	t := e.time.Scalar()
+	if t != e._lastOutputT {
+		e._lastOutputT = t
+		e._outputID++
+	}
+	return e._outputID
+}
+
+// Returns ++_handleCount. Used to identify objects like crontabs so they can later by manipulated through this ID.
+func (e *Engine) NewHandle() int {
+	e._handleCount++ // Let's not use 0 as a valid handle.
+	return e._handleCount
 }
 
 //__________________________________________________________________ set/get

@@ -86,12 +86,11 @@ func (e *Engine) WriteDot(out io.Writer) {
 	fmt.Fprintln(out, "}")
 }
 
-
 // replaces characters that graphviz cannot handle as labels.
-func sanitize(in string) (out string){
-	 out = strings.Replace(in, "<", "_leftavg_", -1)
-	 out = strings.Replace(out, ">", "_rightavg_", -1)
-	 out = strings.Replace(out, ".", "_dot_", -1)
+func sanitize(in string) (out string) {
+	out = strings.Replace(in, "<", "_leftavg_", -1)
+	out = strings.Replace(out, ">", "_rightavg_", -1)
+	out = strings.Replace(out, ".", "_dot_", -1)
 	return
 }
 
