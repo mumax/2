@@ -13,6 +13,7 @@ package engine
 
 import (
 	. "mumax/common"
+	"strings"
 	"exec"
 	"fmt"
 	"io"
@@ -27,17 +28,17 @@ func (e *Engine) WriteDot(out io.Writer) {
 	// Add quantities
 	quants := e.quantity
 	for _, v := range quants {
-		k := v.Name()
+		k := sanitize(v.Name())
 		label := "label=" + `"` + v.FullName()
 		//if v.desc != "" {
 		//	label += "\\n(" + v.desc + `)"`
 		//} else {
 		label += `"`
 		//}
-		fmt.Fprintln(out, `"`+k+`"`, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
+		fmt.Fprintln(out, k, " [shape=box, group=", k[0:1], label, "];") // use first letter as group name.
 		// Add dependencies
 		for _, c := range v.children {
-			fmt.Fprintln(out, k, "->", c.name, ";")
+			fmt.Fprintln(out, k, "->", sanitize(c.name), ";")
 		}
 	}
 
@@ -83,6 +84,15 @@ func (e *Engine) WriteDot(out io.Writer) {
 	}
 
 	fmt.Fprintln(out, "}")
+}
+
+
+// replaces characters that graphviz cannot handle as labels.
+func sanitize(in string) (out string){
+	 out = strings.Replace(in, "<", "_leftavg_", -1)
+	 out = strings.Replace(out, ">", "_rightavg_", -1)
+	 out = strings.Replace(out, ".", "_dot_", -1)
+	return
 }
 
 // Executes dot -Tformat -O infile
