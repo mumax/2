@@ -41,6 +41,7 @@ for i in range(100):
 	step()
 
 printstats()
+savegraph("graph.png")
 
 
 
