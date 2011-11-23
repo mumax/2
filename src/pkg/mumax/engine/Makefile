@@ -21,6 +21,7 @@ GOFILES=\
 	mod_aexchange.go\
 	mod_demagexchange.go\
 	kernel.go\
+	demag.go\
 	mod_exchange6.go\
 	mod_regions.go\
 	quant.go\
