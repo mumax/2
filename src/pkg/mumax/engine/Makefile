@@ -20,6 +20,7 @@ GOFILES=\
 	mod_uniaxialanisotropy.go\
 	mod_aexchange.go\
 	mod_demagexchange.go\
+	kernel.go\
 	mod_exchange6.go\
 	mod_regions.go\
 	quant.go\
