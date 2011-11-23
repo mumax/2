@@ -66,8 +66,12 @@ func newDemagExchUpdater(Hdex, m, Msat, Aex *Quant) Updater {
 	u.Msat = Msat
 	u.Aex = Aex
 
-	//gridsize := GetEngine().size3D
-	//u.conv.Init(gridsize, nil) // TODO: kernel here.
+	e := GetEngine()
+	kernsize := padSize(e.GridSize(), e.Periodic())
+	accuracy := 8
+	kernel := FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic())
+
+	u.conv.Init(e.GridSize(), kernel)
 	return u
 }
 

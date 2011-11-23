@@ -25,8 +25,8 @@ import (
 // Only the non-redundant elements of this symmetric tensor are returned: XX, YY, ZZ, YZ, XZ, XY
 // You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
 // K[KernIdx[X][X]] returns K[XX]
-func FaceKernel6(size []int, cellsize []float32, accuracy int, periodic []int) []*host.Array {
-
+func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int) []*host.Array {
+	Debug("Calculating kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
 	k := make([]*host.Array, 6)
 	for i := range k {
 		k[i] = host.NewArray(1, size)
@@ -61,26 +61,25 @@ func FaceKernel6(size []int, cellsize []float32, accuracy int, periodic []int) [
 				yw := wrap(y, size[Y])
 				for z := z1; z <= z2; z++ {
 					zw := wrap(z, size[Z])
-					R.Set(float32(x)*cellsize[X], float32(y)*cellsize[Y], float32(z)*cellsize[Z])
+					R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
 
 					faceIntegral(B, R, cellsize, s, accuracy)
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
-						i := kernIdx[s][d]               // 3x3 symmetric index to 1x6 index
-						k[i].Array[0][xw][yw][zw] += B[d] // We have to ADD because there are multiple contributions in case of periodicity
+						i := kernIdx[s][d]                         // 3x3 symmetric index to 1x6 index
+						k[i].Array[0][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
 				}
 			}
 		}
 	}
 
-
 	return k
 }
 
 // UNTESTED:
 // Smart version of FaceKernel6, uses symmetry to cut cpu time roughly in 1/8
-//func fastKernel6(size []int, cellsize []float32, accuracy int) []*tensor.T3 {
+//func fastKernel6(size []int, cellsize []float64, accuracy int) []*tensor.T3 {
 //	k := make([]*tensor.T3, 6)
 //	for i := range k {
 //		k[i] = tensor.NewT3(size)
@@ -104,7 +103,7 @@ func FaceKernel6(size []int, cellsize []float32, accuracy int, periodic []int) [
 //				z1 := 0 //-(size[Z] - 1) / 2
 //				for z := z1; z <= size[Z]/2-1; z++ {
 //					zw := wrap(z, size[Z])
-//					R.Set(float32(x)*cellsize[X], float32(y)*cellsize[Y], float32(z)*cellsize[Z])
+//					R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
 //
 //					faceIntegral(B, R, cellsize, s, accuracy)
 //
@@ -123,16 +122,16 @@ func FaceKernel6(size []int, cellsize []float32, accuracy int, periodic []int) [
 // Calculates only the self-kernel K[ij][0][0][0].
 // used for edge corrections where we need to subtract this generic self kernel contribution and
 // replace it by an edge-corrected version specific for each cell.
-//func selfKernel(sourcedir int, cellsize []float32, accuracy int) []float32 {
+//func selfKernel(sourcedir int, cellsize []float64, accuracy int) []float64 {
 //	B := tensor.NewVector()
 //	R := tensor.NewVector()
 //	faceIntegral(B, R, cellsize, sourcedir, accuracy)
-//	return []float32{B[X], B[Y], B[Z]}
+//	return []float64{B[X], B[Y], B[Z]}
 //}
 
 // Magnetostatic field at position r (integer, number of cellsizes away from source) for a given source magnetization direction m (X, Y, or
 // s = source direction (x, y, z)
-func faceIntegral(B, R *vector, cellsize []float32, s int, accuracy int) {
+func faceIntegral(B, R *vector, cellsize []float64, s int, accuracy int) {
 	n := accuracy                  // number of integration points = n^2
 	u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
 	R2 := NewVector()
@@ -147,9 +146,9 @@ func faceIntegral(B, R *vector, cellsize []float32, s int, accuracy int) {
 
 	B.Set(0., 0., 0.) // accumulates magnetic field
 	for i := 0; i < n; i++ {
-		pv := -(cellsize[v] / 2.) + cellsize[v]/float32(2*n) + float32(i)*(cellsize[v]/float32(n))
+		pv := -(cellsize[v] / 2.) + cellsize[v]/float64(2*n) + float64(i)*(cellsize[v]/float64(n))
 		for j := 0; j < n; j++ {
-			pw := -(cellsize[w] / 2.) + cellsize[w]/float32(2*n) + float32(j)*(cellsize[w]/float32(n))
+			pw := -(cellsize[w] / 2.) + cellsize[w]/float64(2*n) + float64(j)*(cellsize[w]/float64(n))
 
 			pole[u] = pu1
 			pole[v] = pv
@@ -172,21 +171,19 @@ func faceIntegral(B, R *vector, cellsize []float32, s int, accuracy int) {
 			B.Add(R2)
 		}
 	}
-	B.Scale(1. / (float32(n * n))) // n^2 integration points
+	B.Scale(1. / (float64(n * n))) // n^2 integration points
 }
-
 
 // Maps the 3x3 indices of the symmetric demag kernel (K_ij) onto
 // a length 6 array containing the upper triangular part:
 // (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy)
 var kernIdx [3][3]int = [3][3]int{
-        [3]int{XX, XY, XZ},
-        [3]int{XY, YY, YZ},
-        [3]int{XZ, YZ, ZZ}}
-
+	[3]int{XX, XY, XZ},
+	[3]int{XY, YY, YZ},
+	[3]int{XZ, YZ, ZZ}}
 
 // A 3-component vector
-type vector [3]float32
+type vector [3]float64
 
 func NewVector() *vector {
 	return new(vector)
@@ -198,7 +195,7 @@ func UnitVector(direction int) *vector {
 	return v
 }
 
-func (v *vector) Set(x, y, z float32) {
+func (v *vector) Set(x, y, z float64) {
 	v[0] = x
 	v[1] = y
 	v[2] = z
@@ -218,12 +215,12 @@ func (a *vector) Cross(b *vector) vector {
 	return cross
 }
 
-func (a *vector) Dot(b *vector) float32 {
+func (a *vector) Dot(b *vector) float64 {
 	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 }
 
-func (v *vector) Norm() float32 {
-	return float32(math.Sqrt(float64(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])))
+func (v *vector) Norm() float64 {
+	return float64(math.Sqrt(float64(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])))
 }
 
 func (v *vector) Normalize() {
@@ -233,13 +230,13 @@ func (v *vector) Normalize() {
 	v[2] *= invnorm
 }
 
-func (v *vector) Scale(r float32) {
+func (v *vector) Scale(r float64) {
 	v[0] *= r
 	v[1] *= r
 	v[2] *= r
 }
 
-func (v *vector) Divide(r float32) {
+func (v *vector) Divide(r float64) {
 	v[0] /= r
 	v[1] /= r
 	v[2] /= r

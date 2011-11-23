@@ -31,7 +31,8 @@ func (x ModMicromag) Load(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("hfield")
 	e.LoadModule("zeeman")
-	e.LoadModule("demagexch")
+	e.LoadModule("aexchange")
+	//e.LoadModule("demagexch") // not yet enabled by default until well tested
 	e.LoadModule("llg")
 	e.LoadModule("regions")
 }
