@@ -309,7 +309,8 @@ func (e *Engine) LoadModule(name string) {
 
 // Add an arbitrary quantity. Name tag is case-independent.
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {
-	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, desc...))
+	const CPUONLY = false
+	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
 }
 
 func (e *Engine) addQuant(q *Quant) {

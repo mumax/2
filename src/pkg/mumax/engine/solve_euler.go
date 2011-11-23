@@ -21,7 +21,7 @@ type EulerSolver struct {
 }
 
 func NewEuler(e *Engine, y, dy *Quant) *EulerSolver {
-	buffer := newQuant("eulerBuffer", y.NComp(), e.size3D, FIELD, y.Unit(), "hidden buffer to cache output quant")
+	buffer := newQuant("eulerBuffer", y.NComp(), e.size3D, FIELD, y.Unit(), false, "hidden buffer to cache output quant")
 	return &EulerSolver{y, buffer, dy, e.time, e.dt}
 }
 

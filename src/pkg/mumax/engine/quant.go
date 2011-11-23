@@ -50,6 +50,7 @@ type Quant struct {
 	kind        QuantKind         // VALUE, FIELD or MASK
 	updates     int               // Number of times the quantity has been updated (for debuggin)
 	invalidates int               // Number of times the quantity has been invalidated (for debuggin)
+	cpuOnly     bool              // true if quantity exists only in CPU RAM, not on GPU
 	buffer      *host.Array       // Host buffer for copying from/to the GPU array
 	bufUpToDate bool              // Flags if the buffer (in RAM) needs to be updated
 	bufXfers    int               // Number of times it has been copied from GPU
@@ -60,9 +61,9 @@ type Quant struct {
 //____________________________________________________________________ init
 
 // Returns a new quantity. See Quant.init().
-func newQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, desc ...string) *Quant {
+func newQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, cpuOnly bool, desc ...string) *Quant {
 	q := new(Quant)
-	q.init(name, nComp, size3D, kind, unit, desc...)
+	q.init(name, nComp, size3D, kind, unit, cpuOnly, desc...)
 	return q
 }
 
@@ -79,13 +80,16 @@ const (
 // hold NULL pointers for each of the GPU parts.
 // indicating this quantity should not be post-multiplied.
 // multiply = true
-func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit Unit, desc ...string) {
+func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit Unit, cpuOnly bool, desc ...string) {
 	Assert(nComp > 0)
 	Assert(size3D == nil || len(size3D) == 3)
 
 	q.name = name
 	q.nComp = nComp
 	q.kind = kind
+	q.unit = unit
+	q.cpuOnly = cpuOnly
+	q.initChildrenParents()
 
 	switch kind {
 	// A FIELD is calculated by mumax itself, not settable by the user.
@@ -108,13 +112,6 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		panic(Bug("Quant.init kind"))
 	}
 
-	q.updater = nil
-
-	q.children = make(map[string]*Quant)
-	q.parents = make(map[string]*Quant)
-
-	q.unit = unit
-
 	// concatenate desc strings
 	buf := ""
 	for i, str := range desc {
@@ -124,6 +121,11 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		buf += str
 	}
 	q.desc = buf
+}
+
+func (q *Quant) initChildrenParents() {
+	q.children = make(map[string]*Quant)
+	q.parents = make(map[string]*Quant)
 }
 
 // Quantity representing a single component of the original,
