@@ -114,7 +114,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	}
 
 	if cpuOnly{
-		q.Buffer() // Allocate CPU storage
+		q.allocBuffer() // Allocate CPU storage
 	}
 
 	// concatenate desc strings
@@ -153,8 +153,7 @@ func (orig *Quant) Component(comp int) *Quant {
 	q.array.Assign(&(orig.array.Comp[comp]))
 	q.multiplier = orig.multiplier[comp : comp+1]
 
-	q.children = make(map[string]*Quant)
-	q.parents = make(map[string]*Quant)
+	q.initChildrenParents()
 
 	q.unit = orig.unit
 	return q
@@ -271,8 +270,10 @@ func (q *Quant) IsSpaceDependent() bool {
 // when bufferUpToDate == false. Multiplies by the multiplier and handles masks correctly.
 // Does not Update().
 func (q *Quant) Buffer() *host.Array {
-	q.Update()
-	if q.bufUpToDate {
+
+	//q.Update() // TODO: really needed??
+
+	if q.cpuOnly || q.bufUpToDate {
 		return q.buffer
 	}
 
@@ -281,8 +282,7 @@ func (q *Quant) Buffer() *host.Array {
 	// allocate if needed
 	array := q.Array()
 	if q.buffer == nil {
-		//Debug("buffer", q.Name(), q.NComp(), "x", q.Array().Size3D())
-		q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
+		q.allocBuffer()
 	}
 
 	// copy
@@ -309,6 +309,12 @@ func (q *Quant) Buffer() *host.Array {
 	q.bufUpToDate = true
 	q.bufMutex.Unlock()
 	return q.buffer
+}
+
+
+func (q*Quant)allocBuffer(){
+	if q.buffer != nil{panic(Bug("Buffer already allocated"))}
+	q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
 }
 
 //____________________________________________________________________ tree walk

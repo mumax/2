@@ -37,15 +37,31 @@ func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")
 
-	// kernel quant
+	// demag kernel 
 	CPUONLY := true
-	demagkern := newQuant("kern_d", SYMMTENS, e.GridSize(), FIELD, Unit(""), CPUONLY, "reduced demag kernel")
+	demagkern := newQuant("kern_d", SYMMTENS, e.GridSize(), FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.addQuant(demagkern)
 	demagkern.SetUpdater(&demagKernUpdater{})
 
+	// exch kernel 
+	exchKern := newQuant("kern_ex", SYMMTENS, e.GridSize(), FIELD, Unit("A/J"), CPUONLY, "reduced exchange kernel (/Aex)")
+	e.addQuant(exchKern)
+	//exchKern.SetUpdater(&exchKernUpdater{})
+
+	// demag+exchange kernel
+	dexKern := newQuant("Kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
+	e.addQuant(dexKern)
+	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
+
+	// fft kernel quant
+	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit(""), false, "FFT demag+exchange kernel")
+	e.addQuant(fftKern)
+	e.Depends("~kern_dex", "kern_dex")
+	fftKern.SetUpdater(&demagKernUpdater{}) // TODO: add exchange
+
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
-	e.Depends("H_dex", "Aex", "m", "Msat")
+	e.Depends("H_dex", "m", "~Kern_dex")
 	Hdex := e.Quant("H_dex")
 	Hdex.updater = newDemagExchUpdater(Hdex, e.Quant("m"), e.Quant("Msat"), e.Quant("Aex"))
 
@@ -55,16 +71,25 @@ func (x ModDemagExch) Load(e *Engine) {
 	sum.AddParent("H_dex")
 }
 
+
+//____________________________________________________________________ kernel
+
+// Update kernel (cpu)
 type demagKernUpdater struct{
 	demagKern *Quant
 }
 
+// Update kernel (cpu)
 func (u *demagKernUpdater) Update() {
 	e := GetEngine()
 	kernsize := padSize(e.GridSize(), e.Periodic())
 	accuracy := 8
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
 }
+
+//_____________________________________________________________________ fftkern
+
+
 
 // Updates the demag+exchange field in one single convolution
 type demagExchUpdater struct {

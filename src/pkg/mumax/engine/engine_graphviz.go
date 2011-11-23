@@ -91,6 +91,7 @@ func sanitize(in string) (out string) {
 	out = strings.Replace(in, "<", "_leftavg_", -1)
 	out = strings.Replace(out, ">", "_rightavg_", -1)
 	out = strings.Replace(out, ".", "_dot_", -1)
+	out = strings.Replace(out, "~", "_tilda_", -1)
 	return
 }
 

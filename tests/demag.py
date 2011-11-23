@@ -10,13 +10,18 @@ load('micromagnetism')
 load('demagexch')
 
 setscalar('Msat', 800e3)
+setscalar('Aex', 12e-13)
 
 m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)
 
-save("H", "txt", [], "H.txt")
-H = getarray('H')
-print H
+
+debug_update("kern_d")
+debug_update("kern_d.xx")
+save("kern_d.xx", "txt", [], "kern_d.xx.txt")
+
+#H = getarray('H')
+#print H
 echo("")
 
 printstats()
