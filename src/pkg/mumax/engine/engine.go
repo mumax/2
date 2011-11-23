@@ -119,6 +119,14 @@ func (e *Engine) SetGridSize(size3D []int) {
 	} else {
 		panic(InputErr("Grid size already set"))
 	}
+
+	Log("Grid size:", Size(size3D), "Cells:", e.NCell())
+
+	if !IsGoodGridSize(size3D) {
+		Warn("Grid size", Size(size3D), "hurts performance. Each size should be 2^n * {1, 2, 5 or 7}. X,Y sizes should be >= 16.")
+	}
+
+	e.logTotalSize()
 }
 
 // Gets the FD grid size
@@ -139,6 +147,24 @@ func (e *Engine) SetCellSize(size []float64) {
 	} else {
 		panic(InputErr("Cell size already set"))
 	}
+
+	Log("Cell size:", size[Z], "x", size[Y], "x", size[X], "m³")
+	e.logTotalSize()
+}
+
+// log total size if known
+func (e *Engine) logTotalSize() {
+	if e.size3D != nil && e.cellSize != nil {
+		size := e.WorldSize()
+		Log("World size:", size[Z], "x", size[Y], "x", size[X], "m³")
+	}
+}
+
+// Size of total simulated world, in meters.
+func (e *Engine) WorldSize() []float64 {
+	cell := e.CellSize()
+	grid := e.GridSize()
+	return []float64{float64(grid[X]) * cell[X], float64(grid[Y]) * cell[Y], float64(grid[Z]) * cell[Z]}
 }
 
 // Gets the FD cell size

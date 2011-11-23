@@ -47,10 +47,16 @@ func (a API) SetCellSize(x, y, z float64) {
 	a.Engine.SetCellSize([]float64{z, y, x}) // convert to internal axes and units
 }
 
-// Set the cell size.
+// Get the cell size.
 // WARNING: convert to ZYX, internal units
 func (a API) GetCellSize() (x, y, z float64) {
 	size := a.Engine.CellSize()
+	return size[Z], size[Y], size[X] // convert to internal axes
+}
+
+// Get the toal size, in meters, of the simulated world.
+func (a API) GetWorldSize() (x, y, z float64) {
+	size := a.Engine.WorldSize()
 	return size[Z], size[Y], size[X] // convert to internal axes
 }
 
