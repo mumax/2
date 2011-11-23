@@ -41,10 +41,10 @@ func (x ModDemagExch) Load(e *Engine) {
 	// demag kernel 
 	CPUONLY := true
 	kernSize := padSize(e.GridSize(), e.Periodic())
-	demagkern := newQuant("kern_d", SYMMTENS, kernSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
-	e.addQuant(demagkern)
+	demagKern := newQuant("kern_d", SYMMTENS, kernSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
+	e.addQuant(demagKern)
 	e.Depends("kern_d", "m") // debug
-	demagkern.SetUpdater(newDemagKernUpdater(demagkern))
+	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
 	exchKern := newQuant("kern_ex", SYMMTENS, e.GridSize(), FIELD, Unit("A/J"), CPUONLY, "reduced exchange kernel (/Aex)")
@@ -55,9 +55,10 @@ func (x ModDemagExch) Load(e *Engine) {
 	dexKern := newQuant("Kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
 	e.addQuant(dexKern)
 	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
+	dexKern.SetUpdater(&demagExchKernUpdater{dexKern, demagKern, exchKern, e.Quant("MSat"), e.Quant("Aex")})
 
 	// fft kernel quant
-	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit(""), false, "FFT demag+exchange kernel")
+	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
 	//fftKern.SetUpdater(&demagKernUpdater{demagK}) // TODO: add exchange
@@ -65,8 +66,8 @@ func (x ModDemagExch) Load(e *Engine) {
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	e.Depends("H_dex", "m", "~Kern_dex")
-	Hdex := e.Quant("H_dex")
-	Hdex.updater = newDemagExchUpdater(Hdex, e.Quant("m"), e.Quant("Msat"), e.Quant("Aex"))
+	//Hdex := e.Quant("H_dex")
+	//Hdex.SetUpdater(&demagExchHUpdater{Hdex, e.Quant("m"), e.Quant("Msat"), e.Quant("Aex")})
 
 	// add H_dex to total H
 	hfield := e.Quant("H")
@@ -76,7 +77,7 @@ func (x ModDemagExch) Load(e *Engine) {
 
 //____________________________________________________________________ kernel
 
-// Update kernel (cpu)
+// Update demag kernel (cpu)
 type demagKernUpdater struct {
 	demagKern *Quant
 }
@@ -87,7 +88,7 @@ func newDemagKernUpdater(demagKern *Quant) Updater {
 	return u
 }
 
-// Update kernel (cpu)
+// Update demag kernel (cpu)
 func (u *demagKernUpdater) Update() {
 	e := GetEngine()
 	kernsize := padSize(e.GridSize(), e.Periodic())
@@ -95,6 +96,21 @@ func (u *demagKernUpdater) Update() {
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
 	Debug("demagkernupdater got", u.demagKern.Buffer())
 }
+
+
+
+// Update demag+exchange kernel (cpu)
+type demagExchKernUpdater struct {
+	dexKern, demagKern, exchKern, MSat, Aex *Quant
+}
+
+// Update demag+exchange kernel (cpu)
+func (u *demagExchKernUpdater) Update() {
+	Debug("Update demagexch")
+}
+
+
+
 
 //_____________________________________________________________________ fftkern
 

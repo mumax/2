@@ -15,8 +15,8 @@ setscalar('Aex', 12e-13)
 m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)
 
-save("kern_d.xx", "txt", [], "kern_d.xx.txt")
 save("kern_d", "txt", [], "kern_d.txt")
+save("kern_dex", "txt", [], "kern_dex.txt")
 
 #H = getarray('H')
 #print H

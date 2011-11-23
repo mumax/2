@@ -59,8 +59,8 @@ func (a *Array) NComp() int {
 }
 
 // Component array, shares storage with original
-func(a*Array)Component(component int)*Array{
-	comp:= new(Array)
+func (a *Array) Component(component int) *Array {
+	comp := new(Array)
 	copy(comp.Size[:], a.Size[:])
 	comp.Size[0] = 1 // 1 component
 	comp.Size4D = comp.Size[:]
