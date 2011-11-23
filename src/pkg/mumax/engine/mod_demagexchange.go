@@ -39,7 +39,8 @@ func (x ModDemagExch) Load(e *Engine) {
 
 	// demag kernel 
 	CPUONLY := true
-	demagkern := newQuant("kern_d", SYMMTENS, e.GridSize(), FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
+	kernSize := padSize(e.GridSize(), e.Periodic())
+	demagkern := newQuant("kern_d", SYMMTENS, kernSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.addQuant(demagkern)
 	e.Depends("kern_d", "m") // debug
 	demagkern.SetUpdater(newDemagKernUpdater(demagkern))

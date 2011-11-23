@@ -30,8 +30,8 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 
 	k := kern.Array	
 
-	//Assert(len(k) == 6)
-	//CheckSize(k[0].size, size)
+	Assert(len(kern.Array) == 6)
+	CheckSize(kern.Size3D, size)
 
 //	for i := range k {
 //		k[i] = host.NewArray(1, size)

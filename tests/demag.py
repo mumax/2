@@ -3,7 +3,7 @@ from mumax2_geom import *
 
 # test file for demag field
 
-setgridsize(32, 32, 1)
+setgridsize(8, 8, 1)
 setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')
@@ -19,8 +19,6 @@ setarray('m', m)
 savegraph("graph.png")
 printstats()
 
-debug_update("kern_d")
-debug_update("kern_d.xx")
 save("kern_d.xx", "txt", [], "kern_d.xx.txt")
 
 #H = getarray('H')
