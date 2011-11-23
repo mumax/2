@@ -43,6 +43,7 @@ CGO_LDFLAGS+=\
    	-L/usr/local/cuda/lib64\
 	-L/usr/lib/nvidia-current\
 	-L/usr/lib/nvidia\
+	-L/usr/lib64/nvidia\
    	-L../../../libmumax2
 endif
 
