@@ -16,6 +16,9 @@ m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)
 
 
+savegraph("graph.png")
+printstats()
+
 debug_update("kern_d")
 debug_update("kern_d.xx")
 save("kern_d.xx", "txt", [], "kern_d.xx.txt")
@@ -24,6 +27,5 @@ save("kern_d.xx", "txt", [], "kern_d.xx.txt")
 #print H
 echo("")
 
-printstats()
 savegraph("graph.png")
 

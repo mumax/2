@@ -41,7 +41,8 @@ func (x ModDemagExch) Load(e *Engine) {
 	CPUONLY := true
 	demagkern := newQuant("kern_d", SYMMTENS, e.GridSize(), FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.addQuant(demagkern)
-	demagkern.SetUpdater(&demagKernUpdater{})
+	e.Depends("kern_d", "m") // debug
+	demagkern.SetUpdater(newDemagKernUpdater(demagkern))
 
 	// exch kernel 
 	exchKern := newQuant("kern_ex", SYMMTENS, e.GridSize(), FIELD, Unit("A/J"), CPUONLY, "reduced exchange kernel (/Aex)")
@@ -57,7 +58,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit(""), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
-	fftKern.SetUpdater(&demagKernUpdater{}) // TODO: add exchange
+	//fftKern.SetUpdater(&demagKernUpdater{demagK}) // TODO: add exchange
 
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
@@ -77,6 +78,12 @@ func (x ModDemagExch) Load(e *Engine) {
 // Update kernel (cpu)
 type demagKernUpdater struct{
 	demagKern *Quant
+}
+
+func newDemagKernUpdater(demagKern *Quant)Updater{
+	u := new(demagKernUpdater)
+	u.demagKern = demagKern
+	return u
 }
 
 // Update kernel (cpu)
