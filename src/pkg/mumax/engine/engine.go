@@ -418,7 +418,7 @@ func (e *Engine) notifyAll() {
 
 // Saves the quantity once in the specified format and file name
 func (e *Engine) Save(q *Quant, format string, options []string, filename string) {
-	q.Update()//!!
+	q.Update() //!!
 	checkKinds(q, MASK, FIELD)
 	out := OpenWRONLY(filename)
 	defer out.Close()
@@ -442,8 +442,8 @@ func (e *Engine) Tabulate(quants []string, filename string) {
 		e.outputTables[filename] = NewTable(e.Relative(filename))
 	}
 	table := e.outputTables[filename]
-	for _,q:=range quants{
-		e.Quant(q).Update()//!
+	for _, q := range quants {
+		e.Quant(q).Update() //!
 	}
 	table.Tabulate(quants)
 }

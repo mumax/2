@@ -28,14 +28,11 @@ import (
 func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, kern *host.Array) {
 	Debug("Calculating kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
 
-	k := kern.Array	
+	k := kern.Array
 
 	Assert(len(kern.Array) == 6)
 	CheckSize(kern.Size3D, size)
 
-//	for i := range k {
-//		k[i] = host.NewArray(1, size)
-//	}
 	B := NewVector()
 	R := NewVector()
 
@@ -71,7 +68,7 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 					faceIntegral(B, R, cellsize, s, accuracy)
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
-						i := kernIdx[s][d]                         // 3x3 symmetric index to 1x6 index
+						i := kernIdx[s][d]                // 3x3 symmetric index to 1x6 index
 						k[i][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
 				}

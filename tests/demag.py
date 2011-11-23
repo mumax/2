@@ -15,11 +15,7 @@ setscalar('Aex', 12e-13)
 m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)
 
-
-savegraph("graph.png")
-printstats()
-
-save("kern_d.xx", "txt", [], "kern_d.xx.txt")
+save("kern_d", "txt", [], "kern_d.txt")
 
 #H = getarray('H')
 #print H
@@ -27,3 +23,6 @@ echo("")
 
 savegraph("graph.png")
 
+
+savegraph("graph.png")
+printstats()

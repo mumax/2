@@ -11,6 +11,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -73,15 +74,14 @@ func (x ModDemagExch) Load(e *Engine) {
 	sum.AddParent("H_dex")
 }
 
-
 //____________________________________________________________________ kernel
 
 // Update kernel (cpu)
-type demagKernUpdater struct{
+type demagKernUpdater struct {
 	demagKern *Quant
 }
 
-func newDemagKernUpdater(demagKern *Quant)Updater{
+func newDemagKernUpdater(demagKern *Quant) Updater {
 	u := new(demagKernUpdater)
 	u.demagKern = demagKern
 	return u
@@ -93,11 +93,10 @@ func (u *demagKernUpdater) Update() {
 	kernsize := padSize(e.GridSize(), e.Periodic())
 	accuracy := 8
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
+	Debug("demagkernupdater got", u.demagKern.Buffer())
 }
 
 //_____________________________________________________________________ fftkern
-
-
 
 // Updates the demag+exchange field in one single convolution
 type demagExchUpdater struct {
@@ -115,7 +114,6 @@ func newDemagExchUpdater(Hdex, m, Msat, Aex *Quant) Updater {
 	u.m = m
 	u.Msat = Msat
 	u.Aex = Aex
-
 
 	//u.conv.Init(e.GridSize(), kernel)
 	return u

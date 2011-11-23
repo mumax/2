@@ -113,7 +113,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		panic(Bug("Quant.init kind"))
 	}
 
-	if cpuOnly{
+	if cpuOnly {
 		q.allocBuffer() // Allocate CPU storage
 	}
 
@@ -152,6 +152,10 @@ func (orig *Quant) Component(comp int) *Quant {
 
 	q.array.Assign(&(orig.array.Comp[comp]))
 	q.multiplier = orig.multiplier[comp : comp+1]
+	if orig.cpuOnly{
+		q.cpuOnly = true
+		q.allocBuffer()
+	}
 
 	q.initChildrenParents()
 
@@ -271,10 +275,12 @@ func (q *Quant) IsSpaceDependent() bool {
 // Does not Update().
 func (q *Quant) Buffer() *host.Array {
 	//q.Update() // TODO: really needed??
-
+	Debug("Update", q.Name())
 	if q.cpuOnly || q.bufUpToDate {
+		Debug("buffer of", q.Name(), q.buffer.Array)
 		return q.buffer
 	}
+	Debug("XFer", q.Name())
 
 	q.bufMutex.Lock()
 
@@ -310,9 +316,10 @@ func (q *Quant) Buffer() *host.Array {
 	return q.buffer
 }
 
-
-func (q*Quant)allocBuffer(){
-	if q.buffer != nil{panic(Bug("Buffer already allocated"))}
+func (q *Quant) allocBuffer() {
+	if q.buffer != nil {
+		panic(Bug("Buffer already allocated"))
+	}
 	q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
 }
 
