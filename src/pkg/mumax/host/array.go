@@ -57,3 +57,16 @@ func (a *Array) Len() int {
 func (a *Array) NComp() int {
 	return a.Size[0]
 }
+
+// Component array, shares storage with original
+func(a*Array)Component(component int)*Array{
+	comp:= new(Array)
+	copy(comp.Size[:], a.Size[:])
+	comp.Size[0] = 1 // 1 component
+	comp.Size4D = comp.Size[:]
+	comp.Size3D = comp.Size[1:]
+	comp.List = a.Comp[component]
+	comp.Array = Slice4D(comp.List, comp.Size4D)
+	comp.Comp = Slice2D(comp.List, []int{1, Prod(comp.Size3D)})
+	return comp
+}

@@ -150,11 +150,11 @@ func (orig *Quant) Component(comp int) *Quant {
 	q.nComp = 1
 	q.kind = orig.kind
 
-	q.array.Assign(&(orig.array.Comp[comp]))
-	q.multiplier = orig.multiplier[comp : comp+1]
-	if orig.cpuOnly{
+	q.array.Assign(&(orig.array.Comp[comp])) // share storage with parent
+	q.multiplier = orig.multiplier[comp : comp+1] // share storage with parent
+	if orig.cpuOnly {
 		q.cpuOnly = true
-		q.allocBuffer()
+		q.buffer = orig.buffer.Component(comp)// share storage with parent
 	}
 
 	q.initChildrenParents()
