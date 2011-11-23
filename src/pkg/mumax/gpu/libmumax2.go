@@ -305,6 +305,25 @@ func TransposeComplexYZPart(out, in *Array) {
 	out.Stream.Sync()
 }
 
+
+//this function has only different input for x- and y components
+func TransposeComplexYZPart_inv(out, in *Array) {
+  Assert(
+    out.size4D[0] == in.size4D[0] &&
+      out.size3D[0] == in.size3D[0] &&
+      out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
+
+  C.transposeComplexYZAsyncPart(
+    (**C.float)(unsafe.Pointer(&out.pointer[0])),
+    (**C.float)(unsafe.Pointer(&in.pointer[0])),
+    C.int(in.size4D[0]*in.size3D[0]), // nComp * N0
+    C.int(in.size3D[2])/2,              //!? Why factor 2? -> probably due to 2 devices for testing.
+    C.int(in.partSize[1]*2),            //!? Why factor 2? -> probably due to 2 devices for testing.
+    (*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+  out.Stream.Sync()
+}
+
+
 func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream, nRealNumbers int) {
 	CheckSize(fftMx.size4D, fftKxx.size4D) // the rest should hopefully be ok...
 	C.kernelMulMicromag3DAsync(

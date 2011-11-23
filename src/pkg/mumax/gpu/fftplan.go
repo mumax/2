@@ -170,7 +170,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	Start("Transpose1_FW")
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	Stop("Transpose1_FW")
-// 	fmt.Println("copy:", transp1.LocalCopy().Array)
+ 	fmt.Println("copy:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	Start("MemcpyDtoD_FW")
@@ -282,9 +282,9 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 			}
 		}
 	}
-//   fmt.Println("copy:", transp1.LocalCopy().Array)
+  fmt.Println("copy:", transp1.LocalCopy().Array)
 
-  TransposeComplexYZPart(padZ, transp1) // fftZ!
+  TransposeComplexYZPart_inv(padZ, transp1) // fftZ!
 	//(&transp1).CopyFromDevice(&padZ)
 	fmt.Println("transpose:", padZ.LocalCopy().Array)
 
@@ -295,7 +295,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 	fft.Sync()
 	fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
-	CopyPadZ(in, padZ)
-	fmt.Println("padZ:", padZ.LocalCopy().Array)
+	CopyPadZ(out, padZ)
+	fmt.Println("out:", out.LocalCopy().Array)
 
 }
