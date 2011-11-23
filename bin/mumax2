@@ -4,17 +4,13 @@
 
 ARGV="$@"
 
-# 1) set up environment
-MUMAX2BIN=$(dirname $(readlink -f $0)) # path to this script
+MUMAX2BIN=$(dirname $(readlink -f $0)) || MUMAX2BIN=$(echo REPLACE_ME_BY_PATH)
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MUMAX2BIN/../src/libmumax2
-#echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
 export PYTHONPATH=$PYTHONPATH:$MUMAX2BIN/../src/python
-#echo PYTHONPATH: $PYTHONPATH
-set `uname`
-if [ "$1" == "Darwin" ]
+
+if [ $(uname) == "Darwin" ]
 then
 	export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/local/cuda/lib:$MUMAX2BIN/../src/libmumax2
 fi
 
-# 2) run mumax
 exec $MUMAX2BIN/../src/mumax2/mumax2 $ARGV
