@@ -95,7 +95,8 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	// A FIELD is calculated by mumax itself, not settable by the user.
 	// So it should not have a multiplier, but always have allocated storage.
 	case FIELD:
-		q.array.Init(nComp, size3D, true)
+		alloc := !cpuOnly
+		q.array.Init(nComp, size3D, alloc)
 		q.multiplier = ones(nComp)
 	// A MASK should always have a value (stored in the multiplier).
 	// We initialize it to zero. The space-dependent mask is optinal
@@ -112,6 +113,10 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		panic(Bug("Quant.init kind"))
 	}
 
+	if cpuOnly{
+		q.Buffer() // Allocate CPU storage
+	}
+
 	// concatenate desc strings
 	buf := ""
 	for i, str := range desc {
@@ -121,6 +126,14 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 		buf += str
 	}
 	q.desc = buf
+}
+
+// Safely sets the updater.
+func (q *Quant) SetUpdater(u Updater) {
+	if q.updater != nil {
+		panic(Bug(fmt.Sprint("Quant.SetUpdater:", q.Name(), "updater already set.")))
+	}
+	q.updater = u
 }
 
 func (q *Quant) initChildrenParents() {

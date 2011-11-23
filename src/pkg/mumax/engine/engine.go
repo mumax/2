@@ -308,6 +308,8 @@ func (e *Engine) LoadModule(name string) {
 }
 
 // Add an arbitrary quantity. Name tag is case-independent.
+// TODO: refactor AddQuant(q*Quant)
+// TODO: NewQuant should take size from global engine.
 func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {
 	const CPUONLY = false
 	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
@@ -509,7 +511,11 @@ func (e *Engine) Stats() string {
 	str := fmt.Sprintln("engine running", e.timer.Seconds(), "s")
 	quants := e.quantity
 	for _, v := range quants {
-		str += fmt.Sprintln(fill(v.Name()), "\t",
+		gpu := "     "
+		if v.cpuOnly {
+			gpu = "[CPU]"
+		}
+		str += fmt.Sprintln(fill(v.Name()), "\t", gpu,
 			valid(v.upToDate), " upd:", fill(v.updates),
 			" inv:", fill(v.invalidates),
 			valid(v.bufUpToDate), " xfer:", fill(v.bufXfers),

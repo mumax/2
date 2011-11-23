@@ -25,12 +25,17 @@ import (
 // Only the non-redundant elements of this symmetric tensor are returned: XX, YY, ZZ, YZ, XZ, XY
 // You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
 // K[KernIdx[X][X]] returns K[XX]
-func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int) []*host.Array {
+func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, kern *host.Array) {
 	Debug("Calculating kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
-	k := make([]*host.Array, 6)
-	for i := range k {
-		k[i] = host.NewArray(1, size)
-	}
+
+	k := kern.Array	
+
+	//Assert(len(k) == 6)
+	//CheckSize(k[0].size, size)
+
+//	for i := range k {
+//		k[i] = host.NewArray(1, size)
+//	}
 	B := NewVector()
 	R := NewVector()
 
@@ -67,14 +72,13 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int) [
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
 						i := kernIdx[s][d]                         // 3x3 symmetric index to 1x6 index
-						k[i].Array[0][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
+						k[i][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
 				}
 			}
 		}
 	}
 
-	return k
 }
 
 // UNTESTED:

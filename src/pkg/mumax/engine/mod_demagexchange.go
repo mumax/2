@@ -37,6 +37,12 @@ func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")
 
+	// kernel quant
+	CPUONLY := true
+	demagkern := newQuant("kern_d", SYMMTENS, e.GridSize(), FIELD, Unit(""), CPUONLY, "reduced demag kernel")
+	e.addQuant(demagkern)
+	demagkern.SetUpdater(&demagKernUpdater{})
+
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	e.Depends("H_dex", "Aex", "m", "Msat")
@@ -47,6 +53,17 @@ func (x ModDemagExch) Load(e *Engine) {
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)
 	sum.AddParent("H_dex")
+}
+
+type demagKernUpdater struct{
+	demagKern *Quant
+}
+
+func (u *demagKernUpdater) Update() {
+	e := GetEngine()
+	kernsize := padSize(e.GridSize(), e.Periodic())
+	accuracy := 8
+	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
 }
 
 // Updates the demag+exchange field in one single convolution
@@ -66,12 +83,8 @@ func newDemagExchUpdater(Hdex, m, Msat, Aex *Quant) Updater {
 	u.Msat = Msat
 	u.Aex = Aex
 
-	e := GetEngine()
-	kernsize := padSize(e.GridSize(), e.Periodic())
-	accuracy := 8
-	kernel := FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic())
 
-	u.conv.Init(e.GridSize(), kernel)
+	//u.conv.Init(e.GridSize(), kernel)
 	return u
 }
 
