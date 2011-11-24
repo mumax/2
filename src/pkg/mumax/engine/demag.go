@@ -15,6 +15,7 @@ import (
 	"math"
 )
 
+
 // Calculates the magnetostatic kernel
 //
 // size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding

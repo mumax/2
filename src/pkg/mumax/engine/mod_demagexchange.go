@@ -38,7 +38,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")
-	
+
 	m := e.Quant("m")
 	MSat := e.Quant("MSat")
 	Aex := e.Quant("Aex")

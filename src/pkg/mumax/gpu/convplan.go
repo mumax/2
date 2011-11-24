@@ -46,7 +46,7 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	// init fft
-	conv.fftIn.Init(1, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
+	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
 	conv.fft.Init(dataSize, logicSize)
 
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
@@ -113,12 +113,6 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 
 }
 
-//func NewConvPlan(dataSize,  []int) *ConvPlan {
-//	conv := new(ConvPlan)
-//	conv.Init(dataSize, kernSize)
-//	return conv
-//}
-
 // Extract real parts, copy them from src to dst.
 // In the meanwhile, check if imaginary parts are nearly zero.
 func scaleRealParts(dst, src *Array, scale float32) {
@@ -155,7 +149,12 @@ func (conv *ConvPlan) Free() {
 }
 
 func (conv *ConvPlan) Convolve(in, out *Array) {
+	Debug("Convolve")
 	for c := range in.Comp {
-		conv.fft.Forward(&in.Comp[c], &conv.fftIn)
+		conv.fft.Forward(&in.Comp[c], &conv.fftIn.Comp[c])
+	}
+	// kernmul here	
+	for c := range in.Comp {
+		conv.fft.Inverse(&conv.fftIn.Comp[c] ,&in.Comp[c] )
 	}
 }
