@@ -13,6 +13,8 @@ GOFILES=\
 	reductor.go\
 	convplan.go\
 	fftplan.go\
+	#fftplan2.go\
+	#fftplan1gpu.go\
 
 CGOFILES=\
 	multigpu.go\

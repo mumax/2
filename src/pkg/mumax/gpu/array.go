@@ -93,6 +93,7 @@ func (a *Array) Assign(other *Array) {
 // but all other sizes may be arbitrary.
 // Possibly dangerous to use. Typically used to save memory.
 func (original *Array) SharedArray(nComp int, size []int) *Array {
+  Assert(nComp*size[0]*size[1]*size[2] <= original.Len())
 	shared := new(Array)
 	shared.pointer = original.pointer
 	shared.initSize(nComp, size)
