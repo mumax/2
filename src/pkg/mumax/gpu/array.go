@@ -56,11 +56,16 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	}
 
 	// initialize component arrays
-	a.Comp = make([]Array, components)
+	a.initComp()
 
+}
+
+// initialize component arrays
+func (a *Array) initComp() {
+	a.Comp = make([]Array, a.NComp())
 	for c := range a.Comp {
-		a.Comp[c].initSize(1, size3D)
-		a.Comp[c].pointer = make([]cu.DevicePtr, Ndev)
+		a.Comp[c].initSize(1, a.Size3D())
+		a.Comp[c].pointer = make([]cu.DevicePtr, NDevice())
 		a.Comp[c].Stream = NewStream()
 		a.Comp[c].Comp = nil
 
@@ -81,6 +86,18 @@ func (a *Array) Assign(other *Array) {
 	a.partLen3D = other.partLen3D
 	a.Stream = other.Stream
 	a.Comp = other.Comp
+}
+
+// Returns a new array that shares storage with the original array.
+// The new array's total number of elements should fit in the original,
+// but all other sizes may be arbitrary.
+// Possibly dangerous to use. Typically used to save memory.
+func (original *Array) SharedArray(nComp int, size []int) *Array {
+	shared := new(Array)
+	shared.pointer = original.pointer
+	shared.initSize(nComp, size)
+	shared.initComp()
+	return shared
 }
 
 // Parameters for Array.Init()
