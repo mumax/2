@@ -41,23 +41,23 @@ func TestFFT(test *testing.T) {
 
 
 
-  a := inh.Array[0]
-  n := 0
-  for i := 0; i < N0; i++ {
-    //    n  = 0
-    for j := 0; j < N1; j++ {
-      for k := 0; k < N2; k++ {
-        //        if i == 0 {
-        a[i][j][k] = float32(1)
-        //        }
-        n++
-      }
-    }
-  }
-  inh.List[0] = 1
+//   a := inh.Array[0]
+//   n := 0
+//   for i := 0; i < N0; i++ {
+//     //    n  = 0
+//     for j := 0; j < N1; j++ {
+//       for k := 0; k < N2; k++ {
+//         //        if i == 0 {
+//         a[i][j][k] = float32(1)
+//         //        }
+//         n++
+//       }
+//     }
+//   }
+//   inh.List[0] = 1
 
 // test for symmetrical input
-/*  a := inh.Array[0]
+  a := inh.Array[0]
 
   for i := 0; i < N0; i++ {
     for j := 0; j < N1; j++ {
@@ -71,9 +71,9 @@ func TestFFT(test *testing.T) {
   if N0>1{
     maxN0=N0/2
   }
- */
+ 
   
-/*	for i := 0; i < maxN0; i++ {
+	for i := 0; i < maxN0; i++ {
 		for j := 0; j < N1/2; j++ {
 			for k := 0; k < N2/2; k++ {
 				a[i][j][k] = float32(i+j+k)
@@ -100,15 +100,15 @@ func TestFFT(test *testing.T) {
         }
 			}
 		}
-	}*/
+	}
 	
-// 	fmt.Println (a)
+	fmt.Println (a)
 
 	//inh.List[0] = 1
 	in.CopyFromHost(inh)
 
 	fft.Forward(in, out)
- 	fft.Inverse(out, in)
+// 	fft.Inverse(out, in)
 
   PrintTimers()
 }
