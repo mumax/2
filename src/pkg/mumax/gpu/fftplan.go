@@ -46,7 +46,6 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 		fft.outputSize[i] = outputSize[i]
 	} //---------------------------------------------
 
-
 	// init stream ----------------------------------
 	fft.Stream = NewStream()
 	//-----------------------------------------------
@@ -136,7 +135,7 @@ func (fft *FFTPlan) OutputSize() []int {
 }
 
 // Returns the (NDevice-dependent) output size of an FFT with given logic size.
-func FFTOutputSize(logicSize []int) []int{
+func FFTOutputSize(logicSize []int) []int {
 	outputSize := make([]int, 3)
 	outputSize[0] = logicSize[0]
 	outputSize[1] = logicSize[1]

@@ -111,7 +111,7 @@ type dexKernUpdater struct {
 	demagKern, exchKern, MSat, Aex *Quant // my dependencies
 }
 
-func newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex *Quant)Updater{
+func newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex *Quant) Updater {
 	CheckSize(dexKern.Size3D(), demagKern.Size3D())
 	CheckSize(dexKern.Size3D(), exchKern.Size3D())
 	return &dexKernUpdater{dexKern, demagKern, exchKern, MSat, Aex}
