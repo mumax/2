@@ -89,7 +89,7 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 	fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DO_ALLOC) //TODO make this point to the output array
 
 	fft.planY = make([]cufft.Handle, NDev)
-  batchY := ((fft.logicSize[2])/2/NDev + 1) * fft.logicSize[0]
+  batchY := ((fft.logicSize[2])/2/NDev + 1) * fft.dataSize[0]
   for dev := range _useDevice {
     setDevice(_useDevice[dev])
     fft.planY[dev] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
@@ -141,6 +141,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	AssertMsg(out.size3D[1] == fft.logicSize[1], "7")
   AssertMsg(out.size3D[2] == fft.logicSize[2]+2*NDevice(), "8")
 
+  fmt.Println("FORWARD FFT")
+  fmt.Println("")
 	// shorthand
 	padZ := &(fft.padZ)
 	transp1 := &(fft.transp1)
@@ -240,7 +242,11 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 func (fft *FFTPlan) Inverse(in, out *Array) {
 
-//   fmt.Println("in:", in.LocalCopy().Array)
+  fmt.Println("")
+  fmt.Println("")
+  fmt.Println("INVERSE FFT")
+  fmt.Println("")
+  fmt.Println("in:", in.LocalCopy().Array)
   
   // shorthand
 	padZ := &(fft.padZ)

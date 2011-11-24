@@ -25,7 +25,11 @@ func TestFFT(test *testing.T) {
 	nComp := 1
 	N0, N1, N2 := 4, 8, 8
 	dataSize := []int{N0, N1, N2}
-	fftSize := []int{N0, N1, N2}
+	fftSize := []int{2*N0, 2*N1, 2*N2}
+	
+	if N0 ==1 { //2D case, no padding in x-direction
+    fftSize[0] = NO;
+  }
 	fft := NewFFTPlan(dataSize, fftSize)
 	defer fft.Free()
 
@@ -53,7 +57,7 @@ func TestFFT(test *testing.T) {
 	in.CopyFromHost(inh)
 
 	fft.Forward(in, out)
-	fft.Inverse(out, in)
+ 	fft.Inverse(out, in)
 
 }
 
