@@ -105,15 +105,15 @@ type dexKernUpdater struct {
 // Update demag+exchange kernel (cpu)
 func (u *dexKernUpdater) Update() {
 	Debug("Update demagexch")
-	
+
 	dex := u.dexKern.Buffer().List
 	demag := u.demagKern.Buffer().List
 	exch := u.exchKern.Buffer().List
 	MSat := u.MSat.Scalar()
 	Aex := u.Aex.Scalar()
-	for i:=range dex{
+	for i := range dex {
 		// dex = MSat * demag + 2A/µ0MSat * laplacian
-		dex[i] = float32(MSat * float64(demag[i]) + ( (2 * Aex) / (Mu0 * MSat) ) * float64(exch[i]))
+		dex[i] = float32(MSat*float64(demag[i]) + ((2*Aex)/(Mu0*MSat))*float64(exch[i]))
 	}
 }
 

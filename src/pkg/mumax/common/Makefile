@@ -12,6 +12,7 @@ GOFILES=\
 	io.go\
 	strconv.go\
 	misc.go\
+	index.go\
 	sizes.go\
 	size.go\
 	ansi.go\

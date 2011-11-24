@@ -298,15 +298,6 @@ func (a API) FileNumberFormat(format string) {
 	Log("Using", format, "to number automatically saved files.")
 }
 
-//________________________________________________________________________________ internal
-
-// INTERNAL: swaps the X-Z values of the array.
-func swapXYZ(array []float64) {
-	if len(array) == 3 {
-		array[X], array[Z] = array[Z], array[X]
-	}
-	return
-}
 
 //________________________________________________________________________________ misc
 

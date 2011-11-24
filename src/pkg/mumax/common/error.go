@@ -15,6 +15,7 @@ package common
 
 import (
 	"os"
+	"fmt"
 )
 
 // We define different error types so a recover() after
@@ -29,6 +30,11 @@ type InputErr string
 
 func (e InputErr) String() string {
 	return string(e)
+}
+
+// Shorthand for InputErr(fmt.Sprint(msg...))
+func InputErrF(msg ...interface{}) InputErr{
+	return InputErr(fmt.Sprint(msg...))
 }
 
 // Empty function implements interface{InputErr()}
