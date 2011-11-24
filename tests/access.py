@@ -18,7 +18,6 @@ Sz = 10e-9
 setcellsize(Sx, Sy, Sz)
 
 load('micromagnetism')
-savegraph("graph.dot")
 
 setscalar('alpha', 0.1)
 if getscalar('alpha') != 0.1:
@@ -50,5 +49,6 @@ if m != [0.,0.,1.]:
 		fail(str(m))
 
 printstats()
+savegraph("graph.png")
 
 

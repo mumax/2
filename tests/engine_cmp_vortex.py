@@ -5,7 +5,6 @@ setgridsize(80, 40, 2)
 setcellsize(5e-9, 5e-9, 50e-9)
 
 load('micromagnetism')
-savegraph("graph.dot")
 
 setscalar('alpha', 0.1)
 getscalar('alpha')
@@ -42,10 +41,3 @@ for i in range(100):
 
 printstats()
 savegraph("graph.png")
-
-
-
-
-
-
-
