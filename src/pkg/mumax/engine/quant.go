@@ -83,6 +83,9 @@ const (
 func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit Unit, cpuOnly bool, desc ...string) {
 	Assert(nComp > 0)
 	Assert(size3D == nil || len(size3D) == 3)
+	if cpuOnly { // no mask games on CPU.
+		Assert(kind == FIELD)
+	}
 
 	q.name = name
 	q.nComp = nComp
