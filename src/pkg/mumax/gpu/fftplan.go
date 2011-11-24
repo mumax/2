@@ -17,15 +17,15 @@ import (
 )
 
 type FFTPlan struct {
-	dataSize  [3]int         // Size of the (non-zero) input data block
-	logicSize [3]int         // Transform size including zero-padding. >= dataSize
-	outputSize [3]int // Size of the output data (one extra row PER GPU)
-	padZ      Array          // Buffer for Z-zeropadding and +2 elements for R2C
-	planZ_FW  []cufft.Handle // Forward transform of padZ parts, 1/GPU /// ... from outer space
-	planZ_INV []cufft.Handle // Inverse transform of padZ parts, 1/GPU /// ... from outer space
-	transp1   Array          // Buffer for partial transpose per GPU
-	chunks    []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
-	transp2   Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
+	dataSize   [3]int         // Size of the (non-zero) input data block
+	logicSize  [3]int         // Transform size including zero-padding. >= dataSize
+	outputSize [3]int         // Size of the output data (one extra row PER GPU)
+	padZ       Array          // Buffer for Z-zeropadding and +2 elements for R2C
+	planZ_FW   []cufft.Handle // Forward transform of padZ parts, 1/GPU /// ... from outer space
+	planZ_INV  []cufft.Handle // Inverse transform of padZ parts, 1/GPU /// ... from outer space
+	transp1    Array          // Buffer for partial transpose per GPU
+	chunks     []Array        // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
+	transp2    Array          // Buffer for full YZ inter device transpose + zero padding in Z' and X
 	// 	planYX    []cufft.Handle // In-place transform of transp2 parts. Is just a Y transform for 2D.
 	planY  []cufft.Handle // In-place transform of transp2 parts, in y-direction
 	planX  []cufft.Handle // In-place transform of transp2 parts, in x-direction (strided)
@@ -39,14 +39,13 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 	const nComp = 1
 
 	// init size ------------------------------------
+	outputSize := FFTOutputSize(logicSize)
 	for i := range fft.dataSize {
 		fft.dataSize[i] = dataSize[i]
 		fft.logicSize[i] = logicSize[i]
+		fft.outputSize[i] = outputSize[i]
 	} //---------------------------------------------
 
-	fft.outputSize[0] = fft.logicSize[0]
-	fft.outputSize[1] = fft.logicSize[1]
-	fft.outputSize[2] = fft.logicSize[2] + 2 * NDevice() // One extra row of complex numbers PER GPU
 
 	// init stream ----------------------------------
 	fft.Stream = NewStream()
@@ -132,8 +131,17 @@ func (fft *FFTPlan) Free() {
 	// TODO destroy
 }
 
-func (fft*FFTPlan) OutputSize()[]int{
+func (fft *FFTPlan) OutputSize() []int {
 	return fft.outputSize[:]
+}
+
+// Returns the (NDevice-dependent) output size of an FFT with given logic size.
+func FFTOutputSize(logicSize []int) []int{
+	outputSize := make([]int, 3)
+	outputSize[0] = logicSize[0]
+	outputSize[1] = logicSize[1]
+	outputSize[2] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
+	return outputSize
 }
 
 func (fft *FFTPlan) Normalization() int {

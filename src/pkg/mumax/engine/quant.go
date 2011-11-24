@@ -259,6 +259,13 @@ func (q *Quant) NComp() int {
 	return q.nComp
 }
 
+// Grid size of the quantity,
+// not necessarily the engine's grid size
+func(q*Quant)Size3D()[]int{
+	return q.array.Size3D()
+}
+
+// The quantities unit.
 func (q *Quant) Unit() Unit {
 	return q.unit
 }
@@ -268,6 +275,8 @@ func (q *Quant) Array() *gpu.Array {
 	return &(q.array)
 }
 
+
+// True if the quantity varies in space.
 func (q *Quant) IsSpaceDependent() bool {
 	return q.kind == FIELD || q.kind == MASK && !q.array.IsNil()
 }

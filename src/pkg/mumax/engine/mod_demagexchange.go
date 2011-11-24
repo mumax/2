@@ -40,27 +40,29 @@ func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("aexchange")
 
 	CPUONLY := true
+	// Size of all kernels (not FFT'd)
+	kernelSize := padSize(e.GridSize(), e.Periodic())
 
 	// demag kernel 
-	kernSize := padSize(e.GridSize(), e.Periodic())
-	demagKern := newQuant("kern_d", SYMMTENS, kernSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
+	demagKern := newQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.addQuant(demagKern)
 	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
-	exchKern := newQuant("kern_ex", SYMMTENS, e.GridSize(), FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
+	exchKern := newQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
 	e.addQuant(exchKern)
 	//exchKern.SetUpdater(&exchKernUpdater{})
 
 	// demag+exchange kernel
-	dexKern := newQuant("Kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
+	dexKern := newQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
 	e.addQuant(dexKern)
 	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
-	dexKern.SetUpdater(&dexKernUpdater{dexKern, demagKern, exchKern, e.Quant("MSat"), e.Quant("Aex")})
+	dexKern.SetUpdater(newDexKernUpdater(dexKern, demagKern, exchKern, e.Quant("MSat"), e.Quant("Aex")))
 
 	// fft kernel quant
-	fftSize := []int{0,0,0}//todo
-	fftKern := newQuant("~kern_dex", SYMMTENS, fftSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
+	fftOutSize := gpu.FFTOutputSize(kernelSize)
+	fftOutSize[2] /= 2 // only real parts are stored
+	fftKern := newQuant("~kern_dex", SYMMTENS, fftOutSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
 	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
@@ -107,6 +109,12 @@ func (u *demagKernUpdater) Update() {
 type dexKernUpdater struct {
 	dexKern                        *Quant // that's me!
 	demagKern, exchKern, MSat, Aex *Quant // my dependencies
+}
+
+func newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex *Quant)Updater{
+	CheckSize(dexKern.Size3D(), demagKern.Size3D())
+	CheckSize(dexKern.Size3D(), exchKern.Size3D())
+	return &dexKernUpdater{dexKern, demagKern, exchKern, MSat, Aex}
 }
 
 // Update demag+exchange kernel (cpu)
