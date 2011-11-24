@@ -68,7 +68,6 @@ func (a *Array) Init(components int, size3D []int, alloc bool) {
 	a.initCompPtrs()
 }
 
-
 // a = other
 // (accessible from packages where Array is not assignable)
 func (a *Array) Assign(other *Array) {
@@ -83,7 +82,6 @@ func (a *Array) Assign(other *Array) {
 	a.Stream = other.Stream
 	a.Comp = other.Comp
 }
-
 
 // Parameters for Array.Init()
 const (

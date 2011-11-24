@@ -17,14 +17,14 @@ import (
 )
 
 type ConvPlan struct {
-	dataSize  [3]int   // Size of the (non-zero) input data block
-	logicSize [3]int   // Non-transformed kernel size >= dataSize
-	fftKern   [6]Array // transformed kernel components, unused ones are nil.
-	fftIn     Array    // transformed input data
-	fft       FFTPlan  // transforms input/output data
+	dataSize  [3]int    // Size of the (non-zero) input data block
+	logicSize [3]int    // Non-transformed kernel size >= dataSize
+	fftKern   [6]*Array // transformed kernel components, unused ones are nil.
+	fftIn     Array     // transformed input data
+	fft       FFTPlan   // transforms input/output data
 }
 
-func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
+func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array) {
 	Assert(len(dataSize) == 3)
 	Assert(len(kernel) == 6)
 
@@ -41,7 +41,6 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 	for i := range conv.dataSize {
 		conv.dataSize[i] = dataSize[i]
 		conv.logicSize[i] = logicSize[i]
-		//conv.storeSize[i] = kernSize[i]
 	}
 
 	// init fft
@@ -51,12 +50,22 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array) {
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
 
 	// init fftKern
+	//	for i, k := range kernel {
+	//		if k != nil {
+	//			Debug("ConvPlan.init", "alloc:", TensorIndexStr[i])
+	//			conv.fftKern[i].Init(1, []int{logicSize[0], logicSize[1], logicSize[2]/2 + 1}, DO_ALLOC) // not so aligned..
+	//		}
+	//	}
+
+	fftKernSize := []int{logicSize[0], logicSize[1], logicSize[2]/2 + 1}
+	CheckSize(fftKernSize, fftKern.Size3D())
 	for i, k := range kernel {
 		if k != nil {
-			Debug("ConvPlan.init", "alloc:", TensorIndexStr[i])
-			conv.fftKern[i].Init(1, []int{logicSize[0], logicSize[1], logicSize[2]/2 + 1}, DO_ALLOC) // not so aligned..
+			Debug("ConvPlan.init", "use K", TensorIndexStr[i])
+			conv.fftKern[i] = &fftKern.Comp[i]
 		}
 	}
+
 	conv.loadKernel(kernel)
 
 }
@@ -95,7 +104,7 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 			fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
-			scaleRealParts(&conv.fftKern[i], devOut, 1/float32(fft.Normalization()))
+			scaleRealParts(conv.fftKern[i], devOut, 1/float32(fft.Normalization()))
 			fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}

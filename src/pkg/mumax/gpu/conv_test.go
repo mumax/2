@@ -7,37 +7,37 @@
 
 package gpu
 
-import (
-	. "mumax/common"
-	"testing"
-	"mumax/host"
-	"fmt"
-)
+//import (
+//	. "mumax/common"
+//	"testing"
+//	"mumax/host"
+//	"fmt"
+//)
 
-func TestConv(t *testing.T) {
-
-	size := []int{1, 8, 8}
-	kernelSize := []int{size[0] * 1, size[1] * 2, size[2] * 2}
-
-	kernel := make([]*host.Array, 6)
-	kernel[XX] = host.NewArray(1, kernelSize)
-	kernel[XX].List[0] = 1
-
-	var conv ConvPlan
-	defer conv.Free()
-	conv.Init(size, kernel)
-
-	m := NewArray(3, size)
-	defer m.Free()
-	h := NewArray(3, size)
-	defer h.Free()
-
-	mh := m.LocalCopy()
-	mh.Array[0][0][4][4] = 1
-	fmt.Println("m", mh)
-	m.CopyFromHost(mh)
-
-	conv.Convolve(m, h)
-
-	fmt.Println("h", h.LocalCopy())
-}
+//func TestConv(t *testing.T) {
+//
+//	size := []int{1, 8, 8}
+//	kernelSize := []int{size[0] * 1, size[1] * 2, size[2] * 2}
+//
+//	kernel := make([]*host.Array, 6)
+//	kernel[XX] = host.NewArray(1, kernelSize)
+//	kernel[XX].List[0] = 1
+//
+//	var conv ConvPlan
+//	defer conv.Free()
+//	conv.Init(size, kernel)
+//
+//	m := NewArray(3, size)
+//	defer m.Free()
+//	h := NewArray(3, size)
+//	defer h.Free()
+//
+//	mh := m.LocalCopy()
+//	mh.Array[0][0][4][4] = 1
+//	fmt.Println("m", mh)
+//	m.CopyFromHost(mh)
+//
+//	conv.Convolve(m, h)
+//
+//	fmt.Println("h", h.LocalCopy())
+//}
