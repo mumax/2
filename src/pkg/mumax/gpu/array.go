@@ -92,10 +92,14 @@ func (a *Array) Assign(other *Array) {
 // The new array's total number of elements should fit in the original,
 // but all other sizes may be arbitrary.
 // Possibly dangerous to use. Typically used to save memory.
-func (original *Array) SharedArray(nComp int, size []int) *Array {
-  Assert(nComp*size[0]*size[1]*size[2] <= original.Len())
+func (original *Array) SharedArray(nComp int, size []int, offset int) *Array {
+  Assert(nComp*size[0]*size[1]*size[2] + offset <= original.Len())
+  Assert(offset%NDevice() == 0)
 	shared := new(Array)
-	shared.pointer = original.pointer
+	shared.pointer = make([]cu.DevicePtr, NDevice())
+	for i:=range shared.pointer{
+    shared.pointer[i] = cu.DevicePtr(ArrayOffset(uintptr(original.pointer[i]), offset/NDevice()))
+  }
 	shared.initSize(nComp, size)
 	shared.initComp()
 	return shared
