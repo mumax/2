@@ -48,6 +48,11 @@ func (e IOErr) String() string {
 	return string(e)
 }
 
+// Shorthand for IOErr(fmt.Sprint(msg...))
+func IOErrF(msg ...interface{}) IOErr{
+	return IOErr(fmt.Sprint(msg...))
+}
+
 // Empty function implements interface{IOErr()}
 func (e *IOErr) IOErr() {
 }
@@ -57,6 +62,11 @@ type Bug string
 
 func (e Bug) String() string {
 	return string(e)
+}
+
+// Shorthand for Bug(fmt.Sprint(msg...))
+func BugF(msg ...interface{}) Bug{
+	return BugF(fmt.Sprint(msg...))
 }
 
 // Empty function implements interface{Bug()}
@@ -80,8 +90,19 @@ func CheckErr(err os.Error, code int) {
 	}
 }
 
+// Raises IOErr if err != nil
 func CheckIO(err os.Error) {
 	CheckErr(err, ERR_IO)
+}
+
+// Raises InputErr if err != nil
+func CheckInput(err os.Error) {
+	CheckErr(err, ERR_INPUT)
+}
+
+// Raises Bug if err != nil
+func CheckBug(err os.Error) {
+	CheckErr(err, ERR_BUG)
 }
 
 //func Exit(status int) {
