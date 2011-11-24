@@ -38,6 +38,10 @@ func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")
+	
+	m := e.Quant("m")
+	MSat := e.Quant("MSat")
+	Aex := e.Quant("Aex")
 
 	CPUONLY := true
 	// Size of all kernels (not FFT'd)
@@ -57,7 +61,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	dexKern := newQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
 	e.addQuant(dexKern)
 	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
-	dexKern.SetUpdater(newDexKernUpdater(dexKern, demagKern, exchKern, e.Quant("MSat"), e.Quant("Aex")))
+	dexKern.SetUpdater(newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex))
 
 	// fft kernel quant
 	fftOutSize := gpu.FFTOutputSize(kernelSize)
@@ -70,8 +74,8 @@ func (x ModDemagExch) Load(e *Engine) {
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	e.Depends("H_dex", "m", "~Kern_dex")
-	//Hdex := e.Quant("H_dex")
-	//Hdex.SetUpdater(&demagExchHUpdater{Hdex, e.Quant("m"), e.Quant("Msat"), e.Quant("Aex")})
+	Hdex := e.Quant("H_dex")
+	Hdex.SetUpdater(newHDexUpdater(Hdex, m, fftKern))
 
 	// add H_dex to total H
 	hfield := e.Quant("H")
@@ -163,19 +167,19 @@ func (u *fftKernUpdater) Update() {
 
 // Updates the demag+exchange field in one single convolution
 type hDexUpdater struct {
-	Hdex, m, fftKernDex *Quant
-	conv                gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
-	init                bool
+	Hdex, m, fftDexKern *Quant
+	conv                *gpu.ConvPlan // points to fftKernDex.updater.conv
 }
 
-func newHDexUpdater(Hdex, m, Msat, Aex *Quant) Updater {
+func newHDexUpdater(Hdex, m, fftDexKern *Quant) Updater {
 	u := new(hDexUpdater)
-	//	e := GetEngine()
-	//
-	//	u.conv.Init(e.GridSize(), Hdex.Comp, Hdex)
+	u.Hdex = Hdex
+	u.m = m
+	u.fftDexKern = fftDexKern
+	u.conv = &(fftDexKern.updater.(*fftKernUpdater).conv)
 	return u
 }
 
 func (u *hDexUpdater) Update() {
-
+	u.conv.Convolve(&u.m.array, &u.Hdex.array)
 }

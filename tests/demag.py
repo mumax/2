@@ -18,6 +18,7 @@ setarray('m', m)
 save("kern_ex", "txt", [], "kern_ex.txt")
 save("kern_d", "txt", [], "kern_d.txt")
 save("kern_dex", "txt", [], "kern_dex.txt")
+save("~kern_dex", "txt", [], "fftkern_dex.txt")
 save("H_dex", "txt", [], "H_dex.txt")
 
 #H = getarray('H')
