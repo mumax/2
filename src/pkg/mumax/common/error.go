@@ -33,7 +33,7 @@ func (e InputErr) String() string {
 }
 
 // Shorthand for InputErr(fmt.Sprint(msg...))
-func InputErrF(msg ...interface{}) InputErr{
+func InputErrF(msg ...interface{}) InputErr {
 	return InputErr(fmt.Sprint(msg...))
 }
 
@@ -49,7 +49,7 @@ func (e IOErr) String() string {
 }
 
 // Shorthand for IOErr(fmt.Sprint(msg...))
-func IOErrF(msg ...interface{}) IOErr{
+func IOErrF(msg ...interface{}) IOErr {
 	return IOErr(fmt.Sprint(msg...))
 }
 
@@ -65,7 +65,7 @@ func (e Bug) String() string {
 }
 
 // Shorthand for Bug(fmt.Sprint(msg...))
-func BugF(msg ...interface{}) Bug{
+func BugF(msg ...interface{}) Bug {
 	return BugF(fmt.Sprint(msg...))
 }
 

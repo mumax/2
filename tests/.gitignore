@@ -1,2 +1,5 @@
-*.class
-graph.dot
+*.dot
+*.omf
+*.ovf
+*.txt
+*.pyc

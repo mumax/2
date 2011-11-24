@@ -146,13 +146,12 @@ func writeOvf2Binary4(out io.Writer, array *host.Array) {
 
 	// Here we loop over X,Y,Z, not Z,Y,X, because
 	// internal in C-order == external in Fortran-order
+	ncomp := array.NComp()
 	for i := 0; i < gridsize[X]; i++ {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
-				for c := Z; c >= X; c-- {
-					bytes = (*[4]byte)(unsafe.Pointer(&data[c][i][j][k]))[:]
-					// dirty conversion from float32 to [4]byte
-					//bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0]
+				for c := 0; c < ncomp; c++ {
+					bytes = (*[4]byte)(unsafe.Pointer(&data[SwapIndex(c)][i][j][k]))[:]
 					out.Write(bytes)
 				}
 			}

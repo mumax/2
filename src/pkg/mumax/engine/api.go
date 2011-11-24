@@ -298,7 +298,6 @@ func (a API) FileNumberFormat(format string) {
 	Log("Using", format, "to number automatically saved files.")
 }
 
-
 //________________________________________________________________________________ misc
 
 // Saves an image file of the physics graph using the given file name.

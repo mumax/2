@@ -123,12 +123,13 @@ func writeOmfBinary4(out io.Writer, array *host.Array) {
 
 	// Here we loop over X,Y,Z, not Z,Y,X, because
 	// internal in C-order == external in Fortran-order
+	ncomp := array.NComp()
 	for i := 0; i < gridsize[X]; i++ {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
-				for c := Z; c >= X; c-- {
+				for c := 0; c < ncomp; c++ {
 					// dirty conversion from float32 to [4]byte
-					bytes = (*[4]byte)(unsafe.Pointer(&data[c][i][j][k]))[:]
+					bytes = (*[4]byte)(unsafe.Pointer(&data[SwapIndex(c)][i][j][k]))[:]
 					bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0]
 					out.Write(bytes)
 				}
@@ -144,11 +145,12 @@ func writeOmfText(out io.Writer, array *host.Array) {
 
 	// Here we loop over X,Y,Z, not Z,Y,X, because
 	// internal in C-order == external in Fortran-order
+	ncomp := array.NComp()
 	for i := 0; i < gridsize[X]; i++ {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
-				for c := Z; c >= X; c-- {
-					fmt.Fprint(out, data[c][i][j][k], " ")
+				for c := 0; c < ncomp; c++ {
+					fmt.Fprint(out, data[SwapIndex(c)][i][j][k], " ")
 				}
 			}
 		}
