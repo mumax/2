@@ -114,7 +114,7 @@ func (a API) Run(duration float64) {
 // which typically contains dimensionless numbers between 0 and 1.
 func (a API) SetValue(quantity string, value []float64) {
 	q := a.Engine.Quant(quantity)
-	swapXYZ(value)
+	SwapXYZ(value)
 	q.SetValue(value)
 }
 
@@ -165,7 +165,7 @@ func (a API) GetValue(quantity string) []float64 {
 	q.Update() //!
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
-	swapXYZ(value)
+	SwapXYZ(value)
 	return value
 }
 
@@ -175,7 +175,7 @@ func (a API) DebugValue(quantity string) []float64 {
 	//q.Update() //!
 	value := make([]float64, len(q.multiplier))
 	copy(value, q.multiplier)
-	swapXYZ(value)
+	SwapXYZ(value)
 	return value
 }
 
@@ -235,14 +235,14 @@ func (a API) GetCell(quant string, x, y, z int) []float64 {
 			value[c] = q.multiplier[c] * float64(q.Array().Get(c, z, y, x))
 		}
 	}
-	swapXYZ(value)
+	SwapXYZ(value)
 	return value
 }
 
 // Sets the value of the quantity at cell position x,y,z
 func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	q := a.Engine.Quant(quant)
-	swapXYZ(value)
+	SwapXYZ(value)
 	for c := range value {
 		q.Array().Set(c, z, y, x, float32(value[c]))
 	}
