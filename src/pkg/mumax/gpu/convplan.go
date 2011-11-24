@@ -155,6 +155,6 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 	}
 	// kernmul here	
 	for c := range in.Comp {
-		conv.fft.Inverse(&conv.fftIn.Comp[c] ,&in.Comp[c] )
+		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
 	}
 }
