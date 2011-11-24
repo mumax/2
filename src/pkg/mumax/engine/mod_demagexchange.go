@@ -59,7 +59,8 @@ func (x ModDemagExch) Load(e *Engine) {
 	dexKern.SetUpdater(&dexKernUpdater{dexKern, demagKern, exchKern, e.Quant("MSat"), e.Quant("Aex")})
 
 	// fft kernel quant
-	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
+	fftSize := []int{0,0,0}//todo
+	fftKern := newQuant("~kern_dex", SYMMTENS, fftSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
 	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
@@ -129,7 +130,7 @@ func (u *dexKernUpdater) Update() {
 // as well as the convolution plan that goes with it.
 type fftKernUpdater struct {
 	fftKern *Quant       // that's me!
-	kern *Quant //  my dependencies
+	kern    *Quant       //  my dependencies
 	conv    gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
 }
 
@@ -144,7 +145,7 @@ func (u *fftKernUpdater) Update() {
 	Debug("Update fftKern")
 	dataSize := GetEngine().GridSize()
 	kernel := make([]*host.Array, 6)
-	for i:=range kernel{
+	for i := range kernel {
 		kernel[i] = (u.kern.Buffer().Component(i))
 	}
 	u.conv.Init(dataSize, kernel, u.fftKern.Array())

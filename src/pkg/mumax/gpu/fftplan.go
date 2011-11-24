@@ -19,6 +19,7 @@ import (
 type FFTPlan struct {
 	dataSize  [3]int         // Size of the (non-zero) input data block
 	logicSize [3]int         // Transform size including zero-padding. >= dataSize
+	outputSize [3]int // Size of the output data (one extra row PER GPU)
 	padZ      Array          // Buffer for Z-zeropadding and +2 elements for R2C
 	planZ_FW  []cufft.Handle // Forward transform of padZ parts, 1/GPU /// ... from outer space
 	planZ_INV []cufft.Handle // Inverse transform of padZ parts, 1/GPU /// ... from outer space
@@ -42,6 +43,10 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 		fft.dataSize[i] = dataSize[i]
 		fft.logicSize[i] = logicSize[i]
 	} //---------------------------------------------
+
+	fft.outputSize[0] = fft.logicSize[0]
+	fft.outputSize[1] = fft.logicSize[1]
+	fft.outputSize[2] = fft.logicSize[2] + 2 * NDevice() // One extra row of complex numbers PER GPU
 
 	// init stream ----------------------------------
 	fft.Stream = NewStream()
@@ -127,6 +132,10 @@ func (fft *FFTPlan) Free() {
 	// TODO destroy
 }
 
+func (fft*FFTPlan) OutputSize()[]int{
+	return fft.outputSize[:]
+}
+
 func (fft *FFTPlan) Normalization() int {
 	return (fft.logicSize[X] * fft.logicSize[Y] * fft.logicSize[Z])
 }
@@ -134,12 +143,8 @@ func (fft *FFTPlan) Normalization() int {
 func (fft *FFTPlan) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
-	AssertMsg(in.size3D[0] == fft.dataSize[0], "3")
-	AssertMsg(in.size3D[1] == fft.dataSize[1], "4")
-	AssertMsg(in.size3D[2] == fft.dataSize[2], "5")
-	AssertMsg(out.size3D[0] == fft.logicSize[0], "6")
-	AssertMsg(out.size3D[1] == fft.logicSize[1], "7")
-	AssertMsg(out.size3D[2] == fft.logicSize[2]+2*NDevice(), "8")
+	CheckSize(in.size3D, fft.dataSize[:])
+	CheckSize(out.size3D, fft.outputSize[:])
 
 	fmt.Println("FORWARD FFT")
 	fmt.Println("")
