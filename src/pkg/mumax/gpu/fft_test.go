@@ -28,7 +28,7 @@ func TestFFT(test *testing.T) {
 	fftSize := []int{2*N0, 2*N1, 2*N2}
 	
 	if N0 ==1 { //2D case, no padding in x-direction
-    fftSize[0] = NO;
+    fftSize[0] = N0;
   }
 	fft := NewFFTPlan(dataSize, fftSize)
 	defer fft.Free()
