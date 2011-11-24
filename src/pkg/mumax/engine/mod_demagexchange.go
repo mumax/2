@@ -61,7 +61,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
-	fftKern.SetUpdater(newFftKernUpdater()) 
+	fftKern.SetUpdater(newFftKernUpdater())
 
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
@@ -99,12 +99,11 @@ func (u *demagKernUpdater) Update() {
 
 //____________________________________________________________________ exchange kernel
 
-
 //____________________________________________________________________ demag+exchange kernel
 
 // Update demag+exchange kernel (cpu)
 type dexKernUpdater struct {
-	dexKern *Quant // that's me!
+	dexKern                        *Quant // that's me!
 	demagKern, exchKern, MSat, Aex *Quant // my dependencies
 }
 
@@ -127,40 +126,38 @@ func (u *dexKernUpdater) Update() {
 
 // Holds any transformed kernel 
 // as well as the convolution plan that goes with it.
-type fftKernUpdater struct{
-	fftKern *Quant // that's me!
-	conv               gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
+type fftKernUpdater struct {
+	fftKern *Quant       // that's me!
+	conv    gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
 }
 
-func newFftKernUpdater()Updater{
-	u:=new(fftKernUpdater)
+func newFftKernUpdater() Updater {
+	u := new(fftKernUpdater)
 
 	return u
 }
 
-func(*fftKernUpdater)Update(){
+func (*fftKernUpdater) Update() {
 	Debug("Update fftKern")
 }
-
 
 //____________________________________________________________________ H_dex
 
 // Updates the demag+exchange field in one single convolution
 type hDexUpdater struct {
 	Hdex, m, fftKernDex *Quant
-	conv               gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
-	init bool
+	conv                gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
+	init                bool
 }
 
 func newHDexUpdater(Hdex, m, Msat, Aex *Quant) Updater {
 	u := new(hDexUpdater)
-//	e := GetEngine()
-//
-//	u.conv.Init(e.GridSize(), Hdex.Comp, Hdex)
+	//	e := GetEngine()
+	//
+	//	u.conv.Init(e.GridSize(), Hdex.Comp, Hdex)
 	return u
 }
 
 func (u *hDexUpdater) Update() {
 
 }
-
