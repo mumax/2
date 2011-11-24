@@ -137,7 +137,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	AssertMsg(in.size3D[2] == fft.dataSize[2], "5")
 	AssertMsg(out.size3D[0] == fft.logicSize[0], "6")
 	AssertMsg(out.size3D[1] == fft.logicSize[1], "7")
-	AssertMsg(out.size3D[2] == fft.logicSize[2]+2, "8")
+  AssertMsg(out.size3D[2] == fft.logicSize[2]+2*NDevice(), "8")
 
 	// shorthand
 	padZ := &(fft.padZ)
@@ -154,6 +154,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	CopyPadZ(padZ, in)
 	Stop("CopyPadZ_FW")
 
+  fmt.Println("")
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
 
 	// fft Z
@@ -163,12 +164,14 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	}
 	fft.Sync()
 	Stop("fftZ_FW")
-	fmt.Println("transpose:", padZ.LocalCopy().Array)
+  fmt.Println("")
+	fmt.Println("fftz:", padZ.LocalCopy().Array)
 
 	Start("Transpose1_FW")
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	Stop("Transpose1_FW")
-	fmt.Println("copy:", transp1.LocalCopy().Array)
+  fmt.Println("")
+ 	fmt.Println("transpose:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	Start("MemcpyDtoD_FW")
@@ -202,33 +205,40 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 		InsertBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
 	Stop("InsertBlockZ_FW")
-	//   fmt.Println("y transpose:", transp2.LocalCopy().Array)
+  fmt.Println("")
+  fmt.Println("insert:", transp2.LocalCopy().Array)
 
 	// FFT Y
 	Start("fftY_FW")
-	for dev := range _useDevice {
-		fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
-	}
-	fft.Sync()
-	Stop("fftY_FW")
-	//   fmt.Println("ffty:", out.LocalCopy().Array)
+  for dev := range _useDevice {
+    fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
+  }
+  fft.Sync()
+  Stop("fftY_FW")
+  fmt.Println("")
+  fmt.Println("ffty:", out.LocalCopy().Array)
 
-	// FFT X
-	if logicSize[0] > 1 {
-		Start("fftX_FW")
-		for dev := range _useDevice {
-			fft.planX[dev].ExecC2C(uintptr(out.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in x-direction
-		}
-		fft.Sync()
-		Stop("fftX_FW")
-	}
-	//   fmt.Println("out:", out.LocalCopy().Array)
+  // FFT X
+  if logicSize[0]>1{
+    Start("fftX_FW")
+    for dev := range _useDevice {
+      fft.planX[dev].ExecC2C(uintptr(out.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in x-direction
+    }
+    fft.Sync()
+    Stop("fftX_FW")
+  }
+  fmt.Println("")
+    fmt.Println("out:", out.LocalCopy().Array)
 
 }
 
-// DOES NOT WORK YET
+
+
 func (fft *FFTPlan) Inverse(in, out *Array) {
-	// shorthand
+
+//   fmt.Println("in:", in.LocalCopy().Array)
+  
+  // shorthand
 	padZ := &(fft.padZ)
 	transp1 := &(fft.transp1)
 	dataSize := fft.dataSize
@@ -237,30 +247,34 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 	chunks := fft.chunks // not sure if chunks[0] copies the struct...
 	transp2 := &(fft.transp2)
 
-	// FFT X
-	if logicSize[0] > 1 {
-		Start("fftX_INV")
-		for dev := range _useDevice {
-			fft.planX[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(in.pointer[dev]), cufft.INVERSE) //FFT in x-direction
-		}
-		fft.Sync()
-		Stop("fftY_INV")
-		//     fmt.Println("fftx:", in.LocalCopy().Array)
-	}
+  // FFT X
+  if logicSize[0]>1{
+    Start("fftX_INV")
+    for dev := range _useDevice {
+      fft.planX[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(in.pointer[dev]), cufft.INVERSE) //FFT in x-direction
+    }
+    fft.Sync()
+    Stop("fftX_INV")
+    fmt.Println("")
+    fmt.Println("")
+    fmt.Println("fftx:", in.LocalCopy().Array)
+  }
+  
+  // FFT Y
+  Start("fftY_INV")
+  for dev := range _useDevice {
+    fft.planY[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.INVERSE) //FFT in y-direction
+  }
+  fft.Sync()
+  Stop("fftY_INV")
+  fmt.Println("")
+  fmt.Println("ffty:", transp2.LocalCopy().Array)
 
-	// FFT Y
-	Start("fftY_INV")
-	for dev := range _useDevice {
-		fft.planY[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.INVERSE) //FFT in y-direction
-	}
-	fft.Sync()
-	Stop("fftY_INV")
-	//   fmt.Println("ffty:", transp2.LocalCopy().Array)
-
-	//   fmt.Println("y transpose:", transp2.LocalCopy().Array)
 	for c := range chunks {
 		ExtractBlockZ(&(chunks[c]), transp2, c)
 	}
+  fmt.Println("")
+  fmt.Println("extract:", transp2.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
@@ -280,10 +294,11 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 			}
 		}
 	}
-	fmt.Println("copy:", transp1.LocalCopy().Array)
+  fmt.Println("")
+  fmt.Println("copy:", transp1.LocalCopy().Array)
 
-	TransposeComplexYZPart_inv(padZ, transp1) // fftZ!
-	//(&transp1).CopyFromDevice(&padZ)
+  TransposeComplexYZPart_inv(padZ, transp1) // fftZ!
+  fmt.Println("")
 	fmt.Println("transpose:", padZ.LocalCopy().Array)
 
 	// fft Z
@@ -291,9 +306,11 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 		fft.planZ_INV[dev].ExecC2R(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
 	}
 	fft.Sync()
+  fmt.Println("")
 	fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 	CopyPadZ(out, padZ)
+  fmt.Println("")
 	fmt.Println("out:", out.LocalCopy().Array)
 
 }
