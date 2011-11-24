@@ -13,6 +13,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/gpu"
+	"mumax/host"
 )
 
 // Register this module
@@ -61,7 +62,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
-	fftKern.SetUpdater(newFftKernUpdater())
+	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
 
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
@@ -128,17 +129,25 @@ func (u *dexKernUpdater) Update() {
 // as well as the convolution plan that goes with it.
 type fftKernUpdater struct {
 	fftKern *Quant       // that's me!
+	kern *Quant //  my dependencies
 	conv    gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
 }
 
-func newFftKernUpdater() Updater {
+func newFftKernUpdater(fftKern, kern *Quant) Updater {
 	u := new(fftKernUpdater)
-
+	u.fftKern = fftKern
+	u.kern = kern
 	return u
 }
 
-func (*fftKernUpdater) Update() {
+func (u *fftKernUpdater) Update() {
 	Debug("Update fftKern")
+	dataSize := GetEngine().GridSize()
+	kernel := make([]*host.Array, 6)
+	for i:=range kernel{
+		kernel[i] = (u.kern.Buffer().Component(i))
+	}
+	u.conv.Init(dataSize, kernel, u.fftKern.Array())
 }
 
 //____________________________________________________________________ H_dex
