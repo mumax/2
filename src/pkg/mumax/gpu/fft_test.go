@@ -17,19 +17,19 @@ import (
 )
 
 func TestFFT(test *testing.T) {
-  fmt.Println("")
-  fmt.Println("")
-  fmt.Println("")
-  fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
+	fmt.Println("")
 	fmt.Println("FFT Test")
 	nComp := 1
 	N0, N1, N2 := 4, 8, 8
 	dataSize := []int{N0, N1, N2}
-	fftSize := []int{2*N0, 2*N1, 2*N2}
-	
-	if N0 ==1 { //2D case, no padding in x-direction
-    fftSize[0] = N0;
-  }
+	fftSize := []int{2 * N0, 2 * N1, 2 * N2}
+
+	if N0 == 1 { //2D case, no padding in x-direction
+		fftSize[0] = N0
+	}
 	fft := NewFFTPlan(dataSize, fftSize)
 	defer fft.Free()
 
@@ -41,12 +41,12 @@ func TestFFT(test *testing.T) {
 	a := inh.Array[0]
 	n := 0
 	for i := 0; i < N0; i++ {
-// 		n  = 0
+		// 		n  = 0
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
-// 				if i == 0 {
-					a[i][j][k] = float32(1)
-// 				}
+				// 				if i == 0 {
+				a[i][j][k] = float32(1)
+				// 				}
 				n++
 			}
 		}
@@ -57,7 +57,7 @@ func TestFFT(test *testing.T) {
 	in.CopyFromHost(inh)
 
 	fft.Forward(in, out)
- 	fft.Inverse(out, in)
+	fft.Inverse(out, in)
 
 }
 
