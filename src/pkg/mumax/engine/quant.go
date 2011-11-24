@@ -280,7 +280,7 @@ func (q *Quant) Buffer() *host.Array {
 	//q.Update() // TODO: really needed??
 	Debug("Update", q.Name())
 	if q.cpuOnly || q.bufUpToDate {
-		Debug("buffer of", q.Name(), q.buffer.Array)
+		//Debug("buffer of", q.Name(), q.buffer.Array)
 		return q.buffer
 	}
 	Debug("XFer", q.Name())

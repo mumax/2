@@ -38,12 +38,12 @@ func (x ModDemagExch) Load(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")
 
-	// demag kernel 
 	CPUONLY := true
+
+	// demag kernel 
 	kernSize := padSize(e.GridSize(), e.Periodic())
 	demagKern := newQuant("kern_d", SYMMTENS, kernSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.addQuant(demagKern)
-	e.Depends("kern_d", "m") // debug
 	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
@@ -61,7 +61,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	fftKern := newQuant("~kern_dex", SYMMTENS, e.GridSize(), FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
-	//fftKern.SetUpdater(&demagKernUpdater{demagK}) // TODO: add exchange
+	fftKern.SetUpdater(newFftKernUpdater()) 
 
 	// demag+exchange field quant
 	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
@@ -75,11 +75,11 @@ func (x ModDemagExch) Load(e *Engine) {
 	sum.AddParent("H_dex")
 }
 
-//____________________________________________________________________ kernel
+//____________________________________________________________________ demag kernel
 
 // Update demag kernel (cpu)
 type demagKernUpdater struct {
-	demagKern *Quant
+	demagKern *Quant // that's me!
 }
 
 func newDemagKernUpdater(demagKern *Quant) Updater {
@@ -94,12 +94,18 @@ func (u *demagKernUpdater) Update() {
 	kernsize := padSize(e.GridSize(), e.Periodic())
 	accuracy := 8
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
-	Debug("demagkernupdater got", u.demagKern.Buffer())
+	//Debug("demagkernupdater got", u.demagKern.Buffer())
 }
+
+//____________________________________________________________________ exchange kernel
+
+
+//____________________________________________________________________ demag+exchange kernel
 
 // Update demag+exchange kernel (cpu)
 type dexKernUpdater struct {
-	dexKern, demagKern, exchKern, MSat, Aex *Quant
+	dexKern *Quant // that's me!
+	demagKern, exchKern, MSat, Aex *Quant // my dependencies
 }
 
 // Update demag+exchange kernel (cpu)
@@ -119,37 +125,42 @@ func (u *dexKernUpdater) Update() {
 
 //_____________________________________________________________________ fftkern
 
-// Updates the demag+exchange field in one single convolution
-type demagExchUpdater struct {
-	Hdex, m, Msat, Aex *Quant
+// Holds any transformed kernel 
+// as well as the convolution plan that goes with it.
+type fftKernUpdater struct{
+	fftKern *Quant // that's me!
 	conv               gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
 }
 
-func (u *demagExchUpdater) Update() {
+func newFftKernUpdater()Updater{
+	u:=new(fftKernUpdater)
 
-}
-
-func newDemagExchUpdater(Hdex, m, Msat, Aex *Quant) Updater {
-	u := new(demagExchUpdater)
-	u.Hdex = Hdex
-	u.m = m
-	u.Msat = Msat
-	u.Aex = Aex
-
-	//u.conv.Init(e.GridSize(), kernel)
 	return u
 }
 
-// Zero-pads gridsize if needed
-// (not periodic, not size 1)
-func zeropad(gridsize, periodic []int) (padded []int) {
-	padded = make([]int, 3)
-	for i := range gridsize {
-		if gridsize[i] > 1 && periodic[i] == 0 {
-			padded[i] = 2 * gridsize[i]
-		} else {
-			padded[i] = gridsize[i]
-		}
-	}
-	return padded
+func(*fftKernUpdater)Update(){
+	Debug("Update fftKern")
 }
+
+
+//____________________________________________________________________ H_dex
+
+// Updates the demag+exchange field in one single convolution
+type hDexUpdater struct {
+	Hdex, m, fftKernDex *Quant
+	conv               gpu.ConvPlan // TODO: move gpu.ConvPlan into engine?
+	init bool
+}
+
+func newHDexUpdater(Hdex, m, Msat, Aex *Quant) Updater {
+	u := new(hDexUpdater)
+//	e := GetEngine()
+//
+//	u.conv.Init(e.GridSize(), Hdex.Comp, Hdex)
+	return u
+}
+
+func (u *hDexUpdater) Update() {
+
+}
+
