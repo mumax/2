@@ -28,6 +28,8 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	Assert(len(dataSize) == 3)
 	Assert(len(kernel) == 6)
 
+	conv.Free() // must not leak memory on 2nd init.
+
 	// find non-nil kernel element to get kernel size
 	var logicSize []int
 	for _, k := range kernel {
