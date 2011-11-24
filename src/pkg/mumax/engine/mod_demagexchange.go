@@ -97,8 +97,6 @@ func (u *demagKernUpdater) Update() {
 	Debug("demagkernupdater got", u.demagKern.Buffer())
 }
 
-
-
 // Update demag+exchange kernel (cpu)
 type demagExchKernUpdater struct {
 	dexKern, demagKern, exchKern, MSat, Aex *Quant
@@ -108,9 +106,6 @@ type demagExchKernUpdater struct {
 func (u *demagExchKernUpdater) Update() {
 	Debug("Update demagexch")
 }
-
-
-
 
 //_____________________________________________________________________ fftkern
 
