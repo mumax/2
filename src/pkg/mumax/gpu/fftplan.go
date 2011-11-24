@@ -153,7 +153,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	fmt.Println("in:", in.LocalCopy().Array)
 
 	Start("CopyPadZ_FW")
-	CopyPadZ(padZ, in)
+  CopyPadZ(padZ, in)
 	Stop("CopyPadZ_FW")
 
 	fmt.Println("padZ:", padZ.LocalCopy().Array)
