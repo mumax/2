@@ -89,23 +89,25 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 	fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DO_ALLOC) //TODO make this point to the output array
 
 	fft.planY = make([]cufft.Handle, NDev)
-	batchY := ((fft.logicSize[2])/2/NDev + 1) * fft.logicSize[0]
-	for dev := range _useDevice {
-		fft.planY[dev] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
-		fft.planY[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change 
-	}
+  batchY := ((fft.logicSize[2])/2/NDev + 1) * fft.logicSize[0]
+  for dev := range _useDevice {
+    setDevice(_useDevice[dev])
+    fft.planY[dev] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
+    fft.planY[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change 
+  }
 
-	if fft.logicSize[0] == 1 { // 2D
-		fft.planX = nil
-	} else { //3D
-		fft.planX = make([]cufft.Handle, NDev)
-		batchX := ((fft.logicSize[2])/2/NDev + 1) * fft.logicSize[1]
-		stride := batchX
-		for dev := range _useDevice {
-			fft.planX[dev] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, stride, []int{1}, stride, cufft.C2C, batchX)
-			fft.planX[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change
-		}
-	}
+  if fft.logicSize[0] == 1 { // 2D
+    fft.planX = nil
+  } else{ //3D
+    fft.planX = make([]cufft.Handle, NDev)
+    batchX := ((fft.logicSize[2])/2/NDev + 1) * fft.logicSize[1]
+    stride := batchX
+    for dev := range _useDevice {
+      setDevice(_useDevice[dev])
+      fft.planX[dev] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, stride, []int{1}, stride, cufft.C2C, batchX)
+      fft.planX[dev].SetStream(uintptr(fft.Stream[dev])) // TODO: change
+    }
+   }
 
 }
 
@@ -160,6 +162,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	// fft Z
 	Start("fftZ_FW")
 	for dev := range _useDevice {
+    setDevice(_useDevice[dev])
 		fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
 	}
 	fft.Sync()
@@ -211,6 +214,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	// FFT Y
 	Start("fftY_FW")
   for dev := range _useDevice {
+    setDevice(_useDevice[dev])
     fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
   }
   fft.Sync()
@@ -251,6 +255,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
   if logicSize[0]>1{
     Start("fftX_INV")
     for dev := range _useDevice {
+      setDevice(_useDevice[dev])
       fft.planX[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(in.pointer[dev]), cufft.INVERSE) //FFT in x-direction
     }
     fft.Sync()
@@ -263,6 +268,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
   // FFT Y
   Start("fftY_INV")
   for dev := range _useDevice {
+    setDevice(_useDevice[dev])
     fft.planY[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.INVERSE) //FFT in y-direction
   }
   fft.Sync()
@@ -303,6 +309,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 
 	// fft Z
 	for dev := range _useDevice {
+    setDevice(_useDevice[dev])
 		fft.planZ_INV[dev].ExecC2R(uintptr(padZ.pointer[dev]), uintptr(padZ.pointer[dev])) // is this really async?
 	}
 	fft.Sync()
