@@ -26,17 +26,17 @@ autotabulate(["t", "<H>"], "H.txt", 10e-12)
 
 save('kern_ex', 'txt', [], 'kern_ex.txt')
 
-steps(10000)
+run(5e-9)
 
-#Hx = -24.6E-3 / mu0
-#Hy =   4.3E-3 / mu0
-#Hz =   0      / mu0 
-#setvalue('H_ext', [Hx, Hy, Hz])
+Hx = -24.6E-3 / mu0
+Hy =   4.3E-3 / mu0
+Hz =   0      / mu0 
+setvalue('H_ext', [Hx, Hy, Hz])
 #
-#setscalar('alpha', 0.02)
-#setscalar('dt', 0.1e-12)
+setscalar('alpha', 0.02)
+setscalar('dt', 0.01e-12)
 
-#steps(10000)
+run(1e-9)
 
 printstats()
 savegraph("graph.png")
