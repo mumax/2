@@ -44,7 +44,7 @@ func InitVectorQuantUniformRegion(S, regions *Array, initValuesX, initValuesY, i
 		(*C.float)(unsafe.Pointer(&(initValuesX[0]))),
 		(*C.float)(unsafe.Pointer(&(initValuesY[0]))),
 		(*C.float)(unsafe.Pointer(&(initValuesZ[0]))),
-		
+
 		(C.int)(len(initValuesX)),
 
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),

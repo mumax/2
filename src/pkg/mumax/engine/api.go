@@ -254,7 +254,7 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 // @param quant (string) name of the scalar quantity to set
 // @param initValues (map[string] float64) array containing the initial values to set. The index of each value must correpond to the concerned region.
 // @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
-func (a API) SetScalarUniformRegion(quant string, initValues [] float32) {
+func (a API) SetScalarUniformRegion(quant string, initValues []float32) {
 	q := a.Engine.Quant(quant)
 	if q.nComp != 1 {
 		panic(InputErr(fmt.Sprint(q.Name(), " is not a scalar. It has ", q.nComp, "component(s).")))
@@ -269,7 +269,7 @@ func (a API) SetScalarUniformRegion(quant string, initValues [] float32) {
 // @param quant (string) name of the scalar quantity to set
 // @param initValues (map[string] float64) array containing the initial values to set. The index of each value must correpond to the concerned region.
 // @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
-func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, initValuesZ [] float32) {
+func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, initValuesZ []float32) {
 	q := a.Engine.Quant(quant)
 	if q.nComp != 3 {
 		panic(InputErr(fmt.Sprint(q.Name(), " is not a vector. It has ", q.nComp, "component(s).")))
