@@ -261,7 +261,7 @@ def extrudeImage( imageName , regionList , plane = 'xy'):
 ## Initialize scalar quantity with uniform value in each region
 #  Every regions that have been set but that are not used here will be considered as part of 'empty' region. Empty region will set the quantity to zero.
 # @param quantName (string) name of the scalar quantity to set
-# @param initValues (dictionary string(region name) => float (region index)) initial values. Any not existing region is ignored.
+# @param initValues (dictionary string(region name) => float (value in region)) initial values. Any not existing region is ignored.
 def InitUniformRegionScalarQuant(quantName, initValues):
 	global regionNameDictionary
 	Idx = 0.
@@ -275,6 +275,33 @@ def InitUniformRegionScalarQuant(quantName, initValues):
 			values.append(0.)
 		Idx +=1
 	setscalaruniformregion(quantName,values)
+	return
+
+## Initialize Vector quantity with uniform value in each region
+#  Every regions that have been set but that are not used here will be considered as part of 'empty' region. Empty region will set the quantity to zero.
+# @param quantName (string) name of the vector quantity to set
+# @param initValues (dictionary string(region name) => [3]float (value in region)) initial values. Any not existing region is ignored.
+def InitUniformRegionVectorQuant(quantName, initValues):
+	global regionNameDictionary
+	Idx = 0.
+	valuesX = []
+	valuesY = []
+	valuesZ = []
+	for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+		if initValues.has_key(key):
+			valuesX.append(initValues[key][0])
+			valuesY.append(initValues[key][1])
+			valuesZ.append(initValues[key][2])
+		elif key == 'empty':
+			valuesX.append(0.1)
+			valuesY.append(0.1)
+			valuesZ.append(0.1)
+		else:
+			valuesX.append(0.1)
+			valuesY.append(0.1)
+			valuesZ.append(0.1)
+		Idx +=1
+	setvectoruniformregion(quantName, valuesX, valuesY, valuesZ )
 	return
 
 
