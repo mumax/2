@@ -4,6 +4,7 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,9 +17,6 @@ __global__ void initScalarQuantUniformRegionKern(float* S, float* regions, float
 		int regionIndex = __float2int_rn(regions[i]);
 		if (regionIndex < regionNum) {
 			S[i] = initValues[regionIndex];
-		}
-		else {
-			S[i] = -1.0f;
 		}
 	}
 }
@@ -49,10 +47,14 @@ __global__ void initVectorQuantUniformRegionKern(float* Sx, float* Sy, float* Sz
 	int i = threadindex;
 	if (i < Npart) {
 		int regionIndex = __float2int_rn(regions[i]);
-		if (regionIndex < regionNum) {
+		if (regionIndex < regionNum && regionIndex > 0) {
 			Sx[i] = initValuesX[regionIndex];
 			Sy[i] = initValuesY[regionIndex];
 			Sz[i] = initValuesZ[regionIndex];
+		} else {
+			Sx[i] = 1.0f;
+			Sy[i] = 0.0f;
+			Sz[i] = 0.0f;
 		}
 	}
 }
@@ -73,13 +75,17 @@ void initVectorQuantUniformRegionAsync(float** Sx, float** Sy, float** Sz, float
 		assert(host_initValuesY != NULL);
 		assert(host_initValuesZ != NULL);
 		gpu_safe(cudaSetDevice(deviceId(dev)));
+		gpu_safe(cudaSetDevice(deviceId(dev)));
 		gpu_safe( cudaMalloc( (void**)&dev_initValuesX,initValNum * sizeof(float)));
 		gpu_safe( cudaMalloc( (void**)&dev_initValuesY,initValNum * sizeof(float)));
 		gpu_safe( cudaMalloc( (void**)&dev_initValuesZ,initValNum * sizeof(float)));
 		gpu_safe( cudaMemcpy(dev_initValuesX,host_initValuesX,initValNum * sizeof(float), cudaMemcpyHostToDevice));
-		gpu_safe( cudaMemcpy(dev_initValuesX,host_initValuesY,initValNum * sizeof(float), cudaMemcpyHostToDevice));
-		gpu_safe( cudaMemcpy(dev_initValuesX,host_initValuesZ,initValNum * sizeof(float), cudaMemcpyHostToDevice));
+		gpu_safe( cudaMemcpy(dev_initValuesY,host_initValuesY,initValNum * sizeof(float), cudaMemcpyHostToDevice));
+		gpu_safe( cudaMemcpy(dev_initValuesZ,host_initValuesZ,initValNum * sizeof(float), cudaMemcpyHostToDevice));
 		initVectorQuantUniformRegionKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (Sx[dev],Sy[dev],Sz[dev],regions[dev],dev_initValuesX,dev_initValuesY,dev_initValuesZ, initValNum, Npart);
+		cudaFree(dev_initValuesX);
+		cudaFree(dev_initValuesY);
+		cudaFree(dev_initValuesZ);
 	}
 }
 

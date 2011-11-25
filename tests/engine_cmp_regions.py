@@ -1,6 +1,8 @@
 from mumax2 import *
 from mumax2_cmp import *
 
+regionNameDictionary ={}
+
 setgridsize(80, 40, 2)
 setcellsize(5e-9, 5e-9, 50e-9)
 
@@ -8,7 +10,7 @@ load('micromagnetism')
 
 setscalar('alpha', 0.1)
 getscalar('alpha')
-setscalar('Msat', 1.0)
+setscalar('Msat', 8.0e5)
 setscalar('Aex', 12e-13)
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
@@ -23,15 +25,24 @@ regionDic = {"M":"Blue",
 			 "x":"Red",
 			 "2":"Yellow"}
 extrudeImage( imageName, regionDic)
-mValues = {"M":1.e6,
-		   "u":2.e6,
-		   "m":3.e6,
-		   "a":4.e6,
-		   "x":5.e6,
-		   "2":6.e6}
-InitUniformRegionScalarQuant('Msat', mValues)
+MsatValues = {"M":1.e6,
+			  "u":2.e6,
+			  "m":3.e6,
+			  "a":4.e6,
+			  "x":5.e6,
+			  "2":6.e6}
+InitUniformRegionScalarQuant('Msat', MsatValues)
+
+mValues = {"M":[ 1.0, 0.0,0.0],
+		   "u":[ 1.0, 1.0,0.0],
+		   "m":[ 0.0, 1.0,0.0],
+		   "a":[-1.0, 1.0,0.0],
+		   "x":[-1.0, 0.0,0.0],
+		   "2":[-1.0,-1.0,0.0]}
+InitUniformRegionVectorQuant('m', mValues)
+
 save("Msat", "ovf", ["Text"], "regions_picture_Ms.ovf" )
-save("regionDefinition", "ovf", ["Text"], "regions_picture_regionDefinition.ovf" )
+save("m", "ovf", ["Text"], "regions_picture_m.ovf" )
 
 ## Example of initialization of region system with a script
 def script(X, Y, Z, param):

@@ -252,13 +252,34 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 
 // Sets scalar quantity uniform on each 
 // @param quant (string) name of the scalar quantity to set
-// @param initValues ([]float) array containing the initial values to set. The index of each value must correpond to the concerned region.
+// @param initValues (map[string] float64) array containing the initial values to set. The index of each value must correpond to the concerned region.
 // @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
-func (a API) SetScalarUniformRegion(quant string, initValues []float64) {
+func (a API) SetScalarUniformRegion(quant string, initValues [] float32) {
 	q := a.Engine.Quant(quant)
+	if q.nComp != 1 {
+		panic(InputErr(fmt.Sprint(q.Name(), " is not a scalar. It has ", q.nComp, "component(s).")))
+	}
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
 	gpu.InitScalarQuantUniformRegion(q.Array(), regions.Array(), initValues)
+	q.Invalidate()
+}
+
+// Sets vector quantity uniform on each 
+// @param quant (string) name of the scalar quantity to set
+// @param initValues (map[string] float64) array containing the initial values to set. The index of each value must correpond to the concerned region.
+// @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
+func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, initValuesZ [] float32) {
+	q := a.Engine.Quant(quant)
+	if q.nComp != 3 {
+		panic(InputErr(fmt.Sprint(q.Name(), " is not a vector. It has ", q.nComp, "component(s).")))
+	}
+	if len(initValuesX) != len(initValuesY) || len(initValuesY) != len(initValuesZ) || len(initValuesX) != len(initValuesZ) {
+		panic(InputErr(fmt.Sprint("Initial values are corrupted. The number of X, Y and Z components is not the same.")))
+	}
+	q.assureAlloc()
+	regions := a.Engine.Quant("regionDefinition")
+	gpu.InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
 	q.Invalidate()
 }
 
