@@ -10,7 +10,7 @@ load('micromagnetism')
 load('demagexch')
 
 setscalar('Msat', 800e3)
-setscalar('Aex', 1.3e-11/2)
+setscalar('Aex', 1.3e-11)
 setscalar('alpha', 1)
 setscalar('dt', 10e-12)
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
