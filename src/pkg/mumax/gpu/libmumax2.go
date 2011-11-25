@@ -5,7 +5,8 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// This file wraps libmultigpu.so.
+// This file wraps the core functions of libmultigpu.so.
+// Functions added by add-on modules are wrapped elsewhere.
 // Author: Arne Vansteenkiste
 
 package gpu
@@ -322,7 +323,14 @@ func TransposeComplexYZPart_inv(out, in *Array) {
 	out.Stream.Sync()
 }
 
-func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream, nRealNumbers int) {
+// Point-wise 3D micromagnetic kernel multiplication in Fourier space.
+// Overwrites M (in Fourier space, of course) with the result:
+//	|Mx|   |Kxx Kxy Kxz|   |Mx|
+//	|My| = |Kxy Kyy Kyz| * |My|
+//	|Mz|   |Kxz Kyz Kzz|   |Mz|
+// The kernel is symmetric.
+// partLen3D: number of reals per GPU for one component (e.g. fftMx).
+func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream) {
 	CheckSize(fftMx.size4D, fftKxx.size4D) // the rest should hopefully be ok...
 	C.kernelMulMicromag3DAsync(
 		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
@@ -335,5 +343,5 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 		(**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
 		(**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-		C.int(nRealNumbers))
+		C.int(fftMx.partLen3D))
 }

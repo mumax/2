@@ -150,10 +150,18 @@ func (conv *ConvPlan) Free() {
 
 func (conv *ConvPlan) Convolve(in, out *Array) {
 	Debug("Convolve")
+	fftIn := &conv.fftIn
+	fftKern := &conv.fftKern
+
+	// First transform all 3 components
 	for c := range in.Comp {
-		conv.fft.Forward(&in.Comp[c], &conv.fftIn.Comp[c])
+		conv.fft.Forward(&in.Comp[c], &fftIn.Comp[c])
 	}
-	// kernmul here	
+
+	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+		fftKern[XX], fftKern[YY], fftKern[ZZ],
+		fftKern[YZ], fftKern[XZ], fftKern[XY],
+		fftIn.Stream) // TODO: choose stream wisely
 	for c := range in.Comp {
 		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
 	}
