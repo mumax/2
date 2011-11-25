@@ -15,33 +15,25 @@ import "C"
 
 import (
 	. "mumax/common"
-	cu "cuda/driver"
 	"unsafe"
 )
 
 // Initialise scalar quantity with uniform value in each region
-func InitScalarQuantUniformRegion(S, regions *Array, initValues []float64) {
-	//initialValues = make([]cu.DevicePtr, 1)
-	initialValues := cu.MemAlloc(SIZEOF_FLOAT * int64(len(initValues)))
-	/*cu.MemcpyHtoD(cu.DevicePtr(offset(uintptr(initialValues), SIZEOF_FLOAT * len(initValues))),
-	cu.HostPtr(unsafe.Pointer(&(initValues))),
-	int64(len(initValues))*SIZEOF_FLOAT)*/
+func InitScalarQuantUniformRegion(S, regions *Array, initValues []float32) {
 	C.initScalarQuantUniformRegionAsync(
 		(**C.float)(unsafe.Pointer(&(S.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
-		(*C.float)(unsafe.Pointer(initialValues)),
+		(*C.float)(unsafe.Pointer(&(initValues[0]))),
 		(C.int)(len(initValues)),
 
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
 
 		(C.int)(regions.partLen3D))
 	S.Stream.Sync()
-	initialValues.Free()
-
 }
 
 // Initialise scalar quantity with uniform value in each region
-/*func initVectorQuantUniformRegion(S, regions *Array, initValues [][]float64) {
+func InitVectorQuantUniformRegion(S, regions *Array, initValuesX, initValuesY, initValuesZ []float32) {
 	C.initVectorQuantUniformRegionAsync(
 		(**C.float)(unsafe.Pointer(&(S.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(S.Comp[Y].pointer[0]))),
@@ -49,14 +41,14 @@ func InitScalarQuantUniformRegion(S, regions *Array, initValues []float64) {
 
 		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
 
-		(*C.float)(unsafe.Pointer(initValues[0])),
-		(*C.float)(unsafe.Pointer(initValues[1])),
-		(*C.float)(unsafe.Pointer(initValues[2])),
+		(*C.float)(unsafe.Pointer(&(initValuesX[0]))),
+		(*C.float)(unsafe.Pointer(&(initValuesY[0]))),
+		(*C.float)(unsafe.Pointer(&(initValuesZ[0]))),
+		
+		(C.int)(len(initValuesX)),
 
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
 
 		(C.int)(regions.partLen3D))
 	S.Stream.Sync()
-
 }
-*/
