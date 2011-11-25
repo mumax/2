@@ -55,7 +55,7 @@ func (x ModDemagExch) Load(e *Engine) {
 	// exch kernel 
 	exchKern := newQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
 	e.addQuant(exchKern)
-	//exchKern.SetUpdater(&exchKernUpdater{})
+	exchKern.SetUpdater(newExchKernUpdater(exchKern))
 
 	// demag+exchange kernel
 	dexKern := newQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
@@ -101,12 +101,30 @@ func (u *demagKernUpdater) Update() {
 	e := GetEngine()
 	kernsize := padSize(e.GridSize(), e.Periodic())
 	accuracy := 8
+	// TODO: wisdom
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
-	//Debug("demagkernupdater got", u.demagKern.Buffer())
 }
 
 //____________________________________________________________________ exchange kernel
 
+// Update exchange kernel (cpu)
+type exchKernUpdater struct {
+	exchKern *Quant // that's me!
+}
+
+func newExchKernUpdater(exchKern *Quant) Updater {
+	u := new(exchKernUpdater)
+	u.exchKern = exchKern
+	return u
+}
+
+// Update exch kernel (cpu)
+func (u *exchKernUpdater) Update() {
+	e := GetEngine()
+	kernsize := padSize(e.GridSize(), e.Periodic())
+	// Fast, so no wisdom needed here
+	Exch6NgbrKernel(kernsize, e.CellSize(), u.exchKern.Buffer())
+}
 //____________________________________________________________________ demag+exchange kernel
 
 // Update demag+exchange kernel (cpu)

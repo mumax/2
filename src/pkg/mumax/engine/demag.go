@@ -26,8 +26,8 @@ import (
 // You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
 // K[KernIdx[X][X]] returns K[XX]
 func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, kern *host.Array) {
-	Debug("Calculating kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
-
+	Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
+	Start("kern_d")
 	k := kern.Array
 
 	Assert(len(kern.Array) == 6)
@@ -75,7 +75,7 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 			}
 		}
 	}
-
+	Stop("kern_d")
 }
 
 // UNTESTED:
@@ -174,14 +174,6 @@ func faceIntegral(B, R *vector, cellsize []float64, s int, accuracy int) {
 	}
 	B.Scale(1. / (float64(n * n))) // n^2 integration points
 }
-
-// Maps the 3x3 indices of the symmetric demag kernel (K_ij) onto
-// a length 6 array containing the upper triangular part:
-// (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy)
-var kernIdx [3][3]int = [3][3]int{
-	[3]int{XX, XY, XZ},
-	[3]int{XY, YY, YZ},
-	[3]int{XZ, YZ, ZZ}}
 
 // A 3-component vector
 type vector [3]float64
