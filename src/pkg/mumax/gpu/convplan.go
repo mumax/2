@@ -13,7 +13,6 @@ package gpu
 import (
 	. "mumax/common"
 	"mumax/host"
-	"fmt"
 )
 
 // Convolution plan
@@ -108,11 +107,11 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 
 	for i, k := range kernel {
 		if k != nil {
-			fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
+			//fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
 			scaleRealParts(conv.fftKern[i], devOut, 1/float32(fft.Normalization()))
-			fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
+			//fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}
 
@@ -155,7 +154,7 @@ func (conv *ConvPlan) Free() {
 }
 
 func (conv *ConvPlan) Convolve(in, out *Array) {
-	Debug("Convolve")
+	//Debug("Convolve")
 	fftIn := &conv.fftIn
 	fftKern := &conv.fftKern
 
