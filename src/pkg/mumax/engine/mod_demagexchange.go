@@ -134,6 +134,7 @@ type dexKernUpdater struct {
 }
 
 func newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex *Quant) Updater {
+	// TODO: verify Aex space-independent
 	CheckSize(dexKern.Size3D(), demagKern.Size3D())
 	CheckSize(dexKern.Size3D(), exchKern.Size3D())
 	return &dexKernUpdater{dexKern, demagKern, exchKern, MSat, Aex}
