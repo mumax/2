@@ -28,6 +28,7 @@ extern "C" {
 #include "copypad.h"
 #include "transpose.h"
 #include "kernelmul_micromag.h"
+#include "uniform.h"
 
 
 #ifdef __cplusplus

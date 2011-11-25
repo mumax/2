@@ -8,7 +8,7 @@ load('micromagnetism')
 
 setscalar('alpha', 0.1)
 getscalar('alpha')
-setscalar('Msat', 800e3)
+setscalar('Msat', 1.0)
 setscalar('Aex', 12e-13)
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
@@ -23,7 +23,15 @@ regionDic = {"M":"Blue",
 			 "x":"Red",
 			 "2":"Yellow"}
 extrudeImage( imageName, regionDic)
-save("regionDefinition", "ovf", ["Text"], "regions_picture.ovf" )
+mValues = {"M":1.e6,
+		   "u":2.e6,
+		   "m":3.e6,
+		   "a":4.e6,
+		   "x":5.e6,
+		   "2":6.e6}
+InitUniformRegionScalarQuant('Msat', mValues)
+save("Msat", "ovf", ["Text"], "regions_picture_Ms.ovf" )
+save("regionDefinition", "ovf", ["Text"], "regions_picture_regionDefinition.ovf" )
 
 ## Example of initialization of region system with a script
 def script(X, Y, Z, param):
@@ -33,8 +41,11 @@ def script(X, Y, Z, param):
 		return 'Lower'
 gridSize = getgridsize()
 parameters = {"slope" : gridSize[1]/gridSize[0]}
-initRegionsScript( script , parameters)
-save("regionDefinition", "ovf", ["Text"], "regions_script.ovf" )
+#initRegionsScript( script , parameters)
+mValues = {"Upper":1e6,
+		   "Lower":2e6}
+#InitUniformRegionScalarQuant('Msat', mValues)
+#save("Msat", "ovf", ["Text"], "regions_script.ovf" )
 
 Hx = 0 / mu0
 Hy = 0 / mu0

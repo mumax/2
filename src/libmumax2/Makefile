@@ -13,6 +13,7 @@ OFILES=\
 	transpose.o\
 	exchange6.o\
 	kernelmul_micromag.o\
+ 	uniform.o\
 # 	addHani.o\
 
 all: libmumax2.so

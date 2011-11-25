@@ -194,6 +194,7 @@ def extrudeImage( imageName , regionList , plane = 'xy'):
 	#first convert regionList to be fully coded in color hex code and fill regionNameDictionanry
 	htmlCodeRE = re.compile('\#[a-f\d]{6}',re.IGNORECASE)
 	colorToRegion = {}
+	setupRegionSystem()
 	regionNameListLen = float(len(regionNameDictionary))
 	for i, cell in regionList.items():
 		if cell[0] != '#':
@@ -202,7 +203,6 @@ def extrudeImage( imageName , regionList , plane = 'xy'):
 			regionNameDictionary[i] = regionNameListLen
 			colorToRegion[regionList[i]] = regionNameListLen
 			regionNameListLen += 1.
-	setupRegionSystem()
 	#Read picture
 	imageReader = png.Reader( filename = imageName )
 	imageWidth, imageHeight, pngData, meta = imageReader.read()
@@ -257,3 +257,25 @@ def extrudeImage( imageName , regionList , plane = 'xy'):
 	setmask('regionDefinition', regionDefinition)
 	
 	return
+
+## Initialize scalar quantity with uniform value in each region
+#  Every regions that have been set but that are not used here will be considered as part of 'empty' region. Empty region will set the quantity to zero.
+# @param quantName (string) name of the scalar quantity to set
+# @param initValues (dictionary string(region name) => float (region index)) initial values. Any not existing region is ignored.
+def InitUniformRegionScalarQuant(quantName, initValues):
+	global regionNameDictionary
+	Idx = 0.
+	values = []
+	for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+		if initValues.has_key(key):
+			values.append(initValues[key])
+		elif key == 'empty':
+			values.append(0.)
+		else:
+			values.append(0.)
+		Idx +=1
+	setscalaruniformregion(quantName,values)
+	return
+
+
+	

@@ -18,6 +18,7 @@ GOFILES=\
 CGOFILES=\
 	multigpu.go\
 	libmumax2.go\
+	lib_quant_init.go\
 
 GC+=\
 	-I../../cuda/driver/_obj\
