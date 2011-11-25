@@ -14,7 +14,9 @@ extern "C" {
 #endif
 
 
-/// @param partLen3D number of floats (not complex) PER GPU, PER COMPONENT
+/// @param fftMx fftMy fftMz Fourier-transformed magnetization
+/// @param fftKxx... Fourier-transformed convolution kernel, symmetric and purely real. Size is half the size of fftM*!
+/// @param partLen3D number of floats (not complex) PER GPU, PER fftM* COMPONENT
 /// |Hx|   |Kxx Kxy Kxz|   |Mx|
 /// |Hy| = |Kxy Kyy Kyz| * |My|
 /// |Hz|   |Kxz Kyz Kzz|   |Mz|

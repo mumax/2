@@ -151,7 +151,7 @@ func writeOvf2Binary4(out io.Writer, array *host.Array) {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
 				for c := 0; c < ncomp; c++ {
-					bytes = (*[4]byte)(unsafe.Pointer(&data[SwapIndex(c,ncomp)][i][j][k]))[:]
+					bytes = (*[4]byte)(unsafe.Pointer(&data[SwapIndex(c, ncomp)][i][j][k]))[:]
 					out.Write(bytes)
 				}
 			}

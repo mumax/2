@@ -331,7 +331,11 @@ func TransposeComplexYZPart_inv(out, in *Array) {
 // The kernel is symmetric.
 // partLen3D: number of reals per GPU for one component (e.g. fftMx).
 func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream) {
-	CheckSize(fftMx.size4D, fftKxx.size4D) // the rest should hopefully be ok...
+	Assert(fftMx.size4D[0] == 1 &&
+		fftKxx.size4D[0] == 1 &&
+		fftMx.Len() == 2*fftKxx.Len())
+	// Other sizes hopefully OK.
+
 	C.kernelMulMicromag3DAsync(
 		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
 		(**C.float)(unsafe.Pointer(&fftMy.pointer[0])),

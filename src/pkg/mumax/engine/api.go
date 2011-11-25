@@ -256,7 +256,7 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 // @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
 func (a API) SetScalarUniformRegion(quant string, initValues []float64) {
 	q := a.Engine.Quant(quant)
-	q.assureAlloc();
+	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
 	gpu.InitScalarQuantUniformRegion(q.Array(), regions.Array(), initValues)
 	q.Invalidate()

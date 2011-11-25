@@ -26,7 +26,7 @@ func (tens *Array) WriteAscii(out io.Writer) {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
 				for c := 0; c < tens.NComp(); c++ {
-					_, err := fmt.Fprint(out, data[SwapIndex(c,tens.NComp())][i][j][k], " ") // converts to user space.
+					_, err := fmt.Fprint(out, data[SwapIndex(c, tens.NComp())][i][j][k], " ") // converts to user space.
 					if err != nil {
 						panic(IOErr(err.String()))
 					}

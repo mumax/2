@@ -16,6 +16,7 @@ import (
 	"fmt"
 )
 
+// Convolution plan
 type ConvPlan struct {
 	dataSize  [3]int    // Size of the (non-zero) input data block
 	logicSize [3]int    // Non-transformed kernel size >= dataSize
@@ -24,6 +25,8 @@ type ConvPlan struct {
 	fft       FFTPlan   // transforms input/output data
 }
 
+// Kernel does not need to take into account unnormalized FFTs,
+// this is handled by the convplan.
 func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array) {
 	Assert(len(dataSize) == 3)
 	Assert(len(kernel) == 6)
@@ -79,7 +82,9 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 // so that the convolution definitely works.
 // After FFT'ing, the kernel is purely real,
 // so we discard the imaginary parts.
-// This saves a huge amount of memory
+// This saves a huge amount of memory.
+// The kernel is internally scaled to compensate
+// for unnormalized FFTs
 func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 
 	// Check sanity of kernel
@@ -114,7 +119,8 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 }
 
 // Extract real parts, copy them from src to dst.
-// In the meanwhile, check if imaginary parts are nearly zero.
+// In the meanwhile, check if imaginary parts are nearly zero
+// and scale the kernel to compensate for unnormalized FFTs.
 func scaleRealParts(dst, src *Array, scale float32) {
 	Assert(dst.size3D[0] == src.size3D[0] &&
 		dst.size3D[1] == src.size3D[1] &&
@@ -153,15 +159,20 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 	fftIn := &conv.fftIn
 	fftKern := &conv.fftKern
 
-	// First transform all 3 components
+	// First transform all 3 components 
+	// (FFTPlan knows about zero padding etc)
 	for c := range in.Comp {
 		conv.fft.Forward(&in.Comp[c], &fftIn.Comp[c])
 	}
 
+	// Point-wise kernel multiplication
 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
 		fftKern[XX], fftKern[YY], fftKern[ZZ],
 		fftKern[YZ], fftKern[XZ], fftKern[XY],
 		fftIn.Stream) // TODO: choose stream wisely
+
+	// Backtransform
+	// (FFTPlan knows about zero padding etc)
 	for c := range in.Comp {
 		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
 	}

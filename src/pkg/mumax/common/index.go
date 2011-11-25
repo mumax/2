@@ -60,7 +60,7 @@ func SwapXYZ(array []float64) {
 //	XZ <-> XZ
 //	XY <-> YZ 
 func SwapIndex(index, dim int) int {
-	if dim !=1 {
+	if dim != 1 {
 		switch index {
 		default:
 			panic(InputErrF("Vector/tensor index out of range:", index))
@@ -78,7 +78,7 @@ func SwapIndex(index, dim int) int {
 			return YZ
 		}
 	} else {
-		return index;
+		return index
 	}
 	return -1 // silence 6g
 }
