@@ -39,13 +39,13 @@ func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
 		hy := cellsize[Y] * cellsize[Y]
 		hz := cellsize[Z] * cellsize[Z]
 
-		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(-2./hx - 2./hy - 2./hz)
-		arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(1. / hx)
-		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(1. / hx)
-		arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = float32(1. / hy)
-		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = float32(1. / hy)
-		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = float32(1. / hz)
-		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = float32(1. / hz)
+		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
+		arr[wrap(+1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(1 / hx)
+		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(1 / hx)
+		arr[wrap(0, size[X])][wrap(+1, size[Y])][wrap(0, size[Z])] = float32(1 / hy)
+		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = float32(1 / hy)
+		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(+1, size[Z])] = float32(1 / hz)
+		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = float32(1 / hz)
 	}
 	Stop("kern_ex")
 }
