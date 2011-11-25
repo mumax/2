@@ -49,7 +49,7 @@ func SwapXYZ(array []float64) {
 	return
 }
 
-// Transforms the index between user and program space:
+// Transforms the index between user and program space, unless it is a scalar:
 //	X  <-> Z
 //	Y  <-> Y
 //	Z  <-> X
@@ -59,22 +59,26 @@ func SwapXYZ(array []float64) {
 //	YZ <-> XY
 //	XZ <-> XZ
 //	XY <-> YZ 
-func SwapIndex(index int) int {
-	switch index {
-	default:
-		panic(InputErrF("Vector/tensor index out of range:", index))
-	case X:
-		return Z // also handles XX
-	case Y:
-		return Y // also handles YY
-	case Z:
-		return X // also handles ZZ
-	case YZ:
-		return XY
-	case XZ:
-		return XZ
-	case XY:
-		return YZ
+func SwapIndex(index, dim int) int {
+	if dim !=1 {
+		switch index {
+		default:
+			panic(InputErrF("Vector/tensor index out of range:", index))
+		case X:
+			return Z // also handles XX
+		case Y:
+			return Y // also handles YY
+		case Z:
+			return X // also handles ZZ
+		case YZ:
+			return XY
+		case XZ:
+			return XZ
+		case XY:
+			return YZ
+		}
+	} else {
+		return index;
 	}
 	return -1 // silence 6g
 }
