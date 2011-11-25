@@ -10,14 +10,14 @@ load('micromagnetism')
 load('demagexch')
 
 setscalar('Msat', 800e3)
-setscalar('Aex', 1.3e-11)
+setscalar('Aex', 1.3e-11/2)
 setscalar('alpha', 1)
 setscalar('dt', 10e-12)
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-autosave("m", "omf", ["Text"], 100e-12)
+autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
 autotabulate(["t", "<H>"], "H.txt", 10e-12)
 
