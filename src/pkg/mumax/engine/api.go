@@ -354,18 +354,18 @@ func (a API) Debug_VerifyAll() {
 }
 
 // DEBUG: start a timer with a given identifier tag
-func(a API)StartTimer(tag string){
-	EnableTimers(true) 
+func (a API) StartTimer(tag string) {
+	EnableTimers(true)
 	Start(tag)
 }
 
 // DEBUG: stop a timer with a given identifier tag.
 // It must be started first.
-func(a API)StopTimer(tag string){
+func (a API) StopTimer(tag string) {
 	Stop(tag)
 }
 
-func(a API)GetTime(tag string)float64{
+func (a API) GetTime(tag string) float64 {
 	return GetTime(tag)
 }
 

@@ -91,11 +91,10 @@ func Stop(tag string) {
 	timers[tag] = timer
 }
 
-
 // Get the total run time (in seconds) of a global timer
-func GetTime(tag string)float64{
+func GetTime(tag string) float64 {
 	timer := timers[tag]
-	return timer.Seconds()	
+	return timer.Seconds()
 }
 
 // Print names and runtime of all global timers
