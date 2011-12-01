@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 /// @debug sets array[i] to i.
-__global__ void SetIndex1D(float* part, int PART, int N){
+__global__ void setIndex1DKern(float* part, int PART, int N){
 
   int i = threadindex;
   if (i < N){
@@ -28,7 +28,7 @@ __global__ void SetIndex1D(float* part, int PART, int N){
 
 
 /// @debug sets array[i,j,k] to its C-oder index.
-__global__ void SetIndex3D(float* part, int PART, int N0, int N1, int N2){
+__global__ void setIndex3DKern(float* part, int PART, int N0, int N1, int N2){
 
   int k = blockIdx.y * blockDim.y + threadIdx.y;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
@@ -42,6 +42,15 @@ __global__ void SetIndex3D(float* part, int PART, int N0, int N1, int N2){
 }
 
 
+
+void setIndexX(float** dst, int N0, int N1, int N2) {
+
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
+
+
