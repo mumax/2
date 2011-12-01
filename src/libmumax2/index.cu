@@ -7,7 +7,10 @@
 
 /// This file implements various functions used for debugging.
 
-#include "macros.h"
+#include "index.h"
+#include "multigpu.h"
+#include "gpu_conf.h"
+#include "gpu_safe.h"
 
 #ifdef __cplusplus
 extern "C" {
