@@ -16,35 +16,30 @@
 extern "C" {
 #endif
 
-/// @debug sets array[i] to i.
-__global__ void setIndex1DKern(float* part, int PART, int N){
 
-  int i = threadindex;
-  if (i < N){
-	part[i] = i + PART*N;
-  }
-}
-
-
-
-/// @debug sets array[i,j,k] to its C-oder index.
-__global__ void setIndex3DKern(float* part, int PART, int N0, int N1, int N2){
+/// @debug sets array[i,j,k] to its C-oder X (outer) index.
+__global__ void setIndexXKern(float* dst, int PART, int N0, int N1Part, int N2){
 
   int k = blockIdx.y * blockDim.y + threadIdx.y;
   int j = blockIdx.x * blockDim.x + threadIdx.x;
-  float j2 = j + PART * N1; // j-index in the big array
-  if (j < N1 && k < N2){
+  //float j2 = j + PART * N1Part; // j-index in the big array
+  if (j < N1Part && k < N2){
 	for(int i=0; i<N0; i++){
-  		int I = i*N1*N2 + j*N2 + k; // linear array index
-			part[I] = i+j2+k;
+  		int I = i*N1Part*N2 + j*N2 + k; // linear array index
+			dst[I] = i; 
 		}
 	}
 }
 
 
 
-void setIndexX(float** dst, int N0, int N1, int N2) {
-
+void setIndexX(float** dst, int N0, int N1Part, int N2) {
+	dim3 gridSize, blockSize;
+	make2dconf(N1Part, N2, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		setIndexXKern <<<gridSize, blockSize>>> (dst[dev], dev, N0, N1Part, N2);
+	}
 }
 
 
