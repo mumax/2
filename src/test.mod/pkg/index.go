@@ -6,10 +6,11 @@ import "C"
 import (
 	"mumax/gpu"
 	"unsafe"
+	"fmt"
 )
 
 func init(){
-	panic("loaded test.mod")
+	fmt.Println("loaded test.mod")
 }
 
 // DEBUG: sets all values to their X (i) index

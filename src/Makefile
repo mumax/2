@@ -1,38 +1,33 @@
-UNAME := $(shell uname)
+dirs=\
+	libmumax2\
+	libtensor\
+	pkg\
+	mumax2\
+	python\
 
 # exclude muview for the moment in Os X
-ifeq ($(UNAME), Darwin) # Os X
-        dirs=\
-                libmumax2\
-                libomf\
-                libtensor\
-                pkg\
-                mumax2\
-                python\
+UNAME := $(shell uname)
+ifneq ($(UNAME), Darwin) # Linux and other Unix based systems
 
-else # Linux and other Unix based systems
-        dirs=\
-                libmumax2\
-                libtensor\
-                pkg\
-                mumax2\
-                python\
-                #libomf\
-                #muview\
+dirs+=\
+	  #libomf\
+      #muview\
         
 endif
+
 
 MODULES=$(wildcard *.mod)
 
 all: $(dirs) $(MODULES)
 
+$(MODULES): libmumax2 pkg
 pkg: libmumax2
 mumax2: pkg $(MODULES)
 muview: libomf libtensor
 python: mumax2 
 
 $(MODULES):
-	$(MAKE) install --no-print-directory --directory=$@/pkg $(TARGET)
+	$(MAKE) install --no-print-directory --directory=$@/pkg
 	
 .PHONY: $(dirs)
 
@@ -59,4 +54,5 @@ bench: install
 clean:
 	$(MAKE) TARGET=clean
 	rm -rf $(CLEANFILES)
+	$(foreach module, $(MODULES), make clean -C $(module)/pkg)
 

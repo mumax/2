@@ -12,9 +12,8 @@ modules=$(wildcard ../*.mod)
 # build is fast and dependencies complex
 .PHONY: $(executables)
 
-#$(GC) -I_obj $@.go $(modules)/pkg/import.go
 mumax2:
-	$(GC) -I_obj $@.go 
+	$(GC) -I_obj $@.go $(modules)/pkg/import.go
 	$(LD) -L_obj -o $@ $@.$O
 
 apigen:

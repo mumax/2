@@ -17,6 +17,6 @@ clean:
 
 .PHONY: test
 test:
-	$(foreach dir, $(dirs), $(MAKE) test -C $(dir);)
+	$(foreach dir, $(dirs), $(MAKE) test -C $(dir)&&)
 
 
