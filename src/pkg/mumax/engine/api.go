@@ -374,6 +374,22 @@ func (a API) Debug_VerifyAll() {
 	}
 }
 
+// DEBUG: start a timer with a given identifier tag
+func (a API) StartTimer(tag string) {
+	EnableTimers(true)
+	Start(tag)
+}
+
+// DEBUG: stop a timer with a given identifier tag.
+// It must be started first.
+func (a API) StopTimer(tag string) {
+	Stop(tag)
+}
+
+func (a API) GetTime(tag string) float64 {
+	return GetTime(tag)
+}
+
 // DEBUG: echos a string, can be used for synchronous output
 func (a API) Echo(str string) {
 	Log(str)

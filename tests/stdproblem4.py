@@ -36,7 +36,10 @@ setvalue('H_ext', [Hx, Hy, Hz])
 setscalar('alpha', 0.02)
 setscalar('dt', 0.01e-12)
 
+starttimer("run")
 run(1e-9)
+stoptimer("run")
+echo("run time: " + str(gettimer("run")))
 
 printstats()
 savegraph("graph.png")

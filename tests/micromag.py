@@ -7,6 +7,7 @@ setcellsize(5e-9, 5e-9, 5e-9)
 setperiodic(10, 0, 0)
 
 load('micromagnetism')
+load('demagexch')
 
 setscalar('alpha', 0.01)
 setscalar('msat', 800e3)
@@ -25,7 +26,6 @@ setscalar('dt', 1e-12)
 autosave("m", "omf", ["Text"], 10e-12)
 autosave("m", "ovf", ["Text"], 10e-12)
 autosave("m", "bin", [], 10e-12)
-autotabulate(["t", "<m>", "H_ext"], "out.txt", 10e-12)
 steps(100)
 
 printstats()
