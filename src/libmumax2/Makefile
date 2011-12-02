@@ -2,7 +2,7 @@ include ../Make.inc
 
 
 MY_CUFILES   = $(wildcard *.cu)                  # my cuda files
-MOD_CUFILES  = $(wildcard ../*.modules/cuda/*.cu)# module cuda files
+MOD_CUFILES  = $(wildcard ../*.mod/cuda/*.cu)# module cuda files
 CUFILES      = $(MY_CUFILES) $(MOD_CUFILES)      # all cuda files
 CPPFILES     = $(wildcard *.cpp)                 # my c++ files
 CU_HFILES    = $(CUFILES:.cu=.h)                 # cuda only header files
@@ -35,7 +35,7 @@ libmumax2.h: $(CU_HFILES) multigpu.h
 
 .PHONY: clean
 clean:
-	rm -f *.o *.so libmumax2.h ../*.modules/cuda/*.o
+	rm -f *.o *.so libmumax2.h ../*.mod/cuda/*.o
 
 install: all
 
