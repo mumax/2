@@ -19,6 +19,7 @@ import (
 // as input and they should not receive its value "from the future".
 // When all solvers have buffered their output, they are asked to 
 // CopyBuffer(), which copies their output buffer to the output quantity.
+// TODO: the engine could check the need for CopyBuffer()
 type Solver interface {
 	AdvanceBuffer()           // Takes one time step but hides the result in a buffer
 	CopyBuffer()              // Overwrite the output quantity with the previously calculated buffer

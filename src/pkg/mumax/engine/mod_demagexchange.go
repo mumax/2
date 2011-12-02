@@ -34,6 +34,8 @@ func (x ModDemagExch) Name() string {
 }
 
 func (x ModDemagExch) Load(e *Engine) {
+	// TODO: verify aexch space-independent
+
 	// dependencies
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
