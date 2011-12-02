@@ -19,7 +19,7 @@ $(CUOFILES): %.o: %.cu %.h
 	$(NVCC) -c $(@:.o=.cu) -o $(@)
 
 $(CPPOFILES): %.o: %.cpp %.h
-	 $(CC) -fPIC -c -I/usr/local/cuda/include $(@:.o=.cpp) -o $(@)
+	 $(CC) -fPIC -c $(@:.o=.cpp) -o $(@)
 
 libmumax2.so: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "

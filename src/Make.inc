@@ -13,18 +13,21 @@ NVCC+=\
 # flags for the gcc compiler
 # As CUDA is delivered only in 32 bits on Os X, architecture is forced to i386 on Darwin platform
 
-UNAME := $(shell uname)
+CC=g++\
 
-ifeq ($(UNAME), Darwin) # Os X
-CC=g++
 CC+=\
+ -I/usr/local/cuda/include\
  -Wall\
  -g\
+
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin) # Os X
+CC+=\
  -arch i386
 export GOARCH=386
+
 else # Linux and other Unix based systems
-CC=g++
+
 CC+=\
- -Wall\
- -g
+
 endif
