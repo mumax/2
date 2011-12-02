@@ -39,7 +39,7 @@ setscalar('dt', 0.01e-12)
 starttimer("run")
 run(1e-9)
 stoptimer("run")
-echo("run time: " + str(gettimer("run")))
+echo("run time: " + str(gettime("run")))
 
 printstats()
 savegraph("graph.png")
