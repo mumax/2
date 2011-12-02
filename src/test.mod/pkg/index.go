@@ -1,36 +1,39 @@
-package gpu
+package test
 
 //#include "libmumax2.h"
 import "C"
 
 import (
-	. "mumax/common"
+	"mumax/gpu"
 	"unsafe"
 )
 
 // DEBUG: sets all values to their X (i) index
-func SetIndexX(dst *Array) {
+func SetIndexX(dst *gpu.Array) {
+	partSize := dst.PartSize()
 	C.setIndexX(
-		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
-		C.int(dst.size3D[0]),
-		C.int(dst.partSize[1]),
-		C.int(dst.size3D[2]))
+		(**C.float)(unsafe.Pointer(&(dst.Pointers()[0]))),
+		C.int(partSize[0]),
+		C.int(partSize[1]),
+		C.int(partSize[2]))
 }
 
 // DEBUG: sets all values to their Y (j) index
-func SetIndexY(dst *Array) {
+func SetIndexY(dst *gpu.Array) {
+	partSize := dst.PartSize()
 	C.setIndexY(
-		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
-		C.int(dst.size3D[0]),
-		C.int(dst.partSize[1]),
-		C.int(dst.size3D[2]))
+		(**C.float)(unsafe.Pointer(&(dst.Pointers()[0]))),
+		C.int(partSize[0]),
+		C.int(partSize[1]),
+		C.int(partSize[2]))
 }
 
 // DEBUG: sets all values to their Z (k) index
-func SetIndexZ(dst *Array) {
+func SetIndexZ(dst *gpu.Array) {
+	partSize := dst.PartSize()
 	C.setIndexZ(
-		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
-		C.int(dst.size3D[0]),
-		C.int(dst.partSize[1]),
-		C.int(dst.size3D[2]))
+		(**C.float)(unsafe.Pointer(&(dst.Pointers()[0]))),
+		C.int(partSize[0]),
+		C.int(partSize[1]),
+		C.int(partSize[2]))
 }

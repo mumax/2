@@ -14,7 +14,7 @@ CPP_OFILES   = $(CPPFILES:.cpp=.o)               # c++ objects
 OFILES       = $(CU_OFILES) $(CPP_OFILES)        # all objects
 
 
-all: libmumax2.so libmumax2.h
+all: libmumax2.so libmumax2.h link
 
 $(CU_OFILES): %.o: %.cu %.h
 	$(NVCC) -c -I. $(@:.o=.cu) -o $(@)
@@ -25,13 +25,17 @@ $(CPP_OFILES): %.o: %.cpp %.h
 libmumax2.so: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
-	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
 
 libmumax2.h: $(CU_HFILES) multigpu.h
 	cp libmumax2.h.head libmumax2.h
 	$(foreach hfile, $(CU_HFILES),  echo \#include "\""$(hfile)"\"" >> libmumax2.h;)
 	echo \#include \"multigpu.h\" >> libmumax2.h
 	cat libmumax2.h.tail >> libmumax2.h	
+
+.PHONY: link
+link:
+	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
+	$(foreach module, $(wildcard ../*.mod), ln -sf $(CURDIR)/libmumax2.so $(module)/pkg;)
 
 .PHONY: clean
 clean:

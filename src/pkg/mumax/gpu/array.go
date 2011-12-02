@@ -231,9 +231,9 @@ func (a *Array) Component(i int) *Array {
 }
 
 // Array of pointers to parts, one per GPU.
-//func (a *Array) Pointers() []cu.DevicePtr {
-//return a.pointer
-//}
+func (a *Array) Pointers() []cu.DevicePtr {
+ return a.pointer
+}
 
 // True if the array has no underlying GPU storage.
 // E.g., when created by NilArray()
@@ -244,6 +244,11 @@ func (a *Array) IsNil() bool {
 // Size of the vector field.
 func (a *Array) Size3D() []int {
 	return a.size3D
+}
+
+// Size of each part per GPU 
+func (a *Array) PartSize() []int {
+	return a.partSize
 }
 
 // check if comp, x, y, z is inside the array's bounds.

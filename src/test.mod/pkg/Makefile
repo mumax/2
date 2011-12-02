@@ -7,12 +7,12 @@ GOFILES=\
 	doc.go\
 
 CGOFILES=\
-	test.go\
+	index.go\
 
 
 CGO_CFLAGS+=\
 	-I/usr/local/cuda/include\
-	-I../../../libmumax2\
+	-I../../libmumax2\
 
 UNAME := $(shell uname)
 
@@ -27,7 +27,7 @@ CGO_LDFLAGS+=\
 	-L/usr/lib/nvidia-current\
 	-L/usr/lib/nvidia\
 	-L/usr/lib64/nvidia\
-   	-L../../../libmumax2
+   	-L../../libmumax2
 endif
 
 
