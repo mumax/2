@@ -22,9 +22,6 @@ extern "C" {
 #include "add.h"
 #include "copypad.h"
 #include "exchange6.h"
-#include "gpu_conf.h"
-#include "gpu_properties.h"
-#include "gpu_safe.h"
 #include "index.h"
 #include "kernelmul_micromag.h"
 #include "multigpu.h"
@@ -33,7 +30,6 @@ extern "C" {
 #include "torque.h"
 #include "transpose.h"
 #include "uniform.h"
-#include "../test.module/test.h"
 
 
 #ifdef __cplusplus

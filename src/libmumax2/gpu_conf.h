@@ -19,6 +19,8 @@
 #ifndef gpu_conf_h
 #define gpu_conf_h
 
+#include <cuda_runtime.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,9 +58,9 @@ void gpu_setmaxthreads(int max);
  * CUDA tends to ignore invalid configurations silently, which is painfull for debugging.
  * Uses device properties
  */
-void check3dconf(dim3 gridsize, ///< 3D size of the thread grid
-           dim3 blocksize ///< 3D size of the trhead blocks on the grid
-           );
+///< 3D size of the thread grid
+///< 3D size of the trhead blocks on the grid
+void check3dconf(dim3 gridsize, dim3 blocksize );
 
 /**
  * Checks if the CUDA 1D kernel launch configuration is valid. 

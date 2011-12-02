@@ -2,23 +2,33 @@ include ../Make.inc
 
 CUFILES= $(wildcard *.cu ../*.module/*.cu)
 
-HFILES=$(CUFILES:.cu=.h)
+CPPFILES= $(wildcard *.cpp)
 
-OFILES=$(CUFILES:.cu=.o)
+CUHFILES=$(CUFILES:.cu=.h)
+
+HFILES=$(CUHFILES) $(CPPFILES:.cpp=.h)
+
+CUOFILES=$(CUFILES:.cu=.o) 
+CPPOFILES=$(CPPFILES:.cpp=.o)
+OFILES=$(CUOFILES) $(CPPOFILES)
+
 
 all: libmumax2.so libmumax2.h
 
-$(OFILES): %.o: %.cu %.h
-	 $(NVCC) -c $(@:.o=.cu) -o $(@)
+$(CUOFILES): %.o: %.cu %.h
+	$(NVCC) -c $(@:.o=.cu) -o $(@)
+
+$(CPPOFILES): %.o: %.cpp %.h
+	 $(CC) -fPIC -c -I/usr/local/cuda/include $(@:.o=.cpp) -o $(@)
 
 libmumax2.so: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
 	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
 
-libmumax2.h: $(HFILES)
+libmumax2.h: $(CUHFILES)
 	cp libmumax2.h.head libmumax2.h
-	$(foreach hfile, $(HFILES),  echo \#include "\""$(hfile)"\"" >> libmumax2.h;)
+	$(foreach hfile, $(CUHFILES),  echo \#include "\""$(hfile)"\"" >> libmumax2.h;)
 	cat libmumax2.h.tail >> libmumax2.h	
 
 .PHONY: clean
