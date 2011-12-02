@@ -11,9 +11,6 @@ GOFILES=\
 
 CGOFILES=\
 
-GC+=\
-	-I../common/_obj\
-
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	
 include $(GOROOT)/src/Make.pkg

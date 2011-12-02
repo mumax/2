@@ -18,5 +18,5 @@ frontend: common engine gpu
 apigen: common engine frontend
 queue: common
 
-include ../../Dirs.pkg
+include ../../InstallDirs.pkg
 
