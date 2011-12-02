@@ -13,19 +13,11 @@ GOFILES=\
 	reductor.go\
 	convplan.go\
 	fftplan.go\
-	#fftplan1gpu.go\
 
 CGOFILES=\
 	multigpu.go\
 	libmumax2.go\
 	lib_quant_init.go\
-
-GC+=\
-	-I../../cuda/driver/_obj\
-	-I../../cuda/runtime/_obj\
-	-I../../cuda/cufft/_obj\
-	-I../common/_obj\
-	-I../host/_obj\
 
 CGO_CFLAGS+=\
 	-I/usr/local/cuda/include\
@@ -47,7 +39,6 @@ CGO_LDFLAGS+=\
 	-L/usr/lib64/nvidia\
    	-L../../../libmumax2
 endif
-
 
 CGO_LDFLAGS+=\
 	-lcuda\
