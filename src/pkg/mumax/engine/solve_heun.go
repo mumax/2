@@ -9,15 +9,12 @@ package engine
 
 // Author: Arne Vansteenkiste
 
-import (
-)
-
-
+import ()
 
 type HeunSolver struct {
 	y, dy *Quant // Input
-	y1 *Quant // First stores euler solution, then heun solution.
-	dy0 *Quant // saves initial dy estimate
+	y1    *Quant // First stores euler solution, then heun solution.
+	dy0   *Quant // saves initial dy estimate
 	t, dt *Quant
 }
 
@@ -29,10 +26,10 @@ func NewHeun(e *Engine, y, dy *Quant) *HeunSolver {
 
 func (s *HeunSolver) AdvanceBuffer() {
 	panic("todo")
-//	y := s.y
-//	dy := s.dy
-//	y1 := s.y1
-//	dy0 := s.dy0
+	//	y := s.y
+	//	dy := s.dy
+	//	y1 := s.y1
+	//	dy0 := s.dy0
 
 	//dy.Update()
 	//dy0.Array().CopyFromDevice(dy.Array()) // Save dy0 for later
@@ -59,4 +56,3 @@ func (e *HeunSolver) Deps() (in, out []*Quant) {
 	out = []*Quant{e.y}
 	return
 }
-

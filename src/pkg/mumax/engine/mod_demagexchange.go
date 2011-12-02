@@ -33,7 +33,6 @@ func (x ModDemagExch) Name() string {
 	return "demagexch"
 }
 
-
 func (x ModDemagExch) Load(e *Engine) {
 	// TODO: verify aexch space-independent
 
