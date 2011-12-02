@@ -44,6 +44,60 @@ void setIndexX(float** dst, int N0, int N1Part, int N2) {
 
 
 
+/// @debug sets array[i,j,k] to its C-oder Y index.
+__global__ void setIndexYKern(float* dst, int PART, int N0, int N1Part, int N2){
+
+  int k = blockIdx.y * blockDim.y + threadIdx.y;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+  float j2 = j + PART * N1Part; // j-index in the big array
+  if (j < N1Part && k < N2){
+	for(int i=0; i<N0; i++){
+  		int I = i*N1Part*N2 + j*N2 + k; // linear array index
+			dst[I] = j2; 
+		}
+	}
+}
+
+
+
+void setIndexY(float** dst, int N0, int N1Part, int N2) {
+	dim3 gridSize, blockSize;
+	make2dconf(N1Part, N2, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		setIndexYKern <<<gridSize, blockSize>>> (dst[dev], dev, N0, N1Part, N2);
+	}
+}
+
+
+
+/// @debug sets array[i,j,k] to its C-oder Z (inner) index.
+__global__ void setIndexZKern(float* dst, int PART, int N0, int N1Part, int N2){
+
+  int k = blockIdx.y * blockDim.y + threadIdx.y;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+  //float j2 = j + PART * N1Part; // j-index in the big array
+  if (j < N1Part && k < N2){
+	for(int i=0; i<N0; i++){
+  		int I = i*N1Part*N2 + j*N2 + k; // linear array index
+			dst[I] = k; 
+		}
+	}
+}
+
+
+
+void setIndexZ(float** dst, int N0, int N1Part, int N2) {
+	dim3 gridSize, blockSize;
+	make2dconf(N1Part, N2, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		setIndexZKern <<<gridSize, blockSize>>> (dst[dev], dev, N0, N1Part, N2);
+	}
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
