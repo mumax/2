@@ -1,21 +1,22 @@
 include ../Make.inc
 
-OFILES=\
-	gpu_safe.o\
-	gpu_conf.o\
-	gpu_properties.o\
-	multigpu.o\
-	reduce.o\
-	add.o\
-	torque.o\
-	normalize.o\
-	copypad.o\
-	transpose.o\
-	exchange6.o\
-	kernelmul_micromag.o\
- 	uniform.o\
-	index.o\
-# 	addHani.o\
+CUFILES=\
+	gpu_safe.cu\
+	gpu_conf.cu\
+	gpu_properties.cu\
+	multigpu.cu\
+	reduce.cu\
+	add.cu\
+	torque.cu\
+	normalize.cu\
+	copypad.cu\
+	transpose.cu\
+	exchange6.cu\
+	kernelmul_micromag.cu\
+ 	uniform.cu\
+	index.cu\
+
+OFILES=$(CUFILES:.cu=.o)
 
 all: libmumax2.so
 
