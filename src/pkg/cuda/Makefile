@@ -5,4 +5,4 @@ dirs=\
 
 all:$(dirs)
 
-include ../../InstallDirs.pkg
+include ../GoDirs.pkg

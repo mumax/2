@@ -7,8 +7,6 @@ dirs=\
 	apigen\
 	queue\
 
-CLEANFILES+=*.log
-
 all: $(dirs)
 
 host: common
@@ -18,5 +16,5 @@ frontend: common engine gpu
 apigen: common engine frontend
 queue: common
 
-include ../../InstallDirs.pkg
+include ../GoDirs.pkg
 

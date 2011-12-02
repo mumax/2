@@ -8,6 +8,10 @@ import (
 	"unsafe"
 )
 
+func init(){
+	panic("loaded test.mod")
+}
+
 // DEBUG: sets all values to their X (i) index
 func SetIndexX(dst *gpu.Array) {
 	partSize := dst.PartSize()

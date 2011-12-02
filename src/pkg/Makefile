@@ -4,7 +4,6 @@ dirs=\
 
 all: $(dirs)
 
-include ../InstallDirs.pkg
-
 mumax: cuda
 
+include GoDirs.pkg
