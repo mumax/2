@@ -98,6 +98,9 @@ void make1dconf(int N,           ///< size of array to span (number of floats)
                 );
 
 
+void make2dconf(int N1, int N2, dim3* gridSize, dim3* blockSize);
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -29,6 +29,7 @@ extern "C" {
 #include "transpose.h"
 #include "kernelmul_micromag.h"
 #include "uniform.h"
+#include "index.h"
 
 
 #ifdef __cplusplus

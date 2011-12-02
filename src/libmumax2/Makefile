@@ -14,6 +14,7 @@ OFILES=\
 	exchange6.o\
 	kernelmul_micromag.o\
  	uniform.o\
+	index.o\
 # 	addHani.o\
 
 all: libmumax2.so
