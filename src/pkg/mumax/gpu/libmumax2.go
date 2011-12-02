@@ -349,3 +349,12 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		C.int(fftMx.partLen3D))
 }
+
+// DEBUG
+func SetIndexX(dst *Array) {
+	C.setIndexX(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		C.int(dst.size3D[0]),
+		C.int(dst.partSize[1]),
+		C.int(dst.size3D[2]))
+}
