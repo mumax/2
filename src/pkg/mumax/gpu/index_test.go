@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-func TestIndex(test*testing.T){
+func TestIndex(test *testing.T) {
 	nComp := 1
 	N0 := 4
 	N1 := 8
@@ -25,12 +25,12 @@ func TestIndex(test*testing.T){
 	SetIndexX(a)
 	ah := a.LocalCopy().Array
 	//fmt.Println(ah)
-	for c := 0; c<nComp;c++{
-		for i:=0; i<N0; i++{
-			for j:=0;j<N1;j++{
-				for k:=0;k<N2;k++{
-					if(ah[c][i][j][k] != float32(i)){
-						test.Error( ah[c][i][j][k] ,"!=", float32(i))
+	for c := 0; c < nComp; c++ {
+		for i := 0; i < N0; i++ {
+			for j := 0; j < N1; j++ {
+				for k := 0; k < N2; k++ {
+					if ah[c][i][j][k] != float32(i) {
+						test.Error(ah[c][i][j][k], "!=", float32(i))
 					}
 				}
 			}
@@ -41,12 +41,12 @@ func TestIndex(test*testing.T){
 	SetIndexY(a)
 	ah = a.LocalCopy().Array
 	//fmt.Println(ah)
-	for c := 0; c<nComp;c++{
-		for i:=0; i<N0; i++{
-			for j:=0;j<N1;j++{
-				for k:=0;k<N2;k++{
-					if(ah[c][i][j][k] != float32(j)){
-						test.Error( ah[c][i][j][k] ,"!=", float32(j))
+	for c := 0; c < nComp; c++ {
+		for i := 0; i < N0; i++ {
+			for j := 0; j < N1; j++ {
+				for k := 0; k < N2; k++ {
+					if ah[c][i][j][k] != float32(j) {
+						test.Error(ah[c][i][j][k], "!=", float32(j))
 					}
 				}
 			}
@@ -57,12 +57,12 @@ func TestIndex(test*testing.T){
 	SetIndexZ(a)
 	ah = a.LocalCopy().Array
 	//fmt.Println(ah)
-	for c := 0; c<nComp;c++{
-		for i:=0; i<N0; i++{
-			for j:=0;j<N1;j++{
-				for k:=0;k<N2;k++{
-					if(ah[c][i][j][k] != float32(k)){
-						test.Error( ah[c][i][j][k] ,"!=", float32(k))
+	for c := 0; c < nComp; c++ {
+		for i := 0; i < N0; i++ {
+			for j := 0; j < N1; j++ {
+				for k := 0; k < N2; k++ {
+					if ah[c][i][j][k] != float32(k) {
+						test.Error(ah[c][i][j][k], "!=", float32(k))
 					}
 				}
 			}
