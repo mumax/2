@@ -1,20 +1,6 @@
 include ../Make.inc
 
-CUFILES=\
-	gpu_safe.cu\
-	gpu_conf.cu\
-	gpu_properties.cu\
-	multigpu.cu\
-	reduce.cu\
-	add.cu\
-	torque.cu\
-	normalize.cu\
-	copypad.cu\
-	transpose.cu\
-	exchange6.cu\
-	kernelmul_micromag.cu\
- 	uniform.cu\
-	index.cu\
+CUFILES= $(wildcard *.cu)
 
 OFILES=$(CUFILES:.cu=.o)
 
@@ -28,9 +14,9 @@ libmumax2.so: $(OFILES)
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
 	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
 
-omflibs: $(OMFSTATICLIBS)
-	cp $(CURDIR)/libOMFImport.a $(CURDIR)/../../lib
-	cp $(CURDIR)/libOMFHeader.a $(CURDIR)/../../lib
+#omflibs: $(OMFSTATICLIBS)
+	#cp $(CURDIR)/libOMFImport.a $(CURDIR)/../../lib
+	#cp $(CURDIR)/libOMFHeader.a $(CURDIR)/../../lib
 
 %.a: %.o
 	$(CC) $(<:.o=.cpp) -o $(@:.a=.o) -I.
