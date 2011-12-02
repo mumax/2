@@ -1,6 +1,6 @@
 include ../Make.inc
 
-CUFILES= $(wildcard *.cu ../*.module/*.cu)
+CUFILES= $(wildcard *.cu ../*.modules/cuda/*.cu)
 
 CPPFILES= $(wildcard *.cpp)
 
@@ -33,7 +33,7 @@ libmumax2.h: $(CUHFILES)
 
 .PHONY: clean
 clean:
-	rm -f *.o *.so libmumax2.h
+	rm -f *.o *.so libmumax2.h ../*.modules/cuda/*.o
 
 install: all
 
