@@ -17,16 +17,46 @@ else # Linux and other Unix based systems
                 pkg\
                 mumax2\
                 python\
-#               libomf\
-#               muview\
+                #libomf\
+                #muview\
         
 endif
 
-all: $(dirs)
+MODULES=$(wildcard *.mod)
+
+all: $(dirs) $(MODULES)
 
 pkg: libmumax2
-mumax2: pkg
+mumax2: pkg $(MODULES)
 muview: libomf libtensor
 python: mumax2 
 
-include Dirs.pkg
+$(MODULES):
+	$(MAKE) install --no-print-directory --directory=$@/pkg $(TARGET)
+	
+.PHONY: $(dirs)
+
+$(dirs):
+	$(MAKE) --no-print-directory --directory=$@ $(TARGET)
+
+
+.PHONY: install
+install:
+	$(MAKE) TARGET=install
+
+
+.PHONY: test
+test: install
+	$(MAKE) TARGET=test
+
+
+.PHONY: bench
+bench: install
+	$(MAKE) TARGET=bench
+
+
+.PHONY: clean
+clean:
+	$(MAKE) TARGET=clean
+	rm -rf $(CLEANFILES)
+
