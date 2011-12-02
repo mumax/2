@@ -259,7 +259,7 @@ void GLWidget::paintGL()
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
-		    glRotatef(180.0*(phi+90.0)/PI, 0.0, 0.0, 1.0);
+		    glRotatef(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
 		    glRotatef(180.0*theta/PI,  1.0, 0.0, 0.0);
 
 		    glCallList(cone);
