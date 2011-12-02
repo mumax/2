@@ -10,43 +10,53 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"mumax/gpu"
-	"fmt"
 )
 
-// Heun solver
-// TODO: implement
+
+
 type HeunSolver struct {
-	y, dy, t, dt *Quant
+	y, dy *Quant // Input
+	y1 *Quant // First stores euler solution, then heun solution.
+	dy0 *Quant // saves initial dy estimate
+	t, dt *Quant
 }
 
-func NewHeun(y, dy, t, dt *Quant) *HeunSolver {
-	return &EulerSolver{y, dy, t, dt}
+func NewHeun(e *Engine, y, dy *Quant) *HeunSolver {
+	y1 := newQuant("heun_y1", y.NComp(), e.size3D, FIELD, y.Unit(), false, "hidden buffer")
+	dy0 := newQuant("heun_dy0", y.NComp(), e.size3D, FIELD, y.Unit(), false, "hidden buffer")
+	return &HeunSolver{y, dy, y1, dy0, e.time, e.dt}
 }
 
-func (s *HeunSolver) Step() {
-	y := s.y.Array()
-	dy := s.dy.Array()
-	dyMul := s.dy.multiplier
-	checkUniform(dyMul)
+func (s *HeunSolver) AdvanceBuffer() {
+	panic("todo")
+//	y := s.y
+//	dy := s.dy
+//	y1 := s.y1
+//	dy0 := s.dy0
 
-	t := s.t
-	dt := s.dt.Scalar()
-	if dt <= 0 {
-		panic(InputErr(fmt.Sprint("dt=", dt)))
-	}
+	//dy.Update()
+	//dy0.Array().CopyFromDevice(dy.Array()) // Save dy0 for later
 
-	gpu.Madd(y, y, dy, float32(dt*dyMul[0]))
+	//dyMul := s.dy.multiplier
+	//checkUniform(dyMul)
+	//dt := s.dt.Scalar()
 
-	t.SetScalar(t.Scalar() + dt) // do not use quant dt.Scalar, which might get updated
+	//gpu.Madd(s.ybuf.Array(), y, dy, float32(dt*dyMul[0]))
+
+	//s.y.Invalidate()
 }
 
-//DEBUG
-func checkUniform(array []float64) {
-	for _, v := range array {
-		if v != array[0] {
-			panic(Bug(fmt.Sprint("should be all equal:", array)))
-		}
-	}
+func (s *HeunSolver) CopyBuffer() {
+	//s.y.Array().CopyFromDevice(s.ybuf.Array())
 }
+
+func (s *HeunSolver) ProposeDt() float64 {
+	return 0 // this is not an adaptive step solver yet
+}
+
+func (e *HeunSolver) Deps() (in, out []*Quant) {
+	in = []*Quant{e.dy}
+	out = []*Quant{e.y}
+	return
+}
+

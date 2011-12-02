@@ -37,6 +37,7 @@ GOFILES=\
 	verify.go\
 	solver.go\
 	solve_euler.go\
+	solve_heun.go\
 	resample.go\
 	notifier.go\
 	notify_autosave.go\
