@@ -52,7 +52,6 @@ func (s *EulerSolver) Step() {
 	e.time.SetScalar(e.time.Scalar() + dt)
 }
 
-
 //DEBUG
 func checkUniform(array []float64) {
 	for _, v := range array {

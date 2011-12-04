@@ -42,31 +42,36 @@ func (e *Engine) WriteDot(out io.Writer) {
 		}
 	}
 
-	 //Add solver cluster node
-		fmt.Fprintln(out, "subgraph cluster0{")
-		fmt.Fprintln(out, "rank=sink;")
-		for i, _ := range e.equation {
-			ODE := "solver" + fmt.Sprint(i)
-			fmt.Fprintln(out, ODE+` [style=filled, shape=box, label="`, e.equation[i].String() , `"];`)
+	//Add solver cluster node
+	fmt.Fprintln(out, "subgraph cluster0{")
+	fmt.Fprintln(out, "rank=sink;")
+	for i, _ := range e.equation {
+		ODE := "solver" + fmt.Sprint(i)
+		fmt.Fprintln(out, ODE+` [style=filled, shape=box, label="`, e.equation[i].String(), `"];`)
+	}
+	fmt.Fprintln(out, "}")
+	fmt.Fprintln(out, "subgraph cluster0 -> dt;")
+	fmt.Fprintln(out, "subgraph cluster0 -> t;")
+	fmt.Fprintln(out, "subgraph cluster0 -> step;")
+	fmt.Fprintln(out, "dt -> subgraph cluster0;")
+	//fmt.Fprintln(out, "{rank=same;", "dt;t", ";", "subgraph cluster0", "};")
+	fmt.Fprintln(out, "{rank=sink;", "subgraph cluster0", "};")
+	fmt.Fprintln(out, "{rank=sink;", "solver0", "};")
+
+	// Add ODE node
+	for i, eqn := range e.equation {
+		ODE := "solver" + fmt.Sprint(i)
+		inp, outp := eqn.input, eqn.output
+		for j := range outp {
+			fmt.Fprintln(out, ODE, "->", outp[j].Name(), ";")
+			fmt.Fprintln(out, "{rank=source;", outp[j].Name(), "};")
+			fmt.Fprintln(out, "{rank=sink;", inp[j].Name(), "};")
 		}
-		fmt.Fprintln(out, "}")
-		fmt.Fprintln(out, "solver0 -> dt;")
-		fmt.Fprintln(out, "dt -> solver0;")
-		fmt.Fprintln(out, "{rank=same;", "dt", ";", "solver0", "};")
-	
-		// Add ODE node
-		for i, eqn := range e.equation {
-			ODE := "solver" + fmt.Sprint(i)
-			inp, outp := eqn.input, eqn.output
-			for j := range outp {
-				fmt.Fprintln(out, ODE, "->", outp[j].Name(), ";")
-				fmt.Fprintln(out, "{rank=source;", outp[j].Name(), "};")
-			}
-			for j := range inp {
-				fmt.Fprintln(out, inp[j].Name(), "->", ODE, ";")
-				//fmt.Fprintln(out, "{rank=sink;", inp[j].Name(), "};")
-			}
+		for j := range inp {
+			fmt.Fprintln(out, inp[j].Name(), "->", ODE, ";")
+			//fmt.Fprintln(out, "{rank=sink;", inp[j].Name(), "};")
 		}
+	}
 
 	// align similar nodes
 	i := 0
