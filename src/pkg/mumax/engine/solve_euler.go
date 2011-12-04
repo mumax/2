@@ -38,6 +38,7 @@ func (s *EulerSolver) Step() {
 	dt := engine.dt.Scalar()
 
 	// Then step all outputs (without intermediate updates!)
+	// and invalidate them.
 	for i := range equation {
 		y := equation[i].output[0]
 		dy := equation[i].input[0]
@@ -50,6 +51,7 @@ func (s *EulerSolver) Step() {
 	// Advance time
 	e.time.SetScalar(e.time.Scalar() + dt)
 }
+
 
 //DEBUG
 func checkUniform(array []float64) {
