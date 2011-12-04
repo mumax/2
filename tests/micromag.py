@@ -8,6 +8,7 @@ setperiodic(10, 0, 0)
 
 load('micromagnetism')
 load('demagexch')
+load('solver/euler')
 
 setscalar('alpha', 0.01)
 setscalar('msat', 800e3)

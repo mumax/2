@@ -11,6 +11,7 @@ setcellsize(500e-9/Nx, 125e-9/Ny, 3e-9/Nz)
 
 load('micromagnetism')
 load('demagexch')
+load('solver/euler')
 
 setscalar('Msat', 800e3)
 setscalar('Aex', 1.3e-11)

@@ -17,12 +17,8 @@ import (
 
 // Euler solver
 type EulerSolver struct {
-
 }
 
-func NewEuler() *EulerSolver {
-	return &EulerSolver{}
-}
 
 func (s *EulerSolver) Step() {
 	e := GetEngine()
@@ -62,3 +58,27 @@ func checkUniform(array []float64) {
 		}
 	}
 }
+
+
+
+
+
+// Register this module
+func init() {
+	RegisterModule(EulerModule(0))
+}
+
+func (m EulerModule) Load(e *Engine) {
+	e.SetSolver(&EulerSolver{})
+}
+
+type EulerModule int
+
+func (m EulerModule) Description() string {
+	return "Fixed-step Euler solver"
+}
+
+func (m EulerModule) Name() string {
+	return "solver/euler"
+}
+
