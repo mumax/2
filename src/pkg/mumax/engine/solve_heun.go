@@ -50,4 +50,3 @@ func (s *HeunSolver) Step() {
 	e.time.SetScalar(e.time.Scalar() + dt)
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }
-

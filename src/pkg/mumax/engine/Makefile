@@ -49,6 +49,7 @@ GOFILES=\
 	format_omf.go\
 	format_ovf2.go\
 	table.go\
+	arraypool.go\
 	#input.go\
 
 CGOFILES=\
