@@ -26,6 +26,7 @@ autotabulate(["t", "<H>"], "H.txt", 10e-12)
 
 save('kern_ex', 'txt', [], 'kern_ex.txt')
 
+savegraph("graph.png")
 run(5e-9)
 
 Hx = -24.6E-3 / mu0

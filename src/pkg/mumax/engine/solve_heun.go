@@ -18,12 +18,11 @@ type HeunSolver struct {
 	buffer []*gpu.Array
 }
 
-func NewHeun(e*Engine) *HeunSolver {
-	s:=new(HeunSolver)
-	s.buffer=make([]*gpu.Array,len(e.equation))
+func NewHeun(e *Engine) *HeunSolver {
+	s := new(HeunSolver)
+	s.buffer = make([]*gpu.Array, len(e.equation))
 	return s
 }
-
 
 func (s *HeunSolver) Step() {
 	e := GetEngine()
@@ -74,7 +73,6 @@ func (s *HeunSolver) Step() {
 
 		y.Invalidate()
 	}
-
 
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }

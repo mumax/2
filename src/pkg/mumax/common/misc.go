@@ -28,6 +28,18 @@ func CheckSize(a, b []int) {
 	}
 }
 
+// Check if array sizes are equal. Panics if arrays a and b are different. 
+func CheckSize3(a, b, c []int) {
+	if len(a) != len(b) || len(a) != len(c) {
+		panic(InputErr(fmt.Sprint("array size mismatch: ", a, b, c)))
+	}
+	for i, s := range a {
+		if s != b[i] || s != c[i] {
+			panic(InputErr(fmt.Sprint("array size mismatch: ", a, b, c)))
+		}
+	}
+}
+
 // True if a and b are equal. Used to check for equal array sizes.
 func EqualSize(a, b []int) bool {
 	if len(a) != len(b) {

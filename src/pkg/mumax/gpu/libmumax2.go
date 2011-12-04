@@ -21,6 +21,7 @@ import (
 
 // Adds 2 multi-GPU arrays: dst = a + b
 func Add(dst, a, b *Array) {
+	CheckSize(dst.size4D, a.size4D)
 	C.addAsync(
 		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
@@ -28,6 +29,30 @@ func Add(dst, a, b *Array) {
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
+}
+
+// Asynchronous multiply-add: a += mulB*b
+// b may contain NULL pointers, implemented as all 1's.
+func Madd1Async(a, b *Array, mulB float32, stream Stream) {
+	C.madd1Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
+}
+
+// Asynchronous multiply-add: a += mulB*b + mulC*c
+// b,c may contain NULL pointers, implemented as all 1's.
+func Madd2Async(a, b *Array, mulB float32, c *Array, mulC float32, stream Stream) {
+	C.madd2Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
 }
 
 // Multiply-add: dst = a + mulB*b

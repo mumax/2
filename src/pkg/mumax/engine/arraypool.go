@@ -28,6 +28,6 @@ func (p *ArrayPool) Get(nComp int, size []int) *gpu.Array {
 func (p *ArrayPool) Recycle(array **gpu.Array) {
 	// TODO: actual recycling
 	(*array).Free()
-	(*array)=nil
-	
+	(*array) = nil
+
 }

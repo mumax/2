@@ -54,6 +54,63 @@ void maddAsync(float** dst, float** a, float** b, float mulB, CUstream* stream, 
 	}
 }
 
+///@internal
+__global__ void madd1Kern(float* a, float* b, float mulB, int Npart) {
+	int i = threadindex;
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+	if (i < Npart) {
+		a[i] += mulB * bMask;
+	}
+}
+
+
+void madd1Async(float** a, float** b, float mulB, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd1Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, Npart);
+	}
+}
+
+///@internal
+__global__ void madd2Kern(float* a, float* b, float mulB, float* c, float mulC, int Npart) {
+	int i = threadindex;
+
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+
+	float cMask;
+	if (c == NULL){
+		cMask = 1.0f;
+	}else{
+		cMask = c[i];
+	}
+
+	if (i < Npart) {
+		a[i] += mulB * bMask + mulC * cMask;
+	}
+}
+
+
+void madd2Async(float** a, float** b, float mulB, float** c, float mulC, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd2Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, c[dev], mulC, Npart);
+	}
+}
+
 #ifdef __cplusplus
 }
 #endif
