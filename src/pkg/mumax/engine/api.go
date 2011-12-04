@@ -110,19 +110,31 @@ func (a API) Run(duration float64) {
 
 //________________________________________________________________________________ set quantities
 
-// Sets the value of a quantity. The quantity must be of type VALUE or MASK.
+// Set value of a quantity. The quantity must be of type VALUE or MASK.
 // If the quantity is a MASK, the value will be multiplied by a space-dependent mask
 // which typically contains dimensionless numbers between 0 and 1.
-func (a API) SetValue(quantity string, value []float64) {
+func (a API) SetV(quantity string, value []float64) {
 	q := a.Engine.Quant(quantity)
 	SwapXYZ(value)
 	q.SetValue(value)
 }
 
-// Convenience method for SetValue() with only one number.
-func (a API) SetScalar(quantity string, value float64) {
+func (a API) SetValue(quantity string, value []float64) {
+Warn("deprecated")
+a.SetV(quantity, value)
+}
+
+
+// Set scalar. Convenience method for SetValue() with only one number.
+// REDUNDANT?
+func (a API) SetS(quantity string, value float64) {
 	q := a.Engine.Quant(quantity)
 	q.SetValue([]float64{value})
+}
+
+func (a API) SetScalar(quantity string, value float64) {
+Warn("deprecated")
+a.SetS(quantity, value)
 }
 
 // Sets a space-dependent multiplier mask for the quantity.
