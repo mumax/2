@@ -392,15 +392,22 @@ func (e *Engine) AddPDE1(y, diff string) {
 
 //________________________________________________________________________________ step
 
-func (e *Engine) initSolver() {
-	SetRK12(e)
+func (e *Engine) SetSolver(s Solver) {
+	if e.solver != nil {
+		panic(InputErr("solver already set"))
+	}
+	e.solver = s
 }
 
 // Takes one ODE step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
 	if len(e.equation) == 0 {
-		panic(InputErr("engine.Step: no differential equations loaded."))
+		panic(InputErr("no modules defining a differential equation loaded"))
+	}
+
+	if e.solver == nil {
+		panic(InputErr("no solver has been loaded yet"))
 	}
 
 	e.solver.Step()

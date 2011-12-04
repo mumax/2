@@ -14,35 +14,49 @@ import (
 	"mumax/gpu"
 )
 
+// Register this module
+func init() {
+	RegisterModule(RK12Module(0))
+}
+
 type RK12Solver struct {
 	buffer []*gpu.Array
 	error  []*Quant // error estimates for each equation
 	maxErr []*Quant // maximum error for each equation
-	diff []gpu.Reductor
+	diff   []gpu.Reductor
 }
 
-func SetRK12(e *Engine) {
+func (m RK12Module) Load(e *Engine) {
 	s := new(RK12Solver)
 	equation := e.equation
 	s.buffer = make([]*gpu.Array, len(equation))
 	s.error = make([]*Quant, len(equation))
 	s.maxErr = make([]*Quant, len(equation))
 	s.diff = make([]gpu.Reductor, len(equation))
-	e.solver = s
+	e.SetSolver(s)
 
 	for i := range equation {
 		eqn := &(equation[i])
 		Assert(eqn.kind == EQN_PDE1)
 		out := eqn.output[0]
 		unit := out.Unit()
-		e.AddQuant(out.Name() + "_error", SCALAR, VALUE, unit, "Error estimate for " + out.Name())
+		e.AddQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.error[i] = e.Quant(out.Name() + "_error")
-		e.AddQuant(out.Name() + "_maxError", SCALAR, VALUE, unit, "Maximum error for " + out.Name())
-		s.maxErr[i] = e.Quant(out.Name()+"_maxError")
+		e.AddQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s.maxErr[i] = e.Quant(out.Name() + "_maxError")
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 	}
 }
 
+type RK12Module int
+
+func (m RK12Module) Description() string {
+	return "Adaptive Heun solver"
+}
+
+func (m RK12Module) Name() string {
+	return "solver/rk12"
+}
 
 //func(s*RK12Solver)Input()[]*Quant{
 //	
@@ -103,8 +117,12 @@ func (s *RK12Solver) Step() {
 		factor := s.maxErr[i].Scalar() / error
 
 		// TODO: give user the control:
-		if factor < 0.01 {factor = 0.01}
-		if factor < minFactor{minFactor = factor} // take minimum time increase factor of all eqns.
+		if factor < 0.01 {
+			factor = 0.01
+		}
+		if factor < minFactor {
+			minFactor = factor
+		} // take minimum time increase factor of all eqns.
 
 		Pool.Recycle(&s.buffer[i])
 		y.Invalidate()
