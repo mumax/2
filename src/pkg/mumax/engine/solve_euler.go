@@ -17,40 +17,38 @@ import (
 
 // Euler solver
 type EulerSolver struct {
-	y, ybuf, dy, t, dt *Quant
+
 }
 
-func NewEuler(e *Engine, y, dy *Quant) *EulerSolver {
-	buffer := newQuant("eulerBuffer", y.NComp(), e.size3D, FIELD, y.Unit(), false, "hidden buffer to cache output quant")
-	return &EulerSolver{y, buffer, dy, e.time, e.dt}
+func NewEuler() *EulerSolver {
+	return &EulerSolver{}
 }
 
-func (s *EulerSolver) AdvanceBuffer() {
-	s.dy.Update()
+func (s *EulerSolver) Step() {
+	e := GetEngine()
+	equation := e.equation
 
-	y := s.y.Array()
-	dy := s.dy.Array()
-	dyMul := s.dy.multiplier
-	checkUniform(dyMul)
-	dt := s.dt.Scalar()
+	// First update all inputs
+	for i := range equation {
+		Assert(equation[i].kind == EQN_PDE1)
+		equation[i].input[0].Update()
+	}
 
-	gpu.Madd(s.ybuf.Array(), y, dy, float32(dt*dyMul[0]))
+	// get dt here to avoid updates later on.
+	dt := engine.dt.Scalar()
 
-	s.y.Invalidate()
-}
+	// Then step all outputs (without intermediate updates!)
+	for i := range equation {
+		y := equation[i].output[0]
+		dy := equation[i].input[0]
+		dyMul := dy.multiplier
+		checkUniform(dyMul)
+		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // TODO: faster MAdd
+		y.Invalidate()
+	}
 
-func (s *EulerSolver) CopyBuffer() {
-	s.y.Array().CopyFromDevice(s.ybuf.Array())
-}
-
-func (s *EulerSolver) ProposeDt() float64 {
-	return 0 // this is not an adaptive step solver
-}
-
-func (e *EulerSolver) Deps() (in, out []*Quant) {
-	in = []*Quant{e.dy}
-	out = []*Quant{e.y}
-	return
+	// Advance time
+	e.time.SetScalar(e.time.Scalar() + dt)
 }
 
 //DEBUG

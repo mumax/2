@@ -12,22 +12,23 @@ package engine
 // Type representing a differential equation
 type Equation struct {
 	input, output []*Quant // input/output quantities
-	kind int // type of equation
+	kind          int      // type of equation
 }
 
 // d output / d t = input
-func PDE1(output, input *Quant)Equation{
+func PDE1(output, input *Quant) Equation {
 	return Equation{[]*Quant{input}, []*Quant{output}, EQN_PDE1}
 }
 
-func(e *Equation)String()string{
-	switch(e.kind){
-		case EQN_PDE1: return "∂" + e.output[0].Name() + "/∂t=" + e.input[0].Name()
+func (e *Equation) String() string {
+	switch e.kind {
+	case EQN_PDE1:
+		return "∂" + e.output[0].Name() + "/∂t=" + e.input[0].Name()
 	}
 	return "<invalid equation>"
 }
 
-const(
+const (
 	EQN_INVALID = iota // not used
-	EQN_PDE1// dy/dt=f(y,t) 
+	EQN_PDE1           // dy/dt=f(y,t) 
 )
