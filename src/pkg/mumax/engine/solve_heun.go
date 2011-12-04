@@ -64,11 +64,12 @@ func (s *HeunSolver) Step() {
 	// stage 1
 	for i := range equation {
 		y := equation[i].output[0]
-		//dy := equation[i].input[0]
-		//dyMul := dy.multiplier
+		dy := equation[i].input[0]
+		dyMul := dy.multiplier
 
-		//h := 0.5 * float32(dt*dyMul[0])
-		//gpu.Madd2(y.Array(), h, dy.Array(), h, s.buffer[i]) // corrected step
+		h := float32(dt*dyMul[0])
+		gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.buffer[i], -0.5*h, y.Array().Stream) // corrected step
+		y.Array().Sync()
 		Pool.Recycle(&s.buffer[i])
 
 		y.Invalidate()

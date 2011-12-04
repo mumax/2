@@ -15,7 +15,7 @@ load('demagexch')
 setscalar('Msat', 800e3)
 setscalar('Aex', 1.3e-11)
 setscalar('alpha', 1)
-setscalar('dt', 0.1e-12)
+setscalar('dt', 1e-12)
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
@@ -27,7 +27,7 @@ autotabulate(["t", "<H>"], "H.txt", 10e-12)
 save('kern_ex', 'txt', [], 'kern_ex.txt')
 
 savegraph("graph.png")
-run(5e-9)
+run(2e-9)
 
 Hx = -24.6E-3 / mu0
 Hy =   4.3E-3 / mu0
@@ -35,7 +35,7 @@ Hz =   0      / mu0
 setvalue('H_ext', [Hx, Hy, Hz])
 #
 setscalar('alpha', 0.02)
-setscalar('dt', 0.01e-12)
+setscalar('dt', 0.2e-12)
 
 starttimer("run")
 run(1e-9)
