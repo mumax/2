@@ -15,38 +15,66 @@ import (
 )
 
 type HeunSolver struct {
-
+	buffer []*gpu.Array
 }
 
-func NewHeun() *HeunSolver {
-	return &HeunSolver{}
+func NewHeun(e*Engine) *HeunSolver {
+	s:=new(HeunSolver)
+	s.buffer=make([]*gpu.Array,len(e.equation))
+	return s
 }
+
 
 func (s *HeunSolver) Step() {
 	e := GetEngine()
 	equation := e.equation
 
 	// First update all inputs
+	dt := engine.dt.Scalar()
 	for i := range equation {
 		Assert(equation[i].kind == EQN_PDE1)
 		equation[i].input[0].Update()
 	}
 
-	// get dt here to avoid updates later on.
-	dt := engine.dt.Scalar()
-
-	// Then step all outputs (without intermediate updates!)
+	// Then step all outputs
 	// and invalidate them.
+
+	// stage 0
 	for i := range equation {
 		y := equation[i].output[0]
 		dy := equation[i].input[0]
 		dyMul := dy.multiplier
 		checkUniform(dyMul)
-		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // TODO: faster MAdd
+		s.buffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		s.buffer[i].CopyFromDevice(dy.Array()) // save for later
+
+		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // initial euler step
+
 		y.Invalidate()
 	}
 
 	// Advance time
 	e.time.SetScalar(e.time.Scalar() + dt)
+
+	// update inputs again
+	for i := range equation {
+		Assert(equation[i].kind == EQN_PDE1)
+		equation[i].input[0].Update()
+	}
+
+	// stage 1
+	for i := range equation {
+		y := equation[i].output[0]
+		//dy := equation[i].input[0]
+		//dyMul := dy.multiplier
+
+		//h := 0.5 * float32(dt*dyMul[0])
+		//gpu.Madd2(y.Array(), h, dy.Array(), h, s.buffer[i]) // corrected step
+		Pool.Recycle(&s.buffer[i])
+
+		y.Invalidate()
+	}
+
+
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }

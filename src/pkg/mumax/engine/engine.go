@@ -76,7 +76,7 @@ func (e *Engine) init() {
 	e.step = e.Quant("step")
 
 	e.equation = make([]Equation, 0, 1)
-	e.solver = &EulerSolver{} // default
+	e.solver = nil 
 	e.modules = make([]Module, 0)
 	e.crontabs = make(map[int]Notifier)
 	e.outputTables = make(map[string]*Table)
@@ -392,11 +392,18 @@ func (e *Engine) AddPDE1(y, diff string) {
 
 //________________________________________________________________________________ step
 
+func(e*Engine)initSolver(){
+	e.solver=NewHeun(e)
+}
+
 // Takes one ODE step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
 	if len(e.equation) == 0 {
 		panic(InputErr("engine.Step: no differential equations loaded."))
+	}
+	if e.solver == nil{
+		e.initSolver()
 	}
 
 	e.solver.Step()

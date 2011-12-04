@@ -16,15 +16,18 @@ import (
 // the global array pool
 var Pool ArrayPool
 
-type ArrayPool struct{
+type ArrayPool struct {
+
 }
 
-func (p*ArrayPool) Get(nComp int, size []int)*gpu.Array{
+func (p *ArrayPool) Get(nComp int, size []int) *gpu.Array {
 	// TODO: actual recycling
 	return gpu.NewArray(nComp, size)
 }
 
-func(p*ArrayPool) Return(array *gpu.Array){
+func (p *ArrayPool) Recycle(array **gpu.Array) {
 	// TODO: actual recycling
-	array.Free()
+	(*array).Free()
+	(*array)=nil
+	
 }
