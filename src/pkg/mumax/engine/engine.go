@@ -393,7 +393,7 @@ func (e *Engine) AddPDE1(y, diff string) {
 //________________________________________________________________________________ step
 
 func (e *Engine) initSolver() {
-	e.solver = NewHeun(e)
+	SetRK12(e)
 }
 
 // Takes one ODE step.
@@ -402,24 +402,12 @@ func (e *Engine) Step() {
 	if len(e.equation) == 0 {
 		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
+	// TODO: nice solver initialization and choice
 	if e.solver == nil {
 		e.initSolver()
 	}
 
 	e.solver.Step()
-
-	//	// step, but hide result in buffer so we don't interfere with other solvers depending on the result
-	//	for _, solver := range e.solver {
-	//		solver.AdvanceBuffer()
-	//	}
-	//	// now that all solvers have updated behind the screens, we can make the result visible.
-	//	for _, solver := range e.solver {
-	//		solver.CopyBuffer()
-	//	}
-	//
-	//	// advance time
-	//	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
-	//	//e.time.Invalidate() // automatically
 
 	// check if output needs to be saved
 	e.notifyAll()

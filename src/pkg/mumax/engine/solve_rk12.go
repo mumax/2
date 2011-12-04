@@ -14,17 +14,41 @@ import (
 	"mumax/gpu"
 )
 
-type HeunSolver struct {
+type RK12Solver struct {
 	buffer []*gpu.Array
+	error  []*Quant // error estimates for each equation
+	maxErr []*Quant // maximum error for each equation
+	diff []gpu.Reductor
 }
 
-func NewHeun(e *Engine) *HeunSolver {
-	s := new(HeunSolver)
-	s.buffer = make([]*gpu.Array, len(e.equation))
-	return s
+func SetRK12(e *Engine) {
+	s := new(RK12Solver)
+	equation := e.equation
+	s.buffer = make([]*gpu.Array, len(equation))
+	s.error = make([]*Quant, len(equation))
+	s.maxErr = make([]*Quant, len(equation))
+	s.diff = make([]gpu.Reductor, len(equation))
+	e.solver = s
+
+	for i := range equation {
+		eqn := &(equation[i])
+		Assert(eqn.kind == EQN_PDE1)
+		out := eqn.output[0]
+		unit := out.Unit()
+		e.AddQuant(out.Name() + "_error", SCALAR, VALUE, unit, "Error estimate for " + out.Name())
+		s.error[i] = e.Quant(out.Name() + "_error")
+		e.AddQuant(out.Name() + "_maxError", SCALAR, VALUE, unit, "Maximum error for " + out.Name())
+		s.maxErr[i] = e.Quant(out.Name()+"_maxError")
+		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
+	}
 }
 
-func (s *HeunSolver) Step() {
+
+//func(s*RK12Solver)Input()[]*Quant{
+//	
+//}
+
+func (s *RK12Solver) Step() {
 	e := GetEngine()
 	equation := e.equation
 
@@ -70,8 +94,12 @@ func (s *HeunSolver) Step() {
 		h := float32(dt * dyMul[0])
 		gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.buffer[i], -0.5*h, y.Array().Stream) // corrected step
 		y.Array().Sync()
-		Pool.Recycle(&s.buffer[i])
 
+		// step control
+		stepDiff := s.diff[i].MaxDiff(dy.Array(), s.buffer[i]) * h
+		s.error[i].SetScalar(float64(stepDiff))
+
+		Pool.Recycle(&s.buffer[i])
 		y.Invalidate()
 	}
 
