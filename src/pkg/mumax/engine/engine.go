@@ -29,15 +29,15 @@ func GetEngine() *Engine {
 // An acyclic graph structure consisting of interconnected quantities
 // determines what should be calculated and when.
 type Engine struct {
-	size3D_        [3]int            // INTENRAL
-	size3D         []int             // size of the FD grid, nil means not yet set
-	cellSize_      [3]float64        // INTENRAL
-	cellSize       []float64         // size of the FD cells, nil means not yet set
-	periodic_      [3]int            // INTERNAL
-	periodic       []int             // periodicity in each dimension
-	set_periodic_  bool              // INTERNAL: periodic already set?
-	quantity       map[string]*Quant // maps quantity names onto their data structures
-	solver         []Solver          // each solver does the time stepping for its own quantities
+	size3D_       [3]int            // INTENRAL
+	size3D        []int             // size of the FD grid, nil means not yet set
+	cellSize_     [3]float64        // INTENRAL
+	cellSize      []float64         // size of the FD cells, nil means not yet set
+	periodic_     [3]int            // INTERNAL
+	periodic      []int             // periodicity in each dimension
+	set_periodic_ bool              // INTERNAL: periodic already set?
+	quantity      map[string]*Quant // maps quantity names onto their data structures
+	//solver         []Solver          // each solver does the time stepping for its own quantities
 	time           *Quant            // time quantity is always present
 	dt             *Quant            // time step quantity is always present
 	timer          Timer             // For benchmarking
@@ -365,21 +365,22 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 // E.g.: ODE1("m", "torque")
 // No direct dependency should be declared between the arguments.
 func (e *Engine) ODE1(y, diff string) {
-	yQ := e.Quant(y)
-	dQ := e.Quant(diff)
+	panic("todo")
+	//yQ := e.Quant(y)
+	//dQ := e.Quant(diff)
 
-	// check that two solvers are not trying to update the same output quantity
-	if e.solver != nil {
-		for _, solver := range e.solver {
-			_, out := solver.Deps()
-			for _, q := range out {
-				if q.Name() == y {
-					panic(Bug("Already in ODE: " + y))
-				}
-			}
-		}
-	}
-	e.solver = append(e.solver, NewEuler(e, yQ, dQ)) // TODO: choose solver type here
+	//// check that two solvers are not trying to update the same output quantity
+	//if e.solver != nil {
+	//	for _, solver := range e.solver {
+	//		_, out := solver.Deps()
+	//		for _, q := range out {
+	//			if q.Name() == y {
+	//				panic(Bug("Already in ODE: " + y))
+	//			}
+	//		}
+	//	}
+	//}
+	//e.solver = append(e.solver, NewEuler(e, yQ, dQ)) // TODO: choose solver type here
 }
 
 //________________________________________________________________________________ step
@@ -387,25 +388,26 @@ func (e *Engine) ODE1(y, diff string) {
 // Takes one ODE step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
-	if len(e.solver) == 0 {
-		panic(InputErr("engine.Step: no differential equations loaded."))
-	}
-
-	// step, but hide result in buffer so we don't interfere with other solvers depending on the result
-	for _, solver := range e.solver {
-		solver.AdvanceBuffer()
-	}
-	// now that all solvers have updated behind the screens, we can make the result visible.
-	for _, solver := range e.solver {
-		solver.CopyBuffer()
-	}
-
-	// advance time
-	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
-	//e.time.Invalidate() // automatically
-
-	// check if output needs to be saved
-	e.notifyAll()
+	panic("todo")
+	//	if len(e.solver) == 0 {
+	//		panic(InputErr("engine.Step: no differential equations loaded."))
+	//	}
+	//
+	//	// step, but hide result in buffer so we don't interfere with other solvers depending on the result
+	//	for _, solver := range e.solver {
+	//		solver.AdvanceBuffer()
+	//	}
+	//	// now that all solvers have updated behind the screens, we can make the result visible.
+	//	for _, solver := range e.solver {
+	//		solver.CopyBuffer()
+	//	}
+	//
+	//	// advance time
+	//	e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
+	//	//e.time.Invalidate() // automatically
+	//
+	//	// check if output needs to be saved
+	//	e.notifyAll()
 }
 //__________________________________________________________________ output
 

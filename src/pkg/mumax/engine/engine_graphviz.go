@@ -43,30 +43,30 @@ func (e *Engine) WriteDot(out io.Writer) {
 	}
 
 	// Add ODE cluster node
-	fmt.Fprintln(out, "subgraph cluster0{")
-	fmt.Fprintln(out, "rank=sink;")
-	for i, _ := range e.solver {
-		ODE := "solver" + fmt.Sprint(i)
-		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
-	}
-	fmt.Fprintln(out, "}")
-	fmt.Fprintln(out, "solver0 -> dt;")
-	fmt.Fprintln(out, "dt -> solver0;")
-	fmt.Fprintln(out, "{rank=same;", "dt", ";", "solver0", "};")
-
-	// Add ODE node
-	for i, ode := range e.solver {
-		ODE := "solver" + fmt.Sprint(i)
-		inp, outp := ode.Deps()
-		for j := range outp {
-			fmt.Fprintln(out, ODE, "->", outp[j].Name(), ";")
-			fmt.Fprintln(out, "{rank=source;", outp[j].Name(), "};")
-		}
-		for j := range inp {
-			fmt.Fprintln(out, inp[j].Name(), "->", ODE, ";")
-			//fmt.Fprintln(out, "{rank=sink;", inp[j].Name(), "};")
-		}
-	}
+	//	fmt.Fprintln(out, "subgraph cluster0{")
+	//	fmt.Fprintln(out, "rank=sink;")
+	//	for i, _ := range e.solver {
+	//		ODE := "solver" + fmt.Sprint(i)
+	//		fmt.Fprintln(out, ODE+" [style=filled, shape=box];")
+	//	}
+	//	fmt.Fprintln(out, "}")
+	//	fmt.Fprintln(out, "solver0 -> dt;")
+	//	fmt.Fprintln(out, "dt -> solver0;")
+	//	fmt.Fprintln(out, "{rank=same;", "dt", ";", "solver0", "};")
+	//
+	//	// Add ODE node
+	//	for i, ode := range e.solver {
+	//		ODE := "solver" + fmt.Sprint(i)
+	//		inp, outp := ode.Deps()
+	//		for j := range outp {
+	//			fmt.Fprintln(out, ODE, "->", outp[j].Name(), ";")
+	//			fmt.Fprintln(out, "{rank=source;", outp[j].Name(), "};")
+	//		}
+	//		for j := range inp {
+	//			fmt.Fprintln(out, inp[j].Name(), "->", ODE, ";")
+	//			//fmt.Fprintln(out, "{rank=sink;", inp[j].Name(), "};")
+	//		}
+	//	}
 
 	// align similar nodes
 	i := 0
