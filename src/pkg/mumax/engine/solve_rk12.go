@@ -86,6 +86,7 @@ func (s *RK12Solver) Step() {
 	}
 
 	// stage 1
+	minFactor := 2.0
 	for i := range equation {
 		y := equation[i].output[0]
 		dy := equation[i].input[0]
@@ -95,13 +96,20 @@ func (s *RK12Solver) Step() {
 		gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.buffer[i], -0.5*h, y.Array().Stream) // corrected step
 		y.Array().Sync()
 
-		// step control
+		// error estimate
 		stepDiff := s.diff[i].MaxDiff(dy.Array(), s.buffer[i]) * h
-		s.error[i].SetScalar(float64(stepDiff))
+		error := float64(stepDiff)
+		s.error[i].SetScalar(error)
+		factor := s.maxErr[i].Scalar() / error
+
+		// TODO: give user the control:
+		if factor < 0.01 {factor = 0.01}
+		if factor < minFactor{minFactor = factor} // take minimum time increase factor of all eqns.
 
 		Pool.Recycle(&s.buffer[i])
 		y.Invalidate()
 	}
 
+	e.dt.SetScalar(dt * minFactor)
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }

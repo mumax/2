@@ -402,10 +402,6 @@ func (e *Engine) Step() {
 	if len(e.equation) == 0 {
 		panic(InputErr("engine.Step: no differential equations loaded."))
 	}
-	// TODO: nice solver initialization and choice
-	if e.solver == nil {
-		e.initSolver()
-	}
 
 	e.solver.Step()
 

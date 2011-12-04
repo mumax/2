@@ -11,18 +11,20 @@ setcellsize(500e-9/Nx, 125e-9/Ny, 3e-9/Nz)
 
 load('micromagnetism')
 load('demagexch')
+loadsolver('')
 
 setscalar('Msat', 800e3)
 setscalar('Aex', 1.3e-11)
 setscalar('alpha', 1)
 setscalar('dt', 1e-12)
+setscalar('m_maxerror', 1./1000)
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
 autosave("m", "omf", ["Text"], 200e-12)
 step()
-autotabulate(["t", "<m>", "m_error"], "m.txt", 1e-12)
+autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 1e-12)
 
 save('kern_ex', 'txt', [], 'kern_ex.txt')
 

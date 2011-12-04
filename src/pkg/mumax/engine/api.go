@@ -85,6 +85,10 @@ func (a API) Load(name string) {
 	a.Engine.LoadModule(name)
 }
 
+func(a API) LoadSolver(kind string){
+	a.Engine.initSolver()//TODO: kind
+}
+
 //________________________________________________________________________________ run
 
 // Take one solver step
