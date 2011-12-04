@@ -50,6 +50,7 @@ func (s *EulerSolver) Step() {
 
 	// Advance time
 	e.time.SetScalar(e.time.Scalar() + dt)
+	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }
 
 //DEBUG

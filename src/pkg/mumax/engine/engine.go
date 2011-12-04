@@ -61,14 +61,20 @@ func Init() {
 // initialize
 func (e *Engine) init() {
 	e.periodic = e.periodic_[:]
+
 	e.quantity = make(map[string]*Quant)
+
 	// special quantities time and dt are always present
 	e.AddQuant("t", SCALAR, VALUE, Unit("s"))
-	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
-	e.AddQuant("step", SCALAR, VALUE, Unit(""))
 	e.time = e.Quant("t")
+
+	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.dt = e.Quant("dt")
 	e.dt.SetVerifier(Positive)
+
+	e.AddQuant("step", SCALAR, VALUE, Unit(""))
+	e.step = e.Quant("step")
+
 	e.equation = make([]Equation, 0, 1)
 	e.solver = &EulerSolver{} // default
 	e.modules = make([]Module, 0)
