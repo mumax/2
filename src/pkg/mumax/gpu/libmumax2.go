@@ -33,7 +33,7 @@ func Add(dst, a, b *Array) {
 
 // Asynchronous multiply-add: a += mulB*b
 // b may contain NULL pointers, implemented as all 1's.
-func Madd1Async(a, b *Array, mulB float32, stream Stream) {
+func MAdd1Async(a, b *Array, mulB float32, stream Stream) {
 	C.madd1Async(
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
@@ -44,7 +44,7 @@ func Madd1Async(a, b *Array, mulB float32, stream Stream) {
 
 // Asynchronous multiply-add: a += mulB*b + mulC*c
 // b,c may contain NULL pointers, implemented as all 1's.
-func Madd2Async(a, b *Array, mulB float32, c *Array, mulC float32, stream Stream) {
+func MAdd2Async(a, b *Array, mulB float32, c *Array, mulC float32, stream Stream) {
 	C.madd2Async(
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
