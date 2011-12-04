@@ -57,7 +57,7 @@ func (x ModLLG) Load(e *Engine) {
 		α: e.Quant("alpha"),
 		γ: e.Quant("gamma")}
 
-	e.ODE1("m", "torque")
+	e.AddPDE1("m", "torque")
 }
 
 // 

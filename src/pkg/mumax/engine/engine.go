@@ -37,6 +37,7 @@ type Engine struct {
 	periodic      []int             // periodicity in each dimension
 	set_periodic_ bool              // INTERNAL: periodic already set?
 	quantity      map[string]*Quant // maps quantity names onto their data structures
+	equation      []Equation        // differential equations connecting quantities
 	//solver         []Solver          // each solver does the time stepping for its own quantities
 	time           *Quant            // time quantity is always present
 	dt             *Quant            // time step quantity is always present
@@ -66,6 +67,7 @@ func (e *Engine) init() {
 	e.time = e.Quant("t")
 	e.dt = e.Quant("dt")
 	e.dt.SetVerifier(Positive)
+	e.equation = make([]Equation, 0, 1)
 	e.modules = make([]Module, 0)
 	e.crontabs = make(map[int]Notifier)
 	e.outputTables = make(map[string]*Table)
@@ -360,27 +362,23 @@ func (e *Engine) Depends(childQuantity string, parentQuantities ...string) {
 	}
 }
 
-// Add a 1st order differential equation:
+// Add a 1st order partial differential equation:
 //	d y / d t = diff
 // E.g.: ODE1("m", "torque")
 // No direct dependency should be declared between the arguments.
-func (e *Engine) ODE1(y, diff string) {
-	panic("todo")
-	//yQ := e.Quant(y)
-	//dQ := e.Quant(diff)
+func (e *Engine) AddPDE1(y, diff string) {
+	yQ := e.Quant(y)
+	dQ := e.Quant(diff)
 
-	//// check that two solvers are not trying to update the same output quantity
-	//if e.solver != nil {
-	//	for _, solver := range e.solver {
-	//		_, out := solver.Deps()
-	//		for _, q := range out {
-	//			if q.Name() == y {
-	//				panic(Bug("Already in ODE: " + y))
-	//			}
-	//		}
-	//	}
-	//}
-	//e.solver = append(e.solver, NewEuler(e, yQ, dQ)) // TODO: choose solver type here
+	// check that two solvers are not trying to update the same output quantity
+		for _, eqn := range e.equation {
+			for _,out := range eqn.output{
+				if out.Name() == y {
+					panic(Bug("Already output of an equation: " + y))
+				}
+			}
+		}
+	e.equation = append(e.equation, PDE1(yQ, dQ)) 
 }
 
 //________________________________________________________________________________ step
@@ -515,6 +513,9 @@ func (e *Engine) String() string {
 // DEBUG: statistics
 func (e *Engine) Stats() string {
 	str := fmt.Sprintln("engine running", e.timer.Seconds(), "s")
+	for _,eqn := range e.equation{
+		str += fmt.Sprintln(eqn.String())
+	}
 	quants := e.quantity
 	for _, v := range quants {
 		gpu := "     "

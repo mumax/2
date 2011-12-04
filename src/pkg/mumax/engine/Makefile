@@ -35,6 +35,7 @@ GOFILES=\
 	update_average.go\
 	zeropad.go\
 	verify.go\
+	equation.go\
 	solver.go\
 	solve_euler.go\
 	solve_heun.go\
