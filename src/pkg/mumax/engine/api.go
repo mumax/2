@@ -120,10 +120,9 @@ func (a API) SetV(quantity string, value []float64) {
 }
 
 func (a API) SetValue(quantity string, value []float64) {
-Warn("deprecated")
-a.SetV(quantity, value)
+	Warn("deprecated")
+	a.SetV(quantity, value)
 }
-
 
 // Set scalar. Convenience method for SetValue() with only one number.
 // REDUNDANT?
@@ -133,8 +132,8 @@ func (a API) SetS(quantity string, value float64) {
 }
 
 func (a API) SetScalar(quantity string, value float64) {
-Warn("deprecated")
-a.SetS(quantity, value)
+	Warn("deprecated")
+	a.SetS(quantity, value)
 }
 
 // Sets a space-dependent multiplier mask for the quantity.
