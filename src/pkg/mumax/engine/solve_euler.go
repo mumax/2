@@ -17,8 +17,8 @@ import (
 
 // Euler solver
 type EulerSolver struct {
-}
 
+}
 
 func (s *EulerSolver) Step() {
 	e := GetEngine()
@@ -59,10 +59,6 @@ func checkUniform(array []float64) {
 	}
 }
 
-
-
-
-
 // Register this module
 func init() {
 	RegisterModule(EulerModule(0))
@@ -81,4 +77,3 @@ func (m EulerModule) Description() string {
 func (m EulerModule) Name() string {
 	return "solver/euler"
 }
-
