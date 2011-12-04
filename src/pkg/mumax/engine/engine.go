@@ -41,7 +41,7 @@ type Engine struct {
 	solver         Solver            // the solver simultaneously steps all equations forward in time
 	time           *Quant            // time quantity is always present
 	dt             *Quant            // time step quantity is always present
-	step             *Quant            // number of time steps been taken
+	step           *Quant            // number of time steps been taken
 	timer          Timer             // For benchmarking
 	modules        []Module          // loaded modules 
 	crontabs       map[int]Notifier  // periodical jobs, indexed by handle

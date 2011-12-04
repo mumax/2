@@ -9,50 +9,45 @@ package engine
 
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/common"
+	"mumax/gpu"
+)
 
 type HeunSolver struct {
-	y, dy *Quant // Input
-	y1    *Quant // First stores euler solution, then heun solution.
-	dy0   *Quant // saves initial dy estimate
-	t, dt *Quant
+
 }
 
-func NewHeun(e *Engine, y, dy *Quant) *HeunSolver {
-	y1 := newQuant("heun_y1", y.NComp(), e.size3D, FIELD, y.Unit(), false, "hidden buffer")
-	dy0 := newQuant("heun_dy0", y.NComp(), e.size3D, FIELD, y.Unit(), false, "hidden buffer")
-	return &HeunSolver{y, dy, y1, dy0, e.time, e.dt}
+func NewHeun() *HeunSolver {
+	return &HeunSolver{}
 }
 
-func (s *HeunSolver) AdvanceBuffer() {
-	panic("todo")
-	//	y := s.y
-	//	dy := s.dy
-	//	y1 := s.y1
-	//	dy0 := s.dy0
+func (s *HeunSolver) Step() {
+	e := GetEngine()
+	equation := e.equation
 
-	//dy.Update()
-	//dy0.Array().CopyFromDevice(dy.Array()) // Save dy0 for later
+	// First update all inputs
+	for i := range equation {
+		Assert(equation[i].kind == EQN_PDE1)
+		equation[i].input[0].Update()
+	}
 
-	//dyMul := s.dy.multiplier
-	//checkUniform(dyMul)
-	//dt := s.dt.Scalar()
+	// get dt here to avoid updates later on.
+	dt := engine.dt.Scalar()
 
-	//gpu.Madd(s.ybuf.Array(), y, dy, float32(dt*dyMul[0]))
+	// Then step all outputs (without intermediate updates!)
+	// and invalidate them.
+	for i := range equation {
+		y := equation[i].output[0]
+		dy := equation[i].input[0]
+		dyMul := dy.multiplier
+		checkUniform(dyMul)
+		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // TODO: faster MAdd
+		y.Invalidate()
+	}
 
-	//s.y.Invalidate()
+	// Advance time
+	e.time.SetScalar(e.time.Scalar() + dt)
+	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }
 
-func (s *HeunSolver) CopyBuffer() {
-	//s.y.Array().CopyFromDevice(s.ybuf.Array())
-}
-
-func (s *HeunSolver) ProposeDt() float64 {
-	return 0 // this is not an adaptive step solver yet
-}
-
-func (e *HeunSolver) Deps() (in, out []*Quant) {
-	in = []*Quant{e.dy}
-	out = []*Quant{e.y}
-	return
-}
