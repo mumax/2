@@ -10,14 +10,14 @@ package temperature_brown
 // Author: Arne Vansteenkiste
 
 import (
-	"mumax/engine"
+	. "mumax/engine"
 )
 
 
 
 // Register this module
 func init() {
-	engine.RegisterModule(ModTempBrown(0))
+	RegisterModule(ModTempBrown(0))
 }
 
 type ModTempBrown int
@@ -30,6 +30,19 @@ func (x ModTempBrown) Name() string {
 	return "temperature/brown"
 }
 
-func (x ModTempBrown) Load(e *engine.Engine) {
+func (x ModTempBrown) Load(e *Engine) {
+
+	// TODO: make it a mask so we can have temperature gradients
+	e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")
+	e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
+	e.Depends("H_therm", "Temp", "Step")
+	
 	e.LoadModule("hfield")
+	hfield := e.Quant("H")
+	sum := hfield.GetUpdater().(*SumUpdater)
+	sum.AddParent("H_therm")
+
 }
+
+
+

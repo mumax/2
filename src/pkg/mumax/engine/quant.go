@@ -407,6 +407,12 @@ func (q *Quant) SetVerifier(f func(*Quant)) {
 	q.verifier = f
 }
 
+
+// Gets the updater
+func(q*Quant)GetUpdater()Updater{
+	return q.updater
+}
+
 //___________________________________________________________ 
 
 // INTERNAL: in case of a MASK, make sure the underlying array is allocted.

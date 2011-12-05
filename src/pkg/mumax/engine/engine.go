@@ -318,12 +318,15 @@ func (e *Engine) LoadModule(name string) {
 	e.modules = append(e.modules, module)
 }
 
-// Add an arbitrary quantity. Name tag is case-independent.
+// Add an arbitrary quantity.
+// (Also returns it, but it's not necessarily used further)
+// Name tag is case-independent.
 // TODO: refactor AddQuant(q*Quant)
 // TODO: NewQuant should take size from global engine.
-func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) {
+func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) *Quant{
 	const CPUONLY = false
 	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
+	return e.Quant(name)
 }
 
 func (e *Engine) addQuant(q *Quant) {
