@@ -249,7 +249,8 @@ func (e *Engine) addDerivedQuant(name string) {
 	if strings.Contains(name, ".") {
 		split := strings.Split(name, ".")
 		if len(split) != 2 {
-			panic(InputErr("engine: undefined quantity: " + name))
+			e.panicNoSuchQuant(name)
+			//panic(InputErr("engine: undefined quantity: " + name))
 		}
 		origname, compname := split[0], strings.ToLower(split[1])
 		orig := e.Quant(origname)
@@ -285,7 +286,21 @@ func (e *Engine) addDerivedQuant(name string) {
 		e.Depends(derived.name, origname)
 		return
 	}
-	panic(InputErr("engine: undefined quantity: " + name))
+	e.panicNoSuchQuant(name)
+	//panic(InputErr("engine: undefined quantity: " + name))
+}
+
+func (e *Engine) panicNoSuchQuant(name string) {
+	msg := " Undefined quantity: " + name
+	msg += "\n Options are: ["
+	for k, _ := range e.quantity {
+		msg += " " + k
+	}
+	msg += "]"
+	msg += "\n Names are case-independent"
+	msg += "\n Spatial averages can be taken as <name>"
+	msg += "\n Components can be taken as name.x, name.y, etc"
+	panic(InputErr(msg))
 }
 
 //__________________________________________________________________ add
