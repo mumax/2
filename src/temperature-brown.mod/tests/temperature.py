@@ -14,9 +14,10 @@ load('temperature/brown')
 
 setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
-setv('alpha', 1)
+setv('alpha', 0.01)
 setv('dt', 1e-12)
 setv('m_maxerror', 1./100)
+setv('temp', 100)
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
