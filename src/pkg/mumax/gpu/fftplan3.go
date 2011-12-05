@@ -201,30 +201,26 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 
 //   fmt.Println("in:", in.LocalCopy().Array)
+  
 
+// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
   Start("CopyPadZ_FW")
   CopyPadZAsync(padZ, in, fft.Stream)
   Stop("CopyPadZ_FW")
 
-//   fmt.Println("")
-//   fmt.Println("padZ:", padZ.LocalCopy().Array)
-
-  // fft Z
   Start("fftZ_FW")
   for dev := range _useDevice {
     setDevice(_useDevice[dev])
     fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(fftZbuffer.pointer[dev])) // is this really async?
   }
-  fft.Sync()
   Stop("fftZ_FW")
-//   fmt.Println("")
-//   fmt.Println("fftz:", padZ.LocalCopy().Array)
-
+  fft.Sync()     
+  
+// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON PLANES @@@@@@@@
   Start("Transpose1_FW")
-  TransposeComplexYZPart(transp1, fftZbuffer) // fftZ!
+//  TransposeComplexYZPart(transp1, fftZbuffer) // fftZ!
+  TransposeComplexYZPartAsync(transp1, fftZbuffer, fft.Stream) // fftZ!
   Stop("Transpose1_FW")
-//   fmt.Println("")
-//   fmt.Println("transpose:", transp1.LocalCopy().Array)
 
   // copy chunks, cross-device
   Start("MemcpyDtoD_FW")
@@ -237,16 +233,15 @@ func (fft *FFTPlan) Forward(in, out *Array) {
       // target device = chunk
 
       for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
-        srcPlaneN := transp1.partSize[1] * transp1.partSize[2] //fmt.Println("srcPlaneN:", srcPlaneN)//seems OK
+        srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
         srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(logicSize[2]/NDev))
         src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
-        dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2] //fmt.Println("dstPlaneN:", dstPlaneN)//seems OK
+        dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
         dstOffset := i * dstPlaneN
         dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
 
-//         cu.MemcpyDtoD(dst, src, chunkPlaneBytes) // chunkPlaneBytes for plane-by-plane
-        cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[dev]) // chunkPlaneBytes for plane-by-plane
+        cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[dev])
       }
     }
   }
@@ -255,22 +250,21 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   Start("InsertBlockZ_FW")
   transp2.Zero()
   for c := range chunks {
-    InsertBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
+    InsertBlockZ(transp2, &(chunks[c]), c)
+    InsertBlockZAsync(transp2, &(chunks[c]), c, fft.Stream)
   }
   Stop("InsertBlockZ_FW")
-//   fmt.Println("")
-// fmt.Println("insert:", transp2.LocalCopy().Array)
-
-  // FFT Y
+  fft.Sync()     
+  
+  
+// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
   Start("fftY_FW")
   for dev := range _useDevice {
     setDevice(_useDevice[dev])
     fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
   }
-  fft.Sync()
+  fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
   Stop("fftY_FW")
-//   fmt.Println("")
-//   fmt.Println("ffty:", out.LocalCopy().Array)
 
   // FFT X
   if logicSize[0] > 1 {
@@ -278,11 +272,13 @@ func (fft *FFTPlan) Forward(in, out *Array) {
     for dev := range _useDevice {
       fft.planX[dev].ExecC2C(uintptr(out.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in x-direction
     }
-    fft.Sync()
+    fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
     Stop("fftX_FW")
   }
-//   fmt.Println("")
-//   fmt.Println("out:", out.LocalCopy().Array)
+  fmt.Println("")
+  fmt.Println("out:", out.LocalCopy().Array)
+  
+  fft.Sync()
 
 }
 
