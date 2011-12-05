@@ -178,6 +178,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   fmt.Println("")
 
   // shorthand and define ghost arrays ----------------------------
+  // shorthand
+
   buffer := &(fft.buffer)
   padZ := &(fft.padZ)
   padZ.PointTo(out, 0)
