@@ -146,7 +146,7 @@ func (fft *FFTPlan) Free() {
     fft.dataSize[i] = 0
     fft.logicSize[i] = 0
   }
-  (&(fft.padZ)).Free()
+  (&(fft.buffer)).Free()
 
   // TODO destroy
 }
@@ -174,8 +174,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   CheckSize(in.size3D, fft.dataSize[:])
   CheckSize(out.size3D, fft.outputSize[:])
 
-  fmt.Println("FORWARD FFT")
-  fmt.Println("")
+//   fmt.Println("FORWARD FFT")
+//   fmt.Println("")
 
   // shorthand and define ghost arrays ----------------------------
 
@@ -200,7 +200,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   // -------------------------------------------------------------
 
 
-  fmt.Println("in:", in.LocalCopy().Array)
+//   fmt.Println("in:", in.LocalCopy().Array)
 
   Start("CopyPadZ_FW")
   CopyPadZAsync(padZ, in, fft.Stream)
@@ -281,8 +281,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
     fft.Sync()
     Stop("fftX_FW")
   }
-  fmt.Println("")
-  fmt.Println("out:", out.LocalCopy().Array)
+//   fmt.Println("")
+//   fmt.Println("out:", out.LocalCopy().Array)
 
 }
 
@@ -291,12 +291,12 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 func (fft *FFTPlan) Inverse(in, out *Array) {
 
-  fmt.Println("")
+/*  fmt.Println("")
   fmt.Println("")
   fmt.Println("INVERSE FFT")
   fmt.Println("")
   fmt.Println("in:", in.LocalCopy().Array)
-
+*/
   // shorthand
   buffer := &(fft.buffer)
   padZ := &(fft.padZ)
@@ -385,7 +385,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 //   fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
   CopyPadZ(out, padZ)
-  fmt.Println("")
-  fmt.Println("out:", out.LocalCopy().Array)
+//   fmt.Println("")
+//   fmt.Println("out:", out.LocalCopy().Array)
 
 }
