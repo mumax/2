@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QWidget>
 
+// Other parts of the interface
+#include "preferences.h"
+
 // For reading OMF files
 #include "OMFContainer.h"
 #include <vector>
@@ -35,7 +38,7 @@ private slots:
   void openFiles();
   void openDir();
 
-  //void settings();
+  void settings();
   void about();
   void updateDisplayData(int index);
   
@@ -55,6 +58,9 @@ private:
   QAction *settingsAct;
   QAction *aboutAct;
   //QAction *webAct;
+
+  // Prefereences window;
+  Preferences *prefs;
 
   // Other Stuff
   QSlider *createSlider();
