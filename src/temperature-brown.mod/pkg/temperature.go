@@ -20,7 +20,6 @@ func init() {
 	engine.RegisterModule(ModTempBrown(0))
 }
 
-// Micromagnetism meta-module.
 type ModTempBrown int
 
 func (x ModTempBrown) Description() string {
@@ -28,7 +27,7 @@ func (x ModTempBrown) Description() string {
 }
 
 func (x ModTempBrown) Name() string {
-	return "temperatrue-brown"
+	return "temperature/brown"
 }
 
 func (x ModTempBrown) Load(e *engine.Engine) {

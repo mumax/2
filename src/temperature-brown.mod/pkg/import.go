@@ -1,3 +1,3 @@
 package main
 
-import _ "module/test"
+import _ "module/temperature_brown"
