@@ -20,7 +20,7 @@ const BIG = 16 * 128 * 512
 
 func init() {
 	flag.Parse()
-	InitLogger("")
+	InitLogger("test.log")
 	cu.Init()
 	//InitAllGPUs(0)
 	//println("		*****  u s i n g    1    g p u  *******  ")

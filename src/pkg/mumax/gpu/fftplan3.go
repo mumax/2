@@ -14,8 +14,9 @@ import (
   cu "cuda/driver"
   "cuda/cufft"
   "fmt"
+//   "cuda/runtime"
 )
-
+// runtime.GetDeviceProperties().MultiProcessorCount
 type FFTPlan struct {
   //sizes
   dataSize   [3]int         // Size of the (non-zero) input data block
@@ -67,8 +68,6 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
   // init padZ (not allocated)  -------------------
   padZN0 := fft.dataSize[0]
   padZN1 := fft.dataSize[1]
-//   padZN2 := fft.logicSize[2] + 2
-//  fft.padZ.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1],fft.logicSize[2] + 2}, DONT_ALLOC)
   fft.padZ.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2]}, DONT_ALLOC)
   fft.fftZbuffer.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2] + 2}, DONT_ALLOC)
   //-----------------------------------------------
@@ -177,8 +176,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
   fmt.Println("FORWARD FFT")
   fmt.Println("")
-  // shorthand
 
+  // shorthand and define ghost arrays ----------------------------
   buffer := &(fft.buffer)
   padZ := &(fft.padZ)
   padZ.PointTo(out, 0)
@@ -196,11 +195,13 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   dataSize := fft.dataSize
   logicSize := fft.logicSize
   NDev := NDevice()
+  // -------------------------------------------------------------
+
 
   fmt.Println("in:", in.LocalCopy().Array)
 
   Start("CopyPadZ_FW")
-  CopyPadZ(padZ, in)
+  CopyPadZAsync(padZ, in, fft.Stream)
   Stop("CopyPadZ_FW")
 
 //   fmt.Println("")
@@ -242,7 +243,8 @@ func (fft *FFTPlan) Forward(in, out *Array) {
         dstOffset := i * dstPlaneN
         dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
 
-        cu.MemcpyDtoD(dst, src, chunkPlaneBytes) // chunkPlaneBytes for plane-by-plane
+//         cu.MemcpyDtoD(dst, src, chunkPlaneBytes) // chunkPlaneBytes for plane-by-plane
+        cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[dev]) // chunkPlaneBytes for plane-by-plane
       }
     }
   }

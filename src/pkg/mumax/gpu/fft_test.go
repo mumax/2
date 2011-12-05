@@ -14,6 +14,7 @@ package gpu
 import (
 	"testing"
 	"fmt"
+  ."mumax/common"
 )
 
 func TestFFT(test *testing.T) {
@@ -109,6 +110,7 @@ func TestFFT(test *testing.T) {
 	fft.Forward(in, out)
  	fft.Inverse(out, in)
 
+  PrintTimers()
 }
 
 func BenchmarkFFT(b *testing.B) {
