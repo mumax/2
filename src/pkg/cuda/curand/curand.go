@@ -11,3 +11,6 @@ import (
 	//"unsafe"
 )
 
+
+
+curandCreateGenerator(curandGenerator_t *generator, curandRngType_t rng_type);
