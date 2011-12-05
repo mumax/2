@@ -88,9 +88,11 @@ func (a *Array) Assign(other *Array) {
 	a.Comp = other.Comp
 }
 
+// TODO: test after rebase!
 // Lets the pointers of an already initialized, but not allocated array (shared) 
 // point to an allocated array (original) possibly with an offset.
 func(shared *Array)PointTo(original *Array, offset int){
+  panic("broken")
   Assert(shared.Len() + offset <= original.Len())
   Assert(offset%NDevice() == 0)
   for i:=range shared.pointer{
@@ -98,21 +100,18 @@ func(shared *Array)PointTo(original *Array, offset int){
   }
 }
 
+// TODO: test after rebase!
 // Returns a new array that shares storage with the original array.
 // The new array's total number of elements should fit in the original,
 // but all other sizes may be arbitrary.
 // Possibly dangerous to use. Typically used to save memory.
 func (original *Array) SharedArray(nComp int, size []int, offset int) *Array {
+  panic("broken")
   Assert(nComp*size[0]*size[1]*size[2] + offset <= original.Len())
   Assert(offset%NDevice() == 0)
-	shared := new(Array)
-	shared.pointer = make([]cu.DevicePtr, NDevice())
-	for i:=range shared.pointer{
+  for i:=range shared.pointer{
     shared.pointer[i] = cu.DevicePtr(ArrayOffset(uintptr(original.pointer[i]), offset/NDevice()))
   }
-	shared.initSize(nComp, size)
-	shared.initComp()
-	return shared
 }
 
 // Parameters for Array.Init()
