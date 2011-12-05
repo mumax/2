@@ -188,8 +188,7 @@ func setDevice(deviceId int) {
 	cuda.SetDevice(deviceId)
 }
 
-
-func SetDeviceForIndex(index int){
+func SetDeviceForIndex(index int) {
 	setDevice(_useDevice[index])
 }
 

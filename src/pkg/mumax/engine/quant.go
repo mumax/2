@@ -364,7 +364,7 @@ func (q *Quant) Update() {
 	}
 
 	// verify if new value is OK
-	if q.verifier != nil{
+	if q.verifier != nil {
 		q.Verify()
 	}
 	q.upToDate = true
@@ -407,9 +407,8 @@ func (q *Quant) SetVerifier(f func(*Quant)) {
 	q.verifier = f
 }
 
-
 // Gets the updater
-func(q*Quant)GetUpdater()Updater{
+func (q *Quant) GetUpdater() Updater {
 	return q.updater
 }
 

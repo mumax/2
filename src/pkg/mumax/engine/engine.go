@@ -323,7 +323,7 @@ func (e *Engine) LoadModule(name string) {
 // Name tag is case-independent.
 // TODO: refactor AddQuant(q*Quant)
 // TODO: NewQuant should take size from global engine.
-func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) *Quant{
+func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) *Quant {
 	const CPUONLY = false
 	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
 	return e.Quant(name)

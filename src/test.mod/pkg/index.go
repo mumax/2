@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func init(){
+func init() {
 	fmt.Println("loaded test.mod")
 }
 

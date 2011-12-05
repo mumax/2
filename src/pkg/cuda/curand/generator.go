@@ -48,7 +48,7 @@ func (g Generator) GenerateNormal(output uintptr, n int64, mean, stddev float32)
 	}
 }
 
-func(g Generator) SetSeed(seed int64){
+func (g Generator) SetSeed(seed int64) {
 	err := Status(C.curandSetPseudoRandomGeneratorSeed(C.curandGenerator_t(unsafe.Pointer(g)), _Ctype_ulonglong(seed)))
 	if err != SUCCESS {
 		panic(err)
