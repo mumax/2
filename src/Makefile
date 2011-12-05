@@ -54,5 +54,5 @@ bench: install
 clean:
 	$(MAKE) TARGET=clean
 	rm -rf $(CLEANFILES)
-	$(foreach module, $(MODULES), make clean -C $(module)/pkg)
+	$(foreach module, $(MODULES), make clean -C $(module)/pkg;)
 

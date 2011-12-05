@@ -13,7 +13,7 @@ modules=$(wildcard ../*.mod)
 .PHONY: $(executables)
 
 mumax2:
-	$(GC) -I_obj $@.go $(modules)/pkg/import.go
+	$(GC) -I_obj $@.go $(modules:.mod=.mod/pkg/import.go)
 	$(LD) -L_obj -o $@ $@.$O
 
 apigen:

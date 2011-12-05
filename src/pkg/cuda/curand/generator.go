@@ -13,23 +13,21 @@ import (
 	"unsafe"
 )
 
-
-
-type Generator uintptr 
+type Generator uintptr
 
 type RngType int
 
-const(
-    PSEUDO_DEFAULT          RngType = C.CURAND_RNG_PSEUDO_DEFAULT          ///< Default pseudorandom generator
-    PSEUDO_XORWOW           RngType = C.CURAND_RNG_PSEUDO_XORWOW           ///< XORWOW pseudorandom generator
-    QUASI_DEFAULT           RngType = C.CURAND_RNG_QUASI_DEFAULT           ///< Default quasirandom generator
-    QUASI_SOBOL32           RngType = C.CURAND_RNG_QUASI_SOBOL32           ///< Sobol32 quasirandom generator
-    QUASI_SCRAMBLED_SOBOL32 RngType = C.CURAND_RNG_QUASI_SCRAMBLED_SOBOL32 ///< Scrambled Sobol32 quasirandom generator
-    QUASI_SOBOL64           RngType = C.CURAND_RNG_QUASI_SOBOL64           ///< Sobol64 quasirandom generator
-    QUASI_SCRAMBLED_SOBOL64 RngType = C.CURAND_RNG_QUASI_SCRAMBLED_SOBOL64 ///< Scrambled Sobol64 quasirandom generator
+const (
+	PSEUDO_DEFAULT          RngType = C.CURAND_RNG_PSEUDO_DEFAULT          ///< Default pseudorandom generator
+	PSEUDO_XORWOW           RngType = C.CURAND_RNG_PSEUDO_XORWOW           ///< XORWOW pseudorandom generator
+	QUASI_DEFAULT           RngType = C.CURAND_RNG_QUASI_DEFAULT           ///< Default quasirandom generator
+	QUASI_SOBOL32           RngType = C.CURAND_RNG_QUASI_SOBOL32           ///< Sobol32 quasirandom generator
+	QUASI_SCRAMBLED_SOBOL32 RngType = C.CURAND_RNG_QUASI_SCRAMBLED_SOBOL32 ///< Scrambled Sobol32 quasirandom generator
+	QUASI_SOBOL64           RngType = C.CURAND_RNG_QUASI_SOBOL64           ///< Sobol64 quasirandom generator
+	QUASI_SCRAMBLED_SOBOL64 RngType = C.CURAND_RNG_QUASI_SCRAMBLED_SOBOL64 ///< Scrambled Sobol64 quasirandom generator
 )
 
-func CreateGenerator(rngType RngType) Generator{
+func CreateGenerator(rngType RngType) Generator {
 	var rng C.curandGenerator_t
 	err := Status(C.curandCreateGenerator(&rng, C.curandRngType_t(rngType)))
 	if err != SUCCESS {
@@ -38,15 +36,14 @@ func CreateGenerator(rngType RngType) Generator{
 	return Generator(unsafe.Pointer(rng))
 }
 
-
-func(g Generator) GenerateNormal(output uintptr, n int64, mean, stddev float32){
+func (g Generator) GenerateNormal(output uintptr, n int64, mean, stddev float32) {
 	err := Status(C.curandGenerateNormal(
-		C.curandGenerator_t(unsafe.Pointer(g)), 
-		(*C.float)(unsafe.Pointer(output)), 
+		C.curandGenerator_t(unsafe.Pointer(g)),
+		(*C.float)(unsafe.Pointer(output)),
 		C.size_t(n),
 		C.float(mean),
 		C.float(stddev)))
-	if err != SUCCESS{
+	if err != SUCCESS {
 		panic(err)
 	}
 }

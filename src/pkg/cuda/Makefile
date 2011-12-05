@@ -2,6 +2,7 @@ dirs=\
 	driver\
 	runtime\
 	cufft\
+	curand\
 
 all:$(dirs)
 

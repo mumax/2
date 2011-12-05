@@ -1,13 +1,13 @@
 include $(GOROOT)/src/Make.inc
 PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
 
-TARG=module/test
+TARG=module/temperature_brown
 
 GOFILES=\
 	doc.go\
+	temperature.go\
 
 CGOFILES=\
-	temperature.go\
 
 
 CGO_CFLAGS+=\

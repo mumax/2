@@ -1,44 +1,36 @@
-package test
+//  This file is part of MuMax, a high-performance micromagnetic simulator.
+//  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
+//  Use of this source code is governed by the GNU General Public License version 3
+//  (as published by the Free Software Foundation) that can be found in the license.txt file.
+//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  copyright notices and prominently state that you modified it, giving a relevant date.
 
-//#include "libmumax2.h"
-import "C"
+package temperature_brown
+
+// Author: Arne Vansteenkiste
 
 import (
-	"mumax/gpu"
-	"unsafe"
-	"fmt"
+	"mumax/engine"
 )
 
-func init(){
-	fmt.Println("loaded test.mod")
+
+
+// Register this module
+func init() {
+	engine.RegisterModule(ModTempBrown(0))
 }
 
-// DEBUG: sets all values to their X (i) index
-func SetIndexX(dst *gpu.Array) {
-	partSize := dst.PartSize()
-	C.setIndexX(
-		(**C.float)(unsafe.Pointer(&(dst.Pointers()[0]))),
-		C.int(partSize[0]),
-		C.int(partSize[1]),
-		C.int(partSize[2]))
+// Micromagnetism meta-module.
+type ModTempBrown int
+
+func (x ModTempBrown) Description() string {
+	return "Thermal fluctuating field according to Brown."
 }
 
-// DEBUG: sets all values to their Y (j) index
-func SetIndexY(dst *gpu.Array) {
-	partSize := dst.PartSize()
-	C.setIndexY(
-		(**C.float)(unsafe.Pointer(&(dst.Pointers()[0]))),
-		C.int(partSize[0]),
-		C.int(partSize[1]),
-		C.int(partSize[2]))
+func (x ModTempBrown) Name() string {
+	return "temperatrue-brown"
 }
 
-// DEBUG: sets all values to their Z (k) index
-func SetIndexZ(dst *gpu.Array) {
-	partSize := dst.PartSize()
-	C.setIndexZ(
-		(**C.float)(unsafe.Pointer(&(dst.Pointers()[0]))),
-		C.int(partSize[0]),
-		C.int(partSize[1]),
-		C.int(partSize[2]))
+func (x ModTempBrown) Load(e *engine.Engine) {
+	e.LoadModule("hfield")
 }
