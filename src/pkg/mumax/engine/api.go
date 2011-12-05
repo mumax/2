@@ -172,7 +172,7 @@ func (a API) SetArray(quantity string, field *host.Array) {
 // Get the value of a space-independent or masked quantity.
 // Returns an array with vector components or an
 // array with just one element in case of a scalar quantity.
-func (a API) GetValue(quantity string) []float64 {
+func (a API) GetV(quantity string) []float64 {
 	q := a.Engine.Quant(quantity)
 	q.Update() //!
 	value := make([]float64, len(q.multiplier))
@@ -181,8 +181,13 @@ func (a API) GetValue(quantity string) []float64 {
 	return value
 }
 
+// DEPRECATED: same as getv()
+func (a API) GetValue(quantity string) []float64 {
+	return a.GetV(quantity)
+}
+
 // DEBUG: Does not update.
-func (a API) DebugValue(quantity string) []float64 {
+func (a API) DebugV(quantity string) []float64 {
 	q := a.Engine.Quant(quantity)
 	//q.Update() //!
 	value := make([]float64, len(q.multiplier))
@@ -198,12 +203,16 @@ func (a API) Unit(quantity string) string {
 
 // Get the value of a scalar, space-independent quantity.
 // Similar to GetValue, but returns a single number.
-func (a API) GetScalar(quantity string) float64 {
+func (a API) GetS(quantity string) float64 {
 	q := a.Engine.Quant(quantity)
 	q.Update() //!
 	return q.Scalar()
 }
 
+// DEPRECATED: same as gets()
+func (a API) GetScalar(quantity string) float64 {
+	return a.GetS(quantity)
+}
 // Gets a space-dependent quantity. If the quantity uses a mask,
 // the result is equal to GetMask() * GetValue()
 func (a API) GetArray(quantity string) *host.Array {
