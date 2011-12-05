@@ -51,7 +51,7 @@
     <enum>Qt::AutoText</enum>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButton">
+  <widget class="QRadioButton" name="color_inplane">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -70,7 +70,7 @@
     <string>coloringGroup</string>
    </attribute>
   </widget>
-  <widget class="QRadioButton" name="radioButton_2">
+  <widget class="QRadioButton" name="color_x">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -86,7 +86,7 @@
     <string>coloringGroup</string>
    </attribute>
   </widget>
-  <widget class="QRadioButton" name="radioButton_3">
+  <widget class="QRadioButton" name="color_y">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -102,7 +102,7 @@
     <string>coloringGroup</string>
    </attribute>
   </widget>
-  <widget class="QRadioButton" name="radioButton_4">
+  <widget class="QRadioButton" name="color_z">
    <property name="geometry">
     <rect>
      <x>30</x>

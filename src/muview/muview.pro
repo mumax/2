@@ -11,7 +11,11 @@ LIBS    += -lglut -L../libomf -lomf -lQxtCore -lQxtGui
 INCLUDEPATH += ../libomf /usr/include/qxt/QxtCore /usr/include/qxt/QxtGui
 
 # Files and Targets
-HEADERS = glwidget.h window.h
-SOURCES = glwidget.cpp main.cpp window.cpp 
+HEADERS = glwidget.h window.h \
+    preferences.h
+SOURCES = glwidget.cpp main.cpp window.cpp \ 
+    preferences.cpp
 TARGET  = muview
 
+FORMS += \
+    preferences.ui
