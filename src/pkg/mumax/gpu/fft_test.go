@@ -108,7 +108,7 @@ func TestFFT(test *testing.T) {
 	in.CopyFromHost(inh)
 
 	fft.Forward(in, out)
-//  	fft.Inverse(out, in)
+ 	fft.Inverse(out, in)
 
   PrintTimers()
 }
