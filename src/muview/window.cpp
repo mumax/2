@@ -1,4 +1,6 @@
 #include <vector>
+#include <vector>
+#include <vector>
 #include <iostream>
 
 #include <QtGui>
@@ -22,6 +24,7 @@ Window::Window(int argc, char *argv[])
   setCentralWidget(widget);
 
   glWidget = new GLWidget;
+  prefs = new Preferences(this);
 
   xSlider = createSlider();
   ySlider = createSlider();
@@ -228,6 +231,8 @@ void Window::createMenus()
   helpMenu->addSeparator();
   //helpMenu->addAction(webAct);
 
+  settingsMenu->addAction(settingsAct);
+
 }
 
 void Window::about()
@@ -238,6 +243,12 @@ void Window::about()
 			"Mumax visualization tool written in OpenGL and Qt<br>"
 			"<br>Created by Graham Rowlands 2011."));
 }
+
+void Window::settings()
+{
+    prefs->exec();
+}
+
 
 void Window::openFiles()
 {
@@ -331,6 +342,10 @@ void Window::createActions()
   aboutAct = new QAction(tr("&About Muview"), this);
   //aboutAct->setStatusTip(tr("Show the application's About box"));
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+  settingsAct = new QAction(tr("&Muview Preferences"), this);
+  //settingsAct->setStatusTip(tr("Show the application's preferences"));
+  connect(settingsAct, SIGNAL(triggered()), this, SLOT(settings()));
 
   openFilesAct  = new QAction(tr("&Open File(s)"), this);
   openFilesAct->setShortcuts(QKeySequence::Open);
