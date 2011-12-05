@@ -52,7 +52,8 @@ bench: install
 
 .PHONY: clean
 clean:
-	$(MAKE) TARGET=clean
+	#$(MAKE) TARGET=clean
 	rm -rf $(CLEANFILES)
 	$(foreach module, $(MODULES), make clean -C $(module)/pkg;)
+	$(foreach dir, $(dirs), make clean -C $(dir);)
 
