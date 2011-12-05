@@ -50,6 +50,12 @@ func (s *EulerSolver) Step() {
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }
 
+func (s *EulerSolver) Dependencies() (children, parents []string) {
+	children = []string{"step"}
+	parents = []string{"dt"}
+	return
+}
+
 //DEBUG
 func checkUniform(array []float64) {
 	for _, v := range array {

@@ -12,5 +12,6 @@ import (
 )
 
 type Solver interface {
-	Step()
+	Step()                                      // Takes one time step
+	Dependencies() (children, parents []string) // Reports dependencies apart from the normal input/output. E.g.: time, dt,maxerror
 }

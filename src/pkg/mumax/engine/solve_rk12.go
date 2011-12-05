@@ -50,6 +50,16 @@ func (m RK12Module) Load(e *Engine) {
 	}
 }
 
+func (s *RK12Solver) Dependencies() (children, parents []string) {
+	children = []string{"dt", "step"}
+	parents = []string{"dt"}
+	for i := range s.error {
+		parents = append(parents, s.maxErr[i].Name())
+		children = append(children, s.error[i].Name())
+	}
+	return
+}
+
 type RK12Module int
 
 func (m RK12Module) Description() string {
