@@ -2,6 +2,8 @@
 // Use of this source code is governed by a freeBSD
 // license that can be found in the LICENSE.txt file.
 
+// Documentation was taken from the curand headers.
+
 package curand
 
 //#include <curand.h>
@@ -17,9 +19,14 @@ type Generator uintptr
 
 type RngType int
 
-
 const(
-
+    PSEUDO_DEFAULT          RngType = C.CURAND_RNG_PSEUDO_DEFAULT          ///< Default pseudorandom generator
+    PSEUDO_XORWOW           RngType = C.CURAND_RNG_PSEUDO_XORWOW           ///< XORWOW pseudorandom generator
+    QUASI_DEFAULT           RngType = C.CURAND_RNG_QUASI_DEFAULT           ///< Default quasirandom generator
+    QUASI_SOBOL32           RngType = C.CURAND_RNG_QUASI_SOBOL32           ///< Sobol32 quasirandom generator
+    QUASI_SCRAMBLED_SOBOL32 RngType = C.CURAND_RNG_QUASI_SCRAMBLED_SOBOL32 ///< Scrambled Sobol32 quasirandom generator
+    QUASI_SOBOL64           RngType = C.CURAND_RNG_QUASI_SOBOL64           ///< Sobol64 quasirandom generator
+    QUASI_SCRAMBLED_SOBOL64 RngType = C.CURAND_RNG_QUASI_SCRAMBLED_SOBOL64 ///< Scrambled Sobol64 quasirandom generator
 )
 
 func CreateGenerator(rngType RngType) Generator{
@@ -31,3 +38,15 @@ func CreateGenerator(rngType RngType) Generator{
 	return Generator(unsafe.Pointer(rng))
 }
 
+
+func(g Generator) GenerateNormal(output uintptr, n int64, mean, stddev float32){
+	err := Status(C.curandGenerateNormal(
+		C.curandGenerator_t(unsafe.Pointer(g)), 
+		(*C.float)(unsafe.Pointer(output)), 
+		C.size_t(n),
+		C.float(mean),
+		C.float(stddev)))
+	if err != SUCCESS{
+		panic(err)
+	}
+}
