@@ -23,10 +23,10 @@ setarray('m', m)
 
 autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
-autotabulate(["t", "<H>"], "H.txt", 10e-12)
+autotabulate(["t", "<H_therm>"], "H_therm.txt", 10e-12)
 
 savegraph("graph.png")
-steps(100)
+run(1e-9)
 
 printstats()
 

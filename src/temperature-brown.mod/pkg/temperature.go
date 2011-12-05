@@ -10,7 +10,9 @@ package temperature_brown
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	. "mumax/engine"
+	"math"
 	"mumax/gpu"
 	"cuda/curand"
 )
@@ -33,11 +35,12 @@ func (x ModTempBrown) Name() string {
 func (x ModTempBrown) Load(e *Engine) {
 
 	// TODO: make it a mask so we can have temperature gradients
-	e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")
+	temp := 	e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")
+	temp.SetVerifier(NonNegative)
 	Htherm := e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
-	e.Depends("H_therm", "Temp", "Step")//, "Therm_seed")
-	Htherm.SetUpdater(NewTempBrownUpdater())
+	e.Depends("H_therm", "Temp", "Step", "dt", "alpha", "gamma")//, "Therm_seed")
+	Htherm.SetUpdater(NewTempBrownUpdater(Htherm))
 
 	e.LoadModule("hfield")
 	hfield := e.Quant("H")
@@ -47,18 +50,43 @@ func (x ModTempBrown) Load(e *Engine) {
 
 type TempBrownUpdater struct {
 	rng []curand.Generator
+	htherm *Quant
 }
 
-func NewTempBrownUpdater() Updater {
+func NewTempBrownUpdater(htherm *Quant) Updater {
 	u := new(TempBrownUpdater)
+	u.htherm = htherm
 	u.rng = make([]curand.Generator, gpu.NDevice())
-	for i := range u.rng {
-		gpu.SetDeviceForIndex(i)
-		u.rng[i] = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
+	for dev := range u.rng {
+		gpu.SetDeviceForIndex(dev)
+		u.rng[dev] = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
+		u.rng[dev].SetSeed(int64(dev)) // TODO: something else
 	}
 	return u
 }
 
 func (u *TempBrownUpdater) Update() {
+	e := GetEngine()
+	
+	temp := e.Quant("temp").Scalar()
+	if temp == 0{return}
 
+	dt := e.Quant("dt").Scalar()
+	cellSize := e.CellSize()
+	V := cellSize[X] * cellSize[Y] * cellSize[Z]
+	alpha := e.Quant("alpha").Scalar()
+	gamma := e.Quant("gamma").Scalar()
+	mSat := e.Quant("Msat").Scalar()
+
+	stddev := float32(math.Sqrt((2*alpha*Kb*temp)/(gamma*Mu0*mSat*V*dt)))
+
+	array := u.htherm.Array()
+	devPointers := array.Pointers()
+	N := int64(array.PartLen4D())
+
+	for dev:=range u.rng{
+		gpu.SetDeviceForIndex(dev)
+		u.rng[dev].GenerateNormal(uintptr(devPointers[dev]), N, 0, stddev)
+	}
 }
+

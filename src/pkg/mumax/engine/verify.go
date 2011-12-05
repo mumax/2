@@ -37,3 +37,12 @@ func Positive(q *Quant) {
 		}
 	}
 }
+
+// Panics if a multiplier is < 0
+func NonNegative(q *Quant) {
+	for _, v := range q.multiplier {
+		if v < 0 {
+			panic(InputErr(q.Name() + " should be non-negative"))
+		}
+	}
+}
