@@ -11,6 +11,8 @@ package temperature_brown
 
 import (
 	. "mumax/engine"
+	"mumax/gpu"
+	"cuda/curand"
 )
 
 
@@ -34,15 +36,32 @@ func (x ModTempBrown) Load(e *Engine) {
 
 	// TODO: make it a mask so we can have temperature gradients
 	e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")
-	e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
-	e.Depends("H_therm", "Temp", "Step")
+	Htherm := e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
+	e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
+	e.Depends("H_therm", "Temp", "Step", "Therm_seed")
+	Htherm.SetUpdater(NewTempBrownUpdater())	
 	
 	e.LoadModule("hfield")
 	hfield := e.Quant("H")
 	sum := hfield.GetUpdater().(*SumUpdater)
 	sum.AddParent("H_therm")
-
 }
 
 
+type TempBrownUpdater struct{
+	rng []curand.Generator
+}
 
+func NewTempBrownUpdater()Updater{
+	u:=new(TempBrownUpdater)
+	u.rng = make([]curand.Generator, gpu.NDevice())
+	for i := range u.rng{
+		gpu.SetDeviceForIndex(i)
+		u.rng[i] = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
+	}
+	return u
+}
+
+func(u*TempBrownUpdater)Update(){
+
+}

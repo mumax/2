@@ -188,6 +188,11 @@ func setDevice(deviceId int) {
 	cuda.SetDevice(deviceId)
 }
 
+
+func SetDeviceForIndex(index int){
+	setDevice(_useDevice[index])
+}
+
 // Returns the list of usable devices. 
 func getDevices() []int {
 	if _useDevice == nil {
