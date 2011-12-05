@@ -51,19 +51,17 @@ func (e *Engine) WriteDot(out io.Writer) {
 	}
 	fmt.Fprintln(out, "}")
 
-
 	// Special dependencies of solver
-	if e.solver != nil{
-	//fmt.Fprintln(out, "subgraph cluster0 -> step;")
-	children, parents := e.solver.Dependencies()
-	for _, c := range children {
-		fmt.Fprintln(out, "subgraph cluster0 ->", c, ";")
+	if e.solver != nil {
+		//fmt.Fprintln(out, "subgraph cluster0 -> step;")
+		children, parents := e.solver.Dependencies()
+		for _, c := range children {
+			fmt.Fprintln(out, "subgraph cluster0 ->", c, ";")
+		}
+		for _, p := range parents {
+			fmt.Fprintln(out, p, "-> subgraph cluster0;")
+		}
 	}
-	for _, p := range parents {
-		fmt.Fprintln(out, p, "-> subgraph cluster0;")
-	}
-	}
-
 
 	//fmt.Fprintln(out, "{rank=same;", "dt;t", ";", "subgraph cluster0", "};")
 	fmt.Fprintln(out, "{rank=sink;", "subgraph cluster0", "};")

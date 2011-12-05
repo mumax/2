@@ -54,8 +54,8 @@ type Quant struct {
 	buffer      *host.Array       // Host buffer for copying from/to the GPU array
 	bufUpToDate bool              // Flags if the buffer (in RAM) needs to be updated
 	bufXfers    int               // Number of times it has been copied from GPU
-	bufMutex    sync.RWMutex
 	timer       Timer // Debug/benchmarking
+	bufMutex    sync.RWMutex
 }
 
 //____________________________________________________________________ init
@@ -291,7 +291,7 @@ func (q *Quant) Buffer() *host.Array {
 		//Debug("buffer of", q.Name(), q.buffer.Array)
 		return q.buffer
 	}
-	Debug("XFer", q.Name())
+	//Debug("XFer", q.Name())
 
 	q.bufMutex.Lock()
 
