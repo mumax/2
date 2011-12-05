@@ -36,6 +36,7 @@ func (m RK12Module) Load(e *Engine) {
 	e.SetSolver(s)
 
 	for i := range equation {
+
 		eqn := &(equation[i])
 		Assert(eqn.kind == EQN_PDE1)
 		out := eqn.output[0]
@@ -45,6 +46,7 @@ func (m RK12Module) Load(e *Engine) {
 		e.AddQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
 		s.maxErr[i] = e.Quant(out.Name() + "_maxError")
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
+		s.maxErr[i].SetVerifier(Positive)
 	}
 }
 

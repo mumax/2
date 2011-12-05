@@ -363,8 +363,11 @@ func (q *Quant) Update() {
 		q.updates++
 	}
 
+	// verify if new value is OK
+	if q.verifier != nil{
+		q.Verify()
+	}
 	q.upToDate = true
-	// Do not update buffer!
 }
 
 // Opposite of Update. Sets upToDate flag of this node and
