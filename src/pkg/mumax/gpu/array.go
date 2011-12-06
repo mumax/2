@@ -91,6 +91,7 @@ func (a *Array) Assign(other *Array) {
 // TODO: test after rebase!
 // Lets the pointers of an already initialized, but not allocated array (shared) 
 // point to an allocated array (original) possibly with an offset.
+<<<<<<< HEAD
 func(shared *Array)PointTo(original *Array, offset int){
   panic("broken")
   Assert(shared.Len() + offset <= original.Len())
@@ -98,6 +99,14 @@ func(shared *Array)PointTo(original *Array, offset int){
   for i:=range shared.pointer{
     shared.pointer[i] = cu.DevicePtr(ArrayOffset(uintptr(original.pointer[i]), offset/NDevice()))
   }
+=======
+func (shared *Array) PointTo(original *Array, offset int) {
+	Assert(shared.Len()+offset <= original.Len())
+	Assert(offset%NDevice() == 0)
+	for i := range shared.pointer {
+		shared.pointer[i] = cu.DevicePtr(ArrayOffset(uintptr(original.pointer[i]), offset/NDevice()))
+	}
+>>>>>>> error when #gpu=1
 }
 
 // TODO: test after rebase!

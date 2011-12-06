@@ -14,7 +14,7 @@ package gpu
 import (
 	"testing"
 	"fmt"
-  ."mumax/common"
+	. "mumax/common"
 )
 
 func TestFFT(test *testing.T) {
@@ -39,78 +39,76 @@ func TestFFT(test *testing.T) {
 	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2] + 2*NDevice()})
 	inh := in.LocalCopy()
 
-
-
-  a := inh.Array[0]
-  n := 0
-  for i := 0; i < N0; i++ {
-    //    n  = 0
-    for j := 0; j < N1; j++ {
-      for k := 0; k < N2; k++ {
-        //        if i == 0 {
-        a[i][j][k] = float32(1)
-        //        }
-        n++
-      }
-    }
-  }
-  inh.List[0] = 1
-
-// test for symmetrical input
-/*  a := inh.Array[0]
-
-  for i := 0; i < N0; i++ {
-    for j := 0; j < N1; j++ {
-      for k := 0; k < N2; k++ {
-        a[i][j][k] = 0
-      }
-    }
-  }
-
-  maxN0 :=1
-  if N0>1{
-    maxN0=N0/2
-  }
- */
-  
-/*	for i := 0; i < maxN0; i++ {
-		for j := 0; j < N1/2; j++ {
-			for k := 0; k < N2/2; k++ {
-				a[i][j][k] = float32(i+j+k)
-				if (i>0){
-          a[N0-i][j][k] = float32(i+j+k)
-        }
-        if (j>0){
-          a[i][N1-j][k] = float32(i+j+k)
-        }
-        if (k>0){
-          a[i][j][N2-k] = float32(i+j+k)
-        }
-        if (i>0 && j>0){
-          a[N0-i][N1-j][k] = float32(i+j+k)
-        }
-        if (j>0 && k>0){
-          a[i][N1-j][N2-k] = float32(i+j+k)
-        }
-        if (i>0 && k>0){
-          a[N0-i][j][N2-k] = float32(i+j+k)
-        }
-        if (i>0 && j>0 && k>0){
-          a[N0-i][N1-j][N2-k] = float32(i+j+k)
-        }
+	a := inh.Array[0]
+	n := 0
+	for i := 0; i < N0; i++ {
+		//    n  = 0
+		for j := 0; j < N1; j++ {
+			for k := 0; k < N2; k++ {
+				//        if i == 0 {
+				a[i][j][k] = float32(1)
+				//        }
+				n++
 			}
 		}
-	}*/
-	
-// 	fmt.Println (a)
+	}
+	inh.List[0] = 1
+
+	// test for symmetrical input
+	/*  a := inh.Array[0]
+
+	for i := 0; i < N0; i++ {
+	  for j := 0; j < N1; j++ {
+	    for k := 0; k < N2; k++ {
+	      a[i][j][k] = 0
+	    }
+	  }
+	}
+
+	maxN0 :=1
+	if N0>1{
+	  maxN0=N0/2
+	}
+	*/
+
+	/*	for i := 0; i < maxN0; i++ {
+			for j := 0; j < N1/2; j++ {
+				for k := 0; k < N2/2; k++ {
+					a[i][j][k] = float32(i+j+k)
+					if (i>0){
+	          a[N0-i][j][k] = float32(i+j+k)
+	        }
+	        if (j>0){
+	          a[i][N1-j][k] = float32(i+j+k)
+	        }
+	        if (k>0){
+	          a[i][j][N2-k] = float32(i+j+k)
+	        }
+	        if (i>0 && j>0){
+	          a[N0-i][N1-j][k] = float32(i+j+k)
+	        }
+	        if (j>0 && k>0){
+	          a[i][N1-j][N2-k] = float32(i+j+k)
+	        }
+	        if (i>0 && k>0){
+	          a[N0-i][j][N2-k] = float32(i+j+k)
+	        }
+	        if (i>0 && j>0 && k>0){
+	          a[N0-i][N1-j][N2-k] = float32(i+j+k)
+	        }
+				}
+			}
+		}*/
+
+	// 	fmt.Println (a)
 
 	//inh.List[0] = 1
 	in.CopyFromHost(inh)
 
 	fft.Forward(in, out)
- 	fft.Inverse(out, in)
+	fft.Inverse(out, in)
 
-  PrintTimers()
+	PrintTimers()
 }
 
 func BenchmarkFFT(b *testing.B) {

@@ -261,23 +261,23 @@ func CopyPadZ(dst, src *Array) {
 }
 
 func CopyPadZAsync(dst, src *Array, stream Stream) {
-  Assert(
-    dst.size4D[0] == src.size4D[0] &&
-      dst.size3D[0] == src.size3D[0] &&
-      dst.size3D[1] == src.size3D[1])
+	Assert(
+		dst.size4D[0] == src.size4D[0] &&
+			dst.size3D[0] == src.size3D[0] &&
+			dst.size3D[1] == src.size3D[1])
 
-  D2 := dst.size3D[2]
-  S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
-  S1Part := src.partSize[1]
-  S2 := src.size3D[2]
-  C.copyPadZAsync(
-    (**C.float)(unsafe.Pointer(&dst.pointer[0])),
-    C.int(D2),
-    (**C.float)(unsafe.Pointer(&src.pointer[0])),
-    C.int(S0),
-    C.int(S1Part),
-    C.int(S2),
-    (*C.CUstream)(unsafe.Pointer(&(stream[0]))))
+	D2 := dst.size3D[2]
+	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
+	S1Part := src.partSize[1]
+	S2 := src.size3D[2]
+	C.copyPadZAsync(
+		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
+		C.int(D2),
+		(**C.float)(unsafe.Pointer(&src.pointer[0])),
+		C.int(S0),
+		C.int(S1Part),
+		C.int(S2),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
 // Insert from src into a block in dst
@@ -308,34 +308,33 @@ func InsertBlockZ(dst, src *Array, block int) {
 }
 
 func InsertBlockZAsync(dst, src *Array, block int, stream Stream) {
-  //  AssertMsg(dst.size4D[0] == src.size4D[0], "1")
-  //  AssertMsg(dst.size3D[0] == src.size3D[0], "2")
-  //  AssertMsg(dst.size3D[1] == src.size3D[1], "3")
-  //  AssertMsg(dst.size3D[2] >= src.size3D[2]*(block+1), "4")
+	//  AssertMsg(dst.size4D[0] == src.size4D[0], "1")
+	//  AssertMsg(dst.size3D[0] == src.size3D[0], "2")
+	//  AssertMsg(dst.size3D[1] == src.size3D[1], "3")
+	//  AssertMsg(dst.size3D[2] >= src.size3D[2]*(block+1), "4")
 
-  D2 := dst.size3D[2]
-  S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
-  S1Part := src.partSize[1]
-  S2 := src.size3D[2]
-  C.insertBlockZAsync(
-    (**C.float)(unsafe.Pointer(&dst.pointer[0])),
-    C.int(D2),
-    (**C.float)(unsafe.Pointer(&src.pointer[0])),
-    C.int(S0),
-    C.int(S1Part),
-    C.int(S2),
-    C.int(block),
-    (*C.CUstream)(unsafe.Pointer(&(stream[0]))))
+	D2 := dst.size3D[2]
+	S0 := src.size4D[0] * src.size3D[0] // NComp * Size0
+	S1Part := src.partSize[1]
+	S2 := src.size3D[2]
+	C.insertBlockZAsync(
+		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
+		C.int(D2),
+		(**C.float)(unsafe.Pointer(&src.pointer[0])),
+		C.int(S0),
+		C.int(S1Part),
+		C.int(S2),
+		C.int(block),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
 
-
-func ZeroArrayAsync(A *Array, stream Stream){
-  N := A.PartLen4D()
-  C.zeroArrayAsync(
-     (**C.float)(unsafe.Pointer(&A.pointer[0])),
-     C.int(N), 
-     (*C.CUstream) (unsafe.Pointer(&(stream[0]))))
+func ZeroArrayAsync(A *Array, stream Stream) {
+	N := A.PartLen4D()
+	C.zeroArrayAsync(
+		(**C.float)(unsafe.Pointer(&A.pointer[0])),
+		C.int(N),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
 
@@ -384,18 +383,18 @@ func TransposeComplexYZPart(out, in *Array) {
 }
 
 func TransposeComplexYZPartAsync(out, in *Array, stream Stream) {
-  Assert(
-    out.size4D[0] == in.size4D[0] &&
-      out.size3D[0] == in.size3D[0] &&
-      out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
+	Assert(
+		out.size4D[0] == in.size4D[0] &&
+			out.size3D[0] == in.size3D[0] &&
+			out.size3D[1]*out.size3D[2] == in.size3D[2]*in.size3D[1])
 
-  C.transposeComplexYZAsyncPart(
-    (**C.float)(unsafe.Pointer(&out.pointer[0])),
-    (**C.float)(unsafe.Pointer(&in.pointer[0])),
-    C.int(in.size4D[0]*in.size3D[0]), // nComp * N0
-    C.int(in.partSize[1]),            //!?
-    C.int(in.size3D[2]),              // not / 2 !
-    (*C.CUstream)(unsafe.Pointer(&(stream[0]))))
+	C.transposeComplexYZAsyncPart(
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		(**C.float)(unsafe.Pointer(&in.pointer[0])),
+		C.int(in.size4D[0]*in.size3D[0]), // nComp * N0
+		C.int(in.partSize[1]),            //!?
+		C.int(in.size3D[2]),              // not / 2 !
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
 //this function has only different input for x- and y components
