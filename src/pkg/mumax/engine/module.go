@@ -14,9 +14,9 @@ import (
 
 // A physics module. Loading it adds various quantity nodes to the engine.
 type Module struct {
-	Name string        // Name to identify to module to the machine
-	Description string // Human-readable description of what the module does
-	LoadFunc func(e *Engine)      // Loads this module's quantities and dependencies into the engine
+	Name        string          // Name to identify to module to the machine
+	Description string          // Human-readable description of what the module does
+	LoadFunc    func(e *Engine) // Loads this module's quantities and dependencies into the engine
 }
 
 // Map with registered modules
@@ -24,7 +24,7 @@ var modules map[string]Module = make(map[string]Module)
 
 // Registers a module in the list of known modules.
 // Each module should register itself in its init() function.
-func RegisterModule(name, description string, loadfunc func(e*Engine)) {
+func RegisterModule(name, description string, loadfunc func(e *Engine)) {
 	if _, ok := modules[name]; ok {
 		panic(InputErr("module " + name + " already registered"))
 	}

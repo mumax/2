@@ -14,7 +14,6 @@ import (
 	"mumax/gpu"
 )
 
-
 type RK12Solver struct {
 	buffer []*gpu.Array
 	error  []*Quant // error estimates for each equation

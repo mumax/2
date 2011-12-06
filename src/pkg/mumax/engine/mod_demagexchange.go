@@ -21,8 +21,7 @@ func init() {
 	RegisterModule("demagexch", "combined magnetostatic + exchange field", LoadDemagExch)
 }
 
-
-func  LoadDemagExch(e *Engine) {
+func LoadDemagExch(e *Engine) {
 	// TODO: verify aexch space-independent
 
 	// dependencies

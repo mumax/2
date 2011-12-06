@@ -70,7 +70,6 @@ func init() {
 	RegisterModule("solver/euler", "Fixed-step Euler solver", LoadEuler)
 }
 
-func  LoadEuler(e *Engine) {
+func LoadEuler(e *Engine) {
 	e.SetSolver(&EulerSolver{})
 }
-

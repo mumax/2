@@ -13,10 +13,10 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule("regions",  "Region definition", LoadRegions)
+	RegisterModule("regions", "Region definition", LoadRegions)
 }
 
-func  LoadRegions(e *Engine) {
+func LoadRegions(e *Engine) {
 
 	e.AddQuant("regionDefinition", SCALAR, MASK, Unit(""), "regions")
 

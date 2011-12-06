@@ -13,10 +13,10 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule("exchange6",  "6-neighbor ferromagnetic exchange interaction", LoadExch6)
+	RegisterModule("exchange6", "6-neighbor ferromagnetic exchange interaction", LoadExch6)
 }
 
-func  LoadExch6(e *Engine) {
+func LoadExch6(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")

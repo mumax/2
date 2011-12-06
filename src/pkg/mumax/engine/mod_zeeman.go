@@ -16,7 +16,6 @@ func init() {
 	RegisterModule("zeeman", "Externally applied field", LoadZeeman)
 }
 
-
 func LoadZeeman(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")

@@ -16,7 +16,6 @@ func init() {
 	RegisterModule("magnetization", "Reduced magnetization, saturation magnetization", LoadMagnetization)
 }
 
-
 func LoadMagnetization(e *Engine) {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")

@@ -18,14 +18,12 @@ import (
 	"cuda/curand"
 )
 
-
 // Register this module
 func init() {
-	RegisterModule("temperature/brown",  "Thermal fluctuating field according to Brown.", LoadTempBrown)
+	RegisterModule("temperature/brown", "Thermal fluctuating field according to Brown.", LoadTempBrown)
 }
 
-
-func  LoadTempBrown(e *Engine) {
+func LoadTempBrown(e *Engine) {
 
 	// TODO: make temp a mask so we can have temperature gradients
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")

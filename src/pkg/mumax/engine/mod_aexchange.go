@@ -14,9 +14,9 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule("aexchange",  "Exchange constant [J/m]", LoadAexchange)
+	RegisterModule("aexchange", "Exchange constant [J/m]", LoadAexchange)
 }
 
-func  LoadAexchange(e *Engine) {
+func LoadAexchange(e *Engine) {
 	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
 }

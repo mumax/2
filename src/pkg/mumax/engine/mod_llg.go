@@ -14,9 +14,8 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("llg",  "Landau-Lifshitz-Gilbert equation", LoadLLG)
+	RegisterModule("llg", "Landau-Lifshitz-Gilbert equation", LoadLLG)
 }
-
 
 // The torque quant contains the Landau-Lifshitz torque τ acting on the reduced magnetization m = M/Msat.
 //	d m / d t =  τ  
