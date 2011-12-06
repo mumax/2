@@ -18,25 +18,14 @@ import (
 	"cuda/curand"
 )
 
-type ModTempBrown int //(dummy type)
 
 // Register this module
 func init() {
-	RegisterModule(ModTempBrown(0))
+	RegisterModule("temperature/brown",  "Thermal fluctuating field according to Brown.", LoadTempBrown)
 }
 
-// Implements Module interface
-func (x ModTempBrown) Description() string {
-	return "Thermal fluctuating field according to Brown."
-}
 
-// Implements Module interface
-func (x ModTempBrown) Name() string {
-	return "temperature/brown"
-}
-
-// Implements Module interface
-func (x ModTempBrown) Load(e *Engine) {
+func  LoadTempBrown(e *Engine) {
 
 	// TODO: make temp a mask so we can have temperature gradients
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")

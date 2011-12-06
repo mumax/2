@@ -14,20 +14,9 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModAExchange{})
+	RegisterModule("aexchange",  "Exchange constant [J/m]", LoadAexchange)
 }
 
-// Module for exchange constant
-type ModAExchange struct{}
-
-func (x ModAExchange) Description() string {
-	return "Exchange constant [J/m]"
-}
-
-func (x ModAExchange) Name() string {
-	return "aexchange"
-}
-
-func (x ModAExchange) Load(e *Engine) {
+func  LoadAexchange(e *Engine) {
 	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient")
 }

@@ -13,21 +13,10 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModUniaxialAnisotropy{})
+	RegisterModule("anisotropy/uniaxial", "Uniaxial magnetocrystalline anisotropy", LoadAnisUniaxial)
 }
 
-// Uniaxial anisotropy module
-type ModUniaxialAnisotropy struct{}
-
-func (x ModUniaxialAnisotropy) Description() string {
-	return ""
-}
-
-func (x ModUniaxialAnisotropy) Name() string {
-	return "anisotropy-uniaxial"
-}
-
-func (x ModUniaxialAnisotropy) Load(e *Engine) {
+func LoadAnisUniaxial(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
 	e.AddQuant("k1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1")
@@ -36,6 +25,6 @@ func (x ModUniaxialAnisotropy) Load(e *Engine) {
 	sum := hfield.updater.(*SumUpdater)
 	sum.AddParent("H_anis")
 	e.Depends("H_anis", "k1", "k2")
-	e.Depends("k1", "t")
-	e.Depends("k2", "t")
+	//e.Depends("k1", "t")
+	//e.Depends("k2", "t")
 }

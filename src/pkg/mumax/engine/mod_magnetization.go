@@ -13,21 +13,11 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModMagnetization{})
+	RegisterModule("magnetization", "Reduced magnetization, saturation magnetization", LoadMagnetization)
 }
 
-// Magnetization module.
-type ModMagnetization struct{}
 
-func (x ModMagnetization) Description() string {
-	return "m: normalized magnetization, mSat: saturation magnetization [A/m]"
-}
-
-func (x ModMagnetization) Name() string {
-	return "magnetization"
-}
-
-func (x ModMagnetization) Load(e *Engine) {
+func LoadMagnetization(e *Engine) {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
 	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")

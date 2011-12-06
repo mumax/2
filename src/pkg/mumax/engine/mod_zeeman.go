@@ -13,20 +13,11 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModZeeman{})
+	RegisterModule("zeeman", "Externally applied field", LoadZeeman)
 }
 
-type ModZeeman struct{}
 
-func (x ModZeeman) Description() string {
-	return "externally applied field (A/m)"
-}
-
-func (x ModZeeman) Name() string {
-	return "zeeman"
-}
-
-func (x ModZeeman) Load(e *Engine) {
+func LoadZeeman(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
 	hfield := e.Quant("H")

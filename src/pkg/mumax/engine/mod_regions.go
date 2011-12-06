@@ -13,21 +13,10 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModRegions{})
+	RegisterModule("regions",  "Region definition", LoadRegions)
 }
 
-// Magnetization module.
-type ModRegions struct{}
-
-func (x ModRegions) Description() string {
-	return "regionDefinition: regions"
-}
-
-func (x ModRegions) Name() string {
-	return "regions"
-}
-
-func (x ModRegions) Load(e *Engine) {
+func  LoadRegions(e *Engine) {
 
 	e.AddQuant("regionDefinition", SCALAR, MASK, Unit(""), "regions")
 

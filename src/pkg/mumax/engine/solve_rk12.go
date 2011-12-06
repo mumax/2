@@ -14,10 +14,6 @@ import (
 	"mumax/gpu"
 )
 
-// Register this module
-func init() {
-	RegisterModule(RK12Module(0))
-}
 
 type RK12Solver struct {
 	buffer []*gpu.Array
@@ -26,7 +22,7 @@ type RK12Solver struct {
 	diff   []gpu.Reductor
 }
 
-func (m RK12Module) Load(e *Engine) {
+func LoadRK12(e *Engine) {
 	s := new(RK12Solver)
 	equation := e.equation
 	s.buffer = make([]*gpu.Array, len(equation))
@@ -60,19 +56,10 @@ func (s *RK12Solver) Dependencies() (children, parents []string) {
 	return
 }
 
-type RK12Module int
-
-func (m RK12Module) Description() string {
-	return "Adaptive Heun solver"
+// Register this module
+func init() {
+	RegisterModule("solver/rk12", "Adaptive Heun solver (Runge-Kutta 1+2)", LoadRK12)
 }
-
-func (m RK12Module) Name() string {
-	return "solver/rk12"
-}
-
-//func(s*RK12Solver)Input()[]*Quant{
-//	
-//}
 
 func (s *RK12Solver) Step() {
 	e := GetEngine()

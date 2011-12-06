@@ -67,19 +67,10 @@ func checkUniform(array []float64) {
 
 // Register this module
 func init() {
-	RegisterModule(EulerModule(0))
+	RegisterModule("solver/euler", "Fixed-step Euler solver", LoadEuler)
 }
 
-func (m EulerModule) Load(e *Engine) {
+func  LoadEuler(e *Engine) {
 	e.SetSolver(&EulerSolver{})
 }
 
-type EulerModule int
-
-func (m EulerModule) Description() string {
-	return "Fixed-step Euler solver"
-}
-
-func (m EulerModule) Name() string {
-	return "solver/euler"
-}

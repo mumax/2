@@ -308,7 +308,7 @@ func (e *Engine) panicNoSuchQuant(name string) {
 // Returns true if the named module is already loaded.
 func (e *Engine) HasModule(name string) bool {
 	for _, m := range e.modules {
-		if m.Name() == name {
+		if m.Name == name {
 			return true
 		}
 	}
@@ -328,8 +328,8 @@ func (e *Engine) LoadModule(name string) {
 		return
 	}
 	module := GetModule(name)
-	Log("Loaded module", module.Name(), ":", module.Description())
-	module.Load(e)
+	Log("Loaded module", module.Name, ":", module.Description)
+	module.LoadFunc(e)
 	e.modules = append(e.modules, module)
 }
 

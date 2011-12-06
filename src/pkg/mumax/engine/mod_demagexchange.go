@@ -18,22 +18,11 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule(&ModDemagExch{})
+	RegisterModule("demagexch", "combined magnetostatic + exchange field", LoadDemagExch)
 }
 
-// Module for combined calculation of demag + exchange field
-// in one single convolution.
-type ModDemagExch struct{}
 
-func (x ModDemagExch) Description() string {
-	return "combined magnetostatic + exchange field"
-}
-
-func (x ModDemagExch) Name() string {
-	return "demagexch"
-}
-
-func (x ModDemagExch) Load(e *Engine) {
+func  LoadDemagExch(e *Engine) {
 	// TODO: verify aexch space-independent
 
 	// dependencies

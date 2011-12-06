@@ -14,19 +14,9 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule(&ModLLG{})
+	RegisterModule("llg",  "Landau-Lifshitz-Gilbert equation", LoadLLG)
 }
 
-// Landau-Lifshitz-Gilbert module.
-type ModLLG struct{}
-
-func (x ModLLG) Description() string {
-	return "Landau-Lifshitz-Gilbert equation"
-}
-
-func (x ModLLG) Name() string {
-	return "llg"
-}
 
 // The torque quant contains the Landau-Lifshitz torque τ acting on the reduced magnetization m = M/Msat.
 //	d m / d t =  τ  
@@ -38,7 +28,7 @@ func (x ModLLG) Name() string {
 //	h = H / Msat
 // To keep numbers from getting extremely large or small, 
 // the multiplier is set to gamma, so the array stores τ/gamma
-func (x ModLLG) Load(e *Engine) {
+func LoadLLG(e *Engine) {
 
 	e.LoadModule("magnetization")
 

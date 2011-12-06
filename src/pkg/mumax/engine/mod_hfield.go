@@ -11,25 +11,15 @@ package engine
 
 import ()
 
-// Register this module
-func init() {
-	RegisterModule(&ModHField{})
-}
-
+// Register this module.
 // Module for the total field H. Other modules like H_demag, H_anis, H_ext have
 // to add their field to the sum make by H.
 // H is in units A/m and does not have a multiplier. I.e., is not normalized to Msat.
-type ModHField struct{}
-
-func (x ModHField) Description() string {
-	return "H: total magnetic field [A/m]"
+func init() {
+	RegisterModule("hfield", "Total magnetic field.", LoadHField)
 }
 
-func (x ModHField) Name() string {
-	return "hfield"
-}
-
-func (x ModHField) Load(e *Engine) {
+func LoadHField(e *Engine) {
 	e.AddQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
 	q := e.Quant("H")
 	q.updater = &SumUpdater{q}

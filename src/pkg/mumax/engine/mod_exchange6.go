@@ -13,20 +13,10 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule(&ModExch6{})
+	RegisterModule("exchange6",  "6-neighbor ferromagnetic exchange interaction", LoadExch6)
 }
 
-type ModExch6 struct{}
-
-func (x ModExch6) Description() string {
-	return "6-neighbor ferromagnetic exchange interaction"
-}
-
-func (x ModExch6) Name() string {
-	return "exchange"
-}
-
-func (x ModExch6) Load(e *Engine) {
+func  LoadExch6(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
 	e.LoadModule("aexchange")
@@ -44,5 +34,5 @@ type exch6Updater struct {
 }
 
 func (u *exch6Updater) Update() {
-	//println("To be implemented")
+	panic("To be implemented")
 }
