@@ -13,7 +13,7 @@ import (
   . "mumax/common"
   cu "cuda/driver"
   "cuda/cufft"
-  "fmt"
+//   "fmt"
 )
 
 type FFTPlan struct {
@@ -147,7 +147,7 @@ func (fft *FFTPlan) Free() {
     fft.dataSize[i] = 0
     fft.logicSize[i] = 0
   }
-  (&(fft.padZ)).Free()
+//   (&(fft.padZ)).Free()
 
   // TODO destroy
 }
@@ -175,8 +175,9 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   CheckSize(in.size3D, fft.dataSize[:])
   CheckSize(out.size3D, fft.outputSize[:])
 
-  fmt.Println("FORWARD FFT")
-  fmt.Println("")
+  Start("total_FW")
+/*  fmt.Println("FORWARD FFT")
+  fmt.Println("")*/
   // shorthand
 
   buffer := &(fft.buffer)
@@ -197,7 +198,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   logicSize := fft.logicSize
   NDev := NDevice()
 
-  fmt.Println("in:", in.LocalCopy().Array)
+//   fmt.Println("in:", in.LocalCopy().Array)
 
   Start("CopyPadZ_FW")
   CopyPadZ(padZ, in)
@@ -277,9 +278,10 @@ func (fft *FFTPlan) Forward(in, out *Array) {
     fft.Sync()
     Stop("fftX_FW")
   }
-  fmt.Println("")
-  fmt.Println("out:", out.LocalCopy().Array)
+//   fmt.Println("")
+//   fmt.Println("out:", out.LocalCopy().Array)
 
+  Stop("total_FW")
 }
 
 
@@ -287,11 +289,11 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 func (fft *FFTPlan) Inverse(in, out *Array) {
 
-  fmt.Println("")
-  fmt.Println("")
-  fmt.Println("INVERSE FFT")
-  fmt.Println("")
-  fmt.Println("in:", in.LocalCopy().Array)
+//   fmt.Println("")
+//   fmt.Println("")
+//   fmt.Println("INVERSE FFT")
+//   fmt.Println("")
+//   fmt.Println("in:", in.LocalCopy().Array)
 
   // shorthand
   buffer := &(fft.buffer)
@@ -317,7 +319,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
   // FFT X
   if logicSize[0] > 1 {
     Start("fftX_INV")
-    fmt.Println("")
+//     fmt.Println("")
     for dev := range _useDevice {
       setDevice(_useDevice[dev])
       fft.planX[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(in.pointer[dev]), cufft.INVERSE) //FFT in x-direction
@@ -381,7 +383,7 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 //   fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
   CopyPadZ(out, padZ)
-  fmt.Println("")
-  fmt.Println("out:", out.LocalCopy().Array)
+//   fmt.Println("")
+//   fmt.Println("out:", out.LocalCopy().Array)
 
 }

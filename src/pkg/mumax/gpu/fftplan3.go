@@ -13,7 +13,12 @@ import (
   . "mumax/common"
   cu "cuda/driver"
   "cuda/cufft"
+<<<<<<< HEAD
   "fmt"
+=======
+//   "fmt"
+//   "cuda/runtime"
+>>>>>>> zeroArray function added.
 )
 
 type FFTPlan struct {
@@ -145,9 +150,9 @@ func (fft *FFTPlan) Free() {
     fft.dataSize[i] = 0
     fft.logicSize[i] = 0
   }
-  (&(fft.buffer)).Free()
+//   (&(fft.buffer)).Free()
 
-  // TODO destroy
+  // TODO destroy, free the buffer
 }
 
 func (fft *FFTPlan) OutputSize() []int {
@@ -200,7 +205,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 //   fmt.Println("in:", in.LocalCopy().Array)
   
-
+Start("total_FW")
 // @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
   Start("CopyPadZ_FW")
   CopyPadZAsync(padZ, in, fft.Stream)
@@ -283,12 +288,21 @@ func (fft *FFTPlan) Forward(in, out *Array) {
   }
   Stop("MemcpyDtoD_FW")
 
+  Start("zero_FW")
+//   transp2.Zero()
+  ZeroArrayAsync(transp2, fft.Stream)
+  Stop("zero_FW")
   Start("InsertBlockZ_FW")
-  transp2.Zero()
   for c := range chunks {
 <<<<<<< HEAD
+<<<<<<< HEAD
     InsertBlockZ(transp2, &(chunks[c]), c)
+=======
+//     InsertBlockZ(transp2, &(chunks[c]), c)
+>>>>>>> zeroArray function added.
     InsertBlockZAsync(transp2, &(chunks[c]), c, fft.Stream)
+    
+//     ZeroBlockAsync(transp2, )
   }
   Stop("InsertBlockZ_FW")
   fft.Sync()     
@@ -306,11 +320,16 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 >>>>>>> fftplan3.go added.
   Start("fftY_FW")
   for dev := range _useDevice {
+    
     setDevice(_useDevice[dev])
     fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
   fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
+=======
+//   fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
+>>>>>>> zeroArray function added.
   Stop("fftY_FW")
 =======
   fft.Sync()
@@ -332,6 +351,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 >>>>>>> fftplan3.go added.
     Stop("fftX_FW")
   }
+<<<<<<< HEAD
   fmt.Println("")
   fmt.Println("out:", out.LocalCopy().Array)
 <<<<<<< HEAD
@@ -340,6 +360,16 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 =======
 >>>>>>> fftplan3.go added.
 
+=======
+/*  fmt.Println("")
+  fmt.Println("out:", out.LocalCopy().Array)*/
+ 
+  fft.Sync()
+/*  fmt.Println("")
+  fmt.Println("out:", out.LocalCopy().Array)*/
+  
+Stop("total_FW")
+>>>>>>> zeroArray function added.
 }
 
 
@@ -384,26 +414,26 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 
   // FFT X
   if logicSize[0] > 1 {
-    Start("fftX_INV")
-    fmt.Println("")
+//     Start("fftX_INV")
+//     fmt.Println("")
     for dev := range _useDevice {
       setDevice(_useDevice[dev])
       fft.planX[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(in.pointer[dev]), cufft.INVERSE) //FFT in x-direction
     }
     fft.Sync()
-    Stop("fftX_INV")
+//     Stop("fftX_INV")
 /*    fmt.Println("")
     fmt.Println("fftx:", in.LocalCopy().Array)*/
   }
 
   // FFT Y
-  Start("fftY_INV")
+//   Start("fftY_INV")
   for dev := range _useDevice {
     setDevice(_useDevice[dev])
     fft.planY[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.INVERSE) //FFT in y-direction
   }
   fft.Sync()
-  Stop("fftY_INV")
+//   Stop("fftY_INV")
 //   fmt.Println("")
 //   fmt.Println("ffty:", transp2.LocalCopy().Array)
 

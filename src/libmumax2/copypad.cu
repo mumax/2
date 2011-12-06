@@ -78,6 +78,29 @@ void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, in
 
 
 
+__global__ void zeroArrayKern(float *A, int N){
+  
+  int i = threadindex;
+  
+  if (i<N){
+    A[i] = 0;
+    
+  }
+}
+
+void zeroArrayAsync(float **A, int length, CUstream *streams){
+
+  dim3 gridSize, blockSize;
+  make1dconf(length, &gridSize, &blockSize);
+  
+  for (int dev = 0; dev < nDevice(); dev++) {
+    gpu_safe(cudaSetDevice(deviceId(dev)));
+    zeroArrayKern<<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>>( A[dev], length );
+  }
+}
+
+
+
 
 
 /// @internal Does Z-padding and unpadding of a 2D matrix.

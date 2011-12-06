@@ -30,6 +30,8 @@ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2,
 ///	[ 0 0  S3 S4  0 0 ]
 void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
 
+/// Put an array to zero with (sub)sizes [NO, N1part, N2]
+void zeroArrayAsync(float **A, int N, CUstream *streams);
 
 /// Extract from src a block to dst
 /// E.g.:
