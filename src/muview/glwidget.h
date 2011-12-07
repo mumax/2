@@ -32,6 +32,7 @@ public slots:
   void updateExtent();
   void updateData(array_ptr data);
   void updateTopOverlay(QString newstring);
+  void toggleDisplay(bool cubes);
 
 signals:
   void xRotationChanged(int angle);
@@ -56,8 +57,8 @@ private:
   QColor qtGreen;
   QColor qtPurple;
 
-  GLuint cone;
-
+  GLuint cone, cube;
+  bool drawCubes;
   // For storing the magnetization vectors
   // we only need float32 since double precision
   // is not necessary for rendering

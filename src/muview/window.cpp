@@ -224,15 +224,16 @@ void Window::createMenus()
   fileMenu->addSeparator();
 
   settingsMenu = menuBar()->addMenu(tr("&Settings"));
-  settingsMenu->addSeparator();
-
+  
   helpMenu = menuBar()->addMenu(tr("&Help"));
   helpMenu->addAction(aboutAct);
   helpMenu->addSeparator();
   //helpMenu->addAction(webAct);
 
   settingsMenu->addAction(settingsAct);
-
+  settingsMenu->addSeparator();
+  settingsMenu->addAction(cubesAct);
+  settingsMenu->addAction(conesAct);
 }
 
 void Window::about()
@@ -336,24 +337,35 @@ void Window::openDir()
     }
 }
 
+void Window::toggleDisplay() {
+  glWidget->toggleDisplay(cubesAct->isChecked());
+}
+
 
 void Window::createActions()
 {
   aboutAct = new QAction(tr("&About Muview"), this);
-  //aboutAct->setStatusTip(tr("Show the application's About box"));
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
   settingsAct = new QAction(tr("&Muview Preferences"), this);
-  //settingsAct->setStatusTip(tr("Show the application's preferences"));
   connect(settingsAct, SIGNAL(triggered()), this, SLOT(settings()));
+
+  cubesAct = new QAction(tr("&Display Cubes"), this);
+  conesAct = new QAction(tr("&Display Cones"), this);
+  cubesAct->setCheckable(true);
+  cubesAct->setChecked(true);
+  conesAct->setCheckable(true);
+  connect(cubesAct, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
+  connect(conesAct, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
+  displayType = new QActionGroup(this);
+  displayType->addAction(cubesAct);
+  displayType->addAction(conesAct);
 
   openFilesAct  = new QAction(tr("&Open File(s)"), this);
   openFilesAct->setShortcuts(QKeySequence::Open);
-  //openAct->setStatusTip(tr("Open an existing file"));
   connect(openFilesAct, SIGNAL(triggered()), this, SLOT(openFiles()));
 
   openDirAct  = new QAction(tr("&Open Dir"), this);
-  //openAct->setStatusTip(tr("Open all files in a directory"));
   connect(openDirAct, SIGNAL(triggered()), this, SLOT(openDir()));
 }
 

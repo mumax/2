@@ -190,8 +190,16 @@ void GLWidget::initializeGL()
   // Draw a cone pointing along the z axis
   glNewList(cone, GL_COMPILE);
     glPushMatrix();
-    //glRotatef(0.0f,0.0f,0.0f,0.0f);
     glutSolidCone(0.2f, 0.7f, 10, 1);
+    glPopMatrix();
+  glEndList();
+  
+  // Display List for cube
+  cube = glGenLists(1);
+  // Draw a cone pointing along the z axis
+  glNewList(cube, GL_COMPILE);
+    glPushMatrix();
+    glutSolidCube(1.0f);
     glPopMatrix();
   glEndList();
 
@@ -201,6 +209,12 @@ void GLWidget::initializeGL()
 
   // Initial view
   zoom=0.5;
+}
+
+void GLWidget::toggleDisplay(bool cubes) 
+{
+  drawCubes = cubes;
+  updateGL();
 }
 
 void GLWidget::paintGL()
@@ -259,11 +273,13 @@ void GLWidget::paintGL()
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
-		    glRotatef(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
-		    glRotatef(180.0*theta/PI,  1.0, 0.0, 0.0);
-
-		    glCallList(cone);
-
+		    if (drawCubes) {
+		      glCallList(cube);
+		    } else {		    
+		      glRotatef(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
+		      glRotatef(180.0*theta/PI,  1.0, 0.0, 0.0);
+		      glCallList(cone);
+		    }
 		    glPopMatrix();
 		  }
 	      }

@@ -37,6 +37,7 @@ protected:
 private slots:
   void openFiles();
   void openDir();
+  void toggleDisplay();
 
   void settings();
   void about();
@@ -57,9 +58,13 @@ private:
   QAction *attachToMumax;
   QAction *settingsAct;
   QAction *aboutAct;
+
+  QActionGroup *displayType;
+  QAction *conesAct;
+  QAction *cubesAct;
   //QAction *webAct;
 
-  // Prefereences window;
+  // Preferences window;
   Preferences *prefs;
 
   // Other Stuff
