@@ -2,10 +2,4 @@
 *.omf
 *.ovf
 *.txt
-<<<<<<< HEAD
 *.pyc
-=======
-*.pyc
-
-
->>>>>>> Revert "some gitignore items"
