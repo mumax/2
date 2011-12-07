@@ -22,6 +22,18 @@ extern "C" {
 /// @param S2: source Z size , <= D2
 void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
+/// Copy+zero pad a 3D matrix in all directions: only to be used when 1 device is used.
+/// @param dst: destination arrays
+/// @param D0: dst X size, >= S0
+/// @param D1: dst Y size, >= S1
+/// @param D2: dst Z size, >= S2
+/// @param src: source arrays
+/// @param S0: source X size , <= D0
+/// @param S1: source Y size , <= D1
+/// @param S2: source Z size , <= D2
+/// @param Ncomp: number of array components
+void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams);
+
 
 /// Insert from src into a block in dst
 /// E.g.:

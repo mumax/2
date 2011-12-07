@@ -24,7 +24,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-	//   "fmt"
+	  "fmt"
 	//   "cuda/runtime"
 >>>>>>> error when #gpu=1
 )
@@ -488,8 +488,8 @@ Stop("total_FW")
 	fmt.Println("out:", out.LocalCopy().Array)*/
 
 	fft.Sync()
-	/*  fmt.Println("")
-	fmt.Println("out:", out.LocalCopy().Array)*/
+	  fmt.Println("")
+	fmt.Println("out:", out.LocalCopy().Array)
 
 	Stop("total_FW")
 >>>>>>> error when #gpu=1
