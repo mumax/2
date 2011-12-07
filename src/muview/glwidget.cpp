@@ -190,7 +190,7 @@ void GLWidget::initializeGL()
   // Draw a cone pointing along the z axis
   glNewList(cone, GL_COMPILE);
     glPushMatrix();
-    glutSolidCone(0.2f, 0.7f, 10, 1);
+    glutSolidCone(0.35f, 0.95f, 10, 1);
     glPopMatrix();
   glEndList();
   
