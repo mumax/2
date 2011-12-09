@@ -13,7 +13,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-	//   "fmt"
+	  "fmt"
 	//   "cuda/runtime"
 )
 // runtime.GetDeviceProperties().MultiProcessorCount
@@ -31,7 +31,8 @@ type FFTPlan struct {
 	fftZbuffer Array   // Array after R2C transform: same size as padZ +2 elements in z-direction
 	transp1    Array   // Array for partial transpose per GPU
 	chunks     []Array // A chunk (single-GPU part of these arrays) is copied from GPU to GPU
-	transp2    Array   // Array for full YZ inter device transpose + zero padding in Z' and X
+	transp2    Array   // Arrays for full YZ inter device transpose + zero padding in Z' and X
+	fftZ1Dev   []Array // Arrays containing data for batched FFTs when 1 device is used.
 
 	// fft plans
 	planY     []cufft.Handle // In-place transform of transp2 parts, in y-direction
@@ -70,6 +71,11 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 //    fft.transp2 = nil
     //-----------------------------------------------
     
+    offset := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
+    for i:=0; i< fft.dataSize[0]; i++{
+      fft.fftZ1Dev[i].Init(nComp, []int{1, 1, offset}, DONT_ALLOC)
+    } //---------------------------------------------
+
     // init planZ -----------------------------------
     fft.planZ_FW = make([]cufft.Handle, NDev)
     fft.planZ_INV = make([]cufft.Handle, NDev)
@@ -98,6 +104,9 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 
     
   }else{     // multi-gpu implementation
+
+//     fft.fftZ1Dev = nil  TODO  How to give this a null pointer?
+
     // init buffer (allocated) ----------------------
     bufferSize := dataSize[0] * ((logicSize[2]/2)/NDev + 1) * dataSize[1] * 2 //this size is the one needed for the chuncks
     fft.buffer.Init(nComp, []int{1, NDev, bufferSize}, DO_ALLOC)
@@ -213,13 +222,20 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
   
   if (NDevice()==1){     //  single-gpu implementation
+
+    fmt.Println("single GPU used" )
+
+    fftZ1Dev := fft.fftZ1Dev
+
     // zero padding, all FFTs are in-place
     CopyPad3D(out, in)
     
     // FFT in z-direction
     offset := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
     for i:=0; i< fft.dataSize[0]; i++{
-      fft.planZ_FW[0].ExecR2C(uintptr(&out.pointer[0][i*offset]), uintptr(&out.pointer[0][i*offset]))
+      fftZ1Dev[i].PointTo(out, offset)
+      ptr := uintptr(fftZ1Dev[i].pointer[0])
+      fft.planZ_FW[0].ExecR2C(ptr, ptr)
     }
     fft.Sync()      //  Is this required?
     
@@ -359,6 +375,9 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
 	*/
 
   if (NDevice()==1){     //  single-gpu implementation
+
+    fftZ1Dev := fft.fftZ1Dev
+    
     // FFT in x-direction
     if fft.logicSize[0] > 1 {
       fft.planX[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in x-direction
@@ -366,15 +385,21 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
     fft.Sync()      //  Is this required?
     
     // FFT in y-direction
-    fft.planY[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.INVERSE) //FFT in y-direction
+    fft.planY[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in y-direction
     fft.Sync()      //  Is this required?
 
     // FFT in z-direction
     offset := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
     for i:=0; i< fft.dataSize[0]; i++{
-      fft.planZ_FW[0].ExecR2C(uintptr(&(out.pointer[0][i*offset])), uintptr(&(out.pointer[0][i*offset])))
-//      fft.planZ_FW[0].ExecR2C(uintptr(out.pointer[0][i*offset]), uintptr(out.pointer[0][i*offset]))
-    } 
+      fftZ1Dev[i].PointTo(in, offset)
+      ptr := uintptr(fftZ1Dev[i].pointer[0])
+      fft.planZ_FW[0].ExecC2R(ptr, ptr)
+    }
+//     for i:=0; i< fft.dataSize[0]; i++{
+//       fft.planZ_INV[0].ExecR2C( cu.DevicePtr(ArrayOffset(uintptr(out.pointer[0]), offset)), cu.DevicePtr(ArrayOffset(uintptr(out.pointer[0]), offset)) )
+//       ptr := cu.DevicePtr(ArrayOffset(uintptr(out.pointer[0]), offset));
+//       fft.planZ_INV[0].ExecR2C( ptr, ptr )
+//     } 
 
     fft.Sync()      //  Is this required?
 
@@ -469,7 +494,8 @@ func (fft *FFTPlan) Inverse(in, out *Array) {
     //   fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
     CopyPadZ(out, padZ)
-    //   fmt.Println("")
-    //   fmt.Println("out:", out.LocalCopy().Array)
   }
+  fmt.Println("")
+  fmt.Println("out:", out.LocalCopy().Array)
+  
 }
