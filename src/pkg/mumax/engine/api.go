@@ -136,7 +136,8 @@ func (a API) SetPointwise(quantity string, time float64, value []float64) {
 	}
 
 	pointwise := u.(*PointwiseUpdater)
-	pointwise.Append(time, value)
+	SwapXYZ(value)
+	pointwise.Append(time, value) // swap!
 
 }
 

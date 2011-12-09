@@ -17,8 +17,8 @@ type PointwiseUpdater struct {
 	points  [][]float64 // List of time+value lines: [time0, valx, valy, valz], [time1, ...
 }
 
-func newPointwiseUpdater(q*Quant)*PointwiseUpdater{
-	u:=new(PointwiseUpdater)
+func newPointwiseUpdater(q *Quant) *PointwiseUpdater {
+	u := new(PointwiseUpdater)
 	u.quant = q
 	u.points = make([][]float64, 0, 100)
 	return u
@@ -38,9 +38,9 @@ func (field *PointwiseUpdater) Update() {
 	// first search backwards in time, 
 	// multi-stage solvers may have gone back in time.
 	i := 0
-	defer func(){
-		err:=recover()
-		if err != nil{
+	defer func() {
+		err := recover()
+		if err != nil {
 			Debug("i=", i)
 		}
 	}()
@@ -76,7 +76,7 @@ func (field *PointwiseUpdater) Update() {
 	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
-	field.quant.SetValue(value)//?
+	field.quant.SetValue(value) //?
 
 	Debug("pointwise update", field.quant.Name(), "time=", time, "i=", i, "value=", value)
 }
