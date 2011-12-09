@@ -22,10 +22,11 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 10e-12)
 
 run(2e-9) #relax
+
+autosave("m", "omf", ["Text"], 20e-12)
 
 Hx = -24.6E-3 / mu0
 Hy =   4.3E-3 / mu0

@@ -188,7 +188,7 @@ func zeros(n int) []float64 {
 
 // Set the multiplier of a MASK or the value of a VALUE
 func (q *Quant) SetValue(val []float64) {
-	Debug("SetValue", q.name, val)
+	//Debug("SetValue", q.name, val)
 	checkKinds(q, MASK, VALUE)
 	checkComp(q, len(val))
 	for i, v := range val {
@@ -224,7 +224,7 @@ func (q *Quant) SetField(field *host.Array) {
 func (q *Quant) SetMask(field *host.Array) {
 	checkKind(q, MASK)
 	q.assureAlloc()
-	Debug(q.Name(), q.Array())
+	//Debug(q.Name(), q.Array())
 	q.Array().CopyFromHost(field)
 	q.Invalidate() //!
 }
@@ -421,7 +421,7 @@ func (q *Quant) assureAlloc() {
 	if pointers[0] == 0 {
 		Debug("assureAlloc: " + q.Name())
 		q.Array().Alloc()
-		Debug(q.Name(), q.Array())
+		//Debug(q.Name(), q.Array())
 	}
 }
 
