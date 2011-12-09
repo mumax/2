@@ -73,15 +73,13 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 		//Debug("Opened log file:", logfile)
 	}
 	l.Initialized = true
-	//Log("log normal output:", l.ShowPrint)
-	//Log("log debug messages:", l.ShowDebug)
-	//Log("log warnings:", l.ShowWarn)
 }
 
 // Log a debug message.
 func Debug(msg ...interface{}) {
 	// put [debug] in front of message
 	msgcol := append([]interface{}{LOG_DEBUG_COL + "[debug]"}, msg...)
+	msgcol = append(msgcol, RESET)
 	msg = append([]interface{}{"[debug]"}, msg...)
 
 	LogFile(msg...)
@@ -102,6 +100,7 @@ const MSG_WARNING = "Warning:"
 func Warn(msg ...interface{}) {
 	// put [warn ] in front of message
 	msgcol := append([]interface{}{LOG_WARN_COL + "[warn ]"}, msg...)
+	msgcol = append(msgcol, RESET)
 	msg = append([]interface{}{"[warn ]"}, msg...)
 
 	if !logger.Initialized && logger.ShowWarn {
