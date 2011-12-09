@@ -39,6 +39,10 @@ setpointwise('H_ext', 3e-9, [-Hx, -Hy, -Hz])
 setpointwise('H_ext', 4e-9, [-Hx, -Hy, -Hz])
 setpointwise('H_ext', 4e-9, [0,0,0])
 
+setpointwise('alpha', 0, 1)
+setpointwise('alpha', 1e-9, 0.02)
+
+savegraph("graph.png")
 
 setv('alpha', 1)
 run(1e-9)
@@ -47,5 +51,4 @@ run(5e-9)
 
 
 printstats()
-savegraph("graph.png")
 

@@ -22,6 +22,8 @@ import (
 
 // run the input files given on the command line
 func clientMain() {
+	//defer fmt.Println(RESET)
+
 	if !*flag_silent {
 		fmt.Println(WELCOME)
 	}

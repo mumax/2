@@ -10,7 +10,6 @@ setgridsize(Nx, Ny, Nz)
 setcellsize(500e-9/Nx, 125e-9/Ny, 3e-9/Nz)
 
 load('micromagnetism')
-load('demagexch')
 load('solver/rk12')
 
 setv('Msat', 800e3)

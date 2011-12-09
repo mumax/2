@@ -22,5 +22,4 @@ func LoadZeeman(e *Engine) {
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)
 	sum.AddParent("H_ext")
-	e.Depends("H_ext", "t") // EVEN IF H_ext IS NOT REALLY TIME-DEPENDENT, THINGS BREAK IF THIS IS NOT HERE. NEED TO DEBUG
 }

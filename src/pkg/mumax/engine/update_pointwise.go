@@ -11,6 +11,7 @@ import (
 	. "mumax/common"
 )
 
+// Updates a quantity according to a point-wise defined function of time.
 type PointwiseUpdater struct {
 	quant   *Quant
 	lastIdx int         // Index of last time, for fast lookup of next
@@ -21,6 +22,7 @@ func newPointwiseUpdater(q *Quant) *PointwiseUpdater {
 	u := new(PointwiseUpdater)
 	u.quant = q
 	u.points = make([][]float64, 0, 100)
+	engine.Depends(q.Name(), "t") // declare time-dependence
 	return u
 }
 
@@ -51,7 +53,7 @@ func (field *PointwiseUpdater) Update() {
 		}
 	}
 	// i now points to a time >= engine.time
-	//field.lastIdx = i TODO
+	field.lastIdx = i 
 
 	// out of range: value = unchanged
 	if i-1 < 0 || i >= len(field.points) {
