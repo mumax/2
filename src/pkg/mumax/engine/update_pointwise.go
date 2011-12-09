@@ -53,7 +53,7 @@ func (field *PointwiseUpdater) Update() {
 		}
 	}
 	// i now points to a time >= engine.time
-	field.lastIdx = i 
+	field.lastIdx = i
 
 	// out of range: value = unchanged
 	if i-1 < 0 || i >= len(field.points) {

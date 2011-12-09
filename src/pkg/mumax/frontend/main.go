@@ -271,5 +271,5 @@ const (
   GNU General Public License for more details.
 `
 	LOGFILE  = "mumax2.log"
-	SENDMAIL = "\n-----\nIf you would like to have this issue fixed, please send \"" + LOGFILE + "\" to Arne.Vansteenkiste@UGent.be and/or Ben.VandeWiele@UGent.be\n-----\n"
+	SENDMAIL = "\n------\nIf you believe this is a bug, please file an issue on http://code.google.com/p/mumax2/issues. Be sure to include the log file \"" + LOGFILE + "\n------\n"
 )
