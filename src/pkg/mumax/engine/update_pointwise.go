@@ -17,7 +17,17 @@ type PointwiseUpdater struct {
 	points  [][]float64 // List of time+value lines: [time0, valx, valy, valz], [time1, ...
 }
 
+func newPointwiseUpdater(q*Quant)*PointwiseUpdater{
+	u:=new(PointwiseUpdater)
+	u.quant = q
+	u.points = make([][]float64, 0, 100)
+	return u
+}
+
 func (field *PointwiseUpdater) Update() {
+
+	//Debug(field)
+
 	if len(field.points) < 2 {
 		panic(InputErr("Pointwise definition needs at least two points"))
 	}
@@ -28,19 +38,26 @@ func (field *PointwiseUpdater) Update() {
 	// first search backwards in time, 
 	// multi-stage solvers may have gone back in time.
 	i := 0
-	for i = field.lastIdx; i >= 0; i-- {
+	defer func(){
+		err:=recover()
+		if err != nil{
+			Debug("i=", i)
+		}
+	}()
+	for i = field.lastIdx; i > 0; i-- {
 		if field.points[i][0] < time {
 			break
 		}
 	}
 	// then search forward
 	for ; i < len(field.points); i++ {
+		//Debug("i", i)
 		if field.points[i][0] >= time {
 			break
 		}
 	}
 	// i now points to a time >= engine.time
-	field.lastIdx = i
+	//field.lastIdx = i TODO
 
 	// out of range: value = unchanged
 	if i-1 < 0 || i >= len(field.points) {
@@ -54,20 +71,24 @@ func (field *PointwiseUpdater) Update() {
 	v2 := field.points[i][1:]
 	dt := t2 - t1         //pt2[0] - pt1[0]
 	t := (time - t1) / dt // 0..1
+	Assert(time >= 0 && time <= 1)
 	value := field.quant.multiplier
 	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
+	field.quant.SetValue(value)//?
+
+	Debug("pointwise update", field.quant.Name(), "time=", time, "i=", i, "value=", value)
 }
 
-func (p*PointwiseUpdater)Append(time float64, value []float64){
+func (p *PointwiseUpdater) Append(time float64, value []float64) {
 	nComp := p.quant.NComp()
-	if len(value) != nComp{
+	if len(value) != nComp {
 		panic(InputErrF(p.quant.Name(), "has", nComp, "components, but", len(value), "provided"))
 	}
-	if len(p.points) > 0{
-		if p.points[len(p.points)-1][0] > time{
-			panic(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time ))
+	if len(p.points) > 0 {
+		if p.points[len(p.points)-1][0] > time {
+			panic(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time))
 		}
 	}
 
@@ -75,5 +96,5 @@ func (p*PointwiseUpdater)Append(time float64, value []float64){
 	entry[0] = time
 	copy(entry[1:], value)
 	p.points = append(p.points, entry)
-	
+
 }
