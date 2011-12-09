@@ -70,7 +70,7 @@ func (field *PointwiseUpdater) Update() {
 	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
-	field.quant.Invalidate()//SetValue(value) //?
+	field.quant.Invalidate() //SetValue(value) //?
 	//Debug("pointwise update", field.quant.Name(), "time=", time, "i=", i, "value=", value)
 }
 
