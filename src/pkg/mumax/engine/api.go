@@ -120,7 +120,7 @@ func (a API) SetV(quantity string, value []float64) {
 }
 
 func (a API) SetValue(quantity string, value []float64) {
-	Warn("deprecated")
+	Warn("setvalue deprecated: use setv")
 	a.SetV(quantity, value)
 }
 
@@ -132,7 +132,7 @@ func (a API) SetS(quantity string, value float64) {
 }
 
 func (a API) SetScalar(quantity string, value float64) {
-	Warn("deprecated")
+	Warn("setscalar deprecated: use sets or setv")
 	a.SetS(quantity, value)
 }
 

@@ -12,11 +12,10 @@ import (
 )
 
 type PointwiseUpdater struct {
-	quant *Quant
-	lastIdx int          // Index of last time, for fast lookup of next
+	quant   *Quant
+	lastIdx int         // Index of last time, for fast lookup of next
 	points  [][]float64 // List of time+value lines: [time0, valx, valy, valz], [time1, ...
 }
-
 
 func (field *PointwiseUpdater) Update() {
 	if len(field.points) < 2 {
@@ -28,8 +27,8 @@ func (field *PointwiseUpdater) Update() {
 
 	// first search backwards in time, 
 	// multi-stage solvers may have gone back in time.
-	i:=0
-	for i= field.lastIdx; i >= 0; i-- {
+	i := 0
+	for i = field.lastIdx; i >= 0; i-- {
 		if field.points[i][0] < time {
 			break
 		}
@@ -46,19 +45,17 @@ func (field *PointwiseUpdater) Update() {
 	// out of range: value = unchanged
 	if i-1 < 0 || i >= len(field.points) {
 		// or should we zero it?
-		return 
+		return
 	}
-
 
 	t1 := field.points[i-1][0]
 	t2 := field.points[i][0]
 	v1 := field.points[i-1][1:]
 	v2 := field.points[i][1:]
-	dt := t2 - t1 //pt2[0] - pt1[0]
+	dt := t2 - t1         //pt2[0] - pt1[0]
 	t := (time - t1) / dt // 0..1
 	value := field.quant.multiplier
-	for i := range value{
+	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
 }
-
