@@ -38,12 +38,6 @@ func (field *PointwiseUpdater) Update() {
 	// first search backwards in time, 
 	// multi-stage solvers may have gone back in time.
 	i := 0
-	defer func() {
-		err := recover()
-		if err != nil {
-			Debug("i=", i)
-		}
-	}()
 	for i = field.lastIdx; i > 0; i-- {
 		if field.points[i][0] < time {
 			break
@@ -76,9 +70,8 @@ func (field *PointwiseUpdater) Update() {
 	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
-	field.quant.SetValue(value) //?
-
-	Debug("pointwise update", field.quant.Name(), "time=", time, "i=", i, "value=", value)
+	field.quant.Invalidate()//SetValue(value) //?
+	//Debug("pointwise update", field.quant.Name(), "time=", time, "i=", i, "value=", value)
 }
 
 func (p *PointwiseUpdater) Append(time float64, value []float64) {
