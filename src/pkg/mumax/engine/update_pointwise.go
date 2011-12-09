@@ -59,3 +59,21 @@ func (field *PointwiseUpdater) Update() {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
 }
+
+func (p*PointwiseUpdater)Append(time float64, value []float64){
+	nComp := p.quant.NComp()
+	if len(value) != nComp{
+		panic(InputErrF(p.quant.Name(), "has", nComp, "components, but", len(value), "provided"))
+	}
+	if len(p.points) > 0{
+		if p.points[len(p.points)-1][0] > time{
+			panic(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time ))
+		}
+	}
+
+	entry := make([]float64, nComp+1)
+	entry[0] = time
+	copy(entry[1:], value)
+	p.points = append(p.points, entry)
+	
+}

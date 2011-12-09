@@ -124,6 +124,23 @@ func (a API) SetValue(quantity string, value []float64) {
 	a.SetV(quantity, value)
 }
 
+
+func (a API) SetPointwise(quantity string, time float64, value []float64){
+	e:=a.Engine
+	q:=e.Quant(quantity)
+	checkKinds(q, VALUE, MASK)
+
+	u := q.GetUpdater()
+	if u == nil{
+		u = new(PointwiseUpdater)
+		q.SetUpdater(u)
+	}	
+	
+	pointwise := u.(*PointwiseUpdater)
+	pointwise.Append(time, value)
+	
+}
+
 // Set scalar. Convenience method for SetValue() with only one number.
 // REDUNDANT?
 func (a API) SetS(quantity string, value float64) {
