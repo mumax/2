@@ -197,6 +197,9 @@ func (v *Array) Free() {
 		v._size[i] = 0
 	}
 	v.initCompPtrs() // also set component pointers to NULL
+	for c:=range v.Comp{
+		v.Comp[c].Stream.Destroy()
+	}
 }
 
 // Address of part of the array on each GPU device
