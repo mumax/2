@@ -32,11 +32,7 @@ func engineMain() {
 	LogFile(WELCOME)
 	Debug("Go", runtime.Version())
 
-	// initialize CUDA first
-	Debug("Initializing CUDA")
-	runtime.LockOSThread()
-	Debug("Locked OS Thread")
-	cu.Init()
+	initCUDA()
 
 	initMultiGPU()
 
@@ -48,6 +44,13 @@ func engineMain() {
 	var client Client
 	client.Init("-", outdir, "")
 	client.RunSlave()
+}
+
+func initCUDA(){
+	Debug("Initializing CUDA")
+	runtime.LockOSThread()
+	Debug("Locked OS Thread")
+	cu.Init()
 }
 
 // Do not start interpreter subprocess but wait for commands on Stdin.

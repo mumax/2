@@ -14,26 +14,51 @@ package engine
 
 import (
 	. "mumax/common"
+	cu "cuda/driver"
+	"mumax/gpu"
 	"strings"
+	"runtime"
+	"os"
+	"fmt"
 )
 
-func TexGen(){
-
-	for mod := range modules{
+func TexGen() {
+	initCUDA()
+	gpu.InitMultiGPU([]int{0},0)
+	for mod := range modules {
 		moduleTexGen(mod)
 	}
 }
 
+func initCUDA(){
+	Debug("Initializing CUDA")
+	runtime.LockOSThread()
+	Debug("Locked OS Thread")
+	cu.Init()
+}
 
-func moduleTexGen(module string){
+func moduleTexGen(module string) {
+	defer func(){
+		err := recover()
+		if err != nil{
+			fmt.Fprintln(os.Stderr, "texgen failed", module, err)
+		}
+	}()
 	out := OpenWRONLY("modules/" + texify(module) + ".tex")
 	defer out.Close()
 
-	
+	engine = *new(Engine) // flush global engine with zero value	
+	Init()
+	engine.outputDir = "."
+	api := &API{&engine}
+	api.SetGridSize(4,4,4 )// dummy size 
+	api.SetCellSize(1e-9,1e-9,1e-9 )// dummy size 
+	api.Load(module)
+	api.SaveGraph("modules/"+texify(module)+".pdf")
 }
 
-func texify(str string)string{
-	const ALL=-1
-	str =strings.Replace(str, "/", "-", ALL)
+func texify(str string) string {
+	const ALL = -1
+	str = strings.Replace(str, "/", "-", ALL)
 	return str
 }
