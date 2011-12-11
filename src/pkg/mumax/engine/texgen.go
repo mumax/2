@@ -71,22 +71,30 @@ func moduleTexGen(out io.Writer, module string) {
 	fmt.Fprintln(out, `\label{`+module+`}`)
 	fmt.Fprintln(out, `\index{`+module+`}`)
 	fmt.Fprintln(out)
+	fmt.Fprintln(out, `Load this module with \texttt{\textbf{load}("`+module+`")}`)
+	fmt.Fprintln(out, `\subsubsection*{Module description}`)
 	fmt.Fprintln(out, modules[module].Description, `\\`)
 
 	// provided quantities
-	if len(engine.quantity)>3{
-	fmt.Fprintln(out, `\subsubsection*{Quantities}`)
-	fmt.Fprintln(out, `\begin{tabular}{llll}`)
-	fmt.Fprintln(out, `name & unit & comp+kind & desc \\\hline`)
-	for n,q := range engine.quantity{
-		if n=="t" || n=="dt"||n=="step"{continue}
-		fmt.Fprintln(out, texEsc(q.Name()), "&", q.Unit(), "&",q.NComp(),  q.kind, "&",  q.desc, `\\`)
-	}
-	fmt.Fprintln(out, `\end{tabular}\\`)
+	if len(engine.quantity) > 3 {
+		fmt.Fprintln(out, `\subsubsection*{Module quantities}`)
+		fmt.Fprintln(out, `These quantities are provided by the module:\\`)
+		fmt.Fprintln(out, `\smallskip`)
+		fmt.Fprintln(out, `\begin{tabular}{llll}`)
+		fmt.Fprintln(out, `name & unit & comp+kind & desc \\\hline`)
+		for n, q := range engine.quantity {
+			if n == "t" || n == "dt" || n == "step" {
+				continue
+			}
+			name := texEsc(q.Name())
+			fmt.Fprintln(out, `\texttt{`+name+`}\index{`+name+`}`, "&", q.Unit(), "&", q.NComp(), q.kind, "&", q.desc, `\\`)
+		}
+		fmt.Fprintln(out, `\end{tabular}\\`)
 	}
 
 	// graph
-	fmt.Fprintln(out, `\subsubsection*{Graph}`)
+	fmt.Fprintln(out, `\subsubsection*{Module graph}`)
+	fmt.Fprintln(out, `This is the dependency graph between this module's quantities:\\`)
 	fmt.Fprintln(out, `\includegraphics[height=5cm, width=\textwidth, keepaspectratio=true]{`+graphbase+`}`)
 
 	fmt.Fprintln(out)
