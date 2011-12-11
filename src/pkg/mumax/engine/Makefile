@@ -12,6 +12,7 @@ GOFILES=\
 	gridsize.go\
 	api.go\
 	module.go\
+	texgen.go\
 	mod_magnetization.go\
 	mod_llg.go\
 	mod_zeeman.go\

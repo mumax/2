@@ -3,6 +3,7 @@ include $(GOROOT)/src/Make.inc
 executables=\
 	mumax2\
 	apigen\
+	texgen\
 
 all: $(executables) 
 
@@ -16,7 +17,7 @@ mumax2:
 	$(GC) -I_obj $@.go $(modules:.mod=.mod/pkg/import.go)
 	$(LD) -L_obj -o $@ $@.$O
 
-apigen:
+apigen texgen:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
 
