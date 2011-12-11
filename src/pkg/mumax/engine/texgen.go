@@ -24,8 +24,6 @@ import (
 	"fmt"
 )
 
-
-
 func TexGen() {
 	initCUDA()
 	gpu.InitMultiGPU([]int{0}, 0)
@@ -63,20 +61,46 @@ func moduleTexGen(out io.Writer, module string) {
 	api.Load(module)
 
 	// save physics graph
-	graphbase := "modules/"+texify(module)
+	graphbase := "modules/" + noslash(module)
 	api.SaveGraph(graphbase + ".pdf")
-	err := exec.Command("mv", graphbase + ".dot.pdf", graphbase+".pdf").Run()
+	err := exec.Command("mv", graphbase+".dot.pdf", graphbase+".pdf").Run()
 	CheckIO(err)
 
-	fmt.Fprintln(out,`\subsection{`+ module+ `}`)
-	fmt.Fprintln(out,`\label{`+ module+ `}`)
-	fmt.Fprintln(out,`\index{`+ module+ `}`)
+	// module subsection
+	fmt.Fprintln(out, `\subsection{`+module+`}`)
+	fmt.Fprintln(out, `\label{`+module+`}`)
+	fmt.Fprintln(out, `\index{`+module+`}`)
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, modules[module].Description, `\\`)
 
-	fmt.Fprintln(out, `\includegraphics[width=0.75\textwidth]{` + graphbase + `}`)
+	// provided quantities
+	if len(engine.quantity)>3{
+	fmt.Fprintln(out, `\subsubsection*{Quantities}`)
+	fmt.Fprintln(out, `\begin{tabular}{llll}`)
+	fmt.Fprintln(out, `name & unit & comp+kind & desc \\\hline`)
+	for n,q := range engine.quantity{
+		if n=="t" || n=="dt"||n=="step"{continue}
+		fmt.Fprintln(out, texEsc(q.Name()), "&", q.Unit(), "&",q.NComp(),  q.kind, "&",  q.desc, `\\`)
+	}
+	fmt.Fprintln(out, `\end{tabular}\\`)
+	}
+
+	// graph
+	fmt.Fprintln(out, `\subsubsection*{Graph}`)
+	fmt.Fprintln(out, `\includegraphics[height=5cm, width=\textwidth, keepaspectratio=true]{`+graphbase+`}`)
+
+	fmt.Fprintln(out)
+	fmt.Fprintln(out)
 }
 
-func texify(str string) string {
+func noslash(str string) string {
 	const ALL = -1
 	str = strings.Replace(str, "/", "-", ALL)
+	return str
+}
+
+func texEsc(str string) string {
+	const ALL = -1
+	str = strings.Replace(str, "_", `\_`, ALL)
 	return str
 }
