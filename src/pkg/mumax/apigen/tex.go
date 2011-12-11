@@ -49,32 +49,53 @@ func (p *Tex) WriteFunc(out io.Writer, name string, comment []string, argNames [
 	fmt.Fprintln(out)
 
 	fmt.Fprintln(out, `\subsection{`+sanitize(name)+`}`)
+	fmt.Fprintln(out, `\label{`+(name)+`}`)
 
-//	fmt.Fprint(out, "def ", name, "(")
-//
-//	args := ""
-//	for i := range argTypes {
-//		if i != 0 {
-//			args += ", "
-//		}
-//		args += argNames[i]
-//	}
-//	fmt.Fprintln(out, args, "):")
-//
-//	fmt.Fprintf(out, `	ret = call("%s", [%s])`, name, args)
-//	fmt.Fprint(out, "\n	return ")
-//	for i := range returnTypes {
-//		if i != 0 {
-//			fmt.Fprint(out, ", ")
-//		}
-//		fmt.Fprintf(out, `%v(ret[%v])`, python_convert[returnTypes[i].String()], i)
-//	}
-//	fmt.Fprintln(out)
-//	//fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args)) // single return value only
+
+		fmt.Fprint(out, `\texttt{\textbf{` + sanitize(name), `}(`)
+	
+		args := ""
+		for i := range argTypes {
+			if i != 0 {
+				args += ", "
+			}
+			args += argNames[i]
+		}
+		fmt.Fprintln(out, args+ `)}\\`)
+
+		fmt.Fprintln(out, catComment(comment))
+
+	//	fmt.Fprintf(out, `	ret = call("%s", [%s])`, name, args)
+	//	fmt.Fprint(out, "\n	return ")
+	//	for i := range returnTypes {
+	//		if i != 0 {
+	//			fmt.Fprint(out, ", ")
+	//		}
+	//		fmt.Fprintf(out, `%v(ret[%v])`, python_convert[returnTypes[i].String()], i)
+	//	}
+		fmt.Fprintln(out)
+		//fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args)) // single return value only
+}
+
+func sanitize(str string) string {
+	const ALL = -1
+	str = strings.Replace(str, `_`, `\_`, ALL)
+	str= strings.Replace(str, `#`, `\#`, ALL)
+	str= strings.Replace(str, `@param`, `\textbf{parameter:}`, ALL)
+	str= strings.Replace(str, `@note`, `\textbf{note:}`, ALL)
+	return str
 }
 
 
-func sanitize(str string)string{
-	const ALL = -1
-	return strings.Replace(str, `_`, `\_`, ALL)
+
+
+func catComment(lines []string) string {
+	str := ""
+	if len(lines) == 0 {
+		return ""
+	}
+	for _, l := range lines {
+		str += sanitize(l ) + "\\\\\n"
+	}
+	return str
 }

@@ -1,7 +1,9 @@
 all: manual.pdf
 
 
+.PHONY: manual.pdf
 manual.pdf: mumax2-api.tex *.tex
+	make clean
 	pdflatex --halt-on-error manual.tex
 	pdflatex --halt-on-error manual.tex
 	pdflatex --halt-on-error manual.tex
