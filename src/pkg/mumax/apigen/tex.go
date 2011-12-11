@@ -64,13 +64,20 @@ func (p *Tex) WriteFunc(out io.Writer, name string, comment []string, argNames [
 
 	fmt.Fprintln(out, catComment(comment))
 
-	if len(argTypes)>0{
-	fmt.Fprintln(out, `\textbf{parameter types:}\\`)
-	for i := range argTypes{
-		fmt.Fprintln(out, argNames[i], `:`, argTypes[i], `\\`)
+	if len(argTypes) > 0 {
+		fmt.Fprintln(out, `\textbf{parameter types:}\\`)
+		for i := range argTypes {
+			fmt.Fprintln(out, argNames[i], `:`, argTypes[i], `\\`)
+		}
 	}
+
+	if len(returnTypes) > 0 {
+
+		fmt.Fprintln(out, `\textbf{returns:}`)
+		for i := range returnTypes {
+			fmt.Fprint(out, sanitize(fmt.Sprint(returnTypes[i])), " ")
+		}
 	}
-	//fmt.Fprintln(out, `\textbf{returns:}\\`, returnTypes)
 
 	//	fmt.Fprintf(out, `	ret = call("%s", [%s])`, name, args)
 	//	fmt.Fprint(out, "\n	return ")
@@ -90,6 +97,8 @@ func sanitize(str string) string {
 	str = strings.Replace(str, `#`, `\#`, ALL)
 	str = strings.Replace(str, `@param`, `\textbf{parameter:}`, ALL)
 	str = strings.Replace(str, `@note`, `\textbf{note:}`, ALL)
+	str = strings.Replace(str, `[`, `\[`, ALL)
+	str = strings.Replace(str, `]`, `\]`, ALL)
 	return str
 }
 
