@@ -39,7 +39,7 @@ func APIGen() {
 	frontend.AddMethods(method, new(engine.API))
 
 	// target languages
-	langs := []Lang{&Python{}} //, &Java{}, &Lua{}}
+	langs := []Lang{&Python{}, &Tex{}} //, &Java{}, &Lua{}}
 
 	// output api files for each language.
 	for _, lang := range langs {

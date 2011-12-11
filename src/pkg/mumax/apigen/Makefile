@@ -9,11 +9,12 @@ TARG=mumax/apigen
 GOFILES=\
 	apigen.go\
 	parse.go\
-	c.go\
-	java.go\
 	lang.go\
-	lua.go\
 	python.go \
+	tex.go\
+	#c.go\
+	#java.go\
+	#lua.go\
 
 CGOFILES=\
 

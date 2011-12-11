@@ -12,6 +12,7 @@ import (
 	"io"
 	"reflect"
 	"fmt"
+	"os"
 )
 
 type Python struct{}
@@ -70,9 +71,10 @@ func (p *Python) WriteFunc(out io.Writer, name string, comment []string, argName
 	defer func() {
 		err := recover()
 		if err != nil {
-			//fmt.Println("WriteFunc ", name, comment, argNames, err)
+			fmt.Fprintln(os.Stderr, "WriteFunc ", name, comment, argNames, err)
 		}
 	}()
+
 	fmt.Fprintln(out)
 	fmt.Fprintf(out, pyDocComment(comment))
 	fmt.Fprint(out, "def ", name, "(")
