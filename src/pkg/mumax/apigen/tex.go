@@ -51,19 +51,26 @@ func (p *Tex) WriteFunc(out io.Writer, name string, comment []string, argNames [
 	fmt.Fprintln(out, `\subsection{`+sanitize(name)+`}`)
 	fmt.Fprintln(out, `\label{`+(name)+`}`)
 
+	fmt.Fprint(out, `\texttt{\textbf{`+sanitize(name), `}(`)
 
-		fmt.Fprint(out, `\texttt{\textbf{` + sanitize(name), `}(`)
-	
-		args := ""
-		for i := range argTypes {
-			if i != 0 {
-				args += ", "
-			}
-			args += argNames[i]
+	args := ""
+	for i := range argTypes {
+		if i != 0 {
+			args += ", "
 		}
-		fmt.Fprintln(out, args+ `)}\\`)
+		args += argNames[i]
+	}
+	fmt.Fprintln(out, args+`)}\\`)
 
-		fmt.Fprintln(out, catComment(comment))
+	fmt.Fprintln(out, catComment(comment))
+
+	if len(argTypes)>0{
+	fmt.Fprintln(out, `\textbf{parameter types:}\\`)
+	for i := range argTypes{
+		fmt.Fprintln(out, argNames[i], `:`, argTypes[i], `\\`)
+	}
+	}
+	//fmt.Fprintln(out, `\textbf{returns:}\\`, returnTypes)
 
 	//	fmt.Fprintf(out, `	ret = call("%s", [%s])`, name, args)
 	//	fmt.Fprint(out, "\n	return ")
@@ -73,21 +80,18 @@ func (p *Tex) WriteFunc(out io.Writer, name string, comment []string, argNames [
 	//		}
 	//		fmt.Fprintf(out, `%v(ret[%v])`, python_convert[returnTypes[i].String()], i)
 	//	}
-		fmt.Fprintln(out)
-		//fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args)) // single return value only
+	fmt.Fprintln(out)
+	//fmt.Fprintln(out, fmt.Sprintf(`	return %s(call("%s", [%s])[0])`, python_convert[retType], name, args)) // single return value only
 }
 
 func sanitize(str string) string {
 	const ALL = -1
 	str = strings.Replace(str, `_`, `\_`, ALL)
-	str= strings.Replace(str, `#`, `\#`, ALL)
-	str= strings.Replace(str, `@param`, `\textbf{parameter:}`, ALL)
-	str= strings.Replace(str, `@note`, `\textbf{note:}`, ALL)
+	str = strings.Replace(str, `#`, `\#`, ALL)
+	str = strings.Replace(str, `@param`, `\textbf{parameter:}`, ALL)
+	str = strings.Replace(str, `@note`, `\textbf{note:}`, ALL)
 	return str
 }
-
-
-
 
 func catComment(lines []string) string {
 	str := ""
@@ -95,7 +99,7 @@ func catComment(lines []string) string {
 		return ""
 	}
 	for _, l := range lines {
-		str += sanitize(l ) + "\\\\\n"
+		str += sanitize(l) + "\\\\\n"
 	}
 	return str
 }
