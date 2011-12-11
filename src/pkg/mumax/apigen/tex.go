@@ -50,6 +50,7 @@ func (p *Tex) WriteFunc(out io.Writer, name string, comment []string, argNames [
 
 	fmt.Fprintln(out, `\subsection{`+sanitize(name)+`}`)
 	fmt.Fprintln(out, `\label{`+(name)+`}`)
+	fmt.Fprintln(out, `\index{`+(sanitize(name))+`}`)
 
 	fmt.Fprint(out, `\texttt{\textbf{`+sanitize(name), `}(`)
 

@@ -3,9 +3,8 @@ all: manual.pdf
 
 .PHONY: manual.pdf
 manual.pdf: mumax2-api.tex *.tex
-	make clean
 	pdflatex --halt-on-error manual.tex
-	pdflatex --halt-on-error manual.tex
+	makeindex manual
 	pdflatex --halt-on-error manual.tex
 
 mumax2-api.tex:
@@ -14,4 +13,4 @@ mumax2-api.tex:
 
 .PHONY: clean
 clean:
-	rm -f *.aux *.bbl *.blg *.ind *.ilg *.log *.toc *.out manual.pdf *.idx
+	rm -f *.aux *.bbl *.blg *.ilg *.log *.toc *.out manual.pdf *.idx *.ind
