@@ -17,44 +17,62 @@ import (
 	cu "cuda/driver"
 	"mumax/gpu"
 	"strings"
+	"exec"
 	"runtime"
 	"os"
+	"io"
 	"fmt"
 )
 
+
+
 func TexGen() {
 	initCUDA()
-	gpu.InitMultiGPU([]int{0},0)
+	gpu.InitMultiGPU([]int{0}, 0)
+
+	out := OpenWRONLY("modules.tex")
+	defer out.Close()
+
 	for mod := range modules {
-		moduleTexGen(mod)
+		moduleTexGen(out, mod)
 	}
 }
 
-func initCUDA(){
+func initCUDA() {
 	Debug("Initializing CUDA")
 	runtime.LockOSThread()
 	Debug("Locked OS Thread")
 	cu.Init()
 }
 
-func moduleTexGen(module string) {
-	defer func(){
+func moduleTexGen(out io.Writer, module string) {
+	defer func() {
 		err := recover()
-		if err != nil{
+		if err != nil {
 			fmt.Fprintln(os.Stderr, "texgen failed", module, err)
 		}
 	}()
-	out := OpenWRONLY("modules/" + texify(module) + ".tex")
-	defer out.Close()
 
+	// init dummy engine
 	engine = *new(Engine) // flush global engine with zero value	
 	Init()
 	engine.outputDir = "."
 	api := &API{&engine}
-	api.SetGridSize(4,4,4 )// dummy size 
-	api.SetCellSize(1e-9,1e-9,1e-9 )// dummy size 
+	api.SetGridSize(4, 4, 4)          // dummy size 
+	api.SetCellSize(1e-9, 1e-9, 1e-9) // dummy size 
 	api.Load(module)
-	api.SaveGraph("modules/"+texify(module)+".pdf")
+
+	// save physics graph
+	graphbase := "modules/"+texify(module)
+	api.SaveGraph(graphbase + ".pdf")
+	err := exec.Command("mv", graphbase + ".dot.pdf", graphbase+".pdf").Run()
+	CheckIO(err)
+
+	fmt.Fprintln(out,`\subsection{`+ module+ `}`)
+	fmt.Fprintln(out,`\label{`+ module+ `}`)
+	fmt.Fprintln(out,`\index{`+ module+ `}`)
+
+	fmt.Fprintln(out, `\includegraphics[width=0.75\textwidth]{` + graphbase + `}`)
 }
 
 func texify(str string) string {

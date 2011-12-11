@@ -46,7 +46,7 @@ func engineMain() {
 	client.RunSlave()
 }
 
-func initCUDA(){
+func initCUDA() {
 	Debug("Initializing CUDA")
 	runtime.LockOSThread()
 	Debug("Locked OS Thread")
