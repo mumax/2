@@ -16,6 +16,9 @@ import ()
 // to use a different FFT implementation globally.
 var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan1
 
+// Global map with all registered FFT plans
+var fftPlans map[string]func(dataSize, logicSize []int) FFTInterface
+
 // Interface for any sparse FFT plan.
 type FFTInterface interface {
 	Forward(in, out *Array)

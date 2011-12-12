@@ -16,6 +16,11 @@ import (
 	//   "fmt"
 )
 
+//Register this FFT plan
+func init() {
+	fftPlans["2"] = NewFFTPlan2
+}
+
 type FFTPlan2 struct {
 	//sizes
 	dataSize   [3]int // Size of the (non-zero) input data block

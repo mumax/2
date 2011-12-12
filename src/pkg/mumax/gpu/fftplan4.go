@@ -16,6 +16,12 @@ import (
 	"fmt"
 	//   "cuda/runtime"
 )
+
+//Register this FFT plan
+func init() {
+	fftPlans["4"] = NewFFTPlan4
+}
+
 // runtime.GetDeviceProperties().MultiProcessorCount
 type FFTPlan4 struct {
 	//sizes

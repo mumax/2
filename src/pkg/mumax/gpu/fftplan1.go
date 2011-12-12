@@ -15,6 +15,11 @@ import (
 	"cuda/cufft"
 )
 
+//Register this FFT plan
+func init() {
+	fftPlans["1"] = NewFFTPlan1
+}
+
 // The most straightforward sparse FFT implementation
 type FFTPlan1 struct {
 	dataSize   [3]int         // Size of the (non-zero) input data block
