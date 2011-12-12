@@ -9,12 +9,22 @@ package gpu
 
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/common"
+)
 
 // The default FFT constructor.
 // The function pointer may be changed 
 // to use a different FFT implementation globally.
 var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan1
+
+func SetDefaultFFT(name string) {
+	f, ok := fftPlans[name]
+	if !ok {
+		panic(InputErrF("Undefined FFT type:", name, "Options are", fftPlans))
+	}
+	NewDefaultFFT = f
+}
 
 // Global map with all registered FFT plans
 var fftPlans map[string]func(dataSize, logicSize []int) FFTInterface

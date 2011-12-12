@@ -39,6 +39,7 @@ var (
 	flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
 	flag_gpus      *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
 	flag_sched     *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
+	flag_fft       *string = flag.String("fft", "", "Override the FFT implementation (advanced)")
 )
 
 // Mumax2 main function
@@ -84,6 +85,10 @@ func Main() {
 		Log("No input files, starting interactive mode")
 		engineMain()
 		return
+	}
+
+	if *flag_fft != "" {
+		gpu.SetDefaultFFT(*flag_fft)
 	}
 
 	// else...
