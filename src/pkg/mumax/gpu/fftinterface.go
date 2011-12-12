@@ -14,16 +14,17 @@ import ()
 // The default FFT constructor.
 // The function pointer may be changed 
 // to use a different FFT implementation globally.
-var NewDefaultFFT func(dataSize, logicSize []int)FFTInterface = NewFFTPlan
+var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan1
 
+// Interface for any sparse FFT plan.
 type FFTInterface interface {
 	Forward(in, out *Array)
 	Inverse(in, out *Array)
 	Free()
 }
 
-
-func FFTNormLogic(logicSize []int)int{
+// Returns the normalization factor of an FFT with this logic size.
+// (just the product of the sizes)
+func FFTNormLogic(logicSize []int) int {
 	return (logicSize[0] * logicSize[1] * logicSize[2])
 }
-

@@ -17,11 +17,11 @@ import (
 
 // Convolution plan
 type ConvPlan struct {
-	dataSize  [3]int    // Size of the (non-zero) input data block
-	logicSize [3]int    // Non-transformed kernel size >= dataSize
-	fftKern   [6]*Array // transformed kernel components, unused ones are nil.
-	fftIn     Array     // transformed input data
-	fft       FFTInterface   // transforms input/output data
+	dataSize  [3]int       // Size of the (non-zero) input data block
+	logicSize [3]int       // Non-transformed kernel size >= dataSize
+	fftKern   [6]*Array    // transformed kernel components, unused ones are nil.
+	fftIn     Array        // transformed input data
+	fft       FFTInterface // transforms input/output data
 }
 
 // Kernel does not need to take into account unnormalized FFTs,

@@ -15,7 +15,8 @@ import (
 	"cuda/cufft"
 )
 
-type FFTPlan struct {
+// The most straightforward sparse FFT implementation
+type FFTPlan1 struct {
 	dataSize   [3]int         // Size of the (non-zero) input data block
 	logicSize  [3]int         // Transform size including zero-padding. >= dataSize
 	outputSize [3]int         // Size of the output data (one extra row PER GPU)
@@ -31,7 +32,7 @@ type FFTPlan struct {
 	Stream                //
 }
 
-func (fft *FFTPlan) init(dataSize, logicSize []int) {
+func (fft *FFTPlan1) init(dataSize, logicSize []int) {
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
 	NDev := NDevice()
@@ -113,13 +114,13 @@ func (fft *FFTPlan) init(dataSize, logicSize []int) {
 
 }
 
-func NewFFTPlan(dataSize, logicSize []int) FFTInterface {
-	fft := new(FFTPlan)
+func NewFFTPlan1(dataSize, logicSize []int) FFTInterface {
+	fft := new(FFTPlan1)
 	fft.init(dataSize, logicSize)
 	return fft
 }
 
-func (fft *FFTPlan) Free() {
+func (fft *FFTPlan1) Free() {
 	for i := range fft.dataSize {
 		fft.dataSize[i] = 0
 		fft.logicSize[i] = 0
@@ -129,7 +130,7 @@ func (fft *FFTPlan) Free() {
 	// TODO destroy
 }
 
-func (fft *FFTPlan) OutputSize() []int {
+func (fft *FFTPlan1) OutputSize() []int {
 	return fft.outputSize[:]
 }
 
@@ -142,7 +143,7 @@ func FFTOutputSize(logicSize []int) []int {
 	return outputSize
 }
 
-func (fft *FFTPlan) Forward(in, out *Array) {
+func (fft *FFTPlan1) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
 	CheckSize(in.size3D, fft.dataSize[:])
@@ -247,7 +248,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 
 }
 
-func (fft *FFTPlan) Inverse(in, out *Array) {
+func (fft *FFTPlan1) Inverse(in, out *Array) {
 
 	//fmt.Println("")
 	//fmt.Println("")
