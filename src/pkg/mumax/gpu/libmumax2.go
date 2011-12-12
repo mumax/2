@@ -505,10 +505,9 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 func KernelMulMicromag3D_2Async(fftMx, fftMy, fftMz *Array, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *symmKern, stream Stream) {
   Assert(fftMx.size4D[0] ==1 &&
     fftKxx.size4D[0] == 1 &&
-    fftMx.size3D[0] = fftKxx.size3D[0]*2+1 &&
-    fftMx.size3D[1] = fftKxx.size3D[1]*2+1 &&
-    fftMx.size3D[2] = fftKxx.size3D[2] &&
-    )
+    fftMx.size3D[0] = fftKxx.block.size3D[0]*2 &&
+    fftMx.size3D[1] = fftKxx.block.size3D[1]*2 &&
+    fftMx.size3D[2] = fftKxx.block.size3D[2])
   // Other sizes hopefully OK.
 
   C.kernelMulMicromag3DAsync(

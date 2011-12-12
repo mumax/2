@@ -28,3 +28,19 @@ type FFTInterface interface {
 func FFTNormLogic(logicSize []int) int {
 	return (logicSize[0] * logicSize[1] * logicSize[2])
 }
+
+// Returns the (NDevice-dependent) output size of an FFT with given logic size.
+func FFTOutputSize(logicSize []int) []int {
+  
+  outputSize := make([]int, 3)
+  outputSize[0] = logicSize[0]
+  if (NDevice()==1){
+    outputSize[1] = logicSize[1]
+    outputSize[2] = logicSize[2] + 2 // One extra row of complex numbers
+  } else{ //multi-gpu: YZ-transposed output!!
+    outputSize[1] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
+    outputSize[2] = logicSize[1]
+  }
+  
+  return outputSize
+}

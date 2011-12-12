@@ -64,19 +64,19 @@ __global__ void kernelMulMicromag3DKern(float* fftMx,  float* fftMy,  float* fft
 void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
-                              CUstream* stream, int nRealNumbers){
+                              CUstream* stream, int partLen3D){
 
-  assert(nRealNumbers > 0);
-  assert(nRealNumbers % 2 == 0);
+  assert(partLen3D > 0);
+  assert(partLen3D % 2 == 0);
 
   dim3 gridSize, blockSize;
-  make1dconf(nRealNumbers/2, &gridSize, &blockSize);
+  make1dconf(partLen3D/2, &gridSize, &blockSize);
 
   for (int dev = 0; dev < nDevice(); dev++) {
 	gpu_safe(cudaSetDevice(deviceId(dev)));
     kernelMulMicromag3DKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>>( fftMx[dev],  fftMy[dev],  fftMz[dev],
                                                                                    fftKxx[dev], fftKyy[dev], fftKzz[dev],
-                                                                                   fftKyz[dev], fftKxz[dev], fftKxy[dev], nRealNumbers/2);
+                                                                                   fftKyz[dev], fftKxz[dev], fftKxy[dev], partLen3D/2);
 	}
 }
 
