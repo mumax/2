@@ -12,13 +12,10 @@ GOFILES=\
 	stream.go\
 	reductor.go\
 	convplan.go\
-<<<<<<< HEAD
 	fftplan.go\
 	#fftplan2.go\
 	#fftplan3.go\
-=======
-	fftplan4.go\
->>>>>>> Optimization of FFT on single GPU
+	#fftplan4.go\
 	#fftplan1gpu.go\
 
 CGOFILES=\
