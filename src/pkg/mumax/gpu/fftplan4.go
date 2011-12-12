@@ -17,7 +17,7 @@ import (
 	//   "cuda/runtime"
 )
 // runtime.GetDeviceProperties().MultiProcessorCount
-type FFTPlan struct {
+type FFTPlan4 struct {
 	//sizes
 	dataSize   [3]int // Size of the (non-zero) input data block
 	logicSize  [3]int // Transform size including zero-padding. >= dataSize
@@ -42,7 +42,7 @@ type FFTPlan struct {
 	Stream                   //
 }
 
-func (fft *FFTPlan) Init(dataSize, logicSize []int) {
+func (fft *FFTPlan4) init(dataSize, logicSize []int) {
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
 	NDev := NDevice()
@@ -180,13 +180,13 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 
 }
 
-func NewFFTPlan(dataSize, logicSize []int) *FFTPlan {
-	fft := new(FFTPlan)
-	fft.Init(dataSize, logicSize)
+func NewFFTPlan4(dataSize, logicSize []int) FFTInterface {
+	fft := new(FFTPlan4)
+	fft.init(dataSize, logicSize)
 	return fft
 }
 
-func (fft *FFTPlan) Free() {
+func (fft *FFTPlan4) Free() {
 	for i := range fft.dataSize {
 		fft.dataSize[i] = 0
 		fft.logicSize[i] = 0
@@ -197,24 +197,7 @@ func (fft *FFTPlan) Free() {
 	// TODO destroy, free the buffer
 }
 
-func (fft *FFTPlan) OutputSize() []int {
-	return fft.outputSize[:]
-}
-
-// Returns the (NDevice-dependent) output size of an FFT with given logic size.
-func FFTOutputSize(logicSize []int) []int {
-	outputSize := make([]int, 3)
-	outputSize[0] = logicSize[0]
-	outputSize[1] = logicSize[1]
-	outputSize[2] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
-	return outputSize
-}
-
-func (fft *FFTPlan) Normalization() int {
-	return (fft.logicSize[X] * fft.logicSize[Y] * fft.logicSize[Z])
-}
-
-func (fft *FFTPlan) Forward(in, out *Array) {
+func (fft *FFTPlan4) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
 	CheckSize(in.size3D, fft.dataSize[:])
@@ -363,7 +346,7 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	Stop("total_FW")
 }
 
-func (fft *FFTPlan) Inverse(in, out *Array) {
+func (fft *FFTPlan4) Inverse(in, out *Array) {
 
 	/*  fmt.Println("")
 	fmt.Println("")

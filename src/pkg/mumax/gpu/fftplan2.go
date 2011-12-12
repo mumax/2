@@ -40,7 +40,7 @@ type FFTPlan2 struct {
 	Stream                   //
 }
 
-func (fft *FFTPlan2) Init(dataSize, logicSize []int) {
+func (fft *FFTPlan2) init(dataSize, logicSize []int) {
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
 	NDev := NDevice()
@@ -134,7 +134,7 @@ func (fft *FFTPlan2) Init(dataSize, logicSize []int) {
 
 func NewFFTPlan2(dataSize, logicSize []int) FFTInterface {
 	fft := new(FFTPlan2)
-	fft.Init(dataSize, logicSize)
+	fft.init(dataSize, logicSize)
 	return fft
 }
 
@@ -147,8 +147,6 @@ func (fft *FFTPlan2) Free() {
 
 	// TODO destroy
 }
-
-
 
 func (fft *FFTPlan2) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")
