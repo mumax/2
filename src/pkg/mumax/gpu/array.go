@@ -98,7 +98,6 @@ func (shared *Array) PointTo(original *Array, offset int) {
 	}
 }
 
-
 //// Returns a new array that shares storage with the original array.
 //// The new array's total number of elements should fit in the original,
 //// but all other sizes may be arbitrary.
