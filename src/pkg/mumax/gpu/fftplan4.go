@@ -69,8 +69,8 @@ func (fft *FFTPlan4) init(dataSize, logicSize []int) {
 	if NDev == 1 { //  single-gpu implementation
 
 		offset := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
-		fft.fftZ1Dev = make([]Array, fft.dataSize[0])
-		for i := 0; i < fft.dataSize[0]; i++ {
+    fft.fftZ1Dev = make([]Array, fft.dataSize[0])
+    for i := 0; i < fft.dataSize[0]; i++ {
 			fft.fftZ1Dev[i].Init(nComp, []int{1, 1, offset}, DONT_ALLOC)
 		} //---------------------------------------------
 

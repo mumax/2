@@ -2,9 +2,9 @@ from mumax2 import *
 
 # test file for FFT benchmarking
 
-Nx = 64
-Ny = 64
-Nz = 64
+Nx = 32
+Ny = 32
+Nz = 1
 setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
 

@@ -26,21 +26,20 @@ func TestFFT(test *testing.T) {
 	nComp := 1
 	N0, N1, N2 := 1, 8, 8
 	dataSize := []int{N0, N1, N2}
-	fftSize := []int{N0, N1, N2}
+	fftSize :=  []int{N0, N1, N2}
 
 	if N0 == 1 { //2D case, no padding in x-direction
 		fftSize[0] = N0
 	}
 
-//	fft := NewFFTPlan4(dataSize, fftSize)
-  fft := NewFFTPlan1(dataSize, fftSize)
+  fft := NewFFTPlan4(dataSize, fftSize)
 	defer fft.Free()
 
 	in := NewArray(nComp, dataSize)
 	defer in.Free()
 
-	//	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2] + 2*NDevice()})
-	out := NewArray(nComp, FFTOutputSize(fftSize))
+//	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2] + 2*NDevice()})
+  out := NewArray(nComp, FFTOutputSize(fftSize))
 	inh := in.LocalCopy()
 
 	a := inh.Array[0]

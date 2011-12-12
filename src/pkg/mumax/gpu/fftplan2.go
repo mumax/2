@@ -13,7 +13,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-	"fmt"
+	  "fmt"
 )
 
 //Register this FFT plan
@@ -362,7 +362,7 @@ func (fft *FFTPlan2) Inverse(in, out *Array) {
 	//   fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 	CopyPadZ(out, padZ)
-	fmt.Println("")
-	fmt.Println("out:", out.LocalCopy().Array)
+	  fmt.Println("")
+	  fmt.Println("out:", out.LocalCopy().Array)
 
 }
