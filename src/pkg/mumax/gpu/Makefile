@@ -14,7 +14,7 @@ GOFILES=\
 	convplan.go\
 	fftinterface.go\
 	fftplan1.go\
-	#fftplan2.go\
+	fftplan2.go\
 	#fftplan3.go\
 	#fftplan4.go\
 

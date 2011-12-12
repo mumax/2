@@ -130,9 +130,6 @@ func (fft *FFTPlan1) Free() {
 	// TODO destroy
 }
 
-func (fft *FFTPlan1) OutputSize() []int {
-	return fft.outputSize[:]
-}
 
 // Returns the (NDevice-dependent) output size of an FFT with given logic size.
 func FFTOutputSize(logicSize []int) []int {
