@@ -72,33 +72,33 @@ func TestFFT(test *testing.T) {
 	*/
 
 	/*	for i := 0; i < maxN0; i++ {
-			for j := 0; j < N1/2; j++ {
-				for k := 0; k < N2/2; k++ {
-					a[i][j][k] = float32(i+j+k)
-					if (i>0){
-	          a[N0-i][j][k] = float32(i+j+k)
-	        }
-	        if (j>0){
-	          a[i][N1-j][k] = float32(i+j+k)
-	        }
-	        if (k>0){
-	          a[i][j][N2-k] = float32(i+j+k)
-	        }
-	        if (i>0 && j>0){
-	          a[N0-i][N1-j][k] = float32(i+j+k)
-	        }
-	        if (j>0 && k>0){
-	          a[i][N1-j][N2-k] = float32(i+j+k)
-	        }
-	        if (i>0 && k>0){
-	          a[N0-i][j][N2-k] = float32(i+j+k)
-	        }
-	        if (i>0 && j>0 && k>0){
-	          a[N0-i][N1-j][N2-k] = float32(i+j+k)
-	        }
+				for j := 0; j < N1/2; j++ {
+					for k := 0; k < N2/2; k++ {
+						a[i][j][k] = float32(i+j+k)
+						if (i>0){
+		          a[N0-i][j][k] = float32(i+j+k)
+		        }
+		        if (j>0){
+		          a[i][N1-j][k] = float32(i+j+k)
+		        }
+		        if (k>0){
+		          a[i][j][N2-k] = float32(i+j+k)
+		        }
+		        if (i>0 && j>0){
+		          a[N0-i][N1-j][k] = float32(i+j+k)
+		        }
+		        if (j>0 && k>0){
+		          a[i][N1-j][N2-k] = float32(i+j+k)
+		        }
+		        if (i>0 && k>0){
+		          a[N0-i][j][N2-k] = float32(i+j+k)
+		        }
+		        if (i>0 && j>0 && k>0){
+		          a[N0-i][N1-j][N2-k] = float32(i+j+k)
+		        }
+					}
 				}
-			}
-		}*/
+			}*/
 
 	// 	fmt.Println (a)
 

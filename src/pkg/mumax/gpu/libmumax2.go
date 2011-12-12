@@ -280,64 +280,60 @@ func CopyPadZAsync(dst, src *Array, stream Stream) {
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
-
 // Padding of a 3D matrix -> only to be used when Ndev=1
 // Copy from src to dst, which have different size3D.
 // If dst is smaller, the src input is cropped to the right size.
 // If dst is larger, the src input is padded with zeros to the right size.
 func CopyPad3D(dst, src *Array) {
-  Assert( dst.size4D[0] == src.size4D[0] &&
-    src.size3D[1] == src.partSize[1] &&   // only works when Ndev=1
-    dst.size3D[1] == dst.partSize[1])     // only works when Ndev=1
-  
-  Ncomp := dst.size4D[0]
-  D0 := dst.size3D[0]
-  D1 := dst.size3D[1]
-  D2 := dst.size3D[2]
-  S0 := src.size3D[0]
-  S1 := src.size3D[1]
-  S2 := src.size3D[2]
-  C.copyPad3DAsync(
-    (**C.float)(unsafe.Pointer(&dst.pointer[0])),
-    C.int(D0),
-    C.int(D1),
-    C.int(D2),
-    (**C.float)(unsafe.Pointer(&src.pointer[0])),
-    C.int(S0),
-    C.int(S1),
-    C.int(S2),
-    C.int(Ncomp),
-    (*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
-  dst.Stream.Sync()
+	Assert(dst.size4D[0] == src.size4D[0] &&
+		src.size3D[1] == src.partSize[1] && // only works when Ndev=1
+		dst.size3D[1] == dst.partSize[1]) // only works when Ndev=1
+
+	Ncomp := dst.size4D[0]
+	D0 := dst.size3D[0]
+	D1 := dst.size3D[1]
+	D2 := dst.size3D[2]
+	S0 := src.size3D[0]
+	S1 := src.size3D[1]
+	S2 := src.size3D[2]
+	C.copyPad3DAsync(
+		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
+		C.int(D0),
+		C.int(D1),
+		C.int(D2),
+		(**C.float)(unsafe.Pointer(&src.pointer[0])),
+		C.int(S0),
+		C.int(S1),
+		C.int(S2),
+		C.int(Ncomp),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
+	dst.Stream.Sync()
 }
 
 func CopyPad3DAsync(dst, src *Array) {
-  Assert( dst.size4D[0] == src.size4D[0] &&
-    src.size3D[1] == src.partSize[1] &&   // only works when Ndev=1
-    dst.size3D[1] == dst.partSize[1])     // only works when Ndev=1
-  
-  Ncomp := dst.size4D[0]
-  D0 := dst.size3D[0]
-  D1 := dst.size3D[1]
-  D2 := dst.size3D[2]
-  S0 := src.size3D[0]
-  S1 := src.size3D[1]
-  S2 := src.size3D[2]
-  C.copyPad3DAsync(
-    (**C.float)(unsafe.Pointer(&dst.pointer[0])),
-    C.int(D0),
-    C.int(D1),
-    C.int(D2),
-    (**C.float)(unsafe.Pointer(&src.pointer[0])),
-    C.int(S0),
-    C.int(S1),
-    C.int(S2),
-    C.int(Ncomp),
-    (*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
+	Assert(dst.size4D[0] == src.size4D[0] &&
+		src.size3D[1] == src.partSize[1] && // only works when Ndev=1
+		dst.size3D[1] == dst.partSize[1]) // only works when Ndev=1
+
+	Ncomp := dst.size4D[0]
+	D0 := dst.size3D[0]
+	D1 := dst.size3D[1]
+	D2 := dst.size3D[2]
+	S0 := src.size3D[0]
+	S1 := src.size3D[1]
+	S2 := src.size3D[2]
+	C.copyPad3DAsync(
+		(**C.float)(unsafe.Pointer(&dst.pointer[0])),
+		C.int(D0),
+		C.int(D1),
+		C.int(D2),
+		(**C.float)(unsafe.Pointer(&src.pointer[0])),
+		C.int(S0),
+		C.int(S1),
+		C.int(S2),
+		C.int(Ncomp),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))))
 }
-
-
-
 
 // Insert from src into a block in dst
 // E.g.:
@@ -387,7 +383,6 @@ func InsertBlockZAsync(dst, src *Array, block int, stream Stream) {
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
-
 func ZeroArrayAsync(A *Array, stream Stream) {
 	N := A.PartLen4D()
 	C.zeroArrayAsync(
@@ -395,7 +390,6 @@ func ZeroArrayAsync(A *Array, stream Stream) {
 		C.int(N),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
-
 
 // Extract from src a block to dst
 // E.g.:

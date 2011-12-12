@@ -280,7 +280,6 @@ func (fft *FFTPlan) Forward(in, out *Array) {
 	Stop("total_FW")
 }
 
-
 func (fft *FFTPlan) Inverse(in, out *Array) {
 
 	//   fmt.Println("")
