@@ -13,11 +13,19 @@ import (
 	. "mumax/common"
 )
 
+func init() {
+	fftPlans = make(map[string]func(d, l []int) FFTInterface)
+}
+
 // The default FFT constructor.
 // The function pointer may be changed 
 // to use a different FFT implementation globally.
 var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan1
 
+// Global map with all registered FFT plans
+var fftPlans map[string]func(dataSize, logicSize []int) FFTInterface
+
+// Sets a global default FFT 
 func SetDefaultFFT(name string) {
 	f, ok := fftPlans[name]
 	if !ok {
@@ -25,9 +33,6 @@ func SetDefaultFFT(name string) {
 	}
 	NewDefaultFFT = f
 }
-
-// Global map with all registered FFT plans
-var fftPlans map[string]func(dataSize, logicSize []int) FFTInterface
 
 // Interface for any sparse FFT plan.
 type FFTInterface interface {
