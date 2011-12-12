@@ -13,6 +13,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
+	"fmt"
 )
 
 //Register this FFT plan
@@ -135,7 +136,6 @@ func (fft *FFTPlan1) Free() {
 	// TODO destroy
 }
 
-
 func (fft *FFTPlan1) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
@@ -236,8 +236,8 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 		fft.Sync()
 		Stop("fftX_FW")
 	}
-	//fmt.Println("")
-	//fmt.Println("out:", out.LocalCopy().Array)
+	fmt.Println("")
+	fmt.Println("out:", out.LocalCopy().Array)
 
 }
 
@@ -326,7 +326,7 @@ func (fft *FFTPlan1) Inverse(in, out *Array) {
 	//fmt.Println("fftZ:", padZ.LocalCopy().Array)
 
 	CopyPadZ(out, padZ)
-	//fmt.Println("")
-	//fmt.Println("out:", out.LocalCopy().Array)
+	fmt.Println("")
+	fmt.Println("out:", out.LocalCopy().Array)
 
 }

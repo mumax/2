@@ -68,17 +68,9 @@ func (fft *FFTPlan4) init(dataSize, logicSize []int) {
 
 	if NDev == 1 { //  single-gpu implementation
 
-		// no extra buffers or arrays required  TODO How to give them a null pointer?
-		//    fft.buffer = nil
-		//    fft.padZ = nil
-		//    fft.fftZbuffer = nil
-		//    fft.transp1 = nil
-		//    fft.chunks = nil
-		//    fft.transp2 = nil
-		//-----------------------------------------------
-
 		offset := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
-		for i := 0; i < fft.dataSize[0]; i++ {
+    fft.fftZ1Dev = make([]Array, fft.dataSize[0])
+    for i := 0; i < fft.dataSize[0]; i++ {
 			fft.fftZ1Dev[i].Init(nComp, []int{1, 1, offset}, DONT_ALLOC)
 		} //---------------------------------------------
 
@@ -347,8 +339,8 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 		fft.Sync()
 	}
 
-	/*  fmt.Println("")
-	fmt.Println("out:", out.LocalCopy().Array)*/
+	  fmt.Println("")
+	fmt.Println("out:", out.LocalCopy().Array)
 	Stop("total_FW")
 }
 
@@ -380,7 +372,7 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 		for i := 0; i < fft.dataSize[0]; i++ {
 			fftZ1Dev[i].PointTo(in, offset)
 			ptr := uintptr(fftZ1Dev[i].pointer[0])
-			fft.planZ_FW[0].ExecC2R(ptr, ptr)
+			fft.planZ_INV[0].ExecC2R(ptr, ptr)
 		}
 		//     for i:=0; i< fft.dataSize[0]; i++{
 		//       fft.planZ_INV[0].ExecR2C( cu.DevicePtr(ArrayOffset(uintptr(out.pointer[0]), offset)), cu.DevicePtr(ArrayOffset(uintptr(out.pointer[0]), offset)) )
