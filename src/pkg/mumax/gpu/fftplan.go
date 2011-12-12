@@ -31,7 +31,7 @@ type FFTPlan struct {
 	Stream                //
 }
 
-func (fft *FFTPlan) Init(dataSize, logicSize []int) {
+func (fft *FFTPlan) init(dataSize, logicSize []int) {
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
 	NDev := NDevice()
@@ -113,9 +113,9 @@ func (fft *FFTPlan) Init(dataSize, logicSize []int) {
 
 }
 
-func NewFFTPlan(dataSize, logicSize []int) *FFTPlan {
+func NewFFTPlan(dataSize, logicSize []int) FFTInterface {
 	fft := new(FFTPlan)
-	fft.Init(dataSize, logicSize)
+	fft.init(dataSize, logicSize)
 	return fft
 }
 
@@ -140,10 +140,6 @@ func FFTOutputSize(logicSize []int) []int {
 	outputSize[1] = logicSize[1]
 	outputSize[2] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
 	return outputSize
-}
-
-func (fft *FFTPlan) Normalization() int {
-	return (fft.logicSize[X] * fft.logicSize[Y] * fft.logicSize[Z])
 }
 
 func (fft *FFTPlan) Forward(in, out *Array) {

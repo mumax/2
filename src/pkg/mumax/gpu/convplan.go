@@ -21,7 +21,7 @@ type ConvPlan struct {
 	logicSize [3]int    // Non-transformed kernel size >= dataSize
 	fftKern   [6]*Array // transformed kernel components, unused ones are nil.
 	fftIn     Array     // transformed input data
-	fft       FFTPlan   // transforms input/output data
+	fft       FFTInterface   // transforms input/output data
 }
 
 // Kernel does not need to take into account unnormalized FFTs,
@@ -49,7 +49,9 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 
 	// init fft
 	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
-	conv.fft.Init(dataSize, logicSize)
+
+
+	conv.fft = NewDefaultFFT(dataSize, logicSize)
 
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
 
@@ -95,9 +97,8 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 		}
 	}
 
-	var fft FFTPlan
+	fft := NewDefaultFFT(conv.logicSize[:], conv.logicSize[:])
 	defer fft.Free()
-	fft.Init(conv.logicSize[:], conv.logicSize[:])
 
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
@@ -110,7 +111,7 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 			//fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
-			scaleRealParts(conv.fftKern[i], devOut, 1/float32(fft.Normalization()))
+			scaleRealParts(conv.fftKern[i], devOut, 1/float32(FFTNormLogic(logic)))
 			//fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}

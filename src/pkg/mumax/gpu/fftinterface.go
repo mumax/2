@@ -11,8 +11,19 @@ package gpu
 
 import ()
 
+// The default FFT constructor.
+// The function pointer may be changed 
+// to use a different FFT implementation globally.
+var NewDefaultFFT func(dataSize, logicSize []int)FFTInterface = NewFFTPlan
+
 type FFTInterface interface {
 	Forward(in, out *Array)
 	Inverse(in, out *Array)
 	Free()
 }
+
+
+func FFTNormLogic(logicSize []int)int{
+	return (logicSize[0] * logicSize[1] * logicSize[2])
+}
+
