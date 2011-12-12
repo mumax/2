@@ -423,8 +423,14 @@ func (a API) StopTimer(tag string) {
 	Stop(tag)
 }
 
+// DEBUG: Gets the time, in seconds, recorded by the timer with this tag.
 func (a API) GetTime(tag string) float64 {
 	return GetTime(tag)
+}
+
+// DEBUG: Resets the timer with this tag.
+func (a API) ResetTimer(tag string) {
+	ResetTimer(tag)
 }
 
 // DEBUG: echos a string, can be used for synchronous output

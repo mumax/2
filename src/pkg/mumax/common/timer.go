@@ -86,9 +86,24 @@ func Stop(tag string) {
 	if !enableTimers {
 		return
 	}
-	timer := timers[tag]
+	timer, ok := timers[tag]
+	if !ok {
+		panic(InputErr("Undefined timer: " + tag))
+	}
 	timer.Stop()
 	timers[tag] = timer
+}
+
+// Re-set the timer to its initial state
+func ResetTimer(tag string) {
+	timer, ok := timers[tag]
+	if !ok {
+		panic(InputErr("Undefined timer: " + tag))
+	}
+	timer.StartNanos = 0
+	timer.TotalNanos = 0
+	timer.Count = 0
+	timers[tag] = timer // have to write back modified value to map
 }
 
 // Get the total run time (in seconds) of a global timer
