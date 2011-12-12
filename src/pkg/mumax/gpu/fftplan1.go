@@ -130,14 +130,6 @@ func (fft *FFTPlan1) Free() {
 	// TODO destroy
 }
 
-// Returns the (NDevice-dependent) output size of an FFT with given logic size.
-func FFTOutputSize(logicSize []int) []int {
-	outputSize := make([]int, 3)
-	outputSize[0] = logicSize[0]
-	outputSize[1] = logicSize[1]
-	outputSize[2] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
-	return outputSize
-}
 
 func (fft *FFTPlan1) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")

@@ -502,27 +502,27 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 //  |Mz|   |Kxz Kyz Kzz|   |Mz|
 // The kernel is symmetric.
 // partLen3D: number of reals per GPU for one component (e.g. fftMx).
-func KernelMulMicromag3D_2Async(fftMx, fftMy, fftMz *Array, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *symmKern, stream Stream) {
-  Assert(fftMx.size4D[0] ==1 &&
-    fftKxx.size4D[0] == 1 &&
-    fftMx.size3D[0] = fftKxx.block.size3D[0]*2 &&
-    fftMx.size3D[1] = fftKxx.block.size3D[1]*2 &&
-    fftMx.size3D[2] = fftKxx.block.size3D[2])
-  // Other sizes hopefully OK.
-
-  C.kernelMulMicromag3DAsync(
-    (**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
-    (**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
-    (*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-    C.int(fftMx.partLen3D))
-}
+// func KernelMulMicromag3D_2Async(fftMx, fftMy, fftMz *Array, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *symmKern, stream Stream) {
+//   Assert(fftMx.size4D[0] ==1 &&
+//     fftKxx.size4D[0] == 1 &&
+//     fftMx.size3D[0] = fftKxx.block.size3D[0]*2 &&
+//     fftMx.size3D[1] = fftKxx.block.size3D[1]*2 &&
+//     fftMx.size3D[2] = fftKxx.block.size3D[2])
+//   // Other sizes hopefully OK.
+// 
+//   C.kernelMulMicromag3DAsync(
+//     (**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
+//     (**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
+//     (*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+//     C.int(fftMx.partLen3D))
+// }
 
 
 
