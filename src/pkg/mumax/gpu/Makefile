@@ -12,6 +12,7 @@ GOFILES=\
 	stream.go\
 	reductor.go\
 	convplan.go\
+	fftinterface.go\
 	fftplan.go\
 	#fftplan2.go\
 	#fftplan3.go\
