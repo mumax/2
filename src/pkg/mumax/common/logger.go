@@ -148,16 +148,21 @@ func LogFile(msg ...interface{}) {
 	}
 }
 
-func Dashboard(msg ...interface{}){
-	if logger.ShowPrint{
+// Used for showing "live" progress in the terminal.
+// Prints the message but does not move the cursor down.
+// The next call will replace the previous line.
+// To resume normal printing, call DashExit() once.
+func Dashboard(msg ...interface{}) {
+	if logger.ShowPrint {
 		fmt.Print(ERASE)
 		fmt.Println(msg...)
 		fmt.Print(LINEUP)
 	}
 }
 
-func DashExit(){
-		fmt.Print(LINEDOWN)
+// Resume normal printing after previous Dashboard() calls.
+func DashExit() {
+	fmt.Print(LINEDOWN)
 }
 
 func nop() {}

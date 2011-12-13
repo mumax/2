@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 )
 
 // The global simulation engine
@@ -417,7 +418,7 @@ func (e *Engine) SetSolver(s Solver) {
 	e.solver = s
 }
 
-// Takes one ODE step.
+// Takes one time step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
 	if len(e.equation) == 0 {
@@ -434,25 +435,43 @@ func (e *Engine) Step() {
 	e.notifyAll()
 }
 
-func(e*Engine)Steps(N int){
+// Takes N time steps
+func (e *Engine) Steps(N int) {
 	Log("Running", N, "steps.")
 	for i := 0; i < N; i++ {
 		e.Step()
-		Dashboard("step", e.step.Scalar())
+		e.updateDash()
 	}
 	DashExit()
 }
 
-
-func(e*Engine)Run(duration float64){
+// Runs for a certain duration specified in seconds
+func (e *Engine) Run(duration float64) {
 	Log("Running for", duration, "s.")
 	time := e.time
 	start := time.Scalar()
 	for time.Scalar() < (start + duration) {
 		e.Step()
-		Dashboard("step", e.step.Scalar())
+		e.updateDash()
 	}
 	DashExit()
+}
+
+// time of last dashboard update
+var lastdash int64
+
+// refresh dashboard every x nanoseconds
+const UPDATE_DASH = 150 * 1e6
+
+// INTERNAL: show live progress: steps, t, dt
+func (e *Engine) updateDash() {
+	t := time.Nanoseconds()
+	if t-lastdash > UPDATE_DASH {
+		lastdash = t
+		Dashboard(" step", e.step.multiplier[0],
+			"t:", float32(e.time.multiplier[0]), "s",
+			"dt:", float32(e.dt.multiplier[0]), "s")
+	}
 }
 
 //__________________________________________________________________ output
