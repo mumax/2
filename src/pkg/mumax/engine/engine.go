@@ -433,6 +433,28 @@ func (e *Engine) Step() {
 	// check if output needs to be saved
 	e.notifyAll()
 }
+
+func(e*Engine)Steps(N int){
+	Log("Running", N, "steps.")
+	for i := 0; i < N; i++ {
+		e.Step()
+		Dashboard("step", e.step.Scalar())
+	}
+	DashExit()
+}
+
+
+func(e*Engine)Run(duration float64){
+	Log("Running for", duration, "s.")
+	time := e.time
+	start := time.Scalar()
+	for time.Scalar() < (start + duration) {
+		e.Step()
+		Dashboard("step", e.step.Scalar())
+	}
+	DashExit()
+}
+
 //__________________________________________________________________ output
 
 // Notifies all crontabs that a step has been taken.

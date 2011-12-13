@@ -148,6 +148,18 @@ func LogFile(msg ...interface{}) {
 	}
 }
 
+func Dashboard(msg ...interface{}){
+	if logger.ShowPrint{
+		fmt.Print(ERASE)
+		fmt.Println(msg...)
+		fmt.Print(LINEUP)
+	}
+}
+
+func DashExit(){
+		fmt.Print(LINEDOWN)
+}
+
 func nop() {}
 
 var debugHook func() = nop

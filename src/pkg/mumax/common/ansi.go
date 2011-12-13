@@ -25,6 +25,7 @@ const (
 	ERASE      = "\033[K"  // Erase rest of line
 	LINEUP     = "\033[1A"
 	LINEDOWN   = "\033[1B"
+	LINEBEGIN = "\033[?0E"
 	HIDECURSOR = "\033[?25l"
 	SHOWCURSOR = "\033[?25h"
 )

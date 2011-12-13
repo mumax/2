@@ -7,11 +7,15 @@ godirs=\
 	cuda\
 	cuda/driver\
 
-all: doxygen
+all: doxygen manual
 # $(godirs)
 
 doxygen:
 	doxygen Doxyfile||echo "make doc requires package doxygen, graphviz"
+
+.PHONY: manual
+manual:
+	make -C manual
 
 .PHONY: $(godirs)
 $(godirs):
@@ -24,6 +28,7 @@ cu:
 .PHONY: clean
 clean:
 	rm -rf html latex
+	make clean -C manual
 
 .PHONY: install
 test:
