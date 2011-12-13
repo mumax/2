@@ -35,7 +35,6 @@ func TexGen() {
 		moduleTexGen(out, mod)
 	}
 
-	
 }
 
 func initCUDA() {
