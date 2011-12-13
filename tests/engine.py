@@ -1,4 +1,5 @@
 from mumax2 import *
+from sys import *
 
 # test file for basic engine api
 
@@ -9,7 +10,10 @@ load('micromagnetism')
 load('solver/euler')
 
 setscalar('alpha', 0.1)
-getscalar('alpha')
+a=getscalar('alpha')
+if a != 0.1:
+		exit(-1)
+
 setscalar('Msat', 800e3)
 setscalar('Aex', 12e-13)
 

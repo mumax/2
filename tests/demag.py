@@ -21,12 +21,12 @@ hdex = getvalue('<h_dex>')
 echo("h_dex " + str(hdex)) 
 
 if hdex[0] != 0 or hdex[1] != 0:
-		sys.exit(-1)
+		exit(-1)
 
 Hz_good = -790000
 
 if abs(hdex[2] - Hz_good) > 1000:  
-		sys.exit(-2)
+		exit(-2)
 
 echo("")
 
