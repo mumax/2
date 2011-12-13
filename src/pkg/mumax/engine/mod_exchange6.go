@@ -19,7 +19,7 @@ func init() {
 func LoadExch6(e *Engine) {
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
-	e.LoadModule("aexchange")
+	e.AddQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient") // here it may be a mask
 	e.AddQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
 	hfield := e.Quant("H")
 	sum := hfield.updater.(*SumUpdater)

@@ -18,7 +18,7 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("demagexch", "combined magnetostatic + exchange field", LoadDemagExch)
+	RegisterModule("demagexch", "Provides combined magnetostatic + exchange field", LoadDemagExch)
 }
 
 func LoadDemagExch(e *Engine) {
@@ -27,7 +27,7 @@ func LoadDemagExch(e *Engine) {
 	// dependencies
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
-	e.LoadModule("aexchange")
+	e.AddQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
 
 	m := e.Quant("m")
 	MSat := e.Quant("MSat")

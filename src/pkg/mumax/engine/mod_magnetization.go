@@ -13,13 +13,13 @@ import ()
 
 // Register this module
 func init() {
-	RegisterModule("magnetization", "Reduced magnetization, saturation magnetization", LoadMagnetization)
+	RegisterModule("magnetization", "Provides the reduced magnetization and saturation magnetization", LoadMagnetization)
 }
 
 func LoadMagnetization(e *Engine) {
 
 	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
-	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magn.")
+	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
 	e.Depends("m", "Msat")
 
 	m := e.Quant("m")
