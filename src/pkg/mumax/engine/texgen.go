@@ -93,9 +93,11 @@ func moduleTexGen(out io.Writer, module string) {
 	}
 
 	// graph
+	if len(engine.quantity) > 3{
 	fmt.Fprintln(out, `\subsubsection*{Module graph}`)
 	fmt.Fprintln(out, `This is the dependency graph between this module's quantities:\\`)
 	fmt.Fprintln(out, `\includegraphics[height=5cm, width=\textwidth, keepaspectratio=true]{`+graphbase+`}`)
+	}
 
 	fmt.Fprintln(out)
 	fmt.Fprintln(out)

@@ -8,6 +8,10 @@ CLEANFILES+=*.log
 
 all: $(dirs) githooks
 
+.PHONY: doc
+doc:
+	make -C doc
+	ln -sf doc/manual/manual.pdf mumax2-manual.pdf
 
 .PHONY: githooks
 githooks:
