@@ -92,6 +92,7 @@ func (u *demagKernUpdater) Update() {
 	kernsize := padSize(e.GridSize(), e.Periodic())
 	accuracy := 8
 	// TODO: wisdom
+	Log("Calculating demag kernel, may take a moment...")
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
 }
 

@@ -197,9 +197,9 @@ func (fft *FFTPlan4) Free() {
 		fft.dataSize[i] = 0
 		fft.logicSize[i] = 0
 	}
-		if (NDevice()>1){
-	  (&(fft.buffer)).Free()
-	 }
+	if NDevice() > 1 {
+		(&(fft.buffer)).Free()
+	}
 	// TODO destroy, free the buffer
 }
 

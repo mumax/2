@@ -494,7 +494,6 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 		C.int(fftMx.partLen3D))
 }
 
-
 // Point-wise 3D micromagnetic kernel multiplication in Fourier space.
 // Overwrites M (in Fourier space, of course) with the result:
 //  |Mx|   |Kxx Kxy Kxz|   |Mx|
@@ -523,8 +522,6 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 //     (*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 //     C.int(fftMx.partLen3D))
 // }
-
-
 
 // DEBUG: sets all values to their X (i) index
 func SetIndexX(dst *Array) {

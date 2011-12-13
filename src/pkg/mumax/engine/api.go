@@ -94,13 +94,16 @@ func (a API) Step() {
 
 // Takes N solver steps
 func (a API) Steps(N int) {
+	Log("Running",N,"steps.")
 	for i := 0; i < N; i++ {
 		a.Engine.Step()
 	}
 }
 
 // Runs for a duration given in seconds.
+// TODO: precise stopping time
 func (a API) Run(duration float64) {
+	Log("Running for",duration,"s.")
 	time := a.Engine.time
 	start := time.Scalar()
 	for time.Scalar() < (start + duration) {

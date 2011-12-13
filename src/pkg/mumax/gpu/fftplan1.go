@@ -135,7 +135,6 @@ func (fft *FFTPlan1) Free() {
 	// TODO destroy
 }
 
-
 func (fft *FFTPlan1) Forward(in, out *Array) {
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
