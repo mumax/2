@@ -4,7 +4,7 @@
 
 from mumax2 import *
 
-## Returns an array with ones inside an ellipsoid with semi-axes rx,ry,rz
+## Returns an array with ones inside an ellipsoid with semi-axes rx,ry,rz (in meters)
 #  and 0 outside. Typically used as a mask.
 def ellipsoid(rx, ry, rz):
 	Nx,Ny,Nz = getgridsize()
@@ -24,6 +24,7 @@ def ellipsoid(rx, ry, rz):
 
 
 
+## Returns a mask for a (2D) ellipse that fits exactly in the simulation box.
 def ellipse():
 	Nx,Ny,Nz = getgridsize()
 	mask= [[[0 for x in range(Nz)] for x in range(Ny)] for x in range(Nx)]
