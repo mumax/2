@@ -11,14 +11,13 @@ thickness=20e-9
 setcellsize(length/Nx, length/Ny, thickness/Nz)
 
 load('micromagnetism')
-#load('solver/rk12')
-load('solver/euler')
+load('solver/rk12')
 
 setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
 setv('alpha', 1)
 setv('dt', 0.001e-12)
-#setv('m_maxerror', 1./1000)
+setv('m_maxerror', 1./1000)
 
 msat=ellipsoid(length/2, length/2, float('Inf'))
 #msat=[[[[1]]]]
@@ -29,24 +28,6 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-save('m', 'omf', ['text'], 'm.omf')
-debug_invalidate('m')
-debug_update('m')
-save('m', 'omf', ['text'], 'm1.omf')
-printstats()
+autosave('m', 'omf', [], 10e-12)
+run(2e-9)
 
-#save('h', 'omf', ['text'], 'h.omf')
-#save('torque', 'omf', ['text'], 'torque.omf')
-#
-#printstats()
-#
-#step()
-#
-#printstats()
-#
-#save('m', 'omf', ['text'], 'm1.omf')
-#save('h', 'omf', ['text'], 'h1.omf')
-#save('torque', 'omf', ['text'], 'torque1.omf')
-#
-#
-#printstats()

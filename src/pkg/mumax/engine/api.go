@@ -365,8 +365,8 @@ func (a API) FileNumberFormat(format string) {
 }
 
 // Returns the output directory for the running simulation.
-func(a API) OutputDirectory()string{
-    return a.Engine.outputDir
+func (a API) OutputDirectory() string {
+	return a.Engine.outputDir
 }
 
 //________________________________________________________________________________ misc

@@ -15,25 +15,29 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 	int i = threadindex;
 	if (i < Npart) {
 
-		// reconstruct inverse norm from map
-		float invnorm;
+		// reconstruct norm from map
+		float norm;
 		if(norm_map == NULL){
-			invnorm = 1.0f;
+			norm = 1.0f;
 		}else{
-			invnorm = norm_map[i];
-			if(invnorm != 0.0f){
-				invnorm = 1.0f/invnorm;
-			}
+			norm = norm_map[i];
 		}
 
     	float Mx = mx[i];
     	float My = my[i];
     	float Mz = mz[i];
     
-		invnorm = invnorm * (1.0f/sqrtf(Mx*Mx + My*My + Mz*Mz));	
-		mx[i] = Mx * invnorm;
-		my[i] = My * invnorm;
-		mz[i] = Mz * invnorm;
+		float Mnorm = sqrtf(Mx*Mx + My*My + Mz*Mz);
+		float scale;
+		if (Mnorm != 0.f){
+			scale = norm / Mnorm;
+		}else{
+			scale = 0.f;
+		}
+
+		mx[i] = Mx * scale;
+		my[i] = My * scale;
+		mz[i] = Mz * scale;
 	}
 }
 
