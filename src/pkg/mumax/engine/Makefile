@@ -50,6 +50,7 @@ GOFILES=\
 	format_omf.go\
 	format_ovf2.go\
 	input.go\
+	input_omf.go\
 	table.go\
 	arraypool.go\
 	#input.go\

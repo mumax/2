@@ -38,6 +38,13 @@ func OpenWRONLY(filename string) *os.File {
 	return f
 }
 
+// Opens the file, panics on error
+func OpenRDONLY(filename string) *os.File {
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0666)
+	CheckIO(err)
+	return f
+}
+
 // Makes sure the Writer is buffered.
 // If it is already a bufio.Writer, just return it.
 // Otherwise, wrap it into a bufio.Writer

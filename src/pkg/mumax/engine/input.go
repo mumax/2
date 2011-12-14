@@ -20,6 +20,7 @@ func ReadFile(fname string) *host.Array {
 	switch path.Ext(fname) {
 	default:
 		panic(InputErrF("Can not load file with extension ", path.Ext(fname)))
+		case ".omf": return ReadOMF(fname)
 	}
 	return nil // silence 6g	
 
