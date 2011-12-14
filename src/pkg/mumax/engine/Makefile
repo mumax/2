@@ -49,6 +49,7 @@ GOFILES=\
 	format_binary.go\
 	format_omf.go\
 	format_ovf2.go\
+	input.go\
 	table.go\
 	arraypool.go\
 	#input.go\

@@ -156,10 +156,15 @@ func (a API) SetMask(quantity string, mask *host.Array) {
 	q := a.Engine.Quant(quantity)
 	qArray := q.Array()
 	if !EqualSize(mask.Size3D, qArray.Size3D()) {
-		Log("auto-resampling ", q.Name(), "from", Size(mask.Size3D), "to", Size(qArray.Size3D()))
+		Log("Auto-resampling ", q.Name(), "from", Size(mask.Size3D), "to", Size(qArray.Size3D()))
 		mask = Resample(mask, qArray.Size3D())
 	}
 	q.SetMask(mask)
+}
+
+// Like SetMask but reads the mask from a file.
+func (a API) ReadMask(quantity string, filename string) {
+	a.SetMask(quantity, ReadFile(filename))
 }
 
 // Sets a space-dependent field quantity, like the magnetization.
@@ -167,7 +172,7 @@ func (a API) SetArray(quantity string, field *host.Array) {
 	q := a.Engine.Quant(quantity)
 	qArray := q.Array()
 	if !EqualSize(field.Size3D, qArray.Size3D()) {
-		Log("auto-resampling ", quantity, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
+		Log("Auto-resampling ", quantity, "from", Size(field.Size3D), "to", Size(qArray.Size3D()))
 		field = Resample(field, qArray.Size3D())
 	}
 	// setting a field when there is a non-1 multiplier is too confusing to allow
@@ -177,6 +182,11 @@ func (a API) SetArray(quantity string, field *host.Array) {
 		}
 	}
 	q.SetField(field)
+}
+
+// Like SetArray but reads the array from a file.
+func (a API) ReadArray(quantity string, filename string) {
+	a.SetArray(quantity, ReadFile(filename))
 }
 
 //________________________________________________________________________________ get quantities
@@ -436,6 +446,11 @@ func (a API) ResetTimer(tag string) {
 // DEBUG: echos a string, can be used for synchronous output
 func (a API) Echo(str string) {
 	Log(str)
+}
+
+// DEBUG: reads an array from a file.
+func (a API) ReadFile(filename string) *host.Array {
+	return ReadFile(filename)
 }
 
 // Returns the output ID corresponding to the current simulation time.

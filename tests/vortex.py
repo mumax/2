@@ -24,10 +24,11 @@ msat=ellipsoid(length/2, length/2, float('Inf'))
 setmask('Msat', msat)
 save('Msat', 'omf', ['text'], 'msat.omf')
 
-m=[ [[[1]]], [[[1]]], [[[0]]] ]
-setarray('m', m)
+readarray('m', 'vortex.omf')
 
 
-autosave('m', 'omf', [], 10e-12)
+autosave('m', 'omf', [], 100e-12)
 run(2e-9)
+
+save('m', 'omf', [], 'vortex.omf')
 
