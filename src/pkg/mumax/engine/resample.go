@@ -21,7 +21,7 @@ import (
 // Returns a new host array of size size2, re-sized from the input array by nearest-neighbor interpolation.
 func Resample(in *host.Array, size2 []int) *host.Array {
 	Assert(len(size2) == 3)
-	Assert(in.NComp() == 3)
+
 	out := host.NewArray(in.NComp(), size2)
 	out_a := out.Array
 	in_a := in.Array

@@ -31,20 +31,20 @@ func (tens *Array) WriteAscii(out io.Writer) {
 						panic(IOErr(err.String()))
 					}
 				}
-				_, err := fmt.Fprint(out, "\n")
-				if err != nil {
-					panic(IOErr(err.String()))
-				}
+				//_, err := fmt.Fprint(out, "\n")
+				//if err != nil {
+				//	panic(IOErr(err.String()))
+				//}
 			}
-			//_, err := fmt.Fprint(out, "\n")
-			//if err != nil {
-			//	panic(IOErr(err.String()))
-			//}
+			_, err := fmt.Fprint(out, "\n")
+			if err != nil {
+				panic(IOErr(err.String()))
+			}
 		}
-		//_, err := fmt.Fprint(out, "\n")
-		//if err != nil {
-		//	panic(IOErr(err.String()))
-		//}
+		_, err := fmt.Fprint(out, "\n")
+		if err != nil {
+			panic(IOErr(err.String()))
+		}
 	}
 }
 
