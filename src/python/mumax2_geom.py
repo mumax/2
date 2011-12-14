@@ -20,7 +20,6 @@ def ellipsoid(rx, ry, rz):
 							mask[i][j][k] = 1
 					else:
 							mask[i][j][k] = 0
-	print "mask", mask
 	return [mask]
 
 
@@ -39,7 +38,6 @@ def ellipse():
 							mask[i][j][k] = 1
 					else:
 							mask[i][j][k] = 0
-	echo("mask"+  str(mask))
 	return [mask]
 
 

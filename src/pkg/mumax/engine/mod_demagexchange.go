@@ -138,7 +138,7 @@ func (u *dexKernUpdater) Update() {
 	dex := u.dexKern.Buffer().List
 	demag := u.demagKern.Buffer().List
 	exch := u.exchKern.Buffer().List
-	MSat := u.MSat.Scalar()
+	MSat := u.MSat.multiplier[0] // Msat may be mask.
 	Aex := u.Aex.Scalar()
 	for i := range dex {
 		// dex = MSat * demag + 2A/µ0MSat * laplacian

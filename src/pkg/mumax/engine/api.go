@@ -364,6 +364,11 @@ func (a API) FileNumberFormat(format string) {
 	Log("Using", format, "to number automatically saved files.")
 }
 
+// Returns the output directory for the running simulation.
+func(a API) OutputDirectory()string{
+    return a.Engine.outputDir
+}
+
 //________________________________________________________________________________ misc
 
 // Saves an image file of the physics graph using the given file name.
