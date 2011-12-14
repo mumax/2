@@ -8,12 +8,13 @@
 // OVF2 suport added by Mykola Dvornik for mumax1, 
 // modified for mumax2 by Arne Vansteenkiste, 2011.
 
-package engine
+package ovf
 
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"mumax/host"
 	"unsafe"
 	"io"
@@ -22,17 +23,17 @@ import (
 )
 
 func init() {
-	RegisterOutputFormat(&FormatOmf{})
+	RegisterOutputFormat(&FormatOvf2{})
 }
 
-// OMF 1.0 output format
-type FormatOmf struct{}
+// OVF 2.0 output format
+type FormatOvf2 struct{}
 
-func (f *FormatOmf) Name() string {
-	return "omf"
+func (f *FormatOvf2) Name() string {
+	return "ovf"
 }
 
-func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
+func (f *FormatOvf2) Write(out io.Writer, q *Quant, options []string) {
 	dataformat := ""
 	switch len(options) {
 	case 0: // No options: default=Binary 4
@@ -40,19 +41,15 @@ func (f *FormatOmf) Write(out io.Writer, q *Quant, options []string) {
 	case 1:
 		dataformat = options[0]
 	default:
-		panic(InputErr(fmt.Sprint("Illegal OMF options:", options)))
+		panic(InputErr(fmt.Sprint("Illegal OVF options:", options)))
 	}
 
-	writeOmfHeader(out, q)
-	writeOmfData(out, q, dataformat)
+	writeOvf2Header(out, q)
+	writeOvf2Data(out, q, dataformat)
 	hdr(out, "End", "Segment")
 }
 
-const (
-	OMF_CONTROL_NUMBER = 1234567.0 // The omf format requires the first encoded number in the binary data section to be this control number
-)
-
-func writeOmfData(out io.Writer, q *Quant, dataformat string) {
+func writeOvf2Data(out io.Writer, q *Quant, dataformat string) {
 
 	hdr(out, "Begin", "Data "+dataformat)
 	switch strings.ToLower(dataformat) {
@@ -60,53 +57,80 @@ func writeOmfData(out io.Writer, q *Quant, dataformat string) {
 		q.Buffer().WriteAscii(out)
 		//writeOmfText(out, q.Buffer())
 	case "binary 4":
-		writeOmfBinary4(out, q.Buffer())
+		writeOvf2Binary4(out, q.Buffer())
 	default:
-		panic(InputErr("Illegal OMF data format " + dataformat + ". Options are: Text, Binary 4"))
+		panic(InputErr("Illegal OVF data format " + dataformat + ". Options are: Text, Binary 4"))
 	}
 	hdr(out, "End", "Data "+dataformat)
 }
 
-// Writes the OMF header
-func writeOmfHeader(out io.Writer, q *Quant) {
+func writeOvf2Header(out io.Writer, q *Quant) {
 	gridsize := GetEngine().GridSize()
-	cellsize := engine.CellSize()
+	cellsize := GetEngine().CellSize()
 
-	hdr(out, "OOMMF", "rectangular mesh v1.0")
+	fmt.Fprintln(out, "# OOMMF OVF 2.0")
+	fmt.Fprintln(out, "#")
 	hdr(out, "Segment count", "1")
+	fmt.Fprintln(out, "#")
 	hdr(out, "Begin", "Segment")
-
 	hdr(out, "Begin", "Header")
+	fmt.Fprintln(out, "#")
 
-	dsc(out, "Time", GetEngine().time.Scalar())
-	hdr(out, "Title", q.Name())
+	hdr(out, "Title", "mumax data") // TODO
 	hdr(out, "meshtype", "rectangular")
 	hdr(out, "meshunit", "m")
-	hdr(out, "xbase", cellsize[Z]/2)
-	hdr(out, "ybase", cellsize[Y]/2)
-	hdr(out, "zbase", cellsize[X]/2)
-	hdr(out, "xstepsize", cellsize[Z])
-	hdr(out, "ystepsize", cellsize[Y])
-	hdr(out, "zstepsize", cellsize[X])
+
 	hdr(out, "xmin", 0)
 	hdr(out, "ymin", 0)
 	hdr(out, "zmin", 0)
+
 	hdr(out, "xmax", cellsize[Z]*float64(gridsize[Z]))
 	hdr(out, "ymax", cellsize[Y]*float64(gridsize[Y]))
 	hdr(out, "zmax", cellsize[X]*float64(gridsize[X]))
+
+	name := q.Name()
+	var labels []interface{}
+	if q.NComp() == 1 {
+		labels = []interface{}{name}
+	} else {
+		for i := 0; i < q.NComp(); i++ {
+			labels = append(labels, name+"_"+string('x'+i))
+		}
+	}
+	hdr(out, "valuedim", q.NComp())
+	hdr(out, "valuelabels", labels...) // TODO
+	unit := q.Unit()
+	if unit == "" {
+		unit = "1"
+	}
+	if q.NComp() == 1 {
+		hdr(out, "valueunits", unit)
+	} else {
+		hdr(out, "valueunits", unit, unit, unit)
+	}
+
+	totaltime := GetEngine().Quant("t").Scalar()
+	// We don't really have stages
+	fmt.Fprintln(out, "# Desc: Stage simulation time: ", totaltime, " s")
+	fmt.Fprintln(out, "# Desc: Total simulation time: ", totaltime, " s")
+
+	hdr(out, "xbase", cellsize[Z]/2)
+	hdr(out, "ybase", cellsize[Y]/2)
+	hdr(out, "zbase", cellsize[X]/2)
+
 	hdr(out, "xnodes", gridsize[Z])
 	hdr(out, "ynodes", gridsize[Y])
 	hdr(out, "znodes", gridsize[X])
-	hdr(out, "ValueRangeMinMag", 1e-08) // not so "optional" as the OOMMF manual suggests...
-	hdr(out, "ValueRangeMaxMag", 1)     // TODO
-	hdr(out, "valueunit", q.Unit())
-	hdr(out, "valuemultiplier", 1)
 
+	hdr(out, "xstepsize", cellsize[Z])
+	hdr(out, "ystepsize", cellsize[Y])
+	hdr(out, "zstepsize", cellsize[X])
+	fmt.Fprintln(out, "#")
 	hdr(out, "End", "Header")
+	fmt.Fprintln(out, "#")
 }
 
-// Writes data in OMF Binary 4 format
-func writeOmfBinary4(out io.Writer, array *host.Array) {
+func writeOvf2Binary4(out io.Writer, array *host.Array) {
 	data := array.Array
 	gridsize := array.Size3D
 
@@ -128,47 +152,10 @@ func writeOmfBinary4(out io.Writer, array *host.Array) {
 		for j := 0; j < gridsize[Y]; j++ {
 			for k := 0; k < gridsize[Z]; k++ {
 				for c := 0; c < ncomp; c++ {
-					// dirty conversion from float32 to [4]byte
 					bytes = (*[4]byte)(unsafe.Pointer(&data[SwapIndex(c, ncomp)][i][j][k]))[:]
-					bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0]
 					out.Write(bytes)
 				}
 			}
 		}
 	}
-}
-
-// Writes data in OMF Text format
-//func writeOmfText(out io.Writer, array *host.Array) {
-//	data := array.Array
-//	gridsize := array.Size3D
-//
-//	// Here we loop over X,Y,Z, not Z,Y,X, because
-//	// internal in C-order == external in Fortran-order
-//	ncomp := array.NComp()
-//	for i := 0; i < gridsize[X]; i++ {
-//		for j := 0; j < gridsize[Y]; j++ {
-//			for k := 0; k < gridsize[Z]; k++ {
-//				for c := 0; c < ncomp; c++ {
-//					fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ")
-//				}
-//			}
-//		}
-//	}
-//	fmt.Fprintln(out)
-//}
-
-func floats2bytes(floats []float32) []byte {
-	return (*[4]byte)(unsafe.Pointer(&floats[0]))[:]
-}
-
-// Writes a header key/value pair to out:
-// # Key: Value
-func hdr(out io.Writer, key string, value ...interface{}) {
-	fmt.Fprint(out, "# ", key, ": ")
-	fmt.Fprintln(out, value...)
-}
-
-func dsc(out io.Writer, k, v interface{}) {
-	hdr(out, "Desc", k, ": ", v)
 }

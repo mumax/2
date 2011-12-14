@@ -5,6 +5,7 @@ dirs=\
 	engine\
 	frontend\
 	apigen\
+	ovf\
 	queue\
 
 all: $(dirs)
@@ -14,6 +15,7 @@ gpu: common host
 engine: common gpu host
 frontend: common engine gpu
 apigen: common engine frontend
+ovf: common host engine
 queue: common
 
 include ../GoDirs.pkg

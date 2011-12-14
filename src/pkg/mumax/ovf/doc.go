@@ -5,13 +5,8 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package main
+// This files provides the package documentation
+// Author: Arne Vansteenkiste
 
-import (
-	"mumax/frontend"
-	_ "mumax/ovf" // register OOMMF output formats
-)
-
-func main() {
-	frontend.Main()
-}
+// Package with support for OOMMF's omf and ovf2 formats.
+package ovf

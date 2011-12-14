@@ -47,10 +47,7 @@ GOFILES=\
 	outputformat.go\
 	format_txt.go\
 	format_binary.go\
-	format_omf.go\
-	format_ovf2.go\
 	input.go\
-	input_omf.go\
 	table.go\
 	arraypool.go\
 	#input.go\

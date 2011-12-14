@@ -15,13 +15,25 @@ import (
 	"path"
 )
 
+// 
+var inputFormats map[string]func(string) *host.Array
+
+func init() {
+	inputFormats = make(map[string]func(string) *host.Array)
+}
+
 // Reads an array from a file.
 func ReadFile(fname string) *host.Array {
-	switch path.Ext(fname) {
-	default:
+	readFunc, ok := inputFormats[path.Ext(fname)]
+	if !ok {
 		panic(InputErrF("Can not load file with extension ", path.Ext(fname)))
-		case ".omf": return ReadOMF(fname)
 	}
-	return nil // silence 6g	
+	return readFunc(fname)
+}
 
+func RegisterInputFormat(extension string, readFunc func(string) *host.Array) {
+	if _, ok := inputFormats[extension]; ok {
+		panic(Bug("Input format already registered: " + extension))
+	}
+	inputFormats[extension] = readFunc
 }

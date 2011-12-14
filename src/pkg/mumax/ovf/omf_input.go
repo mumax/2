@@ -5,18 +5,18 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package ovf
 
 // Auhtor: Arne Vansteenkiste
 
-import (
-)
+import ()
 
 //TODO: move to package omf
 
 import (
 	. "mumax/common"
 	"mumax/host"
+	"mumax/engine"
 	"io"
 	"bufio"
 	. "strings"
@@ -26,8 +26,11 @@ import (
 	"os"
 )
 
+func init() {
+	engine.RegisterInputFormat(".omf", ReadOMF)
+}
 
-func ReadOMF(file string)  *host.Array {
+func ReadOMF(file string) *host.Array {
 	in_ := OpenRDONLY(file)
 	in := NewBlockingReader(bufio.NewReader(in_))
 	info := ReadHeader(in)
@@ -51,9 +54,6 @@ func ReadOMF(file string)  *host.Array {
 	return data
 }
 
-
-
-
 // omf.Info represents the header part of an omf file.
 // TODO: add Err to return error status
 // Perhaps CheckErr() func
@@ -63,14 +63,13 @@ type Info struct {
 	ValueMultiplier float32
 	ValueUnit       string
 	Format          string // binary or text
-	OVFVersion	int
-	TotalTime	float64
-	StageTime	float64
+	OVFVersion      int
+	TotalTime       float64
+	StageTime       float64
 	DataFormat      string // 4 or 8
 	StepSize        [3]float32
 	MeshUnit        string
 }
-
 
 // Safe way to get Desc values: panics when key not present
 func (i *Info) DescGet(key string) interface{} {
@@ -90,8 +89,6 @@ func (i *Info) DescGetFloat32(key string) float32 {
 	}
 	return fl
 }
-
-
 
 func readDataText(in io.Reader, t *host.Array) {
 	size := t.Size3D
@@ -153,7 +150,6 @@ func readDataBinary4(in io.Reader, t *host.Array) {
 	}
 
 }
-
 
 // INTERNAL: Splits "# key: value" into "key", "value"
 func parseHeaderLine(str string) (key, value string) {
@@ -232,14 +228,10 @@ func atoi(a string) int {
 	return i
 }
 
-
-
-
 // Blocks until all requested bytes are read.
 type BlockingReader struct {
 	In io.Reader
 }
-
 
 func (r *BlockingReader) Read(p []byte) (n int, err os.Error) {
 	n, err = r.In.Read(p)
@@ -264,13 +256,9 @@ func (r *BlockingReader) Read(p []byte) (n int, err os.Error) {
 	return
 }
 
-
 func NewBlockingReader(in io.Reader) *BlockingReader {
 	return &BlockingReader{in}
 }
-
-
-
 
 // Reads one character from the Reader.
 // -1 means EOF.
@@ -299,7 +287,6 @@ func ReadLine(in io.Reader) (line string, eof bool) {
 	}
 	return line, eof
 }
-
 
 func isEOF(char int) bool {
 	return char == -1
