@@ -414,7 +414,7 @@ func (a API) Debug_Invalidate(quantity string) {
 }
 
 // DEBUG: removes the updater of this quantity
-func(a API)Debug_DisableUpdate(quantity string){
+func (a API) Debug_DisableUpdate(quantity string) {
 	a.Engine.Quant(quantity).updater = nil
 }
 
