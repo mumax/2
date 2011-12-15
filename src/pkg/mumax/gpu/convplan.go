@@ -49,8 +49,8 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	// init fft
-//	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
-  conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
+	//	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
+	conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
 
 
 	conv.fft = NewDefaultFFT(dataSize, logicSize)
