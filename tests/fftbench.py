@@ -9,6 +9,7 @@ setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')
+debug_disableupdate('kern_d')
 load('demagexch')
 load('solver/euler')
 
