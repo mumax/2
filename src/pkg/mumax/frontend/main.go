@@ -266,9 +266,12 @@ func initTimeout() {
 
 const (
 	WELCOME  = `
- MuMax 2.0.476
- (C) Arne Vansteenkiste & Ben Van de Wiele,
-     Dynamat/EELAB Ghent University.
+ MuMax 2.0.1394 alpha
+ (C) Arne Vansteenkiste, Ben Van de Wiele
+     (Dynamat/EELAB Ghent University, Belgium), and
+     Rémy Lasalle-Balier, Graham Rowlands, Mykola Dvornik.
+
+  Version for testing purposes only. 
 	
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
