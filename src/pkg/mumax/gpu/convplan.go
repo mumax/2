@@ -104,7 +104,8 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
 	defer devIn.Free()
-	devOut := NewArray(1, []int{logic[0], logic[1], logic[2] + 2*NDevice()}) // +2 elements: R2C
+//	devOut := NewArray(1, []int{logic[0], logic[1], logic[2] + 2*NDevice()}) // +2 elements: R2C
+  devOut := NewArray(1, FFTOutputSize(logic)) 
 	defer devOut.Free()
 
 	for i, k := range kernel {
