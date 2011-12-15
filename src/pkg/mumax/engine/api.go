@@ -413,6 +413,11 @@ func (a API) Debug_Invalidate(quantity string) {
 	a.Engine.Quant(quantity).Invalidate()
 }
 
+// DEBUG: removes the updater of this quantity
+func(a API)Debug_DisableUpdate(quantity string){
+	a.Engine.Quant(quantity).updater = nil
+}
+
 // DEBUG: verify all quanties' values
 func (a API) Debug_VerifyAll() {
 	e := a.Engine
