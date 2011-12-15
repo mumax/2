@@ -2,9 +2,9 @@ from mumax2 import *
 
 # test file for FFT benchmarking
 
-Nx = 32
-Ny = 32
-Nz = 1
+Nx = 64
+Ny = 64
+Nz = 64
 setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
 
@@ -23,6 +23,18 @@ setarray('m', m)
 savegraph("graph.png")
 
 debug_update("h_dex") # warm-up
+
+resettimer("FW_total")
+resettimer("FW_zero")
+resettimer("FW_copy")
+resettimer("FW_insertBlockZ")
+resettimer("FW_pad")
+resettimer("FW_Transpose")
+resettimer("FW_fftY")
+resettimer("FW_fftZ")
+
+
+
 
 # force update H demag + exchange a few times
 for i in range(0,100):
