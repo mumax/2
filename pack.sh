@@ -5,7 +5,7 @@
 tarball=mumax2.tar.gz
 rm -f $tarball
 rm -rf examples/*.out tests/*.out
-files=$(ls)
+files=$(ls | grep -v pack.sh)
 
 echo packing into $tarball: $files
 
