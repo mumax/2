@@ -32,14 +32,14 @@ func TestFFT(test *testing.T) {
 		fftSize[0] = N0
 	}
 
-  fft := NewFFTPlan4(dataSize, fftSize)
+	fft := NewFFTPlan4(dataSize, fftSize)
 	defer fft.Free()
 
 	in := NewArray(nComp, dataSize)
 	defer in.Free()
 
-//	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2] + 2*NDevice()})
-  out := NewArray(nComp, FFTOutputSize(fftSize))
+	//	out := NewArray(nComp, []int{fftSize[0], fftSize[1], fftSize[2] + 2*NDevice()})
+	out := NewArray(nComp, FFTOutputSize(fftSize))
 	inh := in.LocalCopy()
 
 	a := inh.Array[0]
@@ -56,7 +56,6 @@ func TestFFT(test *testing.T) {
 		}
 	}
 	inh.List[0] = 1
-
 
 	//inh.List[0] = 1
 	in.CopyFromHost(inh)
