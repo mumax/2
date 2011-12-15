@@ -354,7 +354,7 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 
 	/*  fmt.Println("")
 	fmt.Println("out:", out.LocalCopy().Array)*/
-	Stop("total_FW")
+	Stop("FW_total")
 }
 
 func (fft *FFTPlan4) Inverse(in, out *Array) {
@@ -379,13 +379,10 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 
 		// FFT in y-direction
 		offset := ((fft.logicSize[2]) + 2) * fft.logicSize[1]
-  fmt.Println("offset  : ", offset)
-  fmt.Println("dataS[0]: ", fft.dataSize[0])
   
 		for i := 0; i < fft.dataSize[0]; i++ { // TODO check if streams per plane are faster
 			fftZ1Dev[i].PointTo(in, i*offset)
 			ptr := uintptr(fftZ1Dev[i].pointer[0])
-  fmt.Println("pointer : ", ptr)
 			fft.planY[0].ExecC2C(ptr, ptr, cufft.INVERSE) //FFT in y-direction
 		}
 		fft.Sync() //  Is this required?
