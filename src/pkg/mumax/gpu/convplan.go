@@ -48,8 +48,8 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	// init fft
-//	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
-  conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
+	//	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
+	conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
 
 
 	conv.fft = NewDefaultFFT(dataSize, logicSize)
@@ -64,7 +64,7 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	//		}
 	//	}
 
-	fftKernSize := []int{logicSize[0], logicSize[1], (logicSize[2] + 2*NDevice()) / 2}   //should be something different, but what??
+	fftKernSize := []int{logicSize[0], logicSize[1], (logicSize[2] + 2*NDevice()) / 2} //should be something different, but what??
 	CheckSize(fftKernSize, fftKern.Size3D())
 	for i, k := range kernel {
 		if k != nil {
