@@ -1,5 +1,6 @@
 from mumax2 import *
 from mumax2_geom import *
+from mumax2_magstate import *
 
 Nx = 128
 Ny = 128
@@ -20,11 +21,11 @@ setv('dt', 0.001e-12)
 setv('m_maxerror', 1./1000)
 
 msat=ellipsoid(length/2, length/2, float('Inf'))
-#msat=[[[[1]]]]
 setmask('Msat', msat)
 save('Msat', 'omf', ['text'], 'msat.omf')
 
-readarray('m', 'vortex.omf')
+#readarray('m', 'vortex.omf')
+setarray('m', vortex(1,1))
 
 
 autosave('m', 'omf', [], 100e-12)
