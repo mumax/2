@@ -24,9 +24,9 @@ func TestFFT(test *testing.T) {
 	fmt.Println("")
 	fmt.Println("FFT Test")
 	nComp := 1
-	N0, N1, N2 := 8, 8, 8
+	N0, N1, N2 := 6, 8, 4
 	dataSize := []int{N0, N1, N2}
-	fftSize :=  []int{N0, N1, N2}
+	fftSize :=  []int{2*N0, 2*N1, 2*N2}
 
 	if N0 == 1 { //2D case, no padding in x-direction
 		fftSize[0] = N0
