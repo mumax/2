@@ -62,7 +62,6 @@ func TestFFT(test *testing.T) {
 	in.CopyFromHost(inh)
 
   fmt.Println("in: ", in.LocalCopy().Array)
-  fft.Inverse(out, in)
 	fft.Forward(in, out)
   
   fmt.Println("")
