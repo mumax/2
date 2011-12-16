@@ -26,7 +26,7 @@ func init() {
 func LoadTempBrown(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("hfield")
-	
+
 	// TODO: make temp a mask so we can have temperature gradients
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
 	temp := e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")

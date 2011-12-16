@@ -30,6 +30,7 @@ func init() {
 func LoadLLG(e *Engine) {
 
 	e.LoadModule("magnetization")
+	e.LoadModule("hfield")
 
 	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
 	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
