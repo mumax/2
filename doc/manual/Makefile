@@ -2,7 +2,7 @@ all: manual.pdf
 
 
 .PHONY: manual.pdf
-manual.pdf: mumax2-api.tex flags.tex *.tex
+manual.pdf: mumax2-api.tex flags.tex examples.tex *.tex
 	pdflatex --halt-on-error manual.tex
 	makeindex manual
 	pdflatex --halt-on-error manual.tex
@@ -15,6 +15,10 @@ mumax2-api.tex:
 .PHONY: flags.tex
 flags.tex:
 	mumax2 -h 2> flags.tex
+
+.PHONY: examples.tex
+examples.tex:
+	./examples.sh
 
 .PHONY: clean
 clean:

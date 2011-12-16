@@ -5,6 +5,7 @@
 *.toc
 mumax2-api.tex
 flags.tex
+examples.tex
 manual.pdf
 modules.tex
 modules
