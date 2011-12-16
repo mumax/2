@@ -13,8 +13,8 @@ package gpu
 import (
 	. "mumax/common"
 	"mumax/host"
-//   "fmt"
-  
+	//   "fmt"
+
 )
 
 // Convolution plan
@@ -40,7 +40,8 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 		if k != nil {
 			logicSize = k.Size3D
 			break
-		}	}
+		}
+	}
 
 	// init size
 	for i := range conv.dataSize {
@@ -66,9 +67,9 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	//	}
 
 	fftKernSize := FFTOutputSize(logicSize)
-  fftKernSize[2] = fftKernSize[2]/2
- 
- 	CheckSize(fftKernSize, fftKern.Size3D())
+	fftKernSize[2] = fftKernSize[2] / 2
+
+	CheckSize(fftKernSize, fftKern.Size3D())
 	for i, k := range kernel {
 		if k != nil {
 			Debug("ConvPlan.init", "use K", TensorIndexStr[i])
@@ -107,8 +108,8 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
 	defer devIn.Free()
-//	devOut := NewArray(1, []int{logic[0], logic[1], logic[2] + 2*NDevice()}) // +2 elements: R2C
-  devOut := NewArray(1, FFTOutputSize(logic)) 
+	//	devOut := NewArray(1, []int{logic[0], logic[1], logic[2] + 2*NDevice()}) // +2 elements: R2C
+	devOut := NewArray(1, FFTOutputSize(logic))
 	defer devOut.Free()
 
 	for i, k := range kernel {
