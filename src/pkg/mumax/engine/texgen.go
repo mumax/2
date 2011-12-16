@@ -24,6 +24,7 @@ import (
 	"fmt"
 )
 
+// INTERNAL: generates LaTeX files with documentation.
 func TexGen() {
 	initCUDA()
 	gpu.InitMultiGPU([]int{0}, 0)
@@ -44,6 +45,7 @@ func initCUDA() {
 	cu.Init()
 }
 
+// Write LaTeX documentation for the module.
 func moduleTexGen(out io.Writer, module string) {
 	defer func() {
 		err := recover()
@@ -75,6 +77,7 @@ func moduleTexGen(out io.Writer, module string) {
 	fmt.Fprintln(out, `Load this module with \texttt{\textbf{load}("`+module+`")}`)
 	fmt.Fprintln(out, `\subsubsection*{Module description}`)
 	fmt.Fprintln(out, modules[module].Description, `\\`)
+	//fmt.Fprintln(out, `\include{` + noslash(module) + `}`)
 
 	// provided quantities
 	if len(engine.quantity) > 3 {
@@ -100,7 +103,7 @@ func moduleTexGen(out io.Writer, module string) {
 		fmt.Fprintln(out, `\includegraphics[height=5cm, width=\textwidth, keepaspectratio=true]{`+graphbase+`}`)
 	}
 
-	fmt.Fprintln(out)
+	fmt.Fprintln(out, `\clearpage`)
 	fmt.Fprintln(out)
 }
 
