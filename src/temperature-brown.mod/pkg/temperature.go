@@ -24,7 +24,9 @@ func init() {
 }
 
 func LoadTempBrown(e *Engine) {
-
+	e.LoadModule("magnetization")
+	e.LoadModule("hfield")
+	
 	// TODO: make temp a mask so we can have temperature gradients
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
 	temp := e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")
@@ -34,7 +36,7 @@ func LoadTempBrown(e *Engine) {
 	// By declaring that H_therm depends on Step,
 	// It will be automatically updated at each new time step
 	// and remain constant during the stages of the step.
-	e.Depends("H_therm", "Temp", "Step", "dt", "alpha", "gamma") //, "Therm_seed")
+	e.Depends("H_therm", "Temp", "Step", "dt", "alpha", "gamma", "Msat") //, "Therm_seed")
 	Htherm.SetUpdater(NewTempBrownUpdater(Htherm))
 
 	// Add thermal field to total field
