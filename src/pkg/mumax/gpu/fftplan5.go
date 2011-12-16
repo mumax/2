@@ -311,7 +311,7 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 				}
       }
     }
-// 		fft.Sync()
+//  		fft.Sync()
 		Stop("FW_copy")
 
 
