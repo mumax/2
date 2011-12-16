@@ -11,17 +11,17 @@ extern "C" {
 
 /// @author Arne Vansteenkiste & Ben Van de Wiele
 
-
-
 /// @internal Copies a matrix ("block") into dst, a larger matrix
 /// The position of of the block in dst is block*S2 along the N2 direction.
-__global__ void insertBlockZKern(float* dst, int D2, float* src, int S1, int S2, int block){
+__global__ void insertBlockZKern(float* dst, int D2, float* src, int S0, int S1, int S2, int block){
   
-   int i = blockIdx.y * blockDim.y + threadIdx.y;
-   int j = blockIdx.x * blockDim.x + threadIdx.x;
+   int j = blockIdx.y * blockDim.y + threadIdx.y;
+   int k = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if(i<S1 && j<S2){ // we are in the source array
-	   dst[i*D2 + block*S2 + j] = src[i*S2 + j];
+    for(int i=0; i<S0; i++){
+      if(j<S1 && k<S2){ // we are in the source array
+        dst[i*S1*D2 + j*D2 + block*S2 + k] = src[i*S1*S2 + j*S2 + k];
+      }
     }
 }
 
@@ -34,27 +34,26 @@ void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int
   dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
   check3dconf(gridSize, blockSize);
 
-	for (int dev = 0; dev < nDevice(); dev++) {
-		gpu_safe(cudaSetDevice(deviceId(dev)));
-		for(int i=0; i<S0; i++){
-			float* src2D = &(src[dev][i*S1Part*S2]);
-			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
-			insertBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src2D, S1Part, S2, block);///@todo stream or loop in kernel
-		}
-	}
+  for (int dev = 0; dev < nDevice(); dev++) {
+    gpu_safe(cudaSetDevice(deviceId(dev)));
+    insertBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst[dev], D2, src[dev], S0, S1Part, S2, block);///@todo stream or loop in kernel
+  }
 }
 
 
 /// @internal Extracts a matrix ("block") from src, a larger matrix
 /// The position of of the block in src is block*D2 along the N2 direction.
-__global__ void extractBlockZKern(float* dst, int D1, int D2, float *src, int S2, int block){
+__global__ void extractBlockZKern(float* dst, int D0, int D1, int D2, float *src, int S2, int block){
   
-  int i = blockIdx.y * blockDim.y + threadIdx.y;
-  int j = blockIdx.x * blockDim.x + threadIdx.x;
+  int j = blockIdx.y * blockDim.y + threadIdx.y;
+  int k = blockIdx.x * blockDim.x + threadIdx.x;
 
-  if(i<D1 && j<D2){ // we are in the destination array
-     dst[i*D2 + j] = src[i*S2 + block*D2 + j];
+  
+  for(int i=0; i<D0; i++){
+    if(j<D1 && k<D2){ // we are in the destination array
+      dst[i*D1*D2 + j*D2 + k] = src[i*D1*S2 + j*S2 + block*D2 + k];
     }
+  }
 }
 
 
@@ -68,11 +67,7 @@ void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, in
 
   for (int dev = 0; dev < nDevice(); dev++) {
     gpu_safe(cudaSetDevice(deviceId(dev)));
-    for(int i=0; i<D0; i++){
-      float* src2D = &(src[dev][i*D1Part*S2]);
-      float* dst2D = &(dst[dev][i*D1Part*D2]); //D1==S1
-      extractBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D1Part, D2, src2D, S2, block);///@todo stream or loop in kernel
-    }
+    extractBlockZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst[dev], D0, D1Part, D2, src[dev], S2, block);///@todo stream or loop in kernel
   }
 }
 
@@ -136,12 +131,6 @@ void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, in
       float* dst3D = &(dst[dev][i*D0*D1*D2]); //D1==S1
       copyPad3DKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst3D, D0, D1, D2, src3D, S0, S1, S2);
     }
-/*    for(int i=0; i<S0; i++){
-      float* src2D = &(src[dev][i*S1*S2]);
-      float* dst2D = &(dst[dev][i*S1*D2]); //D1==S1
-      copyPadKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D0, D1, D2, src2D, S0, S1, S2);
-      ///@todo stream or loop in kernel
-    }*/
   }
 }
 
@@ -182,11 +171,6 @@ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2,
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
     copyPadZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst[dev], D2, src[dev], S0, S1Part, S2);///@todo stream or loop in kernel
-/*		for(int i=0; i<S0; i++){
-			float* src2D = &(src[dev][i*S1Part*S2]);
-			float* dst2D = &(dst[dev][i*S1Part*D2]); //D1==S1
-			copyPadZKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst2D, D2, src2D, S0, S1Part, S2);///@todo stream or loop in kernel
-		}*/
 	}
 }
 

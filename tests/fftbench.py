@@ -2,9 +2,9 @@ from mumax2 import *
 
 # test file for FFT benchmarking
 
-Nx = 64
-Ny = 64
-Nz = 64
+Nx = 1024
+Ny = 1024
+Nz = 1
 setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
 
@@ -33,6 +33,7 @@ resettimer("FW_pad")
 resettimer("FW_Transpose")
 resettimer("FW_fftY")
 resettimer("FW_fftZ")
+#resettimer("FW_fftX")
 
 
 

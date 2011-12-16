@@ -16,6 +16,7 @@ GOFILES=\
 	fftplan1.go\
 	fftplan2.go\
 	fftplan4.go\
+	fftplan5.go\
 
 CGOFILES=\
 	multigpu.go\
