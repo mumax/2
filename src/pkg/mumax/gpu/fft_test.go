@@ -14,7 +14,7 @@ package gpu
 import (
 	"testing"
 	"fmt"
-// 	. "mumax/common"
+	// 	. "mumax/common"
 )
 
 func TestFFT(test *testing.T) {
@@ -50,6 +50,7 @@ func TestFFT(test *testing.T) {
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
 <<<<<<< HEAD
+<<<<<<< HEAD
 				// 				       if i == 0 {
 				//				a[i][j][k] = float32(1)
 				a[i][j][k] = float32(i + j + k)
@@ -60,6 +61,12 @@ func TestFFT(test *testing.T) {
 //         a[i][j][k] = float32(i+j+k)
 // 				       }
 >>>>>>> fftplan5 eventually works
+=======
+				// 				       if i == 0 {
+				a[i][j][k] = float32(1)
+				//         a[i][j][k] = float32(i+j+k)
+				// 				       }
+>>>>>>> looking at streams
 				n++
 			}
 		}
@@ -79,9 +86,9 @@ func TestFFT(test *testing.T) {
 	fmt.Println("")
 	fmt.Println("INV: ", in.LocalCopy().Array)
 
-/*   fmt.Println("")
-   fmt.Println("FW->BW: ", in.LocalCopy().Array)*/
-// 	PrintTimers()
+	/*   fmt.Println("")
+	fmt.Println("FW->BW: ", in.LocalCopy().Array)*/
+	// 	PrintTimers()
 }
 
 func BenchmarkFFT(b *testing.B) {

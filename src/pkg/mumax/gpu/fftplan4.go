@@ -275,12 +275,12 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 			fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(fftZbuffer.pointer[dev])) // is this really async?
 		}
 		fft.Sync()
-    Stop("FW_fftZ")
+		Stop("FW_fftZ")
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON PLANES @@@@@@@@
 		Start("FW_Transpose")
-		//  TransposeComplexYZPart(transp1, fftZbuffer) // fftZ!
 		TransposeComplexYZPartAsync(transp1, fftZbuffer, fft.Stream) // fftZ!
+		fft.Sync()
 		Stop("FW_Transpose")
 
 		// copy chunks, cross-device
@@ -288,8 +288,8 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 		chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
 		Assert(dataSize[1]%NDev == 0)
 		Assert(logicSize[2]%NDev == 0)
-		for c := range chunks { // source chunk
-      for dev := range _useDevice { // source device
+		for dev := range _useDevice { // source device
+			for c := range chunks { // source chunk
 				// source device = dev
 				// target device = chunk
 
@@ -304,14 +304,15 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 
 					cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[dev])
 				}
-				
+
 			}
 		}
+		fft.Sync()
 		Stop("FW_copy")
 
 		Start("FW_zero")
-		//   transp2.Zero()
-		ZeroArrayAsync(transp2, fft.Stream)
+		transp2.Zero()
+		fft.Sync()
 		Stop("FW_zero")
 
 		Start("FW_insertBlockZ")
@@ -319,7 +320,8 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 			InsertBlockZAsync(transp2, &(chunks[c]), c, fft.Stream)
 		}
 		fft.Sync()
-    Stop("FW_insertBlockZ")
+		Stop("FW_insertBlockZ")
+		//     Stop("FW_copy")
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 		Start("FW_fftY")
@@ -327,7 +329,7 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 			setDevice(_useDevice[dev])
 			fft.planY[dev].ExecC2C(uintptr(transp2.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in y-direction
 		}
-		   fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
+		fft.Sync() // Can probably deleted.  All FFTs on one device should be finished before going further.
 		Stop("FW_fftY")
 
 		// FFT X
@@ -337,14 +339,14 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 				setDevice(_useDevice[dev])
 				fft.planX[dev].ExecC2C(uintptr(out.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in x-direction
 			}
-      fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
+			fft.Sync() // Can probably deleted.  All FFTs on one device should be finished before going further.
 			Stop("FW_fftX")
 		}
 		/*  fmt.Println("")
 		    fmt.Println("out:", out.LocalCopy().Array)*/
-    Start("lastsync")
+		Start("lastsync")
 		fft.Sync()
-    Stop("lastsync")
+		Stop("lastsync")
 	}
 
 	/*  fmt.Println("")
@@ -438,6 +440,7 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 			fft.planY[dev].ExecC2C(uintptr(in.pointer[dev]), uintptr(transp2.pointer[dev]), cufft.INVERSE) //FFT in y-direction
 		}
 		fft.Sync()
+		//Stop("INV_fftY")
 		//   fmt.Println("")
 		//   fmt.Println("ffty:", transp2.LocalCopy().Array)
 
@@ -445,7 +448,7 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 		for c := range chunks {
 			ExtractBlockZ(&(chunks[c]), transp2, c)
 		}
-    fft.Sync()
+		fft.Sync()
 		//   fmt.Println("")
 		//   fmt.Println("extract:", transp2.LocalCopy().Array)
 
@@ -468,7 +471,7 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 				}
 			}
 		}
-    fft.Sync()
+		fft.Sync()
 		//   fmt.Println("")
 		//   fmt.Println("copy:", transp1.LocalCopy().Array)
 		//Stop("INV_copy")
@@ -479,7 +482,7 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 		//   fmt.Println("transpose:", padZ.LocalCopy().Array)
 		//Stop("INV_transp")
 
-    fft.Sync()
+		fft.Sync()
 		// fft Z
 		//Start("INV_FFTZ")
 		for dev := range _useDevice {
@@ -493,7 +496,8 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 
 		//Start("INV_unpad")
 		CopyPadZ(out, padZ)
-    fft.Sync()
+		//Stop("INV_unpad")
+		fft.Sync()
 	}
 	// 	fmt.Println("")
 	// 	fmt.Println("out:", out.LocalCopy().Array)

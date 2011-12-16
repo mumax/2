@@ -66,6 +66,7 @@ void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, 
     N2 /= 2; // number of complex
     dim3 gridsize((N2-1) / BLOCKSIZE + 1, (N1-1) / BLOCKSIZE + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
     dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
+    
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
   	transposeComplexYZKernel<<<gridsize, blocksize, 0, stream[dev]>>>((complex*)output[dev], (complex*)input[dev], N2, N1, N0);

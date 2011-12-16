@@ -155,9 +155,9 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 
 	//fmt.Println("in:", in.LocalCopy().Array)
 
-  Start("FW_total")
+	Start("FW_total")
 
-  Start("CopyPadZ_FW")
+	Start("CopyPadZ_FW")
 	CopyPadZ(padZ, in)
 	Stop("CopyPadZ_FW")
 
@@ -241,7 +241,7 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 	// 	fmt.Println("")
 	// 	fmt.Println("out:", out.LocalCopy().Array)
 
-  Stop("FW_total")
+	Stop("FW_total")
 }
 
 func (fft *FFTPlan1) Inverse(in, out *Array) {
