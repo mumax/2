@@ -27,6 +27,7 @@ func TestFFT(test *testing.T) {
 	N0, N1, N2 := 1, 8, 8
 	dataSize := []int{N0, N1, N2}
 	fftSize := []int{N0, N1, N2}
+  fmt.Println("size: ", fftSize)
 
 	if N0 == 1 { //2D case, no padding in x-direction
 		fftSize[0] = N0
