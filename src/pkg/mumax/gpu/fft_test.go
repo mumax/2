@@ -32,7 +32,7 @@ func TestFFT(test *testing.T) {
 		fftSize[0] = N0
 	}
 
-	fft := NewFFTPlan5(dataSize, fftSize)
+	fft := NewFFTPlan1(dataSize, fftSize)
 	defer fft.Free()
 
 	in := NewArray(nComp, dataSize)
@@ -48,10 +48,9 @@ func TestFFT(test *testing.T) {
 		//    n  = 0
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
-// 				       if i == 0 {
-//				a[i][j][k] = float32(1)
-        a[i][j][k] = float32(i+j+k)
-// 				       }
+				//        if i == 0 {
+				a[i][j][k] = float32(1)
+				//        }
 				n++
 			}
 		}
@@ -62,14 +61,15 @@ func TestFFT(test *testing.T) {
 	in.CopyFromHost(inh)
 
   fmt.Println("in: ", in.LocalCopy().Array)
-	fft.Forward(in, out)
-  
+
+  fft.Forward(in, out)
   fmt.Println("")
   fmt.Println("FW: ", out.LocalCopy().Array)
-	fft.Inverse(out, in)
 
-/*   fmt.Println("")
-   fmt.Println("FW->BW: ", in.LocalCopy().Array)*/
+  fft.Inverse(out, in)
+  fmt.Println("")
+  fmt.Println("INV: ", in.LocalCopy().Array)
+
 	PrintTimers()
 }
 
