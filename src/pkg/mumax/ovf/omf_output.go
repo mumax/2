@@ -143,7 +143,7 @@ func writeOmfBinary4(out io.Writer, array *host.Array) {
 func writeOmfText(out io.Writer, tens *host.Array) {
 
 	data := tens.Array
-	gridsize :=tens.Size3D
+	gridsize := tens.Size3D
 
 	// Here we loop over X,Y,Z, not Z,Y,X, because
 	// internal in C-order == external in Fortran-order
@@ -161,10 +161,10 @@ func writeOmfText(out io.Writer, tens *host.Array) {
 					panic(IOErr(err.String()))
 				}
 			}
-		//	_, err := fmt.Fprint(out, "\n")
-		//	if err != nil {
-		//		panic(IOErr(err.String()))
-		//	}
+			//	_, err := fmt.Fprint(out, "\n")
+			//	if err != nil {
+			//		panic(IOErr(err.String()))
+			//	}
 		}
 		//_, err := fmt.Fprint(out, "\n")
 		//if err != nil {
@@ -172,23 +172,22 @@ func writeOmfText(out io.Writer, tens *host.Array) {
 		//}
 	}
 
-
-//	data := array.Array
-//	gridsize := array.Size3D
-//
-//	// Here we loop over X,Y,Z, not Z,Y,X, because
-//	// internal in C-order == external in Fortran-order
-//	ncomp := array.NComp()
-//	for i := 0; i < gridsize[X]; i++ {
-//		for j := 0; j < gridsize[Y]; j++ {
-//			for k := 0; k < gridsize[Z]; k++ {
-//				for c := 0; c < ncomp; c++ {
-//					fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ")
-//				}
-//				fmt.Fprintln(out)
-//			}
-//		}
-//	}
+	//	data := array.Array
+	//	gridsize := array.Size3D
+	//
+	//	// Here we loop over X,Y,Z, not Z,Y,X, because
+	//	// internal in C-order == external in Fortran-order
+	//	ncomp := array.NComp()
+	//	for i := 0; i < gridsize[X]; i++ {
+	//		for j := 0; j < gridsize[Y]; j++ {
+	//			for k := 0; k < gridsize[Z]; k++ {
+	//				for c := 0; c < ncomp; c++ {
+	//					fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ")
+	//				}
+	//				fmt.Fprintln(out)
+	//			}
+	//		}
+	//	}
 }
 
 func floats2bytes(floats []float32) []byte {
