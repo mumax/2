@@ -45,6 +45,10 @@ void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int
 /// Put an array to zero with (sub)sizes [NO, N1part, N2]
 void zeroArrayAsync(float **A, int N, CUstream *streams);
 
+// /// Put a part of an array on 1 GPU to zero
+// void zeroArrayPartAsync(float **A, int length, int dev, CUstream streams){
+
+
 /// Extract from src a block to dst
 /// E.g.:
 /// 2x2 dst, block = 1, 2x6 src:

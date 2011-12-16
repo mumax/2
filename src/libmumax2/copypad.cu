@@ -93,6 +93,15 @@ void zeroArrayAsync(float **A, int length, CUstream *streams){
   }
 }
 
+// void zeroArrayPartAsync(float **A, int length, int dev, CUstream streams){
+// 
+//   dim3 gridSize, blockSize;
+//   make1dconf(length, &gridSize, &blockSize);
+//   
+//   gpu_safe(cudaSetDevice(deviceId(dev)));
+//   zeroArrayPartKern<<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>>( A[dev], length );
+// }
+
 
 
 /// @internal Does padding and unpadding of a 3D matrix.  Padding in the y-direction is only correct when 1 GPU is used!!

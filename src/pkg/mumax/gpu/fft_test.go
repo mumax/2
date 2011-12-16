@@ -24,7 +24,7 @@ func TestFFT(test *testing.T) {
 	fmt.Println("")
 	fmt.Println("FFT Test")
 	nComp := 1
-	N0, N1, N2 := 1, 1024, 1024
+	N0, N1, N2 := 1, 32, 32
 	dataSize := []int{N0, N1, N2}
 	fftSize := []int{N0, N1, N2}
 	fmt.Println("size: ", fftSize)
@@ -49,24 +49,10 @@ func TestFFT(test *testing.T) {
 		//    n  = 0
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
-<<<<<<< HEAD
-<<<<<<< HEAD
-				// 				       if i == 0 {
-				//				a[i][j][k] = float32(1)
-				a[i][j][k] = float32(i + j + k)
-				// 				       }
-=======
-// 				       if i == 0 {
-				a[i][j][k] = float32(1)
-//         a[i][j][k] = float32(i+j+k)
-// 				       }
->>>>>>> fftplan5 eventually works
-=======
 				// 				       if i == 0 {
 				a[i][j][k] = float32(1)
 				//         a[i][j][k] = float32(i+j+k)
 				// 				       }
->>>>>>> looking at streams
 				n++
 			}
 		}
@@ -76,15 +62,15 @@ func TestFFT(test *testing.T) {
 	//inh.List[0] = 1
 	in.CopyFromHost(inh)
 
-	fmt.Println("in: ", in.LocalCopy().Array)
+	  fmt.Println("in: ", in.LocalCopy().Array)
 
 	fft.Forward(in, out)
 	fmt.Println("")
-	fmt.Println("FW: ", out.LocalCopy().Array)
+	  fmt.Println("FW: ", out.LocalCopy().Array)
 
 	fft.Inverse(out, in)
 	fmt.Println("")
-	fmt.Println("INV: ", in.LocalCopy().Array)
+	  fmt.Println("INV: ", in.LocalCopy().Array)
 
 	/*   fmt.Println("")
 	fmt.Println("FW->BW: ", in.LocalCopy().Array)*/
