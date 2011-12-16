@@ -22,14 +22,14 @@ setv('m_maxerror', 1./1000)
 
 msat=ellipsoid(length/2, length/2, float('Inf'))
 setmask('Msat', msat)
-save('Msat', 'omf', ['text'], 'msat.omf')
+#save('Msat', 'omf', ['text'], 'msat.omf')
 
 #readarray('m', 'vortex.omf')
 setarray('m', vortex(1,1))
 
 
-autosave('m', 'omf', [], 100e-12)
+autosave('m', 'omf', ['text'], 10e-12)
 run(2e-9)
 
-save('m', 'omf', [], 'vortex.omf')
+#save('m', 'omf', [], 'vortex.omf')
 
