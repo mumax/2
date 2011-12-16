@@ -308,9 +308,8 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 			}
 		}
 		Stop("FW_copy")
-    
-    
-		Start("FW_zero")
+
+    Start("FW_zero")
 		//   transp2.Zero()
 		ZeroArrayAsync(transp2, fft.Stream)
 		Stop("FW_zero")
@@ -340,7 +339,7 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
         setDevice(_useDevice[dev])
 				fft.planX[dev].ExecC2C(uintptr(out.pointer[dev]), uintptr(out.pointer[dev]), cufft.FORWARD) //FFT in x-direction
 			}
-			    fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
+      fft.Sync()    // Can probably deleted.  All FFTs on one device should be finished before going further.
 			Stop("FW_fftX")
 		}
 		/*  fmt.Println("")

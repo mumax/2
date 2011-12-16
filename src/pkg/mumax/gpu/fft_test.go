@@ -27,12 +27,13 @@ func TestFFT(test *testing.T) {
 	N0, N1, N2 := 1, 8, 8
 	dataSize := []int{N0, N1, N2}
 	fftSize := []int{N0, N1, N2}
+  fmt.Println("size: ", fftSize)
 
 	if N0 == 1 { //2D case, no padding in x-direction
 		fftSize[0] = N0
 	}
 
-	fft := NewFFTPlan1(dataSize, fftSize)
+	fft := NewFFTPlan5(dataSize, fftSize)
 	defer fft.Free()
 
 	in := NewArray(nComp, dataSize)
@@ -48,9 +49,10 @@ func TestFFT(test *testing.T) {
 		//    n  = 0
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
-				//        if i == 0 {
-				a[i][j][k] = float32(1)
-				//        }
+// 				       if i == 0 {
+//				a[i][j][k] = float32(1)
+        a[i][j][k] = float32(i+j+k)
+// 				       }
 				n++
 			}
 		}
@@ -70,6 +72,8 @@ func TestFFT(test *testing.T) {
   fmt.Println("")
   fmt.Println("INV: ", in.LocalCopy().Array)
 
+/*   fmt.Println("")
+   fmt.Println("FW->BW: ", in.LocalCopy().Array)*/
 	PrintTimers()
 }
 
