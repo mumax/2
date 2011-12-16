@@ -8,6 +8,7 @@ GOFILES=\
 	temperature.go\
 
 CGOFILES=\
+	#wrapper.go\
 
 
 CGO_CFLAGS+=\

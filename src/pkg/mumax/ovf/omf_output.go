@@ -58,8 +58,8 @@ func writeOmfData(out io.Writer, q *Quant, dataformat string) {
 	hdr(out, "Begin", "Data "+dataformat)
 	switch strings.ToLower(dataformat) {
 	case "text":
-		q.Buffer().WriteAscii(out)
-		//writeOmfText(out, q.Buffer())
+		//q.Buffer().WriteAscii(out)
+		writeOmfText(out, q.Buffer())
 	case "binary 4":
 		writeOmfBinary4(out, q.Buffer())
 	default:
@@ -140,24 +140,55 @@ func writeOmfBinary4(out io.Writer, array *host.Array) {
 }
 
 // Writes data in OMF Text format
-//func writeOmfText(out io.Writer, array *host.Array) {
-//	data := array.Array
-//	gridsize := array.Size3D
-//
-//	// Here we loop over X,Y,Z, not Z,Y,X, because
-//	// internal in C-order == external in Fortran-order
-//	ncomp := array.NComp()
-//	for i := 0; i < gridsize[X]; i++ {
-//		for j := 0; j < gridsize[Y]; j++ {
-//			for k := 0; k < gridsize[Z]; k++ {
-//				for c := 0; c < ncomp; c++ {
-//					fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ")
-//				}
-//			}
-//		}
-//	}
-//	fmt.Fprintln(out)
-//}
+func writeOmfText(out io.Writer, tens *host.Array) {
+
+	data := tens.Array
+	gridsize := tens.Size3D
+
+	// Here we loop over X,Y,Z, not Z,Y,X, because
+	// internal in C-order == external in Fortran-order
+	for i := 0; i < gridsize[X]; i++ {
+		for j := 0; j < gridsize[Y]; j++ {
+			for k := 0; k < gridsize[Z]; k++ {
+				for c := 0; c < tens.NComp(); c++ {
+					_, err := fmt.Fprint(out, data[SwapIndex(c, tens.NComp())][i][j][k], " ") // converts to user space.
+					if err != nil {
+						panic(IOErr(err.String()))
+					}
+				}
+				_, err := fmt.Fprint(out, "\n")
+				if err != nil {
+					panic(IOErr(err.String()))
+				}
+			}
+			//	_, err := fmt.Fprint(out, "\n")
+			//	if err != nil {
+			//		panic(IOErr(err.String()))
+			//	}
+		}
+		//_, err := fmt.Fprint(out, "\n")
+		//if err != nil {
+		//	panic(IOErr(err.String()))
+		//}
+	}
+
+	//	data := array.Array
+	//	gridsize := array.Size3D
+	//
+	//	// Here we loop over X,Y,Z, not Z,Y,X, because
+	//	// internal in C-order == external in Fortran-order
+	//	ncomp := array.NComp()
+	//	for i := 0; i < gridsize[X]; i++ {
+	//		for j := 0; j < gridsize[Y]; j++ {
+	//			for k := 0; k < gridsize[Z]; k++ {
+	//				for c := 0; c < ncomp; c++ {
+	//					fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ")
+	//				}
+	//				fmt.Fprintln(out)
+	//			}
+	//		}
+	//	}
+}
 
 func floats2bytes(floats []float32) []byte {
 	return (*[4]byte)(unsafe.Pointer(&floats[0]))[:]
