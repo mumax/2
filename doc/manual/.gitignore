@@ -4,6 +4,7 @@
 *.ind
 *.toc
 mumax2-api.tex
+flags.tex
 manual.pdf
 modules.tex
 modules
