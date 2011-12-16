@@ -13,11 +13,11 @@ modules=$(wildcard ../*.mod)
 # build is fast and dependencies complex
 .PHONY: $(executables)
 
-mumax2:
+mumax2 texgen:
 	$(GC) -I_obj $@.go $(modules:.mod=.mod/pkg/import.go)
 	$(LD) -L_obj -o $@ $@.$O
 
-apigen texgen:
+apigen:
 	$(GC) -I_obj $@.go
 	$(LD) -L_obj -o $@ $@.$O
 
