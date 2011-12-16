@@ -13,7 +13,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-		"fmt"
+// 		"fmt"
 	//   "cuda/runtime"
 )
 
@@ -122,15 +122,15 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 		//-----------------------------------------------
 
 		// init chunks (not allocated) ------------------
-		chunkN0 := dataSize[0]
-		Assert((logicSize[2]/2)%NDev == 0)
-		chunkN1 := ((logicSize[2]/2)/NDev + 1) * NDev // (complex numbers)
-		Assert(dataSize[1]%NDev == 0)
-		chunkN2 := (dataSize[1] / NDev) * 2 // (complex numbers)
-		fft.chunks = make([]Array, NDev)
-		for dev := range _useDevice {
-			fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DONT_ALLOC)
-		} //---------------------------------------------
+// 		chunkN0 := dataSize[0]
+// 		Assert((logicSize[2]/2)%NDev == 0)
+// 		chunkN1 := ((logicSize[2]/2)/NDev + 1) * NDev // (complex numbers)
+// 		Assert(dataSize[1]%NDev == 0)
+// 		chunkN2 := (dataSize[1] / NDev) * 2 // (complex numbers)
+// 		fft.chunks = make([]Array, NDev)
+// 		for dev := range _useDevice {
+// 			fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DONT_ALLOC)
+// 		} //---------------------------------------------
 
 		// init transp2 (not allocated) -----------------
 		transp2N0 := dataSize[0] // make this logicSize[0] when copyblock can handle it
@@ -248,28 +248,21 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		padZ.PointTo(out, 0)
 		fftZbuffer := &(fft.fftZbuffer)
 		fftZbuffer.PointTo(buffer, 0)
-		transp1 := &(fft.transp1)
-		transp1.PointTo(out, 0)
-		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
-		for dev := range _useDevice { // source device
-			chunks[dev].PointTo(buffer, chunks[dev].Len())
-		}
-/*		transp2 := &(fft.transp2)
-		transp2.PointTo(out, 0)*/
+    transp1 := &(fft.transp1)
+    transp1.PointTo(buffer, 0)
     transp2 := &(fft.transp2)
-    transp2.PointTo(buffer, 0)
+    transp2.PointTo(out, 0)
 
 		dataSize := fft.dataSize
 		logicSize := fft.logicSize
 		NDev := NDevice()
 		// -------------------------------------------------------------
 
-		  fmt.Println("in: ", in.LocalCopy().Array)
+// 		  fmt.Println("in: ", in.LocalCopy().Array)
 
-    fft.Sync()
+ 	// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 
-		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
-		Start("FW_pad")
+    Start("FW_pad")
 		CopyPadZAsync(padZ, in, fft.Stream)
 		Stop("FW_pad")
 
@@ -280,6 +273,12 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		}
 		fft.Sync()
     Stop("FW_fftZ")
+
+    Start("FW_zero")
+    ZeroArrayAsync(transp2, fft.Stream)
+    Stop("FW_zero")
+    fft.Sync()
+
     
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON PLANES @@@@@@@@
 		Start("FW_Transpose")
@@ -287,14 +286,9 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		TransposeComplexYZPartAsync(transp1, fftZbuffer, fft.Stream) // fftZ!
 		Stop("FW_Transpose")
     
-    Start("FW_zero")
-    ZeroArrayAsync(transp2, fft.Stream)
-    Stop("FW_zero")
-    fft.Sync()
 
 		// copy chunks, cross-device
 		Start("FW_copy")
-//    chunkLineBytes := int64(chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
     chunkLineBytes := int64(dataSize[1]*2/NDev) * SIZEOF_FLOAT // one line 
 		Assert(dataSize[1]%NDev == 0)
 		Assert(logicSize[2]%NDev == 0)
@@ -307,27 +301,26 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
     dstPlaneN := (logicSize[2]/NDev/2+1) * logicSize[1]*2
     for dev := range _useDevice { // source device  TODO optimize streams!!
 			for c := range _useDevice { // source chunk
-//         fmt.Println("dev, c: ", dev, c )
+
 				for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
+          srcOffset_i := i*srcPlaneN + c*( (dataSize[1]*2/NDev) * (logicSize[2]/2/NDev) )
+          dstOffset_i := i*dstPlaneN + dev *(dataSize[1]*2/NDev)
+          
           for j :=0; j< (logicSize[2]/NDev/2 +1); j++{
-//           for j :=0; j< 2; j++{
-//            srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(logicSize[2]/NDev)) + j*(dataSize[1]/NDev*2)
-            srcOffset := i*srcPlaneN + c*( (dataSize[1]*2/NDev) * (logicSize[2]/2/NDev) ) + j*(dataSize[1]/NDev*2)
+            srcOffset := srcOffset_i + j*(dataSize[1]/NDev*2)
             src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
-//             dstOffset := i*dstPlaneN + j*logicSize[1]*2 + dev*chunks[0].partSize[2]
-            dstOffset := i*dstPlaneN + j*logicSize[1]*2 + dev *(dataSize[1]*2/NDev)
+            dstOffset := dstOffset_i + j*logicSize[1]*2
             dst := cu.DevicePtr(ArrayOffset(uintptr(transp2.pointer[c]), dstOffset))
-//             dst := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
-//             fmt.Println("srcOffset, dstOffset ", srcOffset, dstOffset)
 
-//            cu.MemcpyDtoDAsync(dst, src, chunkLineBytes, fft.Stream[dev])
             cu.MemcpyDtoD(dst, src, chunkLineBytes)
           }
+          
 				}
 			}
 		}
-		Stop("FW_copy")
+    fft.Sync()
+    Stop("FW_copy")
     
 //     fft.Sync()
 //     fmt.Println("")
@@ -419,10 +412,10 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 		fftZbuffer.PointTo(in, 0)
 		transp1 := &(fft.transp1)
 		transp1.PointTo(buffer, 0)
-		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
+/*		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
 		for dev := range _useDevice { // source device
 			chunks[dev].PointTo(buffer, chunks[dev].Len())
-		}
+		}*/
 		transp2 := &(fft.transp2)
 		transp2.PointTo(in, 0)
 
@@ -457,7 +450,6 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 
 
     // copy chunks, cross-device
-    Start("FW_copy")
 //    chunkLineBytes := int64(chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
     chunkLineBytes := int64(dataSize[1]*2/NDev) * SIZEOF_FLOAT // one line 
     Assert(dataSize[1]%NDev == 0)
@@ -482,7 +474,6 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
         
       }
     }
-    Stop("FW_copy")
     
 
 		//   fmt.Println("")
