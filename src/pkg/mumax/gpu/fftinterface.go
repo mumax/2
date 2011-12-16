@@ -20,7 +20,7 @@ func init() {
 // The default FFT constructor.
 // The function pointer may be changed 
 // to use a different FFT implementation globally.
-var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan4
+var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan5
 
 // Global map with all registered FFT plans
 var fftPlans map[string]func(dataSize, logicSize []int) FFTInterface
