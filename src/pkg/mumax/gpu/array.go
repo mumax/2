@@ -259,6 +259,11 @@ func (a *Array) Size3D() []int {
 	return a.size3D
 }
 
+// Number of components + size of the vector field.
+func (a *Array) Size4D() []int {
+	return a.size4D
+}
+
 // Size of each part per GPU 
 func (a *Array) PartSize() []int {
 	return a.partSize

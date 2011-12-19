@@ -13,21 +13,23 @@ package temperature_brown
 //#include "libmumax2.h"
 import "C"
 import (
+	. "mumax/common"
 	"mumax/gpu"
 	"unsafe"
 )
 
-func ScaleNoise(noise, alphaMask gpu.Array,
+func ScaleNoise(noise, alphaMask *gpu.Array,
 tempMask *gpu.Array, alphaKB2tempMul float32,
 mSatMask *gpu.Array, mu0VgammaDtMsatMul float32,
-stream gpu.Stream, Npart int) {
-
+stream gpu.Stream) {
+	CheckSize(noise.Size4D(), alphaMask.Size4D())
 	C.temperature_scaleNoise(
-		(**C.float)(unsafe.Pointer(&(noise.pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(alphaMask.pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(tempMask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(noise.Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(alphaMask.Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(tempMask.Pointers()[0]))),
 		(C.float)(alphaKB2tempMul),
-		(**C.float)(unsafe.Pointer(&(mSatMask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(mSatMask.Pointers()[0]))),
 		(C.float)(mu0VgammaDtMsatMul),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(C.int)(noise.PartLen3D()))
 }
