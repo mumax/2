@@ -18,11 +18,12 @@ setv('alpha', 0.01)
 setv('dt', 1e-12)
 setv('m_maxerror', 1./100)
 setv('temp', 100)
+setmask('temp', [ [[[0], [1]]] ])
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-autosave("m", "omf", ["Text"], 200e-12)
+autosave("m", "omf", ["Text"], 2e-12)
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
 autotabulate(["t", "<H_therm>"], "H_therm.txt", 10e-12)
 

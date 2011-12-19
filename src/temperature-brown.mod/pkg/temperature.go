@@ -98,7 +98,7 @@ func (u *TempBrownUpdater) Update() {
 	mSatMask := mSat.Array()
 	mSatMul := mSat.Multiplier()[0]
 	tempMask := temp.Array()
-	alphaKB2tempMul := float32(alphaMul * Kb * tempMul)
+	alphaKB2tempMul := float32(alphaMul * Kb * 2 * tempMul)
 	mu0VgammaDtMsatMul := float32(Mu0 * V * gamma * dt * mSatMul)
 
 	for c := 0; c < 3; c++ {
