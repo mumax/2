@@ -391,16 +391,6 @@ func ZeroArrayAsync(A *Array, stream Stream) {
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
-
-// func ZeroArrayPartAsync(A *Array, i int, stream Stream) {
-//   N := A.PartLen4D()
-//   C.zeroArrayPartAsync(
-//     (**C.float)(unsafe.Pointer(&A.pointer[0])),
-//     C.int(N),
-//     C.int(i),
-//     (*C.CUstream)(unsafe.Pointer(&(stream[0]))))
-// }
-
 // Extract from src a block to dst
 // E.g.:
 // 2x2 dst, block = 1, 2x6 src:
