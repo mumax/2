@@ -26,8 +26,14 @@ savegraph("graph.png")
 debug_update("h_dex") # warm-up
 
 resettimer("FW_total")
-#resettimer("FW_zero")
-#resettimer("FW_copy")
+resettimer("FW_copy")
+resettimer("FW_before_copy")
+resettimer("FW_after_copy")
+
+resettimer("copypad")
+resettimer("FFTZ")
+resettimer("transpose")
+
 #resettimer("FW_insertBlockZ")
 #resettimer("FW_pad")
 #resettimer("FW_Transpose")
