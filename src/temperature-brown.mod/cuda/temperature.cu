@@ -12,48 +12,47 @@ extern "C" {
 
 ///@internal
 __global__ void temperature_scaleKern(float* noise, 
-				float* alphaMap, float alphaMul,
-			   	float* tempMap, float kB2tempMul,
-			   	float* mSatMap, float mSatMul,
-			   	float mu0VgammaDt,
+				float* alphaMask,
+			   	float* tempMask, float alphaKB2tempMul,
+			   	float* mSatMask, float mu0VgammaDtMSatMul,
 			   	int Npart){
 
 
 	int i = threadindex;
 	if (i < Npart) {
 
-		float alpha;
-		if(alphaMap != NULL){
-			alpha = alphaMap[i] * alphaMul;
+		float alphaMul;
+		if(alphaMask != NULL){
+			alphaMul = alphaMask[i];
 		}else{
-			alpha = alphaMul;
+			alphaMul = 1.0f;
 		}
 
-		float mSat;
-		if(mSatMap != NULL){
-			mSat = mSatMap[i] * mSatMul;
+		float mSatMul;
+		if(mSatMask != NULL){
+			mSatMul = mSatMask[i];
 		}else{
-			mSat = mSatMul;
+			mSatMul = 1.0f;
 		}
 
-		float kB2temp;
-		if(tempMap != NULL){
-			kB2temp = tempMap[i] * kB2tempMul;
+		float tempMul;
+		if(tempMask != NULL){
+			tempMul = tempMask[i];
 		}else{
-			kB2temp = kB2tempMul;
+			tempMul = 1.0f;
 		}
 
 		
-		noise[i] *= sqrtf((alpha * kB2temp)/(mu0VgammaDt * mSat));
+		noise[i] *= sqrtf((alphaMul * tempMul * alphaKB2tempMul)/(mu0VgammaDtMSatMul * mSatMul));
 	}
 }
 
 
 void temperature_scaleNoise(float** noise,
-			   	float** alpha, float alphaMul,
-			   	float** temp, float kB2tempMul,
-			   	float** mSat, float msatMul,
-			   	float mu0VgammaDt,
+			   	float** alphaMask, 
+			   	float** tempMask, float alphaKB2tempMul,
+			   	float** mSatMask, 
+			   	float mu0VgammaDtMSatMul,
 			   	CUstream* stream, int Npart){
 
 	dim3 gridSize, blockSize;
@@ -61,11 +60,7 @@ void temperature_scaleNoise(float** noise,
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		temperature_scaleKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (
-						noise[dev], 
-						alpha[dev], alphaMul,
-						temp[dev], kB2tempMul,
-						mSat[dev], msatMul,
-						mu0VgammaDt, Npart);
+						noise[dev], alphaMask[dev], tempMask[dev], alphaKB2tempMul, mSatMask[dev], mu0VgammaDtMSatMul, Npart);
 	}
 }
 
