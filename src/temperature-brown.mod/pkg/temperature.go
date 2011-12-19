@@ -13,7 +13,6 @@ package temperature_brown
 import (
 	. "mumax/common"
 	. "mumax/engine"
-	"math"
 	"mumax/gpu"
 	"cuda/curand"
 )
@@ -27,9 +26,9 @@ func LoadTempBrown(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("llg") // needed for alpha.
 
-	// TODO: make temp a mask so we can have temperature gradients
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
-	temp := e.AddQuant("Temp", SCALAR, VALUE, Unit("K"), "Temperature")
+
+	temp := e.AddQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
 	temp.SetVerifier(NonNegative)
 	Htherm := e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
 
@@ -68,28 +67,39 @@ func NewTempBrownUpdater(htherm *Quant) Updater {
 func (u *TempBrownUpdater) Update() {
 	e := GetEngine()
 
-	temp := e.Quant("temp").Scalar()
-	if temp == 0 {
+	// Nothing to do for zero temperature
+	temp := e.Quant("temp")
+	tempMul := temp.Multiplier()[0]
+	if tempMul == 0 {
 		return
 	}
 
-	dt := e.Quant("dt").Scalar()
-	cellSize := e.CellSize()
-	V := cellSize[X] * cellSize[Y] * cellSize[Z]
-	alpha := e.Quant("alpha").Scalar()
-	gamma := e.Quant("gamma").Scalar()
-	mSat := e.Quant("Msat").Scalar()
-
-	stddev := float32(math.Sqrt((2 * alpha * Kb * temp) / (gamma * Mu0 * mSat * V * dt)))
-
-	array := u.htherm.Array()
-	devPointers := array.Pointers()
-	N := int64(array.PartLen4D())
+	// Make standard normal noise
+	noise := u.htherm.Array()
+	devPointers := noise.Pointers()
+	N := int64(noise.PartLen4D())
 
 	// Fills H_therm with gaussian noise.
 	// CURAND does not provide an out-of-the-box way to do this in parallel over the GPUs
 	for dev := range u.rng {
 		gpu.SetDeviceForIndex(dev)
-		u.rng[dev].GenerateNormal(uintptr(devPointers[dev]), N, 0, stddev)
+		u.rng[dev].GenerateNormal(uintptr(devPointers[dev]), N, 0, 1)
 	}
+
+	// Scale the noise according to local parameters
+	dt := e.Quant("dt").Scalar()
+	cellSize := e.CellSize()
+	V := cellSize[X] * cellSize[Y] * cellSize[Z]
+	alpha := e.Quant("alpha")
+	alphaMask := alpha.Array()
+	alphaMul := alpha.Multiplier()[0]
+	gamma := e.Quant("gamma").Scalar()
+	mSat := e.Quant("Msat")
+	mSatMask := mSat.Array()
+	mSatMul := mSat.Multiplier()[0]
+	tempMask := temp.Array()
+	alphaKB2tempMul := float32(alphaMul * Kb * tempMul)
+	mu0VgammaDtMsatMul := float32(Mu0 * V * gamma * dt * mSatMul)
+
+	ScaleNoise(noise, alphaMask, tempMask, alphaKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
 }

@@ -280,6 +280,11 @@ func (q *Quant) IsSpaceDependent() bool {
 	return q.kind == FIELD || q.kind == MASK && !q.array.IsNil()
 }
 
+//
+func (q *Quant) Multiplier() []float64 {
+	return q.multiplier
+}
+
 // Transfers the quantity from GPU to host. The quantities host buffer
 // is allocated when needed. The transfer is only done when needed, i.e.,
 // when bufferUpToDate == false. Multiplies by the multiplier and handles masks correctly.

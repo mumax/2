@@ -20,8 +20,7 @@ import (
 
 func ScaleNoise(noise, alphaMask *gpu.Array,
 tempMask *gpu.Array, alphaKB2tempMul float32,
-mSatMask *gpu.Array, mu0VgammaDtMsatMul float32,
-stream gpu.Stream) {
+mSatMask *gpu.Array, mu0VgammaDtMsatMul float32) {
 	CheckSize(noise.Size4D(), alphaMask.Size4D())
 	C.temperature_scaleNoise(
 		(**C.float)(unsafe.Pointer(&(noise.Pointers()[0]))),
@@ -30,6 +29,6 @@ stream gpu.Stream) {
 		(C.float)(alphaKB2tempMul),
 		(**C.float)(unsafe.Pointer(&(mSatMask.Pointers()[0]))),
 		(C.float)(mu0VgammaDtMsatMul),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(noise.Stream[0]))),
 		(C.int)(noise.PartLen3D()))
 }
