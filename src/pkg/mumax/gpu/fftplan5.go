@@ -9,6 +9,8 @@ package gpu
 
 // Authors: Arne Vansteenkiste and Ben Van de Wiele
 
+// TODO: Whenever it is included in CUFFT: use strided FFT for R2C to include the transpose into the FFT.
+
 import (
 	. "mumax/common"
 	cu "cuda/driver"
@@ -263,28 +265,28 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		//   fmt.Println("in:", in.LocalCopy().Array)
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
-		Start("FW_before_copy")
+		// 		Start("FW_before_copy")
 
-		Start("copypad")
+		//     Start("copypad")
 		CopyPadZAsync(padZ, in, fft.Stream)
-		fft.Sync()
-		Stop("copypad")
+		//     fft.Sync()
+		//     Stop("copypad")
 
-		Start("FFTZ")
+		//     Start("FFTZ")
 		for dev := range _useDevice {
 			setDevice(_useDevice[dev])
-			fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(fftZbuffer.pointer[dev])) // is this really async?
+			fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(fftZbuffer.pointer[dev]))
 		}
-		fft.Sync()
-		Stop("FFTZ")
+		//     fft.Sync()
+		// 		Stop("FFTZ")
 		// 		fft.Sync()
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON PLANES @@@@@@@@
-		Start("transpose")
+		//     Start("transpose")
 		TransposeComplexYZPartAsync(transp1, fftZbuffer, fft.Stream) // fftZ!
 		fft.Sync()
-		Stop("transpose")
-		Stop("FW_before_copy")
+		//     Stop("transpose")
+		// 		Stop("FW_before_copy")
 
 		// copy chunks, cross-device
 		Start("FW_copy")
@@ -346,10 +348,10 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		}
 		/*  fmt.Println("")
 		    fmt.Println("out:", out.LocalCopy().Array)*/
+		Stop("FW_after_copy")
 	}
 
 	fft.Sync()
-	Stop("FW_after_copy")
 	/*  fmt.Println("")
 	fmt.Println("out:", out.LocalCopy().Array)*/
 	Stop("FW_total")
