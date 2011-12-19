@@ -101,5 +101,7 @@ func (u *TempBrownUpdater) Update() {
 	alphaKB2tempMul := float32(alphaMul * Kb * tempMul)
 	mu0VgammaDtMsatMul := float32(Mu0 * V * gamma * dt * mSatMul)
 
-	ScaleNoise(noise, alphaMask, tempMask, alphaKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
+	for c := 0; c < 3; c++ {
+		ScaleNoise(&(noise.Comp[c]), alphaMask, tempMask, alphaKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
+	}
 }
