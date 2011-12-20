@@ -14,10 +14,11 @@ import ()
 
 // Physical constants
 const (
-	Mu0    = 4 * PI * 1e-7    // Permeability of vacuum in J/Am2
-	Gamma0 = 2.211E5          // Gyromagnetic ratio in m/As (actually γ*µ0)
-	Kb     = 1.380650424E-23  // Boltzmann's constant in J/K
-	MuB    = 9.2740091523E-24 // Bohr magneton in Am^2
-	E      = 1.60217646E-19   // Electron charge in As
-	PI     = 3.14159265358979323846264338327950288
+	Mu0      = 4 * PI * 1e-7      // Permeability of vacuum in J/Am2
+	Epsilon0 = 8.854187817620E-12 // Permittivity of vacuum in C/Vm
+	Gamma0   = 2.211E5            // Gyromagnetic ratio in m/As (actually γ*µ0)
+	Kb       = 1.380650424E-23    // Boltzmann's constant in J/K
+	MuB      = 9.2740091523E-24   // Bohr magneton in Am^2
+	E        = 1.60217646E-19     // Electron charge in As
+	PI       = 3.14159265358979323846264338327950288
 )

@@ -22,10 +22,10 @@ func init() {
 func LoadCurrent(e *Engine) {
 
 	e.AddQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
-	e.AddQuant("rho", SCALAR, FIELD, Unit("Q/m3"), "electrical charge density")
+	e.AddQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
 	e.AddQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
 	e.AddQuant("sigma", SCALAR, MASK, Unit("1/Ohm*m"), "electrical conductivity")
-	e.AddQuant("diff_rho", SCALAR, FIELD, Unit("Q/m3s"), "time derivative of rho")
+	e.AddQuant("diff_rho", SCALAR, FIELD, Unit("C/m3s"), "time derivative of rho")
 
 	e.Depends("E", "rho")
 	e.Depends("j", "E", "sigma")

@@ -36,7 +36,7 @@ import (
 
 // Modulo-like function:
 // Wraps an index to [0, max] by adding/subtracting a multiple of max.
-func wrap(number, max int) int {
+func Wrap(number, max int) int {
 	for number < 0 {
 		number += max
 	}

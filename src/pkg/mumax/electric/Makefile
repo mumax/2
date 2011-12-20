@@ -8,6 +8,7 @@ TARG=mumax/electric
 
 GOFILES=\
 		mod_current.go\
+		kernel.go\
 
 CGOFILES=\
 

@@ -58,11 +58,11 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 
 	for s := 0; s < 3; s++ { // source index Ksdxyz
 		for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
-			xw := wrap(x, size[X])
+			xw := Wrap(x, size[X])
 			for y := y1; y <= y2; y++ {
-				yw := wrap(y, size[Y])
+				yw := Wrap(y, size[Y])
 				for z := z1; z <= z2; z++ {
-					zw := wrap(z, size[Z])
+					zw := Wrap(z, size[Z])
 					R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
 
 					faceIntegral(B, R, cellsize, s, accuracy)
