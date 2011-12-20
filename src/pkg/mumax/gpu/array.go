@@ -409,6 +409,7 @@ func (a *Array) MemSet(num float32) {
 	a.Stream.Sync()
 }
 
+
 // Error message.
 const MSG_ARRAY_SIZE_MISMATCH = "array size mismatch"
 
