@@ -14,7 +14,7 @@ package gpu
 import (
 	"testing"
 	"fmt"
-	. "mumax/common"
+	// 	. "mumax/common"
 )
 
 func TestFFT(test *testing.T) {
@@ -24,7 +24,7 @@ func TestFFT(test *testing.T) {
 	fmt.Println("")
 	fmt.Println("FFT Test")
 	nComp := 1
-	N0, N1, N2 := 1, 8, 8
+	N0, N1, N2 := 1, 32, 32
 	dataSize := []int{N0, N1, N2}
 	fftSize := []int{N0, N1, N2}
 	fmt.Println("size: ", fftSize)
@@ -50,8 +50,8 @@ func TestFFT(test *testing.T) {
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
 				// 				       if i == 0 {
-				//				a[i][j][k] = float32(1)
-				a[i][j][k] = float32(i + j + k)
+				a[i][j][k] = float32(1)
+				//         a[i][j][k] = float32(i+j+k)
 				// 				       }
 				n++
 			}
@@ -74,7 +74,7 @@ func TestFFT(test *testing.T) {
 
 	/*   fmt.Println("")
 	fmt.Println("FW->BW: ", in.LocalCopy().Array)*/
-	PrintTimers()
+	// 	PrintTimers()
 }
 
 func BenchmarkFFT(b *testing.B) {

@@ -279,8 +279,8 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON PLANES @@@@@@@@
 		Start("FW_Transpose")
-		//  TransposeComplexYZPart(transp1, fftZbuffer) // fftZ!
 		TransposeComplexYZPartAsync(transp1, fftZbuffer, fft.Stream) // fftZ!
+		fft.Sync()
 		Stop("FW_Transpose")
 
 		// copy chunks, cross-device
@@ -304,13 +304,15 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 
 					cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[dev])
 				}
+
 			}
 		}
+		fft.Sync()
 		Stop("FW_copy")
 
 		Start("FW_zero")
-		//   transp2.Zero()
-		ZeroArrayAsync(transp2, fft.Stream)
+		transp2.Zero()
+		fft.Sync()
 		Stop("FW_zero")
 
 		Start("FW_insertBlockZ")
@@ -319,6 +321,7 @@ func (fft *FFTPlan4) Forward(in, out *Array) {
 		}
 		fft.Sync()
 		Stop("FW_insertBlockZ")
+		//     Stop("FW_copy")
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 		Start("FW_fftY")
