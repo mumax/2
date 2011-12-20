@@ -8,6 +8,7 @@ TARG=mumax/modules
 
 GOFILES=\
 	mod_zeeman.go\
+	mod_exchange6.go\
 	mod_current.go\
 	kernel.go\
 
