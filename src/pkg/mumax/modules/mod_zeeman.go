@@ -5,11 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/engine"
+)
 
 // Register this module
 func init() {
@@ -20,6 +22,6 @@ func LoadZeeman(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
 	hfield := e.Quant("H")
-	sum := hfield.updater.(*SumUpdater)
+	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_ext")
 }

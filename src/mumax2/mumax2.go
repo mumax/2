@@ -9,8 +9,8 @@ package main
 
 import (
 	"mumax/frontend"
-	_ "mumax/ovf" // register OOMMF output formats
-	_ "mumax/electric" // register electric packages
+	_ "mumax/modules" // register and link core modules
+	_ "mumax/ovf" // register and link OOMMF output formats
 )
 
 func main() {

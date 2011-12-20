@@ -139,6 +139,11 @@ func (q *Quant) SetUpdater(u Updater) {
 	q.updater = u
 }
 
+// Gets the updater
+func (q *Quant) Updater() Updater {
+	return q.updater
+}
+
 func (q *Quant) initChildrenParents() {
 	q.children = make(map[string]*Quant)
 	q.parents = make(map[string]*Quant)

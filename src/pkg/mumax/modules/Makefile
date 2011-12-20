@@ -7,8 +7,9 @@ LD_LIBRARY_PATH+=:../../../../lib
 TARG=mumax/modules
 
 GOFILES=\
-		mod_current.go\
-		kernel.go\
+	mod_zeeman.go\
+	mod_current.go\
+	kernel.go\
 
 CGOFILES=\
 
