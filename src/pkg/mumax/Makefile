@@ -3,6 +3,7 @@ dirs=\
 	host\
 	gpu\
 	engine\
+	electric\
 	frontend\
 	apigen\
 	ovf\
@@ -17,6 +18,7 @@ frontend: common engine gpu
 apigen: common engine frontend
 ovf: common host engine
 queue: common
+electric: common engine gpu
 
 include ../GoDirs.pkg
 

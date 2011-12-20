@@ -10,6 +10,7 @@ package main
 import (
 	"mumax/frontend"
 	_ "mumax/ovf" // register OOMMF output formats
+	_ "mumax/electric" // register electric packages
 )
 
 func main() {
