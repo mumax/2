@@ -40,17 +40,17 @@ func LoadDemagExch(e *Engine) {
 
 	// demag kernel 
 	demagKern := NewQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
-	e.addQuant(demagKern)
+	e.AddQuant(demagKern)
 	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
 	exchKern := NewQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
-	e.addQuant(exchKern)
+	e.AddQuant(exchKern)
 	exchKern.SetUpdater(newExchKernUpdater(exchKern))
 
 	// demag+exchange kernel
 	dexKern := NewQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
-	e.addQuant(dexKern)
+	e.AddQuant(dexKern)
 	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
 	dexKern.SetUpdater(newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex))
 
@@ -58,7 +58,7 @@ func LoadDemagExch(e *Engine) {
 	fftOutSize := gpu.FFTOutputSize(kernelSize)
 	fftOutSize[2] /= 2 // only real parts are stored
 	fftKern := NewQuant("~kern_dex", SYMMTENS, fftOutSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
-	e.addQuant(fftKern)
+	e.AddQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
 	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
 

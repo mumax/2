@@ -12,7 +12,6 @@ package modules
 
 import (
 	. "mumax/common"
-	. "mumax/engine"
 	"mumax/host"
 	"math"
 )

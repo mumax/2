@@ -283,7 +283,7 @@ func (e *Engine) addDerivedQuant(name string) {
 
 		derived := orig.Component(comp)
 		derived.name = orig.name + "." + strings.ToLower(compname) // hack, graphviz can't handle "."
-		e.addQuant(derived)
+		e.AddQuant(derived)
 		e.Depends(derived.name, origname)
 		return
 	}
@@ -334,18 +334,19 @@ func (e *Engine) LoadModule(name string) {
 	e.modules = append(e.modules, module)
 }
 
-// Add an arbitrary quantity.
+// Constructs and adds an arbitrary quantity.
 // (Also returns it, but it's not necessarily used further)
 // Name tag is case-independent.
 // TODO: refactor AddQuant(q*Quant)
 // TODO: NewQuant should take size from global engine.
 func (e *Engine) AddNewQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) *Quant {
 	const CPUONLY = false
-	e.addQuant(NewQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
+	e.AddQuant(NewQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
 	return e.Quant(name)
 }
 
-func (e *Engine) addQuant(q *Quant) {
+// Add a quantity.
+func (e *Engine) AddQuant(q *Quant) {
 	lname := strings.ToLower(q.name)
 
 	// quantity should not yet be defined
