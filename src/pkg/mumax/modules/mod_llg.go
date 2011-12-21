@@ -5,10 +5,11 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"mumax/gpu"
 )
 
@@ -40,12 +41,12 @@ func LoadLLG(e *Engine) {
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
-	τ.updater = &torqueUpdater{
+	τ.SetUpdater( &torqueUpdater{
 		τ: e.Quant("torque"),
 		m: e.Quant("m"),
 		H: e.Quant("H"),
 		α: e.Quant("alpha"),
-		γ: e.Quant("gamma")}
+		γ: e.Quant("gamma")})
 
 	e.AddPDE1("m", "torque")
 }
@@ -57,7 +58,7 @@ type torqueUpdater struct {
 
 func (u *torqueUpdater) Update() {
 	//Debug("************** H before update torque", u.H.Buffer().Comp[X][0])
-	multiplier := u.τ.multiplier
+	multiplier := u.τ.Multiplier()
 	// must set ALL multiplier components
 	γ := u.γ.Scalar()
 	if γ == 0 {

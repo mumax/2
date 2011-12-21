@@ -15,6 +15,7 @@ GOFILES=\
 	mod_exchange6.go\
 	mod_current.go\
 	mod_uniaxialanisotropy.go\
+	mod_llg.go\
 	kernel.go\
 
 CGOFILES=\
