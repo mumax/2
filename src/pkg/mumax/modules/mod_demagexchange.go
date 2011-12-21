@@ -5,13 +5,14 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 // Combined demag+exchange module
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"mumax/gpu"
 	"mumax/host"
 )

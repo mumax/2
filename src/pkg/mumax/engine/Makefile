@@ -13,7 +13,6 @@ GOFILES=\
 	api.go\
 	module.go\
 	texgen.go\
-	mod_demagexchange.go\
 	kernel.go\
 	demag.go\
 	exchange.go\

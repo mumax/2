@@ -41,7 +41,7 @@ func LoadLLG(e *Engine) {
 	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
-	τ.SetUpdater( &torqueUpdater{
+	τ.SetUpdater(&torqueUpdater{
 		τ: e.Quant("torque"),
 		m: e.Quant("m"),
 		H: e.Quant("H"),
@@ -57,7 +57,6 @@ type torqueUpdater struct {
 }
 
 func (u *torqueUpdater) Update() {
-	//Debug("************** H before update torque", u.H.Buffer().Comp[X][0])
 	multiplier := u.τ.Multiplier()
 	// must set ALL multiplier components
 	γ := u.γ.Scalar()
@@ -68,5 +67,4 @@ func (u *torqueUpdater) Update() {
 		multiplier[i] = γ
 	}
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
-	//Debug("************** H after update torque", u.H.Buffer().Comp[X][0])
 }
