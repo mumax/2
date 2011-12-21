@@ -70,7 +70,7 @@ func LoadDemagExch(e *Engine) {
 
 	// add H_dex to total H
 	hfield := e.Quant("H")
-	sum := hfield.updater.(*SumUpdater)
+	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_dex")
 }
 
@@ -139,7 +139,7 @@ func (u *dexKernUpdater) Update() {
 	dex := u.dexKern.Buffer().List
 	demag := u.demagKern.Buffer().List
 	exch := u.exchKern.Buffer().List
-	MSat := u.MSat.multiplier[0] // Msat may be mask.
+	MSat := u.MSat.Multiplier()[0] // Msat may be mask.
 	Aex := u.Aex.Scalar()
 	for i := range dex {
 		// dex = MSat * demag + 2A/µ0MSat * laplacian
@@ -187,10 +187,10 @@ func newHDexUpdater(Hdex, m, fftDexKern *Quant) Updater {
 	u.Hdex = Hdex
 	u.m = m
 	u.fftDexKern = fftDexKern
-	u.conv = &(fftDexKern.updater.(*fftKernUpdater).conv)
+	u.conv = &(fftDexKern.Updater().(*fftKernUpdater).conv)
 	return u
 }
 
 func (u *hDexUpdater) Update() {
-	u.conv.Convolve(&u.m.array, &u.Hdex.array)
+	u.conv.Convolve(u.m.Array(), u.Hdex.Array())
 }
