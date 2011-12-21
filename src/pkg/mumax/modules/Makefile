@@ -18,6 +18,9 @@ GOFILES=\
 	mod_llg.go\
 	mod_demagexchange.go\
 	kernel.go\
+	kernel_electrostatic.go\
+	kernel_magnetostatic.go\
+	kernel_exchange.go\
 
 CGOFILES=\
 

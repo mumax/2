@@ -21,7 +21,7 @@ func init() {
 
 func LoadZeeman(e *Engine) {
 	e.LoadModule("hfield")
-	e.AddQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
+	e.AddNewQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
 	hfield := e.Quant("H")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_ext")

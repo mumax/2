@@ -36,9 +36,9 @@ func LoadRK12(e *Engine) {
 		Assert(eqn.kind == EQN_PDE1)
 		out := eqn.output[0]
 		unit := out.Unit()
-		e.AddQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
+		e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.error[i] = e.Quant(out.Name() + "_error")
-		e.AddQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
 		s.maxErr[i] = e.Quant(out.Name() + "_maxError")
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s.maxErr[i].SetVerifier(Positive)

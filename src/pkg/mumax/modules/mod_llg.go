@@ -33,12 +33,12 @@ func LoadLLG(e *Engine) {
 	e.LoadModule("magnetization")
 	e.LoadModule("hfield")
 
-	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
-	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
+	e.AddNewQuant("alpha", SCALAR, MASK, Unit(""), "damping")
+	e.AddNewQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
 	e.Quant("gamma").SetScalar(Gamma0)
 	e.Quant("gamma").SetVerifier(NonZero)
 
-	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
+	e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
 	τ.SetUpdater(&torqueUpdater{

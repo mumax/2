@@ -13,9 +13,6 @@ GOFILES=\
 	api.go\
 	module.go\
 	texgen.go\
-	kernel.go\
-	demag.go\
-	exchange.go\
 	mod_regions.go\
 	quant.go\
 	quantkind.go\

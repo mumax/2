@@ -22,7 +22,7 @@ func init() {
 }
 
 func LoadHField(e *Engine) {
-	e.AddQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
+	e.AddNewQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
 	q := e.Quant("H")
 	q.SetUpdater(NewSumUpdater(q))
 }

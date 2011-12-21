@@ -28,7 +28,7 @@ func LoadDemagExch(e *Engine) {
 	// dependencies
 	e.LoadModule("hfield")
 	e.LoadModule("magnetization")
-	e.AddQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
+	e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
 
 	m := e.Quant("m")
 	MSat := e.Quant("MSat")
@@ -39,17 +39,17 @@ func LoadDemagExch(e *Engine) {
 	kernelSize := padSize(e.GridSize(), e.Periodic())
 
 	// demag kernel 
-	demagKern := newQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
+	demagKern := NewQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.addQuant(demagKern)
 	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
-	exchKern := newQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
+	exchKern := NewQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
 	e.addQuant(exchKern)
 	exchKern.SetUpdater(newExchKernUpdater(exchKern))
 
 	// demag+exchange kernel
-	dexKern := newQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
+	dexKern := NewQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
 	e.addQuant(dexKern)
 	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
 	dexKern.SetUpdater(newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex))
@@ -57,13 +57,13 @@ func LoadDemagExch(e *Engine) {
 	// fft kernel quant
 	fftOutSize := gpu.FFTOutputSize(kernelSize)
 	fftOutSize[2] /= 2 // only real parts are stored
-	fftKern := newQuant("~kern_dex", SYMMTENS, fftOutSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
+	fftKern := NewQuant("~kern_dex", SYMMTENS, fftOutSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
 	e.addQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
 	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
 
 	// demag+exchange field quant
-	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
+	e.AddNewQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	e.Depends("H_dex", "m", "~Kern_dex")
 	Hdex := e.Quant("H_dex")
 	Hdex.SetUpdater(newHDexUpdater(Hdex, m, fftKern))

@@ -18,7 +18,7 @@ func init() {
 
 func LoadRegions(e *Engine) {
 
-	e.AddQuant("regionDefinition", SCALAR, MASK, Unit(""), "regions")
+	e.AddNewQuant("regionDefinition", SCALAR, MASK, Unit(""), "regions")
 
 	//Regions := e.Quant("regionDefinition")
 	//m.updater = &normUpdater{m: m, Msat: Msat}

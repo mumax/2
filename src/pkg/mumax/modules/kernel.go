@@ -5,81 +5,44 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package modules
+package engine
 
-// Kernel for electrical field
+// Common functions for all kernels.
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
-	"mumax/engine"
-	"mumax/host"
-	"math"
 )
 
-// Calculates the electrostatic kernel: 1/4pi * cell volume / r2
-//
-// size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
-//
-// return value: 3 arrays: K[destdir][x][y][z]
-// (e.g. K[X][1][2][3] gives H_x at position (1, 2, 3) due to a unit charge density at the origin.
-// TODO: make more accurate
-func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
-	Debug("Calculating electrostatic kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
-	Start("kern_e")
-	k := kern.Array
-
-	Assert(len(kern.Array) == 3)
-	CheckSize(kern.Size3D, size)
-
-	// Kernel size: calc. between x1,x2; y1,y2; z1,z2
-	x1 := -(size[X] - 1) / 2
-	x2 := size[X]/2 - 1
-	// support for 2D simulations (thickness 1)
-	if size[X] == 1 && periodic[X] == 0 {
-		x2 = 0
+// Modulo-like function:
+// Wraps an index to [0, max] by adding/subtracting a multiple of max.
+func Wrap(number, max int) int {
+	for number < 0 {
+		number += max
 	}
+	for number >= max {
+		number -= max
+	}
+	return number
+}
 
-	y1 := -(size[Y] - 1) / 2
-	y2 := size[Y]/2 - 1
-
-	z1 := -(size[Z] - 1) / 2
-	z2 := size[Z]/2 - 1
-
-	x1 *= (periodic[X] + 1)
-	x2 *= (periodic[X] + 1)
-	y1 *= (periodic[Y] + 1)
-	y2 *= (periodic[Y] + 1)
-	z1 *= (periodic[Z] + 1)
-	z2 *= (periodic[Z] + 1)
-
-	// cell volume
-	V := cellsize[X] * cellsize[Y] * cellsize[Z]
-
-	for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
-		xw := engine.Wrap(x, size[X])
-		for y := y1; y <= y2; y++ {
-			yw := engine.Wrap(y, size[Y])
-			for z := z1; z <= z2; z++ {
-				zw := engine.Wrap(z, size[Z])
-
-				rx, ry, rz := float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z]
-				r := math.Sqrt(rx*rx + ry*ry + rz*rz)
-				if r != 0 {
-					factor := V / (4 * PI * Epsilon0)
-					Ex := factor * rx / (r * r * r)
-					Ey := factor * ry / (r * r * r)
-					Ez := factor * rz / (r * r * r)
-
-					k[X][xw][yw][zw] += float32(Ex)
-					k[Y][xw][yw][zw] += float32(Ey)
-					k[Z][xw][yw][zw] += float32(Ez)
-					// We have to ADD because there are multiple contributions in case of periodicity
-				} else {
-					// E = 0
-				}
-			}
+// Add padding x 2 in all directions where periodic == 0, except when a dimension == 1 (no padding necessary)
+func padSize(size []int, periodic []int) []int {
+	paddedsize := make([]int, len(size))
+	for i := range size {
+		if size[i] > 1 && periodic[i] == 0 {
+			paddedsize[i] = 2 * size[i]
+		} else {
+			paddedsize[i] = size[i]
 		}
 	}
-	Stop("kern_e")
+	return paddedsize
 }
+
+// Maps the 3x3 indices of a symmetric kernel (K_ij) onto
+// a length 6 array containing the upper triangular part:
+// (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy)
+var kernIdx [3][3]int = [3][3]int{
+	[3]int{XX, XY, XZ},
+	[3]int{XY, YY, YZ},
+	[3]int{XZ, YZ, ZZ}}

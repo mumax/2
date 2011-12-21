@@ -20,8 +20,8 @@ func init() {
 
 func LoadMagnetization(e *Engine) {
 
-	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
-	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
+	e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
+	e.AddNewQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
 	e.Depends("m", "Msat")
 
 	m := e.Quant("m")

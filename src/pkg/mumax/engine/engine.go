@@ -66,14 +66,14 @@ func (e *Engine) init() {
 	e.quantity = make(map[string]*Quant)
 
 	// special quantities time and dt are always present
-	e.AddQuant("t", SCALAR, VALUE, Unit("s"))
+	e.AddNewQuant("t", SCALAR, VALUE, Unit("s"))
 	e.time = e.Quant("t")
 
-	e.AddQuant("dt", SCALAR, VALUE, Unit("s"))
+	e.AddNewQuant("dt", SCALAR, VALUE, Unit("s"))
 	e.dt = e.Quant("dt")
 	e.dt.SetVerifier(Positive)
 
-	e.AddQuant("step", SCALAR, VALUE, Unit(""))
+	e.AddNewQuant("step", SCALAR, VALUE, Unit(""))
 	e.step = e.Quant("step")
 
 	e.equation = make([]Equation, 0, 1)
@@ -240,7 +240,7 @@ func (e *Engine) addDerivedQuant(name string) {
 		origname := name[1 : len(name)-1]
 		original := e.Quant(origname)
 
-		e.AddQuant(name, original.nComp, VALUE, original.unit)
+		e.AddNewQuant(name, original.nComp, VALUE, original.unit)
 		derived := e.Quant(name)
 		e.Depends(name, origname)
 		derived.updater = NewAverageUpdater(original, derived)
@@ -339,9 +339,9 @@ func (e *Engine) LoadModule(name string) {
 // Name tag is case-independent.
 // TODO: refactor AddQuant(q*Quant)
 // TODO: NewQuant should take size from global engine.
-func (e *Engine) AddQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) *Quant {
+func (e *Engine) AddNewQuant(name string, nComp int, kind QuantKind, unit Unit, desc ...string) *Quant {
 	const CPUONLY = false
-	e.addQuant(newQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
+	e.addQuant(NewQuant(name, nComp, e.size3D, kind, unit, CPUONLY, desc...))
 	return e.Quant(name)
 }
 
@@ -357,19 +357,19 @@ func (e *Engine) addQuant(q *Quant) {
 }
 
 // AddQuant(name, nComp, VALUE)
-func (e *Engine) AddValue(name string, nComp int, unit Unit) {
-	e.AddQuant(name, nComp, VALUE, unit)
-}
-
-// AddQuant(name, nComp, FIELD)
-func (e *Engine) AddField(name string, nComp int, unit Unit) {
-	e.AddQuant(name, nComp, FIELD, unit)
-}
-
-// AddQuant(name, nComp, MASK)
-func (e *Engine) AddMask(name string, nComp int, unit Unit) {
-	e.AddQuant(name, nComp, MASK, unit)
-}
+//func (e *Engine) AddValue(name string, nComp int, unit Unit) {
+//	e.AddQuant(name, nComp, VALUE, unit)
+//}
+//
+//// AddQuant(name, nComp, FIELD)
+//func (e *Engine) AddField(name string, nComp int, unit Unit) {
+//	e.AddQuant(name, nComp, FIELD, unit)
+//}
+//
+//// AddQuant(name, nComp, MASK)
+//func (e *Engine) AddMask(name string, nComp int, unit Unit) {
+//	e.AddQuant(name, nComp, MASK, unit)
+//}
 
 // Mark childQuantity to depend on parentQuantity.
 // Multiply adding the same dependency has no effect.
