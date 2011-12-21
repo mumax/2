@@ -7,6 +7,7 @@ LD_LIBRARY_PATH+=:../../../../lib
 TARG=mumax/modules
 
 GOFILES=\
+	mod_micromag.go\
 	mod_zeeman.go\
 	mod_exchange6.go\
 	mod_current.go\

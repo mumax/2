@@ -15,7 +15,6 @@ GOFILES=\
 	texgen.go\
 	mod_magnetization.go\
 	mod_llg.go\
-	mod_micromag.go\
 	mod_hfield.go\
 	mod_demagexchange.go\
 	kernel.go\
