@@ -5,24 +5,27 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
+// This file implements the uniaxial anisotropy module
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/engine"
+)
 
 // Register this module
 func init() {
-	RegisterModule("anisotropy/uniaxial", "Uniaxial magnetocrystalline anisotropy", LoadAnisUniaxial)
+	RegisterModule("anisotropy/uniaxial", "INCOMPLETE: Uniaxial magnetocrystalline anisotropy", LoadAnisUniaxial)
 }
 
 func LoadAnisUniaxial(e *Engine) {
 	e.LoadModule("hfield")
 	e.AddQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
-	e.AddQuant("k1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1")
+	e.AddQuant("k1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1") //TODO: Ku1
 	e.AddQuant("k2", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K2")
 	hfield := e.Quant("H")
-	sum := hfield.updater.(*SumUpdater)
+	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_anis")
 	e.Depends("H_anis", "k1", "k2")
 	//e.Depends("k1", "t")

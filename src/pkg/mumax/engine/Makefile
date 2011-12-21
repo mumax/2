@@ -17,7 +17,6 @@ GOFILES=\
 	mod_llg.go\
 	mod_micromag.go\
 	mod_hfield.go\
-	mod_uniaxialanisotropy.go\
 	mod_demagexchange.go\
 	kernel.go\
 	demag.go\

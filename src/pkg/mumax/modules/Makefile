@@ -10,6 +10,7 @@ GOFILES=\
 	mod_zeeman.go\
 	mod_exchange6.go\
 	mod_current.go\
+	mod_uniaxialanisotropy.go\
 	kernel.go\
 
 CGOFILES=\

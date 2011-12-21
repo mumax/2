@@ -7,6 +7,7 @@
 
 package modules
 
+// This file implements the Zeeman module
 // Author: Arne Vansteenkiste
 
 import (
