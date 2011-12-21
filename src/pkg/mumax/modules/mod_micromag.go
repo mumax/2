@@ -20,8 +20,8 @@ func init() {
 }
 
 func LoadMicromag(e *Engine) {
-	e.LoadModule("magnetization")
-	e.LoadModule("hfield")
+	LoadHField(e)
+	LoadMagnetization(e)
 	e.LoadModule("zeeman")
 	e.LoadModule("demagexch")
 	e.LoadModule("llg")

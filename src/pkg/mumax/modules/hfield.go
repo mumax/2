@@ -7,22 +7,18 @@
 
 package modules
 
+// File provides the "H" quantity.
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/engine"
 )
 
-// Register this module.
-// Module for the total field H. Other modules like H_demag, H_anis, H_ext have
-// to add their field to the sum make by H.
-// H is in units A/m and does not have a multiplier. I.e., is not normalized to Msat.
-func init() {
-	RegisterModule("hfield", "Total magnetic field.", LoadHField)
-}
-
+// Loads the "H" quantity if it is not already present.
 func LoadHField(e *Engine) {
-	e.AddNewQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
-	q := e.Quant("H")
-	q.SetUpdater(NewSumUpdater(q))
+	if !e.HasQuant("H") {
+		e.AddNewQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
+		q := e.Quant("H")
+		q.SetUpdater(NewSumUpdater(q))
+	}
 }

@@ -30,8 +30,8 @@ func init() {
 // the multiplier is set to gamma, so the array stores τ/gamma
 func LoadLLG(e *Engine) {
 
-	e.LoadModule("magnetization")
-	e.LoadModule("hfield")
+	LoadHField(e)
+	LoadMagnetization(e)
 
 	e.AddNewQuant("alpha", SCALAR, MASK, Unit(""), "damping")
 	e.AddNewQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")

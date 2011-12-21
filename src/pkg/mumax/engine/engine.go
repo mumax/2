@@ -227,6 +227,13 @@ func (e *Engine) Quant(name string) *Quant {
 	return nil //silence gc
 }
 
+// Returns whether a quantity is already defined in the engine.
+func (e *Engine) HasQuant(name string) bool {
+	lname := strings.ToLower(name)
+	_, ok := e.quantity[lname]
+	return ok
+}
+
 // Derived quantities are averages, components, etc. of existing quantities.
 // They are added to the engine on-demand.
 // Syntax:

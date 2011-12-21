@@ -20,7 +20,7 @@ func init() {
 }
 
 func LoadAnisUniaxial(e *Engine) {
-	e.LoadModule("hfield")
+	LoadHField(e)
 	e.AddNewQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
 	e.AddNewQuant("k1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1") //TODO: Ku1
 	e.AddNewQuant("k2", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K2")

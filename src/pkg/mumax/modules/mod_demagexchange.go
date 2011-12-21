@@ -26,8 +26,8 @@ func LoadDemagExch(e *Engine) {
 	// TODO: verify aexch space-independent
 
 	// dependencies
-	e.LoadModule("hfield")
-	e.LoadModule("magnetization")
+	LoadHField(e)
+	LoadMagnetization(e)
 	e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
 
 	m := e.Quant("m")

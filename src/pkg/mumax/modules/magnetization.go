@@ -7,24 +7,22 @@
 
 package modules
 
+// File provides the magnetization quantity
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/engine"
 )
 
-// Register this module
-func init() {
-	RegisterModule("magnetization", "Provides the reduced magnetization and saturation magnetization", LoadMagnetization)
-}
-
+// Load the magnetization and MSat, if not yet present.
 func LoadMagnetization(e *Engine) {
+	if !e.HasQuant("m") {
+		e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
+		e.AddNewQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
+		e.Depends("m", "Msat")
 
-	e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
-	e.AddNewQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
-	e.Depends("m", "Msat")
-
-	m := e.Quant("m")
-	Msat := e.Quant("Msat")
-	m.SetUpdater(&normUpdater{m: m, Msat: Msat})
+		m := e.Quant("m")
+		Msat := e.Quant("Msat")
+		m.SetUpdater(&normUpdater{m: m, Msat: Msat})
+	}
 }

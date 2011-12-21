@@ -20,8 +20,8 @@ func init() {
 }
 
 func LoadExch6(e *Engine) {
-	e.LoadModule("hfield")
-	e.LoadModule("magnetization")
+	LoadHField(e)
+	LoadMagnetization(e)
 	e.AddNewQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient") // here it may be a mask
 	e.AddNewQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
 	hfield := e.Quant("H")

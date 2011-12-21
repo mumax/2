@@ -8,9 +8,9 @@ TARG=mumax/modules
 
 GOFILES=\
 	mod_micromag.go\
-	mod_magnetization.go\
+	magnetization.go\
 	update_norm.go\
-	mod_hfield.go\
+	hfield.go\
 	mod_zeeman.go\
 	mod_exchange6.go\
 	mod_current.go\
