@@ -23,8 +23,7 @@ func init() {
 }
 
 func LoadTempBrown(e *Engine) {
-	e.LoadModule("magnetization")
-	e.LoadModule("llg") // needed for alpha.
+	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
 
@@ -39,7 +38,6 @@ func LoadTempBrown(e *Engine) {
 	Htherm.SetUpdater(NewTempBrownUpdater(Htherm))
 
 	// Add thermal field to total field
-	e.LoadModule("hfield")
 	hfield := e.Quant("H")
 	sum := hfield.GetUpdater().(*SumUpdater)
 	sum.AddParent("H_therm")
