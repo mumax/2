@@ -13,7 +13,6 @@ GOFILES=\
 	api.go\
 	module.go\
 	texgen.go\
-	mod_magnetization.go\
 	mod_llg.go\
 	mod_hfield.go\
 	mod_demagexchange.go\
@@ -26,7 +25,6 @@ GOFILES=\
 	unit.go\
 	updater.go\
 	update_pointwise.go\
-	update_norm.go\
 	update_sum.go\
 	update_average.go\
 	zeropad.go\
