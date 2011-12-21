@@ -28,9 +28,9 @@ func LoadTempBrown(e *Engine) {
 
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
 
-	temp := e.AddQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
+	temp := e.AddNewQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
 	temp.SetVerifier(NonNegative)
-	Htherm := e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
+	Htherm := e.AddNewQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
 
 	// By declaring that H_therm depends on Step,
 	// It will be automatically updated at each new time step
