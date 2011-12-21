@@ -9,6 +9,7 @@ package main
 
 import (
 	"mumax/apigen"
+	_ "mumax/modules"
 )
 
 func main() {

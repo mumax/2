@@ -9,6 +9,7 @@ package main
 
 import (
 	"mumax/engine"
+	_ "mumax/modules"
 )
 
 func main() {
