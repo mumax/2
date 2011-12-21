@@ -5,11 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/engine"
+)
 
 // Register this module.
 // Module for the total field H. Other modules like H_demag, H_anis, H_ext have
@@ -22,5 +24,5 @@ func init() {
 func LoadHField(e *Engine) {
 	e.AddQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
 	q := e.Quant("H")
-	q.updater = &SumUpdater{q}
+	q.SetUpdater(NewSumUpdater(q))
 }

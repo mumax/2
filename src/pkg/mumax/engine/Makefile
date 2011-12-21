@@ -14,7 +14,6 @@ GOFILES=\
 	module.go\
 	texgen.go\
 	mod_llg.go\
-	mod_hfield.go\
 	mod_demagexchange.go\
 	kernel.go\
 	demag.go\

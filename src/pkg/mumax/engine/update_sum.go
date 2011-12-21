@@ -39,6 +39,10 @@ type SumUpdater struct {
 	//parents []*Quant
 }
 
+func NewSumUpdater(sum *Quant) Updater {
+	return &SumUpdater{sum}
+}
+
 func (u *SumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum

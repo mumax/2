@@ -9,7 +9,9 @@ package modules
 
 // Author: Arne Vansteenkiste
 
-import (."mumax/engine")
+import (
+	. "mumax/engine"
+)
 
 // Register this module
 func init() {
@@ -24,5 +26,5 @@ func LoadMagnetization(e *Engine) {
 
 	m := e.Quant("m")
 	Msat := e.Quant("Msat")
-	m.SetUpdater( &normUpdater{m: m, Msat: Msat})
+	m.SetUpdater(&normUpdater{m: m, Msat: Msat})
 }
