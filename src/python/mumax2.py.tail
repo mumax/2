@@ -14,3 +14,10 @@ MuB    = 9.2740091523E-24
 
 ## Electron charge in As
 E      = 1.60217646E-19
+
+
+## Makes a 4D array suited for mumax.
+# comp: number of components (1:scalar, 3:vector,...). First index ranges over components.
+# nx, ny, nz: number of elements in X,Y,Z.
+def makearray(comp, nx, ny, nz):
+	return [[[[0 for z in range(Nz)] for y in range(Ny)] for x in range(Nx)] for c in range(comp)]
