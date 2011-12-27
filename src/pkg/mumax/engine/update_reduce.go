@@ -14,18 +14,25 @@ import (
 	"mumax/gpu"
 )
 
-type AverageUpdater struct {
+type ReduceUpdater struct {
 	in, out *Quant
 	reduce  gpu.Reductor
 }
 
-func NewAverageUpdater(in, out *Quant) Updater {
+type AverageUpdater ReduceUpdater
+
+
+func NewReduceUpdater(in, out *Quant) *ReduceUpdater {
 	checkKinds(in, FIELD, MASK)
-	avg := new(AverageUpdater)
-	avg.in = in
-	avg.out = out
-	avg.reduce.Init(1, GetEngine().GridSize())
-	return avg
+	red := new(ReduceUpdater)
+	red.in = in
+	red.out = out
+	red.reduce.Init(1, GetEngine().GridSize())
+	return red
+}
+
+func NewAverageUpdater(in, out*Quant)Updater{
+	return (*AverageUpdater)(NewReduceUpdater(in, out))
 }
 
 func (this *AverageUpdater) Update() {

@@ -20,7 +20,7 @@ GOFILES=\
 	updater.go\
 	update_pointwise.go\
 	update_sum.go\
-	update_average.go\
+	update_reduce.go\
 	zeropad.go\
 	verify.go\
 	equation.go\
