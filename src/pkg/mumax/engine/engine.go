@@ -471,14 +471,15 @@ var lastdash int64
 // refresh dashboard every x nanoseconds
 const UPDATE_DASH = 150 * 1e6
 
-// INTERNAL: show live progress: steps, t, dt
+// INTERNAL: show live progress: steps, t, dt, outputID
 func (e *Engine) updateDash() {
 	t := time.Nanoseconds()
 	if t-lastdash > UPDATE_DASH {
 		lastdash = t
 		Dashboard(" step", e.step.multiplier[0],
 			"t:", float32(e.time.multiplier[0]), "s",
-			"dt:", float32(e.dt.multiplier[0]), "s")
+			"dt:", float32(e.dt.multiplier[0]), "s",
+			"out:", e._outputID)
 	}
 }
 
