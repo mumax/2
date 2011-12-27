@@ -15,14 +15,13 @@ import (
 	"mumax/gpu"
 )
 
-
 type RK12Solver struct {
 	buffer []*gpu.Array
 	error  []*Quant // error estimates for each equation
 	maxErr []*Quant // maximum error for each equation
 	diff   []gpu.Reductor
-	minDt *Quant
-	maxDt *Quant
+	minDt  *Quant
+	maxDt  *Quant
 }
 
 // Load the solver into the Engine
@@ -144,14 +143,14 @@ func (s *RK12Solver) Step() {
 
 	// Set new time step but do not go beyond min/max bounds
 	newDt := dt * minFactor
-	if newDt < s.minDt.Scalar(){
+	if newDt < s.minDt.Scalar() {
 		newDt = s.minDt.Scalar()
 	}
-	if newDt > s.maxDt.Scalar(){
+	if newDt > s.maxDt.Scalar() {
 		newDt = s.maxDt.Scalar()
 	}
 	e.dt.SetScalar(newDt)
 
 	// advance time step
-	e.step.SetScalar(e.step.Scalar() + 1) 
+	e.step.SetScalar(e.step.Scalar() + 1)
 }
