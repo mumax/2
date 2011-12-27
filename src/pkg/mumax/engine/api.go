@@ -103,6 +103,32 @@ func (a API) Run(duration float64) {
 	a.Engine.Run(duration)
 }
 
+// Runs the simulation until quantity a < quantity b
+func (api API) Run_Until_Smaller(a, b string) {
+	e := api.Engine
+	A := e.Quant(a)
+	B := e.Quant(b)
+	Log("Running until", A.Name(), "<", B.Name())
+	for A.Scalar() >= B.Scalar() {
+		e.Step()
+		e.updateDash()
+	}
+	DashExit()
+}
+
+// Runs the simulation until quantity a > quantity b
+func (api API) Run_Until_Larger(a, b string) {
+	e := api.Engine
+	A := e.Quant(a)
+	B := e.Quant(b)
+	Log("Running until", A.Name(), "<", B.Name())
+	for A.Scalar() <= B.Scalar() {
+		e.Step()
+		e.updateDash()
+	}
+	DashExit()
+}
+
 //________________________________________________________________________________ set quantities
 
 // Set value of a quantity. The quantity must be of type VALUE or MASK.

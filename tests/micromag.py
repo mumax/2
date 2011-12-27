@@ -2,7 +2,7 @@ from mumax2 import *
 
 # test file for basic micromagnetism
 
-setgridsize(16, 8, 2)
+setgridsize(16, 8, 1)
 setcellsize(5e-9, 5e-9, 5e-9)
 setperiodic(10, 0, 0)
 
