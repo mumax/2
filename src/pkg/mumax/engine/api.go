@@ -178,7 +178,7 @@ func (a API) SetArray(quantity string, field *host.Array) {
 	// setting a field when there is a non-1 multiplier is too confusing to allow
 	for _, m := range q.multiplier {
 		if m != 1 {
-			panic(InputErr(fmt.Sprint(q.Name(), " is not an oridinary array, but has a mask + multiplier value. Did you mean to set the mask or the mulitplier instead of the array?")))
+			panic(InputErr(fmt.Sprint(q.Name(), " is not an oridinary array, but has a mask + multiplier value. Did you mean to set the mask or the multiplier instead of the array?")))
 		}
 	}
 	q.SetField(field)
