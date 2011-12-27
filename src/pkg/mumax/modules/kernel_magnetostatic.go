@@ -67,9 +67,11 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 				yw := Wrap(y, size[Y])
 				for z := z1; z <= z2; z++ {
 					zw := Wrap(z, size[Z])
-					R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
+					//R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
+					R[X] = float64(x) * cellsize[X]
+					R[Y] = float64(y) * cellsize[Y]
+					R[Z] = float64(z) * cellsize[Z]
 
-					//faceIntegral(B, R, cellsize, s, accuracy)
 					n := accuracy                  // number of integration points = n^2
 					u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
 
@@ -106,11 +108,10 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 							B[Z] += R2[Z] * -charge / (4 * PI * r * r * r)
 						}
 					}
-					scale := 1 / float64(n * n)
+					scale := 1 / float64(n*n)
 					B[X] *= scale
 					B[Y] *= scale
 					B[Z] *= scale
-					//(&B).Scale() // n^2 integration points
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
 						i := kernIdx[s][d]                // 3x3 symmetric index to 1x6 index
