@@ -61,7 +61,9 @@ func (this *MaxAbsUpdater) Update() {
 	var max float64
 	for c := 0; c < this.in.nComp; c++ {
 		compMax := float64(this.reduce.MaxAbs(&(this.in.Array().Comp[c]))) * this.in.multiplier[c]
-		if compMax > max{max=compMax}
+		if compMax > max {
+			max = compMax
+		}
 	}
 	this.out.SetScalar(float64(max))
 }
