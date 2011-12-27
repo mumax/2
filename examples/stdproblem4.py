@@ -22,7 +22,7 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 10e-12)
+autotabulate(["t", "<m>", "maxtorque"], "m.txt", 10e-12)
 
 run(2e-9) #relax
 

@@ -103,13 +103,12 @@ func (a API) Run(duration float64) {
 	a.Engine.Run(duration)
 }
 
-// Runs the simulation until quantity a < quantity b
-func (api API) Run_Until_Smaller(a, b string) {
-	e := api.Engine
-	A := e.Quant(a)
-	B := e.Quant(b)
-	Log("Running until", A.Name(), "<", B.Name())
-	for A.Scalar() >= B.Scalar() {
+// Runs the simulation until quantity a < value
+func (a API) Run_Until_Smaller(quantity string, value float64) {
+	e := a.Engine
+	q := e.Quant(quantity)
+	Log("Running until", q.Name(), "<", value, q.Unit())
+	for q.Scalar() >= value {
 		e.Step()
 		e.updateDash()
 	}
@@ -117,12 +116,11 @@ func (api API) Run_Until_Smaller(a, b string) {
 }
 
 // Runs the simulation until quantity a > quantity b
-func (api API) Run_Until_Larger(a, b string) {
-	e := api.Engine
-	A := e.Quant(a)
-	B := e.Quant(b)
-	Log("Running until", A.Name(), "<", B.Name())
-	for A.Scalar() <= B.Scalar() {
+func (a API) Run_Until_Larger(quantity string, value float64) {
+	e := a.Engine
+	q := e.Quant(quantity)
+	Log("Running until", q.Name(), ">", value, q.Unit())
+	for q.Scalar() <= value {
 		e.Step()
 		e.updateDash()
 	}

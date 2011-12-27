@@ -26,4 +26,9 @@ func LoadMicromag(e *Engine) {
 	e.LoadModule("demagexch")
 	e.LoadModule("llg")
 	e.LoadModule("regions")
+
+	torque := e.Quant("torque")
+	maxtorque := e.AddNewQuant("maxtorque", SCALAR, VALUE, torque.Unit(), "Maximum torque")
+	e.Depends("maxtorque", "torque")
+	maxtorque.SetUpdater(NewMaxAbsUpdater(torque, maxtorque))
 }
