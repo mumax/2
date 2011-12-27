@@ -92,36 +92,25 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 							pole[v] = pv
 							pole[w] = pw
 
-							//R2.SetTo(R)
-							//R2.Sub(pole)
 							R2[X], R2[Y], R2[Z] = R[X]-pole[X], R[Y]-pole[Y], R[Z]-pole[Z]
-
-							//r := (&R2).Norm()
 							r := math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
-
-							//(&R2).Normalize()
-							//(&R2).Scale(charge / (4 * math.Pi * r * r * r))
 							B[X] += R2[X] * charge / (4 * PI * r * r * r)
 							B[Y] += R2[Y] * charge / (4 * PI * r * r * r)
 							B[Z] += R2[Z] * charge / (4 * PI * r * r * r)
-							//(&B).Add(&R2)
 
 							pole[u] = pu2
-
-							//(&R2).SetTo(&R)
-							//(&R2).Sub(&pole)
 							R2[X], R2[Y], R2[Z] = R[X]-pole[X], R[Y]-pole[Y], R[Z]-pole[Z]
-							//r = (&R2).Norm()
 							r = math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
-							B[X] += R2[X] *-charge / (4 * PI * r * r * r)
-							B[Y] += R2[Y] *-charge / (4 * PI * r * r * r)
-							B[Z] += R2[Z] *-charge / (4 * PI * r * r * r)
-							//(&R2).Normalize()
-							//(&R2).Scale(-charge / (4 * math.Pi * r * r))
-							//(&B).Add(&R2)
+							B[X] += R2[X] * -charge / (4 * PI * r * r * r)
+							B[Y] += R2[Y] * -charge / (4 * PI * r * r * r)
+							B[Z] += R2[Z] * -charge / (4 * PI * r * r * r)
 						}
 					}
-					(&B).Scale(1. / (float64(n * n))) // n^2 integration points
+					scale := 1 / float64(n * n)
+					B[X] *= scale
+					B[Y] *= scale
+					B[Z] *= scale
+					//(&B).Scale() // n^2 integration points
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
 						i := kernIdx[s][d]                // 3x3 symmetric index to 1x6 index
