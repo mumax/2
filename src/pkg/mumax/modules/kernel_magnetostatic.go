@@ -92,23 +92,33 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 							pole[v] = pv
 							pole[w] = pw
 
-//							R2.SetTo(R)
-//							R2.Sub(pole)
+							//R2.SetTo(R)
+							//R2.Sub(pole)
 							R2[X], R2[Y], R2[Z] = R[X]-pole[X], R[Y]-pole[Y], R[Z]-pole[Z]
 
-							r := (&R2).Norm()
-							(&R2).Normalize()
-							(&R2).Scale(charge / (4 * math.Pi * r * r))
-							(&B).Add(&R2)
+							//r := (&R2).Norm()
+							r := math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
+
+							//(&R2).Normalize()
+							//(&R2).Scale(charge / (4 * math.Pi * r * r * r))
+							B[X] += R2[X] * charge / (4 * PI * r * r * r)
+							B[Y] += R2[Y] * charge / (4 * PI * r * r * r)
+							B[Z] += R2[Z] * charge / (4 * PI * r * r * r)
+							//(&B).Add(&R2)
 
 							pole[u] = pu2
 
-							(&R2).SetTo(&R)
-							(&R2).Sub(&pole)
-							r = (&R2).Norm()
-							(&R2).Normalize()
-							(&R2).Scale(-charge / (4 * math.Pi * r * r))
-							(&B).Add(&R2)
+							//(&R2).SetTo(&R)
+							//(&R2).Sub(&pole)
+							R2[X], R2[Y], R2[Z] = R[X]-pole[X], R[Y]-pole[Y], R[Z]-pole[Z]
+							//r = (&R2).Norm()
+							r = math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
+							B[X] += R2[X] *-charge / (4 * PI * r * r * r)
+							B[Y] += R2[Y] *-charge / (4 * PI * r * r * r)
+							B[Z] += R2[Z] *-charge / (4 * PI * r * r * r)
+							//(&R2).Normalize()
+							//(&R2).Scale(-charge / (4 * math.Pi * r * r))
+							//(&B).Add(&R2)
 						}
 					}
 					(&B).Scale(1. / (float64(n * n))) // n^2 integration points
@@ -173,7 +183,7 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 type vector [3]float64
 
 func NewVector() vector {
-	return vector([3]float64{0,0,0})
+	return vector([3]float64{0, 0, 0})
 }
 
 func UnitVector(direction int) vector {
