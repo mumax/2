@@ -47,6 +47,7 @@ func (u *UniaxialAnisUpdater) Update() {
 		u.ku1.Array(), u.ku1.Multiplier()[0],
 		u.ku2.Array(), u.ku2.Multiplier()[0],
 		u.anisU.Array(), u.anisU.Multiplier(),
-		u.hanis.Array().Stream)
+		gpu.STREAM0)
+	//u.hanis.Array().Stream)
 	u.hanis.Array().Stream.Sync()
 }
