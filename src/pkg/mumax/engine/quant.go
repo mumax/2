@@ -60,7 +60,7 @@ type Quant struct {
 
 //____________________________________________________________________ init
 
-// Returns a new quantity. See Quant.init().
+// Returns a new quantity. See Quant.init(). TODO: make desc obligatory
 func NewQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, cpuOnly bool, desc ...string) *Quant {
 	q := new(Quant)
 	q.init(name, nComp, size3D, kind, unit, cpuOnly, desc...)

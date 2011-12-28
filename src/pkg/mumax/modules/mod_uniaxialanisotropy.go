@@ -12,23 +12,41 @@ package modules
 
 import (
 	. "mumax/engine"
+	"mumax/gpu"
 )
 
 // Register this module
 func init() {
-	RegisterModule("anisotropy/uniaxial", "INCOMPLETE: Uniaxial magnetocrystalline anisotropy", LoadAnisUniaxial)
+	RegisterModule("anisotropy/uniaxial", "Uniaxial magnetocrystalline anisotropy", LoadAnisUniaxial)
 }
 
 func LoadAnisUniaxial(e *Engine) {
 	LoadHField(e)
 
-	e.AddNewQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
-	e.AddNewQuant("Ku1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1") //TODO: Ku1
-	e.AddNewQuant("Ku2", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K2")
-	e.AddNewQuant("anisU", VECTOR, MASK, Unit(""), "uniaxial anisotropy direction")
+	Hanis := e.AddNewQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
+	ku1 := e.AddNewQuant("Ku1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1")
+	ku2 := e.AddNewQuant("Ku2", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K2")
+	anisU := e.AddNewQuant("anisU", VECTOR, MASK, Unit(""), "uniaxial anisotropy direction (unit vector)")
 
 	hfield := e.Quant("H")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_anis")
 	e.Depends("H_anis", "Ku1", "Ku2", "anisU")
+
+	Hanis.SetUpdater(&UniaxialAnisUpdater{e.Quant("m"), Hanis, ku1, ku2, anisU})
+}
+
+type UniaxialAnisUpdater struct {
+	m, hanis, ku1, ku2, anisU *Quant
+}
+
+func (u *UniaxialAnisUpdater) Update() {
+	gpu.UniaxialAnisotropyAsync(
+		u.hanis.Array(),
+		u.m.Array(),
+		u.ku1.Array(), u.ku1.Multiplier()[0],
+		u.ku2.Array(), u.ku2.Multiplier()[0],
+		u.anisU.Array(), u.anisU.Multiplier(),
+		u.hanis.Array().Stream)
+	u.hanis.Array().Stream.Sync()
 }
