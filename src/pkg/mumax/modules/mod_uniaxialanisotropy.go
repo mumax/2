@@ -41,13 +41,17 @@ type UniaxialAnisUpdater struct {
 }
 
 func (u *UniaxialAnisUpdater) Update() {
-	gpu.UniaxialAnisotropyAsync(
-		u.hanis.Array(),
-		u.m.Array(),
-		u.ku1.Array(), u.ku1.Multiplier()[0],
-		u.ku2.Array(), u.ku2.Multiplier()[0],
-		u.anisU.Array(), u.anisU.Multiplier(),
-		gpu.STREAM0)
-	//u.hanis.Array().Stream)
+	hanis := u.hanis.Array()
+	m := u.m.Array()
+	ku1 := u.ku1.Array()
+	ku1mul := u.ku1.Multiplier()[0]
+	ku2 := u.ku2.Array()
+	ku2mul := u.ku2.Multiplier()[0]
+	anisU := u.anisU.Array()
+	anisUMul := u.anisU.Multiplier()
+	stream := u.hanis.Array().Stream
+
+	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, ku1mul, ku2, ku2mul, anisU, anisUMul, stream)
+
 	u.hanis.Array().Stream.Sync()
 }

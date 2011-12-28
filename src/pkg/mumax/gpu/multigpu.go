@@ -216,4 +216,5 @@ const (
 	MSG_DEVICEUNINITIATED = "Device list not initiated"
 )
 
+// Stream 0 on each GPU
 var STREAM0 Stream
