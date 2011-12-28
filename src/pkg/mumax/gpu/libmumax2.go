@@ -7,7 +7,7 @@
 
 // This file wraps the core functions of libmultigpu.so.
 // Functions added by add-on modules are wrapped elsewhere.
-// Author: Arne Vansteenkiste
+// Author: Arne Vansteenkiste, Ben Van de Wiele
 
 package gpu
 
@@ -522,6 +522,30 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 //     (*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 //     C.int(fftMx.partLen3D))
 // }
+
+// Computes the uniaxial anisotropy field, stores in h.
+func UniaxialAnisotropyAsync(h, m *Array, Ku1Mask *Array, Ku1Mul float64, Ku2Mask *Array, Ku2Mul float64, anisUMask *Array, anisUMul []float64, stream Stream) {
+
+	C.uniaxialAnisotropyAsync(
+		(**C.float)(unsafe.Pointer(&(h.pointer[X]))),
+		(**C.float)(unsafe.Pointer(&(h.pointer[Y]))),
+		(**C.float)(unsafe.Pointer(&(h.pointer[Z]))),
+		(**C.float)(unsafe.Pointer(&(m.pointer[X]))),
+		(**C.float)(unsafe.Pointer(&(m.pointer[Y]))),
+		(**C.float)(unsafe.Pointer(&(m.pointer[Z]))),
+		(**C.float)(unsafe.Pointer(&(Ku1Mask.pointer[0]))),
+		C.float(Ku1Mul),
+		(**C.float)(unsafe.Pointer(&(Ku2Mask.pointer[0]))),
+		C.float(Ku2Mul),
+		(**C.float)(unsafe.Pointer(&(anisUMask.pointer[X]))),
+		C.float(anisUMul[X]),
+		(**C.float)(unsafe.Pointer(&(anisUMask.pointer[Y]))),
+		C.float(anisUMul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisUMask.pointer[Z]))),
+		C.float(anisUMul[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(h.partLen3D))
+}
 
 // DEBUG: sets all values to their X (i) index
 func SetIndexX(dst *Array) {
