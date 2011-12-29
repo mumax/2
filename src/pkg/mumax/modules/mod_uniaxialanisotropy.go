@@ -11,6 +11,7 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
@@ -31,7 +32,7 @@ func LoadAnisUniaxial(e *Engine) {
 	hfield := e.Quant("H")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_anis")
-	e.Depends("H_anis", "Ku1", "Ku2", "anisU")
+	e.Depends("H_anis", "Ku1", "Ku2", "anisU", "MSat")
 
 	Hanis.SetUpdater(&UniaxialAnisUpdater{e.Quant("m"), Hanis, ku1, ku2, anisU})
 }
@@ -51,7 +52,9 @@ func (u *UniaxialAnisUpdater) Update() {
 	anisUMul := u.anisU.Multiplier()
 	stream := u.hanis.Array().Stream
 
-	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, ku1mul, ku2, ku2mul, anisU, anisUMul, stream)
+	// TODO
+	msat := GetEngine().Quant("msat")
+	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, 2*ku1mul /(Mu0*msat.Scalar()), ku2, ku2mul, anisU, anisUMul, stream)
 
 	u.hanis.Array().Stream.Sync()
 }
