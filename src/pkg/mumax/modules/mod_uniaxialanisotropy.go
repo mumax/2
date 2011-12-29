@@ -54,7 +54,7 @@ func (u *UniaxialAnisUpdater) Update() {
 
 	// TODO
 	msat := GetEngine().Quant("msat")
-	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, 2*ku1mul /(Mu0*msat.Scalar()), ku2, ku2mul, anisU, anisUMul, stream)
+	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, 2*ku1mul/(Mu0*msat.Scalar()), ku2, ku2mul, anisU, anisUMul, stream)
 
 	u.hanis.Array().Stream.Sync()
 }
