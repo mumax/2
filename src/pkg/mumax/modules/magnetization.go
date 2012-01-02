@@ -17,12 +17,10 @@ import (
 // Load the magnetization and MSat, if not yet present.
 func LoadMagnetization(e *Engine) {
 	if !e.HasQuant("m") {
-		e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
-		e.AddNewQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
+		m := e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
+		Msat := e.AddNewQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
 		e.Depends("m", "Msat")
 
-		m := e.Quant("m")
-		Msat := e.Quant("Msat")
 		m.SetUpdater(&normUpdater{m: m, Msat: Msat})
 	}
 }
