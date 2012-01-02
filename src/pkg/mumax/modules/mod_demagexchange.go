@@ -173,7 +173,6 @@ func (u *fftKernUpdater) Update() {
 	u.conv.SelfTest()
 }
 
-
 //____________________________________________________________________ H_dex
 
 // Updates the demag+exchange field in one single convolution
@@ -194,4 +193,3 @@ func newHDexUpdater(Hdex, m, fftDexKern *Quant) Updater {
 func (u *hDexUpdater) Update() {
 	u.conv.Convolve(u.m.Array(), u.Hdex.Array())
 }
-

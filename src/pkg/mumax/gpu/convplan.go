@@ -13,6 +13,7 @@ package gpu
 import (
 	. "mumax/common"
 	"mumax/host"
+	"rand"
 	//   "fmt"
 
 )
@@ -183,17 +184,40 @@ func (conv *ConvPlan) InverseFFT(out *Array) {
 	}
 }
 
-
-func(conv *ConvPlan) SelfTest(){
+func (conv *ConvPlan) SelfTest() {
 	Debug("FFT self-test")
+	rng := rand.New(rand.NewSource(0))
+	size := conv.dataSize[:]
 
-	in := NewArray(1, conv.dataSize[:])
+	in := NewArray(1, size)
 	defer in.Free()
-	//a := in.LocalCopy()
+	arr := in.LocalCopy()
+	a := arr.List
+	for i := range a {
+		a[i] = 2*rng.Float32() - 1
+		if a[i] == 0 {
+			a[i] = 1
+		}
+	}
+	in.CopyFromHost(arr)
 
-	out := NewArray(1, conv.dataSize[:])
+	out := NewArray(1, size)
 	defer out.Free()
 
 	conv.ForwardFFT(in)
 	conv.InverseFFT(out)
+
+	b := out.LocalCopy().List
+	norm := float32(1 / float64(FFTNormLogic(conv.logicSize[:])))
+	var maxerr float32
+	for i := range a {
+		if Abs32(a[i]-b[i]*norm) > maxerr {
+			maxerr = Abs32(a[i] - b[i]*norm)
+		}
+	}
+	Debug("FFT max error:", maxerr)
+	if maxerr > 1e-3 {
+		panic(BugF("FFT self-test failed, max error:", maxerr, "\nPlease use a different grid size of FFT type."))
+	}
+
 }
