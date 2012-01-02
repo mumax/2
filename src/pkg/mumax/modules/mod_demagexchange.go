@@ -170,7 +170,9 @@ func (u *fftKernUpdater) Update() {
 		kernel[i] = (u.kern.Buffer().Component(i))
 	}
 	u.conv.Init(dataSize, kernel, u.fftKern.Array())
+	u.conv.SelfTest()
 }
+
 
 //____________________________________________________________________ H_dex
 
@@ -192,3 +194,4 @@ func newHDexUpdater(Hdex, m, fftDexKern *Quant) Updater {
 func (u *hDexUpdater) Update() {
 	u.conv.Convolve(u.m.Array(), u.Hdex.Array())
 }
+

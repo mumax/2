@@ -153,7 +153,7 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 	fftIn := &conv.fftIn
 	fftKern := &conv.fftKern
 
-	conv.forwardFFT(in)
+	conv.ForwardFFT(in)
 
 	// Point-wise kernel multiplication
 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
@@ -162,14 +162,13 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 		fftIn.Stream) // TODO: choose stream wisely
 	fftIn.Stream.Sync() // !!
 
-	conv.inverseFFT(out)
+	conv.InverseFFT(out)
 }
-
 
 // 	INTERNAL
 // Sparse transform all 3 components.
 // (FFTPlan knows about zero padding etc)
-func (conv *ConvPlan) forwardFFT(in *Array){
+func (conv *ConvPlan) ForwardFFT(in *Array) {
 	for c := range in.Comp {
 		conv.fft.Forward(&in.Comp[c], &conv.fftIn.Comp[c])
 	}
@@ -178,8 +177,23 @@ func (conv *ConvPlan) forwardFFT(in *Array){
 // 	INTERNAL
 // Sparse backtransform
 // (FFTPlan knows about zero padding etc)
-func (conv *ConvPlan) inverseFFT(out *Array){
+func (conv *ConvPlan) InverseFFT(out *Array) {
 	for c := range out.Comp {
 		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
 	}
+}
+
+
+func(conv *ConvPlan) SelfTest(){
+	Debug("FFT self-test")
+
+	in := NewArray(1, conv.dataSize[:])
+	defer in.Free()
+	//a := in.LocalCopy()
+
+	out := NewArray(1, conv.dataSize[:])
+	defer out.Free()
+
+	conv.ForwardFFT(in)
+	conv.InverseFFT(out)
 }
