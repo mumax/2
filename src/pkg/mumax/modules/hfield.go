@@ -17,8 +17,7 @@ import (
 // Loads the "H" quantity if it is not already present.
 func LoadHField(e *Engine) {
 	if !e.HasQuant("H") {
-		e.AddNewQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
-		q := e.Quant("H")
-		q.SetUpdater(NewSumUpdater(q))
+		H := e.AddNewQuant("H", VECTOR, FIELD, Unit("A/m"), "magnetic field")
+		H.SetUpdater(NewSumUpdater(H))
 	}
 }
