@@ -11,17 +11,17 @@ class Py:
 class Fe:
 	msat=1700e3
 	aex=21e-12
-	ku1=48e3
+	ku=48e3
 
 ## Material parameters for standard Nickel
 class Ni:
 	msat=490e3
 	aex=9e-12
-	ku1=-5.7e3
+	ku=-5.7e3
 
 ## Material parameters for standard HCP Cobalt
 class Co:
 	msat=1400e3
 	aex=30e-12
-	ku1=520e3
+	ku=520e3
 

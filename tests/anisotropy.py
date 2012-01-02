@@ -16,9 +16,9 @@ load('solver/rk12')
 savegraph('graph.png')
 
 setv('Msat', 800e3)
-setmask('Msat', ellipse())
+#setmask('Msat', ellipse())
 setv('Aex', 13e-12)
-setv('Ku1', -500)
+setv('Ku', -500)
 setv('anisU', [1, 0, 0])
 setv('alpha', 0.25)
 
