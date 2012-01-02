@@ -11,8 +11,7 @@ extern "C" {
 
 __global__ void uniaxialAnisotropyKern (float *hx, float *hy, float *hz, 
                                      float *mx, float *my, float *mz,
-                                     float *Ku1_map, float Ku1_mul, 
-                                     float *Ku2_map, float Ku2_mul, 
+                                     float *Ku_map, float* mSat_map, float Ku2_Mu0Msat_mul, 
                                      float *anisU_mapx, float anisU_mulx,
                                      float *anisU_mapy, float anisU_muly,
                                      float *anisU_mapz, float anisU_mulz,
@@ -22,18 +21,21 @@ __global__ void uniaxialAnisotropyKern (float *hx, float *hy, float *hz,
 
   if (i < Npart){
 
-    float Ku1;
-    if (Ku1_map==NULL){
-      Ku1 = Ku1_mul;
+	float mSat_mask;
+	if (mSat_map ==NULL){
+		mSat_mask = 1.0f;
 	}else{
-      Ku1 = Ku1_mul*Ku1_map[i];
+		mSat_mask = mSat_map[i];
+		if (mSat_mask == 0.0f){
+			mSat_mask = 1.0f; // do not divide by zero
+		}
 	}
 
-    float Ku2;
-    if (Ku2_map==NULL){
-      Ku2 = Ku2_mul;
+    float Ku2_Mu0Msat; // 2 * Ku / Mu0 * Msat
+    if (Ku_map==NULL){
+      Ku2_Mu0Msat = Ku2_Mu0Msat_mul / mSat_mask;
 	}else{
-      Ku2 = Ku2_mul*Ku2_map[i];
+      Ku2_Mu0Msat = (Ku2_Mu0Msat_mul / mSat_mask) * Ku_map[i];
 	}
 
     float ux;
@@ -58,9 +60,9 @@ __global__ void uniaxialAnisotropyKern (float *hx, float *hy, float *hz,
     }
     
     float mu = mx[i]*ux + my[i]*uy + mz[i]*uz;
-    hx[i] = Ku1*mu*ux;
-    hy[i] = Ku1*mu*uy;
-    hz[i] = Ku1*mu*uz;
+    hx[i] = Ku2_Mu0Msat*mu*ux;
+    hy[i] = Ku2_Mu0Msat*mu*uy;
+    hz[i] = Ku2_Mu0Msat*mu*uz;
   }
 
 }
@@ -69,14 +71,12 @@ __global__ void uniaxialAnisotropyKern (float *hx, float *hy, float *hz,
 
 void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
-                          float **Ku1_map, float Ku1_mul, 
-                          float **Ku2_map, float Ku2_mul, 
+                          float **Ku1_map, float **MSat_map, float Ku2_Mu0Msat_mul, 
                           float **anisU_mapx, float anisU_mulx,
                           float **anisU_mapy, float anisU_muly,
                           float **anisU_mapz, float anisU_mulz,
                           CUstream* stream, int Npart){
 
-  assert(Ku2_mul == 0); // todo: implement 2nd order
   dim3 gridSize, blockSize;
   make1dconf(Npart, &gridSize, &blockSize);
 
@@ -92,8 +92,7 @@ void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz,
     uniaxialAnisotropyKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (
 					hx[dev],hy[dev],hz[dev],  
                     mx[dev],my[dev],mz[dev], 
-                    Ku1_map[dev], Ku1_mul,
-                    Ku2_map[dev], Ku2_mul,
+                    Ku1_map[dev], MSat_map[dev], Ku2_Mu0Msat_mul,
                     anisU_mapx[dev], anisU_mulx,
                     anisU_mapy[dev], anisU_muly,
                     anisU_mapz[dev], anisU_mulz,

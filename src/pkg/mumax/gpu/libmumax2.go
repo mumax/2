@@ -524,7 +524,7 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 // }
 
 // Computes the uniaxial anisotropy field, stores in h.
-func UniaxialAnisotropyAsync(h, m *Array, Ku1Mask *Array, Ku1Mul float64, Ku2Mask *Array, Ku2Mul float64, anisUMask *Array, anisUMul []float64, stream Stream) {
+func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
 	C.uniaxialAnisotropyAsync(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
@@ -532,10 +532,9 @@ func UniaxialAnisotropyAsync(h, m *Array, Ku1Mask *Array, Ku1Mul float64, Ku2Mas
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Ku1Mask.pointer[0]))),
-		C.float(Ku1Mul),
-		(**C.float)(unsafe.Pointer(&(Ku2Mask.pointer[0]))),
-		C.float(Ku2Mul),
+		(**C.float)(unsafe.Pointer(&(KuMask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(MsatMask.pointer[0]))),
+		C.float(Ku2_Mu0MSat),
 		(**C.float)(unsafe.Pointer(&(anisUMask.Comp[X].pointer[0]))),
 		C.float(anisUMul[X]),
 		(**C.float)(unsafe.Pointer(&(anisUMask.Comp[Y].pointer[0]))),

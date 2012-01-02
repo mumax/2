@@ -17,13 +17,11 @@ extern "C" {
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
-                          float **Ku1_map, float Ku1_mul, 
-                          float **Ku2_map, float Ku2_mul, 
+                          float **Ku1_map, float **MSat_map, float Ku2_Mu0Msat_mul, 
                           float **anisU_mapx, float anisU_mulx,
                           float **anisU_mapy, float anisU_muly,
                           float **anisU_mapz, float anisU_mulz,
-                          CUstream* stream, int Npart
-                          );
+                          CUstream* stream, int Npart);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,7 @@
-#mx -> 0.62
+# mx -> 0.62
 
 from mumax2 import *
+from mumax2_geom import *
 
 
 Nx = 64
@@ -15,6 +16,7 @@ load('solver/rk12')
 savegraph('graph.png')
 
 setv('Msat', 800e3)
+setmask('Msat', ellipse())
 setv('Aex', 13e-12)
 setv('Ku1', -500)
 setv('anisU', [1, 0, 0])

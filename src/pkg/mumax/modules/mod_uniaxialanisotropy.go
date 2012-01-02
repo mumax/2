@@ -26,19 +26,18 @@ func LoadAnisUniaxial(e *Engine) {
 
 	Hanis := e.AddNewQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
 	ku1 := e.AddNewQuant("Ku1", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K1")
-	ku2 := e.AddNewQuant("Ku2", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K2")
 	anisU := e.AddNewQuant("anisU", VECTOR, MASK, Unit(""), "uniaxial anisotropy direction (unit vector)")
 
 	hfield := e.Quant("H")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_anis")
-	e.Depends("H_anis", "Ku1", "Ku2", "anisU", "MSat")
+	e.Depends("H_anis", "Ku1", "anisU", "MSat", "m")
 
-	Hanis.SetUpdater(&UniaxialAnisUpdater{e.Quant("m"), Hanis, ku1, ku2, anisU})
+	Hanis.SetUpdater(&UniaxialAnisUpdater{e.Quant("m"), Hanis, ku1, e.Quant("msat"), anisU})
 }
 
 type UniaxialAnisUpdater struct {
-	m, hanis, ku1, ku2, anisU *Quant
+	m, hanis, ku1, msat, anisU *Quant
 }
 
 func (u *UniaxialAnisUpdater) Update() {
@@ -46,15 +45,12 @@ func (u *UniaxialAnisUpdater) Update() {
 	m := u.m.Array()
 	ku1 := u.ku1.Array()
 	ku1mul := u.ku1.Multiplier()[0]
-	ku2 := u.ku2.Array()
-	ku2mul := u.ku2.Multiplier()[0]
 	anisU := u.anisU.Array()
 	anisUMul := u.anisU.Multiplier()
 	stream := u.hanis.Array().Stream
+	msat := u.msat
 
-	// TODO
-	msat := GetEngine().Quant("msat")
-	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, 2*ku1mul/(Mu0*msat.Scalar()), ku2, ku2mul, anisU, anisUMul, stream)
+	gpu.UniaxialAnisotropyAsync(hanis, m, ku1, msat.Array(), 2*ku1mul/(Mu0*msat.Multiplier()[0]), anisU, anisUMul, stream)
 
 	u.hanis.Array().Stream.Sync()
 }
