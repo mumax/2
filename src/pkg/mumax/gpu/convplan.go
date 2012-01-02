@@ -50,7 +50,6 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	// init fft
-	//	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
 	conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
 
 
@@ -59,13 +58,6 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
 
 	// init fftKern
-	//	for i, k := range kernel {
-	//		if k != nil {
-	//			Debug("ConvPlan.init", "alloc:", TensorIndexStr[i])
-	//			conv.fftKern[i].Init(1, []int{logicSize[0], logicSize[1], logicSize[2]/2 + 1}, DO_ALLOC) // not so aligned..
-	//		}
-	//	}
-
 	fftKernSize := FFTOutputSize(logicSize)
 	fftKernSize[2] = fftKernSize[2] / 2
 
@@ -108,17 +100,14 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
 	defer devIn.Free()
-	//	devOut := NewArray(1, []int{logic[0], logic[1], logic[2] + 2*NDevice()}) // +2 elements: R2C
 	devOut := NewArray(1, FFTOutputSize(logic))
 	defer devOut.Free()
 
 	for i, k := range kernel {
 		if k != nil {
-			//fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
 			scaleRealParts(conv.fftKern[i], devOut, 1/float32(FFTNormLogic(logic)))
-			//fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}
 
@@ -149,7 +138,7 @@ func scaleRealParts(dst, src *Array, scale float32) {
 	// ...however, we check that the imaginary parts are nearly zero,
 	// just to be sure we did not make a mistake during kernel creation.
 	Debug("FFT Kernel max imaginary part=", maximg)
-	if maximg*scale > 1e-5 { // TODO: is this reasonable? How about 
+	if maximg*scale > 1 { // TODO: is this reasonable?
 		Warn("FFT Kernel max imaginary part=", maximg)
 	}
 
@@ -161,25 +150,36 @@ func (conv *ConvPlan) Free() {
 }
 
 func (conv *ConvPlan) Convolve(in, out *Array) {
-	//Debug("Convolve")
 	fftIn := &conv.fftIn
 	fftKern := &conv.fftKern
 
-	// First transform all 3 components 
-	// (FFTPlan knows about zero padding etc)
-	for c := range in.Comp {
-		conv.fft.Forward(&in.Comp[c], &fftIn.Comp[c])
-	}
+	conv.forwardFFT(in)
 
 	// Point-wise kernel multiplication
 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
 		fftKern[XX], fftKern[YY], fftKern[ZZ],
 		fftKern[YZ], fftKern[XZ], fftKern[XY],
 		fftIn.Stream) // TODO: choose stream wisely
+	fftIn.Stream.Sync() // !!
 
-	// Backtransform
-	// (FFTPlan knows about zero padding etc)
+	conv.inverseFFT(out)
+}
+
+
+// 	INTERNAL
+// Sparse transform all 3 components.
+// (FFTPlan knows about zero padding etc)
+func (conv *ConvPlan) forwardFFT(in *Array){
 	for c := range in.Comp {
+		conv.fft.Forward(&in.Comp[c], &conv.fftIn.Comp[c])
+	}
+}
+
+// 	INTERNAL
+// Sparse backtransform
+// (FFTPlan knows about zero padding etc)
+func (conv *ConvPlan) inverseFFT(out *Array){
+	for c := range out.Comp {
 		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
 	}
 }

@@ -28,11 +28,10 @@ func LoadDemagExch(e *Engine) {
 	// dependencies
 	LoadHField(e)
 	LoadMagnetization(e)
-	e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
+	Aex := e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
 
 	m := e.Quant("m")
 	MSat := e.Quant("MSat")
-	Aex := e.Quant("Aex")
 
 	CPUONLY := true
 	// Size of all kernels (not FFT'd)
@@ -63,9 +62,8 @@ func LoadDemagExch(e *Engine) {
 	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
 
 	// demag+exchange field quant
-	e.AddNewQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
+	Hdex := e.AddNewQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	e.Depends("H_dex", "m", "~Kern_dex")
-	Hdex := e.Quant("H_dex")
 	Hdex.SetUpdater(newHDexUpdater(Hdex, m, fftKern))
 
 	// add H_dex to total H

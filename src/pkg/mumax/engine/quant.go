@@ -402,6 +402,7 @@ func (q *Quant) Invalidate() {
 
 // Verifies if the quantity's value makes sense.
 // Called, e.g., after the user set a value.
+// TODO: not used consistently
 func (q *Quant) Verify() {
 	if q.verifier != nil {
 		q.verifier(q)
