@@ -5,6 +5,7 @@ TESTFILES=\
 		  demag.py.out\
 		  engine.py.out\
 		  micromag.py.out\
+		  pointwise.py.out\
 		  #anisotropy.py.out\
 		  #Test.java.out\
 		  #api.py.out\
