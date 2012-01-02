@@ -154,7 +154,10 @@ func (a API) SetPointwise(quantity string, time float64, value []float64) {
 		q.SetUpdater(u)
 	}
 
-	pointwise := u.(*PointwiseUpdater)
+	pointwise, ok := u.(*PointwiseUpdater)
+	if !ok {
+		panic(InputErrF("Can not set time-dependent", quantity, ", it is already determined in an other way [", u, "]"))
+	}
 	SwapXYZ(value)
 	pointwise.Append(time, value) // swap!
 

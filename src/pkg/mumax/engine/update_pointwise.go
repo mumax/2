@@ -78,9 +78,7 @@ func (field *PointwiseUpdater) Update() {
 
 func (p *PointwiseUpdater) Append(time float64, value []float64) {
 	nComp := p.quant.NComp()
-	if len(value) != nComp {
-		panic(InputErrF(p.quant.Name(), "has", nComp, "components, but", len(value), "provided"))
-	}
+	checkComp(p.quant, len(value))
 	if len(p.points) > 0 {
 		if p.points[len(p.points)-1][0] > time {
 			panic(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time))
