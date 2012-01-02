@@ -51,7 +51,7 @@ func (s *EulerSolver) Step() {
 }
 
 func (s *EulerSolver) Dependencies() (children, parents []string) {
-	children = []string{"step"}
+	children = []string{"t", "step"}
 	parents = []string{"dt"}
 	return
 }

@@ -60,7 +60,7 @@ func LoadRK12(e *Engine) {
 
 // Declares this solver's special dependencies
 func (s *RK12Solver) Dependencies() (children, parents []string) {
-	children = []string{"dt", "step"}
+	children = []string{"dt", "step", "t"}
 	parents = []string{"dt", "mindt", "maxdt"}
 	for i := range s.error {
 		parents = append(parents, s.maxErr[i].Name())
