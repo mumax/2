@@ -15,7 +15,7 @@ var input chan Cmd
 // command to the scheduler
 type Cmd struct {
 	text   string      // text-based command
-	answer chan string // chan to send answer and close connection
+	response chan string // chan to send answer and close connection
 }
 
 // initialize the scheduler
@@ -25,5 +25,10 @@ func initSched() {
 
 // run the scheduler
 func runSched() {
-
+	for{
+		select{
+			case cmd := <- input:
+				cmd.response <- "OK:" + cmd.text
+		}
+	}
 }

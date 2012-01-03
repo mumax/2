@@ -30,7 +30,18 @@ func runNet() {
 	for {
 		conn, err3 := listener.AcceptTCP()
 		check(err3)
-		log("accepted", conn)
+		log("connected to", conn.RemoteAddr())
+		serveConn(conn)	
 	}
+}
 
+func serveConn(conn net.Conn){
+	line,_ := readLine(conn)
+	log("read", line)
+
+	resp := make(chan string)
+	input <- Cmd{line, resp}
+
+	conn.Write([]byte(<-resp))
+	conn.Close()
 }
