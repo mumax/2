@@ -7,7 +7,9 @@ package main
 
 // Worker node
 
-import ()
+import (
+	"fmt"
+)
 
 // Worker node
 type Node struct {
@@ -20,4 +22,12 @@ func NewNode(hostname string, NDev int) *Node {
 	n.hostname = hostname
 	n.devBusy = make([]bool, NDev)
 	return n
+}
+
+func(n*Node)String()string{
+	return fmt.Sprint(n.hostname, ": ", n.NDevice(), " GPUs")
+}
+
+func(n*Node)NDevice()int{
+	return len(n.devBusy)
 }
