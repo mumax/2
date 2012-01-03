@@ -5,24 +5,21 @@
 
 package main
 
-// Job entry
+// Implementation of "status" command
 
 import (
 	"fmt"
 )
 
-type Job struct {
-	file string
-	user *User
+func init() {
+	api["status"] = status
 }
 
-func NewJob(user *User, cmd string) *Job {
-	j := new(Job)
-	j.file = cmd
-	j.user = user
-	return j
-}
-
-func (j *Job) String() string {
-	return fmt.Sprint("[", j.user, "] ", j.file)
+// reports the queue status
+func status(user *User, args []string) string {
+	status := fmt.Sprint(len(queue), " Jobs queued\n")
+	for _, job := range queue {
+		status += fmt.Sprint(job, "\n")
+	}
+	return status
 }

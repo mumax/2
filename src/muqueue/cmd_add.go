@@ -7,12 +7,13 @@ package main
 
 // Implementation of "add" command
 
-import ("fmt")
+import (
+	"fmt"
+)
 
-func init(){
-	api["add"]=add
+func init() {
+	api["add"] = add
 }
-
 
 // adds a job
 func add(user *User, args []string) string {

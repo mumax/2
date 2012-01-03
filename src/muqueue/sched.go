@@ -13,14 +13,14 @@ import (
 
 // input from connections enters scheduler here
 var (
-	input   chan *Cmd                        = make(chan *Cmd)                        // takes input commands from user
-	donejob chan *Job                        = make(chan *Job)                        // finished jobs are returned here
-	queue   []*Job                           = make([]*Job, 0)                        // stores queued jobs
-	pending []*Job                           = make([]*Job, 0)                        // stores running jobs
-	nodes   []*Node                          = make([]*Node, 0)                       // stores compute nodes
+	input   chan *Cmd = make(chan *Cmd)  // takes input commands from user
+	donejob chan *Job = make(chan *Job)  // finished jobs are returned here
+	queue   []*Job    = make([]*Job, 0)  // stores queued jobs
+	pending []*Job    = make([]*Job, 0)  // stores running jobs
+	nodes   []*Node   = make([]*Node, 0) // stores compute nodes
 )
 
-var api     map[string]func(*User, []string)string = make(map[string]func(*User, []string)string) // available commands
+var api map[string]func(*User, []string) string = make(map[string]func(*User, []string) string) // available commands
 
 // command to the scheduler
 type Cmd struct {
@@ -60,16 +60,15 @@ func serveCommand(line string) (response string) {
 	args := split[2:]
 
 	f, ok := api[command]
-	if !ok{
+	if !ok {
 		options := ""
-		for k,_:=range api{
+		for k, _ := range api {
 			options += " " + k
 		}
 		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
 	}
 	return f(user, args)
 }
-
 
 func dispatchJob(job *Job) {
 
