@@ -25,7 +25,7 @@ func log(msg ...interface{}) {
 	fmt.Println(msg...)
 }
 
-func err(msg ...interface{}){
-		fmt.Fprintln(os.Stderr, msg...)
-		os.Exit(1)
+func err(msg ...interface{}) {
+	fmt.Fprintln(os.Stderr, msg...)
+	os.Exit(1)
 }

@@ -14,7 +14,7 @@ import (
 )
 
 func clientMain() {
-	if flag.NArg() == 0{
+	if flag.NArg() == 0 {
 		err("need command line argument")
 	}
 
@@ -29,9 +29,8 @@ func clientMain() {
 	log(string(resp))
 }
 
-
 // connects to the job server
-func dialServer()net.Conn{
+func dialServer() net.Conn {
 	const NET = "tcp"
 
 	raddr, err1 := net.ResolveTCPAddr(NET, *flagHost+*flagPort)

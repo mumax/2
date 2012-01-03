@@ -8,10 +8,8 @@ package main
 // Command parsing
 
 import (
-"io"
+	"io"
 )
-
-
 
 //// Blocks until all requested bytes are read.
 //type BlockingReader struct {

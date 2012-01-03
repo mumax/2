@@ -31,12 +31,12 @@ func runNet() {
 		conn, err3 := listener.AcceptTCP()
 		check(err3)
 		log("connected to", conn.RemoteAddr())
-		serveConn(conn)	
+		serveConn(conn)
 	}
 }
 
-func serveConn(conn net.Conn){
-	line,_ := readLine(conn)
+func serveConn(conn net.Conn) {
+	line, _ := readLine(conn)
 	log("read", line)
 
 	resp := make(chan string)
