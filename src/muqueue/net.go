@@ -40,7 +40,7 @@ func serveConn(conn net.Conn) {
 	log("read", line)
 
 	resp := make(chan string)
-	input <- Cmd{line, resp}
+	input <- &Cmd{line, resp}
 
 	conn.Write([]byte(<-resp))
 	conn.Close()

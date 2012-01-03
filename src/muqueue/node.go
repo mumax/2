@@ -9,6 +9,15 @@ package main
 
 import ()
 
+// Worker node
 type Node struct {
+	hostname string
 	devBusy []bool // GPU[i] in use?
+}
+
+func NewNode(hostname string, NDev int)*Node{
+	n:=new(Node)
+	n.hostname=hostname
+	n.devBusy=make([]bool, NDev)
+	return n
 }
