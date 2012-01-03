@@ -7,10 +7,16 @@ package main
 
 // Scheduler
 
-import ()
+import (
+	"fmt"
+)
 
 // input from connections enters scheduler here
-var input chan Cmd
+var (
+	input chan Cmd
+	jobs  []*Job
+	nodes []Node
+)
 
 // command to the scheduler
 type Cmd struct {
@@ -34,5 +40,7 @@ func runSched() {
 }
 
 func serveCommand(line string) (response string) {
-	return "got:" + line
+	log("got command ", line)
+	jobs = append(jobs, NewJob(line))
+	return fmt.Sprint("added job ", len(jobs), ": ", line, "\n")
 }
