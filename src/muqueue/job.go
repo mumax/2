@@ -11,10 +11,12 @@ import ()
 
 type Job struct {
 	file string
+	user *User
 }
 
-func NewJob(cmd string) *Job {
+func NewJob(user *User, cmd string) *Job {
 	j := new(Job)
 	j.file = cmd
+	j.user = user
 	return j
 }

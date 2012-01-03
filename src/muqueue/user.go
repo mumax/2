@@ -5,19 +5,15 @@
 
 package main
 
-// Worker node
+// User
 
 import ()
 
-// Worker node
-type Node struct {
-	hostname string
-	devBusy  []bool // GPU[i] in use?
+// User
+type User struct {
+	name string
 }
 
-func NewNode(hostname string, NDev int) *Node {
-	n := new(Node)
-	n.hostname = hostname
-	n.devBusy = make([]bool, NDev)
-	return n
+func GetUser(name string) *User {
+	return &User{name} // TODO: lookup in map
 }
