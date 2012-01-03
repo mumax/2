@@ -41,9 +41,9 @@ type FFTPlan1 struct {
 func (fft *FFTPlan1) init(dataSize, logicSize []int) {
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
-	if dataSize[0] != 1 || logicSize[0] != 1 {
-		panic(InputErr("fftplan1 works only in 2D"))
-	}
+//	if dataSize[0] != 1 || logicSize[0] != 1 {
+//		panic(InputErr("fftplan1 works only in 2D"))
+//	}
 	NDev := NDevice()
 	const nComp = 1
 
