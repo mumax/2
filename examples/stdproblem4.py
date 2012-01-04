@@ -48,7 +48,9 @@ setv('dt', 1e-15)   # restore time step, will adapt again
 
 # schedule some output
 
+# save magnetization snapshots in OMF text format every 20ps
 autosave("m", "omf", ["Text"], 20e-12)
+# save a table with time and the average magnetization every 10ps
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
 
 
