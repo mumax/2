@@ -10,7 +10,6 @@ package main
 import ()
 
 func serverMain() {
-	initSched()
 	go runSched() // start scheduler loop
 	runNet()      // loops forever
 }

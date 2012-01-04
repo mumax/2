@@ -33,7 +33,7 @@ func NewNode(hostname string, NDev int, loginCmd []string) *Node {
 var lastNodeId int
 
 func (n *Node) String() string {
-	return fmt.Sprint("node", n.id, "(", n.hostname, ")")
+	return fmt.Sprint("node", n.id, "(", n.hostname, ",", n.NDevice(), "GPU", ")")
 }
 
 func (n *Node) NDevice() int {
