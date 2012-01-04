@@ -20,24 +20,25 @@ func remote(user *User, args []string) string {
 		return remoteShow()
 	}
 	subcommand := args[0]
-	switch subcommand{
-		default: return "Unknown subcommand: " + subcommand
-		case "show": return remoteShow()
+	switch subcommand {
+	default:
+		return "Unknown subcommand: " + subcommand
+	case "show":
+		return remoteShow()
 		//case "add":return remoteAdd(args[1:])
 	}
-	return"<internal error>"
+	return "<internal error>"
 }
 
-
 // Show remote worker nodes
-func remoteShow()string{
-	info:=""
-	for _,n:=range nodes{
+func remoteShow() string {
+	info := ""
+	for _, n := range nodes {
 		info += fmt.Sprintln(n)
 	}
 	return info
 }
 
 //func remoteAdd(args[]string)string{
-	//nodes=append(nodes, 
+//nodes=append(nodes, 
 //}

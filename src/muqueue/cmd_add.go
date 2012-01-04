@@ -25,5 +25,6 @@ func add(user *User, args []string) string {
 		queue = append(queue, NewJob(user, file))
 		resp += fmt.Sprint("add ", file, " [#", len(queue), "]\n")
 	}
+	fillNodes()
 	return resp
 }

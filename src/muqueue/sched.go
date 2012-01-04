@@ -13,14 +13,14 @@ import (
 
 // input from connections enters scheduler here
 var (
-	input   chan *Cmd = make(chan *Cmd)  // takes input commands from user
-	queue   []*Job    = make([]*Job, 0)  // stores queued jobs
-	nodes   []*Node   = make([]*Node, 0) // stores compute nodes
+	input  chan *Cmd      = make(chan *Cmd)      // takes input commands from user
+	queue  []*Job         = make([]*Job, 0)      // stores queued jobs
+	finish chan JobStatus = make(chan JobStatus) // returns finished jobs
+	nodes  []*Node        = make([]*Node, 0)     // stores compute nodes
 )
 
 // available commands
 var api map[string]func(*User, []string) string = make(map[string]func(*User, []string) string) // available commands
-
 
 // initialize the scheduler
 func initSched() {
@@ -32,14 +32,19 @@ func initSched() {
 func runSched() {
 	fillNodes()
 	for {
-		cmd := <-input
-		cmd.response <- serveCommand(cmd.text) + "\n"
+		select {
+		case cmd := <-input:
+			cmd.response <- serveCommand(cmd.text) + "\n"
+		case done := <-finish:
+			undispatch(done.Job, done.exitStatus)
+			fillNodes()
+		}
 	}
 }
 
 // processes a command issued by user
 func serveCommand(line string) (response string) {
-	log("command ", line)
+	//log("command ", line)
 
 	split := strings.Split(line, " ")
 	user := GetUser(split[0])
@@ -57,10 +62,14 @@ func serveCommand(line string) (response string) {
 	return f(user, args)
 }
 
-
 // returns the next job to be run
 func nextJob() *Job {
-	return queue[0]
+	for _, job := range queue {
+		if job.status == QUEUED {
+			return job
+		}
+	}
+	return nil
 }
 
 // remove a job from the list
@@ -74,10 +83,6 @@ func rmJob(job *Job, inList []*Job) (outList []*Job) {
 	}
 	outList = append(inList[:i], inList[i+1:]...)
 	return
-}
-
-func fillNodes() {
-
 }
 
 // returns the first free node + device

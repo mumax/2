@@ -9,24 +9,33 @@ package main
 
 import (
 	"fmt"
+	"os"
 )
 
 type Job struct {
-	id int
-	file string
-	user *User
-	status int
+	id     int      // unique identifier
+	file   string   // file to be executed
+	user   *User    // job owner
+	status int      // queued, running, finished, failed
+	node   *Node    // node this job is running on
+	dev    []int    // devices this job is running on
+	err    os.Error // error message, if any
+}
+
+type JobStatus struct {
+	*Job
+	exitStatus os.Error
 }
 
 // job status
-const(
+const (
 	QUEUED = iota
 	RUNNING
 	FINISHED
 	FAILED
 )
 
-var statusStr map[int]string=map[int]string{QUEUED:"que ", RUNNING:"run ", FINISHED:"done", FAILED:"fail"}
+var statusStr map[int]string = map[int]string{QUEUED: "que ", RUNNING: "run ", FINISHED: "done", FAILED: "fail"}
 
 func NewJob(user *User, cmd string) *Job {
 	j := new(Job)
@@ -37,20 +46,25 @@ func NewJob(user *User, cmd string) *Job {
 }
 
 func (j *Job) String() string {
-	return fmt.Sprint("[", printID(j.id), "]", "[", statusStr[j.status], "]","[", j.user, "] ", j.file)
+	if j == nil {
+		return "<no job>"
+	}
+	err := ""
+	if j.err != nil {
+		err = " " + j.err.String()
+	}
+	return fmt.Sprint("[", printID(j.id), "]", "[", statusStr[j.status], "]", "[", j.user, "] ", j.file, err)
 }
 
-
-var(
+var (
 	lastID int
 )
 
-func nextID() int{
+func nextID() int {
 	lastID++
 	return lastID
 }
 
-func printID(id int)string{
+func printID(id int) string {
 	return fmt.Sprintf("%08x", id)
 }
-

@@ -24,10 +24,10 @@ func NewNode(hostname string, NDev int) *Node {
 	return n
 }
 
-func(n*Node)String()string{
+func (n *Node) String() string {
 	return fmt.Sprint(n.hostname)
 }
 
-func(n*Node)NDevice()int{
+func (n *Node) NDevice() int {
 	return len(n.devBusy)
 }
