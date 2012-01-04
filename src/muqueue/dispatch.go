@@ -13,7 +13,6 @@ import (
 
 // Starts the job
 func dispatch(job *Job, node *Node, dev []int) string {
-	log("dispatch", job, node, dev)
 
 	// set job status
 	job.status = RUNNING
@@ -31,16 +30,18 @@ func dispatch(job *Job, node *Node, dev []int) string {
 		devs += fmt.Sprint(",", i)
 	}
 	// insert -gpu=...
-	job.command = append(job.command[:1], append([]string{"-gpu="+devs}, job.command[1:]...)...)
-	ssh := node.loginCmd//[]string{"ssh", job.node.hostname}
+	job.command = append(job.command[:1], append([]string{"-gpu=" + devs}, job.command[1:]...)...)
+	ssh := node.loginCmd //[]string{"ssh", job.node.hostname}
 	job.command = append(ssh, job.command...)
+
+	log("dispatch", job, node, dev)
+
 	cmd := exec.Command(job.command[0], job.command[1:]...) // TODO: ssh
 	go func() {
-		log(job.command[0], job.command[1:]) // TODO: ssh
+		log(job.command[0], job.command[1:])
 		err := cmd.Run()
 		out, _ := cmd.CombinedOutput()
 		log(string(out))
-		//log("finished", job)
 		finish <- JobStatus{job, err}
 	}()
 
@@ -50,7 +51,6 @@ func dispatch(job *Job, node *Node, dev []int) string {
 
 // Reports the job done
 func undispatch(job *Job, exitStatus os.Error) {
-	log("finished", job, exitStatus)
 
 	// set job status
 	job.err = exitStatus
@@ -64,6 +64,7 @@ func undispatch(job *Job, exitStatus os.Error) {
 	for _, d := range job.dev {
 		job.node.devBusy[d] = false
 	}
+	log("finished", job)
 }
 
 // Starts the next job in the queue

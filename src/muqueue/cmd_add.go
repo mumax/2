@@ -23,5 +23,6 @@ func add(user *User, args []string) string {
 	job := NewJob(user, args)
 	queue = append(queue, job)
 	fillNodes()
+	log("added", job)
 	return fmt.Sprint("added ", job)
 }

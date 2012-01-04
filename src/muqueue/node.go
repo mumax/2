@@ -13,8 +13,9 @@ import (
 
 // Worker node
 type Node struct {
+	id       int
 	hostname string
-	loginCmd[]string
+	loginCmd []string
 	devBusy  []bool // GPU[i] in use?
 	// draining bool // stop using this node	
 }
@@ -24,11 +25,15 @@ func NewNode(hostname string, NDev int, loginCmd []string) *Node {
 	n.hostname = hostname
 	n.loginCmd = loginCmd
 	n.devBusy = make([]bool, NDev)
+	lastNodeId++
+	n.id = lastNodeId
 	return n
 }
 
+var lastNodeId int
+
 func (n *Node) String() string {
-	return fmt.Sprint(n.hostname)
+	return fmt.Sprint("node", n.id, "(", n.hostname, ")")
 }
 
 func (n *Node) NDevice() int {
