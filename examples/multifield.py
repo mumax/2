@@ -39,10 +39,15 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
+#relax
+
+setv('alpha', 1)    # high damping for relax
+run_until_smaller('maxtorque', 1e-3 * gets('gamma') * gets('msat'))
+setv('alpha', 0.02) # restore normal damping
+setv('t', 0)        # re-set time to 0 so output starts at 0
+setv('dt', 0.2e-12)
+
 # schedule output
-
-run(2e-9) #relax
-
 autosave("m", "omf", ["Text"], 20e-12)
 
 Hx = -24.6E-3 / mu0
@@ -50,7 +55,6 @@ Hy =   4.3E-3 / mu0
 Hz =   0      / mu0 
 setv('H_ext', [Hx, Hy, Hz])
 setv('alpha', 0.02)
-setv('dt', 0.2e-12)
 
 run(1e-9)
 
