@@ -13,13 +13,13 @@ import (
 )
 
 type Job struct {
-	id     int      // unique identifier
-	file   string   // file to be executed
-	user   *User    // job owner
-	status int      // queued, running, finished, failed
-	node   *Node    // node this job is running on
-	dev    []int    // devices this job is running on
-	err    os.Error // error message, if any
+	id      int      // unique identifier
+	command []string // command and args to be executed
+	user    *User    // job owner
+	status  int      // queued, running, finished, failed
+	node    *Node    // node this job is running on
+	dev     []int    // devices this job is running on
+	err     os.Error // error message, if any
 }
 
 type JobStatus struct {
@@ -37,9 +37,9 @@ const (
 
 var statusStr map[int]string = map[int]string{QUEUED: "que ", RUNNING: "run ", FINISHED: "done", FAILED: "fail"}
 
-func NewJob(user *User, cmd string) *Job {
+func NewJob(user *User, cmd []string) *Job {
 	j := new(Job)
-	j.file = cmd
+	j.command = cmd
 	j.user = user
 	j.id = nextID()
 	return j
@@ -51,9 +51,12 @@ func (j *Job) String() string {
 	}
 	err := ""
 	if j.err != nil {
-		err = " " + j.err.String()
+		err = j.err.String()
 	}
-	return fmt.Sprint("[", printID(j.id), "]", "[", statusStr[j.status], "]", "[", j.user, "] ", j.file, err)
+	return fmt.Sprint("[", printID(j.id), "]",
+		"[", statusStr[j.status], "]",
+		"[", j.user, "] ",
+		j.command, " ", err)
 }
 
 var (

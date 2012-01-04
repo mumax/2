@@ -30,11 +30,12 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	for i := 1; i < len(dev); i++ {
 		devs += fmt.Sprint(",", i)
 	}
-	cmd := exec.Command("mumax2", "-s", "-gpu="+devs, job.file) // TODO: ssh
+	job.command = append(job.command[:1], append([]string{"-gpu="+devs}, job.command[1:]...)...)
+	cmd := exec.Command(job.command[0], job.command[1:]...) // TODO: ssh
 	go func() {
-		log("mumax2", "-s", "-gpu="+devs, job.file)
+		log(job.command[0], job.command[1:]) // TODO: ssh
 		err := cmd.Run()
-		log("finished", job)
+		//log("finished", job)
 		finish <- JobStatus{job, err}
 	}()
 
@@ -44,7 +45,7 @@ func dispatch(job *Job, node *Node, dev []int) string {
 
 // Reports the job done
 func undispatch(job *Job, exitStatus os.Error) {
-	log("done:", job, exitStatus)
+	log("finished", job, exitStatus)
 
 	// set job status
 	job.err = exitStatus

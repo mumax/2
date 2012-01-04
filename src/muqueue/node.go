@@ -15,6 +15,7 @@ import (
 type Node struct {
 	hostname string
 	devBusy  []bool // GPU[i] in use?
+	// draining bool // stop using this node	
 }
 
 func NewNode(hostname string, NDev int) *Node {

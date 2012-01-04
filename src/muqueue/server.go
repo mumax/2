@@ -11,7 +11,6 @@ import ()
 
 func serverMain() {
 	initSched()
-	go runSched()
-	initNet()
-	runNet() // loops forever
+	go runSched() // start scheduler loop
+	runNet()      // loops forever
 }

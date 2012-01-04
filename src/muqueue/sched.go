@@ -9,6 +9,7 @@ package main
 
 import (
 	"strings"
+	"fmt"
 )
 
 // input from connections enters scheduler here
@@ -44,6 +45,16 @@ func runSched() {
 
 // processes a command issued by user
 func serveCommand(line string) (response string) {
+	// do not crash server on panic but report to user
+	defer func() {
+		err := recover()
+		if err != nil {
+			log(err)
+			response = fmt.Sprint(err)
+			return
+		}
+	}()
+
 	//log("command ", line)
 
 	split := strings.Split(line, " ")

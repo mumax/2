@@ -11,11 +11,6 @@ import (
 	"net"
 )
 
-// initialize the network front-end
-func initNet() {
-
-}
-
 // run the network front-end
 func runNet() {
 	const NET = "tcp"

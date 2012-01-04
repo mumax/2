@@ -18,13 +18,10 @@ func init() {
 // adds a job
 func add(user *User, args []string) string {
 	if len(args) == 0 {
-		return "Nothing specified, nothing added.\nMaybe you wanted to say 'add file'?"
+		return "Nothing specified, nothing added.\nMaybe you wanted to say 'add command'?"
 	}
-	resp := ""
-	for _, file := range args {
-		queue = append(queue, NewJob(user, file))
-		resp += fmt.Sprint("add ", file, " [#", len(queue), "]\n")
-	}
+	job := NewJob(user, args)
+	queue = append(queue, job)
 	fillNodes()
-	return resp
+	return fmt.Sprint("added ", job)
 }
