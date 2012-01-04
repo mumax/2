@@ -25,7 +25,7 @@ func NewNode(hostname string, NDev int) *Node {
 }
 
 func(n*Node)String()string{
-	return fmt.Sprint(n.hostname, ": ", n.NDevice(), " GPUs")
+	return fmt.Sprint(n.hostname)
 }
 
 func(n*Node)NDevice()int{

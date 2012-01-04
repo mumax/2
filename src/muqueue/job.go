@@ -12,17 +12,45 @@ import (
 )
 
 type Job struct {
+	id int
 	file string
 	user *User
+	status int
 }
+
+// job status
+const(
+	QUEUED = iota
+	RUNNING
+	FINISHED
+	FAILED
+)
+
+var statusStr map[int]string=map[int]string{QUEUED:"que ", RUNNING:"run ", FINISHED:"done", FAILED:"fail"}
 
 func NewJob(user *User, cmd string) *Job {
 	j := new(Job)
 	j.file = cmd
 	j.user = user
+	j.id = nextID()
 	return j
 }
 
 func (j *Job) String() string {
-	return fmt.Sprint("[", j.user, "] ", j.file)
+	return fmt.Sprint("[", printID(j.id), "]", "[", statusStr[j.status], "]","[", j.user, "] ", j.file)
 }
+
+
+var(
+	lastID int
+)
+
+func nextID() int{
+	lastID++
+	return lastID
+}
+
+func printID(id int)string{
+	return fmt.Sprintf("%08x", id)
+}
+

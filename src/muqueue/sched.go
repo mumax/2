@@ -14,19 +14,13 @@ import (
 // input from connections enters scheduler here
 var (
 	input   chan *Cmd = make(chan *Cmd)  // takes input commands from user
-	donejob chan *Job = make(chan *Job)  // finished jobs are returned here
 	queue   []*Job    = make([]*Job, 0)  // stores queued jobs
-	pending []*Job    = make([]*Job, 0)  // stores running jobs
 	nodes   []*Node   = make([]*Node, 0) // stores compute nodes
 )
 
+// available commands
 var api map[string]func(*User, []string) string = make(map[string]func(*User, []string) string) // available commands
 
-// command to the scheduler
-type Cmd struct {
-	text     string      // text-based command
-	response chan string // chan to send answer and close connection
-}
 
 // initialize the scheduler
 func initSched() {
@@ -36,17 +30,10 @@ func initSched() {
 
 // run the scheduler
 func runSched() {
-
 	fillNodes()
-
 	for {
-		select {
-		case cmd := <-input:
-			cmd.response <- serveCommand(cmd.text) + "\n"
-		case done := <-donejob:
-			rmJob(done, pending)
-			fillNodes()
-		}
+		cmd := <-input
+		cmd.response <- serveCommand(cmd.text) + "\n"
 	}
 }
 
@@ -70,9 +57,6 @@ func serveCommand(line string) (response string) {
 	return f(user, args)
 }
 
-func dispatchJob(job *Job) {
-
-}
 
 // returns the next job to be run
 func nextJob() *Job {

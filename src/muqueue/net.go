@@ -37,7 +37,7 @@ func runNet() {
 
 func serveConn(conn net.Conn) {
 	line, _ := readLine(conn)
-	log("read", line)
+	//log("read", line)
 
 	resp := make(chan string)
 	input <- &Cmd{line, resp}

@@ -17,7 +17,7 @@ func init() {
 
 // reports the queue status
 func status(user *User, args []string) string {
-	status := fmt.Sprint(len(queue), " Jobs queued\n")
+	status := fmt.Sprint(len(queue), " Jobs \n")
 	for _, job := range queue {
 		status += fmt.Sprint(job, "\n")
 	}
