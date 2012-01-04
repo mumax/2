@@ -26,7 +26,7 @@ var api map[string]func(*User, []string) string = make(map[string]func(*User, []
 // initialize the scheduler
 func initSched() {
 	// TODO: read from config
-	nodes = append(nodes, NewNode("localhost", 1))
+	nodes = append(nodes, NewNode("localhost", 1, []string{"ssh", "localhost"}))
 }
 
 // run the scheduler

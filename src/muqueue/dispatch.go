@@ -30,11 +30,16 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	for i := 1; i < len(dev); i++ {
 		devs += fmt.Sprint(",", i)
 	}
+	// insert -gpu=...
 	job.command = append(job.command[:1], append([]string{"-gpu="+devs}, job.command[1:]...)...)
+	ssh := node.loginCmd//[]string{"ssh", job.node.hostname}
+	job.command = append(ssh, job.command...)
 	cmd := exec.Command(job.command[0], job.command[1:]...) // TODO: ssh
 	go func() {
 		log(job.command[0], job.command[1:]) // TODO: ssh
 		err := cmd.Run()
+		out, _ := cmd.CombinedOutput()
+		log(string(out))
 		//log("finished", job)
 		finish <- JobStatus{job, err}
 	}()

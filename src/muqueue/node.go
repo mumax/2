@@ -14,13 +14,15 @@ import (
 // Worker node
 type Node struct {
 	hostname string
+	loginCmd[]string
 	devBusy  []bool // GPU[i] in use?
 	// draining bool // stop using this node	
 }
 
-func NewNode(hostname string, NDev int) *Node {
+func NewNode(hostname string, NDev int, loginCmd []string) *Node {
 	n := new(Node)
 	n.hostname = hostname
+	n.loginCmd = loginCmd
 	n.devBusy = make([]bool, NDev)
 	return n
 }
