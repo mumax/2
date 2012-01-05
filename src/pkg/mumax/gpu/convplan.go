@@ -90,7 +90,9 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	for i, k := range kernel {
 		if k != nil {
 			for _, e := range k.List {
-				if !IsReal(e){ BugF("K", TensorIndexStr[i], "=", e)}
+				if !IsReal(e) {
+					BugF("K", TensorIndexStr[i], "=", e)
+				}
 			}
 		}
 	}
