@@ -11,7 +11,6 @@ package frontend
 
 import (
 	. "mumax/common"
-	"fmt"
 	"io"
 	"os"
 	"exec"
@@ -23,7 +22,7 @@ import (
 func mkFifo(fname string) {
 	err := exec.Command("mkfifo", fname).Run()
 	if err != nil {
-		panic(IOErr(fmt.Sprintf("mkfifo", fname, "returned", err)))
+		panic(IOErrF("mkfifo", fname, "returned", err))
 	}
 }
 
