@@ -14,6 +14,7 @@ import (
 	. "mumax/common"
 	"mumax/host"
 	"rand"
+	"runtime"
 	//   "fmt"
 
 )
@@ -71,7 +72,7 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	conv.loadKernel(kernel)
-
+	runtime.GC()
 }
 
 // INTERNAL: Loads a convolution kernel.
@@ -221,5 +222,5 @@ func (conv *ConvPlan) SelfTest() {
 	if maxerr > 1e-3 {
 		panic(BugF("FFT self-test failed, max error:", maxerr, "\nPlease use a different grid size of FFT type."))
 	}
-
+	runtime.GC()
 }

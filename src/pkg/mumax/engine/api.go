@@ -454,7 +454,7 @@ func (a API) Debug_VerifyAll() {
 	}
 }
 
-func(a API)Debug_GC(){
+func (a API) Debug_GC() {
 	Log("GC")
 	runtime.GC()
 }
