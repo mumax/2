@@ -15,6 +15,7 @@ package engine
 
 import (
 	. "mumax/common"
+	"runtime"
 	"mumax/host"
 	"mumax/gpu"
 	"path"
@@ -451,6 +452,11 @@ func (a API) Debug_VerifyAll() {
 	for _, q := range e.quantity {
 		q.Verify()
 	}
+}
+
+func(a API)Debug_GC(){
+	Log("GC")
+	runtime.GC()
 }
 
 // DEBUG: start a timer with a given identifier tag
