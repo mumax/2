@@ -8,39 +8,16 @@ package main
 // Client main loop
 
 import (
-	"net"
-	"flag"
-	"io/ioutil"
+	"rpc"
+	"fmt"
 )
 
 func clientMain() {
-	if flag.NArg() == 0 {
-		err("need command line argument")
-	}
-
-	text := flag.Arg(0)
-	conn := dialServer()
-	check(conn.SetWriteTimeout(1))
-	_, err1 := conn.Write([]byte(text))
-	check(err1)
-
-	resp, err2 := ioutil.ReadAll(conn)
+	client, err := rpc.DialHTTP("tcp", "localhost:2527")
+	check(err)
+	args := []string{"hello"}
+	var resp string
+	err2 := client.Call("RPC.Call", args, &resp)
 	check(err2)
-	log(string(resp))
-}
-
-// connects to the job server
-func dialServer() net.Conn {
-	const NET = "tcp"
-
-	raddr, err1 := net.ResolveTCPAddr(NET, *flagHost+*flagPort)
-	check(err1)
-
-	laddr, err2 := net.ResolveTCPAddr(NET, "localhost:0")
-	check(err2)
-
-	conn, err3 := net.DialTCP(NET, laddr, raddr)
-	check(err3)
-	log("connected to", conn.RemoteAddr())
-	return conn
+	fmt.Println(resp)
 }
