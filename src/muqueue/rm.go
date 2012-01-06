@@ -23,10 +23,15 @@ func rm(user string, args []string) (resp string) {
 
 	count := 0
 	denied := 0
+	running:=0
 	for i := 0; i < len(queue); i++ {
 		job := queue[i]
-		if !(job.status == RUNNING) && match(job, args) { // TODO: kill if running
+		if  match(job, args) { // TODO: kill if running
 			if user == job.user {
+				if job.status == RUNNING{
+					running++ // do not remove running jobs
+					continue
+				}
 				resp += "\n" + job.String()
 				queue = rmJob(job, queue)
 				count++
@@ -41,6 +46,9 @@ func rm(user string, args []string) (resp string) {
 	resp = fmt.Sprint(head, resp)
 	if denied != 0 {
 		resp += fmt.Sprint("\ndid not remove ", denied, " jobs which you don't own")
+	}
+	if running != 0 {
+		resp += fmt.Sprint("\ndid not remove ", running, " jobs which are running")
 	}
 	return
 }
