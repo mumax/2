@@ -10,18 +10,24 @@ package main
 import (
 	"fmt"
 	"strings"
+	. "mumax/common"
 )
 
 func init() {
 	api["status"] = status
 }
 
-const STATLEN = 20 // show only this many que entries
+const MAXLEN = 20 // show only this many que entries
 
 // reports the queue status
 func status(user string, argz []string) string {
-	n := STATLEN
-	args, _ := parse(argz)
+	n := MAXLEN
+	args, flags := parse(argz, "n")
+
+	// -n overrides maximum number of shown entries
+	if max, ok:=flags["n"]; ok{
+		n = Atoi(max)
+	}
 
 	status := ""
 	count := 0
@@ -33,8 +39,8 @@ func status(user string, argz []string) string {
 			}
 		}
 	}
-	if count > STATLEN {
-		status += fmt.Sprint(count-STATLEN, " more...")
+	if count > n {
+		status += fmt.Sprint(count-n, " more...")
 	}
 	return fmt.Sprint(count, " jobs\n",status)
 }
