@@ -28,11 +28,12 @@ func add(user string, argz []string) string {
 
 	// replace command by full path
 	shortCommand := args[0]
-	command, err := exec.LookPath(shortCommand)
-	if err != nil {
-		command = path.Clean(shortCommand)
+	full, err := exec.LookPath(shortCommand)
+	if err == nil {
+		args[0] = path.Clean(full)
+	}else{
+		args[0] = shortCommand
 	}
-	args[0] = command
 
 	if nice, ok := flags["nice"]; ok {
 		job.nice = Atoi(nice)
