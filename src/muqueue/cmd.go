@@ -7,6 +7,6 @@ package main
 
 // command to the scheduler
 type Cmd struct {
-	text     string      // text-based command
+	text     []string    // text-based command
 	response chan string // chan to send answer and close connection
 }

@@ -11,29 +11,40 @@ import (
 	"rpc"
 	"net"
 	"http"
+	"fmt"
 	"os"
 )
 
+const PORT = ":2527"
+
 func serverMain() {
 	go runSched() // start scheduler loop
-	//runNet()      // loops forever
-	runRPC() // loops forever
+	runRPC()      // loops forever
 }
 
 func runRPC() {
 	RPC := new(RPC)
 	rpc.Register(RPC)
 	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", *flagPort)
+	l, e := net.Listen("tcp", PORT)
 	if e != nil {
 		err("listen error:", e)
 	}
+	log("Listening on port " + PORT)
 	http.Serve(l, nil)
 }
 
 type RPC int // dummy type
 
-func (r *RPC) Call(args []string, resp *string) os.Error {
-	*resp = "call " + args[0]
-	return nil
+func (r *RPC) Call(args []string, resp *string) (err os.Error) {
+	defer func() {
+		e := recover()
+		if e != nil {
+			err = os.NewError(fmt.Sprint(e))
+		}
+	}()
+	respChan := make(chan string)
+	input <- &Cmd{args, respChan}
+	*resp = <-respChan
+	return
 }

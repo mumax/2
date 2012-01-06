@@ -12,10 +12,9 @@ import (
 	"fmt"
 )
 
-func clientMain() {
-	client, err := rpc.DialHTTP("tcp", "localhost:2527")
+func clientMain(args []string) {
+	client, err := rpc.DialHTTP("tcp", "localhost"+PORT)
 	check(err)
-	args := []string{"hello"}
 	var resp string
 	err2 := client.Call("RPC.Call", args, &resp)
 	check(err2)

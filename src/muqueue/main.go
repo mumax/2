@@ -8,18 +8,26 @@ package main
 // Main program
 
 import (
-	"flag"
+	"os"
 )
 
-var flagServer *bool = flag.Bool("server", false, "Server mode")
-var flagHost *string = flag.String("host", "localhost", "Server address")
-var flagPort *string = flag.String("port", ":2527", "Network port")
-
 func main() {
-	flag.Parse()
-	if *flagServer {
-		serverMain()
-	} else {
-		clientMain()
+	if len(os.Args) == 1 {
+		help()
+		os.Exit(1)
 	}
+	args := os.Args[1:] // ommit program name
+
+	if args[0] == "server" {
+		serverMain()
+		return
+	} else {
+		clientMain(args)
+	}
+
+}
+
+func help() {
+	err("Usage:", os.Args[0], "<command>", "[<args>]", "\n",
+		"\nThe available commands are:")
 }

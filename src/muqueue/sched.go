@@ -8,7 +8,6 @@ package main
 // Scheduler
 
 import (
-	"strings"
 	"fmt"
 )
 
@@ -38,7 +37,7 @@ func runSched() {
 }
 
 // processes a command issued by user
-func serveCommand(line string) (response string) {
+func serveCommand(words []string) (response string) {
 	// do not crash server on panic but report to user
 	defer func() {
 		err := recover()
@@ -49,12 +48,8 @@ func serveCommand(line string) (response string) {
 		}
 	}()
 
-	//log("command ", line)
-
-	split := strings.Split(line, " ")
-	user := GetUser(split[0])
-	command := split[1]
-	args := split[2:]
+	command := words[0]
+	args := words[1:]
 
 	f, ok := api[command]
 	if !ok {
@@ -64,7 +59,7 @@ func serveCommand(line string) (response string) {
 		}
 		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
 	}
-	return f(user, args)
+	return f(&User{"-"}, args)
 }
 
 // returns the next job to be run
