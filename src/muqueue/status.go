@@ -9,17 +9,44 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func init() {
 	api["status"] = status
 }
 
+const STATLEN = 20 // show only this many que entries
+
 // reports the queue status
-func status(user string, args []string) string {
-	status := fmt.Sprint(len(queue), " Jobs \n")
-	for _, job := range queue {
-		status += fmt.Sprint(job, "\n")
+func status(user string, argz []string) string {
+	n := STATLEN
+	args, _ := parse(argz)
+
+	status := ""
+	count := 0
+	for i, job := range queue {
+		if match(job, args) {
+			count++
+			if i < n {
+				status += fmt.Sprint(job, "\n")
+			}
+		}
 	}
-	return status
+	if count > STATLEN {
+		status += fmt.Sprint(count-STATLEN, " more...")
+	}
+	return fmt.Sprint(count, " jobs\n",status)
+}
+
+func match(job *Job, regexp []string) bool {
+	if len(regexp) == 0 {
+		return true
+	}
+	for _, r := range regexp {
+		if strings.Contains(job.String(), r) {
+			return true
+		}
+	}
+	return false
 }

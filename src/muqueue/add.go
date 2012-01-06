@@ -23,13 +23,13 @@ func add(user string, argz []string) string {
 	}
 	args, flags := parse(argz)
 	job := NewJob(user, args)
-	if nice, ok := flags["nice"]; ok{
+	if nice, ok := flags["nice"]; ok {
 		job.nice = Atoi(nice)
 	}
-	if gpus, ok := flags["gpu"]; ok{
+	if gpus, ok := flags["gpu"]; ok {
 		job.ndev = Atoi(gpus)
 	}
-	if user, ok := flags["user"]; ok{
+	if user, ok := flags["user"]; ok {
 		job.user = user
 	}
 	queue = append(queue, job)
