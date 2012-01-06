@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	. "mumax/common"
 )
 
 func init() {
@@ -16,11 +17,18 @@ func init() {
 }
 
 // adds a job
-func add(user *User, args []string) string {
-	if len(args) == 0 {
+func add(user *User, argz []string) string {
+	if len(argz) == 0 {
 		return "Nothing specified, nothing added.\nMaybe you wanted to say 'add command'?"
 	}
+	args, flags := parse(argz)
 	job := NewJob(user, args)
+	if nice, ok := flags["nice"]; ok{
+		job.nice = Atoi(nice)
+	}
+	if gpus, ok := flags["gpu"]; ok{
+		job.ndev = Atoi(gpus)
+	}
 	queue = append(queue, job)
 	fillNodes()
 	//log("added", job)

@@ -20,6 +20,8 @@ type Job struct {
 	node    *Node    // node this job is running on
 	dev     []int    // devices this job is running on
 	err     os.Error // error message, if any
+	ndev int // number of requested devices
+	nice int // priority
 }
 
 type JobStatus struct {
@@ -42,6 +44,8 @@ func NewJob(user *User, cmd []string) *Job {
 	j.command = cmd
 	j.user = user
 	j.id = nextID()
+	j.ndev = 1 // default, may be overridden
+	j.nice = 2 // default, may be overridden
 	return j
 }
 
@@ -53,7 +57,9 @@ func (j *Job) String() string {
 	if j.err != nil {
 		err = j.err.String()
 	}
-	return fmt.Sprint("[", printID(j.id), "]",
+	return fmt.Sprint(printID(j.id), ":",
+		"[nice", j.nice, "]",
+		"[", j.ndev, "GPU]",
 		"[", statusStr[j.status], "]",
 		"[", j.user, "] ",
 		j.command, " ", err)

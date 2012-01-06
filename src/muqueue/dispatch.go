@@ -31,14 +31,13 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	}
 	// insert -gpu=...
 	job.command = append(job.command[:1], append([]string{"-gpu=" + devs}, job.command[1:]...)...)
-	ssh := node.loginCmd //[]string{"ssh", job.node.hostname}
+	ssh := node.loginCmd 
 	job.command = append(ssh, job.command...)
 
-	log("dispatch", job, node, dev)
 
-	cmd := exec.Command(job.command[0], job.command[1:]...) // TODO: ssh
+	cmd := exec.Command(job.command[0], job.command[1:]...) 
 	go func() {
-		log(job.command[0], job.command[1:])
+		log(job.command)
 		err := cmd.Run()
 		out, _ := cmd.CombinedOutput()
 		log(string(out))
@@ -64,7 +63,7 @@ func undispatch(job *Job, exitStatus os.Error) {
 	for _, d := range job.dev {
 		job.node.devBusy[d] = false
 	}
-	log("finished", job)
+	log(job)
 }
 
 // Starts the next job in the queue

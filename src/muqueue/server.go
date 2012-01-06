@@ -60,8 +60,6 @@ func serveCommand(words []string) (response string) {
 		err := recover()
 		if err != nil {
 			msg := fmt.Sprint(err, "\n", string(debug.Stack()))
-			//log(msg)
-			//log("recovered")
 			response = msg
 		}
 	}()

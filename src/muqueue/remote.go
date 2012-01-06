@@ -51,7 +51,7 @@ func remoteAdd(args []string) string {
 	login := args[2:]
 	node := NewNode(hostname, ndev, login)
 	nodes = append(nodes, node)
-	log("added node", node)
+	//log("added node", node)
 	fillNodes()
 	return "added node " + node.String()
 }
