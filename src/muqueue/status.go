@@ -25,7 +25,7 @@ func status(user string, argz []string) string {
 	args, flags := parse(argz, "n")
 
 	// -n overrides maximum number of shown entries
-	if max, ok:=flags["n"]; ok{
+	if max, ok := flags["n"]; ok {
 		n = Atoi(max)
 	}
 
@@ -42,7 +42,7 @@ func status(user string, argz []string) string {
 	if count > n {
 		status += fmt.Sprint(count-n, " more...")
 	}
-	return fmt.Sprint(count, " jobs\n",status)
+	return fmt.Sprint(count, " jobs\n", status)
 }
 
 func match(job *Job, regexp []string) bool {

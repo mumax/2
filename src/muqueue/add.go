@@ -8,8 +8,10 @@ package main
 // Implementation of "add" command
 
 import (
-	"fmt"
 	. "mumax/common"
+	"fmt"
+	"exec"
+	"path"
 )
 
 func init() {
@@ -21,8 +23,17 @@ func add(user string, argz []string) string {
 	if len(argz) == 0 {
 		return "Nothing specified, nothing added.\nMaybe you wanted to say 'add command'?"
 	}
-	args, flags := parse(argz)
+	args, flags := parse(argz, "nice", "gpu", "user")
 	job := NewJob(user, args)
+
+	// replace command by full path
+	shortCommand := args[0]
+	command, err := exec.LookPath(shortCommand)
+	if err != nil {
+		command = path.Clean(shortCommand)
+	}
+	args[0] = command
+
 	if nice, ok := flags["nice"]; ok {
 		job.nice = Atoi(nice)
 	}
