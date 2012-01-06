@@ -27,7 +27,7 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	// start command
 	devs := fmt.Sprint(dev[0])
 	for i := 1; i < len(dev); i++ {
-		devs += fmt.Sprint(",", i)
+		devs += fmt.Sprint(",", dev[i])
 	}
 	// insert -gpu=...
 	job.command = append(job.command[:1], append([]string{"-gpu=" + devs}, job.command[1:]...)...)
@@ -68,24 +68,24 @@ func undispatch(job *Job, exitStatus os.Error) {
 
 // Starts the next job in the queue
 func dispatchNext() string {
-	node, dev := freeDevice()
-	if node == nil {
-		return "No free device"
-	}
 	job := nextJob()
 	if job == nil {
 		return "No jobs in queue"
 	}
-	return dispatch(job, node, []int{dev})
+	node, dev := freeDevice(job)
+	if node == nil {
+		return "No free device"
+	}
+	return dispatch(job, node, dev)
 }
 
 func fillNodes() {
-	node, dev := freeDevice()
 	job := nextJob()
+	node, dev := freeDevice(job)
 	for node != nil && job != nil {
-		dispatch(job, node, []int{dev})
-		node, dev = freeDevice()
+		dispatch(job, node, dev)
 		job = nextJob()
+		node, dev = freeDevice(job)
 	}
 }
 

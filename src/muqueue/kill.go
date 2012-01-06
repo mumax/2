@@ -26,18 +26,18 @@ func kill(user string, args []string) (resp string) {
 			resp += "no such job: " + pid + "\n"
 			continue
 		}
-		if job.user != user{
+		if job.user != user {
 			resp += "kill job " + pid + ": permission denied\n"
 		}
-		if job.status != RUNNING{
+		if job.status != RUNNING {
 			resp += "job not running: " + pid + "\n"
 			continue
 		}
 		err := job.cmd.Process.Kill()
-		if err == nil{
+		if err == nil {
 			resp += "killed job " + job.String() + "\n"
-		}else{
-			resp += "kill job "	 + pid + ": " + err.String() + "\n"
+		} else {
+			resp += "kill job " + pid + ": " + err.String() + "\n"
 		}
 	}
 	return

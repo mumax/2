@@ -64,13 +64,33 @@ func rmJob(job *Job, inList []*Job) (outList []*Job) {
 	return
 }
 
-// returns the first free node + device
-func freeDevice() (node *Node, device int) {
+// finds a free node suited for the job.
+// in case of multiple GPUs, they should be
+// successive and aligned (to efficiently support GTX590s, e.g.)
+func freeDevice(job *Job) (node *Node, device []int) {
+	if job == nil {
+		return
+	}
+	ndev := job.ndev
+	device = make([]int, ndev)
 	for _, n := range nodes {
-		for d, busy := range n.devBusy {
+		for d := 0; d <= n.NDevice()-ndev; d++ {
+			if d%ndev != 0 {
+				continue
+			}
+			busy := false
+			j := 0
+			for i := d; i < d+ndev; i++ {
+				log("device[",j,"] =", i)
+				device[j] = i
+				if n.devBusy[i] {
+					busy = true
+				}
+				j++
+			}
 			if !busy {
 				node = n
-				device = d
+				log("device=", device)
 				return
 			}
 		}

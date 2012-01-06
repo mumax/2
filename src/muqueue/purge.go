@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 )
 
 func init() {
@@ -27,5 +28,6 @@ func purge(user string, args []string) string {
 			i--
 		}
 	}
+	runtime.GC()
 	return fmt.Sprint("purged ", count, " finished jobs from list")
 }
