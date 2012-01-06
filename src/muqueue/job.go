@@ -8,6 +8,7 @@ package main
 // Job entry
 
 import (
+	. "mumax/common"
 	"fmt"
 	"os"
 )
@@ -37,7 +38,10 @@ const (
 	FAILED
 )
 
-var statusStr map[int]string = map[int]string{QUEUED: "que ", RUNNING: "run ", DONE: "done", FAILED: "fail"}
+var statusStr map[int]string = map[int]string{QUEUED: "que ",
+	RUNNING: YELLOW + BOLD + "run " + RESET,
+	DONE:    GREEN + "done" + RESET,
+	FAILED:  RED + BOLD + "FAIL" + RESET}
 
 func NewJob(user string, cmd []string) *Job {
 	j := new(Job)
@@ -55,10 +59,27 @@ func (j *Job) String() string {
 	}
 	err := ""
 	if j.err != nil {
+		err = RED+BOLD+j.err.String()+RESET
+	}
+	return fmt.Sprint(printID(j.id),
+		" ", statusStr[j.status],
+		" ", j.user,
+		" nice", j.nice,
+		" ", j.ndev, "gpu ",
+		j.command, " ", err)
+		//append([]string{path.Base(j.command[0])}, j.command[1:]...), " ", err)
+}
+
+func (j *Job) LongString() string {
+	if j == nil {
+		return "<no job>"
+	}
+	err := ""
+	if j.err != nil {
 		err = j.err.String()
 	}
-	return fmt.Sprint(printID(j.id), ":",
-		"[nice", j.nice, "]",
+	return fmt.Sprint(printID(j.id), " ",
+		"nice", j.nice, "]",
 		"[", j.ndev, "GPU]",
 		"[", statusStr[j.status], "]",
 		"[", j.user, "] ",
@@ -78,6 +99,7 @@ func printID(id int) string {
 	return fmt.Sprintf("%08x", id)
 }
 
+// done or failed
 func (job *Job) Finished() bool {
 	return job.status == DONE || job.status == FAILED
 }

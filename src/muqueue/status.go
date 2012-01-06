@@ -50,7 +50,7 @@ func match(job *Job, regexp []string) bool {
 		return true
 	}
 	for _, r := range regexp {
-		if strings.Contains(job.String(), r) {
+		if strings.Contains(job.LongString(), r) {
 			return true
 		}
 	}

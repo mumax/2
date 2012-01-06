@@ -46,5 +46,5 @@ func add(user string, argz []string) string {
 	queue = append(queue, job)
 	fillNodes()
 	//log("added", job)
-	return fmt.Sprint("added ", job)
+	return fmt.Sprint(job)
 }
