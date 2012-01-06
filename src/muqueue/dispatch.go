@@ -31,11 +31,10 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	}
 	// insert -gpu=...
 	job.command = append(job.command[:1], append([]string{"-gpu=" + devs}, job.command[1:]...)...)
-	ssh := node.loginCmd 
+	ssh := node.loginCmd
 	job.command = append(ssh, job.command...)
 
-
-	cmd := exec.Command(job.command[0], job.command[1:]...) 
+	cmd := exec.Command(job.command[0], job.command[1:]...)
 	go func() {
 		log(job.command)
 		err := cmd.Run()
@@ -94,7 +93,7 @@ func init() {
 }
 
 // Manual dispatch
-func dispatchManual(user *User, args []string) string {
+func dispatchManual(user string, args []string) string {
 	if len(args) == 0 {
 		return dispatchNext()
 	}

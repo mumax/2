@@ -76,5 +76,5 @@ func serveCommand(words []string) (response string) {
 		}
 		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
 	}
-	return f(&User{user}, args)
+	return f(user, args)
 }

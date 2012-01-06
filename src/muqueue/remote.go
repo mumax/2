@@ -16,7 +16,7 @@ func init() {
 	api["remote"] = remote
 }
 
-func remote(user *User, args []string) string {
+func remote(user string, args []string) string {
 	if len(args) == 0 {
 		return remoteShow()
 	}

@@ -10,14 +10,14 @@ package main
 import ()
 
 // User
-type User struct {
-	name string
-}
-
-func GetUser(name string) *User {
-	return &User{name} // TODO: lookup in map
-}
-
-func (u *User) String() string {
-	return u.name
-}
+//type User struct {
+//	name string
+//}
+//
+//func GetUser(name string) *User {
+//	return &User{name} // TODO: lookup in map
+//}
+//
+//func (u *User) String() string {
+//	return u.name
+//}

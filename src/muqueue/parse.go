@@ -11,19 +11,20 @@ import (
 	"strings"
 )
 
-func parse(args []string, knownflags... string) (files []string, flags map[string]string){
+func parse(args []string, knownflags ...string) (files []string, flags map[string]string) {
 	flags = make(map[string]string)
-	for _,arg := range args{
-		if strings.HasPrefix(arg, "-"){
+	flagsdone := false
+	for _, arg := range args {
+		if !flagsdone && strings.HasPrefix(arg, "-") {
 			split := strings.Split(arg, "=")
-			key := strings.Trim(split[0],"-")
+			key := strings.Trim(split[0], "-")
 			value := split[1]
 			flags[key] = value
-		}else{
+		} else {
 			files = append(files, arg)
+			flagsdone = true
 		}
 	}
 
-	return 
+	return
 }
-

@@ -18,7 +18,7 @@ var (
 )
 
 // available commands
-var api map[string]func(*User, []string) string = make(map[string]func(*User, []string) string) // available commands
+var api map[string]func(string, []string) string = make(map[string]func(string, []string) string) // available commands
 
 // run the scheduler
 func runSched() {

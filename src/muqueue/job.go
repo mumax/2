@@ -15,13 +15,13 @@ import (
 type Job struct {
 	id      int      // unique identifier
 	command []string // command and args to be executed
-	user    *User    // job owner
+	user    string   // job owner
 	status  int      // queued, running, finished, failed
 	node    *Node    // node this job is running on
 	dev     []int    // devices this job is running on
 	err     os.Error // error message, if any
-	ndev int // number of requested devices
-	nice int // priority
+	ndev    int      // number of requested devices
+	nice    int      // priority
 }
 
 type JobStatus struct {
@@ -39,7 +39,7 @@ const (
 
 var statusStr map[int]string = map[int]string{QUEUED: "que ", RUNNING: "run ", FINISHED: "done", FAILED: "fail"}
 
-func NewJob(user *User, cmd []string) *Job {
+func NewJob(user string, cmd []string) *Job {
 	j := new(Job)
 	j.command = cmd
 	j.user = user
