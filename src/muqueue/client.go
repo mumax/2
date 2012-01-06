@@ -10,12 +10,15 @@ package main
 import (
 	"rpc"
 	"fmt"
+	"os"
 )
 
 func clientMain(args []string) {
 	client, err := rpc.DialHTTP("tcp", "localhost"+PORT)
 	check(err)
 	var resp string
+	user := os.Getenv("USER")
+	args = append([]string{user}, args...)
 	err2 := client.Call("RPC.Call", args, &resp)
 	check(err2)
 	fmt.Println(resp)

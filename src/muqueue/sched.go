@@ -7,9 +7,7 @@ package main
 
 // Scheduler
 
-import (
-	"fmt"
-)
+import ()
 
 // input from connections enters scheduler here
 var (
@@ -34,32 +32,6 @@ func runSched() {
 			fillNodes()
 		}
 	}
-}
-
-// processes a command issued by user
-func serveCommand(words []string) (response string) {
-	// do not crash server on panic but report to user
-	defer func() {
-		err := recover()
-		if err != nil {
-			log(err)
-			response = fmt.Sprint(err)
-			return
-		}
-	}()
-
-	command := words[0]
-	args := words[1:]
-
-	f, ok := api[command]
-	if !ok {
-		options := ""
-		for k, _ := range api {
-			options += " " + k
-		}
-		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
-	}
-	return f(&User{"-"}, args)
 }
 
 // returns the next job to be run

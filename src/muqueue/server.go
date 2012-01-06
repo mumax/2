@@ -12,6 +12,7 @@ import (
 	"net"
 	"http"
 	"fmt"
+	"runtime/debug"
 	"os"
 )
 
@@ -22,6 +23,7 @@ func serverMain() {
 	runRPC()      // loops forever
 }
 
+// run the rpc server
 func runRPC() {
 	RPC := new(RPC)
 	rpc.Register(RPC)
@@ -36,6 +38,8 @@ func runRPC() {
 
 type RPC int // dummy type
 
+// passes the command to the scheduler, who will
+// callback whenever he's ready.
 func (r *RPC) Call(args []string, resp *string) (err os.Error) {
 	defer func() {
 		e := recover()
@@ -47,4 +51,32 @@ func (r *RPC) Call(args []string, resp *string) (err os.Error) {
 	input <- &Cmd{args, respChan}
 	*resp = <-respChan
 	return
+}
+
+// called by scheduler when he's ready to serve the command
+// processes a command issued by user
+func serveCommand(words []string) (response string) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			msg := fmt.Sprint(err, "\n", string(debug.Stack()))
+			//log(msg)
+			//log("recovered")
+			response = msg
+		}
+	}()
+	log(words)
+	user := words[0]
+	command := words[1]
+	args := words[2:]
+
+	f, ok := api[command]
+	if !ok {
+		options := ""
+		for k, _ := range api {
+			options += " " + k
+		}
+		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
+	}
+	return f(&User{user}, args)
 }
