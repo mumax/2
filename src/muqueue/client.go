@@ -35,7 +35,7 @@ func clientMain(args []string) {
 	args = append([]string{user}, args...)
 	err2 := client.Call("RPC.Call", args, &resp)
 	check(err2)
-	fmt.Println(resp)
+	fmt.Print(resp)
 }
 
 func ReadLink(file string) (fullpath string) {

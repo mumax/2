@@ -41,7 +41,7 @@ const (
 var statusStr map[int]string = map[int]string{QUEUED: "que ",
 	RUNNING: YELLOW + BOLD + "run " + RESET,
 	DONE:    GREEN + "done" + RESET,
-	FAILED:  RED + BOLD + "FAIL" + RESET}
+	FAILED:  RED + BOLD + "fail" + RESET}
 
 func NewJob(user string, cmd []string) *Job {
 	j := new(Job)
@@ -59,7 +59,7 @@ func (j *Job) String() string {
 	}
 	err := ""
 	if j.err != nil {
-		err = RED+BOLD+j.err.String()+RESET
+		err = RED + BOLD + j.err.String() + RESET
 	}
 	return fmt.Sprint(printID(j.id),
 		" ", statusStr[j.status],
@@ -67,7 +67,7 @@ func (j *Job) String() string {
 		" nice", j.nice,
 		" ", j.ndev, "gpu ",
 		j.command, " ", err)
-		//append([]string{path.Base(j.command[0])}, j.command[1:]...), " ", err)
+	//append([]string{path.Base(j.command[0])}, j.command[1:]...), " ", err)
 }
 
 func (j *Job) LongString() string {
@@ -96,7 +96,7 @@ func nextID() int {
 }
 
 func printID(id int) string {
-	return fmt.Sprintf("%08x", id)
+	return fmt.Sprintf("%08d", id)
 }
 
 // done or failed

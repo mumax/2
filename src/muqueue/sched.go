@@ -9,7 +9,7 @@ package main
 
 import (
 	. "mumax/common"
-	)
+)
 
 // input from connections enters scheduler here
 var (
@@ -55,7 +55,7 @@ func rmJob(job *Job, inList []*Job) (outList []*Job) {
 			break
 		}
 	}
-	Assert(i!=len(inList))
+	Assert(i != len(inList))
 	if i == len(inList)-1 {
 		outList = inList[:i]
 	} else {
