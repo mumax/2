@@ -23,12 +23,12 @@ func rm(user string, args []string) (resp string) {
 
 	count := 0
 	denied := 0
-	running:=0
+	running := 0
 	for i := 0; i < len(queue); i++ {
 		job := queue[i]
-		if  match(job, args) { // TODO: kill if running
+		if match(job, args) { // TODO: kill if running
 			if user == job.user {
-				if job.status == RUNNING{
+				if job.status == RUNNING {
 					running++ // do not remove running jobs
 					continue
 				}

@@ -34,11 +34,11 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	ssh := node.loginCmd
 	job.command = append(ssh, job.command...)
 
-	cmd := exec.Command(job.command[0], job.command[1:]...)
+	job.cmd = exec.Command(job.command[0], job.command[1:]...)
 	go func() {
 		log(job.command)
-		err := cmd.Run()
-		out, _ := cmd.CombinedOutput()
+		err := job.cmd.Run()
+		out, _ := job.cmd.CombinedOutput()
 		log(string(out))
 		finish <- JobStatus{job, err}
 	}()
@@ -52,6 +52,7 @@ func undispatch(job *Job, exitStatus os.Error) {
 
 	// set job status
 	job.err = exitStatus
+	job.cmd = nil // allow GC
 	if exitStatus == nil {
 		job.status = DONE
 	} else {

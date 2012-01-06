@@ -31,7 +31,7 @@ func add(user string, argz []string) string {
 	full, err := exec.LookPath(shortCommand)
 	if err == nil {
 		args[0] = path.Clean(full)
-	}else{
+	} else {
 		args[0] = shortCommand
 	}
 

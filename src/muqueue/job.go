@@ -9,20 +9,22 @@ package main
 
 import (
 	. "mumax/common"
+	"exec"
 	"fmt"
 	"os"
 )
 
 type Job struct {
-	id      int      // unique identifier
-	command []string // command and args to be executed
-	user    string   // job owner
-	status  int      // queued, running, finished, failed
-	node    *Node    // node this job is running on
-	dev     []int    // devices this job is running on
-	err     os.Error // error message, if any
-	ndev    int      // number of requested devices
-	nice    int      // priority
+	id      int       // unique identifier
+	command []string  // command and args to be executed
+	user    string    // job owner
+	status  int       // queued, running, finished, failed
+	node    *Node     // node this job is running on
+	dev     []int     // devices this job is running on
+	err     os.Error  // error message, if any
+	ndev    int       // number of requested devices
+	nice    int       // priority
+	cmd     *exec.Cmd // command that is running this job
 }
 
 type JobStatus struct {
