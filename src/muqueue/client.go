@@ -9,6 +9,7 @@ package main
 
 import (
 	. "mumax/common"
+	"strings"
 	"rpc"
 	"fmt"
 	"os"
@@ -35,9 +36,10 @@ func clientMain(args []string) {
 	args = append([]string{user}, args...)
 	err2 := client.Call("RPC.Call", args, &resp)
 	check(err2)
-	fmt.Print(resp)
+	fmt.Println(strings.Trim(resp, "\n"))
 }
 
+// return full path of file
 func ReadLink(file string) (fullpath string) {
 	if path.IsAbs(file) {
 		return file

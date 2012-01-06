@@ -81,7 +81,6 @@ func freeDevice(job *Job) (node *Node, device []int) {
 			busy := false
 			j := 0
 			for i := d; i < d+ndev; i++ {
-				log("device[",j,"] =", i)
 				device[j] = i
 				if n.devBusy[i] {
 					busy = true
@@ -90,7 +89,6 @@ func freeDevice(job *Job) (node *Node, device []int) {
 			}
 			if !busy {
 				node = n
-				log("device=", device)
 				return
 			}
 		}
