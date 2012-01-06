@@ -11,14 +11,11 @@ import ()
 
 // input from connections enters scheduler here
 var (
-	input  chan *Cmd      = make(chan *Cmd)       // takes input commands from user
-	queue  []*Job         = make([]*Job, 0)       // stores queued and running jobs
-	done   []*Job         = make([]*Job, NRECENT) // stores the last few finished jobs
-	finish chan JobStatus = make(chan JobStatus)  // returns finished jobs
-	nodes  []*Node        = make([]*Node, 0)      // stores compute nodes
+	input  chan *Cmd      = make(chan *Cmd)      // takes input commands from user
+	queue  []*Job         = make([]*Job, 0)      // stores queued and running jobs
+	finish chan JobStatus = make(chan JobStatus) // returns finished jobs
+	nodes  []*Node        = make([]*Node, 0)     // stores compute nodes
 )
-
-const NRECENT = 32
 
 // available commands
 var api map[string]func(string, []string) string = make(map[string]func(string, []string) string) // available commands
@@ -56,7 +53,11 @@ func rmJob(job *Job, inList []*Job) (outList []*Job) {
 			break
 		}
 	}
-	outList = append(inList[:i], inList[i+1:]...)
+	if i == len(inList)-1 {
+		outList = inList[:i]
+	} else {
+		outList = append(inList[:i], inList[i+1:]...)
+	}
 	return
 }
 

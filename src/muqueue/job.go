@@ -33,11 +33,11 @@ type JobStatus struct {
 const (
 	QUEUED = iota
 	RUNNING
-	FINISHED
+	DONE
 	FAILED
 )
 
-var statusStr map[int]string = map[int]string{QUEUED: "que ", RUNNING: "run ", FINISHED: "done", FAILED: "fail"}
+var statusStr map[int]string = map[int]string{QUEUED: "que ", RUNNING: "run ", DONE: "done", FAILED: "fail"}
 
 func NewJob(user string, cmd []string) *Job {
 	j := new(Job)
@@ -76,4 +76,8 @@ func nextID() int {
 
 func printID(id int) string {
 	return fmt.Sprintf("%08x", id)
+}
+
+func (job *Job) Finished() bool {
+	return job.status == DONE || job.status == FAILED
 }

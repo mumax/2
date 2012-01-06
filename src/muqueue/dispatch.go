@@ -53,7 +53,7 @@ func undispatch(job *Job, exitStatus os.Error) {
 	// set job status
 	job.err = exitStatus
 	if exitStatus == nil {
-		job.status = FINISHED
+		job.status = DONE
 	} else {
 		job.status = FAILED
 	}
