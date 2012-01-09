@@ -12,15 +12,19 @@ import (
 	"net"
 	"http"
 	"fmt"
-	"runtime/debug"
 	"os"
+	"runtime/debug"
+	"strings"
 )
 
 const PORT = ":2527"
 
 func serverMain() {
 	go runSched() // start scheduler loop
-	runRPC()      // loops forever
+	if len(os.Args) >= 3 {
+		runConfig(os.Args[2]) // read commands from config file first
+	}
+	runRPC() // loops forever
 }
 
 // run the rpc server
@@ -77,4 +81,14 @@ func serveCommand(words []string) (response string) {
 		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
 	}
 	return f(GetUser(user), args)
+}
+
+func runConfig(file string) {
+	log("reading", file)
+	in, err := os.Open(file)
+	check(err)
+	for line, eof := ReadLine(in); eof == false; line, eof = ReadLine(in) {
+		words := strings.Split(line, " ")
+		serveCommand(append([]string{"server"}, words...))
+	}
 }

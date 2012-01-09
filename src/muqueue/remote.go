@@ -44,12 +44,14 @@ func remoteShow() string {
 
 func remoteAdd(args []string) string {
 	hostname := args[0]
-	ndev, err := strconv.Atoi(args[1])
+	gpus := args[1]
+	ndev, err := strconv.Atoi(gpus)
 	if err != nil {
 		return err.String()
 	}
-	login := args[2:]
-	node := NewNode(hostname, ndev, login)
+	group := args[2]
+	login := args[3:]
+	node := NewNode(hostname, ndev, group, login)
 	nodes = append(nodes, node)
 	//log("added node", node)
 	fillNodes()

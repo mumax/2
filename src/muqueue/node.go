@@ -21,9 +21,10 @@ type Node struct {
 	// draining bool // stop using this node	
 }
 
-func NewNode(hostname string, NDev int, loginCmd []string) *Node {
+func NewNode(hostname string, NDev int, group string, loginCmd []string) *Node {
 	n := new(Node)
 	n.hostname = hostname
+	n.group = group
 	n.loginCmd = loginCmd
 	n.devBusy = make([]bool, NDev)
 	lastNodeId++
@@ -34,7 +35,7 @@ func NewNode(hostname string, NDev int, loginCmd []string) *Node {
 var lastNodeId int
 
 func (n *Node) String() string {
-	return fmt.Sprint("node", n.id, "(", n.hostname, ",", n.NDevice(), "GPU", ")")
+	return fmt.Sprint("node", n.id, "(", n.hostname, ",", n.NDevice(), "GPU", " "+n.group, ")")
 }
 
 func (n *Node) NDevice() int {

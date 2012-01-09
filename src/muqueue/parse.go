@@ -11,6 +11,9 @@ import (
 	"strings"
 )
 
+// parse arguments into flags and files.
+// flags begin with -
+// after the first file, no more arguments can be specified.
 func parse(args []string, knownflags ...string) (files []string, flags map[string]string) {
 	flags = make(map[string]string)
 	flagsdone := false
