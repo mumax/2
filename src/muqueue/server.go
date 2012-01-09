@@ -27,7 +27,7 @@ func serverMain() {
 	AddUser("root", "-", 0) // add super user
 
 	if len(os.Args) >= 3 {
-		runConfig(os.Args[2]) // read commands from config file first
+		runFile(os.Args[2]) // read commands from config file first
 	}
 
 	do_recover = true // now that the config was read, recover errors
@@ -95,12 +95,14 @@ func serveCommand(words []string) (response string) {
 }
 
 // reads the file and executes the commands
-func runConfig(file string) {
+func runFile(file string) {
 	log("reading", file)
 	in, err := os.Open(file)
 	check(err)
 	for line, eof := ReadLine(in); eof == false; line, eof = ReadLine(in) {
-		if strings.HasPrefix(line, "#"){continue}
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
 		words := strings.Split(line, " ")
 		ret := serveCommand(append([]string{"root"}, words...))
 		fmt.Println(ret)

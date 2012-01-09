@@ -23,7 +23,7 @@ func add(user *User, argz []string) string {
 	if len(argz) == 0 {
 		return "Nothing specified, nothing added.\nMaybe you wanted to say 'add command'?"
 	}
-	args, flags := parse(argz, "nice", "gpu", "user")
+	args, flags := parse(argz, "nice", "gpus", "user")
 	job := NewJob(user, args)
 
 	// replace command by full path
@@ -38,7 +38,7 @@ func add(user *User, argz []string) string {
 	if nice, ok := flags["nice"]; ok {
 		job.nice = Atoi(nice)
 	}
-	if gpus, ok := flags["gpu"]; ok {
+	if gpus, ok := flags["gpus"]; ok {
 		job.ndev = Atoi(gpus)
 	}
 	if username, ok := flags["user"]; ok {
