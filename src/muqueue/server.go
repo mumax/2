@@ -94,11 +94,13 @@ func serveCommand(words []string) (response string) {
 	return f(GetUser(username), args)
 }
 
+// reads the file and executes the commands
 func runConfig(file string) {
 	log("reading", file)
 	in, err := os.Open(file)
 	check(err)
 	for line, eof := ReadLine(in); eof == false; line, eof = ReadLine(in) {
+		if strings.HasPrefix(line, "#"){continue}
 		words := strings.Split(line, " ")
 		ret := serveCommand(append([]string{"root"}, words...))
 		fmt.Println(ret)
