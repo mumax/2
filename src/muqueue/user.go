@@ -7,15 +7,22 @@ package main
 
 // User
 
-import ()
+import (
+	"fmt"
+)
 
 // User
 type User struct {
-	name  string
-	group string
+	name  string // username
+	group string // user's group
+	share int    // user's share (number of GPUs)
 }
 
 var users map[string]*User = make(map[string]*User)
+
+func AddUser(name, group string, share int) {
+	users[name] = &User{name, group, share}
+}
 
 func GetUser(name string) *User {
 	if user, ok := users[name]; ok {
@@ -27,4 +34,8 @@ func GetUser(name string) *User {
 
 func (u *User) String() string {
 	return u.name
+}
+
+func (u *User) LongString() string {
+	return fmt.Sprint(u.name, " group:", u.group, " share:", u.share, "GPUs")
 }

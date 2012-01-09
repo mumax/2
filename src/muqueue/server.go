@@ -19,11 +19,19 @@ import (
 
 const PORT = ":2527"
 
+var do_recover bool = false // server should recover from errors?
+
 func serverMain() {
 	go runSched() // start scheduler loop
+
+	AddUser("root", "-", 0) // add super user
+
 	if len(os.Args) >= 3 {
 		runConfig(os.Args[2]) // read commands from config file first
 	}
+
+	do_recover = true // now that the config was read, recover errors
+
 	runRPC() // loops forever
 }
 
@@ -65,10 +73,13 @@ func serveCommand(words []string) (response string) {
 		if err != nil {
 			msg := fmt.Sprint(err, "\n", string(debug.Stack()))
 			response = msg
+			if !do_recover {
+				panic(err)
+			}
 		}
 	}()
 	log(words)
-	user := words[0]
+	username := words[0]
 	command := words[1]
 	args := words[2:]
 
@@ -80,7 +91,7 @@ func serveCommand(words []string) (response string) {
 		}
 		return "Not a valid command: " + command + "\nDid you mean one of these?\n" + options
 	}
-	return f(GetUser(user), args)
+	return f(GetUser(username), args)
 }
 
 func runConfig(file string) {
@@ -89,6 +100,7 @@ func runConfig(file string) {
 	check(err)
 	for line, eof := ReadLine(in); eof == false; line, eof = ReadLine(in) {
 		words := strings.Split(line, " ")
-		serveCommand(append([]string{"server"}, words...))
+		ret := serveCommand(append([]string{"root"}, words...))
+		fmt.Println(ret)
 	}
 }
