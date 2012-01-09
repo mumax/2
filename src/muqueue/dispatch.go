@@ -6,6 +6,7 @@
 package main
 
 import (
+	. "mumax/common"
 	"fmt"
 	"exec"
 	"os"
@@ -27,6 +28,7 @@ func dispatch(job *Job, node *Node, dev []int) string {
 	// start command
 	devs := fmt.Sprint(dev[0])
 	for i := 1; i < len(dev); i++ {
+		Assert(!node.devBusy[dev[i]])
 		devs += fmt.Sprint(",", dev[i])
 	}
 	// insert -gpu=...
@@ -67,38 +69,28 @@ func undispatch(job *Job, exitStatus os.Error) {
 }
 
 // Starts the next job in the queue
-func dispatchNext() string {
-	job := nextJob()
-	if job == nil {
-		return "No jobs in queue"
-	}
-	node, dev := freeDevice(job)
-	if node == nil {
-		return "No free device"
-	}
-	return dispatch(job, node, dev)
-}
+//func dispatchNext() string {
+//	job := nextJob()
+//	if job == nil {
+//		return "No jobs in queue"
+//	}
+//	node, dev := freeDevice(job)
+//	if node == nil {
+//		return "No free device"
+//	}
+//	return dispatch(job, node, dev)
+//}
 
-func fillNodes() {
-	job := nextJob()
-	node, dev := freeDevice(job)
-	for node != nil && job != nil {
-		dispatch(job, node, dev)
-		job = nextJob()
-		node, dev = freeDevice(job)
-	}
-}
-
-func init() {
-	api["dispatch"] = dispatchManual
-}
+//func init() {
+//	api["dispatch"] = dispatchManual
+//}
 
 // Manual dispatch
-func dispatchManual(user *User, args []string) string {
-	if len(args) == 0 {
-		return dispatchNext()
-	}
-
-	resp := ""
-	return resp
-}
+//func dispatchManual(user *User, args []string) string {
+//	if len(args) == 0 {
+//		return dispatchNext()
+//	}
+//
+//	resp := ""
+//	return resp
+//}

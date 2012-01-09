@@ -88,6 +88,10 @@ func (j *Job) LongString() string {
 		j.command, " ", err)
 }
 
+func (job *Job) Group() string {
+	return job.user.group
+}
+
 var (
 	lastID int
 )

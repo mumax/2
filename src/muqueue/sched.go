@@ -7,9 +7,7 @@ package main
 
 // Scheduler
 
-import (
-	. "mumax/common"
-)
+import ()
 
 // input from connections enters scheduler here
 var (
@@ -46,52 +44,115 @@ func nextJob() *Job {
 	return nil
 }
 
-// remove a job from the list
-func rmJob(job *Job, inList []*Job) (outList []*Job) {
-	// find index
-	i := 0
-	for ; i < len(inList); i++ {
-		if inList[i] == job {
-			break
+func fillNodes() {
+
+	for _, node := range nodes {
+		if node.Busy() {
+			continue
+		}
+
+		ok := true
+		for ok { // as long as we could start a job, try one more
+			ok = false
+
+			// find the job with highest priority for this node
+			var bestjob *Job
+			// find a job to start comparing priorities to
+			for _, job := range queue {
+				if job.status == QUEUED {
+					bestjob = job
+					break
+				}
+			}
+			if bestjob == nil {
+				break
+			}
+
+			for _, job := range queue {
+				if job.status != QUEUED {
+					continue
+				}
+				// first select on priority
+				if job.nice < bestjob.nice {
+					bestjob = job
+					continue
+				}
+				// then prefer a user of this node's group
+				if job.Group() == node.group && bestjob.Group() != node.group {
+					bestjob = job
+					continue
+				}
+				// TODO: then select on share
+			}
+
+			// now find a device on the node
+			devices := freeDevice(bestjob, node)
+			if devices != nil {
+				dispatch(bestjob, node, devices)
+				ok = true
+			} else {
+				log("job ", bestjob, " is stalling ", node)
+			}
 		}
 	}
-	Assert(i != len(inList))
-	if i == len(inList)-1 {
-		outList = inList[:i]
-	} else {
-		outList = append(inList[:i], inList[i+1:]...)
-	}
-	return
 }
 
 // finds a free node suited for the job.
 // in case of multiple GPUs, they should be
 // successive and aligned (to efficiently support GTX590s, e.g.)
-func freeDevice(job *Job) (node *Node, device []int) {
+func freeDevice(job *Job, n *Node) []int {
 	if job == nil {
-		return
+		return nil
 	}
 	ndev := job.ndev
-	device = make([]int, ndev)
-	for _, n := range nodes {
-		for d := 0; d <= n.NDevice()-ndev; d++ {
-			if d%ndev != 0 {
-				continue
+	device := make([]int, ndev)
+	for d := 0; d <= n.NDevice()-ndev; d++ {
+		if d%ndev != 0 {
+			continue
+		}
+		busy := false
+		j := 0
+		for i := d; i < d+ndev; i++ {
+			device[j] = i
+			if n.devBusy[i] {
+				busy = true
 			}
-			busy := false
-			j := 0
-			for i := d; i < d+ndev; i++ {
-				device[j] = i
-				if n.devBusy[i] {
-					busy = true
-				}
-				j++
-			}
-			if !busy {
-				node = n
-				return
-			}
+			j++
+		}
+		if !busy {
+			return device
 		}
 	}
-	return // nil,0 : nothing free
+	return nil
 }
+// finds a free node suited for the job.
+// in case of multiple GPUs, they should be
+// successive and aligned (to efficiently support GTX590s, e.g.)
+//func freeDevice(job *Job) (node *Node, device []int) {
+//	if job == nil {
+//		return
+//	}
+//	ndev := job.ndev
+//	device = make([]int, ndev)
+//	for _, n := range nodes {
+//		for d := 0; d <= n.NDevice()-ndev; d++ {
+//			if d%ndev != 0 {
+//				continue
+//			}
+//			busy := false
+//			j := 0
+//			for i := d; i < d+ndev; i++ {
+//				device[j] = i
+//				if n.devBusy[i] {
+//					busy = true
+//				}
+//				j++
+//			}
+//			if !busy {
+//				node = n
+//				return
+//			}
+//		}
+//	}
+//	return // nil,0 : nothing free
+//}

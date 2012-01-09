@@ -41,3 +41,14 @@ func (n *Node) String() string {
 func (n *Node) NDevice() int {
 	return len(n.devBusy)
 }
+
+// returns if the node is completely busy
+// (not a single device free)
+func (n *Node) Busy() bool {
+	for _, busy := range n.devBusy {
+		if !busy {
+			return false
+		}
+	}
+	return true
+}

@@ -7,7 +7,9 @@ package main
 
 // Implementation of "rm" command
 
+
 import (
+	. "mumax/common"
 	"fmt"
 )
 
@@ -49,6 +51,24 @@ func rm(user *User, args []string) (resp string) {
 	}
 	if running != 0 {
 		resp += fmt.Sprint("\ndid not remove ", running, " jobs which are running")
+	}
+	return
+}
+
+// remove a job from the list
+func rmJob(job *Job, inList []*Job) (outList []*Job) {
+	// find index
+	i := 0
+	for ; i < len(inList); i++ {
+		if inList[i] == job {
+			break
+		}
+	}
+	Assert(i != len(inList))
+	if i == len(inList)-1 {
+		outList = inList[:i]
+	} else {
+		outList = append(inList[:i], inList[i+1:]...)
 	}
 	return
 }
