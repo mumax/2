@@ -14,6 +14,6 @@ func init() {
 }
 
 // reports next job to be dispatched
-func next(user string, args []string) string {
+func next(user *User, args []string) string {
 	return nextJob().String()
 }

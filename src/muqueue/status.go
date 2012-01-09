@@ -20,7 +20,7 @@ func init() {
 const MAXLEN = 20 // show only this many que entries
 
 // reports the queue status
-func status(user string, argz []string) string {
+func status(user *User, argz []string) string {
 	n := MAXLEN
 	args, flags := parse(argz, "n")
 

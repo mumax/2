@@ -15,7 +15,7 @@ func init() {
 	api["kill"] = kill
 }
 
-func kill(user string, args []string) (resp string) {
+func kill(user *User, args []string) (resp string) {
 	if len(args) == 0 {
 		resp = "kill: need job id, e.g. 'kill 00000007'"
 		return
@@ -42,7 +42,6 @@ func kill(user string, args []string) (resp string) {
 	}
 	return
 }
-
 
 // finds a job based on its id
 func jobid(pid int) *Job {

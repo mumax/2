@@ -17,7 +17,7 @@ func init() {
 }
 
 // purge failed or done jobs from list
-func purge(user string, args []string) string {
+func purge(user *User, args []string) string {
 
 	count := 0
 	for i := 0; i < len(queue); i++ {

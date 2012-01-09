@@ -17,6 +17,7 @@ type Node struct {
 	hostname string
 	loginCmd []string
 	devBusy  []bool // GPU[i] in use?
+	group    string // group that owns this node
 	// draining bool // stop using this node	
 }
 

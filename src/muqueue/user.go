@@ -10,14 +10,21 @@ package main
 import ()
 
 // User
-//type User struct {
-//	name string
-//}
-//
-//func GetUser(name string) *User {
-//	return &User{name} // TODO: lookup in map
-//}
-//
-//func (u *User) String() string {
-//	return u.name
-//}
+type User struct {
+	name  string
+	group string
+}
+
+var users map[string]*User = make(map[string]*User)
+
+func GetUser(name string) *User {
+	if user, ok := users[name]; ok {
+		return user
+	}
+	panic("No such user: " + name)
+	return nil // silence 6g
+}
+
+func (u *User) String() string {
+	return u.name
+}

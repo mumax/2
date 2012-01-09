@@ -17,7 +17,7 @@ import (
 type Job struct {
 	id      int       // unique identifier
 	command []string  // command and args to be executed
-	user    string    // job owner
+	user    *User     // job owner
 	status  int       // queued, running, finished, failed
 	node    *Node     // node this job is running on
 	dev     []int     // devices this job is running on
@@ -45,7 +45,7 @@ var statusStr map[int]string = map[int]string{QUEUED: "que ",
 	DONE:    GREEN + "done" + RESET,
 	FAILED:  RED + BOLD + "fail" + RESET}
 
-func NewJob(user string, cmd []string) *Job {
+func NewJob(user *User, cmd []string) *Job {
 	j := new(Job)
 	j.command = cmd
 	j.user = user

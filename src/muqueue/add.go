@@ -19,7 +19,7 @@ func init() {
 }
 
 // adds a job
-func add(user string, argz []string) string {
+func add(user *User, argz []string) string {
 	if len(argz) == 0 {
 		return "Nothing specified, nothing added.\nMaybe you wanted to say 'add command'?"
 	}
@@ -41,8 +41,8 @@ func add(user string, argz []string) string {
 	if gpus, ok := flags["gpu"]; ok {
 		job.ndev = Atoi(gpus)
 	}
-	if user, ok := flags["user"]; ok {
-		job.user = user
+	if username, ok := flags["user"]; ok {
+		job.user = GetUser(username)
 	}
 	queue = append(queue, job)
 	fillNodes()

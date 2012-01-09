@@ -94,7 +94,7 @@ func init() {
 }
 
 // Manual dispatch
-func dispatchManual(user string, args []string) string {
+func dispatchManual(user *User, args []string) string {
 	if len(args) == 0 {
 		return dispatchNext()
 	}

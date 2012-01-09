@@ -15,7 +15,7 @@ func init() {
 	api["rm"] = rm
 }
 
-func rm(user string, args []string) (resp string) {
+func rm(user *User, args []string) (resp string) {
 	if len(args) == 0 {
 		resp = "rm needs an argument"
 		return
