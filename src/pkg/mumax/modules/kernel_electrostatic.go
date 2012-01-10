@@ -51,6 +51,7 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 	y2 *= (periodic[Y] + 1)
 	z1 *= (periodic[Z] + 1)
 	z2 *= (periodic[Z] + 1)
+	Debug("xyz ranges:", x1, x2, y1, y2, z1 ,z2)
 
 	// cell volume
 	//V := cellsize[X] * cellsize[Y] * cellsize[Z]
@@ -65,14 +66,14 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 				rx, ry, rz := float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z]
 				r := math.Sqrt(rx*rx + ry*ry + rz*rz)
 				if r != 0 {
-					factor := 1 / (4 * PI) // TODO: include volume, epsillon0?
-					Ex := factor * rx / (r * r * r)
-					Ey := factor * ry / (r * r * r)
-					Ez := factor * rz / (r * r * r)
+					//factor := V / (4 * PI) // TODO: include epsillon0?
+					Ex := rx//factor * rx / (r * r * r)
+					Ey := ry//factor * ry / (r * r * r)
+					Ez := rz//factor * rz / (r * r * r)
 
-					k[X][xw][yw][zw] = float32(Ex) // TODO: +=
-					k[Y][xw][yw][zw] = float32(Ey)
-					k[Z][xw][yw][zw] = float32(Ez)
+					k[X][xw][yw][zw] += float32(Ex) 
+					k[Y][xw][yw][zw] += float32(Ey)
+					k[Z][xw][yw][zw] += float32(Ez)
 					// We have to ADD because there are multiple contributions in case of periodicity
 				} else {
 					// E += 0

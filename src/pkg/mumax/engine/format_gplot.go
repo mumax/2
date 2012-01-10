@@ -33,17 +33,17 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 
 	data := q.Buffer().Array
 	gridsize := GetEngine().GridSize()
-	//cellsize := GetEngine().CellSize()
+	cellsize := GetEngine().CellSize()
 	ncomp := len(data)
 
 	// Here we loop over X,Y,Z, not Z,Y,X, because
 	// internal in C-order == external in Fortran-order
 	for i := 0; i < gridsize[X]; i++ {
-		x := float64(i) //*cellsize[X]
+		x := float64(i) *cellsize[X]
 		for j := 0; j < gridsize[Y]; j++ {
-			y := float64(j) //*cellsize[Y]
+			y := float64(j) *cellsize[Y]
 			for k := 0; k < gridsize[Z]; k++ {
-				z := float64(k) //*cellsize[Z]
+				z := float64(k) *cellsize[Z]
 				_, err := fmt.Fprint(out, z, " ", y, " ", x, "\t")
 				if err != nil {
 					panic(IOErr(err.String()))
