@@ -39,18 +39,22 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 	// Here we loop over X,Y,Z, not Z,Y,X, because
 	// internal in C-order == external in Fortran-order
 	for i := 0; i < gridsize[X]; i++ {
-		x := float64(i)//*cellsize[X]
+		x := float64(i) //*cellsize[X]
 		for j := 0; j < gridsize[Y]; j++ {
-			y := float64(j)//*cellsize[Y]
+			y := float64(j) //*cellsize[Y]
 			for k := 0; k < gridsize[Z]; k++ {
-				z := float64(k)//*cellsize[Z]
+				z := float64(k) //*cellsize[Z]
+				_, err := fmt.Fprint(out, z, " ", y, " ", x, "\t")
+				if err != nil {
+					panic(IOErr(err.String()))
+				}
 				for c := 0; c < ncomp; c++ {
-					_, err := fmt.Fprint(out, z," ",y," ",x,"\t", data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
+					_, err := fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
 					if err != nil {
 						panic(IOErr(err.String()))
 					}
 				}
-				_, err := fmt.Fprint(out, "\n")
+				_, err = fmt.Fprint(out, "\n")
 				if err != nil {
 					panic(IOErr(err.String()))
 				}
@@ -67,4 +71,3 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 	}
 
 }
-

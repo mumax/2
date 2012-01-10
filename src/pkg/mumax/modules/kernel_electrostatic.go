@@ -53,7 +53,7 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 	z2 *= (periodic[Z] + 1)
 
 	// cell volume
-	V := cellsize[X] * cellsize[Y] * cellsize[Z]
+	//V := cellsize[X] * cellsize[Y] * cellsize[Z]
 
 	for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
 		xw := Wrap(x, size[X])
@@ -65,7 +65,7 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 				rx, ry, rz := float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z]
 				r := math.Sqrt(rx*rx + ry*ry + rz*rz)
 				if r != 0 {
-					factor := V / (4 * PI) // TODO: include volume, epsillon0?
+					factor := 1 / (4 * PI) // TODO: include volume, epsillon0?
 					Ex := factor * rx / (r * r * r)
 					Ey := factor * ry / (r * r * r)
 					Ez := factor * rz / (r * r * r)
