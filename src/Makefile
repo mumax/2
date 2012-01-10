@@ -26,6 +26,7 @@ pkg: libmumax2
 mumax2: pkg $(MODULES)
 muview: libomf libtensor
 python: mumax2 
+muqueue: mumax2
 
 $(MODULES):
 	$(MAKE) install --no-print-directory --directory=$@/pkg
