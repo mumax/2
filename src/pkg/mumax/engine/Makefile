@@ -34,6 +34,7 @@ GOFILES=\
 	notify_tabulate.go\
 	outputformat.go\
 	format_txt.go\
+	format_gplot.go\
 	format_binary.go\
 	input.go\
 	table.go\
