@@ -25,7 +25,7 @@ import (
 // TODO: make more accurate
 func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
 	Debug("Calculating electrostatic kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
-	Start("kern_e")
+	Start("kern_el")
 	k := kern.Array
 
 	Assert(len(kern.Array) == 3)
@@ -75,10 +75,10 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 					k[Z][xw][yw][zw] += float32(Ez)
 					// We have to ADD because there are multiple contributions in case of periodicity
 				} else {
-					// E = 0
+					// E += 0
 				}
 			}
 		}
 	}
-	Stop("kern_e")
+	Stop("kern_el")
 }

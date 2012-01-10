@@ -10,8 +10,9 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
-	//. "mumax/common"
+	. "mumax/common"
 	. "mumax/engine"
+	"mumax/gpu"
 )
 
 // Register this module
@@ -32,23 +33,49 @@ func LoadCurrent(e *Engine) {
 	e.Depends("diff_rho", "j")
 
 	e.AddPDE1("rho", "diff_rho")
+
+	// here be dragons
+
+	const CPUONLY = true
+	const GPU = false
+	// Size of all kernels (not FFT'd)
+	kernelSize := padSize(e.GridSize(), e.Periodic())
+	fftOutSize := gpu.FFTOutputSize(kernelSize)
+
+	elKern := NewQuant("kern_el", VECTOR, kernelSize, FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
+	e.AddQuant(elKern)
+	elKern.SetUpdater(newElKernUpdater(elKern))
+
+	fftElKern := NewQuant("~kern_el", VECTOR, fftOutSize, FIELD, Unit(""), GPU, "FFT reduced electrostatic kernel")
+	e.AddQuant(fftElKern)
+	e.Depends("~kern_el", "kern_el")
+
 }
-//	// dependencies
-//	e.LoadModule("hfield")
-//	e.LoadModule("magnetization")
-//	e.AddQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
-//
-//	m := e.Quant("m")
-//	MSat := e.Quant("MSat")
-//	Aex := e.Quant("Aex")
-//
-//	CPUONLY := true
-//	// Size of all kernels (not FFT'd)
-//	kernelSize := padSize(e.GridSize(), e.Periodic())
-//
-//	// demag kernel 
-//	demagKern := newQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
-//	e.addQuant(demagKern)
+
+
+//____________________________________________________________________ electrostatic kernel
+
+// Update demag kernel (cpu)
+type elKernUpdater struct {
+	kern *Quant // that's me!
+}
+
+func newElKernUpdater(elKern *Quant) Updater {
+	u := new(elKernUpdater)
+	u.kern = elKern
+	return u
+}
+
+// Update electrostatic kernel (cpu)
+func (u *elKernUpdater) Update() {
+	e := GetEngine()
+	kernsize := padSize(e.GridSize(), e.Periodic())
+	// TODO: wisdom
+	Log("Calculating electrosatic kernel, may take a moment...")
+	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
+}
+
+
 //	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 //
 //	// exch kernel 
