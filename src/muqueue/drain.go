@@ -15,6 +15,7 @@ func init() {
 	api["fill"] = fill
 }
 
+// drains a node: do not start new jobs on it
 func drain(user *User, args []string) string {
 	node, resp := resolveNode(args)
 	if node == nil {
@@ -24,6 +25,7 @@ func drain(user *User, args []string) string {
 	return "Draining node " + args[0] + ". Use 'fill " + args[0] + "' to start using it again."
 }
 
+// fill a node: start running jobs on it
 func fill(user *User, args []string) string {
 	node, resp := resolveNode(args)
 	if node == nil {
@@ -34,6 +36,7 @@ func fill(user *User, args []string) string {
 	return "now using node " + args[0]
 }
 
+// get a node from host name (arg[0])
 func resolveNode(args []string) (n *Node, resp string) {
 	if len(args) == 0 {
 		resp = "need an argument (hostname)"
