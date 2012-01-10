@@ -13,6 +13,8 @@ package gpu
 import (
 	. "mumax/common"
 	"mumax/host"
+	"rand"
+	"runtime"
 	//   "fmt"
 
 )
@@ -50,7 +52,6 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	// init fft
-	//	conv.fftIn.Init(3, []int{logicSize[0], logicSize[1], logicSize[2] + 2*NDevice()}, DO_ALLOC) // TODO: FFTPlan.OutputSize()
 	conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
 
 
@@ -59,13 +60,6 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	Debug("ConvPlan.init", "dataSize:", conv.dataSize, "logicSize:", conv.logicSize)
 
 	// init fftKern
-	//	for i, k := range kernel {
-	//		if k != nil {
-	//			Debug("ConvPlan.init", "alloc:", TensorIndexStr[i])
-	//			conv.fftKern[i].Init(1, []int{logicSize[0], logicSize[1], logicSize[2]/2 + 1}, DO_ALLOC) // not so aligned..
-	//		}
-	//	}
-
 	fftKernSize := FFTOutputSize(logicSize)
 	fftKernSize[2] = fftKernSize[2] / 2
 
@@ -78,7 +72,7 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 	}
 
 	conv.loadKernel(kernel)
-
+	runtime.GC()
 }
 
 // INTERNAL: Loads a convolution kernel.
@@ -97,7 +91,9 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	for i, k := range kernel {
 		if k != nil {
 			for _, e := range k.List {
-				AssertMsg(IsReal(e), "K", TensorIndexStr[i], "=", e)
+				if !IsReal(e) {
+					BugF("K", TensorIndexStr[i], "=", e)
+				}
 			}
 		}
 	}
@@ -108,17 +104,14 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
 	defer devIn.Free()
-	//	devOut := NewArray(1, []int{logic[0], logic[1], logic[2] + 2*NDevice()}) // +2 elements: R2C
 	devOut := NewArray(1, FFTOutputSize(logic))
 	defer devOut.Free()
 
 	for i, k := range kernel {
 		if k != nil {
-			//fmt.Println("kern", TensorIndexStr[i], kernel[i].Array)
 			devIn.CopyFromHost(k)
 			fft.Forward(devIn, devOut)
 			scaleRealParts(conv.fftKern[i], devOut, 1/float32(FFTNormLogic(logic)))
-			//fmt.Println("fftKern", TensorIndexStr[i], conv.fftKern[i].LocalCopy().Array)
 		}
 	}
 
@@ -149,7 +142,7 @@ func scaleRealParts(dst, src *Array, scale float32) {
 	// ...however, we check that the imaginary parts are nearly zero,
 	// just to be sure we did not make a mistake during kernel creation.
 	Debug("FFT Kernel max imaginary part=", maximg)
-	if maximg*scale > 1e-5 { // TODO: is this reasonable? How about 
+	if maximg*scale > 1 { // TODO: is this reasonable?
 		Warn("FFT Kernel max imaginary part=", maximg)
 	}
 
@@ -161,25 +154,73 @@ func (conv *ConvPlan) Free() {
 }
 
 func (conv *ConvPlan) Convolve(in, out *Array) {
-	//Debug("Convolve")
 	fftIn := &conv.fftIn
 	fftKern := &conv.fftKern
 
-	// First transform all 3 components 
-	// (FFTPlan knows about zero padding etc)
-	for c := range in.Comp {
-		conv.fft.Forward(&in.Comp[c], &fftIn.Comp[c])
-	}
+	conv.ForwardFFT(in)
 
 	// Point-wise kernel multiplication
 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
 		fftKern[XX], fftKern[YY], fftKern[ZZ],
 		fftKern[YZ], fftKern[XZ], fftKern[XY],
 		fftIn.Stream) // TODO: choose stream wisely
+	fftIn.Stream.Sync() // !!
 
-	// Backtransform
-	// (FFTPlan knows about zero padding etc)
+	conv.InverseFFT(out)
+}
+
+// 	INTERNAL
+// Sparse transform all 3 components.
+// (FFTPlan knows about zero padding etc)
+func (conv *ConvPlan) ForwardFFT(in *Array) {
 	for c := range in.Comp {
+		conv.fft.Forward(&in.Comp[c], &conv.fftIn.Comp[c])
+	}
+}
+
+// 	INTERNAL
+// Sparse backtransform
+// (FFTPlan knows about zero padding etc)
+func (conv *ConvPlan) InverseFFT(out *Array) {
+	for c := range out.Comp {
 		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
 	}
+}
+
+func (conv *ConvPlan) SelfTest() {
+	Debug("FFT self-test")
+	rng := rand.New(rand.NewSource(0))
+	size := conv.dataSize[:]
+
+	in := NewArray(1, size)
+	defer in.Free()
+	arr := in.LocalCopy()
+	a := arr.List
+	for i := range a {
+		a[i] = 2*rng.Float32() - 1
+		if a[i] == 0 {
+			a[i] = 1
+		}
+	}
+	in.CopyFromHost(arr)
+
+	out := NewArray(1, size)
+	defer out.Free()
+
+	conv.ForwardFFT(in)
+	conv.InverseFFT(out)
+
+	b := out.LocalCopy().List
+	norm := float32(1 / float64(FFTNormLogic(conv.logicSize[:])))
+	var maxerr float32
+	for i := range a {
+		if Abs32(a[i]-b[i]*norm) > maxerr {
+			maxerr = Abs32(a[i] - b[i]*norm)
+		}
+	}
+	Debug("FFT max error:", maxerr)
+	if maxerr > 1e-3 {
+		panic(BugF("FFT self-test failed, max error:", maxerr, "\nPlease use a different grid size of FFT type."))
+	}
+	runtime.GC()
 }

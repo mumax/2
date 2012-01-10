@@ -39,25 +39,36 @@ func (field *PointwiseUpdater) Update() {
 
 	// first search backwards in time, 
 	// multi-stage solvers may have gone back in time.
-	i := 0
-	for i = field.lastIdx; i > 0; i-- {
-		if field.points[i][0] < time {
+	i := field.lastIdx
+	if i >= len(field.points) {
+		i = len(field.points) - 1
+	}
+	for ; i > 0; i-- {
+		if field.points[i][0] <= time {
 			break
 		}
 	}
+
+	if i < 0 {
+		i = 0
+	}
+
 	// then search forward
 	for ; i < len(field.points); i++ {
-		//Debug("i", i)
 		if field.points[i][0] >= time {
 			break
 		}
 	}
+
 	// i now points to a time >= engine.time
 	field.lastIdx = i
 
-	// out of range: value = unchanged
-	if i-1 < 0 || i >= len(field.points) {
-		// or should we zero it?
+	value := field.quant.multiplier
+	// out of range: value = 0
+	if i-1 < 0 || i < 0 || i >= len(field.points) {
+		for i := range value {
+			value[i] = 0
+		}
 		return
 	}
 
@@ -68,7 +79,6 @@ func (field *PointwiseUpdater) Update() {
 	dt := t2 - t1         //pt2[0] - pt1[0]
 	t := (time - t1) / dt // 0..1
 	Assert(time >= 0 && time <= 1)
-	value := field.quant.multiplier
 	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
@@ -78,9 +88,7 @@ func (field *PointwiseUpdater) Update() {
 
 func (p *PointwiseUpdater) Append(time float64, value []float64) {
 	nComp := p.quant.NComp()
-	if len(value) != nComp {
-		panic(InputErrF(p.quant.Name(), "has", nComp, "components, but", len(value), "provided"))
-	}
+	checkComp(p.quant, len(value))
 	if len(p.points) > 0 {
 		if p.points[len(p.points)-1][0] > time {
 			panic(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time))

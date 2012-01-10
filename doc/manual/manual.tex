@@ -34,6 +34,7 @@ basicstyle=\scriptsize,       % the size of the fonts that are used for the code
 
 % put a word in the text and index
 \newcommand{\idx}[1]{\emph{#1}\index{#1}}
+\newcommand{\link}[1]{\hyperref[#1]{#1}}
 % used for terminal commands 
 \newcommand{\cmd}[1]{\texttt{#1}}
 \newcommand{\shell}[1]{\bigskip\fbox{\mbox{\parbox{\textwidth}{\cmd{#1}}}}\bigskip}
@@ -55,17 +56,21 @@ basicstyle=\scriptsize,       % the size of the fonts that are used for the code
 
 \tableofcontents
 
-\section{Modules}
-\input{modules}
+\input{intro}
+\input{multiphys}
 
-\section{API}
-\input{mumax2-api}
-
-\section{Examples}
+\section{Examples} \label{examples}
 \input{examples}
 
+
+\section{API overview}
+\input{mumax2-api}
+
+\section{Module overview}\label{modules}
+\input{modules}
+
 \appendix
-%\include{gpl}
+\input{gpl}
 %\bibliography{bibliography}
 \printindex
 

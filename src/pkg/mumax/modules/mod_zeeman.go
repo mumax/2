@@ -5,24 +5,24 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
+// This file implements the Zeeman module
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/engine"
+)
 
 // Register this module
 func init() {
-	RegisterModule("magnetization", "Provides the reduced magnetization and saturation magnetization", LoadMagnetization)
+	RegisterModule("zeeman", "Externally applied field", LoadZeeman)
 }
 
-func LoadMagnetization(e *Engine) {
-
-	e.AddQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
-	e.AddQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
-	e.Depends("m", "Msat")
-
-	m := e.Quant("m")
-	Msat := e.Quant("Msat")
-	m.updater = &normUpdater{m: m, Msat: Msat}
+func LoadZeeman(e *Engine) {
+	LoadHField(e)
+	e.AddNewQuant("H_ext", VECTOR, MASK, Unit("A/m"), "ext. field")
+	hfield := e.Quant("H")
+	sum := hfield.Updater().(*SumUpdater)
+	sum.AddParent("H_ext")
 }

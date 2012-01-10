@@ -26,9 +26,10 @@ func Assert(test bool) {
 }
 
 // Panics if test is false, printing the message.
-func AssertMsg(test bool, msg ...interface{}) {
+// NOTE: msg is string, not ...inteface{} to avoid spurious allocations
+func AssertMsg(test bool, msg string) {
 	if !test {
-		panic(Bug(fmt.Sprint(msg...)))
+		panic(Bug(msg))
 	}
 }
 

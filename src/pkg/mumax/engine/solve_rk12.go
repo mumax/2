@@ -7,6 +7,7 @@
 
 package engine
 
+// This file implements an adaptive Euler-Heun scheme
 // Author: Arne Vansteenkiste
 
 import (
@@ -19,10 +20,22 @@ type RK12Solver struct {
 	error  []*Quant // error estimates for each equation
 	maxErr []*Quant // maximum error for each equation
 	diff   []gpu.Reductor
+	minDt  *Quant
+	maxDt  *Quant
 }
 
+// Load the solver into the Engine
 func LoadRK12(e *Engine) {
 	s := new(RK12Solver)
+
+	// Minimum/maximum time step
+	s.minDt = e.AddNewQuant("mindt", SCALAR, VALUE, Unit("s"), "Minimum time step")
+	s.minDt.SetScalar(1e-38)
+	s.minDt.SetVerifier(Positive)
+	s.maxDt = e.AddNewQuant("maxdt", SCALAR, VALUE, Unit("s"), "Maximum time step")
+	s.maxDt.SetVerifier(Positive)
+	s.maxDt.SetScalar(1e38)
+
 	equation := e.equation
 	s.buffer = make([]*gpu.Array, len(equation))
 	s.error = make([]*Quant, len(equation))
@@ -36,18 +49,19 @@ func LoadRK12(e *Engine) {
 		Assert(eqn.kind == EQN_PDE1)
 		out := eqn.output[0]
 		unit := out.Unit()
-		e.AddQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
+		e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.error[i] = e.Quant(out.Name() + "_error")
-		e.AddQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
 		s.maxErr[i] = e.Quant(out.Name() + "_maxError")
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s.maxErr[i].SetVerifier(Positive)
 	}
 }
 
+// Declares this solver's special dependencies
 func (s *RK12Solver) Dependencies() (children, parents []string) {
-	children = []string{"dt", "step"}
-	parents = []string{"dt"}
+	children = []string{"dt", "step", "t"}
+	parents = []string{"dt", "mindt", "maxdt"}
 	for i := range s.error {
 		parents = append(parents, s.maxErr[i].Name())
 		children = append(children, s.error[i].Name())
@@ -60,6 +74,7 @@ func init() {
 	RegisterModule("solver/rk12", "Adaptive Heun solver (Runge-Kutta 1+2)", LoadRK12)
 }
 
+// Take one time step
 func (s *RK12Solver) Step() {
 	e := GetEngine()
 	equation := e.equation
@@ -126,6 +141,16 @@ func (s *RK12Solver) Step() {
 		y.Invalidate()
 	}
 
-	e.dt.SetScalar(dt * minFactor)
-	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
+	// Set new time step but do not go beyond min/max bounds
+	newDt := dt * minFactor
+	if newDt < s.minDt.Scalar() {
+		newDt = s.minDt.Scalar()
+	}
+	if newDt > s.maxDt.Scalar() {
+		newDt = s.maxDt.Scalar()
+	}
+	e.dt.SetScalar(newDt)
+
+	// advance time step
+	e.step.SetScalar(e.step.Scalar() + 1)
 }

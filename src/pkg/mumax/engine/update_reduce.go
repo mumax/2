@@ -14,18 +14,25 @@ import (
 	"mumax/gpu"
 )
 
-type AverageUpdater struct {
+type ReduceUpdater struct {
 	in, out *Quant
 	reduce  gpu.Reductor
 }
 
-func NewAverageUpdater(in, out *Quant) Updater {
+func NewReduceUpdater(in, out *Quant) *ReduceUpdater {
 	checkKinds(in, FIELD, MASK)
-	avg := new(AverageUpdater)
-	avg.in = in
-	avg.out = out
-	avg.reduce.Init(1, GetEngine().GridSize())
-	return avg
+	red := new(ReduceUpdater)
+	red.in = in
+	red.out = out
+	red.reduce.Init(1, GetEngine().GridSize())
+	return red
+}
+
+type AverageUpdater ReduceUpdater
+
+// Returns an updater that writes the average of in to out
+func NewAverageUpdater(in, out *Quant) Updater {
+	return (*AverageUpdater)(NewReduceUpdater(in, out))
 }
 
 func (this *AverageUpdater) Update() {
@@ -41,4 +48,22 @@ func (this *AverageUpdater) Update() {
 		}
 	}
 
+}
+
+type MaxAbsUpdater ReduceUpdater
+
+// Returns an updater that writes the maximum of absolute values of in to out
+func NewMaxAbsUpdater(in, out *Quant) Updater {
+	return (*MaxAbsUpdater)(NewReduceUpdater(in, out))
+}
+
+func (this *MaxAbsUpdater) Update() {
+	var max float64
+	for c := 0; c < this.in.nComp; c++ {
+		compMax := float64(this.reduce.MaxAbs(&(this.in.Array().Comp[c]))) * this.in.multiplier[c]
+		if compMax > max {
+			max = compMax
+		}
+	}
+	this.out.SetScalar(float64(max))
 }

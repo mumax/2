@@ -62,6 +62,8 @@ private:
   QActionGroup *displayType;
   QAction *conesAct;
   QAction *cubesAct;
+  
+  QAction *scaleByMagnitude;
   //QAction *webAct;
 
   // Preferences window;

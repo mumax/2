@@ -23,14 +23,13 @@ func init() {
 }
 
 func LoadTempBrown(e *Engine) {
-	e.LoadModule("magnetization")
-	e.LoadModule("llg") // needed for alpha.
+	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	//e.AddQuant("Therm_seed", SCALAR, VALUE, Unit(""), "Random seed for H_therm")
 
-	temp := e.AddQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
+	temp := e.AddNewQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
 	temp.SetVerifier(NonNegative)
-	Htherm := e.AddQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
+	Htherm := e.AddNewQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
 
 	// By declaring that H_therm depends on Step,
 	// It will be automatically updated at each new time step
@@ -39,7 +38,6 @@ func LoadTempBrown(e *Engine) {
 	Htherm.SetUpdater(NewTempBrownUpdater(Htherm))
 
 	// Add thermal field to total field
-	e.LoadModule("hfield")
 	hfield := e.Quant("H")
 	sum := hfield.GetUpdater().(*SumUpdater)
 	sum.AddParent("H_therm")

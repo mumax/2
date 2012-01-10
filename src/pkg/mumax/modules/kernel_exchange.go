@@ -5,7 +5,10 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
+
+// Kernel for exchange interaction
+// Author: Arne Vansteenkiste, Ben Van de Wiele
 
 import (
 	. "mumax/common"
@@ -39,13 +42,13 @@ func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
 		hy := cellsize[Y] * cellsize[Y]
 		hz := cellsize[Z] * cellsize[Z]
 
-		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
-		arr[wrap(+1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(1 / hx)
-		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = float32(1 / hx)
-		arr[wrap(0, size[X])][wrap(+1, size[Y])][wrap(0, size[Z])] = float32(1 / hy)
-		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = float32(1 / hy)
-		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(+1, size[Z])] = float32(1 / hz)
-		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = float32(1 / hz)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
+		arr[Wrap(+1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
+		arr[Wrap(-1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
+		arr[Wrap(0, size[X])][Wrap(+1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
+		arr[Wrap(0, size[X])][Wrap(-1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(+1, size[Z])] = float32(1 / hz)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(-1, size[Z])] = float32(1 / hz)
 	}
 	Stop("kern_ex")
 }

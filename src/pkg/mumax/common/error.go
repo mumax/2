@@ -32,9 +32,15 @@ func (e InputErr) String() string {
 	return string(e)
 }
 
+// Like fmt.Sprint() but inserts spaces between the arguments.
+func sprint(msg ...interface{}) string {
+	str := fmt.Sprintln(msg...) // inserts spaces
+	return str[:len(str)-1]     // omit newline
+}
+
 // Shorthand for InputErr(fmt.Sprint(msg...))
 func InputErrF(msg ...interface{}) InputErr {
-	return InputErr(fmt.Sprint(msg...))
+	return InputErr(sprint(msg...))
 }
 
 // Empty function implements interface{InputErr()}
@@ -50,7 +56,7 @@ func (e IOErr) String() string {
 
 // Shorthand for IOErr(fmt.Sprint(msg...))
 func IOErrF(msg ...interface{}) IOErr {
-	return IOErr(fmt.Sprint(msg...))
+	return IOErr(sprint(msg...))
 }
 
 // Empty function implements interface{IOErr()}
@@ -66,7 +72,7 @@ func (e Bug) String() string {
 
 // Shorthand for Bug(fmt.Sprint(msg...))
 func BugF(msg ...interface{}) Bug {
-	return BugF(fmt.Sprint(msg...))
+	return BugF(sprint(msg...))
 }
 
 // Empty function implements interface{Bug()}

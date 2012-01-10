@@ -5,13 +5,14 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 // Combined demag+exchange module
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"mumax/gpu"
 	"mumax/host"
 )
@@ -25,51 +26,49 @@ func LoadDemagExch(e *Engine) {
 	// TODO: verify aexch space-independent
 
 	// dependencies
-	e.LoadModule("hfield")
-	e.LoadModule("magnetization")
-	e.AddQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
+	LoadHField(e)
+	LoadMagnetization(e)
+	Aex := e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // here it has to be a value.
 
 	m := e.Quant("m")
 	MSat := e.Quant("MSat")
-	Aex := e.Quant("Aex")
 
 	CPUONLY := true
 	// Size of all kernels (not FFT'd)
 	kernelSize := padSize(e.GridSize(), e.Periodic())
 
 	// demag kernel 
-	demagKern := newQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
-	e.addQuant(demagKern)
+	demagKern := NewQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
+	e.AddQuant(demagKern)
 	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
-	exchKern := newQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
-	e.addQuant(exchKern)
+	exchKern := NewQuant("kern_ex", SYMMTENS, kernelSize, FIELD, Unit("/m2"), CPUONLY, "reduced exchange kernel (Laplacian)")
+	e.AddQuant(exchKern)
 	exchKern.SetUpdater(newExchKernUpdater(exchKern))
 
 	// demag+exchange kernel
-	dexKern := newQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
-	e.addQuant(dexKern)
+	dexKern := NewQuant("Kern_dex", SYMMTENS, kernelSize, FIELD, Unit("A/m"), CPUONLY, "demag+exchange kernel")
+	e.AddQuant(dexKern)
 	e.Depends("Kern_dex", "kern_d", "kern_ex", "Aex", "MSat")
 	dexKern.SetUpdater(newDexKernUpdater(dexKern, demagKern, exchKern, MSat, Aex))
 
 	// fft kernel quant
 	fftOutSize := gpu.FFTOutputSize(kernelSize)
 	fftOutSize[2] /= 2 // only real parts are stored
-	fftKern := newQuant("~kern_dex", SYMMTENS, fftOutSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
-	e.addQuant(fftKern)
+	fftKern := NewQuant("~kern_dex", SYMMTENS, fftOutSize, FIELD, Unit("A/m"), false, "FFT demag+exchange kernel")
+	e.AddQuant(fftKern)
 	e.Depends("~kern_dex", "kern_dex")
 	fftKern.SetUpdater(newFftKernUpdater(fftKern, dexKern))
 
 	// demag+exchange field quant
-	e.AddQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
+	Hdex := e.AddNewQuant("H_dex", VECTOR, FIELD, Unit("A/m"), "demag+exchange field")
 	e.Depends("H_dex", "m", "~Kern_dex")
-	Hdex := e.Quant("H_dex")
 	Hdex.SetUpdater(newHDexUpdater(Hdex, m, fftKern))
 
 	// add H_dex to total H
 	hfield := e.Quant("H")
-	sum := hfield.updater.(*SumUpdater)
+	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_dex")
 }
 
@@ -138,7 +137,7 @@ func (u *dexKernUpdater) Update() {
 	dex := u.dexKern.Buffer().List
 	demag := u.demagKern.Buffer().List
 	exch := u.exchKern.Buffer().List
-	MSat := u.MSat.multiplier[0] // Msat may be mask.
+	MSat := u.MSat.Multiplier()[0] // Msat may be mask.
 	Aex := u.Aex.Scalar()
 	for i := range dex {
 		// dex = MSat * demag + 2A/µ0MSat * laplacian
@@ -171,6 +170,7 @@ func (u *fftKernUpdater) Update() {
 		kernel[i] = (u.kern.Buffer().Component(i))
 	}
 	u.conv.Init(dataSize, kernel, u.fftKern.Array())
+	u.conv.SelfTest()
 }
 
 //____________________________________________________________________ H_dex
@@ -186,10 +186,10 @@ func newHDexUpdater(Hdex, m, fftDexKern *Quant) Updater {
 	u.Hdex = Hdex
 	u.m = m
 	u.fftDexKern = fftDexKern
-	u.conv = &(fftDexKern.updater.(*fftKernUpdater).conv)
+	u.conv = &(fftDexKern.Updater().(*fftKernUpdater).conv)
 	return u
 }
 
 func (u *hDexUpdater) Update() {
-	u.conv.Convolve(&u.m.array, &u.Hdex.array)
+	u.conv.Convolve(u.m.Array(), u.Hdex.Array())
 }

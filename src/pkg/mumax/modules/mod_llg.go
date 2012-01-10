@@ -5,10 +5,11 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 import (
 	. "mumax/common"
+	. "mumax/engine"
 	"mumax/gpu"
 )
 
@@ -29,23 +30,23 @@ func init() {
 // the multiplier is set to gamma, so the array stores τ/gamma
 func LoadLLG(e *Engine) {
 
-	e.LoadModule("magnetization")
-	e.LoadModule("hfield")
+	LoadHField(e)
+	LoadMagnetization(e)
 
-	e.AddQuant("alpha", SCALAR, MASK, Unit(""), "damping")
-	e.AddQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
+	e.AddNewQuant("alpha", SCALAR, MASK, Unit(""), "damping")
+	e.AddNewQuant("gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
 	e.Quant("gamma").SetScalar(Gamma0)
 	e.Quant("gamma").SetVerifier(NonZero)
 
-	e.AddQuant("torque", VECTOR, FIELD, Unit("/s"))
+	e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"))
 	e.Depends("torque", "m", "H", "alpha", "gamma")
 	τ := e.Quant("torque")
-	τ.updater = &torqueUpdater{
+	τ.SetUpdater(&torqueUpdater{
 		τ: e.Quant("torque"),
 		m: e.Quant("m"),
 		H: e.Quant("H"),
 		α: e.Quant("alpha"),
-		γ: e.Quant("gamma")}
+		γ: e.Quant("gamma")})
 
 	e.AddPDE1("m", "torque")
 }
@@ -56,8 +57,7 @@ type torqueUpdater struct {
 }
 
 func (u *torqueUpdater) Update() {
-	//Debug("************** H before update torque", u.H.Buffer().Comp[X][0])
-	multiplier := u.τ.multiplier
+	multiplier := u.τ.Multiplier()
 	// must set ALL multiplier components
 	γ := u.γ.Scalar()
 	if γ == 0 {
@@ -67,5 +67,4 @@ func (u *torqueUpdater) Update() {
 		multiplier[i] = γ
 	}
 	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
-	//Debug("************** H after update torque", u.H.Buffer().Comp[X][0])
 }

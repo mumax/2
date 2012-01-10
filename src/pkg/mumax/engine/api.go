@@ -15,6 +15,7 @@ package engine
 
 import (
 	. "mumax/common"
+	"runtime"
 	"mumax/host"
 	"mumax/gpu"
 	"path"
@@ -103,6 +104,30 @@ func (a API) Run(duration float64) {
 	a.Engine.Run(duration)
 }
 
+// Runs the simulation until quantity a < value
+func (a API) Run_Until_Smaller(quantity string, value float64) {
+	e := a.Engine
+	q := e.Quant(quantity)
+	Log("Running until", q.Name(), "<", value, q.Unit())
+	for q.Scalar() >= value {
+		e.Step()
+		e.updateDash()
+	}
+	DashExit()
+}
+
+// Runs the simulation until quantity a > quantity b
+func (a API) Run_Until_Larger(quantity string, value float64) {
+	e := a.Engine
+	q := e.Quant(quantity)
+	Log("Running until", q.Name(), ">", value, q.Unit())
+	for q.Scalar() <= value {
+		e.Step()
+		e.updateDash()
+	}
+	DashExit()
+}
+
 //________________________________________________________________________________ set quantities
 
 // Set value of a quantity. The quantity must be of type VALUE or MASK.
@@ -130,7 +155,10 @@ func (a API) SetPointwise(quantity string, time float64, value []float64) {
 		q.SetUpdater(u)
 	}
 
-	pointwise := u.(*PointwiseUpdater)
+	pointwise, ok := u.(*PointwiseUpdater)
+	if !ok {
+		panic(InputErrF("Can not set time-dependent", quantity, ", it is already determined in an other way [", u, "]"))
+	}
 	SwapXYZ(value)
 	pointwise.Append(time, value) // swap!
 
@@ -178,7 +206,7 @@ func (a API) SetArray(quantity string, field *host.Array) {
 	// setting a field when there is a non-1 multiplier is too confusing to allow
 	for _, m := range q.multiplier {
 		if m != 1 {
-			panic(InputErr(fmt.Sprint(q.Name(), " is not an oridinary array, but has a mask + multiplier value. Did you mean to set the mask or the mulitplier instead of the array?")))
+			panic(InputErr(fmt.Sprint(q.Name(), " is not an oridinary array, but has a mask + multiplier value. Did you mean to set the mask or the multiplier instead of the array?")))
 		}
 	}
 	q.SetField(field)
@@ -424,6 +452,11 @@ func (a API) Debug_VerifyAll() {
 	for _, q := range e.quantity {
 		q.Verify()
 	}
+}
+
+func (a API) Debug_GC() {
+	Log("GC")
+	runtime.GC()
 }
 
 // DEBUG: start a timer with a given identifier tag

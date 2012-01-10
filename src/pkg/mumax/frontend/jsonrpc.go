@@ -12,6 +12,7 @@ package frontend
 
 import (
 	. "mumax/common"
+	"runtime"
 	"mumax/host"
 	"io"
 	"os"
@@ -95,7 +96,6 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
 		argvals[i] = convertArg(args[i], f.Type().In(i))
-		//Debug("convertArg", args[i], "=", argvals[i].Interface())
 	}
 	retVals := f.Call(argvals)
 
@@ -242,7 +242,6 @@ func jsonToHostArray(v interface{}) *host.Array {
 
 	size3D := size[1:]
 	arr := host.NewArray(size[0], []int{size3D[X], size3D[Y], size3D[Z]})
-	//Debug("jsonToHostArray:", size[0], []int{size3D[X], size3D[Y], size3D[Z]})
 	a := arr.Array
 	va := v.([]interface{})
 	for c := range a {
@@ -257,6 +256,7 @@ func jsonToHostArray(v interface{}) *host.Array {
 			}
 		}
 	}
+	runtime.GC() // a LOT of garbage has been made
 	return convertXYZ(arr)
 }
 
@@ -290,5 +290,6 @@ func convertXYZ(arr *host.Array) *host.Array {
 			}
 		}
 	}
+	runtime.GC() // a LOT of garbage has been made
 	return transp
 }

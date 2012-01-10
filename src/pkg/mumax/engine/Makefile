@@ -13,26 +13,14 @@ GOFILES=\
 	api.go\
 	module.go\
 	texgen.go\
-	mod_magnetization.go\
-	mod_llg.go\
-	mod_zeeman.go\
-	mod_micromag.go\
-	mod_hfield.go\
-	mod_uniaxialanisotropy.go\
-	mod_demagexchange.go\
-	kernel.go\
-	demag.go\
-	exchange.go\
-	mod_exchange6.go\
 	mod_regions.go\
 	quant.go\
 	quantkind.go\
 	unit.go\
 	updater.go\
 	update_pointwise.go\
-	update_norm.go\
 	update_sum.go\
-	update_average.go\
+	update_reduce.go\
 	zeropad.go\
 	verify.go\
 	equation.go\

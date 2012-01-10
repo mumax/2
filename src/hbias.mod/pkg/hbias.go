@@ -12,6 +12,7 @@ package hbias
 
 import (
 	. "mumax/engine"
+	"mumax/modules"
 )
 
 // Register this module
@@ -20,8 +21,8 @@ func init() {
 }
 
 func LoadHBias(e *Engine) {
-	e.AddQuant("H_bias", VECTOR, MASK, Unit("A/m"), "Bias H field")
-	e.LoadModule("hfield")
+	e.AddNewQuant("H_bias", VECTOR, MASK, Unit("A/m"), "Bias H field")
+	modules.LoadHField(e)
 	hfield := e.Quant("H")
 	sum := hfield.GetUpdater().(*SumUpdater)
 	sum.AddParent("H_bias")

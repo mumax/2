@@ -5,8 +5,9 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
+// Magnetostatic kernel
 // Author: Arne Vansteenkiste
 
 import (
@@ -56,16 +57,61 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 	z1 *= (periodic[Z] + 1)
 	z2 *= (periodic[Z] + 1)
 
+	R2 := NewVector()
+	pole := NewVector() // position of point charge on the surface
+
 	for s := 0; s < 3; s++ { // source index Ksdxyz
 		for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
-			xw := wrap(x, size[X])
+			xw := Wrap(x, size[X])
 			for y := y1; y <= y2; y++ {
-				yw := wrap(y, size[Y])
+				yw := Wrap(y, size[Y])
 				for z := z1; z <= z2; z++ {
-					zw := wrap(z, size[Z])
-					R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
+					zw := Wrap(z, size[Z])
+					//R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
+					R[X] = float64(x) * cellsize[X]
+					R[Y] = float64(y) * cellsize[Y]
+					R[Z] = float64(z) * cellsize[Z]
 
-					faceIntegral(B, R, cellsize, s, accuracy)
+					n := accuracy                  // number of integration points = n^2
+					u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
+
+					R2[X], R2[Y], R2[Z] = 0, 0, 0
+					pole[X], pole[Y], pole[Z] = 0, 0, 0
+
+					surface := cellsize[v] * cellsize[w] // the two directions perpendicular to direction s
+					charge := surface
+
+					pu1 := cellsize[u] / 2. // positive pole
+					pu2 := -pu1             // negative pole
+
+					B[X], B[Y], B[Z] = 0, 0, 0 // accumulates magnetic field
+					for i := 0; i < n; i++ {
+						pv := -(cellsize[v] / 2.) + cellsize[v]/float64(2*n) + float64(i)*(cellsize[v]/float64(n))
+						for j := 0; j < n; j++ {
+							pw := -(cellsize[w] / 2.) + cellsize[w]/float64(2*n) + float64(j)*(cellsize[w]/float64(n))
+
+							pole[u] = pu1
+							pole[v] = pv
+							pole[w] = pw
+
+							R2[X], R2[Y], R2[Z] = R[X]-pole[X], R[Y]-pole[Y], R[Z]-pole[Z]
+							r := math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
+							B[X] += R2[X] * charge / (4 * PI * r * r * r)
+							B[Y] += R2[Y] * charge / (4 * PI * r * r * r)
+							B[Z] += R2[Z] * charge / (4 * PI * r * r * r)
+
+							pole[u] = pu2
+							R2[X], R2[Y], R2[Z] = R[X]-pole[X], R[Y]-pole[Y], R[Z]-pole[Z]
+							r = math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
+							B[X] += R2[X] * -charge / (4 * PI * r * r * r)
+							B[Y] += R2[Y] * -charge / (4 * PI * r * r * r)
+							B[Z] += R2[Z] * -charge / (4 * PI * r * r * r)
+						}
+					}
+					scale := 1 / float64(n*n)
+					B[X] *= scale
+					B[Y] *= scale
+					B[Z] *= scale
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
 						i := kernIdx[s][d]                // 3x3 symmetric index to 1x6 index
@@ -78,111 +124,59 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 	Stop("kern_d")
 }
 
-// UNTESTED:
-// Smart version of FaceKernel6, uses symmetry to cut cpu time roughly in 1/8
-//func fastKernel6(size []int, cellsize []float64, accuracy int) []*tensor.T3 {
-//	k := make([]*tensor.T3, 6)
-//	for i := range k {
-//		k[i] = tensor.NewT3(size)
-//	}
-//	B := tensor.NewVector()
-//	R := tensor.NewVector()
-//
-//	x1 := 0 //-(size[X] - 1) / 2
-//	x2 := size[X]/2 - 1
-//	// support for 2D simulations (thickness 1)
-//	if size[X] == 1 {
-//		x2 = 0
-//	}
-//
-//	for s := 0; s < 3; s++ { // source index Ksdxyz
-//		for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
-//			xw := wrap(x, size[X])
-//			y1 := 0 //-(size[Y] - 1) / 2
-//			for y := y1; y <= size[Y]/2-1; y++ {
-//				yw := wrap(y, size[Y])
-//				z1 := 0 //-(size[Z] - 1) / 2
-//				for z := z1; z <= size[Z]/2-1; z++ {
-//					zw := wrap(z, size[Z])
-//					R.Set(float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z])
-//
-//					faceIntegral(B, R, cellsize, s, accuracy)
-//
-//					for d := s; d < 3; d++ { // destination index Ksdxyz
-//						i := KernIdx[s][d] // 3x3 symmetric index to 1x6 index
-//						k[i].Array()[xw][yw][zw] = B[d]
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	return k
-//}
-
-// Calculates only the self-kernel K[ij][0][0][0].
-// used for edge corrections where we need to subtract this generic self kernel contribution and
-// replace it by an edge-corrected version specific for each cell.
-//func selfKernel(sourcedir int, cellsize []float64, accuracy int) []float64 {
-//	B := tensor.NewVector()
-//	R := tensor.NewVector()
-//	faceIntegral(B, R, cellsize, sourcedir, accuracy)
-//	return []float64{B[X], B[Y], B[Z]}
-//}
-
 // Magnetostatic field at position r (integer, number of cellsizes away from source) for a given source magnetization direction m (X, Y, or
 // s = source direction (x, y, z)
-func faceIntegral(B, R *vector, cellsize []float64, s int, accuracy int) {
-	n := accuracy                  // number of integration points = n^2
-	u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
-	R2 := NewVector()
-	pole := NewVector() // position of point charge on the surface
-
-
-	surface := cellsize[v] * cellsize[w] // the two directions perpendicular to direction s
-	charge := surface
-
-	pu1 := cellsize[u] / 2. // positive pole
-	pu2 := -pu1             // negative pole
-
-	B.Set(0., 0., 0.) // accumulates magnetic field
-	for i := 0; i < n; i++ {
-		pv := -(cellsize[v] / 2.) + cellsize[v]/float64(2*n) + float64(i)*(cellsize[v]/float64(n))
-		for j := 0; j < n; j++ {
-			pw := -(cellsize[w] / 2.) + cellsize[w]/float64(2*n) + float64(j)*(cellsize[w]/float64(n))
-
-			pole[u] = pu1
-			pole[v] = pv
-			pole[w] = pw
-
-			R2.SetTo(R)
-			R2.Sub(pole)
-			r := R2.Norm()
-			R2.Normalize()
-			R2.Scale(charge / (4 * math.Pi * r * r))
-			B.Add(R2)
-
-			pole[u] = pu2
-
-			R2.SetTo(R)
-			R2.Sub(pole)
-			r = R2.Norm()
-			R2.Normalize()
-			R2.Scale(-charge / (4 * math.Pi * r * r))
-			B.Add(R2)
-		}
-	}
-	B.Scale(1. / (float64(n * n))) // n^2 integration points
-}
+//func faceIntegral(B, R *vector, cellsize []float64, s int, accuracy int) {
+//	n := accuracy                  // number of integration points = n^2
+//	u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
+//	R2 := NewVector()
+//	pole := NewVector() // position of point charge on the surface
+//
+//
+//	surface := cellsize[v] * cellsize[w] // the two directions perpendicular to direction s
+//	charge := surface
+//
+//	pu1 := cellsize[u] / 2. // positive pole
+//	pu2 := -pu1             // negative pole
+//
+//	B.Set(0., 0., 0.) // accumulates magnetic field
+//	for i := 0; i < n; i++ {
+//		pv := -(cellsize[v] / 2.) + cellsize[v]/float64(2*n) + float64(i)*(cellsize[v]/float64(n))
+//		for j := 0; j < n; j++ {
+//			pw := -(cellsize[w] / 2.) + cellsize[w]/float64(2*n) + float64(j)*(cellsize[w]/float64(n))
+//
+//			pole[u] = pu1
+//			pole[v] = pv
+//			pole[w] = pw
+//
+//			R2.SetTo(R)
+//			R2.Sub(pole)
+//			r := R2.Norm()
+//			R2.Normalize()
+//			R2.Scale(charge / (4 * math.Pi * r * r))
+//			B.Add(R2)
+//
+//			pole[u] = pu2
+//
+//			R2.SetTo(R)
+//			R2.Sub(pole)
+//			r = R2.Norm()
+//			R2.Normalize()
+//			R2.Scale(-charge / (4 * math.Pi * r * r))
+//			B.Add(R2)
+//		}
+//	}
+//	B.Scale(1. / (float64(n * n))) // n^2 integration points
+//}
 
 // A 3-component vector
 type vector [3]float64
 
-func NewVector() *vector {
-	return new(vector)
+func NewVector() vector {
+	return vector([3]float64{0, 0, 0})
 }
 
-func UnitVector(direction int) *vector {
+func UnitVector(direction int) vector {
 	v := NewVector()
 	v[direction] = 1.
 	return v

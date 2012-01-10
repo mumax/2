@@ -42,8 +42,12 @@ __global__ void temperature_scaleKern(float* noise,
 			tempMul = 1.0f;
 		}
 
-		
-		noise[i] *= sqrtf((alphaMul * tempMul * alphaKB2tempMul)/(mu0VgammaDtMSatMul * mSatMul));
+		if(mSatMul != 0.f){
+			noise[i] *= sqrtf((alphaMul * tempMul * alphaKB2tempMul)/(mu0VgammaDtMSatMul * mSatMul));
+		}else{
+			// no fluctuations outside magnet
+			noise[i] = 0.f;
+		}
 	}
 }
 

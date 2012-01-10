@@ -3,6 +3,7 @@ dirs=\
 	libtensor\
 	pkg\
 	mumax2\
+	muqueue\
 	python\
 
 # exclude muview for the moment in Os X

@@ -60,8 +60,8 @@ type Quant struct {
 
 //____________________________________________________________________ init
 
-// Returns a new quantity. See Quant.init().
-func newQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, cpuOnly bool, desc ...string) *Quant {
+// Returns a new quantity. See Quant.init(). TODO: make desc obligatory
+func NewQuant(name string, nComp int, size3D []int, kind QuantKind, unit Unit, cpuOnly bool, desc ...string) *Quant {
 	q := new(Quant)
 	q.init(name, nComp, size3D, kind, unit, cpuOnly, desc...)
 	return q
@@ -137,6 +137,11 @@ func (q *Quant) SetUpdater(u Updater) {
 		panic(Bug(fmt.Sprint("Quant.SetUpdater:", q.Name(), "updater already set.")))
 	}
 	q.updater = u
+}
+
+// Gets the updater
+func (q *Quant) Updater() Updater {
+	return q.updater
 }
 
 func (q *Quant) initChildrenParents() {
@@ -397,6 +402,7 @@ func (q *Quant) Invalidate() {
 
 // Verifies if the quantity's value makes sense.
 // Called, e.g., after the user set a value.
+// TODO: not used consistently
 func (q *Quant) Verify() {
 	if q.verifier != nil {
 		q.verifier(q)

@@ -5,22 +5,30 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
+// This file implements the micromagnetism meta-module
 // Author: Arne Vansteenkiste
 
-import ()
+import (
+	. "mumax/engine"
+)
 
 // Register this module
 func init() {
-	RegisterModule("micromagnetism", "Standard micromagnetism", LoadMicromag)
+	RegisterModule("micromagnetism", "Basic micromagnetism module", LoadMicromag)
 }
 
 func LoadMicromag(e *Engine) {
-	e.LoadModule("magnetization")
-	e.LoadModule("hfield")
+	LoadHField(e)
+	LoadMagnetization(e)
 	e.LoadModule("zeeman")
 	e.LoadModule("demagexch")
 	e.LoadModule("llg")
 	e.LoadModule("regions")
+
+	torque := e.Quant("torque")
+	maxtorque := e.AddNewQuant("maxtorque", SCALAR, VALUE, torque.Unit(), "Maximum torque")
+	e.Depends("maxtorque", "torque")
+	maxtorque.SetUpdater(NewMaxAbsUpdater(torque, maxtorque))
 }
