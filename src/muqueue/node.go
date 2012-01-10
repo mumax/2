@@ -18,10 +18,13 @@ type Node struct {
 	loginCmd []string
 	devBusy  []bool // GPU[i] in use?
 	group    string // group that owns this node
-	// draining bool // stop using this node	
+	drain    bool   // stop using this node	
 }
 
 func NewNode(hostname string, NDev int, group string, loginCmd []string) *Node {
+	if node, ok := nodemap[hostname]; ok {
+		panic("Node already added: " + node.String())
+	}
 	n := new(Node)
 	n.hostname = hostname
 	n.group = group
@@ -29,8 +32,11 @@ func NewNode(hostname string, NDev int, group string, loginCmd []string) *Node {
 	n.devBusy = make([]bool, NDev)
 	lastNodeId++
 	n.id = lastNodeId
+	nodemap[hostname] = n
 	return n
 }
+
+var nodemap map[string]*Node = make(map[string]*Node) // maps host names onto nodes
 
 var lastNodeId int
 
@@ -45,6 +51,9 @@ func (n *Node) NDevice() int {
 // returns if the node is completely busy
 // (not a single device free)
 func (n *Node) Busy() bool {
+	if n.drain {
+		return true
+	}
 	for _, busy := range n.devBusy {
 		if !busy {
 			return false

@@ -291,10 +291,10 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		// copy chunks, cross-device
 		Start("FW_copy")
 		chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
-    srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
-    dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
+		srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
+		dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
 
-    Assert(dataSize[1]%NDev == 0)
+		Assert(dataSize[1]%NDev == 0)
 		Assert(logicSize[2]%NDev == 0)
 		for c := range chunks { // source chunk
 			for dev := range _useDevice { // source device
