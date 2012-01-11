@@ -407,6 +407,24 @@ func (a API) OutputDirectory() string {
 	return a.Engine.outputDir
 }
 
+//________________________________________________________________________________ add quantities
+
+// Add a new quantity to the multi-physics engine, its
+// value is added to the (existing) sumQuantity.
+// E.g.: Add_To("H", "H_1") adds a new external field
+// H_1 that will be added to H.
+func (a API) Add_To(sumQuantity, newQuantity string) {
+	e := a.Engine
+	sumQuant := e.Quant(sumQuantity)
+	sumUpd, ok := sumQuant.GetUpdater().(*SumUpdater)
+	if !ok {
+		panic(InputErrF("Add_To: quantity ", sumQuant.Name(), " is not of type 'sum', nothing can be added to it."))
+	}
+	term := e.AddNewQuant(newQuantity, sumQuant.NComp(), MASK, sumQuant.Unit())
+	sumUpd.AddParent(term.Name())
+	Log("Added new quantity", term.FullName(), "to", sumQuant.Name())
+}
+
 //________________________________________________________________________________ misc
 
 // Saves an image file of the physics graph using the given file name.
