@@ -63,22 +63,22 @@ func InitVectorQuantVortexRegion(S, regions *Array, regionsToProceed []bool, cen
 		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
 
 		(*C.bool)(unsafe.Pointer(&(regionsToProceed[0]))),
-		
+
 		(C.float)(center[0]),
 		(C.float)(center[1]),
 		(C.float)(center[2]),
-		
+
 		(C.float)(axis[0]),
 		(C.float)(axis[1]),
 		(C.float)(axis[2]),
-		
+
 		(C.float)(cellsize[0]),
 		(C.float)(cellsize[1]),
 		(C.float)(cellsize[2]),
 
 		(C.int)(polarity),
 		(C.int)(chirality),
-		
+
 		(C.float)(maxRadius),
 
 		(C.int)(len(regionsToProceed)),
@@ -86,7 +86,7 @@ func InitVectorQuantVortexRegion(S, regions *Array, regionsToProceed []bool, cen
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
 
 		(C.int)(regions.partLen3D),
-		
+
 		(C.int)(regions.partSize[2]),
 		(C.int)(regions.partSize[1]),
 		(C.int)(regions.partSize[0]))
