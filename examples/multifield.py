@@ -2,9 +2,8 @@ from mumax2 import *
 from math import *
 
 # Example of excitation with 2 localized magnetic fields
-# We (ab)use h_bias, which is intended as a additional field for biasing,
-# but can be used as a general external field field.
-
+# We use add_to(), which can be used to add new contributions
+# to a quantity
 
 # define geometry
 
@@ -22,7 +21,6 @@ setcellsize(sizeX/Nx, sizeY/Ny, sizeZ/Nz)
 # load modules
 
 load('micromagnetism')
-load('hbias') # provides a second external field
 load('solver/rk12')
 
 
@@ -49,13 +47,19 @@ setv('alpha', 0.02) # restore normal damping
 setv('t', 0)        # re-set time to 0 so output starts at 0
 setv('dt', 0.2e-12)
 
+# MULTI-FIELD EXAMPLE:
+# Here we introduce new quantities H_1 and H_2, added to H.
+# Infinitely many can be added.
+add_to('H', 'H_1')
+add_to('H', 'H_2')
+
 # define field1
 # mask is thin line at X=10 cells
 mask1 = makearray(3, Nx, 1, Nz) # 3 x Nx x Ny x Nz array
 mask1[0][10][0][0] = 1 # x-component
 mask1[1][10][0][0] = 1 # y-component
 mask1[2][10][0][0] = 1 # z-component
-setmask('h_ext', mask1)
+setmask('H_1', mask1)
 # masks can also be read from .omf files (readmask, 'h_ext', 'mask.omf')
 
 # define oscillating field
@@ -65,7 +69,7 @@ B1y = 0.1 #T
 B1z = 0 #T
 for i in range(1000): # 1000 points in total
 	t = (i/30.)/omega1 # about 30 points per period
-	setpointwise('h_ext', t, [B1x*sin(omega1*t)/mu0, B1y/mu0*sin(omega1*t), B1z/mu0*sin(omega1*t)])
+	setpointwise('H_1', t, [B1x*sin(omega1*t)/mu0, B1y/mu0*sin(omega1*t), B1z/mu0*sin(omega1*t)])
 
 
 # define field2
@@ -74,7 +78,7 @@ mask2 = makearray(3, Nx, 1, Nz) # 3 x Nx x Ny x Nz array
 mask2[0][120][0][0] = 1 # x-component
 mask2[1][120][0][0] = 1 # y-component
 mask2[2][120][0][0] = 1 # z-component
-setmask('h_bias', mask2)
+setmask('h_2', mask2)
 
 # define oscillating field
 omega2 = 2*pi*20e9 # frequency1: 2GHz
@@ -83,12 +87,12 @@ B2y = 0 #T
 B2z = 0.1 #T
 for i in range(2000):
 	t = (i/30.)/omega2
-	setpointwise('h_bias', t, [B2x*sin(omega2*t)/mu0, B2y/mu0*sin(omega2*t), B2z/mu0*sin(omega2*t)])
+	setpointwise('h_2', t, [B2x*sin(omega2*t)/mu0, B2y/mu0*sin(omega2*t), B2z/mu0*sin(omega2*t)])
 
 B2x = 0 #T
 B2y = 0 #T
 B2z = 0.1 #T
-setv('h_bias', [B2x/mu0, B2y/mu0, B2z/mu0])
+setv('h_2', [B2x/mu0, B2y/mu0, B2z/mu0])
 
 
 # schedule output
@@ -98,7 +102,7 @@ autosave("m", "omf", ["Text"], 20e-12)
 
 # save table with time, average m, average field1 and average field2 every 10e-12
 # one should check this file to see if the fields are defined as expected
-autotabulate(["t", "<m>", "<h_ext>", "<h_bias>"], "m.txt", 1e-12)
+autotabulate(["t", "<m>", "<h_1>", "<h_2>"], "m.txt", 1e-12)
 
 run(1e-9)
 
