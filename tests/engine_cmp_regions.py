@@ -4,13 +4,13 @@ from mumax2_cmp import *
 regionNameDictionary ={}
 
 setgridsize(80, 40, 2)
-setcellsize(5e-9, 5e-9, 50e-9)
+setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')
 
 setscalar('alpha', 0.1)
 getscalar('alpha')
-setscalar('Msat', 8.0e5)
+setscalar('Msat', 1.0)
 setscalar('Aex', 12e-13)
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
@@ -20,7 +20,7 @@ setarray('m', m)
 imageName = os.path.abspath( os.path.dirname(__file__)) + '/engine_cmp_regions.png'
 regionDic = {"M":"Blue",
 			 "u":"Lime",
-			 "m":"White",
+			 "m":"Black",
 			 "a":"DarkBlue",
 			 "x":"Red",
 			 "2":"Yellow"}
@@ -42,7 +42,7 @@ mValues = {"M":[ 1.0, 0.0,0.0],
 InitUniformRegionVectorQuant('m', mValues)
 
 save("Msat", "ovf", ["Text"], "regions_picture_Ms.ovf" )
-save("m", "ovf", ["Text"], "regions_picture_m.ovf" )
+save("m", "ovf", ["Text"], "regions_picture_uniform_m.ovf" )
 
 ## Example of initialization of region system with a script
 def script(X, Y, Z, param):

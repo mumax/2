@@ -52,3 +52,43 @@ func InitVectorQuantUniformRegion(S, regions *Array, initValuesX, initValuesY, i
 		(C.int)(regions.partLen3D))
 	S.Stream.Sync()
 }
+
+// Initialise scalar quantity with uniform value in each region
+func InitVectorQuantVortexRegion(S, regions *Array, regionsToProceed []bool, center, axis, cellsize []float32, polarity, chirality int, maxRadius float32) {
+	C.initVectorQuantVortexRegionAsync(
+		(**C.float)(unsafe.Pointer(&(S.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[X].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
+
+		(*C.bool)(unsafe.Pointer(&(regionsToProceed[0]))),
+		
+		(C.float)(center[0]),
+		(C.float)(center[1]),
+		(C.float)(center[2]),
+		
+		(C.float)(axis[0]),
+		(C.float)(axis[1]),
+		(C.float)(axis[2]),
+		
+		(C.float)(cellsize[0]),
+		(C.float)(cellsize[1]),
+		(C.float)(cellsize[2]),
+
+		(C.int)(polarity),
+		(C.int)(chirality),
+		
+		(C.float)(maxRadius),
+
+		(C.int)(len(regionsToProceed)),
+
+		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
+
+		(C.int)(regions.partLen3D),
+		
+		(C.int)(regions.partSize[2]),
+		(C.int)(regions.partSize[1]),
+		(C.int)(regions.partSize[0]))
+	S.Stream.Sync()
+}

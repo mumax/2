@@ -6,8 +6,8 @@
   * @author RŽmy Lassalle-Balier
   */
 
-#ifndef _QUANT_INIT_H_
-#define _QUANT_INIT_H_
+#ifndef _UNIFORM_H_
+#define _UNIFORM_H_
 
 #include <cuda.h>
 

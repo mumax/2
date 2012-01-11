@@ -52,9 +52,9 @@ __global__ void initVectorQuantUniformRegionKern(float* Sx, float* Sy, float* Sz
 			Sy[i] = initValuesY[regionIndex];
 			Sz[i] = initValuesZ[regionIndex];
 		} else {
-			Sx[i] = 1.0f;
+			Sx[i] = 0.0f;
 			Sy[i] = 0.0f;
-			Sz[i] = 0.0f;
+			Sz[i] = 1.0f;
 		}
 	}
 }
@@ -82,7 +82,7 @@ void initVectorQuantUniformRegionAsync(float** Sx, float** Sy, float** Sz, float
 		gpu_safe( cudaMemcpy(dev_initValuesX,host_initValuesX,initValNum * sizeof(float), cudaMemcpyHostToDevice));
 		gpu_safe( cudaMemcpy(dev_initValuesY,host_initValuesY,initValNum * sizeof(float), cudaMemcpyHostToDevice));
 		gpu_safe( cudaMemcpy(dev_initValuesZ,host_initValuesZ,initValNum * sizeof(float), cudaMemcpyHostToDevice));
-		initVectorQuantUniformRegionKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (Sx[dev],Sy[dev],Sz[dev],regions[dev],dev_initValuesX,dev_initValuesY,dev_initValuesZ, initValNum, Npart);
+		initVectorQuantUniformRegionKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (Sz[dev],Sy[dev],Sx[dev],regions[dev],dev_initValuesX,dev_initValuesY,dev_initValuesZ, initValNum, Npart);
 		cudaFree(dev_initValuesX);
 		cudaFree(dev_initValuesY);
 		cudaFree(dev_initValuesZ);

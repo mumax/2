@@ -320,9 +320,9 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	q.Invalidate() //!
 }
 
-// Sets scalar quantity uniform on each 
+// Sets scalar quantity uniform on each region
 // @param quant (string) name of the scalar quantity to set
-// @param initValues (map[string] float64) array containing the initial values to set. The index of each value must correpond to the concerned region.
+// @param initValues ([]float32) array containing the initial values to set. The index of each value must correpond to the concerned region.
 // @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
 func (a API) SetScalarUniformRegion(quant string, initValues []float32) {
 	q := a.Engine.Quant(quant)
@@ -335,9 +335,9 @@ func (a API) SetScalarUniformRegion(quant string, initValues []float32) {
 	q.Invalidate()
 }
 
-// Sets vector quantity uniform on each 
+// Sets vector quantity uniform on each region
 // @param quant (string) name of the scalar quantity to set
-// @param initValues (map[string] float64) array containing the initial values to set. The index of each value must correpond to the concerned region.
+// @param initValues ([]float32) array containing the initial values to set. The index of each value must correpond to the concerned region.
 // @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
 func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, initValuesZ []float32) {
 	q := a.Engine.Quant(quant)
@@ -350,6 +350,51 @@ func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, init
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
 	gpu.InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
+	q.Invalidate()
+}
+
+// Sets vector quantity to vortex on selected regions 
+// @param quant (string) name of the scalar quantity to set
+// @param regionsToProceed ([]bool) index correspond to region index and value is true if the region should be set to vortex. Else it is set to false.
+// @param center ([]float32) array containing the coordinates of the center of the vortex
+// @param axis ([]float32) array containing the coordinates of the axis of the vortex
+// @param cellsize ([]float32) array containing the cell size along each axis X, Y, Z
+// @param polarity (int) integer equal to +1 if the polarity is up (relatively to the axis) and -1 if the polarity is down.
+// @param chirality (int) integer equal to +1 if the chirality is CCW and -1 if the chirality is CW (when the vortex is seen from the top, relatively to the axis).
+// @param maxRadius (float) float reprensenting the maximum radius around the axis, that should be processed. 0 means limitless.
+// @note A wrapper should be defined to allow the user to give a dictionary where keys are the names of the regions.
+func (a API) SetVectorVortexRegion(quant string, regionsToProceed, center, axis, cellsize []float32, polarity, chirality int, maxRadius float32) {
+	q := a.Engine.Quant(quant)
+	if q.nComp != 3 {
+		panic(InputErr(fmt.Sprint(q.Name(), " is not a vector. It has ", q.nComp, "component(s).")))
+	}
+	if polarity != -1 && polarity != 1 {
+		panic(InputErr(fmt.Sprint("Polarity should be either 1 (up) or -1 (down).")))
+	}
+	if chirality != -1 && chirality != 1 {
+		panic(InputErr(fmt.Sprint("Chirality should be either 1 (CCW) or -1 (CW).")))
+	}
+	if len(center) != 3 {
+		panic(InputErr(fmt.Sprint("Center should have 3D coordinates instead of ", len(center), "D.")))
+	}
+	if len(axis) != 3 {
+		panic(InputErr(fmt.Sprint("Axis should have 3D coordinates instead of ", len(axis), "D.")))
+	}
+	if len(cellsize) != 3 {
+		panic(InputErr(fmt.Sprint("Cellsize should have 3D coordinates instead of ", len(cellsize), "D.")))
+	}
+	q.assureAlloc()
+	regions := a.Engine.Quant("regionDefinition")
+	regionP := []bool{}
+	for c := range regionsToProceed {
+		if regionsToProceed[c] == 0.0 {
+			regionP = append(regionP, false)
+		} else {
+			regionP = append(regionP, true)
+		}
+	}
+	//gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionsToProceed, center, axis, cellsize, polarity, chirality, maxRadius)
+	gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionP, center, axis, cellsize, polarity, chirality, maxRadius)
 	q.Invalidate()
 }
 

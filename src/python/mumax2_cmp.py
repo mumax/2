@@ -56,22 +56,35 @@ def setVortex( fieldName , center , axis , polarity , chirality , region = 'all'
 							  u[1] * polarity ,
 							  u[2] * polarity ]
 						setcell(fieldName,X,Y,Z,m)
-						m = getcell('m',X,Y,Z)
 					else:
 						m = [ - chirality * ( u[1] * v[2] - u[2] * v[1])/d ,
 							  - chirality * ( u[2] * v[0] - u[0] * v[2])/d ,
 							  - chirality * ( u[0] * v[1] - u[1] * v[0])/d ]
 						setcell(fieldName,X,Y,Z,[float(m[0]),float(m[1]),float(m[2])])
-						m = getcell('m',X,Y,Z)
 	return
 
 ## Set up the region system
 # Set up an array of the size of the grid filled with zeros and return it set up a dictionary of the regions name
 def setupRegionSystem():
 	global regionDefinition
-	setscalar('regionDefinition', 1.)
 	global regionNameDictionary
-	regionNameDictionary = {'empty':0.}
+	try:
+		regionNameDictionary
+	except NameError:
+		#build an array at the good size to prevent resample call
+		regionDefinition = [[]]
+		gridSize = getgridsize()
+		for i in range(0,gridSize[0]):
+			regionDefinition[0].append([])
+			for j in range(0,gridSize[1]):
+				regionDefinition[0][i].append([])
+				for k in range(0,gridSize[2]):
+					regionDefinition[0][i][j].append(1.0)
+		setmask('regionDefinition', regionDefinition)
+		regionNameDictionary = {'empty':0.}
+	else:
+		if len(regionNameDictionary) <= 1:
+			regionNameDictionary = {'empty':0.}
 	return
 
 ## Set up and initialize the region system corresponding to a given script
@@ -304,5 +317,28 @@ def InitUniformRegionVectorQuant(quantName, initValues):
 	setvectoruniformregion(quantName, valuesX, valuesY, valuesZ )
 	return
 
-
-	
+## Initialize scalar quantity with uniform value in each region
+#  Every regions that have been set but that are not used here will be considered as part of 'empty' region. Empty region will set the quantity to zero.
+# @param quantName (string) name of the scalar quantity to set
+# @param initValues (dictionary string(region name) => float (value in region)) initial values. Any not existing region is ignored.
+def InitVortexRegionVectorQuant(quantName, regionsToProceed, center, axis, polarity, chirality, maxRadius ):
+	global regionNameDictionary
+	regionsIndexToProceed = []
+	cellSize = getcellsize()
+	setupRegionSystem()
+	if regionsToProceed.has_key('all') and regionsToProceed['all'] != 0.0:
+		if len(regionNameDictionary) == 1:
+			regionNameDictionary[1] = 'all'
+		for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+			regionsIndexToProceed.append(1.0)
+	else:
+		for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+			if regionsToProceed.has_key(key):
+				regionsIndexToProceed.append(regionsToProceed[key])
+			elif key == 'empty':
+				regionsIndexToProceed.append(0.0)
+			else:
+				regionsIndexToProceed.append(0.0)
+	#setvectorvortexregion(quantName, regionsIndexToProceed, center, axis, [cellSize[0],cellSize[1],cellSize[2]], polarity, chirality, maxRadius )
+	setvectorvortexregion(quantName, regionsIndexToProceed, center, axis, cellSize, polarity, chirality, maxRadius )
+	return
