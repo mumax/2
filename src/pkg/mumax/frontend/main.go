@@ -266,7 +266,7 @@ func initTimeout() {
 
 const (
 	WELCOME  = `
- MuMax 2.0.1623 alpha
+ MuMax 2.0.1603 alpha
  (C) Arne Vansteenkiste, Ben Van de Wiele
      (Dynamat/EELAB Ghent University, Belgium), and
      Rémy Lasalle-Balier, Graham Rowlands, Mykola Dvornik.
