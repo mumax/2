@@ -53,133 +53,27 @@ func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
 	Stop("kern_ex")
 }
 
-// See Donahue, M. J. & Porter, D. G.
-// Exchange energy formulations for 3D micromagnetics
-// Physica B-condensed Matter, 2004, 343, 177-183
-//func Exch12NgbrKernel(size []int, cellsize []float32) []*tensor.T3 {
-//	k := make([]*tensor.T3, 6)
-//	for i := range k {
-//		k[i] = tensor.NewT3(size)
-//	}
-//
-//	hx := cellsize[X] * cellsize[X]
-//	hy := cellsize[Y] * cellsize[Y]
-//	hz := cellsize[Z] * cellsize[Z]
-//
-//	for s := 0; s < 3; s++ { // source index Ksdxyz
-//		i := KernIdx[s][s]
-//		arr := k[i].Array()
-//
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = -2.5/hx - 2.5/hy - 2.5/hz
-//
-//		arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = 4. / 3. / hx
-//		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = 4. / 3. / hx
-//		arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = 4. / 3. / hy
-//		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = 4. / 3. / hy
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = 4. / 3. / hz
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = 4. / 3. / hz
-//
-//		arr[wrap(2, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = -1. / 12. / hx
-//		arr[wrap(-2, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = -1. / 12. / hx
-//		arr[wrap(0, size[X])][wrap(2, size[Y])][wrap(0, size[Z])] = -1. / 12. / hy
-//		arr[wrap(0, size[X])][wrap(-2, size[Y])][wrap(0, size[Z])] = -1. / 12. / hy
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(2, size[Z])] = -1. / 12. / hz
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-2, size[Z])] = -1. / 12. / hz
-//	}
-//
-//	return k
-//}
-//
-//// See Donahue, M. J. & Porter, D. G.
-//// Exchange energy formulations for 3D micromagnetics
-//// Physica B-condensed Matter, 2004, 343, 177-183
-//func Exch26NgbrKernel(size []int, cellsize []float32) []*tensor.T3 {
-//	k := make([]*tensor.T3, 6)
-//	for i := range k {
-//		k[i] = tensor.NewT3(size)
-//	}
-//
-//	hx := 18. * cellsize[X] * cellsize[X]
-//	hy := 18. * cellsize[Y] * cellsize[Y]
-//	hz := 18. * cellsize[Z] * cellsize[Z]
-//
-//	for s := 0; s < 3; s++ { // source index Ksdxyz
-//		i := KernIdx[s][s]
-//		arr := k[i].Array()
-//
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = -32./hx - 32./hy - 32./hz
-//
-//		arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = 16./hx - 8./hy - 8./hz
-//		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = 16./hx - 8./hy - 8./hz
-//		arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = -8./hx + 16./hy - 8./hz
-//		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = -8./hx + 16./hy - 8./hz
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = -8./hx - 8./hy + 16./hz
-//		arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = -8./hx - 8./hy + 16./hz
-//
-//		arr[wrap(1, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = 4./hx + 4./hy - 2./hz
-//		arr[wrap(1, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = 4./hx + 4./hy - 2./hz
-//		arr[wrap(-1, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = 4./hx + 4./hy - 2./hz
-//		arr[wrap(-1, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = 4./hx + 4./hy - 2./hz
-//
-//		arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = 4./hx - 2./hy + 4./hz
-//		arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = 4./hx - 2./hy + 4./hz
-//		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = 4./hx - 2./hy + 4./hz
-//		arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = 4./hx - 2./hy + 4./hz
-//
-//		arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(1, size[Z])] = -2./hx + 4./hy + 4./hz
-//		arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(-1, size[Z])] = -2./hx + 4./hy + 4./hz
-//		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(1, size[Z])] = -2./hx + 4./hy + 4./hz
-//		arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(-1, size[Z])] = -2./hx + 4./hy + 4./hz
-//
-//		arr[wrap(1, size[X])][wrap(1, size[Y])][wrap(1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(1, size[X])][wrap(1, size[Y])][wrap(-1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(1, size[X])][wrap(-1, size[Y])][wrap(1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(1, size[X])][wrap(-1, size[Y])][wrap(-1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(-1, size[X])][wrap(1, size[Y])][wrap(1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(-1, size[X])][wrap(1, size[Y])][wrap(-1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(-1, size[X])][wrap(-1, size[Y])][wrap(1, size[Z])] = 1./hx + 1./hy + 1./hz
-//		arr[wrap(-1, size[X])][wrap(-1, size[Y])][wrap(-1, size[Z])] = 1./hx + 1./hy + 1./hz
-//
-//	}
-//
-//	//   for s := 0; s < 3; s++ { // source index Ksdxyz
-//	//     i := KernIdx[s][s]
-//	//     arr := k[i].Array()
-//	// 
-//	//     arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] =1.
-//	// 
-//	//     arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = 1.
-//	// 
-//	//     arr[wrap(1, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(1, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(1, size[Y])][wrap(0, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(-1, size[Y])][wrap(0, size[Z])] = 1.
-//	// 
-//	//     arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(1, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(0, size[Y])][wrap(-1, size[Z])] = 1.
-//	// 
-//	//     arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(1, size[Y])][wrap(-1, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(0, size[X])][wrap(-1, size[Y])][wrap(-1, size[Z])] = 1.
-//	// 
-//	//     arr[wrap(1, size[X])][wrap(1, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(1, size[X])][wrap(1, size[Y])][wrap(-1, size[Z])] = 1.
-//	//     arr[wrap(1, size[X])][wrap(-1, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(1, size[X])][wrap(-1, size[Y])][wrap(-1, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(1, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(1, size[Y])][wrap(-1, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(-1, size[Y])][wrap(1, size[Z])] = 1.
-//	//     arr[wrap(-1, size[X])][wrap(-1, size[Y])][wrap(-1, size[Z])] = 1.
-//	// 
-//	//   }
-//
-//	return k
-//}
+// Many-neighbor exchange kernel
+func ExchKernel(size []int, cellsize []float64, kern *host.Array, Range float64) {
+	Debug("Calculating laplace 6 kernel", "size:", size, "cellsize:", cellsize)
+	Start("kern_ex")
+
+	for s := 0; s < 3; s++ { // source index Ksdxyz
+		i := kernIdx[s][s]
+		arr := kern.Array[i]
+
+		hx := cellsize[X] * cellsize[X]
+		hy := cellsize[Y] * cellsize[Y]
+		hz := cellsize[Z] * cellsize[Z]
+
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
+		arr[Wrap(+1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
+		arr[Wrap(-1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
+		arr[Wrap(0, size[X])][Wrap(+1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
+		arr[Wrap(0, size[X])][Wrap(-1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(+1, size[Z])] = float32(1 / hz)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(-1, size[Z])] = float32(1 / hz)
+	}
+	Stop("kern_ex")
+}
+
