@@ -12,6 +12,7 @@ load('micromagnetism')
 load('solver/rk12')
 
 setv('Msat', 800e3)
+setv('demag_acc', 7)
 setv('Aex', 1.3e-11)
 setv('alpha', 1)
 setv('dt', 1e-12)

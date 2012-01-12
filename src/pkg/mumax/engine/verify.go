@@ -38,6 +38,24 @@ func Positive(q *Quant) {
 	}
 }
 
+// Panics if a multiplier is not a positive or zero integer
+func Uint(q *Quant) {
+	for _, v := range q.multiplier {
+		if v <= 0 || float64(int(v)) != v {
+			panic(InputErr(q.Name() + " should be integer >= 0"))
+		}
+	}
+}
+
+// Panics if a multiplier is not an integer
+func Int(q *Quant) {
+	for _, v := range q.multiplier {
+		if float64(int(v)) != v {
+			panic(InputErr(q.Name() + " should be integer"))
+		}
+	}
+}
+
 // Panics if a multiplier is < 0
 func NonNegative(q *Quant) {
 	for _, v := range q.multiplier {

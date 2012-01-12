@@ -23,7 +23,6 @@ func init() {
 }
 
 func LoadDemagExch(e *Engine) {
-	// TODO: verify aexch space-independent
 
 	// dependencies
 	LoadHField(e)
@@ -38,8 +37,12 @@ func LoadDemagExch(e *Engine) {
 	kernelSize := padSize(e.GridSize(), e.Periodic())
 
 	// demag kernel 
+	demagAcc := e.AddNewQuant("demag_acc", SCALAR, VALUE, Unit(""), "demag field accuracy")
+	demagAcc.SetScalar(8)
+	demagAcc.SetVerifier(Uint)
 	demagKern := NewQuant("kern_d", SYMMTENS, kernelSize, FIELD, Unit(""), CPUONLY, "reduced demag kernel (/Msat)")
 	e.AddQuant(demagKern)
+	e.Depends("kern_d", "demag_acc")
 	demagKern.SetUpdater(newDemagKernUpdater(demagKern))
 
 	// exch kernel 
@@ -89,7 +92,7 @@ func newDemagKernUpdater(demagKern *Quant) Updater {
 func (u *demagKernUpdater) Update() {
 	e := GetEngine()
 	kernsize := padSize(e.GridSize(), e.Periodic())
-	accuracy := 8
+	accuracy := int(e.Quant("demag_acc").Scalar())
 	// TODO: wisdom
 	Log("Calculating demag kernel, may take a moment...")
 	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
