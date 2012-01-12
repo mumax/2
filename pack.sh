@@ -22,6 +22,7 @@ echo packing into $tarball: $files
 
 rm -rf $tarball.tar.gz
 
+rm -rf $dir/mumax2
 tar cv $dir | gzip > $tarball
 
 rm -rf $dir
