@@ -21,6 +21,7 @@ import (
 	"path"
 	"fmt"
 	"os"
+	"quant_init"
 )
 
 // The API methods are accessible to the end-user through scripting languages.
@@ -331,7 +332,7 @@ func (a API) SetScalarUniformRegion(quant string, initValues []float32) {
 	}
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
-	gpu.InitScalarQuantUniformRegion(q.Array(), regions.Array(), initValues)
+	quant_init.InitScalarQuantUniformRegion(q.Array(), regions.Array(), initValues)
 	q.Invalidate()
 }
 
@@ -349,7 +350,7 @@ func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, init
 	}
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
-	gpu.InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
+	quant_init.InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
 	q.Invalidate()
 }
 
@@ -394,7 +395,7 @@ func (a API) SetVectorVortexRegion(quant string, regionsToProceed, center, axis,
 		}
 	}
 	//gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionsToProceed, center, axis, cellsize, polarity, chirality, maxRadius)
-	gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionP, center, axis, cellsize, polarity, chirality, maxRadius)
+	quant_init.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionP, center, axis, cellsize, polarity, chirality, maxRadius)
 	q.Invalidate()
 }
 

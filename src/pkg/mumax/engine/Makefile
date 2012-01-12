@@ -13,7 +13,6 @@ GOFILES=\
 	api.go\
 	module.go\
 	texgen.go\
-	mod_regions.go\
 	quant.go\
 	quantkind.go\
 	unit.go\

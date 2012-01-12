@@ -8,7 +8,7 @@
 // This file wraps libmultigpu.so.
 // Author: Arne Vansteenkiste
 
-package gpu
+package quant_init
 
 //#include "libmumax2.h"
 import "C"
@@ -17,6 +17,11 @@ import (
 	. "mumax/common"
 	"unsafe"
 )
+
+// Register this module
+func init() {
+	//fmt.Println("loaded quant_init.mod")
+}
 
 // Initialise scalar quantity with uniform value in each region
 func InitScalarQuantUniformRegion(S, regions *Array, initValues []float32) {
