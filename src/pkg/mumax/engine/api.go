@@ -17,7 +17,7 @@ import (
 	. "mumax/common"
 	"runtime"
 	"mumax/host"
-//	"mumax/gpu"
+	//	"mumax/gpu"
 	"path"
 	"fmt"
 	"os"
