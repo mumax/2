@@ -76,4 +76,3 @@ func ExchKernel(size []int, cellsize []float64, kern *host.Array, Range float64)
 	}
 	Stop("kern_ex")
 }
-

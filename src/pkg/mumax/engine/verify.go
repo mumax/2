@@ -74,7 +74,7 @@ func NonNegative(q *Quant) {
 	}
 }
 
-func AtLeast1(q*Quant){
+func AtLeast1(q *Quant) {
 	for _, v := range q.multiplier {
 		if v < 1 {
 			panic(InputErr(q.Name() + " should be >= 1"))

@@ -50,11 +50,11 @@ func LoadDemagExch(e *Engine) {
 	e.AddQuant(exchKern)
 	exRange := e.AddNewQuant("ex_range", SCALAR, VALUE, Unit("cells"), "exchange interaction range in cells; 1:nearest, 2:next-nearest,...")
 	exRange.SetVerifier(PosInt)
-//	exRange.SetVerifier(func(q *Quant) {
-//		if q.Scalar() < 1 {
-//			panic(InputErrF(q.Name(), "should be >= 1."))
-//		}
-//	})
+	//	exRange.SetVerifier(func(q *Quant) {
+	//		if q.Scalar() < 1 {
+	//			panic(InputErrF(q.Name(), "should be >= 1."))
+	//		}
+	//	})
 	exRange.SetScalar(1)
 	e.Depends("kern_ex", "ex_range")
 	exchKern.SetUpdater(newExchKernUpdater(exchKern))
