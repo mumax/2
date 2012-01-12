@@ -28,6 +28,7 @@ GOFILES=\
 	kernel_biotsavart.go\
 	kernel_exchange.go\
 	vector.go\
+	mod_regions.go\
 
 CGOFILES=\
 

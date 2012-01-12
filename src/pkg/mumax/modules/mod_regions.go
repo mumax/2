@@ -5,11 +5,13 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package engine
+package modules
 
 // Author: Rémy Lassalle-Balier
 
-import ()
+import (
+	. "mumax/engine"
+)
 
 // Register this module
 func init() {

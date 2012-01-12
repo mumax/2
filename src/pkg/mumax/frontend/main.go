@@ -269,7 +269,7 @@ const (
  MuMax 2.0.1692 alpha
  (C) Arne Vansteenkiste, Ben Van de Wiele
      (Dynamat/EELAB Ghent University, Belgium), and
-     Rémy Lasalle-Balier, Graham Rowlands, Mykola Dvornik.
+     Rémy Lassalle-Balier, Graham Rowlands, Mykola Dvornik.
 
   This is a DEVELOPER PREVIEW for testing purposes only.  
 

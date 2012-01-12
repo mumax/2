@@ -8,43 +8,39 @@
 // This file wraps libmultigpu.so.
 // Author: Arne Vansteenkiste
 
-package quant_init
+package engine
 
 //#include "libmumax2.h"
 import "C"
 
 import (
 	. "mumax/common"
+	. "mumax/gpu"
 	"unsafe"
 )
 
-// Register this module
-func init() {
-	//fmt.Println("loaded quant_init.mod")
-}
-
 // Initialise scalar quantity with uniform value in each region
-func InitScalarQuantUniformRegion(S, regions *Array, initValues []float32) {
+func InitScalarQuantUniformRegion(initValues []float32, S, regions *Array) {
 	C.initScalarQuantUniformRegionAsync(
-		(**C.float)(unsafe.Pointer(&(S.pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(regions.Pointers()[0]))),
 		(*C.float)(unsafe.Pointer(&(initValues[0]))),
 		(C.int)(len(initValues)),
 
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
 
-		(C.int)(regions.partLen3D))
+		(C.int)(regions.PartLen3D()))
 	S.Stream.Sync()
 }
 
 // Initialise scalar quantity with uniform value in each region
 func InitVectorQuantUniformRegion(S, regions *Array, initValuesX, initValuesY, initValuesZ []float32) {
 	C.initVectorQuantUniformRegionAsync(
-		(**C.float)(unsafe.Pointer(&(S.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(S.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(S.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Z].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(regions.Pointers()[0]))),
 
 		(*C.float)(unsafe.Pointer(&(initValuesX[0]))),
 		(*C.float)(unsafe.Pointer(&(initValuesY[0]))),
@@ -54,18 +50,18 @@ func InitVectorQuantUniformRegion(S, regions *Array, initValuesX, initValuesY, i
 
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
 
-		(C.int)(regions.partLen3D))
+		(C.int)(regions.PartLen3D()))
 	S.Stream.Sync()
 }
 
 // Initialise scalar quantity with uniform value in each region
 func InitVectorQuantVortexRegion(S, regions *Array, regionsToProceed []bool, center, axis, cellsize []float32, polarity, chirality int, maxRadius float32) {
 	C.initVectorQuantVortexRegionAsync(
-		(**C.float)(unsafe.Pointer(&(S.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(S.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(S.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Z].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[X].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(regions.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(regions.Pointers()[0]))),
 
 		(*C.bool)(unsafe.Pointer(&(regionsToProceed[0]))),
 
@@ -90,10 +86,10 @@ func InitVectorQuantVortexRegion(S, regions *Array, regionsToProceed []bool, cen
 
 		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
 
-		(C.int)(regions.partLen3D),
+		(C.int)(regions.PartLen3D()),
 
-		(C.int)(regions.partSize[2]),
-		(C.int)(regions.partSize[1]),
-		(C.int)(regions.partSize[0]))
+		(C.int)(regions.PartSize()[2]),
+		(C.int)(regions.PartSize()[1]),
+		(C.int)(regions.PartSize()[0]))
 	S.Stream.Sync()
 }

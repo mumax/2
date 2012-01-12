@@ -23,6 +23,7 @@ GOFILES=\
 CGOFILES=\
 	multigpu.go\
 	libmumax2.go\
+	
 
 CGO_CFLAGS+=\
 	-I/usr/local/cuda/include\

@@ -3,15 +3,17 @@ from mumax2_cmp import *
 
 regionNameDictionary ={}
 
-setgridsize(80, 40, 2)
+setgridsize(256, 128, 2)
 setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')
+load('solver/rk12')
 
-setscalar('alpha', 0.1)
+setv('alpha', 0.1)
 getscalar('alpha')
-setscalar('Msat', 1.0)
-setscalar('Aex', 12e-13)
+setv('Msat', 1.0)
+setv('Aex', 12e-13)
+setv('m_maxerror', 1./1000)
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setarray('m', m)
@@ -40,6 +42,14 @@ mValues = {"M":[ 1.0, 0.0,0.0],
 		   "x":[-1.0, 0.0,0.0],
 		   "2":[-1.0,-1.0,0.0]}
 InitUniformRegionVectorQuant('m', mValues)
+mValues = {"M":0,
+		   "u":0,
+		   "m":0,
+		   "a":1,
+		   "x":0,
+		   "2":0}
+#InitVortexRegionVectorQuant('m', mValues, [200.0e-9,200.0e-9,0.0], [0.0,0.0,1.0], 1, 1, 0 )
+InitVortexRegionVectorQuant('m', mValues, [776.0e-9,213.0e-9,0.0], [0.0,0.0,1.0], 1, 1, 0 )
 
 save("Msat", "ovf", ["Text"], "regions_picture_Ms.ovf" )
 save("m", "ovf", ["Text"], "regions_picture_uniform_m.ovf" )
@@ -62,9 +72,9 @@ Hx = 0 / mu0
 Hy = 0 / mu0
 Hz = 0.1 / mu0 
 
-setvalue('H_ext', [Hx, Hy, Hz])
+setv('H_ext', [Hx, Hy, Hz])
 
-setscalar('dt', 1e-12)
+setv('dt', 1e-12)
 #save("regionDefinition", "omf", ["Text"], "region.omf" )
 #autosave("m", "omf", ["Text"], 10e-12)
 #autosave("m", "ovf", ["Text"], 10e-12)

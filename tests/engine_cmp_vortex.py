@@ -5,11 +5,12 @@ setgridsize(80, 80, 2)
 setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')
+load('solver/rk12')
 
-setscalar('alpha', 0.1)
-getscalar('alpha')
-setscalar('Msat', 800e3)
-setscalar('Aex', 12e-13)
+setv('alpha', 0.1)
+setv('Msat', 800e3)
+setv('Aex', 12e-13)
+setv('m_maxerror', 1./1000)
 
 m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setarray('m', m)
@@ -23,9 +24,9 @@ Hx = 0 / mu0
 Hy = 0 / mu0
 Hz = 0.1 / mu0 
 
-setvalue('H_ext', [Hx, Hy, Hz])
+setv('H_ext', [Hx, Hy, Hz])
 
-setscalar('dt', 1e-12)
+setv('dt', 1e-12)
 #save("m", "omf", ["Text"], "m_vortex.omf" )
 #save("regionDefinition", "omf", ["Text"], "region.omf" )
 #autosave("m", "omf", ["Text"], 10e-12)
