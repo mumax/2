@@ -54,25 +54,54 @@ func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
 }
 
 // Many-neighbor exchange kernel
-func ExchKernel(size []int, cellsize []float64, kern *host.Array, Range float64) {
-	Debug("Calculating laplace 6 kernel", "size:", size, "cellsize:", cellsize)
+func ExchKernel(size []int, cellsize []float64, kern *host.Array, range2 float64) {
+	Debug("Calculating exchange kernel", "range²:", range2)
 	Start("kern_ex")
+
+	if range2 < 1 || range2 > 3 {
+		panic(InputErrF("Exchange range should be 1,2 or 3"))
+	}
+	N := int(range2)
+	Assert(float64(N) == range2)
+
+	var totalWeight float64
+	for i := 1; i <= N; i++ {
+		totalWeight += 1 / float64(i)
+	}
+	scale := 1 / totalWeight
+
+	xmin, xmax := -1, 1
+	ymin, ymax := -1, 1
+	zmin, zmax := -1, 1
+	if size[X] == 1 { // 2D case
+		xmin, xmax = 0, 0
+	}
+
+	dx := cellsize[X]
+	dy := cellsize[Y]
+	dz := cellsize[Z]
 
 	for s := 0; s < 3; s++ { // source index Ksdxyz
 		i := kernIdx[s][s]
 		arr := kern.Array[i]
+		var total float64
 
-		hx := cellsize[X] * cellsize[X]
-		hy := cellsize[Y] * cellsize[Y]
-		hz := cellsize[Z] * cellsize[Z]
-
-		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
-		arr[Wrap(+1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
-		arr[Wrap(-1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
-		arr[Wrap(0, size[X])][Wrap(+1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
-		arr[Wrap(0, size[X])][Wrap(-1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
-		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(+1, size[Z])] = float32(1 / hz)
-		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(-1, size[Z])] = float32(1 / hz)
+		for i := xmin; i <= xmax; i++ {
+			for j := ymin; j <= ymax; j++ {
+				for k := zmin; k <= zmax; k++ {
+					if !(i == 0 && j == 0 && k == 0) {
+						n := i*i + j*j + k*k // distance² from center, in #cells
+						lapl := 1 / (sqr(float64(i)*dx) + sqr(float64(j)*dy) + sqr(float64(k)*dz))
+						val := lapl * (1 / float64(n)) * scale
+						total += val
+						arr[Wrap(i, size[X])][Wrap(j, size[Y])][Wrap(k, size[Z])] = float32(val)
+					}
+				}
+			}
+		}
+		arr[0][0][0] = float32(-total)
 	}
 	Stop("kern_ex")
 }
+
+func sqr(x float64) float64 { return x * x }

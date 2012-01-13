@@ -7,7 +7,8 @@
 
 package modules
 
-// Combined demag+exchange module
+// Combined demag+exchange module.
+// Demag and exchange field are calculated in one single convolution.
 // Author: Arne Vansteenkiste
 
 import (
