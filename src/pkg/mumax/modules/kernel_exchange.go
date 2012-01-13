@@ -19,7 +19,7 @@ import (
 
 // Many-neighbor exchange kernel
 // range2: square of range in which neighbors are considered.
-// TODO: check!
+// TODO: check against donahue!
 // need extra penalty for number of cells > 4 ?
 func ExchKernel(size []int, cellsize []float64, kern *host.Array, range2 float64) {
 	Debug("Calculating exchange kernel", "range²:", range2)

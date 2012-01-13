@@ -17,6 +17,7 @@ import (
 	"mumax/host"
 	"sync"
 	"fmt"
+	"math"
 )
 
 // A quantity represents a scalar/vector/tensor field,value or mask.
@@ -295,8 +296,6 @@ func (q *Quant) Multiplier() []float64 {
 // when bufferUpToDate == false. Multiplies by the multiplier and handles masks correctly.
 // Does not Update().
 func (q *Quant) Buffer() *host.Array {
-	//q.Update() // TODO: really needed??
-	//Debug("Update", q.Name())
 	if q.cpuOnly || q.bufUpToDate {
 		//Debug("buffer of", q.Name(), q.buffer.Array)
 		return q.buffer
@@ -352,11 +351,6 @@ func (q *Quant) allocBuffer() {
 // upToDate is set true.
 // See: Invalidate()
 func (q *Quant) Update() {
-	//Log("update", q.Name(), valid(!q.upToDate))
-	//if q.upToDate {
-	//	return
-	//}
-
 	// update parents first
 	for _, p := range q.parents {
 		p.Update()
@@ -376,6 +370,12 @@ func (q *Quant) Update() {
 	// verify if new value is OK
 	if q.verifier != nil {
 		q.Verify()
+	}
+	for _, m := range q.multiplier {
+		if math.IsNaN(m) {
+			panic("NaN")
+			//panic(BugF(q.Name(), " is NaN.", "timestep", engine.step.multiplier[0])) // crashes...
+		}
 	}
 	q.upToDate = true
 }
