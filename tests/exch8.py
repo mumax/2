@@ -23,6 +23,7 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
+save("kern_ex", "gplot", [], "kern_ex_8.gplot")
 autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 10e-12)
 
