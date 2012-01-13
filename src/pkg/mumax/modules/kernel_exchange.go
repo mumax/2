@@ -89,6 +89,9 @@ func ExchKernel(size []int, cellsize []float64, kern *host.Array, range2 float64
 		for i := xmin; i <= xmax; i++ {
 			for j := ymin; j <= ymax; j++ {
 				for k := zmin; k <= zmax; k++ {
+					if i*i+j*j+k*k > N {
+						continue //only look at close enough neighbors
+					}
 					if !(i == 0 && j == 0 && k == 0) {
 						n := i*i + j*j + k*k // distance² from center, in #cells
 						lapl := 1 / (sqr(float64(i)*dx) + sqr(float64(j)*dy) + sqr(float64(k)*dz))
