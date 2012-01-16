@@ -37,12 +37,11 @@ func LoadCurrent(e *Engine) {
 	elKern := NewQuant("kern_el", VECTOR, kernelSize, FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
 	e.AddQuant(elKern)
 	elKern.SetUpdater(newElKernUpdater(elKern))
-	
+
 	// electric field
 	Efield := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
 	e.Depends("E", "rho", "kern_el")
 	Efield.SetUpdater(newEfieldUpdater(Efield, rho))
-
 
 	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
 	e.AddNewQuant("sigma", SCALAR, MASK, Unit("1/Ohm*m"), "electrical conductivity")
@@ -56,8 +55,8 @@ func LoadCurrent(e *Engine) {
 
 // Updates the E field in a single convolution
 type EfieldUpdater struct {
-	Efield, rho  *Quant
-	conv     *gpu.Conv73Plan
+	Efield, rho *Quant
+	conv        *gpu.Conv73Plan
 }
 
 func newEfieldUpdater(Efield, rho *Quant) Updater {
@@ -69,12 +68,12 @@ func newEfieldUpdater(Efield, rho *Quant) Updater {
 }
 
 func (u *EfieldUpdater) Update() {
-	if u.conv == nil{ // todo: kern_el needs to update the conv?
-		Debug("Init Electric convolution")	
+	if u.conv == nil { // todo: kern_el needs to update the conv?
+		Debug("Init Electric convolution")
 		dataSize := GetEngine().GridSize()
 		kernEl := GetEngine().Quant("kern_el").Buffer()
-		kernMono := []*host.Array{kernEl.Component(0),kernEl.Component(1),  kernEl.Component(2)}
-		u.conv =  gpu.NewConv73Plan(dataSize, kernMono, nil, nil)
+		kernMono := []*host.Array{kernEl.Component(0), kernEl.Component(1), kernEl.Component(2)}
+		u.conv = gpu.NewConv73Plan(dataSize, kernMono, nil, nil)
 	}
 	//u.conv.Convolve(&u.m.array, &u.Hdex.array)
 }
@@ -100,4 +99,3 @@ func (u *elKernUpdater) Update() {
 	Log("Calculating electrosatic kernel, may take a moment...")
 	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
 }
-

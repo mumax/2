@@ -40,7 +40,7 @@ const (
 var opStr map[int]string = map[int]string{MONOPOLE: "MONOPOLE", DIPOLE: "DIPOLE", ROTOR: "ROTOR"}
 
 
-func NewConv73Plan(dataSize []int, kernMono, kernDi, kernRot []*host.Array)*Conv73Plan{
+func NewConv73Plan(dataSize []int, kernMono, kernDi, kernRot []*host.Array) *Conv73Plan {
 	conv := new(Conv73Plan)
 	conv.Init(dataSize, kernMono, kernDi, kernRot)
 	return conv
