@@ -11,12 +11,13 @@ GOFILES=\
 	array.go\
 	stream.go\
 	reductor.go\
-	convplan.go\
+	convplan2.go\
 	fftinterface.go\
 	fftplan1.go\
 	fftplan2.go\
 	fftplan4.go\
 	fftplan5.go\
+# 	convplan.go\
 
 CGOFILES=\
 	multigpu.go\

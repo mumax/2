@@ -494,6 +494,27 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 		C.int(fftMx.partLen3D))
 }
 
+func KernelMulMicromag3D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream) {
+	Assert(fftMx.size4D[0] == 1 &&
+		fftKxx.size4D[0] == 1 &&
+		fftMx.Len() == 2*fftKxx.Len())
+	// Other sizes hopefully OK.
+
+	C.kernelMulMicromag3D2Async(
+		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
+		(**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
+}
+
+
 // Point-wise 3D micromagnetic kernel multiplication in Fourier space.
 // Overwrites M (in Fourier space, of course) with the result:
 //  |Mx|   |Kxx Kxy Kxz|   |Mx|
