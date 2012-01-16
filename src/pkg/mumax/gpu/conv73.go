@@ -8,8 +8,19 @@
 package gpu
 
 // 7-input, 3 output Convolution plan for general Maxwell equations.
-// This is a basic implementation whose memory bandwidth utilization
-// can be improved.
+// This is a basic implementation whose memory bandwidth utilization can be improved.
+//
+// 7 sources:
+// 1 charge (electric or magnetic)
+// 3 dipole components (electric polarization or magnetization)
+// 3 current components (electric or displacement)
+//
+// 3 kernels:
+// MONOPOLE (1x3) for Gauss law on monopole sources
+// DIPOLE (3x3, symmetric) for Gauss law on dipole sources
+// ROTOR (3x3, anitsymmetric (?)) for Faraday/Ampère law on current sources
+//
+// 3 
 // Author: Arne Vansteenkiste
 
 import (
@@ -26,11 +37,9 @@ type Conv73Plan struct {
 	fftKern   [][]*Array   // MONOPOLE, DIPOLE and ROTOR kernels
 	fftBuffer Array        // transformed input data
 	fftPlan   FFTInterface // transforms input/output data
-	//	fftMonopole []*Array     // transformed monopole kernel (electric, magnetic charge) components, unused ones are nil.
-	//	fftDipole   []*Array     // transformed dipole kernel (electric, magnetic polarization) components
-	//	fftRotor    []*Array     // transformed rotor kernel (ampère, faraday) components
 }
 
+// index for kind of kernel
 const (
 	MONOPOLE = 0
 	DIPOLE   = 1
@@ -45,6 +54,10 @@ func NewConv73Plan(dataSize []int, kernMono, kernDi, kernRot []*host.Array) *Con
 	conv.Init(dataSize, kernMono, kernDi, kernRot)
 	return conv
 }
+
+// stores whether the real or imaginary part of a kernel type should be used.
+var oddness map[int]int = map[int]int{MONOPOLE: IMAG, DIPOLE: REAL} //TODO: rotor?
+
 // Kernel does not need to take into account unnormalized FFTs,
 // this is handled by the convplan.
 func (conv *Conv73Plan) Init(dataSize []int, kernMono, kernDi, kernRot []*host.Array) {
@@ -133,7 +146,7 @@ func loadKernComp(fftKern *Array, fft FFTInterface, kernel *host.Array, op int) 
 
 	devIn.CopyFromHost(kernel)
 	fft.Forward(devIn, devOut)
-	scaleRealParts(fftKern, devOut, 1/float32(FFTNormLogic(logic)))
+	scalePart(fftKern, devOut, 1/float32(FFTNormLogic(logic)), oddness[op])
 
 }
 
@@ -243,4 +256,52 @@ func (conv *Conv73Plan) SelfTest() {
 		panic(BugF("FFT self-test failed, max error:", maxerr, "\nPlease use a different grid size of FFT type."))
 	}
 	runtime.GC()
+}
+
+const (
+	REAL = 0
+	IMAG = 1
+)
+
+
+// Extract real or imaginary parts, copy them from src to dst.
+// In the meanwhile, check if the other parts are nearly zero
+// and scale the kernel to compensate for unnormalized FFTs.
+// real_imag = 0: real parts
+// real_imag = 1: imag parts
+func scalePart(dst, src *Array, scale float32, real_imag int) {
+	Assert(real_imag == 0 || real_imag == 1)
+	Assert(dst.size3D[0] == src.size3D[0] &&
+		dst.size3D[1] == src.size3D[1] &&
+		dst.size3D[2] == src.size3D[2]/2)
+
+	dstHost := dst.LocalCopy()
+	srcHost := src.LocalCopy()
+	dstList := dstHost.List
+	srcList := srcHost.List
+
+	// Normally, the FFT'ed kernel is purely real because of symmetry,
+	// so we only store the real parts...
+	maxbad := float32(0.)
+	maxgood := float32(0.)
+	other := 1 - real_imag
+	for i := range dstList {
+		dstList[i] = srcList[2*i+real_imag] * scale
+		if Abs32(srcList[2*i+other]) > maxbad {
+			maxbad = Abs32(srcList[2*i+other])
+		}
+		if Abs32(srcList[2*i+real_imag]) > maxgood {
+			maxgood = Abs32(srcList[2*i+real_imag])
+		}
+	}
+	// ...however, we check that the imaginary parts are nearly zero,
+	// just to be sure we did not make a mistake during kernel creation.
+	Debug("FFT Kernel max part", real_imag, ":", maxgood)
+	Debug("FFT Kernel max part", other, ":", maxbad)
+	Debug("FFT Kernel max bad/good part=", maxbad/maxgood)
+	if maxbad/maxgood > 1e-5 { // TODO: is this reasonable?
+		Warn("FFT Kernel max bad/good part=", maxbad/maxgood)
+	}
+
+	dst.CopyFromHost(dstHost)
 }
