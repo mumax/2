@@ -16,6 +16,7 @@ import (
 	"rand"
 	"runtime"
 	"fmt"
+
 )
 
 // Convolution plan
@@ -158,20 +159,14 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 
 	conv.ForwardFFT(in)
 
-	fmt.Println("")
-	fmt.Println("kernel:", fftKern[XX].LocalCopy().Array)
-	fmt.Println("")
-	fmt.Println("FFTMx:", &fftIn.Comp[X].LocalCopy().Array)
-	fmt.Println("")
-	fmt.Println("parsize Mx", fftIn.Comp[X].partSize)
-	fmt.Println("parsize gx", fftKern[XX].partSize)
 
-	// 	// Point-wise kernel multiplication  (old)
-	// 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-	// 		fftKern[XX], fftKern[YY], fftKern[ZZ],
-	// 		fftKern[YZ], fftKern[XZ], fftKern[XY],
-	// 		fftIn.Stream) // TODO: choose stream wisely
-	// 	fftIn.Stream.Sync() // !!
+
+// 	// Point-wise kernel multiplication  (old)
+// 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+// 		fftKern[XX], fftKern[YY], fftKern[ZZ],
+// 		fftKern[YZ], fftKern[XZ], fftKern[XY],
+// 		fftIn.Stream) // TODO: choose stream wisely
+// 	fftIn.Stream.Sync() // !!
 
 	// Point-wise kernel multiplication (new)
 	KernelMulMicromag3D2Async(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
@@ -179,6 +174,14 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 		fftKern[YZ], fftKern[XZ], fftKern[XY],
 		fftIn.Stream) // TODO: choose stream wisely
 	fftIn.Stream.Sync() // !!
+
+      fmt.Println("")
+/*      fmt.Println("kernel:", fftKern[XX].LocalCopy().Array)
+      fmt.Println("")*/
+      fmt.Println("FFTMx:", &fftIn.Comp[X].LocalCopy().Array)
+      fmt.Println("")
+//       fmt.Println("parsize Mx", fftIn.Comp[X].partSize)
+//       fmt.Println("parsize gx", fftKern[XX].partSize)
 
 	conv.InverseFFT(out)
 }

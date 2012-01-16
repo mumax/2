@@ -51,14 +51,14 @@ __global__ void kernelMulMicromag3D2Kern(
   int K = Bk*BLOCKSIZE_K + k;
   int J = Bj*BLOCKSIZE_K + j;
 
-  int kmax = 0
-  if (N2/2 - (Bj+1)*BLOCKSIZE_K/2)>=0
-    kmax = BLOCKSIZE_K/2 + 1;
+  int kmax = 0;
+  if ( (N2/2 - (Bj+1)*BLOCKSIZE_K/2)>=0 )
+    kmax = BLOCKSIZE_K/2;
   else
-    kmax = N2/2 - (Bj+1)*BLOCKSIZE_K/2 + 1;
+    kmax = N2/2 - (Bj+1)*BLOCKSIZE_K/2;
  
   //for now only for 2D:
-  for i=0; i<N0/2+1; i++{
+  for (int i=0; i<N0/2+1; i++){
 
     // Copying kernel components to shared memory ------------------------------------
     int N2K = N2/2;        //TODO: delete this line when reduced storage of kernel is implemented 
@@ -78,39 +78,43 @@ __global__ void kernelMulMicromag3D2Kern(
     
   
     // Perform kernel multiplication -------------------------------------------------
-    if J<N1 && (K<N2/2) {
-      int Hx=0; int Hy=0; int Hz=0; 
+    if ( J<N1 && (K<N2/2) ) {
+      float Hx=0; float Hy=0; float Hz=0; 
       
       index = i*N1*N2 + J*N2 + K;
-      Hx = Kxx[j][k/2]*FFTMx[index] + Kxy[j][k/2]*FFTMy[index] + Kxz[j][k/2]*FFTMz[index];
-      Hy = Kxy[j][k/2]*FFTMx[index] + Kyy[j][k/2]*FFTMy[index] + Kyz[j][k/2]*FFTMz[index];
-      Hz = Kxz[j][k/2]*FFTMx[index] + Kyz[j][k/2]*FFTMy[index] + Kzz[j][k/2]*FFTMz[index];
+     Hx = Kxx[j][k/2]*fftMx[index] + Kxy[j][k/2]*fftMy[index] + Kxz[j][k/2]*fftMz[index];
+//      Hx = k/2;
+//       Hx = Kxx[j][k/2];
+      Hy = Kxy[j][k/2]*fftMx[index] + Kyy[j][k/2]*fftMy[index] + Kyz[j][k/2]*fftMz[index];
+      Hz = Kxz[j][k/2]*fftMx[index] + Kyz[j][k/2]*fftMy[index] + Kzz[j][k/2]*fftMz[index];
       fftMx[index] = Hx;
       fftMy[index] = Hy;
       fftMz[index] = Hz;
 
       index = i*N1*N2 + J*N2 + N2 - (Bk+1)*BLOCKSIZE_K + k;
       int k_index = kmax-k/2;
-      Hx = Kxx[j][k_index]*FFTMx[index] + Kxy[j][k_index]*FFTMy[index] + Kxz[j][k_index]*FFTMz[index];
-      Hy = Kxy[j][k_index]*FFTMx[index] + Kyy[j][k_index]*FFTMy[index] + Kyz[j][k_index]*FFTMz[index];
-      Hz = Kxz[j][k_index]*FFTMx[index] + Kyz[j][k_index]*FFTMy[index] + Kzz[j][k_index]*FFTMz[index];
+//       Hx = Kxx[j][k_index];
+//      Hx = k_index;
+     Hx = Kxx[j][k_index]*fftMx[index] + Kxy[j][k_index]*fftMy[index] + Kxz[j][k_index]*fftMz[index];
+      Hy = Kxy[j][k_index]*fftMx[index] + Kyy[j][k_index]*fftMy[index] + Kyz[j][k_index]*fftMz[index];
+      Hz = Kxz[j][k_index]*fftMx[index] + Kyz[j][k_index]*fftMy[index] + Kzz[j][k_index]*fftMz[index];
       fftMx[index] = Hx;
       fftMy[index] = Hy;
       fftMz[index] = Hz;
       
       if (i!=0 && i!=N0/2){
         index = (N0-i)*N1*N2 + J*N2 + K;
-        Hx = Kxx[j][k/2]*FFTMx[index] + Kxy[j][k/2]*FFTMy[index] + Kxz[j][k/2]*FFTMz[index];
-        Hy = Kxy[j][k/2]*FFTMx[index] + Kyy[j][k/2]*FFTMy[index] + Kyz[j][k/2]*FFTMz[index];
-        Hz = Kxz[j][k/2]*FFTMx[index] + Kyz[j][k/2]*FFTMy[index] + Kzz[j][k/2]*FFTMz[index];
+        Hx = Kxx[j][k/2]*fftMx[index] + Kxy[j][k/2]*fftMy[index] + Kxz[j][k/2]*fftMz[index];
+        Hy = Kxy[j][k/2]*fftMx[index] + Kyy[j][k/2]*fftMy[index] + Kyz[j][k/2]*fftMz[index];
+        Hz = Kxz[j][k/2]*fftMx[index] + Kyz[j][k/2]*fftMy[index] + Kzz[j][k/2]*fftMz[index];
         fftMx[index] = Hx;
         fftMy[index] = Hy;
         fftMz[index] = Hz;
 
         index = (N0-i)*N1*N2 + J*N2 + N2 - (Bk+1)*BLOCKSIZE_K + k;
-        Hx = Kxx[j][k_index]*FFTMx[index] + Kxy[j][k_index]*FFTMy[index] + Kxz[j][k_index]*FFTMz[index];
-        Hy = Kxy[j][k_index]*FFTMx[index] + Kyy[j][k_index]*FFTMy[index] + Kyz[j][k_index]*FFTMz[index];
-        Hz = Kxz[j][k_index]*FFTMx[index] + Kyz[j][k_index]*FFTMy[index] + Kzz[j][k_index]*FFTMz[index];
+        Hx = Kxx[j][k_index]*fftMx[index] + Kxy[j][k_index]*fftMy[index] + Kxz[j][k_index]*fftMz[index];
+        Hy = Kxy[j][k_index]*fftMx[index] + Kyy[j][k_index]*fftMy[index] + Kyz[j][k_index]*fftMz[index];
+        Hz = Kxz[j][k_index]*fftMx[index] + Kyz[j][k_index]*fftMy[index] + Kzz[j][k_index]*fftMz[index];
         fftMx[index] = Hx;
         fftMy[index] = Hy;
         fftMz[index] = Hz;
@@ -130,9 +134,9 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               CUstream* stream, int* partSize){
 
   // based on sizes of the sources as they are stored on 1 GPU after transpose
-  N0 = partSize[0];
-  N1 = partSize[1];
-  N2 = partSize[2];
+  int N0 = partSize[0];
+  int N1 = partSize[1];
+  int N2 = partSize[2];
 
   //N2 devided by 2 since symmetry in second half is exlpoited (except for 1 element)
   dim3 gridsize((N2/2-1) / BLOCKSIZE_K + 1, (N1-1) / BLOCKSIZE_J + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
@@ -141,7 +145,8 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
 
   for (int dev = 0; dev < nDevice(); dev++) {
     gpu_safe(cudaSetDevice(deviceId(dev)));
-    kernelMulMicromag3D2Kern<<<gridSize, blockSize, 0,cudaStream_t(stream[dev])>>>
+//    kernelMulMicromag3D2Kern<<<gridsize, blocksize, 0,cudaStream_t(stream[dev])>>>
+    kernelMulMicromag3D2Kern<<<gridsize, blocksize, 0,stream[dev]>>>
       ( fftMx[dev],  fftMy[dev],  fftMz[dev],
         fftKxx[dev], fftKyy[dev], fftKzz[dev],
         fftKyz[dev], fftKxz[dev], fftKxy[dev], 

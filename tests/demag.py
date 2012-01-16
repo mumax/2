@@ -5,8 +5,8 @@ from math import *
 # test file for demag field
 
 # thin film
-# setgridsize(128, 128, 1)
-setgridsize(16, 4, 1)
+setgridsize(16, 16, 1)
+#setgridsize(16, 4, 1)
 setcellsize(5e-9, 5e-9, 2e-9)
 
 load('micromagnetism')
