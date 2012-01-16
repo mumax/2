@@ -102,25 +102,25 @@ func sqr(x float64) float64 { return x * x }
 // The dynamics are still correct, only the total energy is offset with a constant
 // term compared to the usual - M . H. Outputting H_eff becomes less useful however,
 // it's better to look at torques. Away from the boundaries, H_eff is as usual.
-//func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
-//	Debug("Calculating laplace 6 kernel", "size:", size, "cellsize:", cellsize)
-//	Start("kern_ex")
-//
-//	for s := 0; s < 3; s++ { // source index Ksdxyz
-//		i := kernIdx[s][s]
-//		arr := kern.Array[i]
-//
-//		hx := cellsize[X] * cellsize[X]
-//		hy := cellsize[Y] * cellsize[Y]
-//		hz := cellsize[Z] * cellsize[Z]
-//
-//		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
-//		arr[Wrap(+1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
-//		arr[Wrap(-1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
-//		arr[Wrap(0, size[X])][Wrap(+1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
-//		arr[Wrap(0, size[X])][Wrap(-1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
-//		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(+1, size[Z])] = float32(1 / hz)
-//		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(-1, size[Z])] = float32(1 / hz)
-//	}
-//	Stop("kern_ex")
-//}
+func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
+	Debug("Calculating laplace 6 kernel", "size:", size, "cellsize:", cellsize)
+	Start("kern_ex")
+
+	for s := 0; s < 3; s++ { // source index Ksdxyz
+		i := kernIdx[s][s]
+		arr := kern.Array[i]
+
+		hx := cellsize[X] * cellsize[X]
+		hy := cellsize[Y] * cellsize[Y]
+		hz := cellsize[Z] * cellsize[Z]
+
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(-2/hx - 2/hy - 2/hz)
+		arr[Wrap(+1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
+		arr[Wrap(-1, size[X])][Wrap(0, size[Y])][Wrap(0, size[Z])] = float32(1 / hx)
+		arr[Wrap(0, size[X])][Wrap(+1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
+		arr[Wrap(0, size[X])][Wrap(-1, size[Y])][Wrap(0, size[Z])] = float32(1 / hy)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(+1, size[Z])] = float32(1 / hz)
+		arr[Wrap(0, size[X])][Wrap(0, size[Y])][Wrap(-1, size[Z])] = float32(1 / hz)
+	}
+	Stop("kern_ex")
+}
