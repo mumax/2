@@ -39,9 +39,15 @@ const (
 
 var opStr map[int]string = map[int]string{MONOPOLE: "MONOPOLE", DIPOLE: "DIPOLE", ROTOR: "ROTOR"}
 
+
+func NewConv73Plan(dataSize []int, kernMono, kernDi, kernRot []*host.Array)*Conv73Plan{
+	conv := new(Conv73Plan)
+	conv.Init(dataSize, kernMono, kernDi, kernRot)
+	return conv
+}
 // Kernel does not need to take into account unnormalized FFTs,
 // this is handled by the convplan.
-func (conv *Conv73Plan) Init(dataSize []int, kernMono, kernDi, kernRot []*host.Array, fftKern *Array) {
+func (conv *Conv73Plan) Init(dataSize []int, kernMono, kernDi, kernRot []*host.Array) {
 	Assert(len(dataSize) == 3)
 
 	conv.Free() // must not leak memory on 2nd init.
@@ -75,7 +81,6 @@ func (conv *Conv73Plan) Init(dataSize []int, kernMono, kernDi, kernRot []*host.A
 	// init fftKern
 	fftKernSize := FFTOutputSize(logicSize)
 	fftKernSize[2] = fftKernSize[2] / 2 // store only non-redundant parts
-	CheckSize(fftKernSize, fftKern.Size3D())
 	conv.fftKern = make([][]*Array, ROTOR)
 
 	// transforms the kernel, FFT is not sparse
@@ -86,10 +91,12 @@ func (conv *Conv73Plan) Init(dataSize []int, kernMono, kernDi, kernRot []*host.A
 		if kernel == nil {
 			continue
 		}
+		conv.fftKern[op] = make([]*Array, len(kernel))
 		for i, k := range kernel {
 			if k != nil {
 				Debug("Conv73Plan.init", "use K", opStr[op], TensorIndexStr[i])
 				conv.fftKern[op][i] = NewArray(1, fftKernSize)
+				CheckSize(fftKernSize, conv.fftKern[op][i].Size3D())
 				loadKernComp(conv.fftKern[op][i], fullFFTPlan, kernel[i], op)
 			}
 		}
