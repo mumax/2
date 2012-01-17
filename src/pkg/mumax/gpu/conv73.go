@@ -292,7 +292,7 @@ func (conv *Conv73Plan) ForwardFFT(in *Array) {
 func (conv *Conv73Plan) InverseFFT(out *Array) {
 	Assert(conv.fftOut.NComp() == out.NComp())
 	for c := range out.Comp {
-		conv.fftPlan.Inverse(&conv.fftOut.Comp[c], out)
+		conv.fftPlan.Inverse(&conv.fftOut.Comp[c], &out.Comp[c])
 	}
 }
 
