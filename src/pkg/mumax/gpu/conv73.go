@@ -95,6 +95,7 @@ func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
 			continue
 		}
 		conv.ForwardFFT(in[i])
+		fmt.Println("conv.fftBuffer", conv.fftBuffer)
 		for j := 0; j < Nout; j++ {
 			if conv.fftKern[i][j] == nil {
 				continue
@@ -102,9 +103,11 @@ func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
 			// Point-wise kernel multiplication
 			CMaddAsync(fftOut, conv.fftMul[i][j], conv.fftKern[i][j], fftBuf, fftOut.Stream)
 			fftOut.Stream.Sync()
+			fmt.Println("conv.fftOut", conv.fftOut)
 		}
 	}
 	conv.InverseFFT(out)
+	fmt.Println("conv out", out)
 }
 
 // Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
@@ -277,6 +280,7 @@ func (conv *Conv73Plan) Free() {
 // Sparse transform all 3 components.
 // (FFTPlan knows about zero padding etc)
 func (conv *Conv73Plan) ForwardFFT(in *Array) {
+	Assert(conv.fftBuffer.NComp() == in.NComp())
 	//for c := range in.Comp {
 	conv.fftPlan.Forward(in, &conv.fftBuffer)
 	//}
@@ -286,9 +290,10 @@ func (conv *Conv73Plan) ForwardFFT(in *Array) {
 // Sparse backtransform
 // (FFTPlan knows about zero padding etc)
 func (conv *Conv73Plan) InverseFFT(out *Array) {
-	//for c := range out.Comp {
-	conv.fftPlan.Inverse(&conv.fftBuffer, out)
-	//}
+	Assert(conv.fftOut.NComp() == out.NComp())
+	for c := range out.Comp {
+		conv.fftPlan.Inverse(&conv.fftOut.Comp[c], out)
+	}
 }
 
 func (conv *Conv73Plan) SelfTest() {

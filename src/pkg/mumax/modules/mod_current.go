@@ -56,6 +56,7 @@ func LoadCurrent(e *Engine) {
 // Updates the E field in a single convolution
 type EfieldUpdater struct {
 	Efield, rho *Quant
+	convInput []*gpu.Array
 	conv        *gpu.Conv73Plan
 }
 
@@ -64,6 +65,8 @@ func newEfieldUpdater(Efield, rho *Quant) Updater {
 	u.Efield = Efield
 	u.rho = rho
 	u.conv = nil
+	u.convInput = make([]*gpu.Array, 7)
+	u.convInput[0] = rho.Array()
 	return u
 }
 
@@ -77,7 +80,7 @@ func (u *EfieldUpdater) Update() {
 		u.conv = gpu.NewConv73Plan(dataSize, logicSize)
 		u.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
 	}
-	//u.conv.Convolve(&u.m.array, &u.Hdex.array)
+	u.conv.Convolve(u.convInput, u.Efield.Array())
 }
 
 //____________________________________________________________________ electrostatic kernel
