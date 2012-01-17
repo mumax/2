@@ -49,7 +49,7 @@ type Conv73Plan struct {
 	fftKern   [Nin][Nout]*Array    // transformed kernel non-redundant parts (only real or imag parts, or nil)
 	fftMul    [Nin][Nout]complex64 // multipliers for kernel
 	fftBuffer Array                // transformed input data
-	fftOut    Array          // transformed output data (3-comp)
+	fftOut    Array                // transformed output data (3-comp)
 	fftPlan   FFTInterface         // transforms input/output data
 }
 
@@ -87,25 +87,24 @@ func (conv *Conv73Plan) Init(dataSize, logicSize []int) {
 }
 
 func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
-		//	
-		//	fftBuf := &conv.fftBuf
-		//	for i := 0; i < Nin; i++{
-		//		if in[i] == nil{continue}
-		//		conv.ForwardFFT(in[i])
-		//		
-		//		for 
-	
-		//		fftKern := &conv.fftKern
-		//
-		//
-		//	// Point-wise kernel multiplication
-		//	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-		//		fftKern[XX], fftKern[YY], fftKern[ZZ],
-		//		fftKern[YZ], fftKern[XZ], fftKern[XY],
-		//		fftIn.Stream) // TODO: choose stream wisely
-		//	fftIn.Stream.Sync() // !!
-		//
-		//	conv.InverseFFT(out)
+	fftBuf := &conv.fftBuffer
+	fftOut := &conv.fftOut
+	fftOut.Zero()
+	for i := 0; i < Nin; i++ {
+		if in[i] == nil {
+			continue
+		}
+		conv.ForwardFFT(in[i])
+		for j := 0; j < Nout; j++ {
+			if conv.fftKern[i][j] == nil {
+				continue
+			}
+			// Point-wise kernel multiplication
+			CMaddAsync(fftOut, conv.fftMul[i][j], conv.fftKern[i][j], fftBuf, fftOut.Stream)
+			fftOut.Stream.Sync()
+		}
+	}
+	conv.InverseFFT(out)
 }
 
 // Loads a sub-kernel at position pos in the 3x7 global kernel matrix.

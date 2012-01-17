@@ -32,12 +32,13 @@ void madd2Async(float** a, float** b, float mulB, float** c, float mulC, CUstrea
 void maddAsync(float** dst, float** a, float** b, float mulB, CUstream* stream, int Npart);
 
 
-/// Complex multiply add. 
+/// Complex multiply add: dst[i] += (a + bI) * kern[i] * src[i]
 /// @param dst contains complex numbers (interleaved format)
-/// @param src contains real numbers
+/// @param src contains complex numbers (interleaved format)
+/// @param kern contains real numbers
 /// @param NComplexPart: number of complex numbers in dst per GPU (== number of real numbers in src per GPU)
 ///	dst[i] += c * src[i]
-void cmaddAsync(float** dst, float** src, float a, float b, CUstream* stream, int NComplexPart);
+void cmaddAsync(float** dst, float a, float b, float** kern, float** src, CUstream* stream, int NComplexPart);
 
 
 #ifdef __cplusplus
