@@ -49,7 +49,6 @@ type Conv73Plan struct {
 	fftBuffer   Array                // transformed input data
 	fftOut      [Nout]Array          // transformed output data
 	fftPlan     FFTInterface         // transforms input/output data
-	fullFFTPlan FFTInterface         // transforms kernel // TODO: free?
 }
 
 
@@ -108,6 +107,8 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 	// FFT output on GPU
 	devOut := NewArray(1, FFTOutputSize(logic))
 	defer devOut.Free()
+	fullFFTPlan := NewDefaultFFT(logic, logic)
+	defer fullFFTPlan.Free()
 
 	// FFT all components
 	fftKern := conv.fftKern
@@ -147,7 +148,7 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 		// normal case
 
 		devIn.CopyFromHost(kernel.Component(k))
-		conv.fullFFTPlan.Forward(devIn, devOut)
+		fullFFTPlan.Forward(devIn, devOut)
 		hostOut := devOut.LocalCopy()
 
 		hostFFTKern := extract(hostOut, realness)
