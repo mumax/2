@@ -13,7 +13,7 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	"mumax/host"
+	//"mumax/host"
 )
 
 // Register this module
@@ -68,13 +68,14 @@ func newEfieldUpdater(Efield, rho *Quant) Updater {
 }
 
 func (u *EfieldUpdater) Update() {
-	if u.conv == nil { // todo: kern_el needs to update the conv?
-		Debug("Init Electric convolution")
-		dataSize := GetEngine().GridSize()
-		kernEl := GetEngine().Quant("kern_el").Buffer()
-		kernMono := []*host.Array{kernEl.Component(0), kernEl.Component(1), kernEl.Component(2)}
-		u.conv = gpu.NewConv73Plan(dataSize, kernMono, nil, nil)
-	}
+	panic("unimplemented")
+	//	if u.conv == nil { // todo: kern_el needs to update the conv?
+	//		Debug("Init Electric convolution")
+	//		dataSize := GetEngine().GridSize()
+	//		kernEl := GetEngine().Quant("kern_el").Buffer()
+	//		kernMono := []*host.Array{kernEl.Component(0), kernEl.Component(1), kernEl.Component(2)}
+	//		u.conv = gpu.NewConv73Plan(dataSize, kernMono, nil, nil)
+	//	}
 	//u.conv.Convolve(&u.m.array, &u.Hdex.array)
 }
 
