@@ -15,14 +15,30 @@ extern "C" {
 
 
 /// @param fftMx fftMy fftMz Fourier-transformed magnetization
-/// @param fftKxx... Fourier-transformed convolution kernel, symmetric and purely real. Size is half the size of fftM*!
-/// @param partLen3D number of floats (not complex) PER GPU, PER fftM* COMPONENT
-/// |Hx|   |Kxx Kxy Kxz|   |Mx|
-/// |Hy| = |Kxy Kyy Kyz| * |My|
-/// |Hz|   |Kxz Kyz Kzz|   |Mz|
+/// @param fftKxx... Fourier-transformed convolution kernel, symmetric and purely real. Symmetry is fully exploited!
+/// @param outx outy outz output arrays, can be the input arrays
+/// @param partSize number of floats (not complex) PER GPU, PER fftM* COMPONENT
+/// |outx|   |Kxx Kxy Kxz|   |Mx|
+/// |outy| = |Kxy Kyy Kyz| * |My|
+/// |outz|   |Kxz Kyz Kzz|   |Mz|
 void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
+                              float** outx, float** outy, float** outz,
+                              CUstream* stream, int* partSize);
+
+
+
+/// @param fftMx fftMy fftMz Fourier-transformed magnetization
+/// @param fftKxx... Fourier-transformed convolution kernel, symmetric and purely real. Symmetry is fully exploited!
+/// @param outx outy outz output arrays, can be the input arrays
+/// @param partSize number of floats (not complex) PER GPU, PER fftM* COMPONENT
+/// |outx|   |Kxx Kxy Kxz|   |Mx|
+/// |outy| = |Kxy Kyy Kyz| * |My|
+/// |outz|   |Kxz Kyz Kzz|   |Mz|
+void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+                              float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
+                              float** outx, float** outy, float** outz,
                               CUstream* stream, int* partSize);
 
 #ifdef __cplusplus

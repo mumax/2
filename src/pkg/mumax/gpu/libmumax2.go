@@ -494,10 +494,16 @@ func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKy
 		C.int(fftMx.partLen3D))
 }
 
-func KernelMulMicromag3D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream) {
+// Point-wise 3D micromagnetic kernel multiplication in Fourier space.
+// Output is saved in out (in Fourier space, of course) with the result, can be in-place or out-of-place:
+//  |outx|   |Kxx Kxy Kxz|   |Mx|
+//  |outy| = |Kxy Kyy Kyz| * |My|
+//  |outz|   |Kxz Kyz Kzz|   |Mz|
+// The kernel is symmetric.
+// partLen3D: number of reals per GPU for one component (e.g. fftMx).
+func KernelMulMicromag3D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy, outx, outy, outz *Array, stream Stream) {
 	Assert(fftMx.size4D[0] == 1 &&
-		fftKxx.size4D[0] == 1 &&
-		fftMx.Len() == 2*fftKxx.Len())
+		fftKxx.size4D[0] == 1 )
 	// Other sizes hopefully OK.
 
 	C.kernelMulMicromag3D2Async(
@@ -510,8 +516,40 @@ func KernelMulMicromag3D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftK
 		(**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
 		(**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
 		(**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
+    (**C.float)(unsafe.Pointer(&outx.pointer[0])),
+    (**C.float)(unsafe.Pointer(&outy.pointer[0])),
+    (**C.float)(unsafe.Pointer(&outz.pointer[0])),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		(*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
+}
+
+
+// Point-wise 2D micromagnetic kernel multiplication in Fourier space.
+// Output is saved in out (in Fourier space, of course) with the result, can be in-place or out-of-place:
+//  |outx|   |Kxx  0   0 |   |Mx|
+//  |outy| = | 0  Kyy Kyz| * |My|
+//  |outz|   | 0  Kyz Kzz|   |Mz|
+// The kernel is symmetric.
+// partLen3D: number of reals per GPU for one component (e.g. fftMx).
+func KernelMulMicromag2D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, outx, outy, outz *Array, stream Stream) {
+  Assert(fftMx.size4D[0] == 1 &&
+    fftKxx.size4D[0] == 1 &&
+    fftKxx.size3D[0] == 1 )
+  // Other sizes hopefully OK.
+
+  C.kernelMulMicromag2D2Async(
+    (**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
+    (**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
+    (**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
+    (**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
+    (**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
+    (**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
+    (**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
+    (**C.float)(unsafe.Pointer(&outx.pointer[0])),
+    (**C.float)(unsafe.Pointer(&outy.pointer[0])),
+    (**C.float)(unsafe.Pointer(&outz.pointer[0])),
+    (*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+    (*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
 }
 
 

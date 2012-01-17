@@ -28,7 +28,9 @@ extern "C" {
 __global__ void kernelMulMicromag3D2Kern(
     float* fftMx,  float* fftMy, float* fftMz, 
     float* fftKxx, float* fftKyy, float* fftKzz,
-    float* fftKyz, float* fftKxz, float* fftKxy, int N0, int N1, int N2){
+    float* fftKyz, float* fftKxz, float* fftKxy,
+    float* outx, float* outy, float* outz,
+    int N0, int N1, int N2){
   
   int index, k_index;
   float Mx, My, Mz;
@@ -84,9 +86,9 @@ __global__ void kernelMulMicromag3D2Kern(
       Mx = fftMx[index];
       My = fftMy[index];
       Mz = fftMz[index];
-      fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
-      fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
-      fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+      outx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
+      outy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
+      outz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
 /*      fftMx[index] = (int)Kxx[j][k/2];
       fftMy[index] = (int)Kxy[j][k/2];
       fftMz[index] = (int)Kxz[j][k/2];
@@ -99,9 +101,9 @@ __global__ void kernelMulMicromag3D2Kern(
       My = fftMy[index];
       Mz = fftMz[index];
       k_index = kmax-k/2;
-      fftMx[index] =   Kxx[j][k_index]*Mx - Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
-      fftMy[index] = - Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
-      fftMz[index] =   Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+      outx[index] =   Kxx[j][k_index]*Mx - Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
+      outy[index] = - Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
+      outz[index] =   Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
 /*      fftMx[index] = (int)Kxx[j][k_index];
       fftMy[index] = -(int)Kxy[j][k_index];
       fftMz[index] = (int)Kxz[j][k_index];
@@ -114,9 +116,9 @@ __global__ void kernelMulMicromag3D2Kern(
         Mx = fftMx[index];
         My = fftMy[index];
         Mz = fftMz[index];
-        fftMx[index] =   Kxx[j][k/2]*Mx - Kxy[j][k/2]*My - Kxz[j][k/2]*Mz;
-        fftMy[index] = - Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
-        fftMz[index] = - Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+        outx[index] =   Kxx[j][k/2]*Mx - Kxy[j][k/2]*My - Kxz[j][k/2]*Mz;
+        outy[index] = - Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
+        outz[index] = - Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
 /*        fftMx[index] = (int)Kxx[j][k/2];
         fftMy[index] = (int)-Kxy[j][k/2];
         fftMz[index] = (int)-Kxz[j][k/2];
@@ -129,9 +131,9 @@ __global__ void kernelMulMicromag3D2Kern(
         My = fftMy[index];
         Mz = fftMz[index];
         k_index = kmax-k/2;
-        fftMx[index] =   Kxx[j][k_index]*Mx + Kxy[j][k_index]*My - Kxz[j][k_index]*Mz;
-        fftMy[index] =   Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
-        fftMz[index] = - Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+        outx[index] =   Kxx[j][k_index]*Mx + Kxy[j][k_index]*My - Kxz[j][k_index]*Mz;
+        outy[index] =   Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
+        outz[index] = - Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
 /*        fftMx[index] =(int)Kxx[j][k_index];
         fftMy[index] = (int)Kxy[j][k_index];
         fftMz[index] = (int)-Kxz[j][k_index];
@@ -151,6 +153,7 @@ __global__ void kernelMulMicromag3D2Kern(
 void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
+                              float** outx, float** outy, float** outz,
                               CUstream* stream, int* partSize){
 
   // based on sizes of the sources as they are stored on 1 GPU after transpose
@@ -158,7 +161,6 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
   int N1 = partSize[1];
   int N2 = partSize[2];
 
-  printf("\n\n%d, %d\n\n",(N2/2-1) / BLOCKSIZE_K + 1, (N1-1) / BLOCKSIZE_J + 1);
   //N2 devided by 2 since symmetry in second half is exlpoited (except for 1 element)
   dim3 gridsize((N2/2-1) / BLOCKSIZE_K + 1, (N1-1) / BLOCKSIZE_J + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
   dim3 blocksize(BLOCKSIZE_K, BLOCKSIZE_J, 1);
@@ -171,6 +173,7 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
       ( fftMx[dev],  fftMy[dev],  fftMz[dev],
         fftKxx[dev], fftKyy[dev], fftKzz[dev],
         fftKyz[dev], fftKxz[dev], fftKxy[dev], 
+        outx[dev], outy[dev], outz[dev],
         N0, N1, N2);
 	}
 }
@@ -178,10 +181,108 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
 
 
 
-//// |Hx|   |Kxx  0   0 |   |Mx|
-//// |Hy| = | 0  Kyy Kyz| * |My|
-//// |Hz|   | 0  Kyz Kzz|   |Mz|
-//
+// |outx|   |Kxx  0   0 |   |Mx|
+// |outy| = | 0  Kyy Kyz| * |My|
+// |outz|   | 0  Kyz Kzz|   |Mz|
+
+__global__ void kernelMulMicromag2D2Kern(
+    float* fftMx,  float* fftMy, float* fftMz, 
+    float* fftKxx, float* fftKyy, float* fftKzz, float* fftKyz,
+    float* outx, float* outy, float* outz,
+    int N1, int N2){
+  
+  int index, k_index;
+  float My, Mz;
+
+  __shared__ float Kxx[BLOCKSIZE_J][BLOCKSIZE_K/2+1];
+  __shared__ float Kyy[BLOCKSIZE_J][BLOCKSIZE_K/2+1];
+  __shared__ float Kyz[BLOCKSIZE_J][BLOCKSIZE_K/2+1];
+  __shared__ float Kzz[BLOCKSIZE_J][BLOCKSIZE_K/2+1];
+
+  // index of the block inside the blockmatrix
+  int Bk = blockIdx.x;  
+  int Bj = blockIdx.y;
+
+  // "minor" indices inside the tile
+  int k = threadIdx.x;
+  int j = threadIdx.y;
+
+  // index in the total array
+  int K = Bk*BLOCKSIZE_K + k;
+  int J = Bj*BLOCKSIZE_J + j;
+
+  int kmax = 0;
+  if ( (N2/4 - (Bk+1)*BLOCKSIZE_K/2)>=0 )
+    kmax = BLOCKSIZE_K/2;
+  else
+    kmax =  (Bk+1)*BLOCKSIZE_K/2 - N2/4 ;
+ 
+  // Copying kernel components to shared memory ------------------------------------
+  int N2K = N2/2;        //TODO: delete this line when reduced storage of kernel is implemented 
+  //  int N2K = N2/4+1;  //TODO: use this line when reduced storage of kernel is implemented 
+  
+  if (J<N1 && K<(N2/2+1) && k<BLOCKSIZE_K/2+1) {
+    index = J*N2K + Bk*BLOCKSIZE_K/2 + k;
+    Kxx[j][k] = fftKxx[index];
+    Kyy[j][k] = fftKyy[index];
+    Kyz[j][k] = fftKyz[index];
+    Kzz[j][k] = fftKzz[index];
+  }
+  __syncthreads();
+  // -------------------------------------------------------------------------------
+  
+
+  // Perform kernel multiplication -------------------------------------------------
+  if ( J<N1 && (K<N2/2) ) {
+
+    index = J*N2 + K;
+    My = fftMy[index];
+    Mz = fftMz[index];
+    outx[index] = Kxx[j][k/2]*fftMx[index];
+    outy[index] = Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
+    outz[index] = Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+
+    index = J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
+    My = fftMy[index];
+    Mz = fftMz[index];
+    k_index = kmax-k/2;
+    outx[index] =   Kxx[j][k_index]*fftMx[index];
+    outy[index] =   Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
+    outz[index] = - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+    
+    __syncthreads();    
+  // -------------------------------------------------------------------------------
+  
+  }
+  
+  return;
+}
+
+void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+                              float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
+                              float** outx, float** outy, float** outz,
+                              CUstream* stream, int* partSize){
+
+  // based on sizes of the sources as they are stored on 1 GPU after transpose
+  int N1 = partSize[1];
+  int N2 = partSize[2];
+
+  //N2 devided by 2 since symmetry in second half is exlpoited (except for 1 element)
+  dim3 gridsize((N2/2-1) / BLOCKSIZE_K + 1, (N1-1) / BLOCKSIZE_J + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
+  dim3 blocksize(BLOCKSIZE_K, BLOCKSIZE_J, 1);
+  
+
+  for (int dev = 0; dev < nDevice(); dev++) {
+    gpu_safe(cudaSetDevice(deviceId(dev)));
+    kernelMulMicromag2D2Kern<<<gridsize, blocksize, 0,stream[dev]>>>
+      ( fftMx[dev],  fftMy[dev],  fftMz[dev],
+        fftKxx[dev], fftKyy[dev], fftKzz[dev], fftKyz[dev], 
+        outx[dev], outy[dev], outz[dev],
+        N1, N2);
+  }
+}
+
+
 //__global__ void _gpu_kernelmul4(float* fftMx,  float* fftMy,  float* fftMz,
 //                                float* fftKxx, float* fftKyy, float* fftKzz, float* fftKyz, int N){
 //  int i = threadindex;
