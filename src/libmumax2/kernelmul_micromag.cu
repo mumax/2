@@ -50,14 +50,18 @@ __global__ void kernelMulMicromag3DKern(float* fftMx,  float* fftMy,  float* fft
 
     fftMx[e  ] = reMx * Kxx + reMy * Kxy + reMz * Kxz;
     fftMx[e+1] = imMx * Kxx + imMy * Kxy + imMz * Kxz;
-//     fftMx[e  ] = (int)Kxx;
-//     fftMx[e+1] = (int)Kxx;
+//     fftMx[e  ] = (int)Kyy;
+//     fftMx[e+1] = (int)Kyy;
 
     fftMy[e  ] = reMx * Kxy + reMy * Kyy + reMz * Kyz;
     fftMy[e+1] = imMx * Kxy + imMy * Kyy + imMz * Kyz;
+//     fftMy[e  ] = (int) Kyz;
+//     fftMy[e+1] = (int) Kyz;
 
     fftMz[e  ] = reMx * Kxz + reMy * Kyz + reMz * Kzz;
     fftMz[e+1] = imMx * Kxz + imMy * Kyz + imMz * Kzz;
+/*    fftMz[e  ] = (int) Kzz;
+    fftMz[e+1] = (int) Kzz;*/
   }
   
   return;

@@ -5,8 +5,8 @@ from math import *
 # test file for demag field
 
 # thin film
-#setgridsize(128, 128, 1)
-setgridsize(200, 200, 1)
+setgridsize(128, 128, 1)
+#setgridsize(20, 20, 1)
 setcellsize(5e-9, 5e-9, 2e-9)
 
 load('micromagnetism')
@@ -15,7 +15,7 @@ load('demagexch')
 setscalar('Msat', 800e3)
 setscalar('Aex', 0)
 
-m=[ [[[0]]], [[[0]]], [[[1]]] ]
+m=[ [[[1]]], [[[0]]], [[[0]]] ]
 setarray('m', m)
 
 hdex = getvalue('<h_dex>')

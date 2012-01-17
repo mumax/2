@@ -175,12 +175,16 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 		fftIn.Stream) // TODO: choose stream wisely
 	fftIn.Stream.Sync() // !!
 
-      fmt.Println("")
-/*      fmt.Println("kernel:", fftKern[XX].LocalCopy().Array)
-      fmt.Println("")*/
+/*      fmt.Println("")
       fmt.Println("FFTMx:", &fftIn.Comp[X].LocalCopy().Array)
       fmt.Println("")
-/*      fmt.Println("FFTMy:", &fftIn.Comp[Y].LocalCopy().Array)
+      fmt.Println("")
+      fmt.Println("")
+      fmt.Println("")
+      fmt.Println("FFTMy:", &fftIn.Comp[Y].LocalCopy().Array)
+      fmt.Println("")
+      fmt.Println("")
+      fmt.Println("")
       fmt.Println("")
       fmt.Println("FFTMz:", &fftIn.Comp[Z].LocalCopy().Array)
       fmt.Println("")*/

@@ -84,36 +84,60 @@ __global__ void kernelMulMicromag3D2Kern(
       Mx = fftMx[index];
       My = fftMy[index];
       Mz = fftMz[index];
-//       fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
+      fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
       fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
       fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+/*      fftMx[index] = (int)Kxx[j][k/2];
+      fftMy[index] = (int)Kxy[j][k/2];
+      fftMz[index] = (int)Kxz[j][k/2];
+      fftMx[index] = (int)Kyy[j][k/2];
+      fftMy[index] = (int)Kyz[j][k/2];
+      fftMz[index] = (int)Kzz[j][k/2];*/
 
       index = i*N1*N2 + J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
       Mx = fftMx[index];
       My = fftMy[index];
       Mz = fftMz[index];
       k_index = kmax-k/2;
-//       fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
-      fftMy[index] = Kxy[j][k_index]*Mx + Kyy[j][k_index]*My + Kyz[j][k_index]*Mz;
-      fftMz[index] = Kxz[j][k_index]*Mx + Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+      fftMx[index] =   Kxx[j][k_index]*Mx - Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
+      fftMy[index] = - Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
+      fftMz[index] =   Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+/*      fftMx[index] = (int)Kxx[j][k_index];
+      fftMy[index] = -(int)Kxy[j][k_index];
+      fftMz[index] = (int)Kxz[j][k_index];
+      fftMx[index] = (int)Kyy[j][k_index];
+      fftMy[index] = (int)-Kyz[j][k_index];
+      fftMz[index] = (int)Kzz[j][k_index];*/
       
       if (i!=0 && i!=(N0/2+1)){
         index = (N0-i)*N1*N2 + J*N2 + K;
         Mx = fftMx[index];
         My = fftMy[index];
         Mz = fftMz[index];
-//         fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
-        fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
-        fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+        fftMx[index] =   Kxx[j][k/2]*Mx - Kxy[j][k/2]*My - Kxz[j][k/2]*Mz;
+        fftMy[index] = - Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
+        fftMz[index] = - Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+/*        fftMx[index] = (int)Kxx[j][k/2];
+        fftMy[index] = (int)-Kxy[j][k/2];
+        fftMz[index] = (int)-Kxz[j][k/2];
+        fftMx[index] = (int)Kyy[j][k/2];
+        fftMy[index] = (int)Kyz[j][k/2];
+        fftMz[index] = (int)Kzz[j][k/2];*/
         
         index = (N0-i)*N1*N2 + J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
         Mx = fftMx[index];
         My = fftMy[index];
         Mz = fftMz[index];
         k_index = kmax-k/2;
-//         fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
-        fftMy[index] = Kxy[j][k_index]*Mx + Kyy[j][k_index]*My + Kyz[j][k_index]*Mz;
-        fftMz[index] = Kxz[j][k_index]*Mx + Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+        fftMx[index] =   Kxx[j][k_index]*Mx + Kxy[j][k_index]*My - Kxz[j][k_index]*Mz;
+        fftMy[index] =   Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
+        fftMz[index] = - Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
+/*        fftMx[index] =(int)Kxx[j][k_index];
+        fftMy[index] = (int)Kxy[j][k_index];
+        fftMz[index] = (int)-Kxz[j][k_index];
+        fftMx[index] = (int)Kyy[j][k_index];
+        fftMy[index] = (int)-Kyz[j][k_index];
+        fftMz[index] = (int)Kzz[j][k_index];*/
       }
       __syncthreads();    
     // -------------------------------------------------------------------------------
