@@ -20,7 +20,9 @@ package gpu
 // DIPOLE (3x3, symmetric) for Gauss law on dipole sources
 // ROTOR (3x3, anitsymmetric (?)) for Faraday/Ampère law on current sources
 //
-// 3 
+// This implementation is optimized for low memory usage, not speed.
+// Speed could be gained when a blocking memory recycler is in place.
+//
 // Author: Arne Vansteenkiste
 //
 // TODO: move to engine/ (?)
@@ -47,7 +49,7 @@ type Conv73Plan struct {
 	fftKern   [Nin][Nout]*Array    // transformed kernel non-redundant parts (only real or imag parts, or nil)
 	fftMul    [Nin][Nout]complex64 // multipliers for kernel
 	fftBuffer Array                // transformed input data
-	fftOut    [Nout]Array          // transformed output data
+	fftOut    Array          // transformed output data (3-comp)
 	fftPlan   FFTInterface         // transforms input/output data
 }
 
@@ -75,9 +77,7 @@ func (conv *Conv73Plan) Init(dataSize, logicSize []int) {
 	// init fft
 	fftOutputSize := FFTOutputSize(logicSize)
 	conv.fftBuffer.Init(1, fftOutputSize, DO_ALLOC) // TODO: recycle
-	for i := 0; i < Nout; i++ {
-		conv.fftOut[i].Init(1, fftOutputSize, DO_ALLOC) // TODO: recycle
-	}
+	conv.fftOut.Init(Nout, fftOutputSize, DO_ALLOC) // TODO: recycle
 	conv.fftPlan = NewDefaultFFT(dataSize, logicSize)
 
 	// init fftKern
@@ -86,7 +86,30 @@ func (conv *Conv73Plan) Init(dataSize, logicSize []int) {
 
 }
 
+func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
+		//	
+		//	fftBuf := &conv.fftBuf
+		//	for i := 0; i < Nin; i++{
+		//		if in[i] == nil{continue}
+		//		conv.ForwardFFT(in[i])
+		//		
+		//		for 
+	
+		//		fftKern := &conv.fftKern
+		//
+		//
+		//	// Point-wise kernel multiplication
+		//	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+		//		fftKern[XX], fftKern[YY], fftKern[ZZ],
+		//		fftKern[YZ], fftKern[XZ], fftKern[XY],
+		//		fftIn.Stream) // TODO: choose stream wisely
+		//	fftIn.Stream.Sync() // !!
+		//
+		//	conv.InverseFFT(out)
+}
 
+// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
+// The symmetry and real/imaginary/complex properties are taken into account to reduce storage.
 func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, realness int) {
 	//Assert(kernel.NComp() == 9) // full tensor
 	if kernel.NComp() == 9 {
@@ -126,8 +149,8 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 		}
 
 		// clear data first
-		conv.fftKern[i+pos][j] = nil
-		conv.fftMul[i+pos][j] = 0
+		AssertMsg(conv.fftKern[i+pos][j] == nil, "I'm afraid I can't let you overwrite that")
+		AssertMsg(conv.fftMul[i+pos][j] == 0, "Likewise")
 
 		// ignore zeros
 		if k < kernel.NComp() && IsZero(kernel.Comp[k]) {
@@ -150,12 +173,12 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 		}
 
 		// calculate FFT of kernel element
-
 		Debug("use", TensorIndexStr[k])
 		devIn.CopyFromHost(kernel.Component(k))
 		fullFFTPlan.Forward(devIn, devOut)
 		hostOut := devOut.LocalCopy()
 
+		// extract real or imag parts
 		hostFFTKern := extract(hostOut, realness)
 		rescale(hostFFTKern, 1/float64(FFTNormLogic(logic)))
 		conv.fftKern[i+pos][j] = NewArray(1, hostFFTKern.Size3D)
@@ -250,23 +273,6 @@ func (conv *Conv73Plan) Free() {
 	// TODO
 }
 
-func (conv *Conv73Plan) Convolve(in, out *Array) {
-	//		fftBuf := &conv.fftBuf
-	//		for i:=MONOPOLE; i<=ROTOR; i++{
-	//
-	//		fftKern := &conv.fftKern
-	//	
-	//		conv.ForwardFFT(in)
-	//	
-	//		// Point-wise kernel multiplication
-	//		KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-	//			fftKern[XX], fftKern[YY], fftKern[ZZ],
-	//			fftKern[YZ], fftKern[XZ], fftKern[XY],
-	//			fftIn.Stream) // TODO: choose stream wisely
-	//		fftIn.Stream.Sync() // !!
-	//	
-	//		conv.InverseFFT(out)
-}
 
 // 	INTERNAL
 // Sparse transform all 3 components.
