@@ -114,7 +114,18 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 	for k := 0; k < 9; k++ {
 		i, j := IdxToIJ(k) // fills diagonal first, then upper, then lower
 
-		// clear first
+		// ignore off-diagonals of vector (would go out of bounds)
+		if k > ZZ && matsymm == DIAGONAL {
+			Debug("break", TensorIndexStr[k], "(off-diagonal)")
+			break
+		}
+
+		// elements of diagonal kernel are stored in one column
+		if matsymm == DIAGONAL {
+			i = 0
+		}
+
+		// clear data first
 		conv.fftKern[i+pos][j] = nil
 		conv.fftMul[i+pos][j] = 0
 
@@ -124,13 +135,7 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 			continue
 		}
 
-		// ignore off-diagonals of vector (would go out of bounds)
-		if k > ZZ && matsymm == DIAGONAL {
-			Debug("skip", TensorIndexStr[k], "(off-diagonal)")
-			continue
-		}
-
-		// handle lower triangle
+		// auto-fill lower triangle if possible
 		if k > XY {
 			if matsymm == SYMMETRIC {
 				conv.fftKern[i+pos][j] = conv.fftKern[j+pos][i]
@@ -144,7 +149,7 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 			}
 		}
 
-		// normal case
+		// calculate FFT of kernel element
 
 		Debug("use", TensorIndexStr[k])
 		devIn.CopyFromHost(kernel.Component(k))
