@@ -42,13 +42,13 @@ const (
 
 // Full Maxwell convolution plan
 type Conv73Plan struct {
-	dataSize    [3]int               // Size of the (non-zero) input data block
-	logicSize   [3]int               // Non-transformed kernel size >= dataSize
-	fftKern     [Nin][Nout]*Array    // transformed kernel non-redundant parts (only real or imag parts, or nil)
-	fftMul      [Nin][Nout]complex64 // multipliers for kernel
-	fftBuffer   Array                // transformed input data
-	fftOut      [Nout]Array          // transformed output data
-	fftPlan     FFTInterface         // transforms input/output data
+	dataSize  [3]int               // Size of the (non-zero) input data block
+	logicSize [3]int               // Non-transformed kernel size >= dataSize
+	fftKern   [Nin][Nout]*Array    // transformed kernel non-redundant parts (only real or imag parts, or nil)
+	fftMul    [Nin][Nout]complex64 // multipliers for kernel
+	fftBuffer Array                // transformed input data
+	fftOut    [Nout]Array          // transformed output data
+	fftPlan   FFTInterface         // transforms input/output data
 }
 
 
@@ -153,7 +153,8 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 
 		hostFFTKern := extract(hostOut, realness)
 		rescale(hostFFTKern, 1/float64(FFTNormLogic(logic)))
-		fftKern[j+pos][i].CopyFromHost(hostFFTKern)
+		fftKern[i+pos][j] = NewArray(1, hostFFTKern.Size3D)
+		fftKern[i+pos][j].CopyFromHost(hostFFTKern)
 	}
 
 	// debug
