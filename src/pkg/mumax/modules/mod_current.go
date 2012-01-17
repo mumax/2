@@ -56,7 +56,7 @@ func LoadCurrent(e *Engine) {
 // Updates the E field in a single convolution
 type EfieldUpdater struct {
 	Efield, rho *Quant
-	convInput []*gpu.Array
+	convInput   []*gpu.Array
 	conv        *gpu.Conv73Plan
 }
 

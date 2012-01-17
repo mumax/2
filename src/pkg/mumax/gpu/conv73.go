@@ -101,7 +101,7 @@ func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
 				continue
 			}
 			// Point-wise kernel multiplication
-			CMaddAsync(fftOut, conv.fftMul[i][j], conv.fftKern[i][j], fftBuf, fftOut.Stream)
+			CMaddAsync(&fftOut.Comp[j], conv.fftMul[i][j], conv.fftKern[i][j], fftBuf, fftOut.Stream)
 			fftOut.Stream.Sync()
 			fmt.Println("conv.fftOut", conv.fftOut)
 		}

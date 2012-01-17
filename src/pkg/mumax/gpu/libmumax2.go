@@ -74,7 +74,13 @@ func Madd(dst, a, b *Array, mulB float32) {
 // src contains real numbers
 // 	dst[i] += scale * kern[i] * src[i]
 func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
-	Assert(dst.Len() == 2*src.Len())
+	Debug("CMadd dst", dst.Size4D())
+	Debug("CMadd src", src.Size4D())
+	Debug("CMadd dst.Len", dst.Len())
+	Debug("CMadd src.Len", src.Len())
+	CheckSize(dst.Size3D(), src.Size3D())
+	AssertMsg(dst.Len() == src.Len(), "src-dst")
+	AssertMsg(dst.Len() == 2*kern.Len(), "dst-kern")
 	C.cmaddAsync(
 		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
 		(C.float)(real(scale)),
