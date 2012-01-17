@@ -70,8 +70,8 @@ func Madd(dst, a, b *Array, mulB float32) {
 
 
 // Complex multiply add. 
-// dst and src contains complex numbers (interleaved format)
-// src contains real numbers
+// dst and src contain complex numbers (interleaved format)
+// kern contains real numbers
 // 	dst[i] += scale * kern[i] * src[i]
 func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
 	Debug("CMadd dst", dst.Size4D())
@@ -88,7 +88,7 @@ func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
 		(**C.float)(unsafe.Pointer(&(kern.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(src.pointer[0]))),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-		(C.int)(src.PartLen3D()))
+		(C.int)(kern.PartLen3D())) // # of numbers (real or complex)
 }
 
 // Calculates:

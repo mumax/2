@@ -78,7 +78,12 @@ func (u *EfieldUpdater) Update() {
 		logicSize := PadSize(e.GridSize(), e.Periodic())
 		kernEl := GetEngine().Quant("kern_el").Buffer()
 		u.conv = gpu.NewConv73Plan(dataSize, logicSize)
-		u.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		Warn("SHOULD BE PUREIMAG")
+		u.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREREAL)
+		//u.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 	u.conv.Convolve(u.convInput, u.Efield.Array())
 }
