@@ -277,18 +277,18 @@ func (conv *Conv73Plan) Free() {
 // Sparse transform all 3 components.
 // (FFTPlan knows about zero padding etc)
 func (conv *Conv73Plan) ForwardFFT(in *Array) {
-	//	for c := range in.Comp {
-	//		conv.fft.Forward(&in.Comp[c], &conv.fftIn.Comp[c])
-	//	}
+	//for c := range in.Comp {
+	conv.fftPlan.Forward(in, &conv.fftBuffer)
+	//}
 }
 
 // 	INTERNAL
 // Sparse backtransform
 // (FFTPlan knows about zero padding etc)
 func (conv *Conv73Plan) InverseFFT(out *Array) {
-	//	for c := range out.Comp {
-	//		conv.fft.Inverse(&conv.fftIn.Comp[c], &out.Comp[c])
-	//	}
+	//for c := range out.Comp {
+	conv.fftPlan.Inverse(&conv.fftBuffer, out)
+	//}
 }
 
 func (conv *Conv73Plan) SelfTest() {
