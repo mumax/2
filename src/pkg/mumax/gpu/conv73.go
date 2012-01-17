@@ -111,14 +111,12 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 	defer fullFFTPlan.Free()
 
 	// FFT all components
-	fftKern := conv.fftKern
-	fftMul := conv.fftMul
 	for k := 0; k < 9; k++ {
 		i, j := IdxToIJ(k) // fills diagonal first, then upper, then lower
 
 		// clear first
-		fftKern[i+pos][j] = nil
-		fftMul[i+pos][j] = 0
+		conv.fftKern[i+pos][j] = nil
+		conv.fftMul[i+pos][j] = 0
 
 		// ignore zeros
 		if k < kernel.NComp() && IsZero(kernel.Comp[k]) {
@@ -128,33 +126,36 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 
 		// ignore off-diagonals of vector (would go out of bounds)
 		if k > ZZ && matsymm == DIAGONAL {
+			Debug("skip", TensorIndexStr[k], "(off-diagonal)")
 			continue
 		}
 
 		// handle lower triangle
 		if k > XY {
 			if matsymm == SYMMETRIC {
-				fftKern[i+pos][j] = fftKern[j+pos][i]
-				fftMul[i+pos][j] = fftMul[j+pos][i]
+				conv.fftKern[i+pos][j] = conv.fftKern[j+pos][i]
+				conv.fftMul[i+pos][j] = conv.fftMul[j+pos][i]
 				continue
 			}
 			if matsymm == ANTISYMMETRIC {
-				fftKern[i+pos][j] = fftKern[j+pos][i]
-				fftMul[i+pos][j] = -fftMul[j+pos][i]
+				conv.fftKern[i+pos][j] = conv.fftKern[j+pos][i]
+				conv.fftMul[i+pos][j] = -conv.fftMul[j+pos][i]
 				continue
 			}
 		}
 
 		// normal case
 
+		Debug("use", TensorIndexStr[k])
 		devIn.CopyFromHost(kernel.Component(k))
 		fullFFTPlan.Forward(devIn, devOut)
 		hostOut := devOut.LocalCopy()
 
 		hostFFTKern := extract(hostOut, realness)
 		rescale(hostFFTKern, 1/float64(FFTNormLogic(logic)))
-		fftKern[i+pos][j] = NewArray(1, hostFFTKern.Size3D)
-		fftKern[i+pos][j].CopyFromHost(hostFFTKern)
+		conv.fftKern[i+pos][j] = NewArray(1, hostFFTKern.Size3D)
+		conv.fftKern[i+pos][j].CopyFromHost(hostFFTKern)
+		conv.fftMul[i+pos][j] = scaling
 	}
 
 	// debug
