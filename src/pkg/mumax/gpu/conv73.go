@@ -187,21 +187,21 @@ func (conv *Conv73Plan) Free() {
 }
 
 func (conv *Conv73Plan) Convolve(in, out *Array) {
-		fftBuf := &conv.fftBuf
-		for i:=MONOPOLE; i<=ROTOR; i++{
-
-		fftKern := &conv.fftKern
-	
-		conv.ForwardFFT(in)
-	
-		// Point-wise kernel multiplication
-		KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-			fftKern[XX], fftKern[YY], fftKern[ZZ],
-			fftKern[YZ], fftKern[XZ], fftKern[XY],
-			fftIn.Stream) // TODO: choose stream wisely
-		fftIn.Stream.Sync() // !!
-	
-		conv.InverseFFT(out)
+	//		fftBuf := &conv.fftBuf
+	//		for i:=MONOPOLE; i<=ROTOR; i++{
+	//
+	//		fftKern := &conv.fftKern
+	//	
+	//		conv.ForwardFFT(in)
+	//	
+	//		// Point-wise kernel multiplication
+	//		KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+	//			fftKern[XX], fftKern[YY], fftKern[ZZ],
+	//			fftKern[YZ], fftKern[XZ], fftKern[XY],
+	//			fftIn.Stream) // TODO: choose stream wisely
+	//		fftIn.Stream.Sync() // !!
+	//	
+	//		conv.InverseFFT(out)
 }
 
 // 	INTERNAL

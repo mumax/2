@@ -111,6 +111,34 @@ void madd2Async(float** a, float** b, float mulB, float** c, float mulC, CUstrea
 	}
 }
 
+
+__global__ void cmaddKern(float* dst, float* src, float a, float b, int NComplexPart){
+
+  int i = threadindex; // complex index
+  int e = 2 * i; // real index
+
+  if(i < NComplexPart){
+
+    float s = src[i];
+
+	dst[e  ] += s * a;
+	dst[e+1] += s * b;
+  }
+  
+  return;
+}
+
+void cmaddAsync(float** dst, float** src, float a, float b, CUstream* stream, int NComplexPart){
+	dim3 gridSize, blockSize;
+	make1dconf(NComplexPart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		cmaddKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], src[dev], a, b, NComplexPart);
+	}
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
