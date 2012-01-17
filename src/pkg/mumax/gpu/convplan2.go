@@ -8,14 +8,14 @@
 package gpu
 
 // Convolution plan
-// Author: Arne Vansteenkiste
+// Author: Arne Vansteenkiste, Ben Van de Wiele
 
 import (
 	. "mumax/common"
 	"mumax/host"
 	"rand"
 	"runtime"
-	"fmt"
+// 	"fmt"
 
 )
 
@@ -104,8 +104,8 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
 	defer devIn.Free()
-	devOut := NewArray(1, FFTOutputSize(logic))
-	defer devOut.Free()
+  devOut := NewArray(1, FFTOutputSize(logic))
+  defer devOut.Free()
 
 	for i, k := range kernel {
 		if k != nil {
@@ -116,6 +116,7 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	}
 
 }
+
 
 // Extract real parts, copy them from src to dst.
 // In the meanwhile, check if imaginary parts are nearly zero
@@ -148,6 +149,8 @@ func scaleRealParts(dst, src *Array, scale float32) {
 
 	dst.CopyFromHost(dstHost)
 }
+
+
 
 func (conv *ConvPlan) Free() {
 	// TODO
@@ -240,4 +243,21 @@ func (conv *ConvPlan) SelfTest() {
 		panic(BugF("FFT self-test failed, max error:", maxerr, "\nPlease use a different grid size of FFT type."))
 	}
 	runtime.GC()
+}
+
+
+func KernOutputSize(logicSize []int) []int {
+  fftSize := make([]int, 3)
+  fftSize = FFTOutputSize(logicSize)
+  
+  kernOutputSize := make([]int, 3)
+  if fftSize[0]==1{
+    kernOutputSize[0] = 1
+  } else{
+    kernOutputSize[0] = fftSize[0]/2+1
+  }
+  kernOutputSize[1] = fftSize[1]
+  kernOutputSize[2] = fftSize[2]/4+1
+  
+  return kernOutputSize
 }
