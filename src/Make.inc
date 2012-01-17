@@ -2,10 +2,17 @@
 # options for DEBUG
 
 # flags for the nvcc compiler
-NVCC=nvcc 
+NVCC=nvcc
 NVCC+=\
   --compiler-options -Wall\
   --compiler-options -Werror\
+  --compiler-options -fPIC\
+  --compiler-options -g\
+  -G\
+  
+NVCCWERRORLESS=nvcc
+NVCCWERRORLESS+=\
+  --compiler-options -Wall\
   --compiler-options -fPIC\
   --compiler-options -g\
   -G\

@@ -329,6 +329,7 @@ func (a API) SetScalarUniformRegion(quant string, initValues []float32) {
 	if q.nComp != 1 {
 		panic(InputErr(fmt.Sprint(q.Name(), " is not a scalar. It has ", q.nComp, "component(s).")))
 	}
+	Log("Set uniformly scalar field", quant)
 	q.assureAlloc()
 	qArray := q.Array()
 	regionArray := a.Engine.Quant("regionDefinition").Array()
@@ -348,6 +349,7 @@ func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, init
 	if len(initValuesX) != len(initValuesY) || len(initValuesY) != len(initValuesZ) || len(initValuesX) != len(initValuesZ) {
 		panic(InputErr(fmt.Sprint("Initial values are corrupted. The number of X, Y and Z components is not the same.")))
 	}
+	Log("Set uniformly vector field", quant)
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
 	InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
@@ -384,6 +386,7 @@ func (a API) SetVectorVortexRegion(quant string, regionsToProceed, center, axis,
 	if len(cellsize) != 3 {
 		panic(InputErr(fmt.Sprint("Cellsize should have 3D coordinates instead of ", len(cellsize), "D.")))
 	}
+	Log("Set", quant, "to vortex state")
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
 	regionP := []bool{}
@@ -396,6 +399,54 @@ func (a API) SetVectorVortexRegion(quant string, regionsToProceed, center, axis,
 	}
 	//gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionsToProceed, center, axis, cellsize, polarity, chirality, maxRadius)
 	InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionP, center, axis, cellsize, polarity, chirality, maxRadius)
+	q.Invalidate()
+}
+
+// Sets scalar quantity random on selected regions. Random value are uniformly distributed between min and max value 
+// @param quant (string) name of the scalar quantity to set
+// @param regionsToProceed ([]bool) index correspond to region index and value is true if the region should be set to vortex. Else it is set to false.
+// @param max (float) upper limit of the range of random number
+// @param min (float) lower limit of the range of random number
+func (a API) SetScalarQuantRandomUniformRegion(quant string, regionsToProceed []float32, max, min float32) {
+	q := a.Engine.Quant(quant)
+	if q.nComp != 1 {
+		panic(InputErr(fmt.Sprint(q.Name(), " is not a scalar. It has ", q.nComp, "components.")))
+	}
+	Log("Set uniformly random scalar quant", quant)
+	q.assureAlloc()
+	regions := a.Engine.Quant("regionDefinition")
+	regionP := []bool{}
+	for c := range regionsToProceed {
+		if regionsToProceed[c] == 0.0 {
+			regionP = append(regionP, false)
+		} else {
+			regionP = append(regionP, true)
+		}
+	}
+	InitScalarQuantRandomUniformRegion(q.Array(), regions.Array(), regionP, max, min)
+	q.Invalidate()
+}
+
+// Sets vector quantity random on selected regions. Random value are uniformly distributed between min and max value 
+// @param quant (string) name of the scalar quantity to set
+// @param regionsToProceed ([]bool) index correspond to region index and value is true if the region should be set to vortex. Else it is set to false.
+func (a API) SetVectorQuantRandomUniformRegion(quant string, regionsToProceed []float32) {
+	q := a.Engine.Quant(quant)
+	if q.nComp != 3 {
+		panic(InputErr(fmt.Sprint(q.Name(), " is not a vector. It has ", q.nComp, "component(s).")))
+	}
+	Log("Set uniformly random vector quant", quant)
+	q.assureAlloc()
+	regions := a.Engine.Quant("regionDefinition")
+	regionP := []bool{}
+	for c := range regionsToProceed {
+		if regionsToProceed[c] == 0.0 {
+			regionP = append(regionP, false)
+		} else {
+			regionP = append(regionP, true)
+		}
+	}
+	InitVectorQuantRandomUniformRegion(q.Array(), regions.Array(), regionP)
 	q.Invalidate()
 }
 

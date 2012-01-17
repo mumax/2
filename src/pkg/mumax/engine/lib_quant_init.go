@@ -93,3 +93,39 @@ func InitVectorQuantVortexRegion(S, regions *Array, regionsToProceed []bool, cen
 		(C.int)(regions.PartSize()[0]))
 	S.Stream.Sync()
 }
+
+// Initialise scalar quantity with random uniform value in each region
+func InitScalarQuantRandomUniformRegion(S, regions *Array, regionsToProceed []bool, max, min float32) {
+	C.initScalarQuantRandomUniformRegionAsync(
+		(**C.float)(unsafe.Pointer(&(S.Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(regions.Pointers()[0]))),
+
+		(*C.bool)(unsafe.Pointer(&(regionsToProceed[0]))),
+		(C.int)(len(regionsToProceed)),
+
+		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
+
+		(C.int)(regions.PartLen3D()),
+
+		(C.float)(max),
+		(C.float)(min))
+	S.Stream.Sync()
+}
+
+// Initialise vector quantity with random uniform value in each region
+func InitVectorQuantRandomUniformRegion(S, regions *Array, regionsToProceed []bool) {
+	C.initVectorQuantRandomUniformRegionAsync(
+		(**C.float)(unsafe.Pointer(&(S.Comp[Z].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[X].Pointers()[0]))),
+
+		(**C.float)(unsafe.Pointer(&(regions.Pointers()[0]))),
+
+		(*C.bool)(unsafe.Pointer(&(regionsToProceed[0]))),
+		(C.int)(len(regionsToProceed)),
+
+		(*C.CUstream)(unsafe.Pointer(&(S.Stream[0]))),
+
+		(C.int)(regions.PartLen3D()))
+	S.Stream.Sync()
+}

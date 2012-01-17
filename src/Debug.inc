@@ -9,6 +9,13 @@ NVCC+=\
   --compiler-options -fPIC\
   --compiler-options -g\
   -G\
+  
+NVCCWERRORLESS=nvcc
+NVCCWERRORLESS+=\
+  --compiler-options -Wall\
+  --compiler-options -fPIC\
+  --compiler-options -g\
+  -G\
 
 # flags for the gcc compiler
 # As CUDA is delivered only in 32 bits on Os X, architecture is forced to i386 on Darwin platform

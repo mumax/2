@@ -23,6 +23,7 @@ extern "C" {
 /// @param Sy multi-GPU array of float with the y component of the vector quantity to initialise, non-NULL
 /// @param Sz multi-GPU array of float with the z component of the vector quantity to initialise, non-NULL
 /// @param regions multi-GPU array of float with region definition, non-NULL
+/// @param host_regionsToProceed multi-GPU array of boolean indicating which region should be proceeded, non-NULL
 /// @param centerX vortex center X coordinate per region, non-NULL.
 /// @param centerY vortex center Y coordinate per region, non-NULL.
 /// @param centerZ vortex center Z coordinate per region, non-NULL.

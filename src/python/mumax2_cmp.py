@@ -71,6 +71,7 @@ def setupRegionSystem():
 	try:
 		regionNameDictionary
 	except NameError:
+		setv('regionDefinition',1.0)
 		#build an array at the good size to prevent resample call
 		regionDefinition = [[]]
 		gridSize = getgridsize()
@@ -79,7 +80,7 @@ def setupRegionSystem():
 			for j in range(0,gridSize[1]):
 				regionDefinition[0][i].append([])
 				for k in range(0,gridSize[2]):
-					regionDefinition[0][i][j].append(1.0)
+					regionDefinition[0][i][j].append(0.0)
 		setmask('regionDefinition', regionDefinition)
 		regionNameDictionary = {'empty':0.}
 	else:
@@ -342,3 +343,184 @@ def InitVortexRegionVectorQuant(quantName, regionsToProceed, center, axis, polar
 	#setvectorvortexregion(quantName, regionsIndexToProceed, center, axis, [cellSize[0],cellSize[1],cellSize[2]], polarity, chirality, maxRadius )
 	setvectorvortexregion(quantName, regionsIndexToProceed, center, axis, cellSize, polarity, chirality, maxRadius )
 	return
+
+## Initialize scalar quantity with uniform value in each region
+#  Every regions that have been set but that are not used here will be considered as part of 'empty' region. Empty region will set the quantity to zero.
+# @param quantName (string) name of the scalar quantity to set
+# @param regionsToProceed (dictionary string(region name) => float (1 or 0)) 1 if region should be set up else 0.
+# @param max (float) upper limit of the range of random number
+# @param min (float) lower limit of the range of random number
+def InitRandomUniformRegionScalarQuant(quantName, regionsToProceed, max, min ):
+	global regionNameDictionary
+	regionsIndexToProceed = []
+	setupRegionSystem()
+	if regionsToProceed.has_key('all') and regionsToProceed['all'] != 0.0:
+		if len(regionNameDictionary) == 1:
+			regionNameDictionary[1] = 'all'
+		for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+			regionsIndexToProceed.append(1.0)
+	else:
+		for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+			if regionsToProceed.has_key(key):
+				regionsIndexToProceed.append(regionsToProceed[key])
+			elif key == 'empty':
+				regionsIndexToProceed.append(0.0)
+			else:
+				regionsIndexToProceed.append(0.0)
+	setscalarquantrandomuniformregion(quantName, regionsIndexToProceed, max, min)
+	return
+
+## Initialize vector quantity with uniform value in each region
+#  Every regions that have been set but that are not used here will be considered as part of 'empty' region. Empty region will set the quantity to zero.
+# @param quantName (string) name of the scalar quantity to set
+# @param regionsToProceed (dictionary string(region name) => float (1 or 0)) 1 if region should be set up else 0.
+def InitRandomUniformRegionVectorQuant(quantName, regionsToProceed ):
+	global regionNameDictionary
+	regionsIndexToProceed = []
+	setupRegionSystem()
+	if regionsToProceed.has_key('all') and regionsToProceed['all'] != 0.0:
+		if len(regionNameDictionary) == 1:
+			regionNameDictionary[1] = 'all'
+		for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+			regionsIndexToProceed.append(1.0)
+	else:
+		for key, value in sorted(regionNameDictionary.iteritems(), key=lambda (k,v): (v,k)):
+			if regionsToProceed.has_key(key):
+				regionsIndexToProceed.append(regionsToProceed[key])
+			elif key == 'empty':
+				regionsIndexToProceed.append(0.0)
+			else:
+				regionsIndexToProceed.append(0.0)
+	setvectorquantrandomuniformregion(quantName, regionsIndexToProceed)
+	return
+
+
+
+
+## Set the grid and initialise the region system with a (2D) regulqr Ngone given a number of sides, a radius, a rotation angle and a center.
+#  The grid will fit exactly around the polygon.
+# @param sides (int) the number of sides (e.g. 3 for triangle, 4 for square ...) (unitless)
+# @param radius (float) the radius of the circumscribed circle of the Ngone (m)
+# @param rotation (float) the rotation angle applied to the Ngone (center being the center of the circumscribed circle) (degree)
+# @param Nx (int) the number of cells along the X-axis (unitless)
+# @param Ny (int) the number of cells along the Y-axis (unitless)
+# @param Nz (int) the number of cells along the Z-axis (unitless)
+# @param Cz (float) the cell size along Z-axis (m)
+# @param region (int) the region to assign to this Ngone (if zero, the region system will not be used)
+def NgoneFit(sides, radius, rotation, Nx, Ny, Nz, Cz, region = 0):
+	setgridsize(Nx, Ny, Nz)
+	Xmin = 0
+	Ymin = 0
+	Xmax = 0
+	Ymax = 0
+	for n in range(0,sides):
+		x = radius *math.cos(rotation*math.pi/180 + 2 * math.pi * n / sides)
+		y = radius *math.sin(rotation*math.pi/180 + 2 * math.pi * n / sides)
+		#print >> sys.stderr, "x: ", x, " y: ", y
+		if Xmin > x :
+			Xmin = x
+		if Xmax < x :
+			Xmax = x
+		if Ymin > y :
+			Ymin = y
+		if Ymax < y :
+			Ymax = y
+	Cx = (Xmax - Xmin)/Nx
+	Cy = (Ymax - Ymin)/Ny
+	#print >> sys.stderr, "Xmin: ", Xmin, " Ymin: ", Ymin, "Xmax: ", Xmax, " Ymax: ", Ymax, " Cx: ", Cx, " Cy: ", Cy
+	setcellsize(Cx, Cy, Cz)
+	load('regions')
+	#mask= [[[0 for x in range(Nz)] for x in range(Ny)] for x in range(Nx)]
+	setupRegionSystem()
+	global regionDefinition
+	regionDefinition = []
+	global regionNameDictionary
+	regionNameDictionary[region] = float(len(regionNameDictionary))
+	diagonal =  radius * math.cos(math.pi / sides)
+	rotRad = rotation * math.pi / 180.
+	for i in range(0,Nx):
+		x = (i + 0.5)*Cx + Xmin
+		regionDefinition.append([])
+		for j in range(0,Ny):
+			y = (j + 0.5)*Cy + Ymin
+			theta = math.atan2(y, x)
+			regionDefinition[i].append([])
+			if theta < rotRad:
+				theta += 2 *math.pi
+			for n in range(0,sides):
+				if theta <= 2*math.pi*(n+1)/sides + rotRad and theta > 2*math.pi*n/sides + rotRad:
+					angle = -2*math.pi*(n+0.5)/sides - rotRad
+					xx = x * math.cos(angle) - y * math.sin(angle)
+					#print >> sys.stderr, i , j, x, y, xx, "<", radius * math.cos(math.pi / sides), angle/math.pi, theta/math.pi, regionNameDictionary[region]
+					if xx < diagonal:
+						for k in range(0,Nz):
+							regionDefinition[i][j].append(regionNameDictionary[region])
+					else:
+						for k in range(0,Nz):
+							regionDefinition[i][j].append(regionNameDictionary["empty"])
+				
+	setmask('regionDefinition', [regionDefinition])
+	"""
+	out = ""
+	for j in range(0,Ny):
+		for i in range(0,Nx):
+			if regionDefinition[i][j][0] >= 2:
+				out += "-"
+			else:
+				out += "."
+		out += "\n"
+	print >> sys.stderr, out
+	print >> sys.stderr, "\n\n\n"
+	
+	regionDefinition = getarray('regionDefinition')
+	out = ""
+	for j in range(0,Ny):
+		for i in range(0,Nx):
+			if regionDefinition[0][i][j][0] >= 1:
+				out += "-"
+			else:
+				out += "."
+		out += "\n"
+	print >> sys.stderr, out
+	"""
+	return 
+
+
+## Returns a mask for a (2D) regulqr Ngone given a number of sides, a radius, a rotation angle and a center.
+# @param sides (int) the number of sides (e.g. 3 for triangle, 4 for square ...) (unitless)
+# @param radius (float) the radius of the circumscribed circle of the Ngone (m)
+# @param rotation (float) the rotation angle applied to the Ngone (center being the center of the circumscribed circle) (degree)
+# @param centerX (float) the X coordinate of the center of the circumscribed circle of the Ngone (m)
+# @param centerY (float) the Y coordinate of the center of the circumscribed circle of the Ngone (m)
+# @param region (int) the region to assign to this Ngone (if zero, the region system will not be used)
+"""
+def Ngone(sides, radius, rotation, centerX, centerY, region = 0):
+	Nx,Ny,Nz = getgridsize()
+	Cx,Cy,Cz = getcellsize()
+	mask= [[[0 for x in range(Nz)] for x in range(Ny)] for x in range(Nx)]
+	if region > 0:
+		setupRegionSystem()
+		regionDefinition = getarray('regionDefinition')
+	for i in range(0,Nx):
+		x = (i + 0.5)*Cx - centerX
+		for j in range(0,Ny):
+			y = (j + 0.5)*Cy - centerY
+			# calculate polar angle
+			theta = math.atan2(y, x)
+			for n in range(0,sides):
+				if theta <= 2*math.pi*(n+1)/sides and theta > 2*math.pi*n/sides:
+					angle = -2*math.pi*(n+0.5)/sides + rotation * math.pi / 180.
+					xx = x * math.cos(angle) - y * math.sin(angle)
+					if xx < radius * math.cos(math.pi / sides):
+						for k in range(0,Nz):
+							mask[i][j][k] = 1
+							if region > 0:
+								regionDefinition[i][j][k] = 1
+					else:
+						for k in range(0,Nz):
+							mask[i][j][k] = 0
+					break
+	if region > 0:
+		setmask('regionDefinition', regionDefinition)
+	return [mask]
+"""
