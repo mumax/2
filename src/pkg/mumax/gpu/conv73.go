@@ -47,7 +47,7 @@ type Conv73Plan struct {
 	fftKern     [Nin][Nout]*Array    // transformed kernel non-redundant parts (only real or imag parts, or nil)
 	fftMul      [Nin][Nout]complex64 // multipliers for kernel
 	fftBuffer   Array                // transformed input data
-	fftOut      [Nout]*Array         // transformed output data
+	fftOut      [Nout]Array          // transformed output data
 	fftPlan     FFTInterface         // transforms input/output data
 	fullFFTPlan FFTInterface         // transforms kernel // TODO: free?
 }
@@ -90,7 +90,9 @@ func (conv *Conv73Plan) Init(dataSize, logicSize []int) {
 
 func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, realness int) {
 	//Assert(kernel.NComp() == 9) // full tensor
-	Assert(matsymm == MatrixSymmetry(kernel))
+	if kernel.NComp() == 9 {
+		Assert(matsymm == MatrixSymmetry(kernel))
+	}
 	Assert(matsymm == SYMMETRIC || matsymm == ANTISYMMETRIC || matsymm == NOSYMMETRY || matsymm == DIAGONAL)
 
 	//if FFT'd kernel is pure real or imag, 
