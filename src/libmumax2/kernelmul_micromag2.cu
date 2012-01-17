@@ -84,7 +84,7 @@ __global__ void kernelMulMicromag3D2Kern(
       Mx = fftMx[index];
       My = fftMy[index];
       Mz = fftMz[index];
-      fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
+//       fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
       fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
       fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
 
@@ -93,7 +93,7 @@ __global__ void kernelMulMicromag3D2Kern(
       My = fftMy[index];
       Mz = fftMz[index];
       k_index = kmax-k/2;
-      fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
+//       fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
       fftMy[index] = Kxy[j][k_index]*Mx + Kyy[j][k_index]*My + Kyz[j][k_index]*Mz;
       fftMz[index] = Kxz[j][k_index]*Mx + Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
       
@@ -102,7 +102,7 @@ __global__ void kernelMulMicromag3D2Kern(
         Mx = fftMx[index];
         My = fftMy[index];
         Mz = fftMz[index];
-        fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
+//         fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
         fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
         fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
         
@@ -111,7 +111,7 @@ __global__ void kernelMulMicromag3D2Kern(
         My = fftMy[index];
         Mz = fftMz[index];
         k_index = kmax-k/2;
-        fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
+//         fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
         fftMy[index] = Kxy[j][k_index]*Mx + Kyy[j][k_index]*My + Kyz[j][k_index]*Mz;
         fftMz[index] = Kxz[j][k_index]*Mx + Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
       }
