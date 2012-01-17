@@ -22,12 +22,16 @@ package gpu
 //
 // 3 
 // Author: Arne Vansteenkiste
+//
+// TODO: move to engine/ (?)
 
 import (
 	. "mumax/common"
 	"mumax/host"
 	"rand"
 	"runtime"
+	"fmt"
+	"unsafe"
 )
 
 
@@ -148,6 +152,15 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 		rescale(hostFFTKern, 1/float64(FFTNormLogic(logic)))
 		fftKern[j+pos][i].CopyFromHost(hostFFTKern)
 	}
+
+	// debug
+	var dbg [Nin][Nout]string
+	for i := range dbg {
+		for j := range dbg[i] {
+			dbg[i][j] = fmt.Sprint(unsafe.Pointer(conv.fftKern[i][j]), "*", conv.fftMul[i][j])
+		}
+	}
+	Debug("convplan kernel:", dbg)
 }
 
 
@@ -221,41 +234,6 @@ const (
 	PUREIMAG = 1 // data is purely complex
 	COMPLEX  = 2 // data is full complex number
 )
-
-// Detects realness of complex data (interleaved format).
-// returns 
-
-// INTERNAL: Loads a convolution kernel.
-// This is automatically done during initialization.
-// "kernel" is not FFT'ed yet, this is done here.
-// We use exactly the same fft as for the magnetizaion
-// so that the convolution definitely works.
-// After FFT'ing, the kernel is purely real,
-// so we discard the imaginary parts.
-// This saves a huge amount of memory.
-// The kernel is internally scaled to compensate
-// for unnormalized FFTs
-func loadKernComp(fftKern *Array, fft FFTInterface, kernel *host.Array, op int) {
-
-	// Check sanity of kernel
-	//	for _, e := range kernel.List {
-	//		if !IsReal(e) {
-	//			BugF("Kern", opStr[op], "=", e)
-	//		}
-	//	}
-
-	//logic := kernel.Size3D
-	//devIn := NewArray(1, logic)
-	//defer devIn.Free()
-
-	//devOut := NewArray(1, FFTOutputSize(logic))
-	//defer devOut.Free()
-
-	//devIn.CopyFromHost(kernel)
-	//fft.Forward(devIn, devOut)
-	//scalePart(fftKern, devOut, 1/float32(FFTNormLogic(logic)), oddness[op])
-
-}
 
 
 func (conv *Conv73Plan) Free() {
@@ -335,11 +313,6 @@ func (conv *Conv73Plan) SelfTest() {
 	}
 	runtime.GC()
 }
-
-const (
-	REAL = 0
-	IMAG = 1
-)
 
 
 // Extract real or imaginary parts, copy them from src to dst.
