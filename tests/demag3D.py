@@ -4,7 +4,7 @@ from math import *
 
 # test file for demag field
 
-setgridsize(32, 32, 32)
+setgridsize(32, 32, 8)
 setcellsize(5e-9, 5e-9, 5e-9)
 
 load('micromagnetism')

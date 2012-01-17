@@ -18,9 +18,9 @@
 extern "C" {
 #endif
 
-/// The size of matrix blocks to be loaded into shared memory.
-#define BLOCKSIZE_K 32
-#define BLOCKSIZE_J 8
+/// The size of matrix blocks to be loaded into shared memory.  BLOCKSIZE_J can be made smaller if needed, BLOCKSIZE_K better not.
+#define BLOCKSIZE_K 16
+#define BLOCKSIZE_J 4  
 
 /// |Hx|   |Kxx Kxy Kxz|   |Mx|
 /// |Hy| = |Kxy Kyy Kyz| * |My|
@@ -30,7 +30,8 @@ __global__ void kernelMulMicromag3D2Kern(
     float* fftKxx, float* fftKyy, float* fftKzz,
     float* fftKyz, float* fftKxz, float* fftKxy, int N0, int N1, int N2){
   
-  int index;
+  int index, k_index;
+  float Mx, My, Mz;
 
   __shared__ float Kxx[BLOCKSIZE_J][BLOCKSIZE_K/2+1];
   __shared__ float Kxy[BLOCKSIZE_J][BLOCKSIZE_K/2+1];
@@ -49,22 +50,21 @@ __global__ void kernelMulMicromag3D2Kern(
 
   // index in the total array
   int K = Bk*BLOCKSIZE_K + k;
-  int J = Bj*BLOCKSIZE_K + j;
+  int J = Bj*BLOCKSIZE_J + j;
 
   int kmax = 0;
-  if ( (N2/2 - (Bj+1)*BLOCKSIZE_K/2)>=0 )
+  if ( (N2/4 - (Bk+1)*BLOCKSIZE_K/2)>=0 )
     kmax = BLOCKSIZE_K/2;
   else
-    kmax = N2/2 - (Bj+1)*BLOCKSIZE_K/2;
+    kmax =  (Bk+1)*BLOCKSIZE_K/2 - N2/4 ;
  
-  //for now only for 2D:
   for (int i=0; i<N0/2+1; i++){
 
     // Copying kernel components to shared memory ------------------------------------
     int N2K = N2/2;        //TODO: delete this line when reduced storage of kernel is implemented 
     //  int N2K = N2/4+1;  //TODO: use this line when reduced storage of kernel is implemented 
     
-    if (J<N1 && K<(N2/4+1) && k<BLOCKSIZE_K/2+1) {
+    if (J<N1 && K<(N2/2+1) && k<BLOCKSIZE_K/2+1) {
       index = i*N1*N2K + J*N2K + Bk*BLOCKSIZE_K/2 + k;
       Kxx[j][k] = fftKxx[index];
       Kxy[j][k] = fftKxy[index];
@@ -79,45 +79,41 @@ __global__ void kernelMulMicromag3D2Kern(
   
     // Perform kernel multiplication -------------------------------------------------
     if ( J<N1 && (K<N2/2) ) {
-      float Hx=0; float Hy=0; float Hz=0; 
-      
+
       index = i*N1*N2 + J*N2 + K;
-     Hx = Kxx[j][k/2]*fftMx[index] + Kxy[j][k/2]*fftMy[index] + Kxz[j][k/2]*fftMz[index];
-//      Hx = k/2;
-//       Hx = Kxx[j][k/2];
-      Hy = Kxy[j][k/2]*fftMx[index] + Kyy[j][k/2]*fftMy[index] + Kyz[j][k/2]*fftMz[index];
-      Hz = Kxz[j][k/2]*fftMx[index] + Kyz[j][k/2]*fftMy[index] + Kzz[j][k/2]*fftMz[index];
-      fftMx[index] = Hx;
-      fftMy[index] = Hy;
-      fftMz[index] = Hz;
+      Mx = fftMx[index];
+      My = fftMy[index];
+      Mz = fftMz[index];
+      fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
+      fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
+      fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
 
-      index = i*N1*N2 + J*N2 + N2 - (Bk+1)*BLOCKSIZE_K + k;
-      int k_index = kmax-k/2;
-//       Hx = Kxx[j][k_index];
-//      Hx = k_index;
-     Hx = Kxx[j][k_index]*fftMx[index] + Kxy[j][k_index]*fftMy[index] + Kxz[j][k_index]*fftMz[index];
-      Hy = Kxy[j][k_index]*fftMx[index] + Kyy[j][k_index]*fftMy[index] + Kyz[j][k_index]*fftMz[index];
-      Hz = Kxz[j][k_index]*fftMx[index] + Kyz[j][k_index]*fftMy[index] + Kzz[j][k_index]*fftMz[index];
-      fftMx[index] = Hx;
-      fftMy[index] = Hy;
-      fftMz[index] = Hz;
+      index = i*N1*N2 + J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
+      Mx = fftMx[index];
+      My = fftMy[index];
+      Mz = fftMz[index];
+      k_index = kmax-k/2;
+      fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
+      fftMy[index] = Kxy[j][k_index]*Mx + Kyy[j][k_index]*My + Kyz[j][k_index]*Mz;
+      fftMz[index] = Kxz[j][k_index]*Mx + Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
       
-      if (i!=0 && i!=N0/2){
+      if (i!=0 && i!=(N0/2+1)){
         index = (N0-i)*N1*N2 + J*N2 + K;
-        Hx = Kxx[j][k/2]*fftMx[index] + Kxy[j][k/2]*fftMy[index] + Kxz[j][k/2]*fftMz[index];
-        Hy = Kxy[j][k/2]*fftMx[index] + Kyy[j][k/2]*fftMy[index] + Kyz[j][k/2]*fftMz[index];
-        Hz = Kxz[j][k/2]*fftMx[index] + Kyz[j][k/2]*fftMy[index] + Kzz[j][k/2]*fftMz[index];
-        fftMx[index] = Hx;
-        fftMy[index] = Hy;
-        fftMz[index] = Hz;
-
-        index = (N0-i)*N1*N2 + J*N2 + N2 - (Bk+1)*BLOCKSIZE_K + k;
-        Hx = Kxx[j][k_index]*fftMx[index] + Kxy[j][k_index]*fftMy[index] + Kxz[j][k_index]*fftMz[index];
-        Hy = Kxy[j][k_index]*fftMx[index] + Kyy[j][k_index]*fftMy[index] + Kyz[j][k_index]*fftMz[index];
-        Hz = Kxz[j][k_index]*fftMx[index] + Kyz[j][k_index]*fftMy[index] + Kzz[j][k_index]*fftMz[index];
-        fftMx[index] = Hx;
-        fftMy[index] = Hy;
-        fftMz[index] = Hz;
+        Mx = fftMx[index];
+        My = fftMy[index];
+        Mz = fftMz[index];
+        fftMx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
+        fftMy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
+        fftMz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
+        
+        index = (N0-i)*N1*N2 + J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
+        Mx = fftMx[index];
+        My = fftMy[index];
+        Mz = fftMz[index];
+        k_index = kmax-k/2;
+        fftMx[index] = Kxx[j][k_index]*Mx + Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
+        fftMy[index] = Kxy[j][k_index]*Mx + Kyy[j][k_index]*My + Kyz[j][k_index]*Mz;
+        fftMz[index] = Kxz[j][k_index]*Mx + Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
       }
       __syncthreads();    
     // -------------------------------------------------------------------------------
@@ -138,6 +134,7 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
   int N1 = partSize[1];
   int N2 = partSize[2];
 
+  printf("\n\n%d, %d\n\n",(N2/2-1) / BLOCKSIZE_K + 1, (N1-1) / BLOCKSIZE_J + 1);
   //N2 devided by 2 since symmetry in second half is exlpoited (except for 1 element)
   dim3 gridsize((N2/2-1) / BLOCKSIZE_K + 1, (N1-1) / BLOCKSIZE_J + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
   dim3 blocksize(BLOCKSIZE_K, BLOCKSIZE_J, 1);

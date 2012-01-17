@@ -168,7 +168,7 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 // 		fftIn.Stream) // TODO: choose stream wisely
 // 	fftIn.Stream.Sync() // !!
 
-	// Point-wise kernel multiplication (new)
+// 	Point-wise kernel multiplication (new)
 	KernelMulMicromag3D2Async(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
 		fftKern[XX], fftKern[YY], fftKern[ZZ],
 		fftKern[YZ], fftKern[XZ], fftKern[XY],
@@ -180,8 +180,12 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
       fmt.Println("")*/
       fmt.Println("FFTMx:", &fftIn.Comp[X].LocalCopy().Array)
       fmt.Println("")
-//       fmt.Println("parsize Mx", fftIn.Comp[X].partSize)
-//       fmt.Println("parsize gx", fftKern[XX].partSize)
+/*      fmt.Println("FFTMy:", &fftIn.Comp[Y].LocalCopy().Array)
+      fmt.Println("")
+      fmt.Println("FFTMz:", &fftIn.Comp[Z].LocalCopy().Array)
+      fmt.Println("")*/
+      fmt.Println("partsize Mx", fftIn.Comp[X].partSize)
+      fmt.Println("partsize gx", fftKern[XX].partSize)
 
 	conv.InverseFFT(out)
 }
