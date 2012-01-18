@@ -28,16 +28,15 @@ func LoadBField(e *Engine) {
 // Updates the E field in a single convolution
 // taking into account all possible sources.
 type BFieldUpdater struct {
-	BField    *Quant
-	convInput []*gpu.Array // 0, m, μ0J + μ0ε0(∂E/∂t)
-	conv      *gpu.Conv73Plan
-	BExt *Quant
+	BField, BExt *Quant
+	convInput    []*gpu.Array // 0, m, μ0J + μ0ε0(∂E/∂t)
+	conv         *gpu.Conv73Plan
 }
 
 func newBFieldUpdater(BField, BExt *Quant) Updater {
 	e := GetEngine()
 	u := new(BFieldUpdater)
-	u.BExt = BExt
+	u.BField = BField
 	u.BExt = BExt
 	// convolution does not have any kernels yet
 	// they are added by other modules
@@ -50,5 +49,5 @@ func newBFieldUpdater(BField, BExt *Quant) Updater {
 
 func (u *BFieldUpdater) Update() {
 	u.conv.Convolve(u.convInput, u.BField.Array())
-	
+	u.BField.Add(u.BExt)
 }

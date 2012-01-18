@@ -235,6 +235,20 @@ func (q *Quant) SetMask(field *host.Array) {
 	q.Invalidate() //!
 }
 
+// 	sum += parent
+func (sum *Quant) Add(parent *Quant) {
+	for c := 0; c < sum.NComp(); c++ {
+		parComp := parent.array.Component(c)
+		parMul := parent.multiplier[c]
+		if parMul == 0 {
+			continue
+		}
+		sumMul := sum.multiplier[c]
+		sumComp := sum.array.Component(c)                           // does not alloc
+		gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
+	}
+}
+
 //____________________________________________________________________ get
 
 // Assuming the quantity represent a scalar value, return it as a number.
