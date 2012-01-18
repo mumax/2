@@ -48,10 +48,7 @@ func LoadCoulomb(e *Engine) {
 	e.Depends("E", "rho", "kern_el")
 }
 
-//____________________________________________________________________ E field
-
-
-// Update demag kernel (cpu)
+// Updates electrostatic kernel (cpu)
 type elKernUpdater struct {
 	kern *Quant // that's me!
 }

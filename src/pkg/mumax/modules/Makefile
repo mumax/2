@@ -18,6 +18,7 @@ GOFILES=\
 	mod_uniaxialanisotropy.go\
 	mod_llg.go\
 	mod_demagexchange.go\
+	mod_current.go\
 	kernel.go\
 	kernel_electrostatic.go\
 	kernel_magnetostatic.go\
