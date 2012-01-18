@@ -22,8 +22,8 @@ func init() {
 // Load Faraday's law
 func LoadFaraday(e *Engine) {
 
-	LoadEfield(e)
-	LoadBfield(e)
+	LoadEField(e)
+	LoadBField(e)
 	LoadDerivative(e.Quant("B"))
 	LoadDerivative(e.Quant("E"))
 

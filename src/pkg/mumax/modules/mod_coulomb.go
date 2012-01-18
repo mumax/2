@@ -32,7 +32,7 @@ func LoadChargeDensity(e *Engine) {
 // Load Coulomb's law
 func LoadCoulomb(e *Engine) {
 
-	LoadEfield(e)
+	LoadEField(e)
 	LoadChargeDensity(e)
 
 	// here be dragons
@@ -69,7 +69,7 @@ func (u *elKernUpdater) Update() {
 	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
 
 	// then also load it into the E field convolution
-	EUpdater := e.Quant("E").GetUpdater().(*EfieldUpdater)
+	EUpdater := e.Quant("E").GetUpdater().(*EFieldUpdater)
 	kernEl := GetEngine().Quant("kern_el").Buffer()
 	EUpdater.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
 	EUpdater.convInput[0] = e.Quant("rho").Array()

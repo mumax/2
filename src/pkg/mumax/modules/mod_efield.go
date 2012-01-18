@@ -17,27 +17,27 @@ import (
 
 
 // Loads E if not yet present
-func LoadEfield(e *Engine) {
+func LoadEField(e *Engine) {
 	if e.HasQuant("E") {
 		return
 	}
-	Efield := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
-	Efield.SetUpdater(newEfieldUpdater(Efield))
+	EField := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
+	EField.SetUpdater(newEFieldUpdater(EField))
 }
 
 // Updates the E field in a single convolution
 // taking into account all possible sources.
-type EfieldUpdater struct {
-	Efield    *Quant
+type EFieldUpdater struct {
+	EField    *Quant
 	convInput []*gpu.Array // rho, P, ∂B/∂t
 	conv      *gpu.Conv73Plan
 	//TODO: add external E field here too
 }
 
-func newEfieldUpdater(Efield *Quant) Updater {
+func newEFieldUpdater(EField *Quant) Updater {
 	e := GetEngine()
-	u := new(EfieldUpdater)
-	u.Efield = Efield
+	u := new(EFieldUpdater)
+	u.EField = EField
 	// convolution does not have any kernels yet
 	// they are added by other modules
 	dataSize := e.GridSize()
@@ -47,6 +47,6 @@ func newEfieldUpdater(Efield *Quant) Updater {
 	return u
 }
 
-func (u *EfieldUpdater) Update() {
-	u.conv.Convolve(u.convInput, u.Efield.Array())
+func (u *EFieldUpdater) Update() {
+	u.conv.Convolve(u.convInput, u.EField.Array())
 }

@@ -16,27 +16,29 @@ import (
 )
 
 // Loads B if not yet present
-func LoadBfield(e *Engine) {
+func LoadBField(e *Engine) {
 	if e.HasQuant("B") {
 		return
 	}
-	Bfield := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
-	Bfield.SetUpdater(newBfieldUpdater(Bfield))
+	BField := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
+	BExt := e.AddNewQuant("B_ext", VECTOR, MASK, Unit("T"), "externally applied magnetic induction")
+	BField.SetUpdater(newBFieldUpdater(BField, BExt))
 }
 
 // Updates the E field in a single convolution
 // taking into account all possible sources.
-type BfieldUpdater struct {
-	Bfield    *Quant
+type BFieldUpdater struct {
+	BField    *Quant
 	convInput []*gpu.Array // 0, m, μ0J + μ0ε0(∂E/∂t)
 	conv      *gpu.Conv73Plan
-	// TODO: add B_ext here
+	BExt *Quant
 }
 
-func newBfieldUpdater(Bfield *Quant) Updater {
+func newBFieldUpdater(BField, BExt *Quant) Updater {
 	e := GetEngine()
-	u := new(BfieldUpdater)
-	u.Bfield = Bfield
+	u := new(BFieldUpdater)
+	u.BExt = BExt
+	u.BExt = BExt
 	// convolution does not have any kernels yet
 	// they are added by other modules
 	dataSize := e.GridSize()
@@ -46,6 +48,7 @@ func newBfieldUpdater(Bfield *Quant) Updater {
 	return u
 }
 
-func (u *BfieldUpdater) Update() {
-	u.conv.Convolve(u.convInput, u.Bfield.Array())
+func (u *BFieldUpdater) Update() {
+	u.conv.Convolve(u.convInput, u.BField.Array())
+	
 }

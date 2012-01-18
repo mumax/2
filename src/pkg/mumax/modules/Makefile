@@ -21,6 +21,7 @@ GOFILES=\
 	mod_llg.go\
 	mod_demagexchange.go\
 	mod_current.go\
+	mod_maxwell.go\
 	kernel.go\
 	kernel_electrostatic.go\
 	kernel_magnetostatic.go\
