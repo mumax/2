@@ -24,6 +24,7 @@ GOFILES=\
 	kernel_magnetostatic.go\
 	kernel_biotsavart.go\
 	kernel_exchange.go\
+	timederivative.go\
 	vector.go\
 
 CGOFILES=\

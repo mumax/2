@@ -6,7 +6,7 @@ TESTFILES=\
 		  engine.py.out\
 		  micromag.py.out\
 		  pointwise.py.out\
-		  efield2D.py.out\
+		  coulomb.py.out\
 		  #anisotropy.py.out\
 		  #Test.java.out\
 		  #api.py.out\

@@ -1,23 +1,29 @@
 from mumax2 import *
+from os import *
 
-# Electrical current paths
+# Tests electrical field in 2D
 
 Nx = 16 
 Ny = 16
 Nz = 1
 setgridsize(Nx, Ny, Nz)
-setcellsize(5e-9, 5e-9, 5e-9)
+cell=1e-9
+setcellsize(cell, cell, cell)
 
-load('current')
+load('coulomb')
 
 rho = makearray(1, Nx, Ny, Nz)
 rho[0][Nx/2][Ny/2][Nz/2] = 1
 setarray('rho', rho)
 
+E=getarray('E')
+Ehave = E[0][0][Ny/2][0]
 
-save('kern_el', 'gplot', [], 'kern_el.gplot')
-save('rho', 'gplot', [], 'rho.gplot')
-save('E', 'gplot', [], 'E.gplot')
+r=(Ny/2)*cell
+vol=cell**3
+q=1*vol
+Ewant = -1 * q/(4*pi*epsilon0*r*r)
+echo('have ' +  str(Ehave) + ' want '+ str(Ewant))
 
-printstats()
-savegraph("graph.png")
+if abs(Ehave - Ewant) / abs(Ewant) > 1e-5:
+	exit(-1)

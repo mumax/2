@@ -7,7 +7,7 @@
 
 package modules
 
-// Provides the Electrical field
+// Provides the Magnetic field
 // Author: Arne Vansteenkiste
 
 import (
@@ -15,29 +15,28 @@ import (
 	"mumax/gpu"
 )
 
-
-// Loads E if not yet present
-func LoadEfield(e *Engine) {
-	if e.HasQuant("E") {
+// Loads B if not yet present
+func LoadBfield(e *Engine) {
+	if e.HasQuant("B") {
 		return
 	}
-	Efield := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
-	Efield.SetUpdater(newEfieldUpdater(Efield))
+	Bfield := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
+	Bfield.SetUpdater(newBfieldUpdater(Bfield))
 }
 
 // Updates the E field in a single convolution
 // taking into account all possible sources.
-type EfieldUpdater struct {
-	Efield    *Quant
-	convInput []*gpu.Array // rho, P, ∂B/∂t
+type BfieldUpdater struct {
+	Bfield    *Quant
+	convInput []*gpu.Array // 0, m, μ0J + μ0ε0(∂E/∂t)
 	conv      *gpu.Conv73Plan
-	//TODO: add external E field here too
+	// TODO: add B_ext here
 }
 
-func newEfieldUpdater(Efield *Quant) Updater {
+func newBfieldUpdater(Bfield *Quant) Updater {
 	e := GetEngine()
-	u := new(EfieldUpdater)
-	u.Efield = Efield
+	u := new(BfieldUpdater)
+	u.Bfield = Bfield
 	// convolution does not have any kernels yet
 	// they are added by other modules
 	dataSize := e.GridSize()
@@ -47,6 +46,6 @@ func newEfieldUpdater(Efield *Quant) Updater {
 	return u
 }
 
-func (u *EfieldUpdater) Update() {
-	u.conv.Convolve(u.convInput, u.Efield.Array())
+func (u *BfieldUpdater) Update() {
+	u.conv.Convolve(u.convInput, u.Bfield.Array())
 }
