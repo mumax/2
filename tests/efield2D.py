@@ -10,7 +10,7 @@ setgridsize(Nx, Ny, Nz)
 cell=1e-9
 setcellsize(cell, cell, cell)
 
-load('current')
+load('coulomb')
 
 rho = makearray(1, Nx, Ny, Nz)
 rho[0][Nx/2][Ny/2][Nz/2] = 1

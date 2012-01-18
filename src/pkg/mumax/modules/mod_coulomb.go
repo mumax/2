@@ -72,7 +72,8 @@ func (u *elKernUpdater) Update() {
 	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
 
 	// then also load it into the E field convolution
-	conv := e.Quant("E").GetUpdater().(*EfieldUpdater).conv
+	EUpdater := e.Quant("E").GetUpdater().(*EfieldUpdater)
 	kernEl := GetEngine().Quant("kern_el").Buffer()
-	conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
+	EUpdater.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
+	EUpdater.convInput[0] = e.Quant("rho").Array()
 }
