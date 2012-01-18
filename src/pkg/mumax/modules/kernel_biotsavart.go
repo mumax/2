@@ -17,6 +17,7 @@ import (
 
 // Calculates a biot-savart type kernel
 //	-(r x j)/r³ dV
+// j is the source (current or displacement current)
 // To be used for both Oersted fields and Faraday's law.
 //
 // TODO: make more accurate, current implementation is that of point source.
