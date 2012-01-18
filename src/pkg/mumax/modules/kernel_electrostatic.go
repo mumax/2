@@ -16,13 +16,14 @@ import (
 	"math"
 )
 
-// Calculates the electrostatic kernel: 1/4pi * cell volume / r2
+// Calculates the electrostatic kernel for unit charge density:
+//	1/(4πε0) * cell volume / r²
 //
 // size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
 //
 // return value: 3 arrays: K[destdir][x][y][z]
-// (e.g. K[X][1][2][3] gives H_x at position (1, 2, 3) due to a unit charge density at the origin.
-// TODO: make more accurate
+// (e.g. K[X][1][2][3] gives E_x at position (1, 2, 3) due to a unit charge density at the origin.
+// TODO: make more accurate, current implementation is that of point charge.
 func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
 	Debug("Calculating electrostatic kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
 	Start("kern_el")
@@ -60,7 +61,7 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 	Debug("xyz ranges:", x1, x2, y1, y2, z1, z2)
 
 	// cell volume
-	//V := cellsize[X] * cellsize[Y] * cellsize[Z]
+	V := cellsize[X] * cellsize[Y] * cellsize[Z]
 
 	for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
 		xw := Wrap(x, size[X])
@@ -71,11 +72,12 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 
 				rx, ry, rz := float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z]
 				r := math.Sqrt(rx*rx + ry*ry + rz*rz)
+				r3 := r * r * r
 				if r != 0 {
-					//factor := V / (4 * PI) // TODO: include epsillon0?
-					Ex := rx //factor * rx / (r * r * r)
-					Ey := ry //factor * ry / (r * r * r)
-					Ez := rz //factor * rz / (r * r * r)
+					factor := V / (4 * PI * Epsilon0)
+					Ex := factor * rx / r3
+					Ey := factor * ry / r3
+					Ez := factor * rz / r3
 
 					k[X][xw][yw][zw] += float32(Ex)
 					k[Y][xw][yw][zw] += float32(Ey)

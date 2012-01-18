@@ -95,20 +95,20 @@ func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
 			continue
 		}
 		conv.ForwardFFT(in[i])
-		fmt.Println("conv.fftBuffer", i, conv.fftBuffer.LocalCopy().Array, "\n")
+		//fmt.Println("conv.fftBuffer", i, conv.fftBuffer.LocalCopy().Array, "\n")
 		for j := 0; j < Nout; j++ {
 			if conv.fftKern[i][j] == nil {
 				continue
 			}
-			fmt.Println("conv.fftKern", i, j, conv.fftKern[i][j].LocalCopy().Array, "\n")
+			//fmt.Println("conv.fftKern", i, j, conv.fftKern[i][j].LocalCopy().Array, "\n")
 			// Point-wise kernel multiplication
 			CMaddAsync(&fftOut.Comp[j], conv.fftMul[i][j], conv.fftKern[i][j], fftBuf, fftOut.Stream)
 			fftOut.Stream.Sync()
-			fmt.Println("conv.fftOut", j, conv.fftOut.Comp[j].LocalCopy().Array, "\n")
+			//fmt.Println("conv.fftOut", j, conv.fftOut.Comp[j].LocalCopy().Array, "\n")
 		}
 	}
 	conv.InverseFFT(out)
-	fmt.Println("conv out", out.LocalCopy().Array, "\n")
+	//fmt.Println("conv out", out.LocalCopy().Array, "\n")
 }
 
 // Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
