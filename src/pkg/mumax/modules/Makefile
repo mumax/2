@@ -20,7 +20,9 @@ GOFILES=\
 	kernel.go\
 	kernel_electrostatic.go\
 	kernel_magnetostatic.go\
+	kernel_biotsavart.go\
 	kernel_exchange.go\
+	vector.go\
 
 CGOFILES=\
 
