@@ -7,27 +7,47 @@
 
 package modules
 
-// Module for Faraday's law.
+// Implements the time derivative of a quantity
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	. "mumax/engine"
+	"mumax/gpu"
 )
 
-// Register this module
-func init() {
-	RegisterModule("faraday", "Faraday's law", LoadFaraday)
+// Load time derivative of quant if not yet present
+func LoadDerivative(q *Quant) {
+	e := GetEngine()
+	name := "d" + q.Name() + "_" + "dt"
+	if e.HasQuant(name) {
+		return
+	}
+	Assert(q.Kind() == FIELD)
+	diff := e.AddNewQuant(name, q.NComp(), FIELD, "("+q.Unit()+")/s", "time derivative of "+q.Name())
+	e.Depends(name, q.Name(), "dt", "step")
+	diff.SetUpdater(newDerivativeUpdater(q, diff))
 }
 
-// Load Faraday's law
-func LoadFaraday(e *Engine) {
-
-	LoadEfield(e)
-	LoadBfield(e)
-	LoadDerivative(e.Quant("B"))
-	LoadDerivative(e.Quant("E"))
-
+type derivativeUpdater struct {
+	orig, diff *Quant     // original and derived quantities
+	prev       *gpu.Array // previous value for numerical derivative
+	started    bool       // have prev value?
 }
+
+func newDerivativeUpdater(orig, diff *Quant) Updater {
+	u := new(derivativeUpdater)
+	u.orig = orig
+	u.diff = diff
+	u.prev = gpu.NewArray(orig.NComp(), orig.Size3D())
+	u.started = false
+	return u
+}
+
+func (u *derivativeUpdater) Update() {
+	panic("all blank here")
+}
+
 //
 //	// here be dragons
 //	const CPUONLY = true

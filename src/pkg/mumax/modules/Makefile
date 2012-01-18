@@ -14,7 +14,9 @@ GOFILES=\
 	mod_zeeman.go\
 	mod_exchange6.go\
 	mod_efield.go\
+	mod_bfield.go\
 	mod_coulomb.go\
+	mod_faraday.go\
 	mod_uniaxialanisotropy.go\
 	mod_llg.go\
 	mod_demagexchange.go\
