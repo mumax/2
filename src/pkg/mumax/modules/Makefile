@@ -13,7 +13,8 @@ GOFILES=\
 	hfield.go\
 	mod_zeeman.go\
 	mod_exchange6.go\
-	mod_current.go\
+	mod_efield.go\
+	mod_coulomb.go\
 	mod_uniaxialanisotropy.go\
 	mod_llg.go\
 	mod_demagexchange.go\
