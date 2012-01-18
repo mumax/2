@@ -246,6 +246,7 @@ func (sum *Quant) Add(parent *Quant) {
 		sumMul := sum.multiplier[c]
 		sumComp := sum.array.Component(c)                           // does not alloc
 		gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
+		sum.Invalidate()
 	}
 }
 

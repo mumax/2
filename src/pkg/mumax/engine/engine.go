@@ -429,16 +429,13 @@ func (e *Engine) SetSolver(s Solver) {
 // Takes one time step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
-	if len(e.equation) == 0 {
-		panic(InputErr("no modules defining a differential equation loaded"))
+	if len(e.equation) == 0 || e.solver == nil {
+		// if no solvers are defined, just advance time.
+		// yes, this can be the desired behavior.
+		e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
+	} else {
+		e.solver.Step()
 	}
-
-	if e.solver == nil {
-		panic(InputErr("no solver has been loaded yet"))
-	}
-
-	e.solver.Step()
-
 	// check if output needs to be saved
 	e.notifyAll()
 }
