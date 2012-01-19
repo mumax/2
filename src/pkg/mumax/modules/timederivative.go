@@ -33,19 +33,20 @@ func LoadDerivative(q *Quant) {
 }
 
 type derivativeUpdater struct {
-	orig, diff *Quant     // original and derived quantities
-	prev       *gpu.Array // previous value for numerical derivative
-	lastT      float64    // time of previous value
-	lastStep   int        // step of previous value
+	val, diff         *Quant     // original and derived quantities
+	lastVal, lastDiff *gpu.Array // previous value for numerical derivative
+	lastT             float64    // time of previous value
+	lastStep          int        // step of previous value
 }
 
 func newDerivativeUpdater(orig, diff *Quant) *derivativeUpdater {
 	u := new(derivativeUpdater)
-	u.orig = orig
+	u.val = orig
 	u.diff = diff
-	u.prev = gpu.NewArray(orig.NComp(), orig.Size3D()) // TODO: alloc only if needed?
-	u.lastT = math.Inf(-1)                             // so the first time the derivative is taken it will be 0
-	u.lastStep = 0                                     //?
+	u.lastVal = gpu.NewArray(orig.NComp(), orig.Size3D())  // TODO: alloc only if needed?
+	u.lastDiff = gpu.NewArray(orig.NComp(), orig.Size3D()) // TODO: alloc only if needed?
+	u.lastT = math.Inf(-1)                                 // so the first time the derivative is taken it will be 0
+	u.lastStep = 0                                         //?
 	return u
 }
 
@@ -54,8 +55,17 @@ func (u *derivativeUpdater) Update() {
 }
 
 
+// called when orig, dt or step changes
 func (u *derivativeUpdater) Invalidate() {
-	Log("dt invalidate")
+	Log("diff invalidate")
+	e := GetEngine()
+	step := e.step.Scalar()
+	if u.lastStep != step {
+		u.lastVal.SetTo(u.val.Array())
+		u.lastDiff.SetTo(u.diff.Array())
+		u.lastT = e.time.Scalar()
+		u.lastStep = step
+	}
 }
 
 
