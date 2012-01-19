@@ -17,8 +17,8 @@ const (
 	Z = 2
 )
 
-// Indices for (anti-)symmetric kernel components
-// when only 6 of the 9 components are stored.
+// Linear indices for matrix components.
+// E.g.: matrix[Y][Z] is stored as list[YZ]
 const (
 	XX = 0
 	YY = 1
@@ -26,19 +26,44 @@ const (
 	YZ = 3
 	XZ = 4
 	XY = 5
+	ZY = 6
+	ZX = 7
+	YX = 8
 )
 
+// Maps the 3x3 indices of a symmetric matrix (K_ij) onto
+// a length 6 array containing the upper triangular part:
+// (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy)
+var SymmTensorIdx [3][3]int = [3][3]int{
+	[3]int{XX, XY, XZ},
+	[3]int{XY, YY, YZ},
+	[3]int{XZ, YZ, ZZ}}
+
+// Maps the 3x3 indices of a matrix (K_ij) onto linear indices
+// (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy, Kzy, Kzx, Kyx)
+var TensorIdx [3][3]int = [3][3]int{
+	[3]int{XX, XY, XZ},
+	[3]int{YX, YY, YZ},
+	[3]int{ZX, ZY, ZZ}}
+
+// Maps a linear index onto matrix indices i,j
+func IdxToIJ(idx int) (i, j int) {
+	i = [9]int{X, Y, Z, Y, X, X, Z, Z, Y}[idx]
+	j = [9]int{X, Y, Z, Z, Z, Y, Y, X, X}[idx]
+	return
+}
+
 // Maps string to tensor index
-var TensorIndex map[string]int = map[string]int{"XX": XX, "YY": YY, "ZZ": ZZ, "YZ": YZ, "XZ": XZ, "XY": XY}
+var TensorIndex map[string]int = map[string]int{"XX": XX, "YY": YY, "ZZ": ZZ, "YZ": YZ, "XZ": XZ, "XY": XY, "ZY": ZY, "ZX": ZX, "YX": YX}
 
 // Maps sting to vector index
 var VectorIndex map[string]int = map[string]int{"X": X, "Y": Y, "Z": Z}
 
 // Maps tensor index to string
-var TensorIndexStr map[int]string = map[int]string{XX: "XX", YY: "YY", ZZ: "ZZ", YZ: "YZ", XZ: "XZ", XY: "XY"}
+var TensorIndexStr []string = []string{"XX", "YY", "ZZ", "YZ", "XZ", "XY", "ZY", "ZX", "YX"}
 
 // Maps vector index to string
-var VectorIndexStr map[int]string = map[int]string{X: "X", Y: "Y", Z: "Z"}
+var VectorIndexStr []string = []string{"X", "Y", "Z"}
 
 // Swaps the X-Z values of the array.
 // This transforms from user to program space and vice-versa.
@@ -59,6 +84,7 @@ func SwapXYZ(array []float64) {
 //	YZ <-> XY
 //	XZ <-> XZ
 //	XY <-> YZ 
+// TODO: cannot handle non-symmetric matrices
 func SwapIndex(index, dim int) int {
 	if dim != 1 {
 		switch index {

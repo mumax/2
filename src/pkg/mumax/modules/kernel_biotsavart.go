@@ -13,30 +13,21 @@ package modules
 import (
 	. "mumax/common"
 	"mumax/host"
-	"math"
 )
 
-// Calculates the electrostatic kernel for unit charge density:
-//	1/(4πε0) * cell volume / r²
+// Calculates a biot-savart type kernel
+//	-(r x j)/r³ dV
+// j is the source (current or displacement current)
+// To be used for both Oersted fields and Faraday's law.
 //
-// size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
-//
-// return value: 3 arrays: K[destdir][x][y][z]
-// (e.g. K[X][1][2][3] gives E_x at position (1, 2, 3) due to a unit charge density at the origin.
-// TODO: make more accurate, current implementation is that of point charge.
-func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
-	Debug("Calculating electrostatic kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
-	Start("kern_el")
+// TODO: make more accurate, current implementation is that of point source.
+func RotorKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
+	Debug("Calculating rotor kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
+	Start("kern_rot")
 	k := kern.Array
 
-	Assert(len(kern.Array) == 3)
+	Assert(len(kern.Array) == 9)
 	CheckSize(kern.Size3D, size)
-
-	//	Warn("OVERRIDING E KERN")
-	//	k[X][0][0][0] = 1
-	//	k[Y][0][0][0] = 1
-	//	k[Z][0][0][0] = 1
-	//	return
 
 	// Kernel size: calc. between x1,x2; y1,y2; z1,z2
 	x1 := -(size[X] - 1) / 2
@@ -70,24 +61,32 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 			for z := z1; z <= z2; z++ {
 				zw := Wrap(z, size[Z])
 
-				rx, ry, rz := float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z]
-				r := math.Sqrt(rx*rx + ry*ry + rz*rz)
-				r3 := r * r * r
-				if r != 0 {
-					factor := V / (4 * PI * Epsilon0)
-					Ex := factor * rx / r3
-					Ey := factor * ry / r3
-					Ez := factor * rz / r3
+				var r vector
+				r[X], r[Y], r[Z] = float64(x)*cellsize[X], float64(y)*cellsize[Y], float64(z)*cellsize[Z]
+				norm := r.Norm()
+				r3 := norm * norm * norm
 
-					k[X][xw][yw][zw] += float32(Ex)
-					k[Y][xw][yw][zw] += float32(Ey)
-					k[Z][xw][yw][zw] += float32(Ez)
-					// We have to ADD because there are multiple contributions in case of periodicity
-				} else {
-					// E += 0
+				for s := 0; s < 3; s++ { // source orientations
+
+					// source: unit vector along s direction
+					var j vector
+					j[s] = 1
+
+					rxj := r.Cross(j)
+					(&rxj).Scale(V / r3)
+
+					if norm != 0 {
+						for d := 0; d < 3; d++ { // destination orientation
+							k[TensorIdx[s][d]][xw][yw][zw] += float32(rxj[d])
+							// We have to ADD because there are multiple contributions in case of periodicity
+						}
+					} else {
+						// E += 0
+					}
+
 				}
 			}
 		}
 	}
-	Stop("kern_el")
+	Stop("kern_rot")
 }

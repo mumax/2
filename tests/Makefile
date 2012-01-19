@@ -6,6 +6,7 @@ TESTFILES=\
 		  engine.py.out\
 		  micromag.py.out\
 		  pointwise.py.out\
+		  coulomb.py.out\
 		  #anisotropy.py.out\
 		  #Test.java.out\
 		  #api.py.out\
@@ -18,7 +19,9 @@ test: $(TESTFILES)
 
 .PHONY: $(TESTFILES)
 $(TESTFILES): 
-	$(mumax2) -f $(@:.out='')
+	$(mumax2) -f -gpu=all $(@:.out='')
+	$(mumax2) -f -gpu=0,0 $(@:.out='')
+	$(mumax2) -f -gpu=0 $(@:.out='')
 
 .PHONY: install
 install:

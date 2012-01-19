@@ -11,7 +11,7 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
+//. "mumax/common"
 )
 
 // Modulo-like function:
@@ -38,11 +38,3 @@ func padSize(size []int, periodic []int) []int {
 	}
 	return paddedsize
 }
-
-// Maps the 3x3 indices of a symmetric kernel (K_ij) onto
-// a length 6 array containing the upper triangular part:
-// (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy)
-var kernIdx [3][3]int = [3][3]int{
-	[3]int{XX, XY, XZ},
-	[3]int{XY, YY, YZ},
-	[3]int{XZ, YZ, ZZ}}

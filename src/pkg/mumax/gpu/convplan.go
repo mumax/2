@@ -133,8 +133,12 @@ func scaleRealParts(dst, src *Array, scale float32) {
 	// Normally, the FFT'ed kernel is purely real because of symmetry,
 	// so we only store the real parts...
 	maximg := float32(0.)
+	maxreal := float32(0.)
 	for i := range dstList {
 		dstList[i] = srcList[2*i] * scale
+		if Abs32(srcList[2*i+0]) > maxreal {
+			maxreal = Abs32(srcList[2*i+0])
+		}
 		if Abs32(srcList[2*i+1]) > maximg {
 			maximg = Abs32(srcList[2*i+1])
 		}
@@ -142,8 +146,10 @@ func scaleRealParts(dst, src *Array, scale float32) {
 	// ...however, we check that the imaginary parts are nearly zero,
 	// just to be sure we did not make a mistake during kernel creation.
 	Debug("FFT Kernel max imaginary part=", maximg)
-	if maximg*scale > 1 { // TODO: is this reasonable?
-		Warn("FFT Kernel max imaginary part=", maximg)
+	Debug("FFT Kernel max real part=", maxreal)
+	Debug("FFT Kernel max imaginary/real part=", maximg/maxreal)
+	if maximg/maxreal > 1e-5 { // TODO: is this reasonable?
+		Warn("FFT Kernel max imaginary/real part=", maximg/maxreal)
 	}
 
 	dst.CopyFromHost(dstHost)

@@ -68,6 +68,29 @@ func Madd(dst, a, b *Array, mulB float32) {
 	dst.Stream.Sync()
 }
 
+
+// Complex multiply add. 
+// dst and src contain complex numbers (interleaved format)
+// kern contains real numbers
+// 	dst[i] += scale * kern[i] * src[i]
+func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
+	Debug("CMadd dst", dst.Size4D())
+	Debug("CMadd src", src.Size4D())
+	Debug("CMadd dst.Len", dst.Len())
+	Debug("CMadd src.Len", src.Len())
+	CheckSize(dst.Size3D(), src.Size3D())
+	AssertMsg(dst.Len() == src.Len(), "src-dst")
+	AssertMsg(dst.Len() == 2*kern.Len(), "dst-kern")
+	C.cmaddAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(C.float)(real(scale)),
+		(C.float)(imag(scale)),
+		(**C.float)(unsafe.Pointer(&(kern.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(src.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(C.int)(kern.PartLen3D())) // # of numbers (real or complex)
+}
+
 // Calculates:
 //	τ = (m x h) - α m  x (m x h)
 // If h = H/Msat, then τ = 1/gamma*dm/dt

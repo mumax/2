@@ -34,8 +34,8 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 	Assert(len(kern.Array) == 6)
 	CheckSize(kern.Size3D, size)
 
-	B := NewVector()
-	R := NewVector()
+	B := [3]float64{0, 0, 0} //NewVector()
+	R := [3]float64{0, 0, 0} //NewVector()
 
 	x1 := -(size[X] - 1) / 2
 	x2 := size[X]/2 - 1
@@ -57,8 +57,8 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 	z1 *= (periodic[Z] + 1)
 	z2 *= (periodic[Z] + 1)
 
-	R2 := NewVector()
-	pole := NewVector() // position of point charge on the surface
+	R2 := [3]float64{0, 0, 0}   //NewVector()
+	pole := [3]float64{0, 0, 0} //NewVector() // position of point charge on the surface
 
 	for s := 0; s < 3; s++ { // source index Ksdxyz
 		for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped. It's crucial that the unused rows remain zero, otherwise the FFT'ed kernel is not purely real anymore.
@@ -114,7 +114,7 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 					B[Z] *= scale
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
-						i := kernIdx[s][d]                // 3x3 symmetric index to 1x6 index
+						i := TensorIdx[s][d]              // 3x3 symmetric index to 1x6 index
 						k[i][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
 				}
@@ -168,75 +168,3 @@ func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, k
 //	}
 //	B.Scale(1. / (float64(n * n))) // n^2 integration points
 //}
-
-// A 3-component vector
-type vector [3]float64
-
-func NewVector() vector {
-	return vector([3]float64{0, 0, 0})
-}
-
-func UnitVector(direction int) vector {
-	v := NewVector()
-	v[direction] = 1.
-	return v
-}
-
-func (v *vector) Set(x, y, z float64) {
-	v[0] = x
-	v[1] = y
-	v[2] = z
-}
-
-func (v *vector) SetTo(other *vector) {
-	v[0] = other[0]
-	v[1] = other[1]
-	v[2] = other[2]
-}
-
-func (a *vector) Cross(b *vector) vector {
-	var cross vector
-	cross[0] = a[1]*b[2] - a[2]*b[1]
-	cross[1] = a[0]*b[2] - a[2]*b[0]
-	cross[2] = a[0]*b[1] - a[1]*b[0]
-	return cross
-}
-
-func (a *vector) Dot(b *vector) float64 {
-	return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
-}
-
-func (v *vector) Norm() float64 {
-	return float64(math.Sqrt(float64(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])))
-}
-
-func (v *vector) Normalize() {
-	invnorm := 1. / v.Norm()
-	v[0] *= invnorm
-	v[1] *= invnorm
-	v[2] *= invnorm
-}
-
-func (v *vector) Scale(r float64) {
-	v[0] *= r
-	v[1] *= r
-	v[2] *= r
-}
-
-func (v *vector) Divide(r float64) {
-	v[0] /= r
-	v[1] /= r
-	v[2] /= r
-}
-
-func (v *vector) Sub(other *vector) {
-	v[0] -= other[0]
-	v[1] -= other[1]
-	v[2] -= other[2]
-}
-
-func (v *vector) Add(other *vector) {
-	v[0] += other[0]
-	v[1] += other[1]
-	v[2] += other[2]
-}

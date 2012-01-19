@@ -7,16 +7,20 @@
 
 package modules
 
-// Provides electrical current density
+// Metamodule for full maxwell equations
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/engine"
 )
 
-func LoadCurrent(e *Engine) {
-	if e.HasQuant("j") {
-		return
-	}
-	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
+// Register this module
+func init() {
+	RegisterModule("maxwell", "Full Maxwell equations", LoadMaxwell)
+}
+
+// Load full Maxwell equations
+func LoadMaxwell(e *Engine) {
+	e.LoadModule("coulomb")
+	e.LoadModule("faraday")
 }
