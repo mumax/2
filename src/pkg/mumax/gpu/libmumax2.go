@@ -74,10 +74,10 @@ func Madd(dst, a, b *Array, mulB float32) {
 // kern contains real numbers
 // 	dst[i] += scale * kern[i] * src[i]
 func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
-//	Debug("CMadd dst", dst.Size4D())
-//	Debug("CMadd src", src.Size4D())
-//	Debug("CMadd dst.Len", dst.Len())
-//	Debug("CMadd src.Len", src.Len())
+	//	Debug("CMadd dst", dst.Size4D())
+	//	Debug("CMadd src", src.Size4D())
+	//	Debug("CMadd dst.Len", dst.Len())
+	//	Debug("CMadd src.Len", src.Len())
 	CheckSize(dst.Size3D(), src.Size3D())
 	AssertMsg(dst.Len() == src.Len(), "src-dst")
 	AssertMsg(dst.Len() == 2*kern.Len(), "dst-kern")
@@ -93,7 +93,7 @@ func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
 
 
 // dst[i] = a[i]*mulA + b[i]*mulB
-func LinearCombination2Async(dst *Array, a *Array, mulA float32, b *Array, mulB float32,  stream Stream) {
+func LinearCombination2Async(dst *Array, a *Array, mulA float32, b *Array, mulB float32, stream Stream) {
 	dstlen := dst.Len()
 	Assert(dstlen == a.Len() && dstlen == b.Len())
 	C.linearCombination2Async(

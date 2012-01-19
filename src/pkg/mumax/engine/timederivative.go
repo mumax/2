@@ -50,7 +50,18 @@ func newDerivativeUpdater(orig, diff *Quant) *derivativeUpdater {
 
 func (u *derivativeUpdater) Update() {
 	Log("diff update")
-	
+	// f'(t) = 2(f(t)-f(0))/(t1-t0) - f'(t0)
+	t := engine.time.Scalar()
+	dt := t - u.lastT
+	Assert(dt >= 0)
+	diff := u.diff.Array()
+	val := u.val.Array()
+	if dt == 0 {
+		diff.CopyFromDevice(u.lastDiff)
+	} else {
+		gpu.LinearCombination3Async(diff, val, float32(2/dt), u.lastVal, -float32(2/dt), u.lastDiff, -1, diff.Stream)
+		diff.Sync()
+	}
 }
 
 
@@ -66,45 +77,3 @@ func (u *derivativeUpdater) Invalidate() {
 		u.lastStep = step
 	}
 }
-
-
-//
-//	// here be dragons
-//	const CPUONLY = true
-//	const GPU = false
-//
-//	// electrostatic kernel
-//	kernelSize := padSize(e.GridSize(), e.Periodic())
-//	elKern := NewQuant("kern_el", VECTOR, kernelSize, FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
-//	e.AddQuant(elKern)
-//	elKern.SetUpdater(newElKernUpdater(elKern))
-//
-//	e.Depends("E", "rho", "kern_el")
-//}
-//
-//// Updates electrostatic kernel (cpu)
-//type elKernUpdater struct {
-//	kern *Quant // that's me!
-//}
-//
-//func newElKernUpdater(elKern *Quant) Updater {
-//	u := new(elKernUpdater)
-//	u.kern = elKern
-//	return u
-//}
-//
-//// Update electrostatic kernel (cpu)
-//func (u *elKernUpdater) Update() {
-//	e := GetEngine()
-//
-//	// first update the kernel
-//	kernsize := padSize(e.GridSize(), e.Periodic())
-//	Log("Calculating electrosatic kernel, may take a moment...")
-//	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
-//
-//	// then also load it into the E field convolution
-//	EUpdater := e.Quant("E").GetUpdater().(*EfieldUpdater)
-//	kernEl := GetEngine().Quant("kern_el").Buffer()
-//	EUpdater.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
-//	EUpdater.convInput[0] = e.Quant("rho").Array()
-//}
