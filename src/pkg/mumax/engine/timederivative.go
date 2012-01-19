@@ -49,16 +49,17 @@ func newDerivativeUpdater(orig, diff *Quant) *derivativeUpdater {
 }
 
 func (u *derivativeUpdater) Update() {
-	Log("dt update")
+	Log("diff update")
+	
 }
 
 
 // called when orig, dt or step changes
 func (u *derivativeUpdater) Invalidate() {
-	Log("diff invalidate")
 	e := GetEngine()
 	step := int(e.step.Scalar())
 	if u.lastStep != step {
+		Log("diff invalidate")
 		u.lastVal.CopyFromDevice(u.val.Array())
 		u.lastDiff.CopyFromDevice(u.diff.Array())
 		u.lastT = e.time.Scalar()

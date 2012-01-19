@@ -18,6 +18,14 @@ extern "C" {
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart);
 
+/// dst[i] = MulA*a[i] + MulB*b[i]
+/// @param Npart number of floats per GPU, so total number of floats / nDevice()
+void linearCombination2Async(float** dst, float** a, float mulA, float** b, float mulB, CUstream* stream, int NPart);
+
+/// dst[i] = MulA*a[i] + MulB*b[i] + MulC*c[i]
+/// @param Npart number of floats per GPU, so total number of floats / nDevice()
+void linearCombination3Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, CUstream* stream, int NPart);
+
 /// Multiply-add: a[i] += mulB * b[i]
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 void madd1Async(float** a, float** b, float mulB, CUstream* stream, int Npart);

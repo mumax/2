@@ -140,7 +140,41 @@ void cmaddAsync(float** dst, float a, float b, float** kern, float** src, CUstre
 	}
 }
 
+///@internal
+__global__ void linearCombination2Kern(float* dst, float* a, float mulA, float* b, float mulB, int NPart) {
+	int i = threadindex;
+	if (i < NPart) {
+		dst[i] = mulA * a[i] + mulB * b[i];
+	}
+}
 
+void linearCombination2Async(float** dst, float** a, float mulA, float** b, float mulB, CUstream* stream, int NPart){
+	dim3 gridSize, blockSize;
+	make1dconf(NPart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		linearCombination2Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], mulA, b[dev], mulB, NPart);
+	}
+}
+
+
+
+///@internal
+__global__ void linearCombination3Kern(float* dst, float* a, float mulA, float* b, float mulB, float* c, float mulC, int NPart) {
+	int i = threadindex;
+	if (i < NPart) {
+		dst[i] = mulA * a[i] + mulB * b[i] + mulC * c[i];
+	}
+}
+
+void linearCombination3Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, CUstream* stream, int NPart){
+	dim3 gridSize, blockSize;
+	make1dconf(NPart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		linearCombination3Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], mulA, b[dev], mulB, c[dev], mulC, NPart);
+	}
+}
 
 #ifdef __cplusplus
 }

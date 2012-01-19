@@ -74,10 +74,10 @@ func Madd(dst, a, b *Array, mulB float32) {
 // kern contains real numbers
 // 	dst[i] += scale * kern[i] * src[i]
 func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
-	Debug("CMadd dst", dst.Size4D())
-	Debug("CMadd src", src.Size4D())
-	Debug("CMadd dst.Len", dst.Len())
-	Debug("CMadd src.Len", src.Len())
+//	Debug("CMadd dst", dst.Size4D())
+//	Debug("CMadd src", src.Size4D())
+//	Debug("CMadd dst.Len", dst.Len())
+//	Debug("CMadd src.Len", src.Len())
 	CheckSize(dst.Size3D(), src.Size3D())
 	AssertMsg(dst.Len() == src.Len(), "src-dst")
 	AssertMsg(dst.Len() == 2*kern.Len(), "dst-kern")
@@ -89,6 +89,37 @@ func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
 		(**C.float)(unsafe.Pointer(&(src.pointer[0]))),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		(C.int)(kern.PartLen3D())) // # of numbers (real or complex)
+}
+
+
+// dst[i] = a[i]*mulA + b[i]*mulB
+func LinearCombination2Async(dst *Array, a *Array, mulA float32, b *Array, mulB float32,  stream Stream) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len())
+	C.linearCombination2Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(dst.partLen4D))
+}
+
+// dst[i] = a[i]*mulA + b[i]*mulB + c[i]*mulC
+func LinearCombination3Async(dst *Array, a *Array, mulA float32, b *Array, mulB float32, c *Array, mulC float32, stream Stream) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len() && dstlen == c.Len())
+	C.linearCombination3Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(dst.partLen4D))
 }
 
 // Calculates:
