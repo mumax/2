@@ -15,7 +15,7 @@ import (
 	"mumax/host"
 	"rand"
 	"runtime"
-// 	"fmt"
+	// 	"fmt"
 
 )
 
@@ -104,8 +104,8 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 	logic := conv.logicSize[:]
 	devIn := NewArray(1, logic)
 	defer devIn.Free()
-  devOut := NewArray(1, FFTOutputSize(logic))
-  defer devOut.Free()
+	devOut := NewArray(1, FFTOutputSize(logic))
+	defer devOut.Free()
 
 	for i, k := range kernel {
 		if k != nil {
@@ -151,7 +151,6 @@ func scaleRealParts(dst, src *Array, scale float32) {
 }
 
 
-
 func (conv *ConvPlan) Free() {
 	// TODO
 }
@@ -162,30 +161,28 @@ func (conv *ConvPlan) Convolve(in, out *Array) {
 
 	conv.ForwardFFT(in)
 
+	// 	// Point-wise kernel multiplication  (old)
+	// 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+	// 		fftKern[XX], fftKern[YY], fftKern[ZZ],
+	// 		fftKern[YZ], fftKern[XZ], fftKern[XY],
+	// 		fftIn.Stream) // TODO: choose stream wisely
+	// 	fftIn.Stream.Sync() // !!
 
+	// 	Point-wise kernel multiplication (new)
+	if fftIn.Comp[X].partSize[0] > 1 {
+		KernelMulMicromag3D2Async(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+			fftKern[XX], fftKern[YY], fftKern[ZZ],
+			fftKern[YZ], fftKern[XZ], fftKern[XY],
+			&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+			fftIn.Stream) // TODO: choose stream wisely
+	} else {
+		KernelMulMicromag2D2Async(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+			fftKern[XX], fftKern[YY], fftKern[ZZ], fftKern[YZ],
+			&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
+			fftIn.Stream) // TODO: choose stream wisely
+	}
+	fftIn.Stream.Sync() // !!
 
-// 	// Point-wise kernel multiplication  (old)
-// 	KernelMulMicromag3DAsync(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-// 		fftKern[XX], fftKern[YY], fftKern[ZZ],
-// 		fftKern[YZ], fftKern[XZ], fftKern[XY],
-// 		fftIn.Stream) // TODO: choose stream wisely
-// 	fftIn.Stream.Sync() // !!
-
-// 	Point-wise kernel multiplication (new)
-  if fftIn.Comp[X].partSize[0]>1{
-    KernelMulMicromag3D2Async(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-      fftKern[XX], fftKern[YY], fftKern[ZZ],
-      fftKern[YZ], fftKern[XZ], fftKern[XY],
-      &fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-      fftIn.Stream) // TODO: choose stream wisely
-  } else {
-    KernelMulMicromag2D2Async(&fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-      fftKern[XX], fftKern[YY], fftKern[ZZ], fftKern[YZ],
-      &fftIn.Comp[X], &fftIn.Comp[Y], &fftIn.Comp[Z],
-      fftIn.Stream) // TODO: choose stream wisely
-  }
-  fftIn.Stream.Sync() // !!
-    
 	conv.InverseFFT(out)
 }
 
@@ -247,17 +244,17 @@ func (conv *ConvPlan) SelfTest() {
 
 
 func KernOutputSize(logicSize []int) []int {
-  fftSize := make([]int, 3)
-  fftSize = FFTOutputSize(logicSize)
-  
-  kernOutputSize := make([]int, 3)
-  if fftSize[0]==1{
-    kernOutputSize[0] = 1
-  } else{
-    kernOutputSize[0] = fftSize[0]/2+1
-  }
-  kernOutputSize[1] = fftSize[1]
-  kernOutputSize[2] = fftSize[2]/4+1
-  
-  return kernOutputSize
+	fftSize := make([]int, 3)
+	fftSize = FFTOutputSize(logicSize)
+
+	kernOutputSize := make([]int, 3)
+	if fftSize[0] == 1 {
+		kernOutputSize[0] = 1
+	} else {
+		kernOutputSize[0] = fftSize[0]/2 + 1
+	}
+	kernOutputSize[1] = fftSize[1]
+	kernOutputSize[2] = fftSize[2]/4 + 1
+
+	return kernOutputSize
 }
