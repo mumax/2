@@ -43,7 +43,7 @@ type Quant struct {
 	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate    bool              // Flags if this quantity needs to be updated
 	updater     Updater           // Called to update this quantity
-	invalidator Invalidator       // Called after each Invalidate()
+	invalidator Invalidator       // Called before each Invalidate()
 	verifier    func(q *Quant)    // Called to verify user input
 	children    map[string]*Quant // Quantities this one depends on, indexed by name
 	parents     map[string]*Quant // Quantities that depend on this one, indexed by name
@@ -415,14 +415,16 @@ func (q *Quant) Update() {
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
+	// invalidator is called before actual invalidate!
+	if q.invalidator != nil {
+		q.invalidator.Invalidate()
+	}
+
 	if q.upToDate {
 		q.invalidates++
 	}
 	q.upToDate = false
 	q.bufUpToDate = false
-	if q.invalidator != nil {
-		q.invalidator.Invalidate()
-	}
 	for _, c := range q.children {
 		c.Invalidate()
 	}
