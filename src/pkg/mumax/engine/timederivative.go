@@ -16,6 +16,8 @@ import (
 	"math"
 )
 
+// TODO: multipliers??
+
 // Load time derivative of quant if not yet present
 func (e *Engine) AddTimeDerivative(q *Quant) {
 	name := "d" + q.Name() + "_" + "dt"
@@ -50,27 +52,49 @@ func newDerivativeUpdater(orig, diff *Quant) *derivativeUpdater {
 
 func (u *derivativeUpdater) Update() {
 	Log("diff update")
-	// f'(t) = 2(f(t)-f(0))/(t1-t0) - f'(t0)
+
+	// not stable:
+	//²	// f'(t) = 2(f(t)-f(0))/(t1-t0) - f'(t0)
+	//²	t := engine.time.Scalar()
+	//²	dt := t - u.lastT
+	//²	Assert(dt >= 0)
+	//²	diff := u.diff.Array()
+	//²	val := u.val.Array()
+	//²	if dt == 0 {
+	//²		Log("dt==0")
+	//²		diff.CopyFromDevice(u.lastDiff)
+	//²	} else {
+	//²		Log("dt!=0")
+	//²		gpu.LinearCombination3Async(diff, val, float32(2/dt), u.lastVal, -float32(2/dt), u.lastDiff, -1, diff.Stream)
+	//²		diff.Sync()
+	//²	}
+
+
 	t := engine.time.Scalar()
 	dt := t - u.lastT
 	Assert(dt >= 0)
 	diff := u.diff.Array()
 	val := u.val.Array()
 	if dt == 0 {
+		Log("dt==0")
 		diff.CopyFromDevice(u.lastDiff)
 	} else {
-		gpu.LinearCombination3Async(diff, val, float32(2/dt), u.lastVal, -float32(2/dt), u.lastDiff, -1, diff.Stream)
+		Log("dt!=0")
+		gpu.LinearCombination2Async(diff, val, float32(1/dt), u.lastVal, -float32(1/dt), diff.Stream)
 		diff.Sync()
 	}
+
 }
 
 
 // called when orig, dt or step changes
+// TODO: pre-invalidator
 func (u *derivativeUpdater) Invalidate() {
 	e := GetEngine()
 	step := int(e.step.Scalar())
 	if u.lastStep != step {
 		Log("diff invalidate")
+		u.Update() // TODO: only if needed !!
 		u.lastVal.CopyFromDevice(u.val.Array())
 		u.lastDiff.CopyFromDevice(u.diff.Array())
 		u.lastT = e.time.Scalar()
