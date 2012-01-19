@@ -19,8 +19,8 @@ extern "C" {
 #endif
 
 /// The size of matrix blocks to be loaded into shared memory.  BLOCKSIZE_J can be made smaller if needed, BLOCKSIZE_K better not.
-#define BLOCKSIZE_K 16
-#define BLOCKSIZE_J 4  
+#define BLOCKSIZE_K 32
+#define BLOCKSIZE_J 8 
 
 /// |Hx|   |Kxx Kxy Kxz|   |Mx|
 /// |Hy| = |Kxy Kyy Kyz| * |My|
@@ -89,12 +89,6 @@ __global__ void kernelMulMicromag3D2Kern(
       outx[index] = Kxx[j][k/2]*Mx + Kxy[j][k/2]*My + Kxz[j][k/2]*Mz;
       outy[index] = Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
       outz[index] = Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
-/*      fftMx[index] = (int)Kxx[j][k/2];
-      fftMy[index] = (int)Kxy[j][k/2];
-      fftMz[index] = (int)Kxz[j][k/2];
-      fftMx[index] = (int)Kyy[j][k/2];
-      fftMy[index] = (int)Kyz[j][k/2];
-      fftMz[index] = (int)Kzz[j][k/2];*/
 
       index = i*N1*N2 + J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
       Mx = fftMx[index];
@@ -104,12 +98,6 @@ __global__ void kernelMulMicromag3D2Kern(
       outx[index] =   Kxx[j][k_index]*Mx - Kxy[j][k_index]*My + Kxz[j][k_index]*Mz;
       outy[index] = - Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
       outz[index] =   Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
-/*      fftMx[index] = (int)Kxx[j][k_index];
-      fftMy[index] = -(int)Kxy[j][k_index];
-      fftMz[index] = (int)Kxz[j][k_index];
-      fftMx[index] = (int)Kyy[j][k_index];
-      fftMy[index] = (int)-Kyz[j][k_index];
-      fftMz[index] = (int)Kzz[j][k_index];*/
       
       if (i!=0 && i!=(N0/2+1)){
         index = (N0-i)*N1*N2 + J*N2 + K;
@@ -119,12 +107,6 @@ __global__ void kernelMulMicromag3D2Kern(
         outx[index] =   Kxx[j][k/2]*Mx - Kxy[j][k/2]*My - Kxz[j][k/2]*Mz;
         outy[index] = - Kxy[j][k/2]*Mx + Kyy[j][k/2]*My + Kyz[j][k/2]*Mz;
         outz[index] = - Kxz[j][k/2]*Mx + Kyz[j][k/2]*My + Kzz[j][k/2]*Mz;
-/*        fftMx[index] = (int)Kxx[j][k/2];
-        fftMy[index] = (int)-Kxy[j][k/2];
-        fftMz[index] = (int)-Kxz[j][k/2];
-        fftMx[index] = (int)Kyy[j][k/2];
-        fftMy[index] = (int)Kyz[j][k/2];
-        fftMz[index] = (int)Kzz[j][k/2];*/
         
         index = (N0-i)*N1*N2 + J*N2 + N2 - Bk*BLOCKSIZE_K - 2*kmax + k;
         Mx = fftMx[index];
@@ -134,12 +116,6 @@ __global__ void kernelMulMicromag3D2Kern(
         outx[index] =   Kxx[j][k_index]*Mx + Kxy[j][k_index]*My - Kxz[j][k_index]*Mz;
         outy[index] =   Kxy[j][k_index]*Mx + Kyy[j][k_index]*My - Kyz[j][k_index]*Mz;
         outz[index] = - Kxz[j][k_index]*Mx - Kyz[j][k_index]*My + Kzz[j][k_index]*Mz;
-/*        fftMx[index] =(int)Kxx[j][k_index];
-        fftMy[index] = (int)Kxy[j][k_index];
-        fftMz[index] = (int)-Kxz[j][k_index];
-        fftMx[index] = (int)Kyy[j][k_index];
-        fftMy[index] = (int)-Kyz[j][k_index];
-        fftMz[index] = (int)Kzz[j][k_index];*/
       }
       __syncthreads();    
     // -------------------------------------------------------------------------------
