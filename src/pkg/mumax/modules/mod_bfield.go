@@ -22,6 +22,7 @@ func LoadBField(e *Engine) {
 	}
 	BField := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
 	BExt := e.AddNewQuant("B_ext", VECTOR, MASK, Unit("T"), "externally applied magnetic induction")
+	e.Depends("B", "B_ext")
 	BField.SetUpdater(newBFieldUpdater(BField, BExt))
 }
 

@@ -16,6 +16,8 @@ import (
 )
 
 
+// TODO: share code with BField!
+
 // Loads E if not yet present
 func LoadEField(e *Engine) {
 	if e.HasQuant("E") {
