@@ -141,6 +141,14 @@ func (q *Quant) SetUpdater(u Updater) {
 	q.updater = u
 }
 
+// Safely sets the invalidator.
+func (q *Quant) SetInvalidator(v Invalidator) {
+	if q.invalidator != nil {
+		panic(Bug(fmt.Sprint("Quant.SetInvalidator:", q.Name(), "invalidator already set.")))
+	}
+	q.invalidator = v
+}
+
 // Gets the updater
 func (q *Quant) Updater() Updater {
 	return q.updater

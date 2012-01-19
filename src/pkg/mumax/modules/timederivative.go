@@ -27,29 +27,37 @@ func LoadDerivative(q *Quant) {
 	Assert(q.Kind() == FIELD)
 	diff := e.AddNewQuant(name, q.NComp(), FIELD, "("+q.Unit()+")/s", "time derivative of "+q.Name())
 	e.Depends(name, q.Name(), "dt", "step")
-	diff.SetUpdater(newDerivativeUpdater(q, diff))
+	updater := newDerivativeUpdater(q, diff)
+	diff.SetUpdater(updater)
+	diff.SetInvalidator(updater)
 }
 
 type derivativeUpdater struct {
 	orig, diff *Quant     // original and derived quantities
 	prev       *gpu.Array // previous value for numerical derivative
-	prevT      float64    // time of previous value
-	prevStep   int        // step of previous value
+	lastT      float64    // time of previous value
+	lastStep   int        // step of previous value
 }
 
-func newDerivativeUpdater(orig, diff *Quant) Updater {
+func newDerivativeUpdater(orig, diff *Quant) *derivativeUpdater {
 	u := new(derivativeUpdater)
 	u.orig = orig
 	u.diff = diff
 	u.prev = gpu.NewArray(orig.NComp(), orig.Size3D()) // TODO: alloc only if needed?
-	u.prevT = math.Inf(-1)                             // so the first time the derivative is taken it will be 0
-	u.prevStep = -1
+	u.lastT = math.Inf(-1)                             // so the first time the derivative is taken it will be 0
+	u.lastStep = 0                                     //?
 	return u
 }
 
 func (u *derivativeUpdater) Update() {
-
+	Log("dt update")
 }
+
+
+func (u *derivativeUpdater) Invalidate() {
+	Log("dt invalidate")
+}
+
 
 //
 //	// here be dragons
