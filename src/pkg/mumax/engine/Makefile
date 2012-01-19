@@ -39,6 +39,7 @@ GOFILES=\
 	input.go\
 	table.go\
 	arraypool.go\
+	timederivative.go\
 	#input.go\
 
 CGOFILES=\

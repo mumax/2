@@ -24,8 +24,8 @@ func LoadFaraday(e *Engine) {
 
 	LoadEField(e)
 	LoadBField(e)
-	LoadDerivative(e.Quant("B"))
-	LoadDerivative(e.Quant("E"))
+	e.AddTimeDerivative(e.Quant("B"))
+	e.AddTimeDerivative(e.Quant("E"))
 
 }
 //

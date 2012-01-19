@@ -5,21 +5,19 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package modules
+package engine
 
 // Implements the time derivative of a quantity
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/common"
-	. "mumax/engine"
 	"mumax/gpu"
 	"math"
 )
 
 // Load time derivative of quant if not yet present
-func LoadDerivative(q *Quant) {
-	e := GetEngine()
+func (e *Engine) AddTimeDerivative(q *Quant) {
 	name := "d" + q.Name() + "_" + "dt"
 	if e.HasQuant(name) {
 		return
@@ -59,10 +57,10 @@ func (u *derivativeUpdater) Update() {
 func (u *derivativeUpdater) Invalidate() {
 	Log("diff invalidate")
 	e := GetEngine()
-	step := e.step.Scalar()
+	step := int(e.step.Scalar())
 	if u.lastStep != step {
-		u.lastVal.SetTo(u.val.Array())
-		u.lastDiff.SetTo(u.diff.Array())
+		u.lastVal.CopyFromDevice(u.val.Array())
+		u.lastDiff.CopyFromDevice(u.diff.Array())
 		u.lastT = e.time.Scalar()
 		u.lastStep = step
 	}
