@@ -52,15 +52,17 @@ func FFTOutputSize(logicSize []int) []int {
 
 	outputSize := make([]int, 3)
 	outputSize[0] = logicSize[0]
-	if NDevice() == 1 {
-		outputSize[1] = logicSize[1]
-		outputSize[2] = logicSize[2] + 2 // One extra row of complex numbers
-	} else { //multi-gpu: YZ-transposed output!!
-		/*		outputSize[1] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
-				outputSize[2] = logicSize[1]*/
-		outputSize[1] = logicSize[2]/2 + NDevice() // One extra row of complex numbers PER GPU
-		outputSize[2] = logicSize[1] * 2
-	}
+  outputSize[1] = logicSize[2]/2 + NDevice() // One extra row of complex numbers PER GPU
+  outputSize[2] = logicSize[1] * 2
+// 	if NDevice() == 1 {
+// 		outputSize[1] = logicSize[1]
+// 		outputSize[2] = logicSize[2] + 2 // One extra row of complex numbers
+// 	} else { //multi-gpu: YZ-transposed output!!
+// 		/*		outputSize[1] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
+// 				outputSize[2] = logicSize[1]*/
+// 		outputSize[1] = logicSize[2]/2 + NDevice() // One extra row of complex numbers PER GPU
+// 		outputSize[2] = logicSize[1] * 2
+// 	}
 
 	return outputSize
 }

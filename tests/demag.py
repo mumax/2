@@ -15,7 +15,7 @@ load('demagexch')
 setscalar('Msat', 800e3)
 setscalar('Aex', 0)
 
-m=[ [[[1]]], [[[0]]], [[[0]]] ]
+m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)
 
 hdex = getvalue('<h_dex>')
