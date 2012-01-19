@@ -13,7 +13,7 @@ setpointwise('B_ext', 0, [0, 0, 0])
 setpointwise('B_ext', 1e-9, [0, 0, 1]) 
 setpointwise('B_ext', 2e-9, [0, 0, 0]) 
 
-autotabulate(['B_ext'], 'B_ext.txt', 2e-12)
+autotabulate(['B_ext', '<B>', '<dB_dt>'], 'B.txt', 2e-12)
 setv('dt', 1e-12)
 run(3e-9)
 

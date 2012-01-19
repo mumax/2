@@ -433,9 +433,12 @@ func (e *Engine) Step() {
 		// if no solvers are defined, just advance time.
 		// yes, this can be the desired behavior.
 		e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
+		// Always update step last, signals completion of step
+		e.step.SetScalar(e.step.Scalar() + 1)
 	} else {
 		e.solver.Step()
 	}
+	// notify that a step has been taken
 	// check if output needs to be saved
 	e.notifyAll()
 }

@@ -14,6 +14,7 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
+	"math"
 )
 
 // Load time derivative of quant if not yet present
@@ -32,20 +33,22 @@ func LoadDerivative(q *Quant) {
 type derivativeUpdater struct {
 	orig, diff *Quant     // original and derived quantities
 	prev       *gpu.Array // previous value for numerical derivative
-	started    bool       // have prev value?
+	prevT      float64    // time of previous value
+	prevStep   int        // step of previous value
 }
 
 func newDerivativeUpdater(orig, diff *Quant) Updater {
 	u := new(derivativeUpdater)
 	u.orig = orig
 	u.diff = diff
-	u.prev = gpu.NewArray(orig.NComp(), orig.Size3D())
-	u.started = false
+	u.prev = gpu.NewArray(orig.NComp(), orig.Size3D()) // TODO: alloc only if needed?
+	u.prevT = math.Inf(-1)                             // so the first time the derivative is taken it will be 0
+	u.prevStep = -1
 	return u
 }
 
 func (u *derivativeUpdater) Update() {
-	panic("all blank here")
+
 }
 
 //
