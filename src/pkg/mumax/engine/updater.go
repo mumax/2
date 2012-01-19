@@ -15,3 +15,9 @@ import ()
 type Updater interface {
 	Update()
 }
+
+
+// Invalidate() is called after each invalidation of a Quant.
+type Invalidator interface {
+	Invalidate()
+}

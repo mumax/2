@@ -43,6 +43,7 @@ type Quant struct {
 	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate    bool              // Flags if this quantity needs to be updated
 	updater     Updater           // Called to update this quantity
+	invalidator Invalidator       // Called after each Invalidate()
 	verifier    func(q *Quant)    // Called to verify user input
 	children    map[string]*Quant // Quantities this one depends on, indexed by name
 	parents     map[string]*Quant // Quantities that depend on this one, indexed by name
@@ -237,6 +238,7 @@ func (q *Quant) SetMask(field *host.Array) {
 
 // 	sum += parent
 func (sum *Quant) Add(parent *Quant) {
+	invalidated := false
 	for c := 0; c < sum.NComp(); c++ {
 		parComp := parent.array.Component(c)
 		parMul := parent.multiplier[c]
@@ -246,6 +248,9 @@ func (sum *Quant) Add(parent *Quant) {
 		sumMul := sum.multiplier[c]
 		sumComp := sum.array.Component(c)                           // does not alloc
 		gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
+		invalidated = true
+	}
+	if invalidated {
 		sum.Invalidate()
 	}
 }
@@ -402,18 +407,14 @@ func (q *Quant) Update() {
 // Opposite of Update. Sets upToDate flag of this node and
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
-	//Log("invalidate", q.Name(), valid(q.upToDate))
-	//if !q.upToDate {
-	//	return
-	//}
-
 	if q.upToDate {
 		q.invalidates++
 	}
 	q.upToDate = false
 	q.bufUpToDate = false
-	//Debug("invalidate " + q.Name())
-	//Log("actually invalidate " + q.Name())
+	if q.invalidator != nil {
+		q.invalidator.Invalidate()
+	}
 	for _, c := range q.children {
 		c.Invalidate()
 	}
