@@ -13,7 +13,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-	// 	"fmt"
+// 		"fmt"
 )
 
 //Register this FFT plan
@@ -145,8 +145,8 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 	CheckSize(in.size3D, fft.dataSize[:])
 	CheckSize(out.size3D, fft.outputSize[:])
 
-	//fmt.Println("FORWARD FFT")
-	//fmt.Println("")
+/*	fmt.Println("FORWARD FFT: FFTPlan1")
+	fmt.Println("")*/
 	// shorthand
 	padZ := &(fft.padZ)
 	transp1 := &(fft.transp1)
@@ -175,14 +175,14 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 	}
 	fft.Sync()
 	Stop("fftZ_FW")
-	//fmt.Println("")
-	//fmt.Println("fftz:", padZ.LocalCopy().Array)
+// 	fmt.Println("")
+// 	fmt.Println("fftz:", padZ.LocalCopy().Array)
 
 	Start("Transpose1_FW")
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	Stop("Transpose1_FW")
-	//fmt.Println("")
-	//fmt.Println("transpose:", transp1.LocalCopy().Array)
+// 	fmt.Println("")
+// 	fmt.Println("transpose:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	Start("MemcpyDtoD_FW")
@@ -196,12 +196,10 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 
 			for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
 				srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
-				//fmt.Println("srcPlaneN:", srcPlaneN)//seems OK
 				srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(logicSize[2]/NDev))
 				src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
 
 				dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
-				//fmt.Println("dstPlaneN:", dstPlaneN)//seems OK
 				dstOffset := i * dstPlaneN
 				dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
 
@@ -211,6 +209,10 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 	}
 	Stop("MemcpyDtoD_FW")
 
+/*  for c := range chunks { // source chunk
+  fmt.Println("")
+  fmt.Println("chunks:", chunks[c].LocalCopy().Array)
+  }*/
 	Start("InsertBlockZ_FW")
 	// 	transp2.pointer = out.pointer     // TODO Here transp2 should point to out
 	transp2.Zero()
@@ -218,8 +220,8 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 		InsertBlockZ(transp2, &(chunks[c]), c) // no need to offset planes here.
 	}
 	Stop("InsertBlockZ_FW")
-	//fmt.Println("")
-	//fmt.Println("insert:", transp2.LocalCopy().Array)
+// 	fmt.Println("")
+// 	fmt.Println("insert:", transp2.LocalCopy().Array)
 
 	// FFT Y
 	Start("fftY_FW")

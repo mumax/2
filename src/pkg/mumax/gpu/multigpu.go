@@ -163,6 +163,7 @@ func InitAllGPUs(flags uint) {
 func InitDebugGPUs() {
 	var use []int
 	N := cu.DeviceGetCount()
+//   N := 1 
 	for i := 0; i < N; i++ {
 		use = append(use, i)
 	}

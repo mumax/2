@@ -15,7 +15,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-	// 		"fmt"
+// 			"fmt"
 	//   "cuda/runtime"
 )
 
@@ -132,6 +132,7 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 		fft.chunks = make([]Array, NDev)
 		for dev := range _useDevice {
 			fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DONT_ALLOC)
+//       fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DO_ALLOC)
 		} //---------------------------------------------
 
 		// init transp2 (not allocated) -----------------
@@ -199,6 +200,9 @@ func (fft *FFTPlan5) Free() {
 
 func (fft *FFTPlan5) Forward(in, out *Array) {
 
+//   fmt.Println("FORWARD FFT: FFTPlan5")
+
+  
 	Start("FW_total")
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
@@ -251,9 +255,15 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		transp1 := &(fft.transp1)
 		transp1.PointTo(out, 0)
 		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
+		cnt:=0
 		for dev := range _useDevice { // source device
-			chunks[dev].PointTo(buffer, chunks[dev].Len())
+			chunks[dev].PointTo(buffer, cnt*chunks[dev].Len())
+      cnt++
 		}
+/*    fmt.Println("", chunks[0].pointer[0])
+    fmt.Println("", chunks[1].pointer[0])
+    fmt.Println("", chunks[2].pointer[0])
+    fmt.Println("", chunks[3].pointer[0])*/
 		transp2 := &(fft.transp2)
 		transp2.PointTo(out, 0)
 
@@ -277,9 +287,11 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 			setDevice(_useDevice[dev])
 			fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(fftZbuffer.pointer[dev]))
 		}
-		//     fft.Sync()
+// 		    fft.Sync()
 		// 		Stop("FFTZ")
-		// 		fft.Sync()
+// 	fft.Sync()
+//   fmt.Println("")
+//   fmt.Println("fftz:", fftZbuffer.LocalCopy().Array)
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON PLANES @@@@@@@@
 		//     Start("transpose")
@@ -287,6 +299,8 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		fft.Sync()
 		//     Stop("transpose")
 		// 		Stop("FW_before_copy")
+//   fmt.Println("")
+//   fmt.Println("transpose:", transp1.LocalCopy().Array)
 
 		// copy chunks, cross-device
 		Start("FW_copy")
@@ -294,13 +308,14 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
 		dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
 
-		Assert(dataSize[1]%NDev == 0)
+    buffer.Zero()
+
+    Assert(dataSize[1]%NDev == 0)
 		Assert(logicSize[2]%NDev == 0)
-		for c := range chunks { // source chunk
-			for dev := range _useDevice { // source device
+    for c := range chunks { // source chunk
+ 			for dev := range _useDevice { // source device
 				// source device = dev
 				// target device = chunk
-
 				for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
 					srcOffset := i*srcPlaneN + c*((dataSize[1]/NDev)*(logicSize[2]/NDev))
 					src := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), srcOffset))
@@ -308,13 +323,20 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 					dstOffset := i * dstPlaneN
 					dst := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), dstOffset))
 
-					cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[c])
+					cu.MemcpyDtoDAsync(dst, src, chunkPlaneBytes, fft.Stream[dev])
 				}
 			}
-
 		}
-		fft.Sync()
+
+   
+    fft.Sync()
 		Stop("FW_copy")
+
+//   fft.Sync()
+//   for c := range chunks { // source chunk
+//   fmt.Println("")
+//   fmt.Println("chunks:", chunks[c].LocalCopy().Array)
+//   }
 
 		Start("FW_after_copy")
 		transp2.Zero()
@@ -327,6 +349,9 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		// 		fft.Sync()
 		// 		Stop("FW_insertBlockZ")
 		// 		    Stop("FW_copy")
+//   fft.Sync()
+//   fmt.Println("")
+//   fmt.Println("insert:", transp2.LocalCopy().Array)
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 		// 		Start("FW_fftY")
@@ -413,8 +438,10 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 		transp1 := &(fft.transp1)
 		transp1.PointTo(in, 0)
 		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
+		cnt :=0
 		for dev := range _useDevice { // source device
-			chunks[dev].PointTo(buffer, chunks[dev].Len())
+			chunks[dev].PointTo(buffer, cnt*chunks[dev].Len())
+      cnt++
 		}
 		transp2 := &(fft.transp2)
 		transp2.PointTo(in, 0)
