@@ -50,8 +50,8 @@ func TestFFT(test *testing.T) {
 		for j := 0; j < N1; j++ {
 			for k := 0; k < N2; k++ {
 				// 				       if i == 0 {
-								a[i][j][k] = float32(1)
-// 				a[i][j][k] = float32(i + j + k)
+				a[i][j][k] = float32(1)
+				// 				a[i][j][k] = float32(i + j + k)
 				// 								       }
 				n++
 			}
@@ -66,7 +66,7 @@ func TestFFT(test *testing.T) {
 
 	fft.Forward(in, out)
 	fmt.Println("")
-  fmt.Println("output size: ", out.size3D)
+	fmt.Println("output size: ", out.size3D)
 	fmt.Println("FW: ", out.LocalCopy().Array)
 
 	fft.Inverse(out, in)

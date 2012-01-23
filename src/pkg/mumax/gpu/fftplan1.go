@@ -181,8 +181,8 @@ func (fft *FFTPlan1) Forward(in, out *Array) {
 	Start("Transpose1_FW")
 	TransposeComplexYZPart(transp1, padZ) // fftZ!
 	Stop("Transpose1_FW")
-// 		fmt.Println("")
-// 		fmt.Println("transpose:", transp1.LocalCopy().Array)
+	// 		fmt.Println("")
+	// 		fmt.Println("transpose:", transp1.LocalCopy().Array)
 
 	// copy chunks, cross-device
 	Start("MemcpyDtoD_FW")
