@@ -27,6 +27,5 @@ func LoadCoulomb(e *Engine) {
 	}
 	rho := e.AddNewQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
 	e.Depends("E", "rho")
-	initMaxwell()
 	maxwell.EnableCoulomb(rho, e.Quant("E"))
 }

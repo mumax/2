@@ -27,6 +27,7 @@ import (
 // Full Maxwell Electromagnetic field solver.
 // TODO: magnetic charge gives H, not B, need M
 type MaxwellPlan struct {
+	initialized  bool             // Already initialized?
 	dataSize     [3]int           // Size of the (non-zero) input data block (engine.GridSize)
 	logicSize    [3]int           // Non-transformed kernel size >= dataSize (due to zeropadding)
 	fftKernSize  [3]int           // transformed kernel size, non-redundant parts only
@@ -54,11 +55,17 @@ const (
 )
 
 
-func (plan *MaxwellPlan) Init(dataSize, logicSize []int) {
+// 
+func (plan *MaxwellPlan) init() {
+	if plan.initialized {
+		return
+	}
+	plan.initialized = true
+	e := GetEngine()
+	dataSize := e.GridSize()
+	logicSize := e.PaddedSize()
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
-
-	//plan.Free() // must not leak memory on 2nd init. // TODO
 
 	// init size
 	copy(plan.dataSize[:], dataSize)
@@ -76,16 +83,24 @@ func (plan *MaxwellPlan) Init(dataSize, logicSize []int) {
 }
 
 
+// Enable Couloumb's law
 func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
-	if plan.kern[CHARGE] == nil {
-		plan.LoadChargeKernel()
-	}
+	plan.init()
+	plan.loadChargeKernel()
 	plan.EInMul[0] = 1 / Epsilon0
 	plan.EInput[0] = rho.Array()
+	if plan.E != nil {
+		Assert(plan.E == E)
+	}
 	plan.E = E
 }
 
-func (plan *MaxwellPlan) LoadChargeKernel() {
+// Load charge kernel if not yet done so.
+// Required for field of electric/magnetic charge density.
+func (plan *MaxwellPlan) loadChargeKernel() {
+	if plan.kern[CHARGE] != nil {
+		return
+	}
 	e := GetEngine()
 	const (
 		CPUONLY = true
@@ -104,12 +119,17 @@ func (plan *MaxwellPlan) LoadChargeKernel() {
 }
 
 
+// Calculate the electric field plan.E.
 func (plan *MaxwellPlan) UpdateE() {
+	plan.update(&plan.EInput, plan.E.Array(), plan.EExt)
+}
+
+
+// calculate E or B
+func (plan *MaxwellPlan) update(in *[7]*gpu.Array, out *gpu.Array, ext *Quant) {
 	fftBuf := &plan.fftBuffer
 	fftOut := &plan.fftOut
 	fftOut.Zero()
-	in := plan.EInput
-	out := plan.E.Array()
 	for i := 0; i < 7; i++ {
 		if in[i] == nil {
 			continue
@@ -129,6 +149,7 @@ func (plan *MaxwellPlan) UpdateE() {
 		}
 	}
 	plan.InverseFFT(out)
+	// add Ext field here
 	//fmt.Println("plan out", out.LocalCopy().Array, "\n")
 }
 

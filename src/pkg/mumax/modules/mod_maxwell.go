@@ -14,14 +14,16 @@ import (
 	. "mumax/engine"
 )
 
-var maxwell *MaxwellPlan
+var (
+	maxwellv MaxwellPlan
+	maxwell  *MaxwellPlan = &maxwellv
+)
 
 // Loads E if not yet present
 func LoadEField(e *Engine) {
 	if e.HasQuant("E") {
 		return
 	}
-	initMaxwell()
 	EField := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
 	EExt := e.AddNewQuant("E_ext", VECTOR, MASK, Unit("V/m"), "externally applied electrical field")
 	e.Depends("E", "E_ext")
@@ -34,7 +36,6 @@ func LoadBField(e *Engine) {
 	if e.HasQuant("B") {
 		return
 	}
-	initMaxwell()
 	BField := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
 	BExt := e.AddNewQuant("B_ext", VECTOR, MASK, Unit("T"), "externally applied magnetic induction")
 	e.Depends("B", "B_ext")
@@ -42,13 +43,6 @@ func LoadBField(e *Engine) {
 	maxwell.BExt = BExt
 }
 
-func initMaxwell() {
-	e := GetEngine()
-	if maxwell == nil {
-		maxwell = new(MaxwellPlan)
-		maxwell.Init(e.GridSize(), e.PaddedSize())
-	}
-}
 // Updates the E field in a single convolution
 // taking into account all possible sources.
 type EFieldUpdater struct {
