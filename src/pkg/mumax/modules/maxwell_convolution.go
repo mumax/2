@@ -16,11 +16,8 @@ package modules
 
 import (
 	. "mumax/common"
-	"mumax/host"
-	"rand"
-	"runtime"
-	"fmt"
-	"unsafe"
+	. "mumax/engine"
+	"mumax/gpu"
 )
 
 
@@ -29,54 +26,59 @@ import (
 type MaxwellPlan struct {
 	dataSize     [3]int           // Size of the (non-zero) input data block (engine.GridSize)
 	logicSize    [3]int           // Non-transformed kernel size >= dataSize (due to zeropadding)
+	fftKernSize  [3]int           // transformed kernel size, non-redundant parts only
 	kern         [3]*Quant        // Real-space kernels for charge, dipole, rotor
-	fftKern      [7][3]*Array     // transformed kernel's non-redundant parts (only real or imag parts, or nil)
+	fftKern      [7][3]*gpu.Array // transformed kernel's non-redundant parts (only real or imag parts, or nil)
 	fftMul       [7][3]complex128 // multipliers for kernel
-	fftBuffer    Array            // transformed input data
-	fftOut       Array            // transformed output data (3-comp)
-	fftPlan      FFTInterface     // transforms input/output data
-	Einput       [7]*Array        // input quantities for electric field (rho, Px, Py, Pz, 0, 0, 0)
+	fftBuffer    gpu.Array        // transformed input data
+	fftOut       gpu.Array        // transformed output data (3-comp)
+	fftPlan      gpu.FFTInterface // transforms input/output data
+	Einput       [7]*gpu.Array    // input quantities for electric field (rho, Px, Py, Pz, 0, 0, 0)
+	Binput       [7]*gpu.Array    // input quantities for magnetic field (rhoB, mx, my, mz, jx, jy, jz)
 	EInMul       [7]complex128    // E input multipliers (epsillon0 etc)
 	BInMul       [7]complex128    // B input multipliers (mu0 etc)
-	fftE1, fftE2 *Array           // previous FFT E fields for time derivative 
-	fftB1, fftB2 *Array           // previous FFT B fields for time derivative 
+	fftE1, fftE2 *gpu.Array       // previous FFT E fields for time derivative 
+	fftB1, fftB2 *gpu.Array       // previous FFT B fields for time derivative 
 	time1, time2 float64          // time of previous fields for derivative
 	BExt, EExt   *Quant           // external B/E field
 	E, B         *Quant           // E/B fields
 }
+
+const (
+	CHARGE = 0
+	DIPOLE = 1
+	ROTOR  = 2
+)
 
 
 func NewMaxwellPlan(dataSize, logicSize []int) *MaxwellPlan {
 	return nil
 }
 
-//// Kernel does not need to take into account unnormalized FFTs,
-//// this is handled by the convplan.
-//func (conv *Conv73Plan) Init(dataSize, logicSize []int) {
-//	Assert(len(dataSize) == 3)
-//	Assert(len(logicSize) == 3)
+func (plan *MaxwellPlan) Init(dataSize, logicSize []int) {
+	Assert(len(dataSize) == 3)
+	Assert(len(logicSize) == 3)
+
+	//plan.Free() // must not leak memory on 2nd init. // TODO
+
+	// init size
+	copy(plan.dataSize[:], dataSize)
+	copy(plan.logicSize[:], logicSize)
+
+	// init fft
+	fftOutputSize := gpu.FFTOutputSize(logicSize)
+	plan.fftBuffer.Init(1, fftOutputSize, gpu.DO_ALLOC) // TODO: recycle
+	plan.fftOut.Init(3, fftOutputSize, gpu.DO_ALLOC)    // TODO: recycle
+	plan.fftPlan = gpu.NewDefaultFFT(dataSize, logicSize)
+
+	// init fftKern
+	copy(plan.fftKernSize[:], gpu.FFTOutputSize(logicSize))
+	plan.fftKernSize[2] = plan.fftKernSize[2] / 2 // store only non-redundant parts
+}
+
+//func(plan*MaxwellPlan)
 //
-//	conv.Free() // must not leak memory on 2nd init.
-//
-//	// init size
-//	for i := range conv.dataSize {
-//		conv.dataSize[i] = dataSize[i]
-//		conv.logicSize[i] = logicSize[i]
-//	}
-//
-//	// init fft
-//	fftOutputSize := FFTOutputSize(logicSize)
-//	conv.fftBuffer.Init(1, fftOutputSize, DO_ALLOC) // TODO: recycle
-//	conv.fftOut.Init(3, fftOutputSize, DO_ALLOC)    // TODO: recycle
-//	conv.fftPlan = NewDefaultFFT(dataSize, logicSize)
-//
-//	// init fftKern
-//	fftKernSize := FFTOutputSize(logicSize)
-//	fftKernSize[2] = fftKernSize[2] / 2 // store only non-redundant parts
-//
-//}
-//
-//func (conv *Conv73Plan) Convolve(in []*Array, out *Array) {
+//func (conv *Conv73Plan) Convolve(in []*gpu.Array, out *gpu.Array) {
 //	fftBuf := &conv.fftBuffer
 //	fftOut := &conv.fftOut
 //	fftOut.Zero()

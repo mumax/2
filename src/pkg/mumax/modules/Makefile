@@ -7,6 +7,7 @@ LD_LIBRARY_PATH+=:../../../../lib
 TARG=mumax/modules
 
 GOFILES=\
+	maxwell_convolution.go\
 	mod_micromag.go\
 	magnetization.go\
 	update_norm.go\
