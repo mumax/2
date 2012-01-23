@@ -27,33 +27,49 @@ import (
 // Full Maxwell Electromagnetic field solver.
 // TODO: magnetic charge gives H, not B, need M
 type MaxwellPlan struct {
-	initialized  bool             // Already initialized?
-	dataSize     [3]int           // Size of the (non-zero) input data block (engine.GridSize)
-	logicSize    [3]int           // Non-transformed kernel size >= dataSize (due to zeropadding)
-	fftKernSize  [3]int           // transformed kernel size, non-redundant parts only
-	kern         [3]*host.Array   // Real-space kernels for charge, dipole, rotor
-	fftKern      [7][3]*gpu.Array // transformed kernel's non-redundant parts (only real or imag parts, or nil)
-	fftMul       [7][3]complex128 // multipliers for kernel
-	fftBuffer    gpu.Array        // transformed input data
-	fftOut       gpu.Array        // transformed output data (3-comp)
-	fftPlan      gpu.FFTInterface // transforms input/output data
-	EInput       [7]*gpu.Array    // input quantities for electric field (rho, Px, Py, Pz, 0, 0, 0)
-	BInput       [7]*gpu.Array    // input quantities for magnetic field (rhoB, mx, my, mz, jx, jy, jz)
-	EInMul       [7]float64       // E input multipliers (epsillon0 etc)
-	BInMul       [7]float64       // B input multipliers (mu0 etc)
-	fftE1, fftE2 *gpu.Array       // previous FFT E fields for time derivative 
-	fftB1, fftB2 *gpu.Array       // previous FFT B fields for time derivative 
-	time1, time2 float64          // time of previous fields for derivative
-	BExt, EExt   *Quant           // external B/E field
-	E, B         *Quant           // E/B fields
+	initialized bool             // Already initialized?
+	dataSize    [3]int           // Size of the (non-zero) input data block (engine.GridSize)
+	logicSize   [3]int           // Non-transformed kernel size >= dataSize (due to zeropadding)
+	fftKernSize [3]int           // transformed kernel size, non-redundant parts only
+	kern        [3]*host.Array   // Real-space kernels for charge, dipole, rotor
+	fftKern     [7][3]*gpu.Array // transformed kernel's non-redundant parts (only real or imag parts, or nil)
+	fftMul      [7][3]complex128 // multipliers for kernel
+	fftBuffer   gpu.Array        // transformed input data
+	fftOut      gpu.Array        // transformed output data (3-comp)
+	fftPlan     gpu.FFTInterface // transforms input/output data
+	EInput      [7]*gpu.Array    // input quantities for electric field (rho, Px, Py, Pz, 0, 0, 0)
+	BInput      [7]*gpu.Array    // input quantities for magnetic field (rhoB, mx, my, mz, jx, jy, jz)
+	EInMul      [7]float64       // E input multipliers (epsillon0 etc)
+	BInMul      [7]float64       // B input multipliers (mu0 etc)
+	BExt, EExt  *Quant           // external B/E field
+	dBdt, dEdt  *Quant           // time derivative of field
+	E, B        *Quant           // E/B fields
+	// TODO: time derivatives could be taken in FFT space, but this complicates external fields
+	//fftE1, fftE2 *gpu.Array       // previous FFT E fields for time derivative 
+	//fftB1, fftB2 *gpu.Array       // previous FFT B fields for time derivative 
+	//time1, time2 float64          // time of previous fields for derivative
 }
 
+// Index for kern
 const (
 	CHARGE = 0
 	DIPOLE = 1
 	ROTOR  = 2
 )
 
+// Index for EInput, BInput, EInMul, BInMul
+const (
+	RHO = 0
+	PX  = 1
+	MX  = 1
+	PY  = 2
+	MY  = 2
+	PZ  = 3
+	MZ  = 3
+	JX  = 4
+	JY  = 5
+	JZ  = 6
+)
 
 // 
 func (plan *MaxwellPlan) init() {
@@ -95,6 +111,23 @@ func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
 	plan.E = E
 }
 
+func (plan *MaxwellPlan) EnableFaraday(dBdt, E *Quant) {
+	plan.init()
+	//plan.loadRotorKernel()
+	plan.EInMul[5] = 1 / Epsilon0
+
+	//plan.EInput[0] = rho.Array()
+	if plan.E != nil {
+		Assert(plan.E == E)
+	}
+	plan.E = E
+}
+
+const (
+	CPUONLY = true
+	GPU     = false
+)
+
 // Load charge kernel if not yet done so.
 // Required for field of electric/magnetic charge density.
 func (plan *MaxwellPlan) loadChargeKernel() {
@@ -102,10 +135,6 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 		return
 	}
 	e := GetEngine()
-	const (
-		CPUONLY = true
-		GPU     = false
-	)
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	// TODO: do not add to engine if debug is off?
 	quant := NewQuant("kern_el", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
@@ -114,7 +143,6 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	kern := quant.Buffer()
 	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
 	plan.kern[CHARGE] = kern
-
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
 }
 
@@ -149,7 +177,7 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, out *gpu.Array, ext *Quant) {
 		}
 	}
 	plan.InverseFFT(out)
-	// add Ext field here
+	// TODO add Ext field here
 	//fmt.Println("plan out", out.LocalCopy().Array, "\n")
 }
 

@@ -21,12 +21,10 @@ func init() {
 
 // Load Faraday's law
 func LoadFaraday(e *Engine) {
-
 	LoadEField(e)
 	LoadBField(e)
 	e.AddTimeDerivative(e.Quant("B"))
-	e.AddTimeDerivative(e.Quant("E"))
-
+	maxwell.EnableFaraday(e.Quant("dB_dt"), e.Quant("B"))
 }
 //
 //	// here be dragons
