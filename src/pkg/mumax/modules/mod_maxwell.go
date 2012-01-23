@@ -56,20 +56,12 @@ type EFieldUpdater struct {
 }
 
 func newEFieldUpdater() Updater {
-	//	e := GetEngine()
 	u := new(EFieldUpdater)
-	//	u.EField = EField
-	//	// convolution does not have any kernels yet
-	//	// they are added by other modules
-	//	dataSize := e.GridSize()
-	//	logicSize := PadSize(e.GridSize(), e.Periodic())
-	//	u.conv = gpu.NewConv73Plan(dataSize, logicSize)
-	//	u.convInput = make([]*gpu.Array, 7)
 	return u
 }
 
 func (u *EFieldUpdater) Update() {
-
+	maxwell.UpdateE()
 }
 // Updates the E field in a single convolution
 // taking into account all possible sources.

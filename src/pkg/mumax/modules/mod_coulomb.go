@@ -22,10 +22,11 @@ func init() {
 // Load Coulomb's law
 func LoadCoulomb(e *Engine) {
 	LoadEField(e)
-	if !e.HasQuant("rho") {
-		e.AddNewQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
+	if e.HasQuant("rho") {
+		return
 	}
+	rho := e.AddNewQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
 	e.Depends("E", "rho")
 	initMaxwell()
-	maxwell.AddCoulomb()
+	maxwell.EnableCoulomb(rho, e.Quant("E"))
 }

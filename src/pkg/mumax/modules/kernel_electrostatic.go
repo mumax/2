@@ -74,7 +74,7 @@ func PointKernel(size []int, cellsize []float64, periodic []int, kern *host.Arra
 				r := math.Sqrt(rx*rx + ry*ry + rz*rz)
 				r3 := r * r * r
 				if r != 0 {
-					factor := V / (4 * PI * Epsilon0)
+					factor := V / (4 * PI)
 					Ex := factor * rx / r3
 					Ey := factor * ry / r3
 					Ez := factor * rz / r3

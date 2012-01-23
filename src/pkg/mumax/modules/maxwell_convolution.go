@@ -36,10 +36,10 @@ type MaxwellPlan struct {
 	fftBuffer    gpu.Array        // transformed input data
 	fftOut       gpu.Array        // transformed output data (3-comp)
 	fftPlan      gpu.FFTInterface // transforms input/output data
-	Einput       [7]*gpu.Array    // input quantities for electric field (rho, Px, Py, Pz, 0, 0, 0)
-	Binput       [7]*gpu.Array    // input quantities for magnetic field (rhoB, mx, my, mz, jx, jy, jz)
-	EInMul       [7]complex128    // E input multipliers (epsillon0 etc)
-	BInMul       [7]complex128    // B input multipliers (mu0 etc)
+	EInput       [7]*gpu.Array    // input quantities for electric field (rho, Px, Py, Pz, 0, 0, 0)
+	BInput       [7]*gpu.Array    // input quantities for magnetic field (rhoB, mx, my, mz, jx, jy, jz)
+	EInMul       [7]float64       // E input multipliers (epsillon0 etc)
+	BInMul       [7]float64       // B input multipliers (mu0 etc)
 	fftE1, fftE2 *gpu.Array       // previous FFT E fields for time derivative 
 	fftB1, fftB2 *gpu.Array       // previous FFT B fields for time derivative 
 	time1, time2 float64          // time of previous fields for derivative
@@ -76,11 +76,13 @@ func (plan *MaxwellPlan) Init(dataSize, logicSize []int) {
 }
 
 
-func (plan *MaxwellPlan) AddCoulomb() {
+func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
 	if plan.kern[CHARGE] == nil {
 		plan.LoadChargeKernel()
 	}
-
+	plan.EInMul[0] = 1 / Epsilon0
+	plan.EInput[0] = rho.Array()
+	plan.E = E
 }
 
 func (plan *MaxwellPlan) LoadChargeKernel() {
@@ -89,10 +91,11 @@ func (plan *MaxwellPlan) LoadChargeKernel() {
 		CPUONLY = true
 		GPU     = false
 	)
-	// Add the kernel as orphan quant, so we can output it.
+	// DEBUG: add the kernel as orphan quant, so we can output it.
 	// TODO: do not add to engine if debug is off?
 	quant := NewQuant("kern_el", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
 	e.AddQuant(quant)
+
 	kern := quant.Buffer()
 	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
 	plan.kern[CHARGE] = kern
@@ -100,31 +103,34 @@ func (plan *MaxwellPlan) LoadChargeKernel() {
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
 }
 
-//
-//func (conv *Conv73Plan) Convolve(in []*gpu.Array, out *gpu.Array) {
-//	fftBuf := &conv.fftBuffer
-//	fftOut := &conv.fftOut
-//	fftOut.Zero()
-//	for i := 0; i < 7; i++ {
-//		if in[i] == nil {
-//			continue
-//		}
-//		conv.ForwardFFT(in[i])
-//		//fmt.Println("conv.fftBuffer", i, conv.fftBuffer.LocalCopy().Array, "\n")
-//		for j := 0; j < 3; j++ {
-//			if conv.fftKern[i][j] == nil {
-//				continue
-//			}
-//			//fmt.Println("conv.fftKern", i, j, conv.fftKern[i][j].LocalCopy().Array, "\n")
-//			// Point-wise kernel multiplication
-//			CMaddAsync(&fftOut.Comp[j], conv.fftMul[i][j], conv.fftKern[i][j], fftBuf, fftOut.Stream)
-//			fftOut.Stream.Sync()
-//			//fmt.Println("conv.fftOut", j, conv.fftOut.Comp[j].LocalCopy().Array, "\n")
-//		}
-//	}
-//	conv.InverseFFT(out)
-//	//fmt.Println("conv out", out.LocalCopy().Array, "\n")
-//}
+
+func (plan *MaxwellPlan) UpdateE() {
+	fftBuf := &plan.fftBuffer
+	fftOut := &plan.fftOut
+	fftOut.Zero()
+	in := plan.EInput
+	out := plan.E.Array()
+	for i := 0; i < 7; i++ {
+		if in[i] == nil {
+			continue
+		}
+		plan.ForwardFFT(in[i])
+		//fmt.Println("plan.fftBuffer", i, plan.fftBuffer.LocalCopy().Array, "\n")
+		for j := 0; j < 3; j++ {
+			if plan.fftKern[i][j] == nil {
+				continue
+			}
+			//fmt.Println("plan.fftKern", i, j, plan.fftKern[i][j].LocalCopy().Array, "\n")
+			// Point-wise kernel multiplication
+			mul := complex64(complex(plan.EInMul[0], 0) * plan.fftMul[i][j])
+			gpu.CMaddAsync(&fftOut.Comp[j], mul, plan.fftKern[i][j], fftBuf, fftOut.Stream)
+			fftOut.Stream.Sync()
+			//fmt.Println("plan.fftOut", j, plan.fftOut.Comp[j].LocalCopy().Array, "\n")
+		}
+	}
+	plan.InverseFFT(out)
+	//fmt.Println("plan out", out.LocalCopy().Array, "\n")
+}
 
 
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
@@ -292,27 +298,27 @@ func (plan *MaxwellPlan) Free() {
 	// TODO
 }
 
-//
-//// 	INTERNAL
-//// Sparse transform all 3 components.
-//// (FFTPlan knows about zero padding etc)
-//func (conv *Conv73Plan) ForwardFFT(in *Array) {
-//	Assert(conv.fftBuffer.NComp() == in.NComp())
-//	//for c := range in.Comp {
-//	conv.fftPlan.Forward(in, &conv.fftBuffer)
-//	//}
-//}
-//
-//// 	INTERNAL
-//// Sparse backtransform
-//// (FFTPlan knows about zero padding etc)
-//func (conv *Conv73Plan) InverseFFT(out *Array) {
-//	Assert(conv.fftOut.NComp() == out.NComp())
-//	for c := range out.Comp {
-//		conv.fftPlan.Inverse(&conv.fftOut.Comp[c], &out.Comp[c])
-//	}
-//}
-//
+
+// 	INTERNAL
+// Sparse transform all 3 components.
+// (FFTPlan knows about zero padding etc)
+func (plan *MaxwellPlan) ForwardFFT(in *gpu.Array) {
+	Assert(plan.fftBuffer.NComp() == in.NComp())
+	//for c := range in.Comp {
+	plan.fftPlan.Forward(in, &plan.fftBuffer)
+	//}
+}
+
+// 	INTERNAL
+// Sparse backtransform
+// (FFTPlan knows about zero padding etc)
+func (plan *MaxwellPlan) InverseFFT(out *gpu.Array) {
+	Assert(plan.fftOut.NComp() == out.NComp())
+	for c := range out.Comp {
+		plan.fftPlan.Inverse(&plan.fftOut.Comp[c], &out.Comp[c])
+	}
+}
+
 //func (conv *Conv73Plan) SelfTest() {
 //	Debug("FFT self-test")
 //	rng := rand.New(rand.NewSource(0))
