@@ -15,7 +15,7 @@ import (
 	"mumax/host"
 	"rand"
 	"runtime"
-// 		"fmt"
+	// 		"fmt"
 
 )
 
@@ -114,7 +114,6 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 			scaleRealParts(conv.fftKern[i], devOut, 1/float32(FFTNormLogic(logic)))
 		}
 	}
-
 
 }
 

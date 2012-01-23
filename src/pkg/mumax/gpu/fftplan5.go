@@ -15,7 +15,7 @@ import (
 	. "mumax/common"
 	cu "cuda/driver"
 	"cuda/cufft"
-// 			"fmt"
+				"fmt"
 	//   "cuda/runtime"
 )
 
@@ -68,6 +68,26 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 	fft.Stream = NewStream()
 	//-----------------------------------------------
 
+  // init buffer (allocated) ----------------------
+  bufferSize := dataSize[0] * ((logicSize[2]/2)/NDev + 1) * dataSize[1] * 2 //this size is the one needed for the chuncks
+  fft.buffer.Init(nComp, []int{1, NDev, bufferSize}, DO_ALLOC)
+  //-----------------------------------------------
+
+  // init padZ (not allocated)  -------------------
+  padZN0 := fft.dataSize[0]
+  padZN1 := fft.dataSize[1]
+  fft.padZ.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2]}, DONT_ALLOC)
+  fft.fftZbuffer.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2] + 2}, DONT_ALLOC)
+  //-----------------------------------------------
+
+  // init transp2 (not allocated) -----------------
+  transp2N0 := dataSize[0] // make this logicSize[0] when copyblock can handle it
+  Assert((logicSize[2]+2*NDev)%2 == 0)
+  transp2N1 := (logicSize[2] + 2*NDev) / 2
+  transp2N2 := logicSize[1] * 2
+  fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DONT_ALLOC) //TODO make this point to the output array
+  //-----------------------------------------------
+
 	if NDev == 1 { //  single-gpu implementation
 
 		offset := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
@@ -79,45 +99,50 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 		// init planZ -----------------------------------
 		fft.planZ_FW = make([]cufft.Handle, NDev)
 		fft.planZ_INV = make([]cufft.Handle, NDev)
-		fft.planZ_FW[0] = cufft.Plan1d(fft.logicSize[2], cufft.R2C, fft.dataSize[1])
+		fft.planZ_FW[0] = cufft.Plan1d(fft.logicSize[2], cufft.R2C, padZN0*padZN1)
 		fft.planZ_FW[0].SetStream(uintptr(fft.Stream[0]))
-		fft.planZ_INV[0] = cufft.Plan1d(fft.logicSize[2], cufft.C2R, fft.dataSize[1])
+		fft.planZ_INV[0] = cufft.Plan1d(fft.logicSize[2], cufft.C2R, padZN0*padZN1)
 		fft.planZ_INV[0].SetStream(uintptr(fft.Stream[0]))
 		//-----------------------------------------------
 
-		// init planY -----------------------------------
-		fft.planY = make([]cufft.Handle, NDev)
-		batchY := ((fft.logicSize[2])/2 + 1)
-		strideY := ((fft.logicSize[2])/2 + 1)
-		fft.planY[0] = cufft.PlanMany([]int{fft.logicSize[1]}, []int{1}, strideY, []int{1}, strideY, cufft.C2C, batchY)
-		fft.planY[0].SetStream(uintptr(fft.Stream[0]))
+    // init planY -----------------------------------
+    fft.planY = make([]cufft.Handle, NDev)
+    batchY := ((fft.logicSize[2])/2 + 1) * fft.dataSize[0]
+    fft.planY[0] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
+    fft.planY[0].SetStream(uintptr(fft.Stream[0])) // TODO: change 
+    //--------------------------------------------
 
-		if fft.logicSize[0] == 1 { // 2D
-			fft.planX = nil
-		} else { //3D
-			fft.planX = make([]cufft.Handle, NDev)
-			batchX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
-			strideX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
-			fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, strideX, []int{1}, strideX, cufft.C2C, batchX)
-			fft.planX[0].SetStream(uintptr(fft.Stream[0]))
-		} //--------------------------------------------
+    // init planX -----------------------------------
+    if fft.logicSize[0] == 1 { // 2D
+      fft.planX = nil
+    } else { //3D
+      fft.planX = make([]cufft.Handle, NDev)
+      batchX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
+      stride := batchX
+      fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, stride, []int{1}, stride, cufft.C2C, batchX)
+      fft.planX[0].SetStream(uintptr(fft.Stream[0])) // TODO: change
+    } //--------------------------------------------
+// 		// init planY -----------------------------------
+// 		fft.planY = make([]cufft.Handle, NDev)
+// 		batchY := ((fft.logicSize[2])/2 + 1)
+// 		strideY := ((fft.logicSize[2])/2 + 1)
+// 		fft.planY[0] = cufft.PlanMany([]int{fft.logicSize[1]}, []int{1}, strideY, []int{1}, strideY, cufft.C2C, batchY)
+// 		fft.planY[0].SetStream(uintptr(fft.Stream[0]))
+// 
+// 		if fft.logicSize[0] == 1 { // 2D
+// 			fft.planX = nil
+// 		} else { //3D
+// 			fft.planX = make([]cufft.Handle, NDev)
+// 			batchX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
+// 			strideX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
+// 			fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, strideX, []int{1}, strideX, cufft.C2C, batchX)
+// 			fft.planX[0].SetStream(uintptr(fft.Stream[0]))
+// 		} //--------------------------------------------
 
 
 	} else { // multi-gpu implementation
 
 		//     fft.fftZ1Dev = nil  TODO  How to give this a null pointer?
-
-		// init buffer (allocated) ----------------------
-		bufferSize := dataSize[0] * ((logicSize[2]/2)/NDev + 1) * dataSize[1] * 2 //this size is the one needed for the chuncks
-		fft.buffer.Init(nComp, []int{1, NDev, bufferSize}, DO_ALLOC)
-		//-----------------------------------------------
-
-		// init padZ (not allocated)  -------------------
-		padZN0 := fft.dataSize[0]
-		padZN1 := fft.dataSize[1]
-		fft.padZ.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2]}, DONT_ALLOC)
-		fft.fftZbuffer.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2] + 2}, DONT_ALLOC)
-		//-----------------------------------------------
 
 		// init transp1 (allocated) -----------------
 		fft.transp1.Init(nComp, fft.fftZbuffer.size3D, DONT_ALLOC)
@@ -132,16 +157,8 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 		fft.chunks = make([]Array, NDev)
 		for dev := range _useDevice {
 			fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DONT_ALLOC)
-//       fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DO_ALLOC)
 		} //---------------------------------------------
 
-		// init transp2 (not allocated) -----------------
-		transp2N0 := dataSize[0] // make this logicSize[0] when copyblock can handle it
-		Assert((logicSize[2]+2*NDev)%2 == 0)
-		transp2N1 := (logicSize[2] + 2*NDev) / 2
-		transp2N2 := logicSize[1] * 2
-		fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DONT_ALLOC) //TODO make this point to the output array
-		//-----------------------------------------------
 
 		// init planZ -----------------------------------
 		fft.planZ_FW = make([]cufft.Handle, NDev)
@@ -200,49 +217,50 @@ func (fft *FFTPlan5) Free() {
 
 func (fft *FFTPlan5) Forward(in, out *Array) {
 
-//   fmt.Println("FORWARD FFT: FFTPlan5")
+	//   fmt.Println("FORWARD FFT: FFTPlan5")
 
-  
+
 	Start("FW_total")
 	AssertMsg(in.size4D[0] == 1, "1")
 	AssertMsg(out.size4D[0] == 1, "2")
 	CheckSize(in.size3D, fft.dataSize[:])
 	CheckSize(out.size3D, fft.outputSize[:])
-	if NDevice() == 1 { //  single-gpu implementation
 
-		// 		fmt.Println("single GPU used")
+  logicSize := fft.logicSize
+	if NDevice() == 1{
+      fmt.Println("FORWARD FFT: fft5, single GPU")
+      fmt.Println("")
 
-		fftZ1Dev := fft.fftZ1Dev
+    buffer := &(fft.buffer)
+    padZ := &(fft.padZ)
+    padZ.PointTo(out, 0)
+    fftZbuffer := &(fft.fftZbuffer)
+    fftZbuffer.PointTo(buffer, 0)
 
-		// zero padding, all FFTs are in-place
-		CopyPad3D(out, in)
-		//   fmt.Println("")
-		//   fmt.Println("zero padding:", out.LocalCopy().Array)
+    CopyPadZAsync(padZ, in, fft.Stream)
 
-		// FFT in z-direction
-		offset := ((fft.logicSize[2]) + 2) * fft.logicSize[1]
-		for i := 0; i < fft.dataSize[0]; i++ { // TODO check if streams per plane are faster
-			fftZ1Dev[i].PointTo(out, i*offset)
-			ptr := uintptr(fftZ1Dev[i].pointer[0])
-			fft.planZ_FW[0].ExecR2C(ptr, ptr)
-		}
-		//   fmt.Println("")
-		//   fmt.Println("FFTZ:", out.LocalCopy().Array)
+    fft.planZ_FW[0].ExecR2C(uintptr(padZ.pointer[0]), uintptr(fftZbuffer.pointer[0]))
+/*    fmt.Println("")
+    fmt.Println("fftZbuffer:", fftZbuffer.LocalCopy().Array)*/
+   
+    out.Zero()
+    TransposeComplexYZSingleGPUFWAsync(out, fftZbuffer, fft.Stream) // fftZ!
 
-		// FFT in y-direction
-		for i := 0; i < fft.dataSize[0]; i++ { // TODO check if streams per plane are faster
-			ptr := uintptr(fftZ1Dev[i].pointer[0])
-			fft.planY[0].ExecC2C(ptr, ptr, cufft.FORWARD) //FFT in y-direction
-		}
-		//   fmt.Println("")
-		//   fmt.Println("FFTY:", out.LocalCopy().Array)
+    fft.Sync()
+//     fmt.Println("fftZbuffer", fftZbuffer.size3D)
+//     fmt.Println("out", out.size3D)
+//     fmt.Println("transpose:", out.LocalCopy().Array)
 
-		// FFT in x-direction
-		if fft.logicSize[0] > 1 {
-			fft.planX[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in x-direction
-		}
-	} else { //  multi-gpu implementation
+    fft.planY[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in y-direction
 
+    if logicSize[0] > 1 {
+      fft.planX[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in x-direction
+    }
+    
+  }	else { //  multi-gpu implementation
+
+      fmt.Println("FORWARD FFT: fft5, multi GPU")
+      fmt.Println("")
 		//   fmt.Println("FORWARD FFT")
 		//   fmt.Println("")
 
@@ -254,21 +272,20 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		fftZbuffer.PointTo(buffer, 0)
 		transp1 := &(fft.transp1)
 		transp1.PointTo(out, 0)
-		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
-		cnt:=0
+		chunks := fft.chunks // not sure if chunks[0] copies the struct...
+		cnt := 0
 		for dev := range _useDevice { // source device
 			chunks[dev].PointTo(buffer, cnt*chunks[dev].Len())
-      cnt++
+			cnt++
 		}
-/*    fmt.Println("", chunks[0].pointer[0])
-    fmt.Println("", chunks[1].pointer[0])
-    fmt.Println("", chunks[2].pointer[0])
-    fmt.Println("", chunks[3].pointer[0])*/
+		/*    fmt.Println("", chunks[0].pointer[0])
+		fmt.Println("", chunks[1].pointer[0])
+		fmt.Println("", chunks[2].pointer[0])
+		fmt.Println("", chunks[3].pointer[0])*/
 		transp2 := &(fft.transp2)
 		transp2.PointTo(out, 0)
 
 		dataSize := fft.dataSize
-		logicSize := fft.logicSize
 		NDev := NDevice()
 		// -------------------------------------------------------------
 
@@ -287,11 +304,9 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 			setDevice(_useDevice[dev])
 			fft.planZ_FW[dev].ExecR2C(uintptr(padZ.pointer[dev]), uintptr(fftZbuffer.pointer[dev]))
 		}
-// 		    fft.Sync()
+		// 		    fft.Sync()
 		// 		Stop("FFTZ")
-// 	fft.Sync()
-//   fmt.Println("")
-//   fmt.Println("fftz:", fftZbuffer.LocalCopy().Array)
+		// 	fft.Sync()
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON PLANES @@@@@@@@
 		//     Start("transpose")
@@ -299,8 +314,8 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		fft.Sync()
 		//     Stop("transpose")
 		// 		Stop("FW_before_copy")
-//   fmt.Println("")
-//   fmt.Println("transpose:", transp1.LocalCopy().Array)
+// 		  fmt.Println("")
+// 		  fmt.Println("transpose:", transp1.LocalCopy().Array)
 
 		// copy chunks, cross-device
 		Start("FW_copy")
@@ -308,12 +323,10 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		srcPlaneN := transp1.partSize[1] * transp1.partSize[2]
 		dstPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
 
-    buffer.Zero()
-
-    Assert(dataSize[1]%NDev == 0)
+		Assert(dataSize[1]%NDev == 0)
 		Assert(logicSize[2]%NDev == 0)
-    for c := range chunks { // source chunk
- 			for dev := range _useDevice { // source device
+		for c := range chunks { // source chunk
+			for dev := range _useDevice { // source device
 				// source device = dev
 				// target device = chunk
 				for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
@@ -328,15 +341,8 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 			}
 		}
 
-   
-    fft.Sync()
+		fft.Sync()
 		Stop("FW_copy")
-
-//   fft.Sync()
-//   for c := range chunks { // source chunk
-//   fmt.Println("")
-//   fmt.Println("chunks:", chunks[c].LocalCopy().Array)
-//   }
 
 		Start("FW_after_copy")
 		transp2.Zero()
@@ -349,9 +355,12 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		// 		fft.Sync()
 		// 		Stop("FW_insertBlockZ")
 		// 		    Stop("FW_copy")
-//   fft.Sync()
-//   fmt.Println("")
-//   fmt.Println("insert:", transp2.LocalCopy().Array)
+		//   fft.Sync()
+		//   fmt.Println("")
+		//   fmt.Println("insert:", transp2.LocalCopy().Array)
+       fft.Sync()
+      fmt.Println("")
+      fmt.Println("transpose:", transp2.LocalCopy().Array)
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 		// 		Start("FW_fftY")
@@ -385,49 +394,40 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 
 func (fft *FFTPlan5) Inverse(in, out *Array) {
 
-	/*  fmt.Println("")
-	fmt.Println("")
-	fmt.Println("INVERSE FFT")
-	fmt.Println("")
-	fmt.Println("in:", in.LocalCopy().Array)
-	*/
+   logicSize := fft.logicSize
+
 
 	//Start("INV_total")
-	if NDevice() == 1 { //  single-gpu implementation
 
-		fftZ1Dev := fft.fftZ1Dev
+  if NDevice() == 1 { //  single-gpu implementation
+    
+    buffer := &(fft.buffer)
+    padZ := &(fft.padZ)
+    padZ.PointTo(in, 0)
+    fftZbuffer := &(fft.fftZbuffer)
+    fftZbuffer.PointTo(buffer, 0)
 
-		// FFT in x-direction
-		if fft.logicSize[0] > 1 {
-			fft.planX[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in x-direction
-		}
-		fft.Sync() //  Is this required?
+    if logicSize[0] > 1 {
+      fft.planX[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in x-direction
+    }
+//       fmt.Println("")
+//       fmt.Println("in:", in.LocalCopy().Array)
 
-		// FFT in y-direction
-		offset := ((fft.logicSize[2]) + 2) * fft.logicSize[1]
+    fft.planY[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in y-direction
+//       fmt.Println("")
+//       fmt.Println("ffty:", in.LocalCopy().Array)
 
-		for i := 0; i < fft.dataSize[0]; i++ { // TODO check if streams per plane are faster
-			fftZ1Dev[i].PointTo(in, i*offset)
-			ptr := uintptr(fftZ1Dev[i].pointer[0])
-			fft.planY[0].ExecC2C(ptr, ptr, cufft.INVERSE) //FFT in y-direction
-		}
-		fft.Sync() //  Is this required?
-		//   fmt.Println("")
-		//   fmt.Println("inv FFTy:", in.LocalCopy().Array)
+/*      fmt.Println("size in:  ", in.size3D)
+      fmt.Println("size out: ", fftZbuffer.size3D)*/
+    TransposeComplexYZSingleGPUINVAsync(fftZbuffer, in, fft.Stream) // fftZ!
+//       fmt.Println("")
+//       fmt.Println("transp:", fftZbuffer.LocalCopy().Array)
 
-		// FFT in z-direction
-		for i := 0; i < fft.dataSize[0]; i++ {
-			ptr := uintptr(fftZ1Dev[i].pointer[0])
-			fft.planZ_INV[0].ExecC2R(ptr, ptr)
-		}
-		fft.Sync() //  Is this required?
-		//   fmt.Println("")
-		//   fmt.Println("before unpadding:", in.LocalCopy().Array)
+    fft.planZ_INV[0].ExecC2R(uintptr(fftZbuffer.pointer[0]), uintptr(padZ.pointer[0]))
 
-		// extracting data
-		CopyPad3D(out, in)
-
-	} else { //  single-gpu implementation
+    CopyPadZAsync(out, padZ, fft.Stream)
+    
+  }else { //  multi-gpu implementation
 
 		// shorthand
 		buffer := &(fft.buffer)
@@ -437,17 +437,16 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 		fftZbuffer.PointTo(buffer, 0)
 		transp1 := &(fft.transp1)
 		transp1.PointTo(in, 0)
-		chunks := fft.chunks          // not sure if chunks[0] copies the struct...
-		cnt :=0
+		chunks := fft.chunks // not sure if chunks[0] copies the struct...
+		cnt := 0
 		for dev := range _useDevice { // source device
 			chunks[dev].PointTo(buffer, cnt*chunks[dev].Len())
-      cnt++
+			cnt++
 		}
 		transp2 := &(fft.transp2)
 		transp2.PointTo(in, 0)
 
 		dataSize := fft.dataSize
-		logicSize := fft.logicSize
 		NDev := NDevice()
 
 		// FFT X
@@ -472,8 +471,8 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 		}
 		fft.Sync()
 		//Stop("INV_fftY")
-		//   fmt.Println("")
-		//   fmt.Println("ffty:", transp2.LocalCopy().Array)
+// 		  fmt.Println("")
+// 		  fmt.Println("ffty:", transp2.LocalCopy().Array)
 
 
 		for c := range chunks {
