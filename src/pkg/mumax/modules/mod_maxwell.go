@@ -12,7 +12,6 @@ package modules
 
 import (
 	. "mumax/engine"
-	"mumax/gpu"
 )
 
 var maxwell *MaxwellPlan
@@ -26,7 +25,8 @@ func LoadEField(e *Engine) {
 	EField := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
 	EExt := e.AddNewQuant("E_ext", VECTOR, MASK, Unit("V/m"), "externally applied electrical field")
 	e.Depends("E", "E_ext")
-	EField.SetUpdater(newEFieldUpdater(EField, EExt))
+	EField.SetUpdater(newEFieldUpdater())
+	maxwell.EExt = EExt
 }
 
 // Loads B if not yet present
@@ -38,34 +38,58 @@ func LoadBField(e *Engine) {
 	BField := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
 	BExt := e.AddNewQuant("B_ext", VECTOR, MASK, Unit("T"), "externally applied magnetic induction")
 	e.Depends("B", "B_ext")
-	BField.SetUpdater(newBFieldUpdater(BField, BExt))
+	BField.SetUpdater(newBFieldUpdater())
+	maxwell.BExt = BExt
 }
 
-func initMaxwell(){
+func initMaxwell() {
 	e := GetEngine()
-	if maxwellplan == nil{
+	if maxwell == nil {
 		maxwell = new(MaxwellPlan)
-		maxwell.Init(e.Gr)
+		maxwell.Init(e.GridSize(), e.PaddedSize())
 	}
 }
 // Updates the E field in a single convolution
 // taking into account all possible sources.
 type EFieldUpdater struct {
+
 }
 
-func newEFieldUpdater(EField *Quant) Updater {
-	e := GetEngine()
+func newEFieldUpdater() Updater {
+	//	e := GetEngine()
 	u := new(EFieldUpdater)
-	u.EField = EField
-	// convolution does not have any kernels yet
-	// they are added by other modules
-	dataSize := e.GridSize()
-	logicSize := PadSize(e.GridSize(), e.Periodic())
-	u.conv = gpu.NewConv73Plan(dataSize, logicSize)
-	u.convInput = make([]*gpu.Array, 7)
+	//	u.EField = EField
+	//	// convolution does not have any kernels yet
+	//	// they are added by other modules
+	//	dataSize := e.GridSize()
+	//	logicSize := PadSize(e.GridSize(), e.Periodic())
+	//	u.conv = gpu.NewConv73Plan(dataSize, logicSize)
+	//	u.convInput = make([]*gpu.Array, 7)
 	return u
 }
 
 func (u *EFieldUpdater) Update() {
-	u.conv.Convolve(u.convInput, u.EField.Array())
+
+}
+// Updates the E field in a single convolution
+// taking into account all possible sources.
+type BFieldUpdater struct {
+
+}
+
+func newBFieldUpdater() Updater {
+	//	e := GetEngine()
+	u := new(BFieldUpdater)
+	//	u.EField = EField
+	//	// convolution does not have any kernels yet
+	//	// they are added by other modules
+	//	dataSize := e.GridSize()
+	//	logicSize := PadSize(e.GridSize(), e.Periodic())
+	//	u.conv = gpu.NewConv73Plan(dataSize, logicSize)
+	//	u.convInput = make([]*gpu.Array, 7)
+	return u
+}
+
+func (u *BFieldUpdater) Update() {
+
 }

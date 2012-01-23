@@ -52,10 +52,6 @@ const (
 )
 
 
-func NewMaxwellPlan(dataSize, logicSize []int) *MaxwellPlan {
-	return nil
-}
-
 func (plan *MaxwellPlan) Init(dataSize, logicSize []int) {
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)

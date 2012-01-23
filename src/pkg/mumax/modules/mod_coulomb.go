@@ -11,9 +11,7 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	. "mumax/engine"
-	"mumax/gpu"
 )
 
 // Register this module
@@ -35,4 +33,3 @@ func LoadCoulomb(e *Engine) {
 	initMaxwell()
 	maxwell.AddCoulomb()
 }
-

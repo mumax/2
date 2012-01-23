@@ -149,6 +149,11 @@ func (e *Engine) GridSize() []int {
 	return e.size3D
 }
 
+// Returns the grid size after zero padding
+func (e *Engine) PaddedSize() []int {
+	return PadSize(e.size3D, e.periodic)
+}
+
 // Sets the FD cell size
 func (e *Engine) SetCellSize(size []float64) {
 	Debug("Engine.SetCellSize", size)
