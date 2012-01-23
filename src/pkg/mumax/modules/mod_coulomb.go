@@ -19,10 +19,6 @@ func init() {
 	RegisterModule("coulomb", "Coulomb's law", LoadCoulomb)
 }
 
-// Load electrical charge density.
-func LoadChargeDensity(e *Engine) {
-}
-
 // Load Coulomb's law
 func LoadCoulomb(e *Engine) {
 	LoadEField(e)

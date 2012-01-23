@@ -7,7 +7,7 @@
 
 package modules
 
-// Provides the Electrical field
+// Provides the Electrical and Magnetic field
 // Author: Arne Vansteenkiste
 
 import (
