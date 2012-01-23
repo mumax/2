@@ -23,54 +23,16 @@ func init() {
 
 // Load electrical charge density.
 func LoadChargeDensity(e *Engine) {
-	if e.HasQuant("rho") {
-		return
-	}
-	e.AddNewQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
 }
 
 // Load Coulomb's law
 func LoadCoulomb(e *Engine) {
-
 	LoadEField(e)
-	LoadChargeDensity(e)
-
-	// here be dragons
-	const CPUONLY = true
-	const GPU = false
-
-	// electrostatic kernel
-	kernelSize := padSize(e.GridSize(), e.Periodic())
-	elKern := NewQuant("kern_el", VECTOR, kernelSize, FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
-	e.AddQuant(elKern)
-	elKern.SetUpdater(newElKernUpdater(elKern))
-
-	e.Depends("E", "rho", "kern_el")
+	if !e.HasQuant("rho") {
+		e.AddNewQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
+	}
+	e.Depends("E", "rho")
+	initMaxwell()
+	maxwell.AddCoulomb()
 }
 
-// Updates electrostatic kernel (cpu)
-type elKernUpdater struct {
-	kern *Quant // that's me!
-}
-
-func newElKernUpdater(elKern *Quant) Updater {
-	u := new(elKernUpdater)
-	u.kern = elKern
-	return u
-}
-
-// Update electrostatic kernel (cpu)
-func (u *elKernUpdater) Update() {
-	e := GetEngine()
-
-	// first update the kernel
-	kernsize := padSize(e.GridSize(), e.Periodic())
-	Log("Calculating electrosatic kernel, may take a moment...")
-	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
-
-	// then also load it into the E field convolution
-	EUpdater := e.Quant("E").GetUpdater().(*EFieldUpdater)
-	kernEl := GetEngine().Quant("kern_el").Buffer()
-	EUpdater.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
-	EUpdater.convInput[0] = e.Quant("rho").Array()
-}

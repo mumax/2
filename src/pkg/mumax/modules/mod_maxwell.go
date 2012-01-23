@@ -7,20 +7,65 @@
 
 package modules
 
-// Metamodule for full maxwell equations
+// Provides the Electrical field
 // Author: Arne Vansteenkiste
 
 import (
 	. "mumax/engine"
+	"mumax/gpu"
 )
 
-// Register this module
-func init() {
-	RegisterModule("maxwell", "Full Maxwell equations", LoadMaxwell)
+var maxwell *MaxwellPlan
+
+// Loads E if not yet present
+func LoadEField(e *Engine) {
+	if e.HasQuant("E") {
+		return
+	}
+	initMaxwell()
+	EField := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
+	EExt := e.AddNewQuant("E_ext", VECTOR, MASK, Unit("V/m"), "externally applied electrical field")
+	e.Depends("E", "E_ext")
+	EField.SetUpdater(newEFieldUpdater(EField, EExt))
 }
 
-// Load full Maxwell equations
-func LoadMaxwell(e *Engine) {
-	e.LoadModule("coulomb")
-	e.LoadModule("faraday")
+// Loads B if not yet present
+func LoadBField(e *Engine) {
+	if e.HasQuant("B") {
+		return
+	}
+	initMaxwell()
+	BField := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
+	BExt := e.AddNewQuant("B_ext", VECTOR, MASK, Unit("T"), "externally applied magnetic induction")
+	e.Depends("B", "B_ext")
+	BField.SetUpdater(newBFieldUpdater(BField, BExt))
+}
+
+func initMaxwell(){
+	e := GetEngine()
+	if maxwellplan == nil{
+		maxwell = new(MaxwellPlan)
+		maxwell.Init(e.Gr)
+	}
+}
+// Updates the E field in a single convolution
+// taking into account all possible sources.
+type EFieldUpdater struct {
+}
+
+func newEFieldUpdater(EField *Quant) Updater {
+	e := GetEngine()
+	u := new(EFieldUpdater)
+	u.EField = EField
+	// convolution does not have any kernels yet
+	// they are added by other modules
+	dataSize := e.GridSize()
+	logicSize := PadSize(e.GridSize(), e.Periodic())
+	u.conv = gpu.NewConv73Plan(dataSize, logicSize)
+	u.convInput = make([]*gpu.Array, 7)
+	return u
+}
+
+func (u *EFieldUpdater) Update() {
+	u.conv.Convolve(u.convInput, u.EField.Array())
 }

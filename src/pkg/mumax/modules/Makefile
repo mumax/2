@@ -12,10 +12,9 @@ GOFILES=\
 	magnetization.go\
 	update_norm.go\
 	hfield.go\
+	mod_maxwell.go\
 	mod_zeeman.go\
 	mod_exchange6.go\
-	mod_efield.go\
-	mod_bfield.go\
 	mod_coulomb.go\
 	mod_faraday.go\
 	mod_uniaxialanisotropy.go\

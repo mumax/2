@@ -18,6 +18,7 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
+	"mumax/host"
 )
 
 
@@ -27,7 +28,7 @@ type MaxwellPlan struct {
 	dataSize     [3]int           // Size of the (non-zero) input data block (engine.GridSize)
 	logicSize    [3]int           // Non-transformed kernel size >= dataSize (due to zeropadding)
 	fftKernSize  [3]int           // transformed kernel size, non-redundant parts only
-	kern         [3]*Quant        // Real-space kernels for charge, dipole, rotor
+	kern         [3]*host.Array   // Real-space kernels for charge, dipole, rotor
 	fftKern      [7][3]*gpu.Array // transformed kernel's non-redundant parts (only real or imag parts, or nil)
 	fftMul       [7][3]complex128 // multipliers for kernel
 	fftBuffer    gpu.Array        // transformed input data
@@ -76,7 +77,28 @@ func (plan *MaxwellPlan) Init(dataSize, logicSize []int) {
 	plan.fftKernSize[2] = plan.fftKernSize[2] / 2 // store only non-redundant parts
 }
 
-//func(plan*MaxwellPlan)
+
+func (plan *MaxwellPlan) AddCoulomb() {
+	if plan.kern[CHARGE] == nil {
+		plan.LoadChargeKernel()
+	}
+}
+
+func (plan *MaxwellPlan) LoadChargeKernel() {
+	e := GetEngine()
+	const (
+		CPUONLY = true
+		GPU     = false
+	)
+	// Add the kernel as orphan quant, so we can output it.
+	// TODO: do not add to engine if debug is off?
+	quant := NewQuant("kern_el", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
+	e.AddQuant(quant)
+	kern := quant.Buffer()
+	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	plan.kern[CHARGE] = kern
+}
+
 //
 //func (conv *Conv73Plan) Convolve(in []*gpu.Array, out *gpu.Array) {
 //	fftBuf := &conv.fftBuffer
