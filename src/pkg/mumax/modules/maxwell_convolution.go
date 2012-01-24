@@ -183,8 +183,7 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	accuracy := 8
 	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	plan.kern[ROTOR] = kern
-	//plan.LoadKernel(kern, 1, ANTISYMMETRIC, PUREREAL)
-	// ç!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !! !!çç
+	plan.LoadKernel(kern, 1, ANTISYMMETRIC, PUREIMAG)
 }
 
 
