@@ -111,18 +111,18 @@ func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
 
 // Enable Demag field
 func (plan *MaxwellPlan) EnableDemag(m, B *Quant) {
-	//	plan.init()
-	//	plan.loadDipoleKernel()
+	plan.init()
+	plan.loadDipoleKernel()
 	//	plan.BInMul[MX] = 
 	//	plan.BInMul[MY] = 
 	//	plan.BInMul[MZ] = 
 	//	plan.BInput[MX] = 
 	//	plan.BInput[MX] =
 	//	plan.BInput[MX] =
-	//	if plan.B != nil {
-	//		Assert(plan.B == B)
-	//	}
-	//	plan.B = B
+	if plan.B != nil {
+		Assert(plan.B == B)
+	}
+	plan.B = B
 }
 
 func (plan *MaxwellPlan) EnableFaraday(dBdt, E *Quant) {
@@ -151,7 +151,7 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	// TODO: do not add to engine if debug is off?
-	quant := NewQuant("kern_el", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
+	quant := NewQuant("kern_charge", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
@@ -163,19 +163,20 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 // Load dipole kernel if not yet done so.
 // Required for field of electric/magnetic charge density.
 func (plan *MaxwellPlan) loadDipoleKernel() {
-	//	if plan.kern[CHARGE] != nil {
-	//		return
-	//	}
-	//	e := GetEngine()
-	//	// DEBUG: add the kernel as orphan quant, so we can output it.
-	//	// TODO: do not add to engine if debug is off?
-	//	quant := NewQuant("kern_el", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
-	//	e.AddQuant(quant)
-	//
-	//	kern := quant.Buffer()
-	//	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-	//	plan.kern[CHARGE] = kern
-	//	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
+	if plan.kern[DIPOLE] != nil {
+		return
+	}
+	e := GetEngine()
+	// DEBUG: add the kernel as orphan quant, so we can output it.
+	// TODO: do not add to engine if debug is off?
+	quant := NewQuant("kern_dipole", SYMMTENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced dipole kernel")
+	e.AddQuant(quant)
+
+	kern := quant.Buffer()
+	accuracy := 8
+	FaceKernel6(plan.logicSize[:], e.CellSize(), accuracy, e.Periodic(), kern)
+	plan.kern[DIPOLE] = kern
+	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }
 
 // Calculate the electric field plan.E.
