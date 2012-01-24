@@ -203,25 +203,18 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 			continue
 		}
 		plan.ForwardFFT(in[i])
-		//fmt.Println("plan.fftBuffer", i, plan.fftBuffer.LocalCopy().Array, "\n")
 		for j := 0; j < 3; j++ {
 			if plan.fftKern[i][j] == nil {
 				continue
 			}
-			//Debug("fft", i, j)
-			//fmt.Println("plan.fftKern", i, j, plan.fftKern[i][j].LocalCopy().Array, "\n")
 			// Point-wise kernel multiplication
 			mul := complex64(complex(inMul[i], 0) * plan.fftMul[i][j])
-			//Debug("inmul", inMul[i])
-			//Debug("mul", mul)
 			gpu.CMaddAsync(&fftOut.Comp[j], mul, plan.fftKern[i][j], fftBuf, fftOut.Stream)
 			fftOut.Stream.Sync()
-			//fmt.Println("plan.fftOut", j, plan.fftOut.Comp[j].LocalCopy().Array, "\n")
 		}
 	}
 	plan.InverseFFT(out)
 	// TODO add Ext field here
-	//fmt.Println("plan out", out.LocalCopy().Array, "\n")
 }
 
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
