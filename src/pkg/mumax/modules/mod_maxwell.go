@@ -29,6 +29,7 @@ func LoadEField(e *Engine) {
 	e.Depends("E", "E_ext")
 	EField.SetUpdater(newEFieldUpdater())
 	maxwell.EExt = EExt
+	maxwell.E = EField
 }
 
 // Loads B if not yet present
@@ -41,6 +42,7 @@ func LoadBField(e *Engine) {
 	e.Depends("B", "B_ext")
 	BField.SetUpdater(newBFieldUpdater())
 	maxwell.BExt = BExt
+	maxwell.B = BField
 }
 
 // Updates the E field in a single convolution

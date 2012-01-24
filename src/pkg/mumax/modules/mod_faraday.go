@@ -24,7 +24,7 @@ func LoadFaraday(e *Engine) {
 	LoadEField(e)
 	LoadBField(e)
 	e.AddTimeDerivative(e.Quant("B"))
-	maxwell.EnableFaraday(e.Quant("dB_dt"), e.Quant("B"))
+	maxwell.EnableFaraday(e.Quant("dB_dt"))
 }
 //
 //	// here be dragons

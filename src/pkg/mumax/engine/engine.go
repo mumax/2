@@ -276,18 +276,13 @@ func (e *Engine) addDerivedQuant(name string) {
 			panic(InputErr(orig.Name() + " has no component " + compname))
 		case 3:
 			comp, ok = VectorIndex[strings.ToUpper(compname)]
-			comp = 2 - comp // userspace
+			comp = SwapIndex(comp, 3)
 		case 6:
 			comp, ok = TensorIndex[strings.ToUpper(compname)]
-			if comp < 3 {
-				comp = 2 - comp
-			} // userspace
-			if comp == YZ {
-				comp = XY
-			}
-			if comp == XY {
-				comp = YZ
-			}
+			comp = SwapIndex(comp, 6)
+		case 9:
+			comp, ok = TensorIndex[strings.ToUpper(compname)]
+			comp = SwapIndex(comp, 9)
 		}
 		if !ok {
 			panic(InputErr("invalid component:" + compname))

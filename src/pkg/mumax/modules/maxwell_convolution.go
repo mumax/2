@@ -98,41 +98,29 @@ func (plan *MaxwellPlan) init() {
 }
 
 // Enable Couloumb's law
-func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
+func (plan *MaxwellPlan) EnableCoulomb(rho *Quant) {
 	plan.init()
 	plan.loadChargeKernel()
 	plan.EInMul[RHO] = 1 / Epsilon0
 	plan.EInput[RHO] = rho.Array()
-	if plan.E != nil {
-		Assert(plan.E == E)
-	}
-	plan.E = E
 }
 
 // Enable Demagnetizing field
-func (plan *MaxwellPlan) EnableDemag(m, Msat, B *Quant) {
+func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	plan.init()
 	plan.loadDipoleKernel()
 	plan.BInput[MX] = m.Array().Component(X)
 	plan.BInput[MY] = m.Array().Component(Y)
 	plan.BInput[MZ] = m.Array().Component(Z)
-	if plan.B != nil {
-		Assert(plan.B == B)
-	}
-	plan.B = B
 }
 
 
-func (plan *MaxwellPlan) EnableFaraday(dBdt, E *Quant) {
+func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.init()
 	plan.loadRotorKernel()
 	//plan.EInMul[5] = 1 / Epsilon0
 
 	//plan.EInput[0] = rho.Array()
-	if plan.E != nil {
-		Assert(plan.E == E)
-	}
-	plan.E = E
 }
 
 const (
