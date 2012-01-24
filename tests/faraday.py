@@ -39,25 +39,26 @@ E=getarray('E')
 x0 = 3
 y0 = 9
 x1 = 8
-y1 = 12
+y1 = 14
 
 emf = 0
 for i in range(x0,x1):
 	j = y0
-	emf += E[0][i][j][0]
+	emf += Cx*E[0][i][j][0]
 
 i = x1
 for j in range(y0,y1):
-	emf += E[1][i][j][0]
+	emf += Cy*E[1][i][j][0]
 
 j=y1
 for i in range(x0,x1):
 	j = y0
-	emf -= E[0][i][j][0]
+	emf -= Cx*E[0][i][j][0]
 
 i=x0
 for j in range(y0,y1):
-	emf -= E[1][i][j][0]
+	emf -= Cy*E[1][i][j][0]
+	
 
 S = (x1-x0-1)*Cx * (y1-y0)*Cy
 dBdt=1e9

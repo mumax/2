@@ -120,14 +120,13 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.init()
 	plan.loadRotorKernel()
+	// curl(E) = - ∂B/∂t
 	plan.EInput[JX] = dBdt.Array().Component(X)
 	plan.EInput[JY] = dBdt.Array().Component(Y)
 	plan.EInput[JZ] = dBdt.Array().Component(Z)
-	plan.EInMul[JX] = Epsilon0
-	plan.EInMul[JY] = Epsilon0
-	plan.EInMul[JZ] = Epsilon0
-
-	//plan.EInput[0] = rho.Array()
+	plan.EInMul[JX] = -1
+	plan.EInMul[JY] = -1
+	plan.EInMul[JZ] = -1
 }
 
 const (
