@@ -67,25 +67,25 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 	fft.Stream = NewStream()
 	//-----------------------------------------------
 
-  // init buffer (allocated) ----------------------
-  bufferSize := dataSize[0] * ((logicSize[2]/2)/NDev + 1) * dataSize[1] * 2 //this size is the one needed for the chuncks
-  fft.buffer.Init(nComp, []int{1, NDev, bufferSize}, DO_ALLOC)
-  //-----------------------------------------------
+	// init buffer (allocated) ----------------------
+	bufferSize := dataSize[0] * ((logicSize[2]/2)/NDev + 1) * dataSize[1] * 2 //this size is the one needed for the chuncks
+	fft.buffer.Init(nComp, []int{1, NDev, bufferSize}, DO_ALLOC)
+	//-----------------------------------------------
 
-  // init padZ (not allocated)  -------------------
-  padZN0 := fft.dataSize[0]
-  padZN1 := fft.dataSize[1]
-  fft.padZ.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2]}, DONT_ALLOC)
-  fft.fftZbuffer.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2] + 2}, DONT_ALLOC)
-  //-----------------------------------------------
+	// init padZ (not allocated)  -------------------
+	padZN0 := fft.dataSize[0]
+	padZN1 := fft.dataSize[1]
+	fft.padZ.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2]}, DONT_ALLOC)
+	fft.fftZbuffer.Init(nComp, []int{fft.dataSize[0], fft.dataSize[1], fft.logicSize[2] + 2}, DONT_ALLOC)
+	//-----------------------------------------------
 
-  // init transp2 (not allocated) -----------------
-  transp2N0 := dataSize[0] // make this logicSize[0] when copyblock can handle it
-  Assert((logicSize[2]+2*NDev)%2 == 0)
-  transp2N1 := (logicSize[2] + 2*NDev) / 2
-  transp2N2 := logicSize[1] * 2
-  fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DONT_ALLOC) //TODO make this point to the output array
-  //-----------------------------------------------
+	// init transp2 (not allocated) -----------------
+	transp2N0 := dataSize[0] // make this logicSize[0] when copyblock can handle it
+	Assert((logicSize[2]+2*NDev)%2 == 0)
+	transp2N1 := (logicSize[2] + 2*NDev) / 2
+	transp2N2 := logicSize[1] * 2
+	fft.transp2.Init(nComp, []int{transp2N0, transp2N1, transp2N2}, DONT_ALLOC) //TODO make this point to the output array
+	//-----------------------------------------------
 
 	if NDev == 1 { //  single-gpu implementation
 
@@ -104,23 +104,23 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 		fft.planZ_INV[0].SetStream(uintptr(fft.Stream[0]))
 		//-----------------------------------------------
 
-    // init planY -----------------------------------
-    fft.planY = make([]cufft.Handle, NDev)
-    batchY := ((fft.logicSize[2])/2 + 1) * fft.dataSize[0]
-    fft.planY[0] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
-    fft.planY[0].SetStream(uintptr(fft.Stream[0])) // TODO: change 
-    //--------------------------------------------
+		// init planY -----------------------------------
+		fft.planY = make([]cufft.Handle, NDev)
+		batchY := ((fft.logicSize[2])/2 + 1) * fft.dataSize[0]
+		fft.planY[0] = cufft.PlanMany([]int{fft.logicSize[1]}, nil, 1, nil, 1, cufft.C2C, batchY)
+		fft.planY[0].SetStream(uintptr(fft.Stream[0])) // TODO: change 
+		//--------------------------------------------
 
-    // init planX -----------------------------------
-    if fft.logicSize[0] == 1 { // 2D
-      fft.planX = nil
-    } else { //3D
-      fft.planX = make([]cufft.Handle, NDev)
-      batchX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
-      stride := batchX
-      fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, stride, []int{1}, stride, cufft.C2C, batchX)
-      fft.planX[0].SetStream(uintptr(fft.Stream[0])) // TODO: change
-    } //--------------------------------------------
+		// init planX -----------------------------------
+		if fft.logicSize[0] == 1 { // 2D
+			fft.planX = nil
+		} else { //3D
+			fft.planX = make([]cufft.Handle, NDev)
+			batchX := ((fft.logicSize[2])/2 + 1) * fft.logicSize[1]
+			stride := batchX
+			fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, stride, []int{1}, stride, cufft.C2C, batchX)
+			fft.planX[0].SetStream(uintptr(fft.Stream[0])) // TODO: change
+		} //--------------------------------------------
 
 
 	} else { // multi-gpu implementation
@@ -141,7 +141,6 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 		for dev := range _useDevice {
 			fft.chunks[dev].Init(nComp, []int{chunkN0, chunkN1, chunkN2}, DONT_ALLOC)
 		} //---------------------------------------------
-
 
 		// init planZ -----------------------------------
 		fft.planZ_FW = make([]cufft.Handle, NDev)
@@ -206,32 +205,31 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 	CheckSize(in.size3D, fft.dataSize[:])
 	CheckSize(out.size3D, fft.outputSize[:])
 
-  logicSize := fft.logicSize
-	if NDevice() == 1{
+	logicSize := fft.logicSize
+	if NDevice() == 1 {
 
-    buffer := &(fft.buffer)
-    padZ := &(fft.padZ)
-    padZ.PointTo(out, 0)
-    fftZbuffer := &(fft.fftZbuffer)
-    fftZbuffer.PointTo(buffer, 0)
+		buffer := &(fft.buffer)
+		padZ := &(fft.padZ)
+		padZ.PointTo(out, 0)
+		fftZbuffer := &(fft.fftZbuffer)
+		fftZbuffer.PointTo(buffer, 0)
 
-    CopyPadZAsync(padZ, in, fft.Stream)
+		CopyPadZAsync(padZ, in, fft.Stream)
 
-    fft.planZ_FW[0].ExecR2C(uintptr(padZ.pointer[0]), uintptr(fftZbuffer.pointer[0]))
-   
-    out.Zero()
-    TransposeComplexYZSingleGPUFWAsync(out, fftZbuffer, fft.Stream) // fftZ!
+		fft.planZ_FW[0].ExecR2C(uintptr(padZ.pointer[0]), uintptr(fftZbuffer.pointer[0]))
 
-    fft.Sync()
+		out.Zero()
+		TransposeComplexYZSingleGPUFWAsync(out, fftZbuffer, fft.Stream) // fftZ!
 
-    fft.planY[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in y-direction
+		fft.Sync()
 
-    if logicSize[0] > 1 {
-      fft.planX[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in x-direction
-    }
-    
-  }	else { //  multi-gpu implementation
+		fft.planY[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in y-direction
 
+		if logicSize[0] > 1 {
+			fft.planX[0].ExecC2C(uintptr(out.pointer[0]), uintptr(out.pointer[0]), cufft.FORWARD) //FFT in x-direction
+		}
+
+	} else { //  multi-gpu implementation
 
 		// shorthand and define ghost arrays ----------------------------
 		buffer := &(fft.buffer)
@@ -253,7 +251,6 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		dataSize := fft.dataSize
 		NDev := NDevice()
 		// -------------------------------------------------------------
-
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ON, ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 		// 		Start("FW_before_copy")
@@ -278,7 +275,7 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		fft.Sync()
 		//     Stop("transpose")
 		// 		Stop("FW_before_copy")
-    
+
 		// copy chunks, cross-device
 		Start("FW_copy")
 		chunkPlaneBytes := int64(chunks[0].partSize[1]*chunks[0].partSize[2]) * SIZEOF_FLOAT // one plane 
@@ -317,7 +314,7 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 		// 		fft.Sync()
 		// 		Stop("FW_insertBlockZ")
 		// 		    Stop("FW_copy")
-       fft.Sync()
+		fft.Sync()
 
 		// @@@@@@@@ SYNCHRONIZATION: FROM THIS POINT ALL IS DONE ON THE COMPLETE DATA SET @@@@@@@@
 		// 		Start("FW_fftY")
@@ -347,32 +344,31 @@ func (fft *FFTPlan5) Forward(in, out *Array) {
 
 func (fft *FFTPlan5) Inverse(in, out *Array) {
 
-   logicSize := fft.logicSize
-
+	logicSize := fft.logicSize
 
 	//Start("INV_total")
 
-  if NDevice() == 1 { //  single-gpu implementation
-    
-    buffer := &(fft.buffer)
-    padZ := &(fft.padZ)
-    padZ.PointTo(in, 0)
-    fftZbuffer := &(fft.fftZbuffer)
-    fftZbuffer.PointTo(buffer, 0)
+	if NDevice() == 1 { //  single-gpu implementation
 
-    if logicSize[0] > 1 {
-      fft.planX[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in x-direction
-    }
+		buffer := &(fft.buffer)
+		padZ := &(fft.padZ)
+		padZ.PointTo(in, 0)
+		fftZbuffer := &(fft.fftZbuffer)
+		fftZbuffer.PointTo(buffer, 0)
 
-    fft.planY[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in y-direction
+		if logicSize[0] > 1 {
+			fft.planX[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in x-direction
+		}
 
-    TransposeComplexYZSingleGPUINVAsync(fftZbuffer, in, fft.Stream) // fftZ!
+		fft.planY[0].ExecC2C(uintptr(in.pointer[0]), uintptr(in.pointer[0]), cufft.INVERSE) //FFT in y-direction
 
-    fft.planZ_INV[0].ExecC2R(uintptr(fftZbuffer.pointer[0]), uintptr(padZ.pointer[0]))
+		TransposeComplexYZSingleGPUINVAsync(fftZbuffer, in, fft.Stream) // fftZ!
 
-    CopyPadZAsync(out, padZ, fft.Stream)
-    
-  }else { //  multi-gpu implementation
+		fft.planZ_INV[0].ExecC2R(uintptr(fftZbuffer.pointer[0]), uintptr(padZ.pointer[0]))
+
+		CopyPadZAsync(out, padZ, fft.Stream)
+
+	} else { //  multi-gpu implementation
 
 		// shorthand
 		buffer := &(fft.buffer)
@@ -426,11 +422,11 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 		for dev := range _useDevice {                                                        // source device
 			for c := range chunks {
 				for i := 0; i < dataSize[0]; i++ { // only memcpys in this loop
-					srcPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2] 
+					srcPlaneN := chunks[0].partSize[1] * chunks[0].partSize[2]
 					srcOffset := i * srcPlaneN
 					src := cu.DevicePtr(ArrayOffset(uintptr(chunks[dev].pointer[c]), srcOffset))
 
-					dstPlaneN := transp1.partSize[1] * transp1.partSize[2] 
+					dstPlaneN := transp1.partSize[1] * transp1.partSize[2]
 					dstOffset := i*dstPlaneN + c*((dataSize[1]/NDev)*(logicSize[2]/NDev))
 					dst := cu.DevicePtr(ArrayOffset(uintptr(transp1.pointer[dev]), dstOffset))
 

@@ -39,7 +39,7 @@ var (
 	flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
 	flag_gpus      *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
 	flag_sched     *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
-	flag_fft       *string = flag.String("fft", "1", "Override the FFT implementation (advanced)")
+	flag_fft       *string = flag.String("fft", "5", "Override the FFT implementation (advanced)")
 )
 
 // Mumax2 main function
