@@ -85,9 +85,9 @@ __global__ void initVectorQuantRandomUniformRegionKern(float* Sx, float* Sy, flo
 		int regionIndex = __float2int_rn(regions[i]);
 		if (regionIndex < regionNum && regionIndex > 0 && regionsToProceed[regionIndex]==true) {
 			curandState localState = globalState[i];
-			Sx[i] = 2.0 * curand_uniform(&localState) - 1.0;
-			Sy[i] = 2.0 * curand_uniform(&localState) - 1.0;
-			Sz[i] = 2.0 * curand_uniform(&localState) - 1.0;
+			Sx[i] = 2.0f * curand_uniform(&localState) - 1.0f;
+			Sy[i] = 2.0f * curand_uniform(&localState) - 1.0f;
+			Sz[i] = 2.0f * curand_uniform(&localState) - 1.0f;
 			float norm = sqrt(Sx[i]*Sx[i] + Sy[i]*Sy[i] + Sz[i]*Sz[i]);
 			Sx[i] /= norm;
 			Sy[i] /= norm;

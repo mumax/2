@@ -9,6 +9,11 @@ import sys
 import math
 from mumax2 import *
 
+
+regionNameDictionary = {'empty':0.}
+regionDefinition = [[]]
+regionInitialised = False
+
 ##  Sets field (E.g. magnetization) as vortex (local or global) in the selected region.
 # @param fieldName (string) the name of the field we should write to
 # @param center (tuple 3 floats) the center of the vortex
@@ -68,12 +73,11 @@ def setVortex( fieldName , center , axis , polarity , chirality , region = 'all'
 def setupRegionSystem():
 	global regionDefinition
 	global regionNameDictionary
-	try:
-		regionNameDictionary
-	except NameError:
+	global regionInitialised
+	if not regionInitialised:
+		load('regions')
 		setv('regionDefinition',1.0)
 		#build an array at the good size to prevent resample call
-		regionDefinition = [[]]
 		gridSize = getgridsize()
 		for i in range(0,gridSize[0]):
 			regionDefinition[0].append([])
@@ -82,10 +86,26 @@ def setupRegionSystem():
 				for k in range(0,gridSize[2]):
 					regionDefinition[0][i][j].append(0.0)
 		setmask('regionDefinition', regionDefinition)
-		regionNameDictionary = {'empty':0.}
-	else:
-		if len(regionNameDictionary) <= 1:
-			regionNameDictionary = {'empty':0.}
+		regionDefinition = getRegionDefinition()[0]
+		regionInitialised = True
+	return
+
+def getRegionNameDictionary():
+	global regionNameDictionary
+	return regionNameDictionary
+
+def setRegionNameDictionary(newDic):
+	global regionNameDictionary
+	regionNameDictionary = newDic
+	return
+
+def getRegionDefinition():
+	global regionDefinition
+	return regionDefinition
+
+def setRegionDefinition(newDef):
+	global regionDefinition
+	regionDefinition = newDef
 	return
 
 ## Set up and initialize the region system corresponding to a given script
@@ -406,7 +426,7 @@ def InitRandomUniformRegionVectorQuant(quantName, regionsToProceed ):
 # @param Ny (int) the number of cells along the Y-axis (unitless)
 # @param Nz (int) the number of cells along the Z-axis (unitless)
 # @param Cz (float) the cell size along Z-axis (m)
-# @param region (int) the region to assign to this Ngone (if zero, the region system will not be used)
+# @param region (string) name of the region to assign to this Ngone (if zero, the region system will not be used)
 def NgoneFit(sides, radius, rotation, Nx, Ny, Nz, Cz, region = 0):
 	setgridsize(Nx, Ny, Nz)
 	Xmin = 0
@@ -484,43 +504,3 @@ def NgoneFit(sides, radius, rotation, Nx, Ny, Nz, Cz, region = 0):
 	print >> sys.stderr, out
 	"""
 	return 
-
-
-## Returns a mask for a (2D) regulqr Ngone given a number of sides, a radius, a rotation angle and a center.
-# @param sides (int) the number of sides (e.g. 3 for triangle, 4 for square ...) (unitless)
-# @param radius (float) the radius of the circumscribed circle of the Ngone (m)
-# @param rotation (float) the rotation angle applied to the Ngone (center being the center of the circumscribed circle) (degree)
-# @param centerX (float) the X coordinate of the center of the circumscribed circle of the Ngone (m)
-# @param centerY (float) the Y coordinate of the center of the circumscribed circle of the Ngone (m)
-# @param region (int) the region to assign to this Ngone (if zero, the region system will not be used)
-"""
-def Ngone(sides, radius, rotation, centerX, centerY, region = 0):
-	Nx,Ny,Nz = getgridsize()
-	Cx,Cy,Cz = getcellsize()
-	mask= [[[0 for x in range(Nz)] for x in range(Ny)] for x in range(Nx)]
-	if region > 0:
-		setupRegionSystem()
-		regionDefinition = getarray('regionDefinition')
-	for i in range(0,Nx):
-		x = (i + 0.5)*Cx - centerX
-		for j in range(0,Ny):
-			y = (j + 0.5)*Cy - centerY
-			# calculate polar angle
-			theta = math.atan2(y, x)
-			for n in range(0,sides):
-				if theta <= 2*math.pi*(n+1)/sides and theta > 2*math.pi*n/sides:
-					angle = -2*math.pi*(n+0.5)/sides + rotation * math.pi / 180.
-					xx = x * math.cos(angle) - y * math.sin(angle)
-					if xx < radius * math.cos(math.pi / sides):
-						for k in range(0,Nz):
-							mask[i][j][k] = 1
-							if region > 0:
-								regionDefinition[i][j][k] = 1
-					else:
-						for k in range(0,Nz):
-							mask[i][j][k] = 0
-					break
-	if region > 0:
-		setmask('regionDefinition', regionDefinition)
-	return [mask]
-"""

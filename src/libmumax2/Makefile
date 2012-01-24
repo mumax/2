@@ -4,6 +4,7 @@ MY_CUFILES_WERRORLESS = random.cu				 		# my cuda files to be compiled without W
 CU_OFILES_WERRORLESS  = $(MY_CUFILES_WERRORLESS:.cu=.o) # my cuda object compiled without Werror flag
 
 MY_CUFILES   = $(filter-out $(wildcard $(MY_CUFILES_WERRORLESS)), $(wildcard *.cu))  # my cuda files
+#MY_CUFILES   = $(wildcard *.cu)					 # my cuda files
 MOD_CUFILES  = $(wildcard ../*.mod/cuda/*.cu)    # module cuda files
 CUFILES      = $(MY_CUFILES) $(MOD_CUFILES)      # all cuda files
 CPPFILES     = $(wildcard *.cpp)                 # my c++ files

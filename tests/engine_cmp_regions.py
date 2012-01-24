@@ -1,7 +1,7 @@
 from mumax2 import *
 from mumax2_cmp import *
 
-regionNameDictionary ={}
+#regionNameDictionary ={}
 
 setgridsize(256, 128, 2)
 setcellsize(5e-9, 5e-9, 5e-9)

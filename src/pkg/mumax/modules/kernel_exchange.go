@@ -16,7 +16,6 @@ import (
 	"math"
 )
 
-
 // Many-neighbor exchange kernel
 // range2: square of range in which neighbors are considered.
 // TODO: check against donahue!
@@ -85,7 +84,6 @@ func ExchKernel(size []int, cellsize []float64, kern *host.Array, range2 float64
 }
 
 func sqr(x float64) float64 { return x * x }
-
 
 // 6-Neighbor Laplace kernel used for exchange.
 //
