@@ -235,6 +235,8 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 	}
 	if needInverseFFT {
 		plan.InverseFFT(out)
+	} else {
+		out.Zero()
 	}
 	// add external field
 	for c := 0; c < 3; c++ {
