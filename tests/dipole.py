@@ -11,7 +11,8 @@ setcellsize(5e-9, 5e-9, 2e-9)
 
 load('demag')
 
-setscalar('Msat', 800e3)
+save('kern_dipole', 'gplot', [], 'kern_dipole.gplot')
+setv('Msat', 800e3)
 
 m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)

@@ -64,18 +64,10 @@ type BFieldUpdater struct {
 }
 
 func newBFieldUpdater() Updater {
-	//	e := GetEngine()
 	u := new(BFieldUpdater)
-	//	u.EField = EField
-	//	// convolution does not have any kernels yet
-	//	// they are added by other modules
-	//	dataSize := e.GridSize()
-	//	logicSize := PadSize(e.GridSize(), e.Periodic())
-	//	u.conv = gpu.NewConv73Plan(dataSize, logicSize)
-	//	u.convInput = make([]*gpu.Array, 7)
 	return u
 }
 
 func (u *BFieldUpdater) Update() {
-
+	maxwell.UpdateB()
 }

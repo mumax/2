@@ -23,6 +23,6 @@ func init() {
 func LoadDemag(e *Engine) {
 	LoadMagnetization(e)
 	LoadBField(e)
-	maxwell.EnableDemag(e.Quant("m"), e.Quant("B"))
-	e.Depends("B", "m")
+	maxwell.EnableDemag(e.Quant("m"), e.Quant("Msat"), e.Quant("B"))
+	e.Depends("B", "m", "Msat")
 }

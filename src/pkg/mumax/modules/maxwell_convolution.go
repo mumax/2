@@ -110,15 +110,12 @@ func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
 }
 
 // Enable Demag field
-func (plan *MaxwellPlan) EnableDemag(m, B *Quant) {
+func (plan *MaxwellPlan) EnableDemag(m, Msat, B *Quant) {
 	plan.init()
 	plan.loadDipoleKernel()
-	//	plan.BInMul[MX] = 
-	//	plan.BInMul[MY] = 
-	//	plan.BInMul[MZ] = 
-	//	plan.BInput[MX] = 
-	//	plan.BInput[MX] =
-	//	plan.BInput[MX] =
+	plan.BInput[MX] = m.Array().Component(X)
+	plan.BInput[MY] = m.Array().Component(Y)
+	plan.BInput[MZ] = m.Array().Component(Z)
 	if plan.B != nil {
 		Assert(plan.B == B)
 	}
@@ -179,13 +176,25 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }
 
-// Calculate the electric field plan.E.
+// Calculate the electric field plan.E
 func (plan *MaxwellPlan) UpdateE() {
-	plan.update(&plan.EInput, plan.E.Array(), plan.EExt)
+	plan.update(&plan.EInput, &plan.EInMul, plan.E.Array(), plan.EExt)
+}
+
+// Calculate the magnetic field plan.B
+func (plan *MaxwellPlan) UpdateB() {
+	// hack, source should be M, not m
+	if GetEngine().HasQuant("Msat") {
+		msat := GetEngine().Quant("Msat")
+		plan.BInMul[MX] = msat.Multiplier()[0]
+		plan.BInMul[MY] = msat.Multiplier()[0]
+		plan.BInMul[MZ] = msat.Multiplier()[0]
+	}
+	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), plan.BExt)
 }
 
 // calculate E or B
-func (plan *MaxwellPlan) update(in *[7]*gpu.Array, out *gpu.Array, ext *Quant) {
+func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.Array, ext *Quant) {
 	fftBuf := &plan.fftBuffer
 	fftOut := &plan.fftOut
 	fftOut.Zero()
@@ -199,9 +208,12 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, out *gpu.Array, ext *Quant) {
 			if plan.fftKern[i][j] == nil {
 				continue
 			}
+			//Debug("fft", i, j)
 			//fmt.Println("plan.fftKern", i, j, plan.fftKern[i][j].LocalCopy().Array, "\n")
 			// Point-wise kernel multiplication
-			mul := complex64(complex(plan.EInMul[0], 0) * plan.fftMul[i][j])
+			mul := complex64(complex(inMul[i], 0) * plan.fftMul[i][j])
+			//Debug("inmul", inMul[i])
+			//Debug("mul", mul)
 			gpu.CMaddAsync(&fftOut.Comp[j], mul, plan.fftKern[i][j], fftBuf, fftOut.Stream)
 			fftOut.Stream.Sync()
 			//fmt.Println("plan.fftOut", j, plan.fftOut.Comp[j].LocalCopy().Array, "\n")
@@ -378,6 +390,7 @@ func (plan *MaxwellPlan) Free() {
 // (FFTPlan knows about zero padding etc)
 func (plan *MaxwellPlan) ForwardFFT(in *gpu.Array) {
 	Assert(plan.fftBuffer.NComp() == in.NComp())
+	Assert(plan.fftBuffer.NComp() == 1)
 	//for c := range in.Comp {
 	plan.fftPlan.Forward(in, &plan.fftBuffer)
 	//}
