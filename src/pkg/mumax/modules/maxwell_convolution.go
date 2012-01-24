@@ -109,7 +109,7 @@ func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
 	plan.E = E
 }
 
-// Enable Demag field
+// Enable Demagnetizing field
 func (plan *MaxwellPlan) EnableDemag(m, Msat, B *Quant) {
 	plan.init()
 	plan.loadDipoleKernel()
@@ -121,6 +121,7 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat, B *Quant) {
 	}
 	plan.B = B
 }
+
 
 func (plan *MaxwellPlan) EnableFaraday(dBdt, E *Quant) {
 	plan.init()
