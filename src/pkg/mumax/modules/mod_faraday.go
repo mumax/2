@@ -21,49 +21,9 @@ func init() {
 
 // Load Faraday's law
 func LoadFaraday(e *Engine) {
-	LoadEField(e)
 	LoadBField(e)
+	LoadEField(e)
 	e.AddTimeDerivative(e.Quant("B"))
 	maxwell.EnableFaraday(e.Quant("dB_dt"))
+	e.Depends("E", "dB_dt")
 }
-
-//
-//	// here be dragons
-//	const CPUONLY = true
-//	const GPU = false
-//
-//	// electrostatic kernel
-//	kernelSize := padSize(e.GridSize(), e.Periodic())
-//	elKern := NewQuant("kern_el", VECTOR, kernelSize, FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
-//	e.AddQuant(elKern)
-//	elKern.SetUpdater(newElKernUpdater(elKern))
-//
-//	e.Depends("E", "rho", "kern_el")
-//}
-//
-//// Updates electrostatic kernel (cpu)
-//type elKernUpdater struct {
-//	kern *Quant // that's me!
-//}
-//
-//func newElKernUpdater(elKern *Quant) Updater {
-//	u := new(elKernUpdater)
-//	u.kern = elKern
-//	return u
-//}
-//
-//// Update electrostatic kernel (cpu)
-//func (u *elKernUpdater) Update() {
-//	e := GetEngine()
-//
-//	// first update the kernel
-//	kernsize := padSize(e.GridSize(), e.Periodic())
-//	Log("Calculating electrosatic kernel, may take a moment...")
-//	PointKernel(kernsize, e.CellSize(), e.Periodic(), u.kern.Buffer())
-//
-//	// then also load it into the E field convolution
-//	EUpdater := e.Quant("E").GetUpdater().(*EfieldUpdater)
-//	kernEl := GetEngine().Quant("kern_el").Buffer()
-//	EUpdater.conv.LoadKernel(kernEl, 0, gpu.DIAGONAL, gpu.PUREIMAG)
-//	EUpdater.convInput[0] = e.Quant("rho").Array()
-//}

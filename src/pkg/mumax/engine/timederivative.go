@@ -26,7 +26,7 @@ func (e *Engine) AddTimeDerivative(q *Quant) {
 	}
 	Assert(q.Kind() == FIELD)
 	diff := e.AddNewQuant(name, q.NComp(), FIELD, "("+q.Unit()+")/s", "time derivative of "+q.Name())
-	e.Depends(name, q.Name(), "dt", "step")
+	e.Depends(name, q.Name(), "t", "step")
 	updater := newDerivativeUpdater(q, diff)
 	diff.SetUpdater(updater)
 	diff.SetInvalidator(updater)
