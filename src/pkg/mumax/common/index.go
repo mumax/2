@@ -68,9 +68,10 @@ var VectorIndexStr []string = []string{"X", "Y", "Z"}
 // Swaps the X-Z values of the array.
 // This transforms from user to program space and vice-versa.
 func SwapXYZ(array []float64) {
-	if len(array) == 3 {
+	Assert(len(array) == 3 || len(array) == 1)
+	if len(array) == 3{
 		array[X], array[Z] = array[Z], array[X]
-	}
+	}	
 	return
 }
 
