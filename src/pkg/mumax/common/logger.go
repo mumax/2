@@ -17,6 +17,10 @@ import (
 	"fmt"
 )
 
+// Global debug flag.
+// Typical use: if DEBUG {Debug(...)} 
+var DEBUG bool = true
+
 // INTERNAL global logger
 var logger Logger
 
@@ -77,6 +81,7 @@ func (l *Logger) Init(logfile string, options ...LogOption) {
 
 // Log a debug message.
 func Debug(msg ...interface{}) {
+	//if !DEBUG {panic(Bug("Need to put if DEBUG{...}")}
 	// put [debug] in front of message
 	msgcol := append([]interface{}{LOG_DEBUG_COL + "[debug]"}, msg...)
 	msgcol = append(msgcol, RESET)

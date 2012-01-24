@@ -55,6 +55,8 @@ func Main() {
 		}
 	}()
 
+	DEBUG = *flag_debug
+
 	initTimeout()
 
 	if *flag_cpuprof != "" {

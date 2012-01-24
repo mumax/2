@@ -51,7 +51,7 @@ func newDerivativeUpdater(orig, diff *Quant) *derivativeUpdater {
 }
 
 func (u *derivativeUpdater) Update() {
-	Log("diff update")
+	if DEBUG{Debug("diff update")}
 
 	// not stable:
 	//²	// f'(t) = 2(f(t)-f(0))/(t1-t0) - f'(t0)
@@ -76,10 +76,10 @@ func (u *derivativeUpdater) Update() {
 	diff := u.diff.Array()
 	val := u.val.Array()
 	if dt == 0 {
-		Log("dt==0")
+		if DEBUG{Debug("dt==0")}
 		diff.CopyFromDevice(u.lastDiff)
 	} else {
-		Log("dt!=0")
+		if DEBUG{Debug("dt!=0")}
 		gpu.LinearCombination2Async(diff, val, float32(1/dt), u.lastVal, -float32(1/dt), diff.Stream)
 		diff.Sync()
 	}
@@ -92,7 +92,7 @@ func (u *derivativeUpdater) Invalidate() {
 	e := GetEngine()
 	step := int(e.step.Scalar())
 	if u.lastStep != step {
-		Log("diff invalidate")
+		if DEBUG{Debug("diff invalidate")}
 		u.Update() // TODO: only if needed !!
 		u.lastVal.CopyFromDevice(u.val.Array())
 		u.lastDiff.CopyFromDevice(u.diff.Array())
