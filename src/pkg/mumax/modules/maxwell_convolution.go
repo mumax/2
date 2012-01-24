@@ -357,8 +357,8 @@ func MatrixSymmetry(matrix *host.Array) int {
 	asymm := true
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			idx1 := TensorIdx[i][j]
-			idx2 := TensorIdx[j][i]
+			idx1 := FullTensorIdx[i][j]
+			idx2 := FullTensorIdx[j][i]
 			comp1 := matrix.Comp[idx1]
 			comp2 := matrix.Comp[idx2]
 			for x := range comp1 {

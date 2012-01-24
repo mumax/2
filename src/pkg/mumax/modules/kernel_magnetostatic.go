@@ -114,7 +114,7 @@ func FaceKernel6(size []int, cellsize []float64, periodic []int, accuracy int, k
 					B[Z] *= scale
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
-						i := TensorIdx[s][d]              // 3x3 symmetric index to 1x6 index
+						i := FullTensorIdx[s][d]              // 3x3 symmetric index to 1x6 index
 						k[i][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
 				}

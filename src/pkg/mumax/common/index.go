@@ -41,7 +41,7 @@ var SymmTensorIdx [3][3]int = [3][3]int{
 
 // Maps the 3x3 indices of a matrix (K_ij) onto linear indices
 // (Kxx, Kyy, Kzz, Kyz, Kxz, Kxy, Kzy, Kzx, Kyx)
-var TensorIdx [3][3]int = [3][3]int{
+var FullTensorIdx [3][3]int = [3][3]int{
 	[3]int{XX, XY, XZ},
 	[3]int{YX, YY, YZ},
 	[3]int{ZX, ZY, ZZ}}

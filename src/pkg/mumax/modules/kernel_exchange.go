@@ -52,7 +52,7 @@ func ExchKernel(size []int, cellsize []float64, kern *host.Array, range2 float64
 	dz := cellsize[Z]
 
 	for s := 0; s < 3; s++ { // source index Ksdxyz
-		i := TensorIdx[s][s]
+		i := FullTensorIdx[s][s]
 		arr := kern.Array[i]
 		var total float64
 
@@ -105,7 +105,7 @@ func Exch6NgbrKernel(size []int, cellsize []float64, kern *host.Array) {
 	Start("kern_ex")
 
 	for s := 0; s < 3; s++ { // source index Ksdxyz
-		i := TensorIdx[s][s]
+		i := FullTensorIdx[s][s]
 		arr := kern.Array[i]
 
 		hx := cellsize[X] * cellsize[X]

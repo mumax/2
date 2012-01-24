@@ -77,7 +77,7 @@ func RotorKernel(size []int, cellsize []float64, periodic []int, accuacy int, ke
 
 					if norm != 0 {
 						for d := 0; d < 3; d++ { // destination orientation
-							k[TensorIdx[s][d]][xw][yw][zw] += float32(rxj[d])
+							k[FullTensorIdx[s][d]][xw][yw][zw] += float32(rxj[d])
 							// We have to ADD because there are multiple contributions in case of periodicity
 						}
 					} else {
