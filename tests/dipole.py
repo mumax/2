@@ -16,15 +16,16 @@ setv('Msat', 800e3)
 
 m=[ [[[0]]], [[[0]]], [[[1]]] ]
 setarray('m', m)
+setv('B_ext', [2,3,4])
 
 hdex = getvalue('<B>')
 echo("B" + str(hdex)) 
 #savegraph("graph.png")
 
-if hdex[0] != 0 or hdex[1] != 0:
+if hdex[0] != 2 or hdex[1] != 3:
 		exit(-1)
 
-Hz_good = -790000*mu0
+Hz_good = -790000*mu0 + 4
 
 tolerance=1./100
 if abs((hdex[2] - Hz_good)/Hz_good) > tolerance:  

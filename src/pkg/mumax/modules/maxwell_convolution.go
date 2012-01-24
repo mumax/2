@@ -214,7 +214,13 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 		}
 	}
 	plan.InverseFFT(out)
-	// TODO add Ext field here
+	// add external field
+	for c := 0; c < 3; c++ {
+		mul := float32(ext.Multiplier()[c])
+		if mul != 0 {
+			gpu.Madd(out.Component(c), out.Component(c), ext.Array().Component(c), mul)
+		}
+	}
 }
 
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
