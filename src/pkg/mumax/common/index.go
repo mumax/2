@@ -86,25 +86,17 @@ func SwapXYZ(array []float64) {
 //	XY <-> YZ 
 // TODO: cannot handle non-symmetric matrices
 func SwapIndex(index, dim int) int {
-	if dim != 1 {
-		switch index {
-		default:
-			panic(InputErrF("Vector/tensor index out of range:", index))
-		case X:
-			return Z // also handles XX
-		case Y:
-			return Y // also handles YY
-		case Z:
-			return X // also handles ZZ
-		case YZ:
-			return XY
-		case XZ:
-			return XZ
-		case XY:
-			return YZ
-		}
-	} else {
+	switch dim {
+	default:
+		panic(BugF("dim=", dim))
+	case 1:
 		return index
+	case 3:
+		return [3]int{Z, Y, X}[index]
+	case 6:
+		return [6]int{ZZ, YY, XX, XY, XZ, YZ}[index]
+	case 9:
+		return [9]int{ZZ, YY, XX, YX, ZX, ZY, XY, XZ, YZ}[index]
 	}
 	return -1 // silence 6g
 }

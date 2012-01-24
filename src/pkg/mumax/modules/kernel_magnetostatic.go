@@ -26,7 +26,7 @@ import (
 // Only the non-redundant elements of this symmetric tensor are returned: XX, YY, ZZ, YZ, XZ, XY
 // You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
 // K[KernIdx[X][X]] returns K[XX]
-func FaceKernel6(size []int, cellsize []float64, accuracy int, periodic []int, kern *host.Array) {
+func FaceKernel6(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array) {
 	Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
 	Start("kern_d")
 	k := kern.Array

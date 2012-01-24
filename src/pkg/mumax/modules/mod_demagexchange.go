@@ -100,7 +100,7 @@ func (u *demagKernUpdater) Update() {
 	accuracy := int(e.Quant("demag_acc").Scalar())
 	// TODO: wisdom
 	Log("Calculating demag kernel, may take a moment...")
-	FaceKernel6(kernsize, e.CellSize(), accuracy, e.Periodic(), u.demagKern.Buffer())
+	FaceKernel6(kernsize, e.CellSize(), e.Periodic(), accuracy, u.demagKern.Buffer())
 }
 
 //____________________________________________________________________ exchange kernel

@@ -21,7 +21,7 @@ import (
 // To be used for both Oersted fields and Faraday's law.
 //
 // TODO: make more accurate, current implementation is that of point source.
-func RotorKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
+func RotorKernel(size []int, cellsize []float64, periodic []int, accuacy int, kern *host.Array) {
 	Debug("Calculating rotor kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
 	Start("kern_rot")
 	k := kern.Array

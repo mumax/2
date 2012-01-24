@@ -125,8 +125,8 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat, B *Quant) {
 
 func (plan *MaxwellPlan) EnableFaraday(dBdt, E *Quant) {
 	plan.init()
-	//plan.loadRotorKernel()
-	plan.EInMul[5] = 1 / Epsilon0
+	plan.loadRotorKernel()
+	//plan.EInMul[5] = 1 / Epsilon0
 
 	//plan.EInput[0] = rho.Array()
 	if plan.E != nil {
@@ -172,10 +172,32 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 
 	kern := quant.Buffer()
 	accuracy := 8
-	FaceKernel6(plan.logicSize[:], e.CellSize(), accuracy, e.Periodic(), kern)
+	FaceKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	plan.kern[DIPOLE] = kern
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }
+
+
+// Load rotor kernel if not yet done so.
+// Required for faraday, ampere-maxwell
+func (plan *MaxwellPlan) loadRotorKernel() {
+	if plan.kern[ROTOR] != nil {
+		return
+	}
+	e := GetEngine()
+	// DEBUG: add the kernel as orphan quant, so we can output it.
+	// TODO: do not add to engine if debug is off?
+	quant := NewQuant("kern_rotor", TENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced rotor kernel")
+	e.AddQuant(quant)
+
+	kern := quant.Buffer()
+	accuracy := 8
+	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	plan.kern[ROTOR] = kern
+	//plan.LoadKernel(kern, 1, ANTISYMMETRIC, PUREREAL)
+	// TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+}
+
 
 // Calculate the electric field plan.E
 func (plan *MaxwellPlan) UpdateE() {
@@ -229,7 +251,9 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, realness int) {
 	//Assert(kernel.NComp() == 9) // full tensor
 	if kernel.NComp() == 9 {
-		Assert(matsymm == MatrixSymmetry(kernel))
+		testedsymm := MatrixSymmetry(kernel)
+		Debug("matsymm", testedsymm)
+		Assert(matsymm == testedsymm)
 	}
 	Assert(matsymm == SYMMETRIC || matsymm == ANTISYMMETRIC || matsymm == NOSYMMETRY || matsymm == DIAGONAL)
 
