@@ -25,7 +25,7 @@ setpointwise('B_ext', 1e-9, [0, 0, 1])
 setpointwise('B_ext', 2e-9, [0, 0, 0]) 
 
 autotabulate(['t', 'B_ext', '<B>', '<dB_dt>'], 'B.txt', 1e-12)
-autosave('E', 'omf', ['Text'], 10e-12)
+autosave('E', 'omf', ['Text'], 1e-12)
 setv('dt', 1e-12)
 run(3e-9)
 

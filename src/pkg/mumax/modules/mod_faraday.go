@@ -26,6 +26,7 @@ func LoadFaraday(e *Engine) {
 	e.AddTimeDerivative(e.Quant("B"))
 	maxwell.EnableFaraday(e.Quant("dB_dt"))
 }
+
 //
 //	// here be dragons
 //	const CPUONLY = true

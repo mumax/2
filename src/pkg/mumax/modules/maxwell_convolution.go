@@ -113,13 +113,19 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	plan.BInput[MX] = m.Array().Component(X)
 	plan.BInput[MY] = m.Array().Component(Y)
 	plan.BInput[MZ] = m.Array().Component(Z)
+	// multipliers set on the fly
 }
 
 
 func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.init()
 	plan.loadRotorKernel()
-	//plan.EInMul[5] = 1 / Epsilon0
+	plan.BInput[JX] = dBdt.Array().Component(X)
+	plan.BInput[JY] = dBdt.Array().Component(Y)
+	plan.BInput[JZ] = dBdt.Array().Component(Z)
+	plan.BInMul[JX] = Epsilon0
+	plan.BInMul[JY] = Epsilon0
+	plan.BInMul[JZ] = Epsilon0
 
 	//plan.EInput[0] = rho.Array()
 }
@@ -183,7 +189,7 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	accuracy := 8
 	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	plan.kern[ROTOR] = kern
-	plan.LoadKernel(kern, 1, ANTISYMMETRIC, PUREIMAG)
+	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)
 }
 
 
@@ -220,6 +226,7 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 			}
 			// Point-wise kernel multiplication
 			mul := complex64(complex(inMul[i], 0) * plan.fftMul[i][j])
+			Debug("mul", mul)
 			gpu.CMaddAsync(&fftOut.Comp[j], mul, plan.fftKern[i][j], fftBuf, fftOut.Stream)
 			fftOut.Stream.Sync()
 		}
@@ -232,6 +239,8 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 			gpu.Madd(out.Component(c), out.Component(c), ext.Array().Component(c), mul)
 		}
 	}
+	panic("out is nonzero but E is...")
+	fmt.Println(plan.E.Array().LocalCopy())
 }
 
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
