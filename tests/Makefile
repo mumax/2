@@ -7,6 +7,7 @@ TESTFILES=\
 		  micromag.py.out\
 		  pointwise.py.out\
 		  coulomb.py.out\
+		  dipole.py.out\
 		  #anisotropy.py.out\
 		  #Test.java.out\
 		  #api.py.out\

@@ -11,7 +11,7 @@ setcellsize(5e-9, 5e-9, 2e-9)
 
 load('demag')
 
-save('kern_dipole', 'gplot', [], 'kern_dipole.gplot')
+#save('kern_dipole', 'gplot', [], 'kern_dipole.gplot')
 setv('Msat', 800e3)
 
 m=[ [[[0]]], [[[0]]], [[[1]]] ]
@@ -19,14 +19,15 @@ setarray('m', m)
 
 hdex = getvalue('<B>')
 echo("B" + str(hdex)) 
-savegraph("graph.png")
+#savegraph("graph.png")
 
 if hdex[0] != 0 or hdex[1] != 0:
 		exit(-1)
 
-Hz_good = -790000
+Hz_good = -790000*mu0
 
-if abs(hdex[2] - Hz_good) > 1000:  
+tolerance=1./100
+if abs((hdex[2] - Hz_good)/Hz_good) > tolerance:  
 		exit(-2)
 
 echo("")

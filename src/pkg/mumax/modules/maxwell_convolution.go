@@ -186,9 +186,9 @@ func (plan *MaxwellPlan) UpdateB() {
 	// hack, source should be M, not m
 	if GetEngine().HasQuant("Msat") {
 		msat := GetEngine().Quant("Msat")
-		plan.BInMul[MX] = msat.Multiplier()[0]
-		plan.BInMul[MY] = msat.Multiplier()[0]
-		plan.BInMul[MZ] = msat.Multiplier()[0]
+		plan.BInMul[MX] = msat.Multiplier()[0] * Mu0
+		plan.BInMul[MY] = msat.Multiplier()[0] * Mu0
+		plan.BInMul[MZ] = msat.Multiplier()[0] * Mu0
 	}
 	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), plan.BExt)
 }
