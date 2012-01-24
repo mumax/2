@@ -20,6 +20,7 @@ import (
 	"mumax/gpu"
 	"mumax/host"
 	"fmt"
+	"math"
 	"unsafe"
 )
 
@@ -155,7 +156,7 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	// TODO: do not add to engine if debug is off?
-	quant := NewQuant("kern_dipole", SYMMTENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced dipole kernel")
+	quant := NewQuant("kern_dipole", TENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced dipole kernel")
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
@@ -183,7 +184,7 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	plan.kern[ROTOR] = kern
 	//plan.LoadKernel(kern, 1, ANTISYMMETRIC, PUREREAL)
-	// TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// ç!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !! !!çç
 }
 
 
@@ -238,7 +239,7 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 //// The symmetry and real/imaginary/complex properties are taken into account to reduce storage.
 func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, realness int) {
 	//Assert(kernel.NComp() == 9) // full tensor
-	if kernel.NComp() == 9 {
+	if kernel.NComp() > 3 {
 		testedsymm := MatrixSymmetry(kernel)
 		Debug("matsymm", testedsymm)
 		Assert(matsymm == testedsymm)
@@ -355,26 +356,44 @@ func MatrixSymmetry(matrix *host.Array) int {
 	AssertMsg(matrix.NComp() == 9, "MatrixSymmetry NComp")
 	symm := true
 	asymm := true
+	max := 1e-100
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
+			scount := 0
+			acount := 0
+			total := 0
 			idx1 := FullTensorIdx[i][j]
 			idx2 := FullTensorIdx[j][i]
 			comp1 := matrix.Comp[idx1]
 			comp2 := matrix.Comp[idx2]
 			for x := range comp1 {
+				if math.Fabs(float64(comp1[x])) > max {
+					max = math.Fabs(float64(comp1[x]))
+				}
+				total++
+				if comp1[x] == comp2[x] {
+					scount++
+				}
 				if comp1[x] != comp2[x] {
+					//Debug(comp1[x], "!=", comp2[x])
 					symm = false
-					if !asymm {
-						break
-					}
+					//if !asymm {
+					//break
+					//}
+				}
+				if comp1[x] == -comp2[x] {
+					acount++
 				}
 				if comp1[x] != -comp2[x] {
+					//Debug(comp1[x] ,"!= -", comp2[x])
 					asymm = false
-					if !symm {
-						break
-					}
+					//if !symm {
+					//break
+					//}
 				}
 			}
+			Debug("max", max)
+			Debug(i, j, "symm", scount, "asymm", acount, "(of", total, ")")
 		}
 	}
 	if symm {

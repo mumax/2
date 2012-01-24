@@ -31,7 +31,7 @@ func FaceKernel6(size []int, cellsize []float64, periodic []int, accuracy int, k
 	Start("kern_d")
 	k := kern.Array
 
-	Assert(len(kern.Array) == 6)
+	Assert(len(kern.Array) == 9) // TODO: should be able to change to 6
 	CheckSize(kern.Size3D, size)
 
 	B := [3]float64{0, 0, 0} //NewVector()
@@ -114,7 +114,7 @@ func FaceKernel6(size []int, cellsize []float64, periodic []int, accuracy int, k
 					B[Z] *= scale
 
 					for d := s; d < 3; d++ { // destination index Ksdxyz
-						i := FullTensorIdx[s][d]              // 3x3 symmetric index to 1x6 index
+						i := FullTensorIdx[s][d]
 						k[i][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
 				}

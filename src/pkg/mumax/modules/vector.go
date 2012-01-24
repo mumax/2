@@ -31,7 +31,7 @@ func (v *vector) SetTo(other *vector) {
 func (a vector) Cross(b vector) vector {
 	var cross vector
 	cross[0] = a[1]*b[2] - a[2]*b[1]
-	cross[1] = a[0]*b[2] - a[2]*b[0]
+	cross[1] = -a[0]*b[2] + a[2]*b[0]
 	cross[2] = a[0]*b[1] - a[1]*b[0]
 	return cross
 }
