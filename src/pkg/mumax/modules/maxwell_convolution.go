@@ -144,7 +144,7 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	// TODO: do not add to engine if debug is off?
-	quant := NewQuant("kern_charge", VECTOR, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced electrostatic kernel")
+	quant := NewQuant("kern_charge", VECTOR, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced electrostatic kernel")
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
@@ -182,7 +182,7 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	// TODO: do not add to engine if debug is off?
-	quant := NewQuant("kern_rotor", TENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced rotor kernel")
+	quant := NewQuant("kern_rotor", TENS, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced rotor kernel")
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
@@ -195,13 +195,11 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 
 // Calculate the electric field plan.E
 func (plan *MaxwellPlan) UpdateE() {
-	Debug("plan.updateE")
 	plan.update(&plan.EInput, &plan.EInMul, plan.E.Array(), plan.EExt)
 }
 
 // Calculate the magnetic field plan.B
 func (plan *MaxwellPlan) UpdateB() {
-	Debug("plan.updateB")
 	// hack, source should be M, not m
 	if GetEngine().HasQuant("Msat") {
 		msat := GetEngine().Quant("Msat")
@@ -216,8 +214,8 @@ func (plan *MaxwellPlan) UpdateB() {
 func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.Array, ext *Quant) {
 	fftBuf := &plan.fftBuffer
 	fftOut := &plan.fftOut
-	fftOut.Zero()
-	Debug("update")
+	fftOut.Zero() // TODO: smarter kernel mul that does not read/add/read/add/...
+	needInverseFFT := false
 	for i := 0; i < 7; i++ {
 		if in[i] == nil {
 			continue
@@ -229,13 +227,15 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 			}
 			// Point-wise kernel multiplication
 			mul := complex64(complex(inMul[i], 0) * plan.fftMul[i][j])
-			Debug(i, j, "mul", mul)
+			//Debug(i, j, "mul", mul)
 			gpu.CMaddAsync(&fftOut.Comp[j], mul, plan.fftKern[i][j], fftBuf, fftOut.Stream)
+			needInverseFFT = true
 			fftOut.Stream.Sync()
 		}
 	}
-	plan.InverseFFT(out) //TODO: only when needed!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	fmt.Println("out", out.LocalCopy().Array)
+	if needInverseFFT {
+		plan.InverseFFT(out)
+	}
 	// add external field
 	for c := 0; c < 3; c++ {
 		mul := float32(ext.Multiplier()[c])
@@ -243,7 +243,6 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 			gpu.Madd(out.Component(c), out.Component(c), ext.Array().Component(c), mul)
 		}
 	}
-	//Debug("maxplan.update", "out", unsafe.Pointer(out), "E", unsafe.Pointer(plan.E.Array()), "B", unsafe.Pointer(plan.B.Array()))
 }
 
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.

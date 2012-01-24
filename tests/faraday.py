@@ -29,7 +29,7 @@ autosave('E', 'omf', ['Text'], 0.1e-12)
 autosave('E', 'gplot', [], 0.1e-12)
 setv('dt', 1e-12)
 #run(3e-9)
-steps(10)
+steps(100)
 
 printstats()
 savegraph("graph.png")
