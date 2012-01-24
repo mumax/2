@@ -21,11 +21,8 @@ func init() {
 
 // Load demag field
 func LoadDemag(e *Engine) {
-	LoadEField(e)
-	if e.HasQuant("rho") {
-		return
-	}
-	rho := e.AddNewQuant("rho", SCALAR, FIELD, Unit("C/m3"), "electrical charge density")
-	e.Depends("E", "rho")
-	maxwell.EnableCoulomb(rho, e.Quant("E"))
+	LoadMagnetization(e)
+	LoadBField(e)
+	maxwell.EnableDemag(e.Quant("m"), e.Quant("B"))
+	e.Depends("B", "m")
 }
