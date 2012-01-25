@@ -2,8 +2,8 @@ from mumax2 import *
 
 # Test for Faraday's law
 
-Nx = 16 
-Ny = 16
+Nx = 32 
+Ny = 32
 Nz = 1
 setgridsize(Nx, Ny, Nz)
 Cx = 5e-9
@@ -13,7 +13,7 @@ setcellsize(Cx, Cy, Cz)
 
 load('faraday')
 savegraph("graph.png")
-#save('kern_rotor', 'gplot', [], 'kern_rotor.gplot')
+save('kern_rotor', 'gplot', [], 'kern_rotor.gplot')
 #save('kern_rotor.xx', 'gplot', [], 'kern_rotorXX.gplot')
 #save('kern_rotor.xy', 'gplot', [], 'kern_rotorXY.gplot')
 #save('kern_rotor.xz', 'gplot', [], 'kern_rotorXZ.gplot')
@@ -32,9 +32,22 @@ autotabulate(['t', 'B_ext', '<B>', '<dB_dt>'], 'B.txt', 1e-12)
 autosave('E', 'omf', ['Text'], 1e-12)
 autosave('E', 'gplot', [], 1e-12)
 setv('dt', 1e-12)
-run(100e-12)
+#run(100e-12)
+steps(6)
 
 E=getarray('E')
+
+# test E vector
+dBdt=1e9
+i = Nx/2 + Nx / 4
+x = (-Nx/2 + i) * Cx
+echo("x=" + str(x))
+S = pi * x * x
+emf = dBdt * S
+Egood = emf / (2 * pi * x)
+Ehave = E[1][i][0][0]
+echo("Ehave " + str(Ehave) + " Ewant " + str(Egood))
+
 
 x0 = 3
 y0 = 9
@@ -61,7 +74,6 @@ for j in range(y0,y1):
 	
 
 S = (x1-x0-1)*Cx * (y1-y0)*Cy
-dBdt=1e9
 want = S * dBdt
 echo("emf " + str(emf) + " want: " + str(want))
 dB = getv("<dB_dt>")
