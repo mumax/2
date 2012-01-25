@@ -219,7 +219,7 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 		if in[i] == nil {
 			continue
 		}
-		fmt.Println("in", i, in[i].LocalCopy().Array)
+		//fmt.Println("in", i, in[i].LocalCopy().Array)
 		plan.ForwardFFT(in[i])
 		for j := 0; j < 3; j++ {
 			if plan.fftKern[i][j] == nil {

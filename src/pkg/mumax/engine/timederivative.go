@@ -9,6 +9,9 @@ package engine
 
 // Implements the time derivative of a quantity
 // Author: Arne Vansteenkiste
+// BUG: only works correctly if Update() is called at each time step 
+// (which is usually the case).
+// TODO: fix
 
 import (
 	. "mumax/common"
@@ -80,12 +83,16 @@ func (u *derivativeUpdater) Update() {
 // TODO: pre-invalidator
 func (u *derivativeUpdater) Invalidate() {
 	e := GetEngine()
-	step := int(e.step.Scalar())
+	step := int(e.step.Multiplier()[0])
 	if u.lastStep != step {
 		if DEBUG {
 			Debug("diff invalidate")
 		}
-		u.Update() // TODO: only if needed !!
+
+		// make sure value is up to date
+		u.val.GetUpdater().Update() // TODO: only if needed !!
+		u.Update()                  // make sure diff is up to date for lastdiff
+
 		u.lastVal.CopyFromDevice(u.val.Array())
 		u.lastDiff.CopyFromDevice(u.diff.Array())
 		u.lastT = e.time.Scalar()

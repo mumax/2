@@ -33,7 +33,7 @@ autosave('E', 'omf', ['Text'], 1e-12)
 autosave('E', 'gplot', [], 1e-12)
 setv('dt', 1e-12)
 #run(100e-12)
-steps(6)
+steps(10)
 
 E=getarray('E')
 
