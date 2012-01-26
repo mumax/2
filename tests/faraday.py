@@ -1,4 +1,5 @@
 from mumax2 import *
+from mumax2_geom import *
 
 # Test for Faraday's law
 
@@ -13,24 +14,23 @@ setcellsize(Cx, Cy, Cz)
 
 load('faraday')
 savegraph("graph.png")
-save('kern_rotor', 'gplot', [], 'kern_rotor.gplot')
-#save('kern_rotor.xx', 'gplot', [], 'kern_rotorXX.gplot')
-#save('kern_rotor.xy', 'gplot', [], 'kern_rotorXY.gplot')
-#save('kern_rotor.xz', 'gplot', [], 'kern_rotorXZ.gplot')
-#save('kern_rotor.yx', 'gplot', [], 'kern_rotorYX.gplot')
-#save('kern_rotor.yy', 'gplot', [], 'kern_rotorYY.gplot')
-#save('kern_rotor.yz', 'gplot', [], 'kern_rotorYZ.gplot')
-#save('kern_rotor.zx', 'gplot', [], 'kern_rotorZX.gplot')
-#save('kern_rotor.zy', 'gplot', [], 'kern_rotorZY.gplot')
-#save('kern_rotor.zz', 'gplot', [], 'kern_rotorZZ.gplot')
-#save('kern_rotor', 'gplot', [], 'kern_rotor.gplot')
 setpointwise('B_ext', 0, [0, 0, 0])
 setpointwise('B_ext', 1e-9, [0, 0, 1]) 
 setpointwise('B_ext', 2e-9, [0, 0, 0]) 
+e=ellipse()
+disk=makearray(3, 1, 1, 1)
+disk[0]=e[0]
+disk[1]=e[0]
+disk[2]=e[0]
+setmask('B_ext', disk)
 
 autotabulate(['t', 'B_ext', '<B>', '<dB_dt>'], 'B.txt', 1e-12)
+autosave('B', 'omf', ['Text'], 1e-12)
+autosave('B', 'gplot', [], 0.1e-12)
+autosave('dB_dt', 'omf', ['Text'], 1e-12)
+autosave('dB_dt', 'gplot', [], 0.1e-12)
 autosave('E', 'omf', ['Text'], 1e-12)
-autosave('E', 'gplot', [], 1e-12)
+autosave('E', 'gplot', [], 0.1e-12)
 setv('dt', 1e-12)
 #run(100e-12)
 steps(10)
@@ -39,7 +39,7 @@ E=getarray('E')
 
 # test E vector
 dBdt=1e9
-i = Nx/2 + Nx / 4
+i = Nx / 4
 x = (-Nx/2 + i) * Cx
 echo("x=" + str(x))
 S = pi * x * x
