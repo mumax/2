@@ -438,6 +438,17 @@ func (a API) New_MaxAbs(newQuantity, inputQuantity string) {
 	New.SetUpdater(NewMaxAbsUpdater(In, New)) // also sets dependency
 }
 
+// Add a new quantity to the multi-physics engine, its
+// value is the maximum norm of inputQuantity (a 3-component vector).
+// E.g.: New_MaxNorm("maxnorm_torque", "torque") adds a new quantity
+// "maxnorm_torque" whose value is max(norm(torque)). 
+func (a API) New_MaxNorm(newQuantity, inputQuantity string) {
+	e := a.Engine
+	In := e.Quant(inputQuantity)
+	New := e.AddNewQuant(newQuantity, SCALAR, VALUE, In.Unit())
+	New.SetUpdater(NewMaxNormUpdater(In, New)) // also sets dependency
+}
+
 //________________________________________________________________________________ misc
 
 // Saves an image file of the physics graph using the given file name.

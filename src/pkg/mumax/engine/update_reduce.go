@@ -12,6 +12,7 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -80,4 +81,21 @@ func (this *MaxAbsUpdater) Update() {
 	this.out.SetScalar(float64(max))
 }
 
-// ________________________________________________________________________________ 
+// ________________________________________________________________________________ maxnorm
+
+
+// Updates the maximum norm of a 3-vector array
+type MaxNormUpdater ReduceUpdater
+
+// Returns an updater that writes the maximum of absolute values of in to out
+func NewMaxNormUpdater(in, out *Quant) Updater {
+	Assert(in.NComp() == 3)
+	return (*MaxNormUpdater)(NewReduceUpdater(in, out))
+}
+
+func (this *MaxNormUpdater) Update() {
+	Assert(this.in.multiplier[0] == this.in.multiplier[1] && this.in.multiplier[1] == this.in.multiplier[2])
+	arr := this.in.Array()
+	max := float64(this.reduce.MaxNorm(arr)) * this.in.multiplier[0]
+	this.out.SetScalar(float64(max))
+}

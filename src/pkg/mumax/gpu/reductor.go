@@ -141,7 +141,7 @@ func (r *Reductor) MaxDiff(a, b *Array) float32 {
 
 // Takes the maximum norm of a 3-component (vector) array.
 func (r *Reductor) MaxNorm(a *Array) float32 {
-	r.checkSize(a)
+	r.checkSize(&a.Comp[0])
 	Assert(a.NComp() == 3)
 	PartialMaxNorm3Sq(&a.Comp[X], &a.Comp[Y], &a.Comp[Z], &(r.devbuffer), r.blocks, r.threads, r.N)
 	// reduce further on CPU
@@ -156,7 +156,7 @@ func (r *Reductor) MaxNorm(a *Array) float32 {
 }
 
 // Takes the maximum norm of the difference between two 3-component (vector) arrays.
-func (r *Reductor) MaxNormDiff(a,b*Array) float32 {
+func (r *Reductor) MaxNormDiff(a, b *Array) float32 {
 	r.checkSize(a)
 	Assert(a.NComp() == 3)
 	PartialMaxNorm3SqDiff(&a.Comp[X], &a.Comp[Y], &a.Comp[Z], &b.Comp[X], &b.Comp[Y], &b.Comp[Z], &(r.devbuffer), r.blocks, r.threads, r.N)

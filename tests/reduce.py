@@ -18,14 +18,18 @@ setv('alpha', 1)
 setv('dt', 1e-12)
 setv('m_maxerror', 1./1000)
 new_maxabs("my_maxtorque", "torque")
+new_maxnorm("maxnorm", "torque")
 
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 t1=getv("maxtorque")
 t2=getv("my_maxtorque")
-echo("maxtorque:" + str(t1) + " my_maxtorque:" + str(t2))
+t3=getv("maxnorm")
+echo("maxtorque:" + str(t1) + " my_maxtorque:" + str(t2) + " maxnorm:" + str(t3))
 if t1 != t2:
+	crash
+if t3 < t2:
 	crash
 
 printstats()
