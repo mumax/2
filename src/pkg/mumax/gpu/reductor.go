@@ -10,6 +10,7 @@ package gpu
 import (
 	. "mumax/common"
 	"mumax/host"
+	"math"
 	"fmt"
 )
 
@@ -122,7 +123,7 @@ func (r *Reductor) MaxAbs(in *Array) float32 {
 	return max
 }
 
-// Takes the maximum absolute difference between the elements of a and b
+// Takes the maximum absolute difference between the elements of a and b.
 func (r *Reductor) MaxDiff(a, b *Array) float32 {
 	r.checkSize(a)
 	r.checkSize(b)
@@ -136,6 +137,38 @@ func (r *Reductor) MaxDiff(a, b *Array) float32 {
 		}
 	}
 	return max
+}
+
+// Takes the maximum norm of a 3-component (vector) array.
+func (r *Reductor) MaxNorm(a *Array) float32 {
+	r.checkSize(a)
+	Assert(a.NComp() == 3)
+	PartialMaxNorm3Sq(&a.Comp[X], &a.Comp[Y], &a.Comp[Z], &(r.devbuffer), r.blocks, r.threads, r.N)
+	// reduce further on CPU
+	(&r.devbuffer).CopyToHost(&r.hostbuffer)
+	max := r.hostbuffer.List[0] // all values are already positive
+	for _, num := range r.hostbuffer.List {
+		if num > max {
+			max = num
+		}
+	}
+	return float32(math.Sqrt(float64(max)))
+}
+
+// Takes the maximum norm of the difference between two 3-component (vector) arrays.
+func (r *Reductor) MaxNormDiff(a,b*Array) float32 {
+	r.checkSize(a)
+	Assert(a.NComp() == 3)
+	PartialMaxNorm3SqDiff(&a.Comp[X], &a.Comp[Y], &a.Comp[Z], &b.Comp[X], &b.Comp[Y], &b.Comp[Z], &(r.devbuffer), r.blocks, r.threads, r.N)
+	// reduce further on CPU
+	(&r.devbuffer).CopyToHost(&r.hostbuffer)
+	max := r.hostbuffer.List[0] // all values are already positive
+	for _, num := range r.hostbuffer.List {
+		if num > max {
+			max = num
+		}
+	}
+	return float32(math.Sqrt(float64(max)))
 }
 
 // INTERNAL: Make sure in has the right size for this reductor
