@@ -14,14 +14,27 @@ setcellsize(Cx, Cy, Cz)
 load('oersted')
 savegraph("graph.png")
 
+jx=1e12 #A/m
 wire = makearray(3, Nx, Ny, Nz)
 j=Ny/2
 k=Nz/2
 for i in range(0,Nx):
-	wire[0][i][j][k] = 1e12
+	wire[0][i][j][k] = jx
 
 #setv('j', [1, 0, 0]) 
 setarray('j', wire)
 
 save('j', 'omf', ['Text'], 'j.omf')
 save('B', 'omf', ['Text'], 'B.omf')
+
+B=getarray('B')
+i=Nx/2
+j=Ny/4
+k=Nz/2
+have=B[2][i][j][k]
+y=Cy * (j - Ny/2)
+echo("y=" + str(y) + "m")
+I=jx*Cy*Cz
+echo("I=" + str(I) + " A")
+want = (mu0*I)/(2*pi*y)
+echo ("want:" + str(want) + "T, have: " + str(have) + "T")

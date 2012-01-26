@@ -73,7 +73,7 @@ func RotorKernel(size []int, cellsize []float64, periodic []int, accuacy int, ke
 					j[s] = 1
 
 					rxj := r.Cross(j)
-					(&rxj).Scale(V / r3)
+					(&rxj).Scale(V / (4 * PI * r3))
 
 					if norm != 0 {
 						for d := 0; d < 3; d++ { // destination orientation
