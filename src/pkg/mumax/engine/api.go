@@ -434,6 +434,7 @@ func (a API) Add_To(sumQuantity, newQuantity string) {
 func (a API) New_MaxAbs(newQuantity, inputQuantity string) {
 	e := a.Engine
 	In := e.Quant(inputQuantity)
+	checkKind(In, FIELD)
 	New := e.AddNewQuant(newQuantity, SCALAR, VALUE, In.Unit())
 	New.SetUpdater(NewMaxAbsUpdater(In, New)) // also sets dependency
 }
@@ -445,6 +446,8 @@ func (a API) New_MaxAbs(newQuantity, inputQuantity string) {
 func (a API) New_MaxNorm(newQuantity, inputQuantity string) {
 	e := a.Engine
 	In := e.Quant(inputQuantity)
+	checkKind(In, FIELD)
+	checkComp(In, 3)
 	New := e.AddNewQuant(newQuantity, SCALAR, VALUE, In.Unit())
 	New.SetUpdater(NewMaxNormUpdater(In, New)) // also sets dependency
 }

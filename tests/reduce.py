@@ -27,7 +27,7 @@ t1=getv("maxtorque")
 t2=getv("my_maxtorque")
 t3=getv("maxnorm")
 echo("maxtorque:" + str(t1) + " my_maxtorque:" + str(t2) + " maxnorm:" + str(t3))
-if t1 != t2:
+if t3 != t1:
 	crash
 if t3 < t2:
 	crash
