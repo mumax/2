@@ -68,7 +68,6 @@ func Madd(dst, a, b *Array, mulB float32) {
 	dst.Stream.Sync()
 }
 
-
 // Complex multiply add. 
 // dst and src contain complex numbers (interleaved format)
 // kern contains real numbers
@@ -90,7 +89,6 @@ func CMaddAsync(dst *Array, scale complex64, kern, src *Array, stream Stream) {
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		(C.int)(kern.PartLen3D())) // # of numbers (real or complex)
 }
-
 
 // dst[i] = a[i]*mulA + b[i]*mulB
 func LinearCombination2Async(dst *Array, a *Array, mulA float32, b *Array, mulB float32, stream Stream) {
@@ -492,7 +490,6 @@ func TransposeComplexYZSingleGPUINVAsync(out, in *Array, stream Stream) {
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
-
 //this function has only different input for x- and y components
 func TransposeComplexYZPart_inv(out, in *Array) {
 	Assert(
@@ -566,7 +563,6 @@ func KernelMulMicromag3D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftK
 		(*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
 }
 
-
 // Point-wise 2D micromagnetic kernel multiplication in Fourier space.
 // Output is saved in out (in Fourier space, of course) with the result, can be in-place or out-of-place:
 //  |outx|   |Kxx  0   0 |   |Mx|
@@ -594,7 +590,6 @@ func KernelMulMicromag2D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftK
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		(*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
 }
-
 
 // Point-wise 3D micromagnetic kernel multiplication in Fourier space.
 // Overwrites M (in Fourier space, of course) with the result:

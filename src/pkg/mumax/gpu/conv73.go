@@ -36,7 +36,6 @@ import (
 	"unsafe"
 )
 
-
 const (
 	Nin  = 7
 	Nout = 3
@@ -52,7 +51,6 @@ type Conv73Plan struct {
 	fftOut    Array                // transformed output data (3-comp)
 	fftPlan   FFTInterface         // transforms input/output data
 }
-
 
 func NewConv73Plan(dataSize, logicSize []int) *Conv73Plan {
 	conv := new(Conv73Plan)
@@ -199,7 +197,6 @@ func (conv *Conv73Plan) LoadKernel(kernel *host.Array, pos int, matsymm int, rea
 	Debug("convplan kernel:", dbg)
 }
 
-
 func IsZero(array []float32) bool {
 	for _, x := range array {
 		if x != 0 {
@@ -208,7 +205,6 @@ func IsZero(array []float32) bool {
 	}
 	return true
 }
-
 
 // arr[i] *= scale
 func rescale(arr *host.Array, scale float64) {
@@ -263,7 +259,6 @@ func MatrixSymmetry(matrix *host.Array) int {
 	return NOSYMMETRY
 }
 
-
 // data realness
 const (
 	PUREREAL = 0 // data is purely real
@@ -271,11 +266,9 @@ const (
 	COMPLEX  = 2 // data is full complex number
 )
 
-
 func (conv *Conv73Plan) Free() {
 	// TODO
 }
-
 
 // 	INTERNAL
 // Sparse transform all 3 components.
@@ -334,7 +327,6 @@ func (conv *Conv73Plan) SelfTest() {
 	}
 	runtime.GC()
 }
-
 
 // Extract real or imaginary parts, copy them from src to dst.
 // In the meanwhile, check if the other parts are nearly zero

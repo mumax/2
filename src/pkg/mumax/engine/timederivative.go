@@ -86,7 +86,6 @@ func (u *derivativeUpdater) Update() {
 
 }
 
-
 // called when orig, dt or step changes
 // TODO: pre-invalidator
 func (u *derivativeUpdater) Invalidate() {

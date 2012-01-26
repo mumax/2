@@ -23,7 +23,6 @@ import (
 	"unsafe"
 )
 
-
 // Full Maxwell Electromagnetic field solver.
 // TODO: magnetic charge gives H, not B, need M
 type MaxwellPlan struct {
@@ -98,7 +97,6 @@ func (plan *MaxwellPlan) init() {
 	plan.fftKernSize[2] = plan.fftKernSize[2] / 2 // store only non-redundant parts
 }
 
-
 // Enable Couloumb's law
 func (plan *MaxwellPlan) EnableCoulomb(rho, E *Quant) {
 	plan.init()
@@ -162,7 +160,6 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
 }
 
-
 // Load dipole kernel if not yet done so.
 // Required for field of electric/magnetic charge density.
 func (plan *MaxwellPlan) loadDipoleKernel() {
@@ -181,12 +178,10 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	//	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
 }
 
-
 // Calculate the electric field plan.E.
 func (plan *MaxwellPlan) UpdateE() {
 	plan.update(&plan.EInput, plan.E.Array(), plan.EExt)
 }
-
 
 // calculate E or B
 func (plan *MaxwellPlan) update(in *[7]*gpu.Array, out *gpu.Array, ext *Quant) {
@@ -215,7 +210,6 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, out *gpu.Array, ext *Quant) {
 	// TODO add Ext field here
 	//fmt.Println("plan out", out.LocalCopy().Array, "\n")
 }
-
 
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
 //// The symmetry and real/imaginary/complex properties are taken into account to reduce storage.
@@ -305,7 +299,6 @@ func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, re
 	Debug("maxwell convplan kernel:", dbg)
 }
 
-
 func IsZero(array []float32) bool {
 	for _, x := range array {
 		if x != 0 {
@@ -314,7 +307,6 @@ func IsZero(array []float32) bool {
 	}
 	return true
 }
-
 
 // arr[i] *= scale
 func rescale(arr *host.Array, scale float64) {
@@ -369,7 +361,6 @@ func MatrixSymmetry(matrix *host.Array) int {
 	return NOSYMMETRY
 }
 
-
 // data realness
 const (
 	PUREREAL = 0 // data is purely real
@@ -377,11 +368,9 @@ const (
 	COMPLEX  = 2 // data is full complex number
 )
 
-
 func (plan *MaxwellPlan) Free() {
 	// TODO
 }
-
 
 // 	INTERNAL
 // Sparse transform all 3 components.
@@ -440,7 +429,6 @@ func (plan *MaxwellPlan) InverseFFT(out *gpu.Array) {
 //	}
 //	runtime.GC()
 //}
-
 
 // Extract real or imaginary parts, copy them from src to dst.
 // In the meanwhile, check if the other parts are nearly zero

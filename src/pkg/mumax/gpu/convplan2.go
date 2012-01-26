@@ -117,7 +117,6 @@ func (conv *ConvPlan) loadKernel(kernel []*host.Array) {
 
 }
 
-
 // Extract real parts, copy them from src to dst.
 // In the meanwhile, check if imaginary parts are nearly zero
 // and scale the kernel to compensate for unnormalized FFTs.
@@ -149,7 +148,6 @@ func scaleRealParts(dst, src *Array, scale float32) {
 
 	dst.CopyFromHost(dstHost)
 }
-
 
 func (conv *ConvPlan) Free() {
 	// TODO
@@ -241,7 +239,6 @@ func (conv *ConvPlan) SelfTest() {
 	}
 	runtime.GC()
 }
-
 
 func KernOutputSize(logicSize []int) []int {
 	fftSize := make([]int, 3)
