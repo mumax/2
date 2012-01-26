@@ -7,27 +7,36 @@
 
 package engine
 
-// This file implements the average of a quantity.
+// This file implements reduction operations on a quantity
+// (average, min, max, ...)
 // Author: Arne Vansteenkiste
 
 import (
 	"mumax/gpu"
 )
 
+// Superclass for all reduce updaters.
 type ReduceUpdater struct {
 	in, out *Quant
 	reduce  gpu.Reductor
 }
 
+
+// New reducing updater.
+// Automatically sets the dependency in -> out.
 func NewReduceUpdater(in, out *Quant) *ReduceUpdater {
 	checkKinds(in, FIELD, MASK)
 	red := new(ReduceUpdater)
 	red.in = in
 	red.out = out
 	red.reduce.Init(1, GetEngine().GridSize())
+	GetEngine().Depends(out.Name(), in.Name())
 	return red
 }
 
+// ________________________________________________________________________________ average
+
+// Updates an average quantity
 type AverageUpdater ReduceUpdater
 
 // Returns an updater that writes the average of in to out
@@ -50,6 +59,9 @@ func (this *AverageUpdater) Update() {
 
 }
 
+// ________________________________________________________________________________ maxabs
+
+// Updates a maximum of absolute values
 type MaxAbsUpdater ReduceUpdater
 
 // Returns an updater that writes the maximum of absolute values of in to out
@@ -67,3 +79,5 @@ func (this *MaxAbsUpdater) Update() {
 	}
 	this.out.SetScalar(float64(max))
 }
+
+// ________________________________________________________________________________ 

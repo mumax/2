@@ -425,6 +425,19 @@ func (a API) Add_To(sumQuantity, newQuantity string) {
 	Log("Added new quantity", term.FullName(), "to", sumQuant.Name())
 }
 
+
+// Add a new quantity to the multi-physics engine, its
+// value is the maximum of the absolute value of inputQuantity.
+// E.g.: New_MaxAbs("max_torque", "torque") adds a new quantity
+// "max_torque" whose value is max(abs(torque)). For vector
+// quantities, the maximum is taken over all components.
+func (a API) New_MaxAbs(newQuantity, inputQuantity string) {
+	e := a.Engine
+	In := e.Quant(inputQuantity)
+	New := e.AddNewQuant(newQuantity, SCALAR, VALUE, In.Unit())
+	New.SetUpdater(NewMaxAbsUpdater(In, New)) // also sets dependency
+}
+
 //________________________________________________________________________________ misc
 
 // Saves an image file of the physics graph using the given file name.
