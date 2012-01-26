@@ -69,7 +69,7 @@ endif
 CGO_LDFLAGS+=\
 	-lcuda\
    	-lcudart\
-	../../../libmumax2/libmumax2.so\
+   	-lmumax2\
 
 CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so 
 	
