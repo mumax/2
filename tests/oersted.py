@@ -18,9 +18,10 @@ wire = makearray(3, Nx, Ny, Nz)
 j=Ny/2
 k=Nz/2
 for i in range(0,Nx):
-	wire[0][i][j][k] = 1
+	wire[0][i][j][k] = 1e12
 
-setv('j', [1e-3, 0, 0]) #1 mA
-setmask('j', wire)
+#setv('j', [1, 0, 0]) 
+setarray('j', wire)
 
 save('j', 'omf', ['Text'], 'j.omf')
+save('B', 'omf', ['Text'], 'B.omf')

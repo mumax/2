@@ -130,7 +130,15 @@ func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 }
 
 func (plan *MaxwellPlan) EnableOersted(j *Quant) {
-
+	plan.init()
+	plan.loadRotorKernel()
+	// curl(B) = µ0*j
+	plan.BInput[JX] = j.Array().Component(X)
+	plan.BInput[JY] = j.Array().Component(Y)
+	plan.BInput[JZ] = j.Array().Component(Z)
+	plan.BInMul[JX] = Mu0
+	plan.BInMul[JY] = Mu0
+	plan.BInMul[JZ] = Mu0
 }
 
 const (

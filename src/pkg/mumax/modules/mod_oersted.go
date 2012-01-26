@@ -19,6 +19,7 @@ func init() {
 	RegisterModule("oersted", "Oersted field of electrical current", LoadOersted)
 }
 
+//TODO: j with multiplier Mu0 to get order of magnitude right?
 func LoadOersted(e *Engine) {
 	LoadBField(e)
 	LoadCurrent(e)
