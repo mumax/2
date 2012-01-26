@@ -13,6 +13,7 @@ GOFILES=\
 	update_norm.go\
 	hfield.go\
 	mod_maxwell.go\
+	mod_oersted.go\
 	mod_zeeman.go\
 	mod_exchange6.go\
 	mod_coulomb.go\

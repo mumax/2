@@ -129,6 +129,10 @@ func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.EInMul[JZ] = -1
 }
 
+func (plan *MaxwellPlan) EnableOersted(j *Quant) {
+
+}
+
 const (
 	CPUONLY = true
 	GPU     = false
