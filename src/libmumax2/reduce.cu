@@ -342,6 +342,131 @@ __global__ void _gpu_maxdiff_kernel(float* a, float* b, float* g_odata, unsigned
       g_odata[blockIdx.x] = sdata[0];
 }
 
+
+
+
+/// This kernel takes a partial maximum euclidian norm squared of x,y,z component arrays
+template <unsigned int blockSize, bool nIsPow2>
+__global__ void _gpu_maxnorm3sq_kernel(float* x, float* y, float* z, float* g_odata, unsigned int n) {
+  float* sdata = SharedMemory<float>();
+
+  // perform first level of reduction,
+  // reading from global memory, writing to shared memory
+  unsigned int tid = threadIdx.x;
+  unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
+  unsigned int gridSize = blockSize*2*gridDim.x;
+
+  float myMaxabs = 0.;
+
+  // we reduce multiple elements per thread.  The number is determined by the
+  // number of active thread blocks (via gridDim).  More blocks will result
+  // in a larger gridSize and therefore fewer elements per thread
+  while (i < n)
+  {
+	float X = x[i];
+	float Y = y[i];
+	float Z = z[i];
+    myMaxabs = fmax(myMaxabs, (X*X + Y*Y + Z*Z));
+    // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
+    if (nIsPow2 || i + blockSize < n){
+      X = x[i+blockSize];
+   	  Y = y[i+blockSize];
+   	  Z = z[i+blockSize];
+      myMaxabs = fmax(myMaxabs, (X*X + Y*Y + Z*Z));
+	}
+    i += gridSize;
+  }
+
+  // each thread puts its local sum into shared memory
+  sdata[tid] = myMaxabs;
+  __syncthreads();
+
+
+  // do reduction in shared mem
+  if (blockSize >= 512) { if (tid < 256) { myMaxabs = fmax(myMaxabs, sdata[tid + 256]); sdata[tid] = myMaxabs; } __syncthreads(); }
+  if (blockSize >= 256) { if (tid < 128) { myMaxabs = fmax(myMaxabs, sdata[tid + 128]); sdata[tid] = myMaxabs; } __syncthreads(); }
+  if (blockSize >= 128) { if (tid <  64) { myMaxabs = fmax(myMaxabs, sdata[tid +  64]); sdata[tid] = myMaxabs; } __syncthreads(); }
+
+  if (tid < 32)
+    {
+      // now that we are using warp-synchronous programming (below)
+      // we need to declare our shared memory volatile so that the compiler
+      // doesn't reorder stores to it and induce incorrect behavior.
+      volatile float* smem = sdata;
+      if (blockSize >=  64) { myMaxabs = fmax(myMaxabs, smem[tid + 32]); smem[tid] = myMaxabs;  }
+      if (blockSize >=  32) { myMaxabs = fmax(myMaxabs, smem[tid + 16]); smem[tid] = myMaxabs;  }
+      if (blockSize >=  16) { myMaxabs = fmax(myMaxabs, smem[tid +  8]); smem[tid] = myMaxabs;  }
+      if (blockSize >=   8) { myMaxabs = fmax(myMaxabs, smem[tid +  4]); smem[tid] = myMaxabs;  }
+      if (blockSize >=   4) { myMaxabs = fmax(myMaxabs, smem[tid +  2]); smem[tid] = myMaxabs;  }
+      if (blockSize >=   2) { myMaxabs = fmax(myMaxabs, smem[tid +  1]); smem[tid] = myMaxabs;  }
+    }
+    // write result for this block to global mem
+    if (tid == 0)
+      g_odata[blockIdx.x] = sdata[0];
+}
+
+
+/// This kernel takes a partial maximum euclidian norm squared of the difference between 3-vectors
+template <unsigned int blockSize, bool nIsPow2>
+__global__ void _gpu_maxnorm3sqdiff_kernel(float* x1, float* y1, float* z1, float* x2, float* y2, float* z2, float* g_odata, unsigned int n) {
+  float* sdata = SharedMemory<float>();
+
+  // perform first level of reduction,
+  // reading from global memory, writing to shared memory
+  unsigned int tid = threadIdx.x;
+  unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
+  unsigned int gridSize = blockSize*2*gridDim.x;
+
+  float myMaxabs = 0.;
+
+  // we reduce multiple elements per thread.  The number is determined by the
+  // number of active thread blocks (via gridDim).  More blocks will result
+  // in a larger gridSize and therefore fewer elements per thread
+  while (i < n)
+  {
+	float X = x1[i]-x2[i];
+	float Y = y1[i]-y2[i];
+	float Z = z1[i]-z2[i];
+    myMaxabs = fmax(myMaxabs, (X*X + Y*Y + Z*Z));
+    // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
+    if (nIsPow2 || i + blockSize < n){
+      X = x1[i+blockSize]-x2[i+blockSize];
+   	  Y = y1[i+blockSize]-y2[i+blockSize];
+   	  Z = z1[i+blockSize]-z2[i+blockSize];
+      myMaxabs = fmax(myMaxabs, (X*X + Y*Y + Z*Z));
+	}
+    i += gridSize;
+  }
+
+  // each thread puts its local sum into shared memory
+  sdata[tid] = myMaxabs;
+  __syncthreads();
+
+
+  // do reduction in shared mem
+  if (blockSize >= 512) { if (tid < 256) { myMaxabs = fmax(myMaxabs, sdata[tid + 256]); sdata[tid] = myMaxabs; } __syncthreads(); }
+  if (blockSize >= 256) { if (tid < 128) { myMaxabs = fmax(myMaxabs, sdata[tid + 128]); sdata[tid] = myMaxabs; } __syncthreads(); }
+  if (blockSize >= 128) { if (tid <  64) { myMaxabs = fmax(myMaxabs, sdata[tid +  64]); sdata[tid] = myMaxabs; } __syncthreads(); }
+
+  if (tid < 32)
+    {
+      // now that we are using warp-synchronous programming (below)
+      // we need to declare our shared memory volatile so that the compiler
+      // doesn't reorder stores to it and induce incorrect behavior.
+      volatile float* smem = sdata;
+      if (blockSize >=  64) { myMaxabs = fmax(myMaxabs, smem[tid + 32]); smem[tid] = myMaxabs;  }
+      if (blockSize >=  32) { myMaxabs = fmax(myMaxabs, smem[tid + 16]); smem[tid] = myMaxabs;  }
+      if (blockSize >=  16) { myMaxabs = fmax(myMaxabs, smem[tid +  8]); smem[tid] = myMaxabs;  }
+      if (blockSize >=   8) { myMaxabs = fmax(myMaxabs, smem[tid +  4]); smem[tid] = myMaxabs;  }
+      if (blockSize >=   4) { myMaxabs = fmax(myMaxabs, smem[tid +  2]); smem[tid] = myMaxabs;  }
+      if (blockSize >=   2) { myMaxabs = fmax(myMaxabs, smem[tid +  1]); smem[tid] = myMaxabs;  }
+    }
+    // write result for this block to global mem
+    if (tid == 0)
+      g_odata[blockIdx.x] = sdata[0];
+}
+
+
 //________________________________________________________________________________________________________________ kernel wrappers
 
 #ifdef __cplusplus
@@ -614,100 +739,108 @@ void partialMaxDiffAsync(float** a, float** b, float** output, int blocks, int t
 	}
 }
 
-///// This kernel takes a partial sum of absolute values
-//template <unsigned int blockSize, bool nIsPow2>
-//__global__ void _gpu_sumabs_kernel(float* g_idata, float* g_odata, unsigned int n) {
-//  float* sdata = SharedMemory<float>();
-//
-//  // perform first level of reduction,
-//  // reading from global memory, writing to shared memory
-//  unsigned int tid = threadIdx.x;
-//  unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
-//  unsigned int gridSize = blockSize*2*gridDim.x;
-//
-//  float mySum = 0;
-//
-//  // we reduce multiple elements per thread.  The number is determined by the
-//  // number of active thread blocks (via gridDim).  More blocks will result
-//  // in a larger gridSize and therefore fewer elements per thread
-//  while (i < n)
-//  {
-//    mySum += fabs(g_idata[i]);
-//    // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
-//    if (nIsPow2 || i + blockSize < n)
-//      mySum += fabs(g_idata[i+blockSize]);
-//    i += gridSize;
-//  }
-//
-//  // each thread puts its local sum into shared memory
-//  sdata[tid] = mySum;
-//  __syncthreads();
-//
-//
-//  // do reduction in shared mem
-//  if (blockSize >= 512) { if (tid < 256) { mySum = mySum + sdata[tid + 256]; sdata[tid] = mySum; } __syncthreads(); }
-//  if (blockSize >= 256) { if (tid < 128) { mySum = mySum + sdata[tid + 128]; sdata[tid] = mySum; } __syncthreads(); }
-//  if (blockSize >= 128) { if (tid <  64) { mySum = mySum + sdata[tid +  64]; sdata[tid] = mySum; } __syncthreads(); }
-//
-//  if (tid < 32)
-//    {
-//      // now that we are using warp-synchronous programming (below)
-//      // we need to declare our shared memory volatile so that the compiler
-//      // doesn't reorder stores to it and induce incorrect behavior.
-//      volatile float* smem = sdata;
-//      if (blockSize >=  64) { mySum = mySum + smem[tid + 32]; smem[tid] = mySum;  }
-//      if (blockSize >=  32) { mySum = mySum + smem[tid + 16]; smem[tid] = mySum;  }
-//      if (blockSize >=  16) { mySum = mySum + smem[tid +  8]; smem[tid] = mySum;  }
-//      if (blockSize >=   8) { mySum = mySum + smem[tid +  4]; smem[tid] = mySum;  }
-//      if (blockSize >=   4) { mySum = mySum + smem[tid +  2]; smem[tid] = mySum;  }
-//      if (blockSize >=   2) { mySum = mySum + smem[tid +  1]; smem[tid] = mySum;  }
-//    }
-//    // write result for this block to global mem
-//    if (tid == 0)
-//      g_odata[blockIdx.x] = sdata[0];
-//}
-//
-//void gpu_partial_sumabs(float* d_idata, float* d_odata, int blocks, int threads, int size) {
-//  dim3 dimBlock(threads, 1, 1);
-//  dim3 dimGrid(blocks, 1, 1);
-//
-//  // when there is only one warp per block, we need to allocate two warps
-//  // worth of shared memory so that we don't index shared memory out of bounds
-//  int smemSize = (threads <= 32) ? 2 * threads * sizeof(float) : threads * sizeof(float);
-//
-//  if (isPow2(size))
-//  {
-//    switch (threads)
-//    {
-//      case 512: _gpu_sumabs_kernel<512, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case 256: _gpu_sumabs_kernel<256, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case 128: _gpu_sumabs_kernel<128, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case  64: _gpu_sumabs_kernel< 64, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case  32: _gpu_sumabs_kernel< 32, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case  16: _gpu_sumabs_kernel< 16, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   8: _gpu_sumabs_kernel<  8, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   4: _gpu_sumabs_kernel<  4, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   2: _gpu_sumabs_kernel<  2, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   1: _gpu_sumabs_kernel<  1, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//    }
-//  }
-//  else
-//  {
-//    switch (threads)
-//    {
-//      case 512: _gpu_sumabs_kernel<512, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case 256: _gpu_sumabs_kernel<256, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case 128: _gpu_sumabs_kernel<128, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case  64: _gpu_sumabs_kernel< 64, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case  32: _gpu_sumabs_kernel< 32, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case  16: _gpu_sumabs_kernel< 16, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   8: _gpu_sumabs_kernel<  8, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   4: _gpu_sumabs_kernel<  4, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   2: _gpu_sumabs_kernel<  2, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//      case   1: _gpu_sumabs_kernel<  1, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_odata, size); break;
-//    }
-//  }
-//}
+
+// Single-GPU
+void partialMaxNorm3SqAsync1(float* x, float* y, float* z, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+  dim3 dimBlock(threads, 1, 1);
+  dim3 dimGrid(blocks, 1, 1);
+
+  // when there is only one warp per block, we need to allocate two warps
+  // worth of shared memory so that we don't index shared memory out of bounds
+  int smemSize = (threads <= 32) ? 2 * threads * sizeof(float) : threads * sizeof(float);
+
+  if (isPow2(size))
+  {
+    switch (threads)
+    {
+      case 512: _gpu_maxnorm3sq_kernel<512, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case 256: _gpu_maxnorm3sq_kernel<256, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case 128: _gpu_maxnorm3sq_kernel<128, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case  64: _gpu_maxnorm3sq_kernel< 64, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case  32: _gpu_maxnorm3sq_kernel< 32, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case  16: _gpu_maxnorm3sq_kernel< 16, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   8: _gpu_maxnorm3sq_kernel<  8, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   4: _gpu_maxnorm3sq_kernel<  4, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   2: _gpu_maxnorm3sq_kernel<  2, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   1: _gpu_maxnorm3sq_kernel<  1, true><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+    }
+  }
+  else
+  {
+    switch (threads)
+    {
+      case 512: _gpu_maxnorm3sq_kernel<512, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case 256: _gpu_maxnorm3sq_kernel<256, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case 128: _gpu_maxnorm3sq_kernel<128, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case  64: _gpu_maxnorm3sq_kernel< 64, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case  32: _gpu_maxnorm3sq_kernel< 32, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case  16: _gpu_maxnorm3sq_kernel< 16, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   8: _gpu_maxnorm3sq_kernel<  8, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   4: _gpu_maxnorm3sq_kernel<  4, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   2: _gpu_maxnorm3sq_kernel<  2, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+      case   1: _gpu_maxnorm3sq_kernel<  1, false><<< dimGrid, dimBlock, smemSize, stream>>>(x, y, z, d_odata, size); break;
+    }
+  }
+}
+
+
+void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams){
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialMaxNorm3SqAsync1(x[dev], y[dev], z[dev], output[dev], blocksPerGPU, threadsPerBlockPerGPU, NPerGPU, streams[dev]);
+	}
+}
+
+
+// Single-GPU
+void partialMaxNorm3SqDiffAsync1(float* x1, float* y1, float* z1,float* x2, float* y2, float* z2, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+  dim3 dimBlock(threads, 1, 1);
+  dim3 dimGrid(blocks, 1, 1);
+
+  // when there is only one warp per block, we need to allocate two warps
+  // worth of shared memory so that we don't index shared memory out of bounds
+  int smemSize = (threads <= 32) ? 2 * threads * sizeof(float) : threads * sizeof(float);
+
+  if (isPow2(size))
+  {
+    switch (threads)
+    {
+      case 512: _gpu_maxnorm3sqdiff_kernel<512, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case 256: _gpu_maxnorm3sqdiff_kernel<256, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case 128: _gpu_maxnorm3sqdiff_kernel<128, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case  64: _gpu_maxnorm3sqdiff_kernel< 64, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case  32: _gpu_maxnorm3sqdiff_kernel< 32, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case  16: _gpu_maxnorm3sqdiff_kernel< 16, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   8: _gpu_maxnorm3sqdiff_kernel<  8, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   4: _gpu_maxnorm3sqdiff_kernel<  4, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   2: _gpu_maxnorm3sqdiff_kernel<  2, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   1: _gpu_maxnorm3sqdiff_kernel<  1, true><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+    }
+  }
+  else
+  {
+    switch (threads)
+    {
+      case 512: _gpu_maxnorm3sqdiff_kernel<512, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case 256: _gpu_maxnorm3sqdiff_kernel<256, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case 128: _gpu_maxnorm3sqdiff_kernel<128, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case  64: _gpu_maxnorm3sqdiff_kernel< 64, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case  32: _gpu_maxnorm3sqdiff_kernel< 32, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case  16: _gpu_maxnorm3sqdiff_kernel< 16, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   8: _gpu_maxnorm3sqdiff_kernel<  8, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   4: _gpu_maxnorm3sqdiff_kernel<  4, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   2: _gpu_maxnorm3sqdiff_kernel<  2, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+      case   1: _gpu_maxnorm3sqdiff_kernel<  1, false><<< dimGrid, dimBlock, smemSize, stream>>>(x1, y1, z1, x2, y2, z2, d_odata, size); break;
+    }
+  }
+}
+
+void partialMaxNorm3SqDiffAsync(float** x1, float** y1, float** z1, float** x2, float** y2, float** z2, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams){
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialMaxNorm3SqDiffAsync1(x1[dev], y1[dev], z1[dev], x2[dev], y2[dev], z2[dev], output[dev], blocksPerGPU, threadsPerBlockPerGPU, NPerGPU, streams[dev]);
+	}
+}
 
 
 #ifdef __cplusplus

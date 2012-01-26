@@ -290,6 +290,37 @@ func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
 	out.Stream.Sync()
 }
 
+// Partial maximum of Euclidian norm squared (see reduce.h)
+func PartialMaxNorm3Sq(x, y, z, out *Array, blocks, threadsPerBlock, N int) {
+	C.partialMaxNorm3SqAsync(
+		(**C.float)(unsafe.Pointer(&x.pointer[0])),
+		(**C.float)(unsafe.Pointer(&y.pointer[0])),
+		(**C.float)(unsafe.Pointer(&z.pointer[0])),
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		C.int(blocks),
+		C.int(threadsPerBlock),
+		C.int(N),
+		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+	out.Stream.Sync()
+}
+
+// Partial maximum of Euclidian norm squared of difference between two 3-vector arrays(see reduce.h)
+func PartialMaxNorm3SqDiff(x1, y1, z1, x2, y2, z2, out *Array, blocks, threadsPerBlock, N int) {
+	C.partialMaxNorm3SqDiffAsync(
+		(**C.float)(unsafe.Pointer(&x1.pointer[0])),
+		(**C.float)(unsafe.Pointer(&y1.pointer[0])),
+		(**C.float)(unsafe.Pointer(&z1.pointer[0])),
+		(**C.float)(unsafe.Pointer(&x2.pointer[0])),
+		(**C.float)(unsafe.Pointer(&y2.pointer[0])),
+		(**C.float)(unsafe.Pointer(&z2.pointer[0])),
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		C.int(blocks),
+		C.int(threadsPerBlock),
+		C.int(N),
+		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+	out.Stream.Sync()
+}
+
 // Copy from src to dst, which have different size3D[Z].
 // If dst is smaller, the src input is cropped to the right size.
 // If dst is larger, the src input is padded with zeros to the right size.
