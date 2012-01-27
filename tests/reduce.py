@@ -32,5 +32,8 @@ if t3 != t1:
 if t3 < t2:
 	crash
 
+new_maxabs("maxtorquez", "torque.z")
+getv("maxtorquez")
+
 printstats()
 savegraph("graph.png")
