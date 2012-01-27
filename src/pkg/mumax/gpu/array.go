@@ -240,6 +240,9 @@ func (a *Array) NComp() int {
 // Gets the i'th component as an array.
 // E.g.: Component(0) is the x-component.
 func (a *Array) Component(i int) *Array {
+	if a._size[0] == 1 { // 1-component
+		return a
+	}
 	return &(a.Comp[i])
 }
 
