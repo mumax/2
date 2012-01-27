@@ -201,6 +201,8 @@ func (e *Engine) SetPeriodic(p []int) {
 	Assert(len(p) == 3)
 	copy(e.periodic, p)
 	e.set_periodic_ = true
+
+	Log("PBC:", e.periodic[Z], "x, ", e.periodic[Y], "x, ", e.periodic[X], "x")
 }
 
 // Gets the FD grid size

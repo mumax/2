@@ -2,13 +2,13 @@ from mumax2 import *
 from mumax2_geom import *
 from mumax2_magstate import *
 
-Nx = 256
-Ny = 256
+Nx = 128
+Ny = 128
 Nz = 1
 
 setgridsize(Nx, Ny, Nz)
 length=1000e-9
-thickness=20e-9
+thickness=40e-9
 setcellsize(length/Nx, length/Ny, thickness/Nz)
 setperiodic(1, 1, 0)
 
@@ -30,9 +30,10 @@ setmask('Msat', msat)
 #save('Msat', 'omf', ['text'], 'msat.omf')
 
 setarray('m', vortex(1,1))
+setcell('m', 0, Ny/2, 0, [0, 0, 1])
 
-autosave('m', 'omf', ['text'], 10e-12)
-run_until_smaller('maxtorque', 1e-3 * gets('gamma') * 800e3)
+autosave('m', 'omf', ['text'], 250e-12)
+run_until_smaller('maxtorque', 1e-4 * gets('gamma') * 800e3)
 
 #save('m', 'omf', [], 'vortex.omf')
 
