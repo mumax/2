@@ -1,6 +1,7 @@
 from mumax2 import *
 from math import *
 
+# fmr example
 # define geometry
 
 Nx = 128
@@ -12,6 +13,9 @@ sizeX = 500e-9
 sizeY = 125e-9
 sizeZ = 3e-9
 setcellsize(sizeX/Nx, sizeY/Ny, sizeZ/Nz)
+
+# set optional PBC here
+periodic(0, 0, 0)
 
 
 # load modules
@@ -66,6 +70,7 @@ autotabulate(["t", "h_ext", "<m>"], "m.txt", 1e-12)
 
 run(2e-9)
 
+# fmr response: deviation from m along X
 my = gets("<m.y>")
 mz = gets("<m.z>")
 resp = sqrt(my*my + mz*mz)
