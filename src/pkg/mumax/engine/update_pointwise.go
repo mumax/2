@@ -63,9 +63,13 @@ func (field *PointwiseUpdater) Update() {
 	// i now points to a time >= engine.time
 	field.lastIdx = i
 
+	if i >= len(field.points) {
+		panic(InputErrF("Out of range of pointwise-defined quantity", field.quant.Name(), ". Field is defined only up to t=", field.points[len(field.points)-1][0], "s, but requested at t=", time, "s. Please define the quantity up to larger t."))
+	}
+
 	value := field.quant.multiplier
 	// out of range: value = 0
-	if i-1 < 0 || i < 0 || i >= len(field.points) {
+	if i-1 < 0 || i < 0 {
 		for i := range value {
 			value[i] = 0
 		}

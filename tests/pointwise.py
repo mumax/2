@@ -38,6 +38,7 @@ setpointwise('H_ext', 3e-11, [0, 0, 0])
 setpointwise('H_ext', 3e-11, [-Hx, -Hy, -Hz])
 setpointwise('H_ext', 4e-11, [-Hx, -Hy, -Hz])
 setpointwise('H_ext', 4e-11, [0,0,0])
+setpointwise('H_ext', 999, [0,0,0])
 
 setpointwise('alpha', 0, 1)
 setpointwise('alpha', 1e-9, 0.02)
