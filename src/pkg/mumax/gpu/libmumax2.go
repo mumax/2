@@ -631,15 +631,38 @@ func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat f
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(KuMask.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(MsatMask.pointer[0]))),
-		C.float(Ku2_Mu0MSat),
+		(C.float)(Ku2_Mu0MSat),
 		(**C.float)(unsafe.Pointer(&(anisUMask.Comp[X].pointer[0]))),
-		C.float(anisUMul[X]),
+		(C.float)(anisUMul[X]),
 		(**C.float)(unsafe.Pointer(&(anisUMask.Comp[Y].pointer[0]))),
-		C.float(anisUMul[Y]),
+		(C.float)(anisUMul[Y]),
 		(**C.float)(unsafe.Pointer(&(anisUMask.Comp[Z].pointer[0]))),
-		C.float(anisUMul[Z]),
+		(C.float)(anisUMul[Z]),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-		C.int(h.partLen3D))
+		(C.int)(h.partLen3D))
+}
+
+func Exchange6Async(h, m *Array, Aex float32, cellSize []float64, periodic []int, stream Stream) {
+	//void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float Aex, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams);
+	CheckSize(h.Size3D(), m.Size3D())
+	C.exchange6Async(
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+		(C.float)(Aex),
+		(C.int)(h.PartSize()[X]),
+		(C.int)(h.PartSize()[Y]),
+		(C.int)(h.PartSize()[Z]),
+		(C.int)(periodic[X]),
+		(C.int)(periodic[Y]),
+		(C.int)(periodic[Z]),
+		(C.float)(cellSize[X]),
+		(C.float)(cellSize[Y]),
+		(C.float)(cellSize[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
 // DEBUG: sets all values to their X (i) index

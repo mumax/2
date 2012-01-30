@@ -119,7 +119,7 @@ int mod(int a, int b){
 }
 
 #define BLOCKSIZE 16
-void exchange6Async(float*** h, float*** m, float Aex, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams){
+void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float Aex, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams){
 
   dim3 gridsize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
   dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
@@ -131,9 +131,11 @@ void exchange6Async(float*** h, float*** m, float Aex, int N0, int N1Part, int N
 
 	int nDev = nDevice();
 
+	float** H = hx;
+    float** M = mx;
 	for(int c=0; c<3; c++){        // for all 3 components
-	    float** H = h[c];
-	    float** M = m[c];
+		if (c==1){H = hy; M = my;}
+		if (c==2){H = hz; M = mz;}
 
 		for (int dev = 0; dev < nDev; dev++) {
 	
