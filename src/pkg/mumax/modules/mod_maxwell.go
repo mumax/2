@@ -43,6 +43,7 @@ func LoadBField(e *Engine) {
 	BField.SetUpdater(newBFieldUpdater())
 	maxwell.BExt = BExt
 	maxwell.B = BField
+	TODO: if H fields exists add B/mu0
 }
 
 // Updates the E field in a single convolution

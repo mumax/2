@@ -20,4 +20,5 @@ func LoadHField(e *Engine) {
 		H := e.AddNewQuant("H_eff", VECTOR, FIELD, Unit("A/m"), "magnetic field")
 		H.SetUpdater(NewSumUpdater(H))
 	}
+	TODO: if B exists: add B/mu0
 }
