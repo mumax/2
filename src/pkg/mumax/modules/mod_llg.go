@@ -39,12 +39,12 @@ func LoadLLG(e *Engine) {
 	e.Quant("gamma").SetVerifier(NonZero)
 
 	e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"))
-	e.Depends("torque", "m", "H", "alpha", "gamma")
+	e.Depends("torque", "m", "H_eff", "alpha", "gamma")
 	τ := e.Quant("torque")
 	τ.SetUpdater(&torqueUpdater{
 		τ: e.Quant("torque"),
 		m: e.Quant("m"),
-		H: e.Quant("H"),
+		H: e.Quant("H_eff"),
 		α: e.Quant("alpha"),
 		γ: e.Quant("gamma")})
 

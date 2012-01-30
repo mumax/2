@@ -28,7 +28,7 @@ func LoadAnisUniaxial(e *Engine) {
 	ku := e.AddNewQuant("Ku", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K")
 	anisU := e.AddNewQuant("anisU", VECTOR, MASK, Unit(""), "uniaxial anisotropy direction (unit vector)")
 
-	hfield := e.Quant("H")
+	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_anis")
 	e.Depends("H_anis", "Ku", "anisU", "MSat", "m")

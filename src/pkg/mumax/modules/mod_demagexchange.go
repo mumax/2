@@ -75,7 +75,7 @@ func LoadDemagExch(e *Engine) {
 	Hdex.SetUpdater(newHDexUpdater(Hdex, m, fftKern))
 
 	// add H_dex to total H
-	hfield := e.Quant("H")
+	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_dex")
 }

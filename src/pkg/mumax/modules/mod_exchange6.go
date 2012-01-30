@@ -25,7 +25,7 @@ func LoadExch6(e *Engine) {
 	LoadMagnetization(e)
 	Aex := e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // TODO: mask
 	Hex := e.AddNewQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
-	hfield := e.Quant("H")
+	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_ex")
 	e.Depends("H_ex", "Aex", "m")
