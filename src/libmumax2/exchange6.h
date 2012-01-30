@@ -16,6 +16,14 @@ extern "C" {
 #endif
 
 
+void exchange6Async(float** mx, float** my, float** mz,         
+                  float** hx, float** hy, float** hz,         
+                  int N0, int N1Part, int N2,
+                  int peridic0, int periodic1, int periodic2,
+                  float cellsizeX, float cellsizeY, float cellsizeZ,
+				  CUstream* streams);
+
+
 #ifdef __cplusplus
 }
 #endif
