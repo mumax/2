@@ -40,6 +40,6 @@ func (u *exch6Updater) Update() {
 	e := GetEngine()
 	Aex := float32(u.Aex.Scalar())
 	stream := u.Hex.Array().Stream
- 	gpu.Exchange6Async(u.Hex.Array(), u.m.Array(), Aex, e.CellSize(), e.Periodic(), stream) 
+	gpu.Exchange6Async(u.Hex.Array(), u.m.Array(), Aex, e.CellSize(), e.Periodic(), stream)
 	stream.Sync()
 }
