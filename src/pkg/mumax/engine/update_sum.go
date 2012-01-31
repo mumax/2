@@ -15,60 +15,49 @@ import (
 	"mumax/gpu"
 )
 
-//func  AddSumNode(name string, args ...string) {
-//		e := GetEngine()
-//	parent0 := e.Quant(args[0])
-//	nComp := parent0.NComp()
-//	unit := parent0.Unit()
-//	e.AddQuant(name, nComp, FIELD, unit)
-//
-//	sum := e.Quant(name)
-//	parents := make([]*Quant, len(args))
-//	for i := range parents {
-//		parents[i] = e.Quant(args[i])
-//		if parents[i].Unit() != sum.Unit() {
-//			panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parents[i].FullName()))
-//		}
-//	}
-//	e.Depends(name, args...)
-//	sum.updater = &SumUpdater{sum, parents}
-//}
-
 type SumUpdater struct {
 	sum *Quant
-	//parents []*Quant
+	parents []*Quant
+	weight []float64
 }
 
 func NewSumUpdater(sum *Quant) Updater {
-	return &SumUpdater{sum}
+	return &SumUpdater{sum, nil, nil}
 }
 
 func (u *SumUpdater) Update() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
 	sum.array.Zero()
-	parents := u.sum.parents
+	parents := u.parents
 	for i := range parents {
 		parent := parents[i]
+		weight := u.weight[i]
 		for c := 0; c < sum.NComp(); c++ {
 			parComp := parent.array.Component(c)
 			parMul := parent.multiplier[c]
 			sumMul := sum.multiplier[c]
 			sumComp := sum.array.Component(c)
 			//Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul/sumMul))
-			gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
+			gpu.Madd(sumComp, sumComp, parComp, float32((weight*parMul)/sumMul)) // divide by sum's multiplier!
 		}
 	}
 }
 
-// Adds a parent to the sum, i.e., its value will be added to the sum
-func (u *SumUpdater) AddParent(name string) {
+// Adds a parent to the sum, i.e., its value*weight will be added to the sum
+func (u *SumUpdater) MAddParent(name string, weight float64) {
 	e := GetEngine()
 	parent := e.Quant(name)
 	sum := u.sum
 	if parent.unit != sum.unit {
 		panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parent.FullName()))
 	}
-	//u.parents = append(u.parents, parent) done by engine
+	u.parents = append(u.parents, parent)
+	u.weight = append(u.weight, weight)
 	e.Depends(sum.Name(), name)
+}
+
+// Add parent with weight 1.
+func(u*SumUpdater)AddParent(name string){
+	u.MaddParent(name, 1)
 }
