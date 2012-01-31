@@ -23,12 +23,11 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
   
   if (j < N1Part && k < N2){
 
-
 	float mSat_mask;
 	if (mSat_map ==NULL){
 		mSat_mask = 1.0f;
 	}else{
-		mSat_mask = mSat_map[i];
+		mSat_mask = mSat_map[I];
 		if (mSat_mask == 0.0f){
 			mSat_mask = 1.0f; // do not divide by zero
 		}
@@ -38,7 +37,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
     if (Aex_map==NULL){
       Aex2_Mu0Msat = Aex2_Mu0Msat_mul / mSat_mask;
 	}else{
-      Aex2_Mu0Msat = (Aex2_Mu0Msat_mul / mSat_mask) * Aex_map[i];
+      Aex2_Mu0Msat = (Aex2_Mu0Msat_mul / mSat_mask) * Aex_map[I];
 	}
 
 

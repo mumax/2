@@ -14,8 +14,16 @@ load('llg')
 load('solver/rk12')
 savegraph("graph.png")
 
-setv('Msat', 800e3)
-setv('Aex', 1.3e-11)
+setv('Msat', 3*800e3)
+msat=makearray(1, 1, 1, 1)
+msat[0][0][0][0] = 1./3.
+setmask('msat', msat)
+echo("msat="+str(gets("<msat>")))
+
+setv('Aex', 2*1.3e-11)
+aex=makearray(1, 1, 1, 1)
+aex[0][0][0][0] = 1./2.
+setmask('aex', aex)
 setv('alpha', 1)
 setv('dt', 1e-15)
 setv('m_maxerror', 1./3000)
@@ -30,7 +38,7 @@ autosave("H_ex", "omf", ["Text"], 200e-12)
 autosave("H_ex", "gplot", [], 200e-12)
 autotabulate(["t", "<m>", "B_ext", "<H_eff>"], "m.txt", 5e-12)
 
-run(10e-9) #relax
+run(2e-9) #relax
 
 m=getv('<m>')
 echo("my="+str(m[1])+" want 0.123")
