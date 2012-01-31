@@ -40,8 +40,8 @@ type exch6Updater struct {
 func (u *exch6Updater) Update() {
 	e := GetEngine()
 	// HACK
-	Aex := float32(u.Aex.Scalar() / (Mu0 * GetEngine().Quant("msat").Scalar()))
+	Aex := u.Aex.Scalar() / (Mu0 * e.Quant("msat").Multiplier()[0])
 	stream := u.Hex.Array().Stream
-	gpu.Exchange6Async(u.Hex.Array(), u.m.Array(), Aex, e.CellSize(), e.Periodic(), stream)
+	gpu.Exchange6Async(u.Hex.Array(), u.m.Array(), e.Quant("msat").Array(), Aex, e.CellSize(), e.Periodic(), stream)
 	stream.Sync()
 }
