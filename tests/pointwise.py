@@ -23,22 +23,20 @@ setarray('m', m)
 
 autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
-autotabulate(["t", "<H>"], "H.txt", 10e-12)
-autotabulate(["t", "H_ext"], "H_ext.txt", 10e-13)
+autotabulate(["t", "B_ext"], "B_ext.txt", 10e-13)
 
-Hx = -24.6E-3 / mu0
-Hy =   4.3E-3 / mu0
-Hz =   0      / mu0 
-setpointwise('H_ext', 0, [0, 0, 0])
-setpointwise('H_ext', 1e-11, [0, 0, 0])
-setpointwise('H_ext', 1e-11, [Hx, Hy, Hz])
-setpointwise('H_ext', 2e-11, [Hx, Hy, Hz])
-setpointwise('H_ext', 2e-11, [0, 0, 0])
-setpointwise('H_ext', 3e-11, [0, 0, 0])
-setpointwise('H_ext', 3e-11, [-Hx, -Hy, -Hz])
-setpointwise('H_ext', 4e-11, [-Hx, -Hy, -Hz])
-setpointwise('H_ext', 4e-11, [0,0,0])
-setpointwise('H_ext', 999, [0,0,0])
+Bx = -24.6E-3
+By =   4.3E-3
+Bz =   0      
+setpointwise('B_ext', 0, [0, 0, 0])
+setpointwise('B_ext', 1e-11, [0, 0, 0])
+setpointwise('B_ext', 1e-11, [Bx, By, Bz])
+setpointwise('B_ext', 2e-11, [Bx, By, Bz])
+setpointwise('B_ext', 2e-11, [0, 0, 0])
+setpointwise('B_ext', 3e-11, [0, 0, 0])
+setpointwise('B_ext', 3e-11, [-Bx, -By, -Bz])
+setpointwise('B_ext', 4e-11, [-Bx, -By, -Bz])
+setpointwise('B_ext', 4e-11, [0,0,0])
 
 setpointwise('alpha', 0, 1)
 setpointwise('alpha', 1e-9, 0.02)

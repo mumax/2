@@ -1,16 +1,10 @@
 mumax2=../bin/mumax2
 
 TESTFILES=\
-		  access.py.out\
-		  demag.py.out\
-		  engine.py.out\
-		  micromag.py.out\
-		  pointwise.py.out\
-		  coulomb.py.out\
-		  dipole.py.out\
-		  #anisotropy.py.out\
-		  #Test.java.out\
-		  #api.py.out\
+	pointwise.py.out\
+	coulomb.py.out\
+	dipole.py.out\
+	addto.py.out\
 		  
 .PHONY: all
 all:

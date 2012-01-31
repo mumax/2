@@ -19,11 +19,11 @@ setscalar('Aex', 12e-13)
 
 m=[ [[[0.01]]], [[[0]]], [[[-1]]] ]
 setarray('m', m)
-Hx = 0 / mu0
-Hy = 0 / mu0
-Hz = 0.1 / mu0 
+Bx = 0 
+By = 0 
+Bz = 0.1 
 
-setvalue('H_ext', [Hx, Hy, Hz])
+setvalue('B_ext', [Bx, By, Bz])
 
 setscalar('dt', 1e-12)
 autosave("m", "omf", ["Text"], 10e-12)

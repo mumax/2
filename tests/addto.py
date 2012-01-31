@@ -24,11 +24,11 @@ setarray('m', m)
 autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 10e-12)
 
-run(2e-9) #relax
+steps(2)
 
-add_to("H", "H1")
-add_to("H", "H2")
-add_to("H", "H3")
+add_to("H_eff", "H1")
+add_to("H_eff", "H2")
+add_to("H_eff", "H3")
 
 Hx = -24.6E-3 / mu0
 Hy =   4.3E-3 / mu0
@@ -41,7 +41,5 @@ setv('H3', [0, 0, Hz])
 setv('alpha', 0.02)
 setv('dt', 0.2e-12)
 
-run(1e-9)
+steps(2)
 
-printstats()
-savegraph("graph.png")

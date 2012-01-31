@@ -22,10 +22,9 @@ func init() {
 func LoadMicromag(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
-	e.LoadModule("zeeman")
-	e.LoadModule("demagexch")
+	e.LoadModule("demag")
+	e.LoadModule("exchange6")
 	e.LoadModule("llg")
-	e.LoadModule("regions")
 
 	torque := e.Quant("torque")
 
