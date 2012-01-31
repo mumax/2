@@ -142,7 +142,7 @@ func writeOvf2Binary4(out io.Writer, array *host.Array) {
 	// encoding/binary is too slow
 	// Inlined for performance, terabytes of data will pass here...
 	bytes = (*[4]byte)(unsafe.Pointer(&controlnumber))[:]
-	bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0] // swap endianess
+	//bytes[0], bytes[1], bytes[2], bytes[3] = bytes[3], bytes[2], bytes[1], bytes[0] // swap endianess
 	out.Write(bytes)
 
 	// Here we loop over X,Y,Z, not Z,Y,X, because
