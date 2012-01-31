@@ -14,9 +14,12 @@ load('llg')
 load('solver/rk12')
 savegraph("graph.png")
 
-setv('Msat', 3*800e3)
+
+# fails for a != 1
+a=1.
+setv('Msat', a*800e3)
 msat=makearray(1, 1, 1, 1)
-msat[0][0][0][0] = 1./3.
+msat[0][0][0][0] = 1./a
 setmask('msat', msat)
 echo("msat="+str(gets("<msat>")))
 
