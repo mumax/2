@@ -16,9 +16,9 @@ import (
 )
 
 type SumUpdater struct {
-	sum *Quant
+	sum     *Quant
 	parents []*Quant
-	weight []float64
+	weight  []float64
 }
 
 func NewSumUpdater(sum *Quant) Updater {
@@ -49,7 +49,7 @@ func (u *SumUpdater) MAddParent(name string, weight float64) {
 	e := GetEngine()
 	parent := e.Quant(name)
 	sum := u.sum
-	if parent.unit != sum.unit {
+	if weight == 1 && parent.unit != sum.unit {
 		panic(InputErr("sum: mismatched units: " + sum.FullName() + " <-> " + parent.FullName()))
 	}
 	u.parents = append(u.parents, parent)
@@ -58,6 +58,6 @@ func (u *SumUpdater) MAddParent(name string, weight float64) {
 }
 
 // Add parent with weight 1.
-func(u*SumUpdater)AddParent(name string){
-	u.MaddParent(name, 1)
+func (u *SumUpdater) AddParent(name string) {
+	u.MAddParent(name, 1)
 }

@@ -11,6 +11,7 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	. "mumax/engine"
 )
 
@@ -43,7 +44,11 @@ func LoadBField(e *Engine) {
 	BField.SetUpdater(newBFieldUpdater())
 	maxwell.BExt = BExt
 	maxwell.B = BField
-	/////////TODO: if H fields exists add B/mu0
+	// Add B/mu0 to H_eff
+	if e.HasQuant("H_eff") {
+		sum := e.Quant("H_eff").Updater().(*SumUpdater)
+		sum.MAddParent("B", 1/Mu0)
+	}
 }
 
 // Updates the E field in a single convolution
