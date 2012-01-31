@@ -47,6 +47,10 @@ func (u *SumUpdater) Update() {
 // Adds a parent to the sum, i.e., its value*weight will be added to the sum
 func (u *SumUpdater) MAddParent(name string, weight float64) {
 	e := GetEngine()
+
+	// TODO: we should check if not yet added
+	Debug("MaddParent", u.sum.Name(), name, weight)
+
 	parent := e.Quant(name)
 	sum := u.sum
 	if weight == 1 && parent.unit != sum.unit {

@@ -154,6 +154,7 @@ func (q *Quant) Updater() Updater {
 	return q.updater
 }
 
+
 func (q *Quant) initChildrenParents() {
 	q.children = make(map[string]*Quant)
 	q.parents = make(map[string]*Quant)

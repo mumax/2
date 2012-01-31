@@ -24,12 +24,13 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
+save('kern_dipole', 'gplot', [], 'kern.gplot')
 autosave("m", "omf", ["Text"], 200e-12)
 autosave("H_ex", "omf", ["Text"], 200e-12)
 autosave("H_ex", "gplot", [], 200e-12)
 autotabulate(["t", "<m>", "B_ext", "<H_eff>"], "m.txt", 5e-12)
 
-run(2e-9) #relax
+run(10e-9) #relax
 
 m=getv('<m>')
 echo("my="+str(m[1])+" want 0.123")

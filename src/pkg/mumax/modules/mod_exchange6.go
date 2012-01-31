@@ -11,6 +11,7 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
@@ -38,7 +39,8 @@ type exch6Updater struct {
 
 func (u *exch6Updater) Update() {
 	e := GetEngine()
-	Aex := float32(u.Aex.Scalar())
+	// HACK
+	Aex := float32(u.Aex.Scalar() / (Mu0 * GetEngine().Quant("msat").Scalar()))
 	stream := u.Hex.Array().Stream
 	gpu.Exchange6Async(u.Hex.Array(), u.m.Array(), Aex, e.CellSize(), e.Periodic(), stream)
 	stream.Sync()
