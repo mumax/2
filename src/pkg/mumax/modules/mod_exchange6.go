@@ -24,24 +24,28 @@ func init() {
 func LoadExch6(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
-	Aex := e.AddNewQuant("Aex", SCALAR, VALUE, Unit("J/m"), "exchange coefficient") // TODO: mask
+	Aex := e.AddNewQuant("Aex", SCALAR, MASK, Unit("J/m"), "exchange coefficient") // TODO: mask
 	Hex := e.AddNewQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_ex")
-	e.Depends("H_ex", "Aex", "m")
-	Hex.SetUpdater(&exch6Updater{m: e.Quant("m"), Aex: Aex, Hex: Hex})
+	e.Depends("H_ex", "Aex", "Msat", "m")
+	Hex.SetUpdater(&exch6Updater{m: e.Quant("m"), Aex: Aex, Hex: Hex, Msat: e.Quant("msat")})
 }
 
 type exch6Updater struct {
-	m, Aex, Hex *Quant
+	m, Aex, Hex, Msat *Quant
 }
 
 func (u *exch6Updater) Update() {
 	e := GetEngine()
-	// HACK
-	Aex := u.Aex.Scalar() / (Mu0 * e.Quant("msat").Multiplier()[0])
+	m := u.m
+	Aex := u.Aex
+	Hex := u.Hex
+	Msat := u.Msat
+
+	Aex2_mu0MsatMul := (2 * u.Aex.Multiplier()[0]) / (Mu0 * Msat.Multiplier()[0])
 	stream := u.Hex.Array().Stream
-	gpu.Exchange6Async(u.Hex.Array(), u.m.Array(), e.Quant("msat").Array(), Aex, e.CellSize(), e.Periodic(), stream)
+	gpu.Exchange6Async(Hex.Array(), m.Array(), Msat.Array(), Aex.Array(), Aex2_mu0MsatMul, e.CellSize(), e.Periodic(), stream)
 	stream.Sync()
 }
