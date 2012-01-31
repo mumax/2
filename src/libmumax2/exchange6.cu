@@ -26,8 +26,6 @@ __global__ void exchange6Kern(float* h, float* m, float* mPart0, float* mPart2,
 	float m0 = m[I]; // mag component of central cell 
 	float m1, m2 ;   // mag component of neighbors in 2 directions
 	
-	// Now add Neighbors.
-
     // neighbors in X direction
 	int idx;
     if (i-1 >= 0){                                // neighbor in bounds...
@@ -125,15 +123,17 @@ void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, 
   dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
   //int NPart = N0 * N1Part * N2;
 
-  float fac0 = Aex/(cellSizeX * cellSizeX);
-  float fac1 = Aex/(cellSizeY * cellSizeY);
-  float fac2 = Aex/(cellSizeZ * cellSizeZ);
+  float fac0 = (2*Aex)/(cellSizeX * cellSizeX);
+  float fac1 = (2*Aex)/(cellSizeY * cellSizeY);
+  float fac2 = (2*Aex)/(cellSizeZ * cellSizeZ);
+  //printf("exchange factors %g %g %g\n", fac0, fac1, fac2); // OK
 
 	int nDev = nDevice();
 
 	float** H = hx;
     float** M = mx;
 	for(int c=0; c<3; c++){        // for all 3 components
+		if (c==0){H = hx; M = mx;}
 		if (c==1){H = hy; M = my;}
 		if (c==2){H = hz; M = mz;}
 
@@ -152,6 +152,7 @@ void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, 
 					mPart2 = NULL;
 				}
 			}
+			//printf("exch dev=%d mPart0=%p mPart2=%p\n", dev, mPart0, mPart2); // OK
 
   			for(int i=0; i<N0; i++){   // for all layers. TODO: 2D version
     			exchange6Kern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], mPart0, mPart2, N0, N1Part, N2, periodic0, periodic2, fac0, fac1, fac2, i);
