@@ -49,6 +49,8 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz, float* drho,
     }
 	float Ex1 = Ex[idx];
 
+	float j1 = (Ex0+Ex1) / (r0+r1)
+
  	if (i+1 < N0){
       idx = (i+1)*N1Part*N2 + j*N2 + k;
     } else {
