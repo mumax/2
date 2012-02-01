@@ -37,6 +37,7 @@ setpointwise('B_ext', 3e-11, [0, 0, 0])
 setpointwise('B_ext', 3e-11, [-Bx, -By, -Bz])
 setpointwise('B_ext', 4e-11, [-Bx, -By, -Bz])
 setpointwise('B_ext', 4e-11, [0,0,0])
+setpointwise('B_ext', 99999, [0,0,0]) # stay at zero for about forever.
 
 setpointwise('alpha', 0, 1)
 setpointwise('alpha', 1e-9, 0.02)

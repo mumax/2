@@ -253,7 +253,9 @@ func (e *Engine) addDerivedQuant(name string) {
 	if strings.HasPrefix(name, "<") && strings.HasSuffix(name, ">") {
 		origname := name[1 : len(name)-1]
 		original := e.Quant(origname)
-
+		if original.kind == VALUE {
+			panic(InputErrF(original.Name(), "is not space-dependent, can not take its average."))
+		}
 		e.AddNewQuant(name, original.nComp, VALUE, original.unit)
 		derived := e.Quant(name)
 		e.Depends(name, origname)
