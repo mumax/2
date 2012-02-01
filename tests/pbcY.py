@@ -1,5 +1,4 @@
 from mumax2 import *
-from mumax2_geom import *
 from mumax2_magstate import *
 
 Nx = 128
