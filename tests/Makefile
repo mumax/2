@@ -5,6 +5,7 @@ TESTFILES=\
 	coulomb.py.out\
 	dipole.py.out\
 	addto.py.out\
+	current.py.out\
 		  
 .PHONY: all
 all:

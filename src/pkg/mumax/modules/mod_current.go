@@ -14,9 +14,16 @@ import (
 	. "mumax/engine"
 )
 
+// Register this module
+func init() {
+	RegisterModule("current", "Electrical currents", LoadCurrent)
+}
+
 func LoadCurrent(e *Engine) {
 	if e.HasQuant("j") {
 		return
 	}
+	LoadCoulomb(e)
 	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
+	e.AddNewQuant("r", SCALAR, MASK, Unit("Ωm"), "electrical resistivity")
 }
