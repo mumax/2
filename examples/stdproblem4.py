@@ -56,11 +56,10 @@ autotabulate(["t", "<m>"], "m.txt", 10e-12)
 
 # run with field
 
-# H, as the name implies, is in A/m
-Hx = -24.6E-3 / mu0
-Hy =   4.3E-3 / mu0
-Hz =   0      / mu0 
-setv('H_ext', [Hx, Hy, Hz])
+Bx = -24.6E-3 
+By =   4.3E-3 
+Bz =   0      
+setv('B_ext', [Bx, By, Bz])
 run(1e-9)
 
 
