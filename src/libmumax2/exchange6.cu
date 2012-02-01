@@ -130,7 +130,6 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 }
 
 
-// Python-style modulo (returns positive int)
 int mod(int a, int b){
 	return (a%b+b)%b;
 }
