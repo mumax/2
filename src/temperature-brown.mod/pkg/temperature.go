@@ -38,7 +38,7 @@ func LoadTempBrown(e *Engine) {
 	Htherm.SetUpdater(NewTempBrownUpdater(Htherm))
 
 	// Add thermal field to total field
-	hfield := e.Quant("H")
+	hfield := e.Quant("H_eff")
 	sum := hfield.GetUpdater().(*SumUpdater)
 	sum.AddParent("H_therm")
 }
