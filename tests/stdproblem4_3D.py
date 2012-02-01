@@ -26,10 +26,10 @@ autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 10e-12)
 
 run(2e-9) #relax
 
-Hx = -24.6E-3 / mu0
-Hy =   4.3E-3 / mu0
-Hz =   0      / mu0 
-setv('H_ext', [Hx, Hy, Hz])
+Bx = -24.6E-3
+By =   4.3E-3
+Bz =   0      
+setv('B_ext', [Bx, By, Bz])
 setv('alpha', 0.02)
 setv('dt', 0.2e-12)
 
