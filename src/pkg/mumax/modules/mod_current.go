@@ -12,6 +12,7 @@ package modules
 
 import (
 	. "mumax/engine"
+	"mumax/gpu"
 )
 
 // Register this module
@@ -24,6 +25,26 @@ func LoadCurrent(e *Engine) {
 		return
 	}
 	LoadCoulomb(e)
-	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
-	e.AddNewQuant("r", SCALAR, MASK, Unit("Ωm"), "electrical resistivity")
+	E := e.Quant("E")
+	j := e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
+	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ωm"), "electrical resistivity")
+	e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
+
+	e.Depends("diff_rho", "j")
+	e.Depends("j", "E", "r")
+	e.AddPDE1("rho", "diff_rho")
+
+	j.SetUpdater(&JUpdater{j: j, E: E, r: r})
+}
+
+
+type JUpdater struct {
+	j, E, r *Quant
+}
+
+
+func (u *JUpdater) Update() {
+	j := u.j.Array()
+	gpu.CurrentDensityAsync(j, u.E.Array(), u.r.Array(), u.r.Multiplier()[0], j.Stream)
+	j.Stream.Sync()
 }
