@@ -44,7 +44,7 @@ setv('t', 0)      # reset time to zero
 
 # Set up an applied field
 B = -0.3 # Tesla
-setv('H_ext', [0, 0, B/mu0])
+setv('B_ext', [0, 0, B])
 
 
 # Schedule output:
