@@ -28,24 +28,25 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
   if (j < N1Part && k < N2){
 
 	// central cell
-    float r0 = rmap[I] * rMul;
-	float E0 = Ex[I];
+    float r1 = rmap[I] * rMul;
+	float E1 = Ex[I];
 
     // neighbors in X direction
-	float E1 = 0;
-	float r1 = 1.0f/0.0f;
+	{
+	float E0 = 0;
+	float r0 = 1.0f/0.0f;
     if (i-1 >= 0){                                // neighbor in bounds...
       int idx = (i-1)*N1Part*N2 + j*N2 + k;       // ... no worries
-	  E1 = Ex[idx];
-	  r1 = rmap[idx] * rMul;
+	  E0 = Ex[idx];
+	  r0 = rmap[idx] * rMul;
     } else {                                      // neighbor out of bounds...
 		if(wrap0){                                // ... PBC?
 			int idx = (N0-1)*N1Part*N2 + j*N2 + k;// yes: wrap around!
-	  		E1 = Ex[idx];
-	  		r1 = rmap[idx] * rMul;
+	  		E0 = Ex[idx];
+	  		r0 = rmap[idx] * rMul;
 		}
     }
-	float j1 = (E0+E1) / (r0+r1);
+	float j0 = (E1+E0) / (r1+r0);
 
 	float E2 = 0;
 	float r2 = 1.0f/0.0f;
@@ -60,67 +61,82 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
 	  		r2 = rmap[idx] * rMul;
 		}
     } 
-	float j2 = (E0+E2) / (r0+r2);
+	float j2 = (E1+E2) / (r1+r2);
 
-	jx[I] = 0.5f*(j1+j2);
+	jx[I] = 0.5f*(j0+j2);
+	}
 
-  //  float H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
 
-  //  // neighbors in Z direction
-  //  if (k-1 >= 0){
-  //    idx = i*N1Part*N2 + j*N2 + (k-1);
-  //  } else {
-  //  	if(wrap2){
-  //  		idx = i*N1Part*N2 + j*N2 + (N2-1);
-  //  	}else{
-  //    		idx = I;
-  //  	}
-  //  }
-  //  m1 = m[idx];
+    // neighbors in Z direction
+	{
+	float E0 = 0;
+	float r0 = 1.0f/0.0f;
+    if (k-1 >= 0){                                
+      int idx = i*N1Part*N2 + j*N2 + (k-1);
+	  E0 = Ez[idx];
+	  r0 = rmap[idx] * rMul;
+    } else {                                     
+		if(wrap2){                              
+  			int idx = i*N1Part*N2 + j*N2 + (N2-1);
+	  		E0 = Ez[idx];
+	  		r0 = rmap[idx] * rMul;
+		}
+    }
+	float j0 = (E1+E0) / (r1+r0);
 
-  //  if (k+1 < N2){
-  //    idx =  i*N1Part*N2 + j*N2 + (k+1);
-  //  } else {
-  //  	if(wrap2){
-  //  		idx = i*N1Part*N2 + j*N2 + (0);
-  //  	}else{
-  //    		idx = I;
-  //  	}
-  //  } 
-  //  m2 = m[idx];
-  // 
-  //  H += Aex2_Mu0Msat * cellz_2 * ((m1-m0) + (m2-m0));
+	float E2 = 0;
+	float r2 = 1.0f/0.0f;
+ 	if (k+1 < N0){
+  	  int idx =  i*N1Part*N2 + j*N2 + (k+1);
+	  E2 = Ez[idx];
+	  r2 = rmap[idx] * rMul;
+    } else {
+		if(wrap2){
+  	        int idx = i*N1Part*N2 + j*N2 + (0);
+	  		E2 = Ez[idx];
+	  		r2 = rmap[idx] * rMul;
+		}
+    } 
+	float j2 = (E1+E2) / (r1+r2);
 
-  //  // Here be dragons.
-  //  // neighbors in Y direction
-  //  if (j-1 >= 0){                                 // neighbor in bounds...
-  //    idx = i*N1Part*N2 + (j-1)*N2 + k;            // ...no worries
-  //    m1 = m[idx];
-  //  } else {                                       // neighbor out of bounds...
-  //  	if(mPart0 != NULL){                        // there is an adjacent part (either PBC or multi-GPU)
-  //  		idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
-  //  		m1 = mPart0[idx];
-  //  	}else{                                     // no adjacent part: use central m (Neumann BC)
-  //    		m1 = m[I];
-  //  	}
-  //  }
+	jz[I] = 0.5f*(j0+j2);
+	}
 
-  //  if (j+1 < N1Part){
-  //    idx = i*N1Part*N2 + (j+1)*N2 + k;
-  //    m2 = m[idx];
-  //  } else {
-  //  	if(mPart2 != NULL){
-  //  		idx = i*N1Part*N2 + (0)*N2 + k;
-  //          m2 = mPart2[idx];
-  //  	}else{
-  //  		m2 = m[I];
-  //  	}
-  //  } 
-  //  H += Aex2_Mu0Msat * celly_2 * ((m1-m0) + (m2-m0));
+    // Here be dragons.
+    // neighbors in Y direction
+	{
+	float E0 = 0;
+	float r0 = 1.0f/0.0f;
+    if (j-1 >= 0){                                     // neighbor in bounds...
+      int idx = i*N1Part*N2 + (j-1)*N2 + k;            // ...no worries
+	  E0 = Ey[idx];
+	  r0 = rmap[idx] * rMul;
+    } else {                                           // neighbor out of bounds...
+    	if(EyPart0 != NULL){                           // there is an adjacent part (either PBC or multi-GPU)
+    		int idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
+	  		E0 = Ey[idx];
+	  		r0 = rmap[idx] * rMul;
+    	}
+    }
+	float j0 = (E1+E0) / (r1+r0);
 
-  //  // Write back to global memory
-  //  h[I] = H;
+	float E2 = 0;
+	float r2 = 1.0f/0.0f;
+    if (j+1 < N1Part){
+      int idx = i*N1Part*N2 + (j+1)*N2 + k;
+	  E2 = Ey[idx];
+	  r2 = rmap[idx] * rMul;
+    } else {
+    	if(EyPart2 != NULL){
+    		int idx = i*N1Part*N2 + (0)*N2 + k;
+	  		E2 = Ey[idx];
+	  		r2 = rmap[idx] * rMul;
+    	}
+    } 
+	float j2 = (E1+E2) / (r1+r2);
 
+	jz[I] = 0.5f*(j0+j2);
+	}
   }
 }
 
