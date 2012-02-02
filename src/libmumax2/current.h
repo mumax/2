@@ -19,7 +19,7 @@ void currentDensityAsync(float** jx, float** jy, float** jz,
                          float** rMap, float rMul, 
                          int N0, int N1Part, int N2,
                          int periodic0, int periodic1, int periodic2, 
-                         float cellx, float celly, float cellz, 
+                         //float cellx, float celly, float cellz, 
                          CUstream* streams);
 
 

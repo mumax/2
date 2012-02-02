@@ -44,7 +44,8 @@ type JUpdater struct {
 
 
 func (u *JUpdater) Update() {
+	e := GetEngine()
 	j := u.j.Array()
-	gpu.CurrentDensityAsync(j, u.E.Array(), u.r.Array(), u.r.Multiplier()[0], j.Stream)
+	gpu.CurrentDensityAsync(j, u.E.Array(), u.r.Array(), u.r.Multiplier()[0], e.Periodic(), j.Stream)
 	j.Stream.Sync()
 }

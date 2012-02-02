@@ -18,7 +18,8 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
 								   float* rPart0, float* rPart2,
 								   int N0, int N1Part, int N2, 
 								   int wrap0, int wrap2, 
-								   float cellx, float celly, float cellz, int i){
+								   //float cellx, float celly, float cellz,
+								   int i){
 
   //  i is passed
   int j = blockIdx.x * blockDim.x + threadIdx.x;
@@ -135,7 +136,7 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
     } 
 	float j2 = (E1+E2) / (r1+r2);
 
-	jz[I] = 0.5f*(j0+j2);
+	jy[I] = 0.5f*(j0+j2);
 	}
   }
 }
@@ -143,7 +144,10 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
 
 
 #define BLOCKSIZE 16
-void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellx, float celly, float cellz, CUstream* streams){
+void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, 
+						int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, 
+						//float cellx, float celly, float cellz, 
+						CUstream* streams){
 
   assert(rMap != NULL);
 
@@ -181,7 +185,8 @@ void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float**
 			    rMap[dev], rMul, rPart0, rPart2,
 				N0, N1Part, N2, 
 				periodic0, periodic2, 
-				cellx, celly, cellz, i);
+				//cellx, celly, cellz,
+				i);
 		}
 	}
 }
