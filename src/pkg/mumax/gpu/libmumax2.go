@@ -159,7 +159,6 @@ func Normalize(m, normMap *Array) {
 	m.Stream.Sync()
 }
 
-
 // Partial sums (see reduce.h)
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialSumAsync(

@@ -529,7 +529,6 @@ func (a API) Add_To(sumQuantity, newQuantity string) {
 	Log("Added new quantity", term.FullName(), "to", sumQuant.Name())
 }
 
-
 // Add a new quantity to the multi-physics engine, its
 // value is the maximum of the absolute value of inputQuantity.
 // E.g.: New_MaxAbs("max_torque", "torque") adds a new quantity

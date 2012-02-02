@@ -22,7 +22,6 @@ type ReduceUpdater struct {
 	reduce  gpu.Reductor
 }
 
-
 // New reducing updater.
 // Automatically sets the dependency in -> out.
 func NewReduceUpdater(in, out *Quant) *ReduceUpdater {
@@ -82,7 +81,6 @@ func (this *MaxAbsUpdater) Update() {
 }
 
 // ________________________________________________________________________________ maxnorm
-
 
 // Updates the maximum norm of a 3-vector array
 type MaxNormUpdater ReduceUpdater
