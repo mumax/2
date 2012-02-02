@@ -13,8 +13,8 @@ package engine
 import (
 	. "mumax/common"
 	"io"
-	"fmt"
 	"image"
+	"image/png"
 	"math"
 )
 
@@ -33,55 +33,30 @@ func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 		panic(InputErr("gplot output format does not take options"))
 	}
 
-	data := q.Buffer().Array
-	gridsize := q.Array().Size3D()
-	cellsize := GetEngine().CellSize()
-	ncomp := len(data)
+	Assert(q.NComp() == 1)
 
-	// Here we loop over X,Y,Z, not Z,Y,X, because
-	// internal in C-order == external in Fortran-order
-	for i := 0; i < gridsize[X]; i++ {
-		x := float64(i) * cellsize[X]
-		for j := 0; j < gridsize[Y]; j++ {
-			y := float64(j) * cellsize[Y]
-			for k := 0; k < gridsize[Z]; k++ {
-				z := float64(k) * cellsize[Z]
-				_, err := fmt.Fprint(out, z, " ", y, " ", x, "\t")
-				if err != nil {
-					panic(IOErr(err.String()))
-				}
-				for c := 0; c < ncomp; c++ {
-					_, err := fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
-					if err != nil {
-						panic(IOErr(err.String()))
-					}
-				}
-				_, err = fmt.Fprint(out, "\n")
-				if err != nil {
-					panic(IOErr(err.String()))
-				}
-			}
-			_, err := fmt.Fprint(out, "\n")
-			if err != nil {
-				panic(IOErr(err.String()))
-			}
-		}
-		_, err := fmt.Fprint(out, "\n")
-		if err != nil {
-			panic(IOErr(err.String()))
-		}
+	data := q.Buffer().Array[0]
+	min, max := Extrema(q.Buffer().List)
+	err := png.Encode(out, DrawScalar(data, min, max))
+	if err != nil {
+		panic(err)
 	}
-
 }
 
+
+func Extrema(data []float32)(min, max float32){
+	min = data[0]
+	max = data[0]
+	for _,d := range data{
+		if d < min{min=d}
+		if d > max{max=d}
+	}
+	return
+}
 
 
 // Writes as png
 //func PNG(out io.Writer, t tensor.Interface) {
-//	err := png.Encode(out, DrawTensor(t))
-//	if err != nil {
-//		panic(err)
-//	}
 //}
 //
 //// Draws rank 4 tensor (3D vector field) as image
