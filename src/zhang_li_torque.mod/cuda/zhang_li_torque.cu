@@ -28,7 +28,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
                                        int dev,
                                        int Nx, int NyPart, int Nz){
 	int i = threadindex;
-	if (i < Npart) {
+	if (i < Npart && Msat[i]!=0.0f) {
 
 		int x = i%Nx;
 		int y = ((i/Nx)%NyPart+(NyPart*dev));
@@ -54,7 +54,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 		float mx1 = 0.f, mx2 = 0.f, my1 = 0.f, my2 = 0.f, mz1 = 0.f, mz2 = 0.f;
 
 		// derivative in X direction
-		if (x-1 >= 0){
+		if (x-1 >= 0 && Msat[i-1] != 0.0f){
 			int idx = i-1;
 			mx1 = mx[idx];
 			my1 = my[idx];
@@ -69,7 +69,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 		  my1 = my[idx];
 		  mz1 = mz[idx];
 		}
-		if (x+1 < Nx){
+		if (x+1 < Nx && Msat[i+1] != 0.0f){
 			int idx = i+1;
 			mx2 = mx[idx];
 			my2 = my[idx];
@@ -86,7 +86,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 
 
 		// derivative in Y direction
-		if (y-1 >= 0){
+		if (y-1 >= 0 && Msat[i-NyPart] != 0.0f){
 			int idx = i - NyPart;
 			mx1 = mx[idx];
 			my1 = my[idx];
@@ -97,7 +97,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 			my1 = my[idx];
 			mz1 = mz[idx];
 		}
-		if (y+1 < Npart/(Nx*Nz)){
+		if (y+1 < Npart/(Nx*Nz) && Msat[i+NyPart] != 0.0f){
 			int idx = i+NyPart;
 			mx2 = mx[idx];
 			my2 = my[idx];
@@ -114,7 +114,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 
 
 		// derivative in Z direction
-		if (z-1 >= 0){
+		if (z-1 >= 0 && Msat[i-Nx*NyPart] != 0.0f){
 			int idx = i - Nx*NyPart;
 			mx1 = mx[idx];
 			my1 = my[idx];
@@ -125,7 +125,7 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 			my1 = my[idx];
 			mz1 = mz[idx];
 		}
-		if (z+1 < Nz){
+		if (z+1 < Nz && Msat[i+Nx*NyPart] != 0.0f){
 			int idx = i + Nx*NyPart;
 			mx2 = mx[idx];
 			my2 = my[idx];
