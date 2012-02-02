@@ -35,6 +35,7 @@ GOFILES=\
 	format_txt.go\
 	format_gplot.go\
 	format_binary.go\
+	format_png.go\
 	input.go\
 	table.go\
 	arraypool.go\
