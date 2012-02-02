@@ -22,4 +22,4 @@ examples.tex:
 
 .PHONY: clean
 clean:
-	rm -f *.aux *.bbl *.blg *.ilg *.log *.toc *.out manual.pdf *.idx *.ind modules
+	rm -f *.aux *.bbl *.blg *.ilg *.log *.toc *.out manual.pdf *.idx *.ind modules/*.dot modules/*.pdf modules/*.aux

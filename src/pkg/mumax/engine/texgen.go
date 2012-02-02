@@ -77,7 +77,8 @@ func moduleTexGen(out io.Writer, module string) {
 	fmt.Fprintln(out, `Load this module with \texttt{\textbf{load}("`+module+`")}`)
 	fmt.Fprintln(out, `\subsubsection*{Module description}`)
 	fmt.Fprintln(out, modules[module].Description, `\\`)
-	//fmt.Fprintln(out, `\include{` + noslash(module) + `}`)
+	exec.Command("touch", graphbase+".tex").Run()
+	fmt.Fprintln(out, `\input{`+"modules/"+noslash(module)+`}`)
 
 	// provided quantities
 	if len(engine.quantity) > 3 {
