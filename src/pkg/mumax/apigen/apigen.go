@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"fmt"
 	"os"
+	"sort"
 )
 
 // the package name
@@ -38,6 +39,15 @@ func APIGen() {
 	method := make(map[string]reflect.Value)
 	frontend.AddMethods(method, new(engine.API))
 
+	// order by alphabetic order
+	keys := make([]string, len(method))
+	i:=0
+	for k,_ := range method {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+
 	// target languages
 	langs := []Lang{&Python{}, &Tex{}} //, &Java{}, &Lua{}}
 
@@ -52,19 +62,19 @@ func APIGen() {
 
 		lang.WriteHeader(out)
 
-		for name, meth := range method {
+		for _,name := range keys {
 			header, ok := headers[name]
 			if !ok {
 				panic(name)
 			}
-			returnTypes := make([]reflect.Type, meth.Type().NumOut())
+			returnTypes := make([]reflect.Type, method[name].Type().NumOut())
 			for i := range returnTypes {
-				returnTypes[i] = meth.Type().Out(i)
+				returnTypes[i] = method[name].Type().Out(i)
 			}
 			comment := header.comment
 			argnames := header.args
 			//fmt.Println(name, comment, argnames)
-			lang.WriteFunc(out, frontend.ConvertCase(name), comment, argnames, argTypes(meth), returnTypes)
+			lang.WriteFunc(out, frontend.ConvertCase(name), comment, argnames, argTypes(method[name]), returnTypes)
 		}
 
 		lang.WriteFooter(out)

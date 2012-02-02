@@ -14,7 +14,7 @@ mumax2-api.tex:
 
 .PHONY: flags.tex
 flags.tex:
-	mumax2 -h 2> flags.tex
+	../../bin/mumax2 -h 2> flags.tex
 
 .PHONY: examples.tex
 examples.tex:

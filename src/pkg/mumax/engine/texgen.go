@@ -22,6 +22,7 @@ import (
 	"os"
 	"io"
 	"fmt"
+	"sort"
 )
 
 // INTERNAL: generates LaTeX files with documentation.
@@ -32,8 +33,17 @@ func TexGen() {
 	out := OpenWRONLY("modules.tex")
 	defer out.Close()
 
-	for mod := range modules {
-		moduleTexGen(out, mod)
+	// order by alphabetic order
+	keys := make([]string, len(modules))
+	i:=0
+	for k,_ := range modules {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+
+	for _,name := range keys {
+		moduleTexGen(out, name)
 	}
 
 }
