@@ -26,9 +26,9 @@ func LoadMicromag(e *Engine) {
 	e.LoadModule("exchange6")
 	e.LoadModule("llg")
 	e.LoadModule("solver/rk12")
-	e.Quant("dt").SetScalar("1e-15")
-	e.Quant("mindt").SetScalar("1e-15")
-	e.Quant("m_maxerror").SetScalar(1/2000)
+	e.Quant("dt").SetScalar(1e-15)
+	e.Quant("mindt").SetScalar(1e-15)
+	e.Quant("m_maxerror").SetScalar(1 / 2000)
 
 	torque := e.Quant("torque")
 

@@ -671,27 +671,28 @@ func Exchange6Async(h, m, msat, aex *Array, Aex2_mu0Msatmul float64, cellSize []
 
 
 func CurrentDensityAsync(j, Efield, r *Array, rmul float64, stream Stream) {
-	CheckSize(j.Size3D(), Efield.Size3D())
-	CheckSize(j.Size3D(), r.Size3D())
-	C.currentDensityAsync(
-		(**C.float)(unsafe.Pointer(&(j.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Efield.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Efield.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Efield.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(r.pointer[0]))),
-		(C.float)(rmul),
-		(C.int)(j.PartSize()[X]),
-		(C.int)(j.PartSize()[Y]),
-		(C.int)(j.PartSize()[Z]),
-		(C.int)(periodic[X]),
-		(C.int)(periodic[Y]),
-		(C.int)(periodic[Z]),
-		(C.float)(cellSize[X]),
-		(C.float)(cellSize[Y]),
-		(C.float)(cellSize[Z]),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
+	panic("//")
+	//	CheckSize(j.Size3D(), Efield.Size3D())
+	//	CheckSize(j.Size3D(), r.Size3D())
+	//	C.currentDensityAsync(
+	//		(**C.float)(unsafe.Pointer(&(j.Comp[X].pointer[0]))),
+	//		(**C.float)(unsafe.Pointer(&(j.Comp[Y].pointer[0]))),
+	//		(**C.float)(unsafe.Pointer(&(j.Comp[Z].pointer[0]))),
+	//		(**C.float)(unsafe.Pointer(&(Efield.Comp[X].pointer[0]))),
+	//		(**C.float)(unsafe.Pointer(&(Efield.Comp[Y].pointer[0]))),
+	//		(**C.float)(unsafe.Pointer(&(Efield.Comp[Z].pointer[0]))),
+	//		(**C.float)(unsafe.Pointer(&(r.pointer[0]))),
+	//		(C.float)(rmul),
+	//		(C.int)(j.PartSize()[X]),
+	//		(C.int)(j.PartSize()[Y]),
+	//		(C.int)(j.PartSize()[Z]),
+	//		(C.int)(periodic[X]),
+	//		(C.int)(periodic[Y]),
+	//		(C.int)(periodic[Z]),
+	//		(C.float)(cellSize[X]),
+	//		(C.float)(cellSize[Y]),
+	//		(C.float)(cellSize[Z]),
+	//		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
 // DEBUG: sets all values to their X (i) index

@@ -27,7 +27,7 @@ func LoadCurrent(e *Engine) {
 	LoadCoulomb(e)
 	E := e.Quant("E")
 	j := e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
-	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ωm"), "electrical resistivity")
+	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ohm*m"), "electrical resistivity")
 	e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
 
 	e.Depends("diff_rho", "j")

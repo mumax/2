@@ -23,6 +23,7 @@ func init() {
 
 func LoadAnisUniaxial(e *Engine) {
 	LoadHField(e)
+	LoadMagnetization(e)
 
 	Hanis := e.AddNewQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
 	ku := e.AddNewQuant("Ku", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K")
