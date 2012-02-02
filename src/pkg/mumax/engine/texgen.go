@@ -35,14 +35,14 @@ func TexGen() {
 
 	// order by alphabetic order
 	keys := make([]string, len(modules))
-	i:=0
-	for k,_ := range modules {
+	i := 0
+	for k, _ := range modules {
 		keys[i] = k
 		i++
 	}
 	sort.Strings(keys)
 
-	for _,name := range keys {
+	for _, name := range keys {
 		moduleTexGen(out, name)
 	}
 

@@ -41,8 +41,8 @@ func APIGen() {
 
 	// order by alphabetic order
 	keys := make([]string, len(method))
-	i:=0
-	for k,_ := range method {
+	i := 0
+	for k, _ := range method {
 		keys[i] = k
 		i++
 	}
@@ -62,7 +62,7 @@ func APIGen() {
 
 		lang.WriteHeader(out)
 
-		for _,name := range keys {
+		for _, name := range keys {
 			header, ok := headers[name]
 			if !ok {
 				panic(name)
