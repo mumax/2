@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 /// 2D, plane per plane, i=plane index
-__global__ void currentDensityKern(float* jx, float* jy, float* jz, float* drho,
+__global__ void currentDensityKern(float* jx, float* jy, float* jz, 
 								   float* Ex, float* Ey, float* Ez,
 								   float* EyPart0, float* EyPart2,
 								   float* rmap, float rMul,
@@ -27,40 +27,42 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz, float* drho,
   
   if (j < N1Part && k < N2){
 
-//    float r;
-//    if (rmap==NULL){
-//      r = rMul;
-//	}else{
-//      r = rMul * rmap[I];
-//	}
+	// central cell
+    float r0 = rmap[I] * rMul;
+	float E0 = Ex[I];
 
-	
-	float Ex0 = Ex[I];
     // neighbors in X direction
-	int idx;
+	float E1 = 0;
+	float r1 = 1.0f/0.0f;
     if (i-1 >= 0){                                // neighbor in bounds...
-      idx = (i-1)*N1Part*N2 + j*N2 + k;           // ... no worries
+      int idx = (i-1)*N1Part*N2 + j*N2 + k;       // ... no worries
+	  E1 = Ex[idx];
+	  r1 = rmap[idx] * rMul;
     } else {                                      // neighbor out of bounds...
 		if(wrap0){                                // ... PBC?
-			idx = (N0-1)*N1Part*N2 + j*N2 + k;    // yes: wrap around!
-		}else{                                    
-      		idx = I;                              // no: use central m (Neumann BC) 
+			int idx = (N0-1)*N1Part*N2 + j*N2 + k;// yes: wrap around!
+	  		E1 = Ex[idx];
+	  		r1 = rmap[idx] * rMul;
 		}
     }
-	float Ex1 = Ex[idx];
+	float j1 = (E0+E1) / (r0+r1);
 
-	float j1 = (Ex0+Ex1) / (r0+r1)
-
+	float E2 = 0;
+	float r2 = 1.0f/0.0f;
  	if (i+1 < N0){
-      idx = (i+1)*N1Part*N2 + j*N2 + k;
+      int idx = (i+1)*N1Part*N2 + j*N2 + k;
+	  E2 = Ex[idx];
+	  r2 = rmap[idx] * rMul;
     } else {
 		if(wrap0){
-			idx = (0)*N1Part*N2 + j*N2 + k;
-		}else{
-      		idx = I;
+			int idx = (0)*N1Part*N2 + j*N2 + k;
+	  		E2 = Ex[idx];
+	  		r2 = rmap[idx] * rMul;
 		}
     } 
-	float Ex2 = Ex[idx]; 
+	float j2 = (E0+E2) / (r0+r2);
+
+	jx[I] = 0.5f*(j1+j2);
 
   //  float H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
 
@@ -125,7 +127,10 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz, float* drho,
 
 
 #define BLOCKSIZE 16
-void currentDensityAsync(float** jx, float** jy, float** jz, float** drho, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellx, float celly, float cellz, CUstream* streams){
+void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellx, float celly, float cellz, CUstream* streams){
+
+  assert(rMap != NULL);
+
   dim3 gridsize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
   dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
   //int NPart = N0 * N1Part * N2;
@@ -154,7 +159,7 @@ void currentDensityAsync(float** jx, float** jy, float** jz, float** drho, float
 
 		for(int i=0; i<N0; i++){   // for all layers. TODO: 2D version
 			currentDensityKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(
-				jx[dev], jy[dev], jz[dev], drho[dev],
+				jx[dev], jy[dev], jz[dev],
 				Ex[dev], Ey[dev], Ez[dev],
 				EyPart0, EyPart2, 
 			    rMap[dev], rMul, rPart0, rPart2,

@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-void currentDensityAsync(float** jx, float** jy, float** jz, float** drho,
+void currentDensityAsync(float** jx, float** jy, float** jz,
                          float** Ex, float** Ey, float** Ez, 
                          float** rMap, float rMul, 
                          int N0, int N1Part, int N2,
