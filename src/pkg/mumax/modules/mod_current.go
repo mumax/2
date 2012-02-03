@@ -28,15 +28,31 @@ func LoadCurrent(e *Engine) {
 	E := e.Quant("E")
 	j := e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
 	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ohm*m"), "electrical resistivity")
-	e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
+	drho := e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
 
 	e.Depends("diff_rho", "j")
 	e.Depends("j", "E", "r")
 	e.AddPDE1("rho", "diff_rho")
 
 	j.SetUpdater(&JUpdater{j: j, E: E, r: r})
+	drho.SetUpdater(&DRhoUpdater{drho: drho, j: j})
 }
 
+
+// Updates time derivative of charge density
+type DRhoUpdater struct {
+	drho, j *Quant
+}
+
+func (u *DRhoUpdater) Update() {
+	e := GetEngine()
+	drho := u.drho.Array()
+	gpu.DiffRhoAsync(drho, u.j.Array(), e.CellSize(), e.Periodic(), drho.Stream)
+	drho.Stream.Sync()
+}
+
+
+// Updates current density
 type JUpdater struct {
 	j, E, r *Quant
 }

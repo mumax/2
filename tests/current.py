@@ -28,9 +28,11 @@ save('j.x', 'png', [])
 save('j.y', 'png', [])
 save('j.z', 'png', [])
 save('rho', 'gplot', [])
+save('diff_rho', 'gplot', [])
 
 
 autosave('E', 'gplot', [], 0.1e-15)
 autosave('rho', 'gplot', [], 0.1e-15)
 autosave('j', 'gplot', [], 0.1e-15)
 
+run(1e-12)

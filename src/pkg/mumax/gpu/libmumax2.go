@@ -694,7 +694,7 @@ func CurrentDensityAsync(j, Efield, r *Array, rmul float64, periodic []int, stre
 }
 
 // Time derivative of electrical charge density.
-func DiffRhoAsync(drho, j *Array, cellsize []float32, periodic []int, stream Stream) {
+func DiffRhoAsync(drho, j *Array, cellsize []float64, periodic []int, stream Stream) {
 	C.diffRhoAsync(
 		(**C.float)(unsafe.Pointer(&(drho.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[X].pointer[0]))),
