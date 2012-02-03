@@ -13,8 +13,8 @@ rotation = 0                      # angle of rotation of the polygon (degre)
 centerX = radius                  # X coordinate of the center of the polygon (m)
 centerY = radius                  # Y coordinate of the center of the polygon (m)
 centerZ = thickness/2             # Z coordinate of the center of the polygon (m)
-Nx = 128                          # number of cell in x direction (unitless)
-Ny = 128                          # number of cell in y direction (unitless)
+Nx = 128                           # number of cell in x direction (unitless)
+Ny = 128                           # number of cell in y direction (unitless)
 Nz = 5                            # number of cell in z direction (unitless)
 Sx = 2 * radius                   # total size of universe in x direction (m)
 Sy = 2 * radius                   # total size of universe in y direction (m)
@@ -57,10 +57,12 @@ mValues = {"pentagon1":1.0}
 InitVortexRegionVectorQuant('m', mValues, [radius,radius,0.0], [0.0,0.0,1.0], 1, 1, 0 )
 mValues = {"pentagon2":1.0}
 InitVortexRegionVectorQuant('m', mValues, [radius,radius,0.0], [0.0,0.0,1.0], -1, -1, 0 )
+save("m", "vtk", ["binary"], "phase_diagram_m.vts" )
+save("Msat", "vtk", ["binary"], "phase_diagram_Msat.vts" )
 save("m", "ovf", ["Text"], "phase_diagram_m.ovf" )
 save("Msat", "ovf", ["Text"], "phase_diagram_Msat.ovf" )
 #setarray('m', regionDefinition)
-
+"""
 #run(2e-9)
 step()
 save("m", "ovf", ["Text"], "phase_diagram_m_end.ovf" )
@@ -68,3 +70,4 @@ save("m", "ovf", ["Text"], "phase_diagram_m_end.ovf" )
 printstats()
 
 savegraph("graph.png")
+"""

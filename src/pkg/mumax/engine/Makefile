@@ -40,6 +40,7 @@ GOFILES=\
 	table.go\
 	arraypool.go\
 	timederivative.go\
+	format_vtk.go\
 	#input.go\
 
 CGOFILES=\
