@@ -500,7 +500,7 @@ func (e *Engine) notifyAll() {
 func (e *Engine) Save(q *Quant, format string, options []string, filename string) {
 	q.Update() //!!
 	checkKinds(q, MASK, FIELD)
-	out := OpenWRONLY(filename)
+	out := OpenWRONLY(e.Relative(filename))
 	defer out.Close()
 	bufout := Buffer(out)
 	defer bufout.Flush()
