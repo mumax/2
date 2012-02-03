@@ -24,6 +24,9 @@ resist[0][1][2][0] = 10
 setmask('r', resist)
 save('E', 'gplot', [], 'E.gplot')
 save('j', 'gplot', [], 'j.gplot')
+save('j.x', 'png', [], 'jx.png')
+save('j.y', 'png', [], 'jy.png')
+save('j.z', 'png', [], 'jz.png')
 save('rho', 'gplot', [], 'rho.gplot')
 
 

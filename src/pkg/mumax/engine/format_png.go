@@ -44,12 +44,16 @@ func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 }
 
 
-func Extrema(data []float32)(min, max float32){
+func Extrema(data []float32) (min, max float32) {
 	min = data[0]
 	max = data[0]
-	for _,d := range data{
-		if d < min{min=d}
-		if d > max{max=d}
+	for _, d := range data {
+		if d < min {
+			min = d
+		}
+		if d > max {
+			max = d
+		}
 	}
 	return
 }
@@ -238,5 +242,3 @@ func abs(number float32) float32 {
 	} // else
 	return number
 }
-
-
