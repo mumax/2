@@ -143,22 +143,125 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
 
 
 
+/// 2D, plane per plane, i=plane index
+__global__ void diffRhoKern(float* drho, float* jx, float* jy, float* jz, 
+							float* jyPart0, float* jyPart2,
+							float cellx, float celly, float cellz,
+							int N0, int N1Part, int N2, 
+							int wrap0, int wrap2, 
+							int i){
+
+  //  i is passed
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+  int k = blockIdx.y * blockDim.y + threadIdx.y;
+  int I = i*N1Part*N2 + j*N2 + k; // linear array index
+  
+  if (j < N1Part && k < N2){
+
+	float Div;
+
+    // neighbors in X direction
+	{
+	float j0 = 0;
+    if (i-1 >= 0){                                // neighbor in bounds...
+      int idx = (i-1)*N1Part*N2 + j*N2 + k;       // ... no worries
+	  j0 = jx[idx];
+    } else {                                      // neighbor out of bounds...
+		if(wrap0){                                // ... PBC?
+			int idx = (N0-1)*N1Part*N2 + j*N2 + k;// yes: wrap around!
+	  		j0 = jx[idx];
+		}
+    }
+
+	float j2 = 0;
+ 	if (i+1 < N0){
+      int idx = (i+1)*N1Part*N2 + j*N2 + k;
+	  j2 = jx[idx];
+    } else {
+		if(wrap0){
+			int idx = (0)*N1Part*N2 + j*N2 + k;
+	  		j2 = jx[idx];
+		}
+    } 
+
+	Div = (j2 - j0) / (2.0f * cellx);
+	}
+
+
+    // neighbors in Z direction
+	{
+	float j0 = 0;
+    if (k-1 >= 0){                                
+      int idx = i*N1Part*N2 + j*N2 + (k-1);
+	  j0 = jz[idx];
+    } else {                                     
+		if(wrap2){                              
+  			int idx = i*N1Part*N2 + j*N2 + (N2-1);
+	  		j0 = jz[idx];
+		}
+    }
+
+	float j2 = 0;
+ 	if (k+1 < N2){
+  	  int idx =  i*N1Part*N2 + j*N2 + (k+1);
+	  j2 = jz[idx];
+    } else {
+		if(wrap2){
+  	        int idx = i*N1Part*N2 + j*N2 + (0);
+	  		j2 = jz[idx];
+		}
+    } 
+	Div += (j2 - j0) / (2.0f * cellz);
+
+	}
+
+    // Here be dragons.
+    // neighbors in Y direction
+	{
+	float j0 = 0;
+    if (j-1 >= 0){                                     // neighbor in bounds...
+      int idx = i*N1Part*N2 + (j-1)*N2 + k;            // ...no worries
+	  j0 = jy[idx];
+    } else {                                           // neighbor out of bounds...
+    	if(jyPart0 != NULL){                           // there is an adjacent part (either PBC or multi-GPU)
+    		int idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
+	  		j0 = jy[idx];
+    	}
+    }
+
+	float j2 = 0;
+    if (j+1 < N1Part){
+      int idx = i*N1Part*N2 + (j+1)*N2 + k;
+	  j2 = jy[idx];
+    } else {
+    	if(jyPart2 != NULL){
+    		int idx = i*N1Part*N2 + (0)*N2 + k;
+	  		j2 = jy[idx];
+    	}
+    } 
+	Div += (j2 - j0) / (2.0f * celly);
+	}
+
+	drho[I] = Div;
+  }
+}
+
+
+
+
+
 #define BLOCKSIZE 16
 void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, 
 						int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, 
-						//float cellx, float celly, float cellz, 
 						CUstream* streams){
 
   assert(rMap != NULL);
 
   dim3 gridsize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
   dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
-  //int NPart = N0 * N1Part * N2;
 
 	int nDev = nDevice();
-
 	for (int dev = 0; dev < nDev; dev++) {
-
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 
 		// set up adjacent parts
@@ -185,12 +288,47 @@ void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float**
 			    rMap[dev], rMul, rPart0, rPart2,
 				N0, N1Part, N2, 
 				periodic0, periodic2, 
-				//cellx, celly, cellz,
 				i);
 		}
 	}
 }
 
+
+
+
+void diffRhoAsync(float** drho, float** jx, float** jy, float** jz,
+				  float cellx, float celly, float cellz,
+                  int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, 
+                  CUstream* streams){
+
+  dim3 gridsize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
+  dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
+
+	int nDev = nDevice();
+	for (int dev = 0; dev < nDev; dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+
+		// set up adjacent parts
+		float* jyPart0 = jy[mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+		float* jyPart2 = jy[mod(dev+1, nDev)];  // parts wrap around...
+		if(periodic1 == 0){                     // unless there are no PBCs...
+			if(dev == 0){
+				jyPart0 = NULL;
+			}
+			if(dev == nDev-1){
+				jyPart2 = NULL;
+			}
+		}
+
+		for(int i=0; i<N0; i++){   // for all layers. TODO: 2D version
+			diffRhoKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(
+				drho[dev], jx[dev], jy[dev], jz[dev], jyPart0, jyPart2, 
+				cellx, celly, cellz,
+				N0, N1Part, N2, periodic0, periodic2, i);
+		}
+	}
+
+}
 
 #ifdef __cplusplus
 }
