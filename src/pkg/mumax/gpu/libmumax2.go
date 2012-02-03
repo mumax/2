@@ -668,6 +668,10 @@ func Exchange6Async(h, m, msat, aex *Array, Aex2_mu0Msatmul float64, cellSize []
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
+
+// Calculates the electrical current density j.
+// Efield: electrical field
+// r, rmul: electrical resistivity (scalar) and multiplier
 func CurrentDensityAsync(j, Efield, r *Array, rmul float64, periodic []int, stream Stream) {
 	CheckSize(j.Size3D(), Efield.Size3D())
 	CheckSize(j.Size3D(), r.Size3D())
@@ -686,9 +690,25 @@ func CurrentDensityAsync(j, Efield, r *Array, rmul float64, periodic []int, stre
 		(C.int)(periodic[X]),
 		(C.int)(periodic[Y]),
 		(C.int)(periodic[Z]),
-		//(C.float)(cellSize[X]),
-		//(C.float)(cellSize[Y]),
-		//(C.float)(cellSize[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
+}
+
+// Time derivative of electrical charge density.
+func DiffRhoAsync(drho, j *Array, cellsize []float32, periodic []int, stream Stream) {
+	C.diffRhoAsync(
+		(**C.float)(unsafe.Pointer(&(drho.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(j.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(j.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(j.Comp[Z].pointer[0]))),
+		(C.float)(cellsize[X]),
+		(C.float)(cellsize[Y]),
+		(C.float)(cellsize[Z]),
+		(C.int)(j.PartSize()[X]),
+		(C.int)(j.PartSize()[Y]),
+		(C.int)(j.PartSize()[Z]),
+		(C.int)(periodic[X]),
+		(C.int)(periodic[Y]),
+		(C.int)(periodic[Z]),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
