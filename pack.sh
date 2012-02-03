@@ -7,6 +7,11 @@ cp -f src/Optimize.inc src/Make.inc
 clean_output="rm -rf examples/*.out tests/*.out src/*.mod/tests/*.out"
 make clean && make -j 4 && make test && make -C src/muview && make doc && $clean_output 
 
+if [ $? ]; then
+	echo failed;
+	exit; 
+fi
+
 dir=mumax2
 tarball=$dir.tar.gz
 

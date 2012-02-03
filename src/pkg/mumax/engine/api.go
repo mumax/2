@@ -191,7 +191,7 @@ func (a API) SetMask(quantity string, mask *host.Array) {
 }
 
 // Like SetMask but reads the mask from a file.
-func (a API) ReadMask(quantity string, filename string) {
+func (a API) SetMask_File(quantity string, filename string) {
 	a.SetMask(quantity, ReadFile(filename))
 }
 
@@ -213,7 +213,7 @@ func (a API) SetArray(quantity string, field *host.Array) {
 }
 
 // Like SetArray but reads the array from a file.
-func (a API) ReadArray(quantity string, filename string) {
+func (a API) SetArray_File(quantity string, filename string) {
 	a.SetArray(quantity, ReadFile(filename))
 }
 

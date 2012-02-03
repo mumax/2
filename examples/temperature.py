@@ -54,5 +54,5 @@ autotabulate(["t", "<m>"], "m.txt", 10e-12)
 autosave("m", "omf", ["Text"], 50e-12)
 
 # run simulation
-run(2e-9) 
+run(2e-12) 
 

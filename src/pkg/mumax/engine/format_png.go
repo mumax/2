@@ -30,7 +30,7 @@ func (f *FormatPNG) Name() string {
 
 func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 	if len(options) > 0 {
-		panic(InputErr("gplot output format does not take options"))
+		panic(InputErr("png output format does not take options"))
 	}
 
 	var image *image.NRGBA
