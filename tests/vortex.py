@@ -29,6 +29,7 @@ setarray('m', vortex(1,1))
 
 
 autosave('m', 'omf', ['text'], 10e-12)
+autosave('m', 'png', [], 10e-12)
 run(2e-9)
 
 #save('m', 'omf', [], 'vortex.omf')

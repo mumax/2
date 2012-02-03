@@ -33,13 +33,20 @@ func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 		panic(InputErr("gplot output format does not take options"))
 	}
 
-	Assert(q.NComp() == 1)
+	var image *image.NRGBA
+	switch q.NComp() {
+	default:
+		panic(InputErrF("PNG cannot handle data with", q.NComp(), "components."))
+	case 1:
+		min, max := Extrema(q.Buffer().List)
+		image = DrawScalars(q.Buffer().Array[0], min, max)
+	case 3:
+		image = DrawVectors(q.Buffer().Array)
+	}
 
-	data := q.Buffer().Array[0]
-	min, max := Extrema(q.Buffer().List)
-	err := png.Encode(out, DrawScalar(data, min, max))
+	err := png.Encode(out, image)
 	if err != nil {
-		panic(err)
+		panic(IOErr(err.String()))
 	}
 }
 
@@ -58,56 +65,36 @@ func Extrema(data []float32) (min, max float32) {
 	return
 }
 
-
-// Writes as png
-//func PNG(out io.Writer, t tensor.Interface) {
-//}
-//
-//// Draws rank 4 tensor (3D vector field) as image
-//// averages data over X (usually thickness of thin film)
-//func DrawTensor(t tensor.Interface) *NRGBA {
-//	switch tensor.Rank(t) {
-//	case 4:
-//		return DrawTensor4(tensor.ToT4(t))
-//	case 3:
-//		return DrawTensor3(tensor.ToT3(t))
-//	default:
-//		panic("Illegal argument")
-//	}
-//	return nil
-//}
-
-
 // Draws rank 4 tensor (3D vector field) as image
 // averages data over X (usually thickness of thin film)
-//func DrawTensor4(t *tensor.T4) *NRGBA {
-//	assert(tensor.Rank(t) == 4)
-//
-//	h, w := t.Size()[2], t.Size()[3]
-//	img := NewNRGBA(w, h)
-//	arr := t.Array()
-//	for i := 0; i < h; i++ {
-//		for j := 0; j < w; j++ {
-//			var x, y, z float32 = 0., 0., 0.
-//			for k := 0; k < t.Size()[1]; k++ {
-//				x += arr[X][k][i][j]
-//				y += arr[Y][k][i][j]
-//				z += arr[Z][k][i][j]
-//			}
-//			x /= float32(t.Size()[1])
-//			y /= float32(t.Size()[1])
-//			z /= float32(t.Size()[1])
-//			img.Set(j, (h-1)-i, HSLMap(z, y, x)) // TODO: x is thickness for now...
-//		}
-//	}
-//	return img
-//}
+func DrawVectors(arr [][][][]float32) *image.NRGBA {
+
+	Assert(len(arr) == 3)
+	h, w := len(arr[0][0]), len(arr[0][0][0])
+	d := len(arr[0])
+	img := image.NewNRGBA(w, h)
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			var x, y, z float32 = 0., 0., 0.
+			for k := 0; k < d; k++ {
+				x += arr[X][k][i][j]
+				y += arr[Y][k][i][j]
+				z += arr[Z][k][i][j]
+			}
+			x /= float32(d)
+			y /= float32(d)
+			z /= float32(d)
+			img.Set(j, (h-1)-i, HSLMap(z, y, x)) // TODO: x is thickness for now...
+		}
+	}
+	return img
+}
 
 
 // Draws rank 3 tensor (3D scalar field) as image
 // averages data over X (usually thickness of thin film)
 // min
-func DrawScalar(arr [][][]float32, min, max float32) *image.NRGBA {
+func DrawScalars(arr [][][]float32, min, max float32) *image.NRGBA {
 
 	h, w := len(arr[0]), len(arr[0][0])
 	d := len(arr)
