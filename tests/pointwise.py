@@ -10,7 +10,8 @@ setgridsize(Nx, Ny, Nz)
 setcellsize(500e-9/Nx, 125e-9/Ny, 3e-9/Nz)
 
 load('micromagnetism')
-load('solver/euler')
+setv('mindt', 1e-12)
+setv('maxdt', 1e-12)
 
 setv('Msat', 800e3)
 setv('Aex', 1.3e-11)

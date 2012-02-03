@@ -22,12 +22,12 @@ for i in range(0,4):
 resist[0][1][2][0] = 10
 
 setmask('r', resist)
-save('E', 'gplot', [], 'E.gplot')
-save('j', 'gplot', [], 'j.gplot')
-save('j.x', 'png', [], 'jx.png')
-save('j.y', 'png', [], 'jy.png')
-save('j.z', 'png', [], 'jz.png')
-save('rho', 'gplot', [], 'rho.gplot')
+save('E', 'gplot', [])
+save('j', 'gplot', [])
+save('j.x', 'png', [])
+save('j.y', 'png', [])
+save('j.z', 'png', [])
+save('rho', 'gplot', [])
 
 
 autosave('E', 'gplot', [], 0.1e-15)

@@ -452,9 +452,16 @@ func (a API) SetVectorQuantRandomUniformRegion(quant string, regionsToProceed []
 
 // ________________________________________________________________________________ save quantities
 
+// Saves a space-dependent quantity, once. Uses the specified format and gives an automatic file name (like "m000001.png").
+// See also: Save()
+func (a API) Save(quantity string, format string, options []string) {
+	quant := a.Engine.Quant(quantity)
+	filename := a.Engine.AutoFilename(quantity, format)
+	a.Engine.SaveAs(quant, format, options, filename)
+}
 // Saves a space-dependent quantity, once. Uses the specified format and file name.
-func (a API) Save(quantity string, format string, options []string, filename string) {
-	a.Engine.Save(a.Engine.Quant(quantity), format, options, filename)
+func (a API) SaveAs(quantity string, format string, options []string, filename string) {
+	a.Engine.SaveAs(a.Engine.Quant(quantity), format, options, filename)
 }
 
 // Saves a space-dependent quantity periodically, every period (expressed in seconds).

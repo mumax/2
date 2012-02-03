@@ -113,7 +113,7 @@ func (e *Engine) NewHandle() int {
 // Resolves a file name relative to the output directory,
 // unless the name begins with a /.
 func (e *Engine) Relative(filename string) string {
-	if filename[0] == '/' {
+	if filename[0] == '/' || strings.HasPrefix(filename, e.outputDir) {
 		return filename
 	}
 	return path.Clean(e.outputDir + "/" + filename)
@@ -497,7 +497,7 @@ func (e *Engine) notifyAll() {
 }
 
 // Saves the quantity once in the specified format and file name
-func (e *Engine) Save(q *Quant, format string, options []string, filename string) {
+func (e *Engine) SaveAs(q *Quant, format string, options []string, filename string) {
 	q.Update() //!!
 	checkKinds(q, MASK, FIELD)
 	out := OpenWRONLY(e.Relative(filename))
