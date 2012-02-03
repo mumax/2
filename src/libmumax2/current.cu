@@ -184,7 +184,7 @@ __global__ void diffRhoKern(float* drho, float* jx, float* jy, float* jz,
 		}
     } 
 
-	Div = (j2 - j0) / (2.0f * cellx);
+	Div = (j0 - j2) / (2.0f * cellx);
 	}
 
 
@@ -211,7 +211,7 @@ __global__ void diffRhoKern(float* drho, float* jx, float* jy, float* jz,
 	  		j2 = jz[idx];
 		}
     } 
-	Div += (j2 - j0) / (2.0f * cellz);
+	Div += (j0 - j2) / (2.0f * cellz);
 
 	}
 
@@ -239,7 +239,7 @@ __global__ void diffRhoKern(float* drho, float* jx, float* jy, float* jz,
 	  		j2 = jy[idx];
     	}
     } 
-	Div += (j2 - j0) / (2.0f * celly);
+	Div += (j0 - j2) / (2.0f * celly);
 	}
 
 	drho[I] = Div;

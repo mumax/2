@@ -13,7 +13,7 @@ setv('dt', 1e-15)
 
 setv('E_ext', [1, 0, 0])
 
-setv('r', 1.7e-8) # Cu
+setv('r', 1.7e-2) # Cu
 resist = makearray(1, 4, 4, 1)
 for i in range(0,4):
 	for j in range(0,4):
@@ -31,8 +31,10 @@ save('rho', 'gplot', [])
 save('diff_rho', 'gplot', [])
 
 
-autosave('E', 'gplot', [], 0.1e-15)
-autosave('rho', 'gplot', [], 0.1e-15)
-autosave('j', 'gplot', [], 0.1e-15)
+autosave('E.x', 'png', [], 100e-15)
+autosave('rho', 'png', [], 100e-15)
+autosave('j.x', 'png', [], 100e-15)
+autotabulate(['<j>'], 'j.txt', 10e-15)
+autosave('diff_rho', 'png', [], 100e-15)
 
-run(1e-12)
+run(100e-12)
