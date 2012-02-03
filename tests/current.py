@@ -13,7 +13,7 @@ setv('dt', 1e-15)
 
 setv('E_ext', [1, 0, 0])
 
-setv('r', 1.7e-2) # Cu
+setv('r', 1.7e-3) # Cu
 resist = makearray(1, 4, 4, 1)
 for i in range(0,4):
 	for j in range(0,4):

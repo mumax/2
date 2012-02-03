@@ -28,116 +28,120 @@ __global__ void currentDensityKern(float* jx, float* jy, float* jz,
   
   if (j < N1Part && k < N2){
 
-	// central cell
-    float r1 = rmap[I] * rMul;
-	float E1 = Ex[I];
+	jx[I] = Ex[I] / (rmap[I] * rMul);
+	jy[I] = Ey[I] / (rmap[I] * rMul);
+	jz[I] = Ez[I] / (rmap[I] * rMul);
 
-    // neighbors in X direction
-	{
-	float E0 = 0;
-	float r0 = 1.0f/0.0f;
-    if (i-1 >= 0){                                // neighbor in bounds...
-      int idx = (i-1)*N1Part*N2 + j*N2 + k;       // ... no worries
-	  E0 = Ex[idx];
-	  r0 = rmap[idx] * rMul;
-    } else {                                      // neighbor out of bounds...
-		if(wrap0){                                // ... PBC?
-			int idx = (N0-1)*N1Part*N2 + j*N2 + k;// yes: wrap around!
-	  		E0 = Ex[idx];
-	  		r0 = rmap[idx] * rMul;
-		}
-    }
-	float j0 = (E1+E0) / (r1+r0);
-
-	float E2 = 0;
-	float r2 = 1.0f/0.0f;
- 	if (i+1 < N0){
-      int idx = (i+1)*N1Part*N2 + j*N2 + k;
-	  E2 = Ex[idx];
-	  r2 = rmap[idx] * rMul;
-    } else {
-		if(wrap0){
-			int idx = (0)*N1Part*N2 + j*N2 + k;
-	  		E2 = Ex[idx];
-	  		r2 = rmap[idx] * rMul;
-		}
-    } 
-	float j2 = (E1+E2) / (r1+r2);
-
-	jx[I] = 0.5f*(j0+j2);
-	}
-
-
-    // neighbors in Z direction
-	{
-	float E0 = 0;
-	float r0 = 1.0f/0.0f;
-    if (k-1 >= 0){                                
-      int idx = i*N1Part*N2 + j*N2 + (k-1);
-	  E0 = Ez[idx];
-	  r0 = rmap[idx] * rMul;
-    } else {                                     
-		if(wrap2){                              
-  			int idx = i*N1Part*N2 + j*N2 + (N2-1);
-	  		E0 = Ez[idx];
-	  		r0 = rmap[idx] * rMul;
-		}
-    }
-	float j0 = (E1+E0) / (r1+r0);
-
-	float E2 = 0;
-	float r2 = 1.0f/0.0f;
- 	if (k+1 < N2){
-  	  int idx =  i*N1Part*N2 + j*N2 + (k+1);
-	  E2 = Ez[idx];
-	  r2 = rmap[idx] * rMul;
-    } else {
-		if(wrap2){
-  	        int idx = i*N1Part*N2 + j*N2 + (0);
-	  		E2 = Ez[idx];
-	  		r2 = rmap[idx] * rMul;
-		}
-    } 
-	float j2 = (E1+E2) / (r1+r2);
-
-	jz[I] = 0.5f*(j0+j2);
-	}
-
-    // Here be dragons.
-    // neighbors in Y direction
-	{
-	float E0 = 0;
-	float r0 = 1.0f/0.0f;
-    if (j-1 >= 0){                                     // neighbor in bounds...
-      int idx = i*N1Part*N2 + (j-1)*N2 + k;            // ...no worries
-	  E0 = Ey[idx];
-	  r0 = rmap[idx] * rMul;
-    } else {                                           // neighbor out of bounds...
-    	if(EyPart0 != NULL){                           // there is an adjacent part (either PBC or multi-GPU)
-    		int idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
-	  		E0 = Ey[idx];
-	  		r0 = rmap[idx] * rMul;
-    	}
-    }
-	float j0 = (E1+E0) / (r1+r0);
-
-	float E2 = 0;
-	float r2 = 1.0f/0.0f;
-    if (j+1 < N1Part){
-      int idx = i*N1Part*N2 + (j+1)*N2 + k;
-	  E2 = Ey[idx];
-	  r2 = rmap[idx] * rMul;
-    } else {
-    	if(EyPart2 != NULL){
-    		int idx = i*N1Part*N2 + (0)*N2 + k;
-	  		E2 = Ey[idx];
-	  		r2 = rmap[idx] * rMul;
-    	}
-    } 
-	float j2 = (E1+E2) / (r1+r2);
-
-	jy[I] = 0.5f*(j0+j2);
-	}
+//	// central cell
+//    float r1 = rmap[I] * rMul;
+//	float E1 = Ex[I];
+//
+//    // neighbors in X direction
+//	{
+//	float E0 = 0;
+//	float r0 = 1.0f/0.0f;
+//    if (i-1 >= 0){                                // neighbor in bounds...
+//      int idx = (i-1)*N1Part*N2 + j*N2 + k;       // ... no worries
+//	  E0 = Ex[idx];
+//	  r0 = rmap[idx] * rMul;
+//    } else {                                      // neighbor out of bounds...
+//		if(wrap0){                                // ... PBC?
+//			int idx = (N0-1)*N1Part*N2 + j*N2 + k;// yes: wrap around!
+//	  		E0 = Ex[idx];
+//	  		r0 = rmap[idx] * rMul;
+//		}
+//    }
+//	float j0 = (E1+E0) / (r1+r0);
+//
+//	float E2 = 0;
+//	float r2 = 1.0f/0.0f;
+// 	if (i+1 < N0){
+//      int idx = (i+1)*N1Part*N2 + j*N2 + k;
+//	  E2 = Ex[idx];
+//	  r2 = rmap[idx] * rMul;
+//    } else {
+//		if(wrap0){
+//			int idx = (0)*N1Part*N2 + j*N2 + k;
+//	  		E2 = Ex[idx];
+//	  		r2 = rmap[idx] * rMul;
+//		}
+//    } 
+//	float j2 = (E1+E2) / (r1+r2);
+//
+//	jx[I] = 0.5f*(j0+j2);
+//	}
+//
+//
+//    // neighbors in Z direction
+//	{
+//	float E0 = 0;
+//	float r0 = 1.0f/0.0f;
+//    if (k-1 >= 0){                                
+//      int idx = i*N1Part*N2 + j*N2 + (k-1);
+//	  E0 = Ez[idx];
+//	  r0 = rmap[idx] * rMul;
+//    } else {                                     
+//		if(wrap2){                              
+//  			int idx = i*N1Part*N2 + j*N2 + (N2-1);
+//	  		E0 = Ez[idx];
+//	  		r0 = rmap[idx] * rMul;
+//		}
+//    }
+//	float j0 = (E1+E0) / (r1+r0);
+//
+//	float E2 = 0;
+//	float r2 = 1.0f/0.0f;
+// 	if (k+1 < N2){
+//  	  int idx =  i*N1Part*N2 + j*N2 + (k+1);
+//	  E2 = Ez[idx];
+//	  r2 = rmap[idx] * rMul;
+//    } else {
+//		if(wrap2){
+//  	        int idx = i*N1Part*N2 + j*N2 + (0);
+//	  		E2 = Ez[idx];
+//	  		r2 = rmap[idx] * rMul;
+//		}
+//    } 
+//	float j2 = (E1+E2) / (r1+r2);
+//
+//	jz[I] = 0.5f*(j0+j2);
+//	}
+//
+//    // Here be dragons.
+//    // neighbors in Y direction
+//	{
+//	float E0 = 0;
+//	float r0 = 1.0f/0.0f;
+//    if (j-1 >= 0){                                     // neighbor in bounds...
+//      int idx = i*N1Part*N2 + (j-1)*N2 + k;            // ...no worries
+//	  E0 = Ey[idx];
+//	  r0 = rmap[idx] * rMul;
+//    } else {                                           // neighbor out of bounds...
+//    	if(EyPart0 != NULL){                           // there is an adjacent part (either PBC or multi-GPU)
+//    		int idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
+//	  		E0 = Ey[idx];
+//	  		r0 = rmap[idx] * rMul;
+//    	}
+//    }
+//	float j0 = (E1+E0) / (r1+r0);
+//
+//	float E2 = 0;
+//	float r2 = 1.0f/0.0f;
+//    if (j+1 < N1Part){
+//      int idx = i*N1Part*N2 + (j+1)*N2 + k;
+//	  E2 = Ey[idx];
+//	  r2 = rmap[idx] * rMul;
+//    } else {
+//    	if(EyPart2 != NULL){
+//    		int idx = i*N1Part*N2 + (0)*N2 + k;
+//	  		E2 = Ey[idx];
+//	  		r2 = rmap[idx] * rMul;
+//    	}
+//    } 
+//	float j2 = (E1+E2) / (r1+r2);
+//
+//	jy[I] = 0.5f*(j0+j2);
+//	}
   }
 }
 
