@@ -38,26 +38,27 @@ setv('m_maxerror', 1./3000) # maximum error per step
 m = vortex(1,1)   # returns matrix with approximate vortex state 
 setarray('m', m) 
 setv('alpha', 1)  # relax vortex with high damping
-run(1e-9)
+run_until_smaller('maxtorque', 1e-3 * gets('gamma') * 800e3)
 setv('t', 0)      # reset time to zero
+setv('dt', 1e-15) # reset time step
 setv('alpha', 0.01)
 
 # Set up an applied field
-N=100
+N=200
 f=1e9 # 1GHz
 for i in range(N):
 		t=10e-12*i
-		H=20e-3 / mu0
-		Hx=H*sin(2*pi*f*t)
-		setpointwise('H_ext', t, [Hx, 0, 0])
+		B=20e-3 
+		Bx=B*sin(2*pi*f*t)
+		setpointwise('B_ext', t, [Bx, 0, 0])
 
 
 # Schedule output:
 # Save a table with t and average m every 10ps.
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
 # Save the full magnetization every 10ps.
-autosave("m", "omf", ["Text"], 50e-12)
+autosave("m", "png", [], 50e-12)
 
 # run simulation
-run(2e-9) 
+run(1e-9) 
 
