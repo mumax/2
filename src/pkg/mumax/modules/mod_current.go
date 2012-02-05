@@ -37,11 +37,9 @@ func LoadCurrent(e *Engine) {
 	j.SetUpdater(&JUpdater{j: j, E: E, r: r})
 }
 
-
 type JUpdater struct {
 	j, E, r *Quant
 }
-
 
 func (u *JUpdater) Update() {
 	e := GetEngine()

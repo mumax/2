@@ -668,7 +668,6 @@ func Exchange6Async(h, m, msat, aex *Array, Aex2_mu0Msatmul float64, cellSize []
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
-
 func CurrentDensityAsync(j, Efield, r *Array, rmul float64, periodic []int, stream Stream) {
 	CheckSize(j.Size3D(), Efield.Size3D())
 	CheckSize(j.Size3D(), r.Size3D())

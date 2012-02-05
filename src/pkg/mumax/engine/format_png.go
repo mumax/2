@@ -50,7 +50,6 @@ func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 	}
 }
 
-
 func Extrema(data []float32) (min, max float32) {
 	min = data[0]
 	max = data[0]
@@ -90,7 +89,6 @@ func DrawVectors(arr [][][][]float32) *image.NRGBA {
 	return img
 }
 
-
 // Draws rank 3 tensor (3D scalar field) as image
 // averages data over X (usually thickness of thin film)
 // min
@@ -113,7 +111,6 @@ func DrawScalars(arr [][][]float32, min, max float32) *image.NRGBA {
 	}
 	return img
 }
-
 
 func GreyMap(min, max, value float32) image.NRGBAColor {
 	color := (value - min) / (max - min)

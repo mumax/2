@@ -116,7 +116,6 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	// multipliers set on the fly
 }
 
-
 func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.init()
 	plan.loadRotorKernel()
@@ -183,7 +182,6 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }
 
-
 // Load rotor kernel if not yet done so.
 // Required for faraday, ampere-maxwell
 func (plan *MaxwellPlan) loadRotorKernel() {
@@ -202,7 +200,6 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	plan.kern[ROTOR] = kern
 	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)
 }
-
 
 // Calculate the electric field plan.E
 func (plan *MaxwellPlan) UpdateE() {
