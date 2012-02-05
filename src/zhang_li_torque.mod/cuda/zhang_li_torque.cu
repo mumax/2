@@ -17,22 +17,23 @@ extern "C" {
 
 
 ///@internal
-__global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
-                                       float* hx, float* hy, float* hz,
-                                       float* alpha, float* bj, float* cj,
-                                       float* Msat,
-                                       float ux, float uy, float uz,
-                                       float* jmapx, float* jmapy, float* jmapz,
-                                       float dt_gilb,
-                                       int Npart,
-                                       int dev,
-                                       int Nx, int NyPart, int Nz){
-	int i = threadindex;
-	if (i < Npart && Msat[i]!=0.0f) {
+__global__ void spintorque_deltaMKern(float* mx, float* my, float* mz,
+									  float* mxPart0, float* myPart0, float* mzPart0,
+									  float* mxPart2, float* myPart2, float* mzPart2,
+                                      float* hx, float* hy, float* hz,
+                                      float* alpha, float* bj, float* cj,
+                                      float* Msat,
+                                      float ux, float uy, float uz,
+                                      float* jmapx, float* jmapy, float* jmapz,
+                                      float dt_gilb,
+                                      int N0, int N1Part, int N2,
+                                      int i){
+	//  i is passed
+	int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int k = blockIdx.y * blockDim.y + threadIdx.y;
+	int I = i*N1Part*N2 + j*N2 + k; // linear array index
 
-		int x = i%Nx;
-		int y = ((i/Nx)%NyPart+(NyPart*dev));
-		int z = i/(Nx*NyPart);
+	if (j < N1Part && k < N2 && Msat[I]!=0.0f){
 
 		// space-dependent map
 		if(jmapx != NULL){
@@ -53,107 +54,127 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 		//float m0x = mx[i*N1*N2 + j*N2 + k];
 		float mx1 = 0.f, mx2 = 0.f, my1 = 0.f, my2 = 0.f, mz1 = 0.f, mz2 = 0.f;
 
-		// derivative in X direction
-		if (x-1 >= 0 && Msat[i-1] != 0.0f){
-			int idx = i-1;
-			mx1 = mx[idx];
-			my1 = my[idx];
-			mz1 = mz[idx];
-		} else {
-		  // How to handle edge cells?
-		  // * leaving the m value zero gives too big a gradient
-		  // * setting it to the central value gives the actual gradient / 2, should not hurt
-		  // * problem with nonuniform norm!! what if a neighbor has zero norm (but still lies in the box)?
-		  int idx = i;
-		  mx1 = mx[idx];
-		  my1 = my[idx];
-		  mz1 = mz[idx];
-		}
-		if (x+1 < Nx && Msat[i+1] != 0.0f){
-			int idx = i+1;
-			mx2 = mx[idx];
-			my2 = my[idx];
-			mz2 = mz[idx];
-		} else {
-			int idx = i;
-			mx1 = mx[idx];
-			my1 = my[idx];
-			mz1 = mz[idx];
-		}
+	    // neighbors in X direction
+		int idx = (i-1)*N1Part*N2 + j*N2 + k;		// if neighbour in bounds and neighbour is magnetic keep it
+	    if (i-1 < 0 || Msat[idx]==0.0f){			// else, neighbor out of bounds or non magnetic...
+//			if(wrap0){								// ... PBC?
+//				idx = (N0-1)*N1Part*N2 + j*N2 + k;	// yes: wrap around!
+//			}else{
+	      		idx = I;							// no: use central m (Neumann BC)
+//			}
+	    }
+	    mx1 = mx[idx];
+		my1 = my[idx];
+		mz1 = mz[idx];
+
+		idx = (i+1)*N1Part*N2 + j*N2 + k;
+	 	if (i+1 >= N0 || Msat[idx]==0.0f){
+//			if(wrap0){
+//				idx = (0)*N1Part*N2 + j*N2 + k;
+//			}else{
+	      		idx = I;
+//			}
+	    }
+	    mx2 = mx[idx];
+		my2 = my[idx];
+		mz2 = mz[idx];
+
 		float diffmx = ux * (mx2 - mx1);
 		float diffmy = ux * (my2 - my1);
 		float diffmz = ux * (mz2 - mz1);
 
+		idx = i*N1Part*N2 + j*N2 + (k-1);
+	    // neighbors in Z direction
+	    if (k-1 < 0 || Msat[idx]==0.0f){
+//			if(wrap2){
+//				idx = i*N1Part*N2 + j*N2 + (N2-1);
+//			}else{
+	      		idx = I;
+//			}
+	    }
+	    mx1 = mx[idx];
+		my1 = my[idx];
+		mz1 = mz[idx];
 
-		// derivative in Y direction
-		if (y-1 >= 0 && Msat[i-NyPart] != 0.0f){
-			int idx = i - NyPart;
-			mx1 = mx[idx];
+		idx =  i*N1Part*N2 + j*N2 + (k+1);
+	 	if (k+1 >= N2 || Msat[idx]==0.0f){
+//			if(wrap2){
+//				idx = i*N1Part*N2 + j*N2 + (0);
+//			}else{
+	      		idx = I;
+//			}
+	    }
+	    mx2 = mx[idx];
+		my2 = my[idx];
+		mz2 = mz[idx];
+
+		diffmx += uz * (mx2 - mx1);
+		diffmy += uz * (my2 - my1);
+		diffmz += uz * (mz2 - mz1);
+
+		// Here be dragons.
+	    // neighbors in Y direction
+		idx = i*N1Part*N2 + (j-1)*N2 + k;
+	    if (j-1 >= 0 && Msat[idx]!=0.0f){				// neighbour in bounds and neighbour is magnetic keep it
+			mx1 = mx[idx];								// no worry
 			my1 = my[idx];
 			mz1 = mz[idx];
-		} else {
-			int idx = i;
-			mx1 = mx[idx];
-			my1 = my[idx];
-			mz1 = mz[idx];
-		}
-		if (y+1 < Npart/(Nx*Nz) && Msat[i+NyPart] != 0.0f){
-			int idx = i+NyPart;
-			mx2 = mx[idx];
+	    } else if (j-1 >= 0 && Msat[idx]==0.0f){		// neighbour in bounds but neighbour not magnetic
+		    mx1 = mx[I];								// no adjacent magnetic part: use central m (Neumann BC)
+			my1 = my[I];
+			mz1 = mz[I];
+	    } else {										// neighbor out of bounds...
+			if(mxPart0 != NULL && myPart0 != NULL && mzPart0 != NULL){                        // there is an adjacent part (either PBC or multi-GPU)
+				idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
+				mx1 = mxPart0[idx];
+				my1 = myPart0[idx];
+				mz1 = mzPart0[idx];
+			}else{                                     // no adjacent part: use central m (Neumann BC)
+			    mx1 = mx[I];
+				my1 = my[I];
+				mz1 = mz[I];
+			}
+	    }
+
+	    idx = i*N1Part*N2 + (j+1)*N2 + k;
+	 	if (j+1 < N1Part && Msat[idx]!=0.0f){
+		    mx2 = mx[idx];
 			my2 = my[idx];
 			mz2 = mz[idx];
-		} else {
-			int idx = i;
-			mx2 = mx[idx];
-			my2 = my[idx];
-			mz2 = mz[idx];
-		}
+	    } else if (j+1 < N1Part && Msat[idx]==0.0f){
+		    mx2 = mx[I];
+			my2 = my[I];
+			mz2 = mz[I];
+	    } else {
+			if(mxPart2 != NULL && myPart2 != NULL && mzPart2 != NULL){
+				idx = i*N1Part*N2 + (0)*N2 + k;
+				mx2 = mxPart2[idx];
+				my2 = myPart2[idx];
+				mz2 = mzPart2[idx];
+			}else{
+			    mx2 = mx[I];
+				my2 = my[I];
+				mz2 = mz[I];
+			}
+	    }
 		diffmx += uy * (mx2 - mx1);
 		diffmy += uy * (my2 - my1);
 		diffmz += uy * (mz2 - mz1);
 
 
-		// derivative in Z direction
-		if (z-1 >= 0 && Msat[i-Nx*NyPart] != 0.0f){
-			int idx = i - Nx*NyPart;
-			mx1 = mx[idx];
-			my1 = my[idx];
-			mz1 = mz[idx];
-		} else {
-			int idx = i;
-			mx1 = mx[idx];
-			my1 = my[idx];
-			mz1 = mz[idx];
-		}
-		if (z+1 < Nz && Msat[i+Nx*NyPart] != 0.0f){
-			int idx = i + Nx*NyPart;
-			mx2 = mx[idx];
-			my2 = my[idx];
-			mz2 = mz[idx];
-		} else {
-			int idx = i;
-			mx2 = mx[idx];
-			my2 = my[idx];
-			mz2 = mz[idx];
-		}
-		diffmx += uz * (mx2 - mx1);
-		diffmy += uz * (my2 - my1);
-		diffmz += uz * (mz2 - mz1);
-
-
 		//(2) torque terms
 
 		// H
-		float Hx = hx[i];
-		float Hy = hy[i];
-		float Hz = hz[i];
-		float Cj	 	= cj[i];
-		float Bj 		= bj[i];
-		float Alpha 	= alpha[i];
-		float Ms		= Msat[i];
+		float Hx 	= hx[I];
+		float Hy 	= hy[I];
+		float Hz 	= hz[I];
+		float Cj	= cj[I];
+		float Bj 	= bj[I];
+		float Alpha = alpha[I];
+		float Ms	= Msat[I];
 
 		// m
-		float Mx = mx[i], My = my[i], Mz = mz[i];
+		float Mx = mx[I], My = my[I], Mz = mz[I];
 
 		// Hp (Hprecess) = H + epsillon Hspin
 		float Hpx = Hx + Cj * diffmx / Ms;
@@ -181,16 +202,22 @@ __global__ void _gpu_spintorque_deltaM(float* mx, float* my, float* mz,
 		float _mxmxHdy = -Mx * _mxHdz + _mxHdx * Mz;
 		float _mxmxHdz =  Mx * _mxHdy - _mxHdx * My;
 
-		hx[i] = dt_gilb * (-_mxHpx + _mxmxHdx);
-		hy[i] = dt_gilb * (-_mxHpy + _mxmxHdy);
-		hz[i] = dt_gilb * (-_mxHpz + _mxmxHdz);
+		hx[I] = dt_gilb * (-_mxHpx + _mxmxHdx);
+		hy[I] = dt_gilb * (-_mxHpy + _mxmxHdy);
+		hz[I] = dt_gilb * (-_mxHpz + _mxmxHdz);
 	}
 
 }
 
 
 
-void gpu_spintorque_deltaM(float** mx, float** my, float** mz,
+int modz(int a, int b){
+	return (a%b+b)%b;
+}
+
+#define BLOCKSIZEZ 16
+
+void spintorque_deltaMAsync(float** mx, float** my, float** mz,
 						   float** hx, float** hy, float** hz,
 						   float** alpha,
 						   float** bj,
@@ -200,10 +227,67 @@ void gpu_spintorque_deltaM(float** mx, float** my, float** mz,
 						   float** jx, float** jy, float** jz,
 						   float dt_gilb,
 						   CUstream* stream,
-						   int Npart,
-						   int Nx, int NyPart, int Nz)
+						   int N0, int N1Part, int N2)
 {
 
+	dim3 gridSize(divUp(N1Part, BLOCKSIZEZ), divUp(N2, BLOCKSIZEZ));
+	dim3 blockSize(BLOCKSIZEZ, BLOCKSIZEZ, 1);
+	//int NPart = N0 * N1Part * N2;
+
+	int nDev = nDevice();
+	for (int dev = 0; dev < nDev; dev++) {
+
+		assert(mx[dev] != NULL);
+		assert(my[dev] != NULL);
+		assert(mz[dev] != NULL);
+		assert(hx[dev] != NULL);
+		assert(hy[dev] != NULL);
+		assert(hz[dev] != NULL);
+		assert(jx[dev] != NULL);
+		assert(jy[dev] != NULL);
+		assert(hz[dev] != NULL);
+		assert(alpha[dev] != NULL);
+		assert(bj[dev] != NULL);
+		assert(cj[dev] != NULL);
+		assert(Msat[dev] != NULL);
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+
+		// set up adjacent parts
+		float* mxPart0 = mx[modz(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+		float* myPart0 = my[modz(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+		float* mzPart0 = mz[modz(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+		float* mxPart2 = mx[modz(dev+1, nDev)];  // parts wrap around...
+		float* myPart2 = my[modz(dev+1, nDev)];  // parts wrap around...
+		float* mzPart2 = mz[modz(dev+1, nDev)];  // parts wrap around...
+// TODO: add periodic boundary conditions
+//  		if(periodic1 == 0){                     // unless there are no PBCs...
+		if(dev == 0){
+			mxPart0 = NULL;
+			myPart0 = NULL;
+			mzPart0 = NULL;
+		}
+		if(dev == nDev-1){
+			mxPart2 = NULL;
+			myPart2 = NULL;
+			mzPart2 = NULL;
+		}
+//		}
+		for(int i=0; i<N0; i++){   // for all layers. TODO: 2D version
+			spintorque_deltaMKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (mx[dev], my[dev], mz[dev],
+																						   mxPart0, myPart0, mzPart0,
+																						   mxPart2, myPart2, mzPart2,
+																						   hx[dev], hy[dev], hz[dev],
+																						   alpha[dev], bj[dev], cj[dev],
+																						   Msat[dev],
+																						   ux, uy, uz,
+																						   jx[dev], jy[dev], jz[dev],
+																						   dt_gilb,
+																						   N0, N1Part,N2,
+																						   i);
+		}
+	}
+//--------------------------------------------------------------------------------------------------
+/*
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -234,6 +318,7 @@ void gpu_spintorque_deltaM(float** mx, float** my, float** mz,
 																						dev,
 																						Nx, NyPart,Nz);
 	}
+	*/
 }
 
 

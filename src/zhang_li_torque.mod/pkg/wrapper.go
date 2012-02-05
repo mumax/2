@@ -20,14 +20,20 @@ import (
 )
 
 func LLZhang(m, h, j, alpha, bj, cj, Msat *Array, ux, uy, uz, dt_gilbert float32) {
-	C.gpu_spintorque_deltaM(
-		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[0]))),
+	CheckSize(h.Size3D(), m.Size3D())
+	CheckSize(j.Size3D(), m.Size3D())
+	CheckSize(alpha.Size3D(), m.Size3D())
+	CheckSize(bj.Size3D(), m.Size3D())
+	CheckSize(cj.Size3D(), m.Size3D())
+	CheckSize(Msat.Size3D(), m.Size3D())
+	C.spintorque_deltaMAsync(
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[1]))),
-		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[2]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[2]))),
 
-		(**C.float)(unsafe.Pointer(&(h.Comp[Z].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].Pointers()[1]))),
-		(**C.float)(unsafe.Pointer(&(h.Comp[X].Pointers()[2]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].Pointers()[2]))),
 
 		(**C.float)(unsafe.Pointer(&(alpha.Pointers()[0]))),
 
@@ -41,17 +47,15 @@ func LLZhang(m, h, j, alpha, bj, cj, Msat *Array, ux, uy, uz, dt_gilbert float32
 		(C.float)(uy),
 		(C.float)(uz),
 
-		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Y].Pointers()[1]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[2]))),
+		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[2]))),
 
 		(C.float)(dt_gilbert),
 
 		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))),
 
-		(C.int)(m.PartLen3D()),
-
-		(C.int)(m.PartSize()[2]),
-		(C.int)(m.PartSize()[1]),
-		(C.int)(m.PartSize()[0]))
+		(C.int)(m.PartSize()[X]),
+		(C.int)(m.PartSize()[Y]),
+		(C.int)(m.PartSize()[Z]))
 }

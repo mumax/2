@@ -35,10 +35,9 @@ extern "C" {
 /// @param jy multi-GPU array of float with the y component of the j vector quantity, non-NULL
 /// @param jz multi-GPU array of float with the z component of the j vector quantity, non-NULL
 /// @param dt_gilb dt * gilbert factor
-/// @param Npart number of elements per in each array (i.e. len(mx[0])
-/// @param Nx number of elements along x axis
-/// @param NyPart number of elements along y axis dealt with on this device (the structure is sliced for multiGPU purpose along Y-axis)
-void gpu_spintorque_deltaM(float** mx, float** my, float** mz,
+/// @param N0 number of elements along x axis
+/// @param N1Part number of elements along y axis dealt with on this device (the structure is sliced for multiGPU purpose along Y-axis)
+void spintorque_deltaMAsync(float** mx, float** my, float** mz,
         				   float** hx, float** hy, float** hz,
                            float** alpha,
                            float** bj,
@@ -48,8 +47,7 @@ void gpu_spintorque_deltaM(float** mx, float** my, float** mz,
                            float** jx, float** jy, float** jz,
                            float dt_gilb,
 						   CUstream* stream,
-                           int Npart,
-                           int Nx, int NyPart, int Nz);
+                           int N0, int N1Part, int N2);
 
 #ifdef __cplusplus
 }
