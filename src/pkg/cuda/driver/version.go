@@ -11,7 +11,7 @@ import "C"
 import ()
 
 // Returns the CUDA driver version.
-func GetVersion() int {
+func Version() int {
 	var version C.int
 	err := Result(C.cuDriverGetVersion(&version))
 	if err != SUCCESS {

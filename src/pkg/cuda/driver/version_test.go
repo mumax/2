@@ -10,5 +10,5 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	fmt.Println("CUDA driver version: ", GetVersion())
+	fmt.Println("CUDA driver version: ", Version())
 }
