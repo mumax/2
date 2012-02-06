@@ -11,12 +11,6 @@ import (
 	"math"
 )
 
-func init() {
-	Init()
-	ctx := CtxCreate(CTX_SCHED_AUTO, 0)
-	CtxSetCurrent(ctx)
-}
-
 func TestMalloc(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		pointer := MemAlloc(16 * 1024 * 1024)
