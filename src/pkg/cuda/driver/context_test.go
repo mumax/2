@@ -15,5 +15,6 @@ func TestContext(t *testing.T) {
 	fmt.Println("CtxSetCurrent")
 	CtxSetCurrent(ctx)
 	fmt.Println("CtxGetApiVersion:", ctx.ApiVersion())
+	fmt.Println("CtxGetDevice:", CtxGetDevice())
 	(&ctx).Destroy()
 }

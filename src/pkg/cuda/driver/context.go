@@ -66,6 +66,18 @@ func CtxGetCurrent() Context {
 	return Context(unsafe.Pointer(ctx))
 }
 
+
+// Returns the ordinal of the current context's device.
+func CtxGetDevice() Device {
+	var dev C.CUdevice
+	err := Result(C.cuCtxGetDevice(&dev))
+	if err != SUCCESS {
+		panic(err)
+	}
+	return Device(dev)
+}
+
+
 // Sets the current active context.
 func CtxSetCurrent(ctx Context) {
 	err := Result(C.cuCtxSetCurrent(C.CUcontext(unsafe.Pointer(ctx))))
@@ -79,15 +91,6 @@ func (ctx Context) SetCurrent() {
 	CtxSetCurrent(ctx)
 }
 
-// Returns the ordinal of the current context's device.
-func CtxGetDevice() Device {
-	var dev C.CUdevice
-	err := Result(C.cuCtxGetDevice(&dev))
-	if err != SUCCESS {
-		panic(err)
-	}
-	return Device(dev)
-}
 
 // Blocks until the device has completed all preceding requested tasks, if the context was created with the CU_CTX_SCHED_BLOCKING_SYNC flag.
 func CtxSynchronize() {
