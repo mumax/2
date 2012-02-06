@@ -14,6 +14,7 @@ import ()
 
 type Context uintptr
 
+// Create a CUDA context.
 func CtxCreate(flags uint, dev Device) Context {
 	var ctx C.CUcontext
 	err := Result(C.cuCtxCreate(&ctx, C.uint(flags), C.CUdevice(dev)))
@@ -32,9 +33,28 @@ func CtxDestroy(ctx Context) {
 }
 
 //Destroys the CUDA context.
-func (ctx Context) Destroy() {
-	CtxDestroy(ctx)
+func (ctx *Context) Destroy() {
+	CtxDestroy(*ctx)
+	*ctx = 0
 }
+
+
+// Returns the API version to create the context.
+func CtxGetApiVersion(ctx Context) (version int){
+	var cversion C.uint
+	err := Result(C.cuCtxGetApiVersion(C.CUcontext(unsafe.Pointer(ctx)), &cversion))
+	if err != SUCCESS {
+		panic(err)
+	}
+	version = int(cversion)
+	return
+}
+
+// Returns the API version to create the context.
+func(ctx Context)ApiVersion() (version int){
+	return CtxGetApiVersion(ctx)
+}
+
 
 // Gets the current active context.
 func CtxGetCurrent() Context {

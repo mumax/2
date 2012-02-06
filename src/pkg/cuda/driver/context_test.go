@@ -6,9 +6,14 @@ package driver
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestContext(t *testing.T) {
+	fmt.Println("CtxCreate")
 	ctx := CtxCreate(CTX_SCHED_AUTO, 0)
+	fmt.Println("CtxSetCurrent")
 	CtxSetCurrent(ctx)
+	fmt.Println("CtxGetApiVersion:", ctx.ApiVersion())
+	(&ctx).Destroy()
 }
