@@ -44,6 +44,17 @@ basicstyle=\scriptsize,       % the size of the fonts that are used for the code
 % example code
 \newcommand{\example}[1]{\fbox{\parbox{\textwidth}{\texttt{ #1 }}}}
 
+% scale down dependency graph if needed
+\newlength{\imgwidth}
+\newcommand\ScaleGraphic[1]{%
+\settowidth{\imgwidth}{\includegraphics[scale=0.66]{#1}}%
+\setlength{\imgwidth}{\minof{\imgwidth}{\linewidth}}%
+\begin{center}%
+\includegraphics[width=\imgwidth, keepaspectratio=true]{#1}%
+\end{center}%
+}
+
+
 \begin{document}
 
 \hypersetup{breaklinks=true}
