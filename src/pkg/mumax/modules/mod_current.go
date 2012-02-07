@@ -38,7 +38,6 @@ func LoadCurrent(e *Engine) {
 	drho.SetUpdater(&DRhoUpdater{drho: drho, j: j})
 }
 
-
 // Updates time derivative of charge density
 type DRhoUpdater struct {
 	drho, j *Quant
@@ -50,7 +49,6 @@ func (u *DRhoUpdater) Update() {
 	gpu.DiffRhoAsync(drho, u.j.Array(), e.CellSize(), e.Periodic(), drho.Stream)
 	drho.Stream.Sync()
 }
-
 
 // Updates current density
 type JUpdater struct {

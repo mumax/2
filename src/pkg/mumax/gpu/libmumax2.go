@@ -668,7 +668,6 @@ func Exchange6Async(h, m, msat, aex *Array, Aex2_mu0Msatmul float64, cellSize []
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
-
 // Calculates the electrical current density j.
 // Efield: electrical field
 // r, rmul: electrical resistivity (scalar) and multiplier
