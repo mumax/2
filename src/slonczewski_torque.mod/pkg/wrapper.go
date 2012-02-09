@@ -20,7 +20,7 @@ import (
 )
 
 func LLSlon(m, h, p, alpha, Msat *gpu.Array,
-aj *gpu.Array, bj *gpu.Array, j *gpu.Array,
+aj float32, bj float32, Pol float32, j *gpu.Array,
 dt_gilbert float32) {
 
 	// Bookkeeping
@@ -30,7 +30,7 @@ dt_gilbert float32) {
 	CheckSize(Msat.Size3D(), m.Size3D())
 
 	// Calling the CUDA functions
-	C.slonczewski_deltaMKern(
+	C.slonczewski_deltaMAsync(
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[1]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[2]))),
@@ -48,14 +48,14 @@ dt_gilbert float32) {
 
 		(C.float)(aj),
 		(C.float)(bj),
+		(C.float)(Pol),
 
 		(**C.float)(unsafe.Pointer(&(j.Pointers()[0]))),
 
 		(C.float)(dt_gilbert),
 
-		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))),
-
 		(C.int)(m.PartSize()[X]),
 		(C.int)(m.PartSize()[Y]),
-		(C.int)(m.PartSize()[Z]))
+		(C.int)(m.PartSize()[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))))
 }

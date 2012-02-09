@@ -9,48 +9,71 @@ extern "C" {
 #endif
   // ========================================
 
-  __global__ void slonczewski_deltaMKern(float *mx, float* my, float* mz, 
+  __global__ void slonczewski_deltaMKern(float* mx, float* my, float* mz, 
 					 float* hx, float* hy, float* hz,
 					 float* px, float* py, float* pz,
 					 float* alpha, float* Msat,
-					 float bj, float cj, float *curr,
-					 float dt_gilb,
+					 float aj, float bj, float Pol, 
+					 float *curr, float dt_gilb,
 					 int N0, int N1Part, int N2,
 					 int i) 
   {
     
-    //  i is passed
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
-    int k = blockIdx.y * blockDim.y + threadIdx.y;
+    //  i is the device index, x coordinate
+    int j = blockIdx.x * blockDim.x + threadIdx.x; // y coordinate
+    int k = blockIdx.y * blockDim.y + threadIdx.y; // z coordinate
     int I = i*N1Part*N2 + j*N2 + k; // linear array index
 
-    int blah = i+j+I;
-    blah = blah*blah;
+    float Ms = Msat[I];
     
-    float pxm_x = -py * mz + my * pz;
-    float pxm_y =  px * mz - mx * pz;
-    float pxm_z = -px * my + mx * py;
-    
-    float mxpxm_x = -pxm_y * mz + my * pxm_z;
-    float mxpxm_y =  pxm_x * mz - mx * pxm_z;
-    float mxpxm_z = -pxm_x * my + mx * pxm_y;
+    if (Ms > 0.0) { // don't bother if there's nothing here!
+      float m_x = mx[I];
+      float m_y = my[I];
+      float m_z = mz[I];
+      float p_x = px[I];
+      float p_y = py[I];
+      float p_z = pz[I];
+
+      float pxm_x = -p_y * m_z + m_y * p_z;
+      float pxm_y =  p_x * m_z - m_x * p_z;
+      float pxm_z = -p_x * m_y + m_x * p_y;
+      
+      float mxpxm_x = -pxm_y * m_z + m_y * pxm_z;
+      float mxpxm_y =  pxm_x * m_z - m_x * pxm_z;
+      float mxpxm_z = -pxm_x * m_y + m_x * pxm_y;
+
+      hx[I] = mxpxm_x;
+      hy[I] = mxpxm_y;
+      hz[I] = mxpxm_z;
+      
+    } // end if (Msat > 0.0)
         
   }
 
+  #define BLOCKSIZE 16
+  
   void slonczewski_deltaMAsync(float** mx, float** my, float** mz, 
 			       float** hx, float** hy, float** hz,
 			       float** px, float** py, float** pz,
 			       float** alpha, float** Msat,
-			       float bj, float cj, float **curr,
-			       float dt_gilb,
-			       CUstream* stream,
-			       int Npart) 
+			       float aj, float bj, float Pol,
+			       float **curr, float dt_gilb,
+			       int N0, int N1Part, int N2, 
+			       CUstream* stream)
   {
-    dim3 gridSize, blockSize;
-    make1dconf(Npart, &gridSize, &blockSize);
-    slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (mx, my, mz, hx, hy, hz,px, py, pz,
-										   alpha, Msat, bj, cj, curr,dt_gilb,Npart);
-      
+    dim3 gridSize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
+    dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
+
+    int nDev = nDevice();
+    for (int dev = 0; dev < nDev; dev++) {
+      gpu_safe(cudaSetDevice(deviceId(dev)));
+      for (int i = 0; i < N0; i++) {
+	slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (mx[dev], my[dev], mz[dev], hx[dev], hy[dev], hz[dev], 
+										       px[dev], py[dev], pz[dev],
+										       alpha[dev], Msat[dev], aj, bj, Pol, curr[dev], dt_gilb,
+										       N0, N1Part, N2, i);
+      } // end i < N0 loop
+    } // end dev < nDev loop
 										  
 										  
   }

@@ -22,8 +22,9 @@ func init() {
 func LoadSlonczewskiTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 	//e.LoadModule("current") // Should eventually intgrate with maxwell stuff
-	e.AddNewQuant("aj", SCALAR, MASK, Unit("unitless"), "In-Plane term")
-	e.AddNewQuant("bj", SCALAR, MASK, Unit("unitless"), "Field-Like term")
+	e.AddNewQuant("aj", SCALAR, VALUE, Unit("unitless"), "In-Plane term")
+	e.AddNewQuant("bj", SCALAR, VALUE, Unit("unitless"), "Field-Like term")
 	e.AddNewQuant("p", VECTOR, FIELD, Unit("unitless"), "Polarization Vector")
+	e.AddNewQuant("Pol", SCALAR, VALUE, Unit("unitless"), "Polarization Efficiency")
 	e.AddNewQuant("CurrentDensity", SCALAR, FIELD, Unit("A/m2"), "Current density")
 }
