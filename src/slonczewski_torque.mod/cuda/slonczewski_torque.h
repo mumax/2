@@ -15,15 +15,14 @@
 extern "C" {
 #endif
 
-void slonczewski_deltaMAsync(float** mx, float** my, float** mz, 
-			     float** hx, float** hy, float** hz,
-			     float** px, float** py, float** pz,
-			     float** alpha, float** Msat,
-			     float aj, float bj, float Pol,
-			     float **curr, float dt_gilb,
-			     int N0, int N1Part, int N2, 
-			     CUstream* stream);
-
+  void slonczewski_async(float** sttx, float** stty, float** sttz, 
+			 float** mx, float** my, float** mz, 
+			 float** px, float** py, float** pz,
+			 float** alpha, float** Msat,
+			 float gamma, float aj, float bj, float Pol,
+			 float **curr, 
+			 int N0, int N1Part, int N2, 
+			 CUstream* stream);
 #ifdef __cplusplus
 }
 #endif

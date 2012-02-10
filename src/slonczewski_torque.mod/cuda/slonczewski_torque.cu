@@ -9,12 +9,12 @@ extern "C" {
 #endif
   // ========================================
 
-  __global__ void slonczewski_deltaMKern(float* mx, float* my, float* mz, 
-					 float* hx, float* hy, float* hz,
+  __global__ void slonczewski_deltaMKern(float* sttx, float* stty, float* sttz, 
+					 float* mx, float* my, float* mz, 
 					 float* px, float* py, float* pz,
 					 float* alpha, float* Msat,
-					 float aj, float bj, float Pol, 
-					 float *curr, float dt_gilb,
+					 float gamma, float aj, float bj, float Pol, 
+					 float *curr, 
 					 int N0, int N1Part, int N2,
 					 int i) 
   {
@@ -42,9 +42,9 @@ extern "C" {
       float mxpxm_y =  pxm_x * m_z - m_x * pxm_z;
       float mxpxm_z = -pxm_x * m_y + m_x * pxm_y;
 
-      hx[I] = mxpxm_x;
-      hy[I] = mxpxm_y;
-      hz[I] = mxpxm_z;
+      sttx[I] = 0.0*mxpxm_x;
+      stty[I] = 0.0*mxpxm_y;
+      sttz[I] = 0.0*mxpxm_z;
       
     } // end if (Msat > 0.0)
         
@@ -52,14 +52,14 @@ extern "C" {
 
   #define BLOCKSIZE 16
   
-  void slonczewski_deltaMAsync(float** mx, float** my, float** mz, 
-			       float** hx, float** hy, float** hz,
-			       float** px, float** py, float** pz,
-			       float** alpha, float** Msat,
-			       float aj, float bj, float Pol,
-			       float **curr, float dt_gilb,
-			       int N0, int N1Part, int N2, 
-			       CUstream* stream)
+  void slonczewski_async(float** sttx, float** stty, float** sttz, 
+			 float** mx, float** my, float** mz, 
+			 float** px, float** py, float** pz,
+			 float** alpha, float** Msat,
+			 float gamma, float aj, float bj, float Pol,
+			 float **curr, 
+			 int N0, int N1Part, int N2, 
+			 CUstream* stream)
   {
     dim3 gridSize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
     dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
@@ -68,9 +68,10 @@ extern "C" {
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
       for (int i = 0; i < N0; i++) {
-	slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (mx[dev], my[dev], mz[dev], hx[dev], hy[dev], hz[dev], 
+	slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
+										       mx[dev], my[dev], mz[dev],  
 										       px[dev], py[dev], pz[dev],
-										       alpha[dev], Msat[dev], aj, bj, Pol, curr[dev], dt_gilb,
+										       alpha[dev], Msat[dev], gamma, aj, bj, Pol, curr[dev], 
 										       N0, N1Part, N2, i);
       } // end i < N0 loop
     } // end dev < nDev loop

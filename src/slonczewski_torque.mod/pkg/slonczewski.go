@@ -21,10 +21,45 @@ func init() {
 
 func LoadSlonczewskiTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
-	//e.LoadModule("current") // Should eventually intgrate with maxwell stuff
+
+	// ============ New Quantities =============
 	e.AddNewQuant("aj", SCALAR, VALUE, Unit("unitless"), "In-Plane term")
 	e.AddNewQuant("bj", SCALAR, VALUE, Unit("unitless"), "Field-Like term")
-	e.AddNewQuant("p", VECTOR, FIELD, Unit("unitless"), "Polarization Vector")
-	e.AddNewQuant("Pol", SCALAR, VALUE, Unit("unitless"), "Polarization Efficiency")
-	e.AddNewQuant("CurrentDensity", SCALAR, FIELD, Unit("A/m2"), "Current density")
+	e.AddNewQuant("p",  VECTOR, FIELD, Unit("unitless"), "Polarization Vector")
+	e.AddNewQuant("pol", SCALAR, VALUE, Unit("unitless"), "Polarization Efficiency")
+	e.AddNewQuant("curr", SCALAR, FIELD, Unit("A/m2"), "Current density")
+	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
+
+	// ============ Dependencies =============
+	e.Depends("stt", "aj", "bj", "p", "pol", "curr", "m", "gamma", "Msat")
+
+	// ============ Updating the torque =============
+	stt.SetUpdater(&slonczewskiUpdater{stt: stt})
+
+	// Add spin-torque to LLG torque
+	//llgTorque := e.Quant("torque")
+	
+	//sum := llgTorque.GetUpdater().(*SumUpdater)
+	//sum.AddParent("stt")
+}
+
+type slonczewskiUpdater struct {
+	stt *Quant
+}
+
+func (u *slonczewskiUpdater) Update() {
+	e	:= GetEngine()
+	stt	:= u.stt
+	m       := e.Quant("m")
+	alpha   := e.Quant("alpha")
+	aj	:= e.Quant("aj").Scalar()
+	bj	:= e.Quant("bj").Scalar()
+	p	:= e.Quant("p")
+	pol	:= e.Quant("pol").Scalar()
+	curr	:= e.Quant("curr")
+	gamma   := e.Quant("gamma").Scalar()
+	msat    := e.Quant("Msat")
+
+	LLSlon(stt.Array(), m.Array(), p.Array(), alpha.Array(), msat.Array(), 
+		float32(gamma), float32(aj), float32(bj), float32(pol), curr.Array())
 }

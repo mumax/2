@@ -19,25 +19,24 @@ import (
 	"unsafe"
 )
 
-func LLSlon(m, h, p, alpha, Msat *gpu.Array,
-aj float32, bj float32, Pol float32, j *gpu.Array,
-dt_gilbert float32) {
+func LLSlon(stt *gpu.Array, m *gpu.Array, p, alpha, Msat *gpu.Array,
+	gamma float32, aj float32, bj float32, Pol float32, j *gpu.Array) {
 
 	// Bookkeeping
-	CheckSize(h.Size3D(), m.Size3D())
 	CheckSize(j.Size3D(), m.Size3D())
+	CheckSize(p.Size3D(), m.Size3D())
 	CheckSize(alpha.Size3D(), m.Size3D())
 	CheckSize(Msat.Size3D(), m.Size3D())
 
 	// Calling the CUDA functions
-	C.slonczewski_deltaMAsync(
+	C.slonczewski_async(
+		(**C.float)(unsafe.Pointer(&(stt.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(stt.Comp[Y].Pointers()[1]))),
+		(**C.float)(unsafe.Pointer(&(stt.Comp[Z].Pointers()[2]))),
+
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[1]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[2]))),
-
-		(**C.float)(unsafe.Pointer(&(h.Comp[X].Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(h.Comp[Y].Pointers()[1]))),
-		(**C.float)(unsafe.Pointer(&(h.Comp[Z].Pointers()[2]))),
 
 		(**C.float)(unsafe.Pointer(&(p.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(p.Comp[Y].Pointers()[1]))),
@@ -46,16 +45,15 @@ dt_gilbert float32) {
 		(**C.float)(unsafe.Pointer(&(alpha.Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(Msat.Pointers()[0]))),
 
+		(C.float)(gamma),
 		(C.float)(aj),
 		(C.float)(bj),
 		(C.float)(Pol),
 
 		(**C.float)(unsafe.Pointer(&(j.Pointers()[0]))),
 
-		(C.float)(dt_gilbert),
-
 		(C.int)(m.PartSize()[X]),
 		(C.int)(m.PartSize()[Y]),
 		(C.int)(m.PartSize()[Z]),
-		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))))
+		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
 }
