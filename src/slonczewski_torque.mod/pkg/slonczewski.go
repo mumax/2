@@ -25,7 +25,7 @@ func LoadSlonczewskiTorque(e *Engine) {
 	// ============ New Quantities =============
 	e.AddNewQuant("aj", SCALAR, VALUE, Unit("unitless"), "In-Plane term")
 	e.AddNewQuant("bj", SCALAR, VALUE, Unit("unitless"), "Field-Like term")
-	e.AddNewQuant("p",  VECTOR, FIELD, Unit("unitless"), "Polarization Vector")
+	e.AddNewQuant("p", VECTOR, FIELD, Unit("unitless"), "Polarization Vector")
 	e.AddNewQuant("pol", SCALAR, VALUE, Unit("unitless"), "Polarization Efficiency")
 	e.AddNewQuant("curr", SCALAR, FIELD, Unit("A/m2"), "Current density")
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
@@ -38,7 +38,7 @@ func LoadSlonczewskiTorque(e *Engine) {
 
 	// Add spin-torque to LLG torque
 	//llgTorque := e.Quant("torque")
-	
+
 	//sum := llgTorque.GetUpdater().(*SumUpdater)
 	//sum.AddParent("stt")
 }
@@ -48,18 +48,18 @@ type slonczewskiUpdater struct {
 }
 
 func (u *slonczewskiUpdater) Update() {
-	e	:= GetEngine()
-	stt	:= u.stt
-	m       := e.Quant("m")
-	alpha   := e.Quant("alpha")
-	aj	:= e.Quant("aj").Scalar()
-	bj	:= e.Quant("bj").Scalar()
-	p	:= e.Quant("p")
-	pol	:= e.Quant("pol").Scalar()
-	curr	:= e.Quant("curr")
-	gamma   := e.Quant("gamma").Scalar()
-	msat    := e.Quant("Msat")
+	e := GetEngine()
+	stt := u.stt
+	m := e.Quant("m")
+	alpha := e.Quant("alpha")
+	aj := e.Quant("aj").Scalar()
+	bj := e.Quant("bj").Scalar()
+	p := e.Quant("p")
+	pol := e.Quant("pol").Scalar()
+	curr := e.Quant("curr")
+	gamma := e.Quant("gamma").Scalar()
+	msat := e.Quant("Msat")
 
-	LLSlon(stt.Array(), m.Array(), p.Array(), alpha.Array(), msat.Array(), 
+	LLSlon(stt.Array(), m.Array(), p.Array(), alpha.Array(), msat.Array(),
 		float32(gamma), float32(aj), float32(bj), float32(pol), curr.Array())
 }
