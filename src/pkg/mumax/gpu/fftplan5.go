@@ -127,7 +127,7 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 
 		//     fft.fftZ1Dev = nil  TODO  How to give this a null pointer?
 
-		// init transp1 (allocated) -----------------
+		// init transp1 (not allocated) -----------------
 		fft.transp1.Init(nComp, fft.fftZbuffer.size3D, DONT_ALLOC)
 		//-----------------------------------------------
 

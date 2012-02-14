@@ -619,6 +619,33 @@ func KernelMulMicromag2D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftK
 //     C.int(fftMx.partLen3D))
 // }
 
+
+func InitFaceKernel6Element(gpuBuffer *Array, co1, co2 int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 **float64){
+  C.initFaceKernel6ElementAsync(
+    (**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
+    C.int(co1),
+    C.int(co2),
+    C.int(gpuBuffer.size3D[0],
+    C.int(gpuBuffer.size3D[1],
+    C.int(gpuBuffer.size3D[2],
+    C.int(gpuBuffer.partSize3D[1],
+    C.int(periodic[0]),
+    C.int(periodic[1]),
+    C.int(periodic[2]),
+    C.float(cellSize[0]),
+    C.float(cellSize[1]),
+    C.float(cellSize[2]),
+    (**C.float)(dev_qd_P_10),
+    (**C.float)(dev_qd_W_10),
+    (*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
+  )
+  gpuBuffer.Stream.Sync()
+
+}
+
+
+
+
 // Computes the uniaxial anisotropy field, stores in h.
 func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
 	C.uniaxialAnisotropyAsync(
