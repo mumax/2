@@ -26,9 +26,17 @@ func NewSumUpdater(sum *Quant) Updater {
 }
 
 func (u *SumUpdater) Update() {
+	u.zero()
+	u.addTerms()
+}
+
+func (u *SumUpdater) zero() {
+	u.sum.array.Zero()
+}
+
+func (u *SumUpdater) addTerms() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
-	sum.array.Zero()
 	parents := u.parents
 	for i := range parents {
 		parent := parents[i]

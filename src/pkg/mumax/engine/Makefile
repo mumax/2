@@ -19,7 +19,9 @@ GOFILES=\
 	updater.go\
 	update_pointwise.go\
 	update_sum.go\
+	update_addterm.go\
 	update_reduce.go\
+	sumnode.go\
 	zeropad.go\
 	verify.go\
 	equation.go\
