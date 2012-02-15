@@ -17,6 +17,7 @@ GOFILES=\
 	fftplan2.go\
 	fftplan4.go\
 	fftplan5.go\
+	kernel_magnetostatic.go\
 # 	convplan.go\
 	#conv73.go\
 

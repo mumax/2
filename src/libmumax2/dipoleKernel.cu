@@ -409,6 +409,9 @@ void initFaceKernel6ElementAsync(float **data, int co1, int co2,            /// 
   }
 }
 
+
+
+
 #ifdef __cplusplus
 }
 #endif
