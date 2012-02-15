@@ -7,7 +7,7 @@
 
 package gpu
 
-// Authors: Arne Vansteenkiste and Ben Van de Wiele
+// Author: Ben Van de Wiele
 
 // TODO: Whenever it is included in CUFFT: use strided FFT for R2C to include the transpose into the FFT.
 

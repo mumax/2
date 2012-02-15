@@ -13,7 +13,7 @@ package modules
 import (
 	. "mumax/common"
 	"mumax/host"
-  "math"
+	"math"
 )
 
 // Calculates the magnetostatic kernel
@@ -123,10 +123,6 @@ func FaceKernel6(size []int, cellsize []float64, periodic []int, accuracy int, k
 	}
 	Stop("kern_d")
 }
-
-
-
-
 
 
 // func FaceKernel6_gpu(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array) {
