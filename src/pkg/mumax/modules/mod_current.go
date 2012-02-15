@@ -20,13 +20,23 @@ func init() {
 	RegisterModule("current", "Electrical currents", LoadCurrent)
 }
 
-func LoadCurrent(e *Engine) {
+// loads the current density
+func LoadCurrentDensity(e *Engine) {
 	if e.HasQuant("j") {
 		return
 	}
+	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
+}
+
+// calculate current density
+func LoadCurrent(e *Engine) {
+	if e.HasQuant("diff_rho") {
+		return
+	}
 	LoadCoulomb(e)
+	LoadCurrentDensity(e)
+	j := e.Quant("j")
 	E := e.Quant("E")
-	j := e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
 	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ohm*m"), "electrical resistivity")
 	drho := e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
 
