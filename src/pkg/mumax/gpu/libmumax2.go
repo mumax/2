@@ -16,6 +16,7 @@ import "C"
 
 import (
 	. "mumax/common"
+	cu "cuda/driver"
 	"unsafe"
 )
 
