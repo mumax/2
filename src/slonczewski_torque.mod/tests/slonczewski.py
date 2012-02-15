@@ -19,8 +19,12 @@ setv('m_maxerror', 1./100)
 setv('aj',1.0)
 setv('bj',0.3)
 setv('Pol',0.56)
-j=[[[[1.0e8]]]]
-setarray('CurrentDensity',j)
+
+j=makearray(3, 1, 1, 1)
+j[0][0][0][0] = 1e8
+j[1][0][0][0] = 0
+j[2][0][0][0] = 0
+setarray('j', j)
 
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 p=[ [[[-1]]], [[[0]]], [[[0]]] ]
