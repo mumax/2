@@ -8,12 +8,13 @@
 package modules
 
 // Magnetostatic kernel
-// Author: Arne Vansteenkiste
+// Author: Ben Van de Wiele
 
 import (
 	. "mumax/common"
 	"mumax/host"
-	"math"
+  cu "cuda/driver"
+  "math"
 )
 
 // Calculates the magnetostatic kernel
@@ -182,35 +183,38 @@ func FaceKernel6_gpu(size []int, cellsize []float64, periodic []int, accuracy in
 }
 
 
-func FaceKernel6_gpu(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array)
-
 func Initialize_Gauss_quadrature_on_gpu_FaceKernel6(dev_qd_W_10, dev_qd_P_10, cellSize []float64){
 
   // initialize standard order 10 Gauss quadrature points and weights _____________________________
     std_qd_P_10 := make([]float64, 10)
-    std_qd_P_10[0] = -0.97390652851717197f;
-    std_qd_P_10[1] = -0.86506336668898498f;
-    std_qd_P_10[2] = -0.67940956829902399f;
-    std_qd_P_10[3] = -0.43339539412924699f;
-    std_qd_P_10[4] = -0.14887433898163099f;
-    std_qd_P_10[5] = -std_qd_P_10[4];
-    std_qd_P_10[6] = -std_qd_P_10[3];
-    std_qd_P_10[7] = -std_qd_P_10[2];
-    std_qd_P_10[8] = -std_qd_P_10[1];
-    std_qd_P_10[9] = -std_qd_P_10[0];
+    std_qd_P_10[0] = -0.97390652851717197
+    std_qd_P_10[1] = -0.86506336668898498
+    std_qd_P_10[2] = -0.67940956829902399
+    std_qd_P_10[3] = -0.43339539412924699
+    std_qd_P_10[4] = -0.14887433898163099
+    std_qd_P_10[5] = -std_qd_P_10[4]
+    std_qd_P_10[6] = -std_qd_P_10[3]
+    std_qd_P_10[7] = -std_qd_P_10[2]
+    std_qd_P_10[8] = -std_qd_P_10[1]
+    std_qd_P_10[9] = -std_qd_P_10[0]
     host_qd_W_10 := make([]float64, 10)
-    host_qd_W_10[0] = host_qd_W_10[9] = 0.066671344308687999f;
-    host_qd_W_10[1] = host_qd_W_10[8] = 0.149451349150581f;
-    host_qd_W_10[2] = host_qd_W_10[7] = 0.21908636251598201f;
-    host_qd_W_10[3] = host_qd_W_10[6] = 0.26926671930999602f;
-    host_qd_W_10[4] = host_qd_W_10[5] = 0.29552422471475298f;
+    host_qd_W_10[0] = 0.066671344308687999
+    host_qd_W_10[9] = 0.066671344308687999
+    host_qd_W_10[1] = 0.149451349150581
+    host_qd_W_10[8] = 0.149451349150581
+    host_qd_W_10[2] = 0.21908636251598201
+    host_qd_W_10[7] = 0.21908636251598201
+    host_qd_W_10[3] = 0.26926671930999602
+    host_qd_W_10[6] = 0.26926671930999602
+    host_qd_W_10[4] = 0.29552422471475298
+    host_qd_W_10[5] = 0.29552422471475298
   // ______________________________________________________________________________________________
 
   // Map the standard Gauss quadrature points to the used integration boundaries __________________
     host_qd_P_10 := make([]float64, 30)
-    get_Quad_Points_FaceKernel6(&host_qd_P_10[X*10], std_qd_P_10, 10, -0.5f*cellSize[X], 0.5f*cellSize[X]);
-    get_Quad_Points_FaceKernel6(&host_qd_P_10[Y*10], std_qd_P_10, 10, -0.5f*cellSize[Y], 0.5f*cellSize[Y]);
-    get_Quad_Points_FaceKernel6(&host_qd_P_10[Z*10], std_qd_P_10, 10, -0.5f*cellSize[Z], 0.5f*cellSize[Z]);
+    get_Quad_Points_FaceKernel6(&host_qd_P_10[X*10], std_qd_P_10, 10, -0.5*cellSize[X], 0.5*cellSize[X])
+    get_Quad_Points_FaceKernel6(&host_qd_P_10[Y*10], std_qd_P_10, 10, -0.5*cellSize[Y], 0.5*cellSize[Y])
+    get_Quad_Points_FaceKernel6(&host_qd_P_10[Z*10], std_qd_P_10, 10, -0.5*cellSize[Z], 0.5*cellSize[Z])
   // ______________________________________________________________________________________________
 
   // copy to the quadrature points and weights to the device ______________________________________
@@ -220,19 +224,19 @@ func Initialize_Gauss_quadrature_on_gpu_FaceKernel6(dev_qd_W_10, dev_qd_P_10, ce
     memcpy_to_gpu (host_qd_P_10, dev_qd_P_10, 3*10);
   // ______________________________________________________________________________________________
 
-  Free(std_qd_P_10);
-  Free(host_qd_P_10);
-  Free(host_qd_W_10);
+  Free(std_qd_P_10)
+  Free(host_qd_P_10)
+  Free(host_qd_W_10)
 
   return;
 }
 
-func get_Quad_Points_FaceKernel6(float *gaussQP, float *stdGaussQP []float64, qOrder int, a, b float64){
+func get_Quad_Points_FaceKernel6(gaussQP, stdGaussQP []float64, qOrder int, a, b float64){
 
-  A := (b-a)/2.0f; // coefficients for transformation x'= Ax+B
-  B := (a+b)/2.0f; // where x' is the new integration parameter
+  A := (b-a)/2.0 // coefficients for transformation x'= Ax+B
+  B := (a+b)/2.0 // where x' is the new integration parameter
   for i:=0; i<qOrder; i++{
-    gaussQP[i] = A*stdGaussQP[i]+B;
+    gaussQP[i] = A*stdGaussQP[i]+B
   }
   
 }

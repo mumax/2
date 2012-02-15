@@ -13,16 +13,16 @@ extern "C" {
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
-__device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int i, int j, int k, int per0, int per1, int per2, 
-                                  float cellX, float cellY, float cellZ, float *dev_qd_P_10, float *dev_qd_W_10)){
+__device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int a, int b, int c, int per0, int per1, int per2, 
+                                  float cellX, float cellY, float cellZ, float *dev_qd_P_10, float *dev_qd_W_10){
 
   float result = 0.0f;
   float *dev_qd_P_10_X = &dev_qd_P_10[X*10];
   float *dev_qd_P_10_Y = &dev_qd_P_10[Y*10];
   float *dev_qd_P_10_Z = &dev_qd_P_10[Z*10];
   
-  int cutoff = 400    //square of the cutoff where the interaction is computed for dipole in the center in stead of magnetized volume
-  
+  int cutoff = 400;    //square of the cutoff where the interaction is computed for dipole in the center in stead of magnetized volume
+
   
   // for elements in Kernel component gxx _________________________________________________________
     if (co1==0 && co2==0){
@@ -341,7 +341,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 __global__ void initFaceKernel6ElementKern (float *data, int co1, int co2, 
                                             int N0, int N1, int N2, int N1part,
                                             int per0, int per1, int per2,
-                                            float cellX, float cellY, float cellZ
+                                            float cellX, float cellY, float cellZ,
                                             float *dev_qd_P_10, float *dev_qd_W_10, 
                                             int dev, int NDev){
 
@@ -397,14 +397,15 @@ void initFaceKernel6ElementAsync(float **data, int co1, int co2,            /// 
                                  CUstream *streams
                                 ){
 
-  dim3 gridSize(divUp(N2/2, BLOCKSIZE), divUp(N1Part, BLOCKSIZE), 1); // range over destination size
+  dim3 gridSize(divUp(N2/2, BLOCKSIZE), divUp(N1part, BLOCKSIZE), 1); // range over destination size
   dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
   check3dconf(gridSize, blockSize);
   
-  for (int dev = 0; dev < nDevice(); dev++) {
+  int NDev = nDevice();
+  for (int dev = 0; dev < NDev; dev++) {
     gpu_safe(cudaSetDevice(deviceId(dev)));
     initFaceKernel6ElementKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> 
-      (data[dev], co1, co2, N0, N1, N2, N1part, perO, per1, per2, cellX, cellY, cellZ, dev_qd_P_10[dev], dev_qd_W_10[dev], dev);
+      (data[dev], co1, co2, N0, N1, N2, N1part, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10[dev], dev_qd_W_10[dev], dev, NDev);
   }
 }
 
