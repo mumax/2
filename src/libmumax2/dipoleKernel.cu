@@ -14,7 +14,7 @@ extern "C" {
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
-__device__ float getKernelElement(int N0, int N1, int N2, int comp, int a, int b, int c, int per0, int per1, int per2, 
+__device__ float getDipoleKernelElement(int N0, int N1, int N2, int comp, int a, int b, int c, int per0, int per1, int per2, 
                                   float cellX, float cellY, float cellZ, float *dev_qd_P_10, float *dev_qd_W_10){
 
   float result = 0.0f;
@@ -357,29 +357,29 @@ __global__ void initDipoleKernel6ElementKern (float *data, int comp,
     for (int i=0; i<(N0+1)/2; i++){     // this also works in the 2D case
       if (j2<N1/2){
           data[i*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, comp, i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0)
           data[(N0-i)*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, comp, -i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, -i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (k>0)
           data[i*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, comp, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0 && k>0)
           data[(N0-i)*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, comp, -i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, -i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
       if (j2>N1/2){
           data[i*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, comp, i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0)
           data[(N0-i)*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, comp, -i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, -i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (k>0)
           data[i*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, comp, i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0 && k>0)
           data[(N0-i)*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, comp, -i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getDipoleKernelElement(N0, N1, N2, comp, -i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
     }
     
