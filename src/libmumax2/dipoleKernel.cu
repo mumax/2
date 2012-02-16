@@ -90,7 +90,6 @@ __device__ float getKernelElement(int N0, int N1, int N2, int comp, int a, int b
         }
 
       }
-      result = 0.0f;
     }
   // ______________________________________________________________________________________________
 
@@ -367,7 +366,7 @@ __global__ void initFaceKernel6ElementKern (float *data, int comp,
             getKernelElement(N0, N1, N2, comp, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0 && k>0)
           data[(N0-i)*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, comp, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, -i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
       if (j2>N1/2){
           data[i*N12 + j*N2 + k] = 
@@ -380,7 +379,7 @@ __global__ void initFaceKernel6ElementKern (float *data, int comp,
             getKernelElement(N0, N1, N2, comp, i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0 && k>0)
           data[(N0-i)*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, comp, i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, -i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
     }
     
