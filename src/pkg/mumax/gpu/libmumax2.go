@@ -621,9 +621,9 @@ func KernelMulMicromag2D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftK
 // }
 
 
-func InitFaceKernel6Element(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
+func InitDipoleKernel6Element(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
 
-	C.initFaceKernel6ElementAsync(
+	C.initDipoleKernel6ElementAsync(
 		(**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
 		C.int(comp),
 		C.int(gpuBuffer.size3D[0]),

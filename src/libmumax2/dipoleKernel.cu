@@ -339,7 +339,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int comp, int a, int b
 
 
 
-__global__ void initFaceKernel6ElementKern (float *data, int comp, 
+__global__ void initDipoleKernel6ElementKern (float *data, int comp, 
                                             int N0, int N1, int N2, int N1part,
                                             int per0, int per1, int per2,
                                             float cellX, float cellY, float cellZ,
@@ -390,7 +390,7 @@ __global__ void initFaceKernel6ElementKern (float *data, int comp,
 
 
 
-void initFaceKernel6ElementAsync(float **data, int comp,                    /// data array and component
+void initDipoleKernel6ElementAsync(float **data, int comp,                    /// data array and component
                                  int N0, int N1, int N2, int N1part,        /// size of the kernel
                                  int per0, int per1, int per2,              /// periodicity
                                  float cellX, float cellY, float cellZ,     /// cell size
@@ -405,7 +405,7 @@ void initFaceKernel6ElementAsync(float **data, int comp,                    /// 
   int NDev = nDevice();
   for (int dev = 0; dev < NDev; dev++) {
     gpu_safe(cudaSetDevice(deviceId(dev)));
-    initFaceKernel6ElementKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> 
+    initDipoleKernel6ElementKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> 
       (data[dev], comp, N0, N1, N2, N1part, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10[dev], dev_qd_W_10[dev], dev, NDev);
   }
 }
