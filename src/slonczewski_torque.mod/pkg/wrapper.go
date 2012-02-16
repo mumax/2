@@ -50,7 +50,8 @@ gamma float32, aj float32, bj float32, Pol float32, j *gpu.Array) {
 		(C.float)(bj),
 		(C.float)(Pol),
 
-		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
+		// The program X component is the user Z component!
+		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
 
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
