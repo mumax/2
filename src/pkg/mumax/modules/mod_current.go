@@ -17,11 +17,11 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("current", "Electrical currents", LoadCurrent)
+	RegisterModule("current", "Electrical currents", LoadCalculatedCurrentDensity)
 }
 
 // loads the current density
-func LoadCurrentDensity(e *Engine) {
+func LoadUserDefinedCurrentDensity(e *Engine) {
 	if e.HasQuant("j") {
 		return
 	}
@@ -29,12 +29,12 @@ func LoadCurrentDensity(e *Engine) {
 }
 
 // calculate current density
-func LoadCurrent(e *Engine) {
+func LoadCalculatedCurrentDensity(e *Engine) {
 	if e.HasQuant("diff_rho") {
 		return
 	}
 	LoadCoulomb(e)
-	LoadCurrentDensity(e)
+	LoadUserDefinedCurrentDensity(e)
 	j := e.Quant("j")
 	E := e.Quant("E")
 	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ohm*m"), "electrical resistivity")

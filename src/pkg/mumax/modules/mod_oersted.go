@@ -22,7 +22,7 @@ func init() {
 //TODO: j with multiplier Mu0 to get order of magnitude right?
 func LoadOersted(e *Engine) {
 	LoadBField(e)
-	LoadCurrent(e)
+	LoadUserDefinedCurrentDensity(e)
 	e.Depends("B", "j")
 	maxwell.EnableOersted(e.Quant("j"))
 }

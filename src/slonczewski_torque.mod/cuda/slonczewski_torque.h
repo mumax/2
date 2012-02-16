@@ -3,7 +3,7 @@
   * This file implements Slonczewski spin torque
   * See Slonczewski JMMM 159 (1996) L1-L7
   *
-  * @author Graham Rowlands
+  * @author Graham Rowlands, Arne Vansteenkiste
   */
 
 #ifndef _SLONCZEWSKI_TORQUE_H_
@@ -21,7 +21,7 @@ extern "C" {
 			 float** alpha, float** Msat,
 			 float gamma, float aj, float bj, float Pol,
 			 float **curr, 
-			 int N0, int N1Part, int N2, 
+			 int NPart, ///< total number of floats per gpu.
 			 CUstream* stream);
 #ifdef __cplusplus
 }

@@ -15,18 +15,15 @@ extern "C" {
 					 float* alpha, float* Msat,
 					 float gamma, float aj, float bj, float Pol, 
 					 float *curr, 
-					 int N0, int N1Part, int N2,
-					 int i) 
+					 int NPart)
   {
     
-    //  i is the device index, x coordinate
-    int j = blockIdx.x * blockDim.x + threadIdx.x; // y coordinate
-    int k = blockIdx.y * blockDim.y + threadIdx.y; // z coordinate
-    int I = i*N1Part*N2 + j*N2 + k; // linear array index
+    int I = threadindex;
+	if (I < NPart){ // Thread configurations are usually too large...
 
-    float Ms = Msat[I];
+      //float Ms = Msat[I];
     
-    if (Ms > 0.0) { // don't bother if there's nothing here!
+    //if (Ms > 0.0) { // do bother if there's nothing here, branching makes cuda code slower.
       float m_x = mx[I];
       float m_y = my[I];
       float m_z = mz[I];
@@ -42,11 +39,11 @@ extern "C" {
       float mxpxm_y =  pxm_x * m_z - m_x * pxm_z;
       float mxpxm_z = -pxm_x * m_y + m_x * pxm_y;
 
-      sttx[I] = 0.0*mxpxm_x;
-      stty[I] = 0.0*mxpxm_y;
-      sttz[I] = 0.0*mxpxm_z;
+      sttx[I] = mxpxm_x;//0.0*mxpxm_x;
+      stty[I] = mxpxm_y;//0.0*mxpxm_y;
+      sttz[I] = mxpxm_z;//0.0*mxpxm_z;
       
-    } // end if (Msat > 0.0)
+    } 
         
   }
 
@@ -58,22 +55,22 @@ extern "C" {
 			 float** alpha, float** Msat,
 			 float gamma, float aj, float bj, float Pol,
 			 float **curr, 
-			 int N0, int N1Part, int N2, 
+			 int NPart, 
 			 CUstream* stream)
   {
-    dim3 gridSize(divUp(N1Part, BLOCKSIZE), divUp(N2, BLOCKSIZE));
-    dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
+
+    // 1D configuration
+    dim3 gridSize, blockSize;
+    make1dconf(NPart, &gridSize, &blockSize);
 
     int nDev = nDevice();
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
-      for (int i = 0; i < N0; i++) {
-	slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
+	    slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
 										       mx[dev], my[dev], mz[dev],  
 										       px[dev], py[dev], pz[dev],
 										       alpha[dev], Msat[dev], gamma, aj, bj, Pol, curr[dev], 
-										       N0, N1Part, N2, i);
-      } // end i < N0 loop
+										       NPart);
     } // end dev < nDev loop
 										  
 										  
