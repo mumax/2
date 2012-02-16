@@ -9,10 +9,8 @@ setgridsize(Nx, Ny, Nz)
 setcellsize(500e-9/Nx, 125e-9/Ny, 3e-9/Nz)
 
 load('micromagnetism')
-load('solver/rk12')
 
 setv('Msat', 800e3)
-setv('demag_acc', 7)
 setv('Aex', 1.3e-11)
 setv('alpha', 1)
 setv('dt', 1e-12)
@@ -27,10 +25,10 @@ autotabulate(["t", "<m>", "m_error", "dt", "maxtorque"], "m.txt", 10e-12)
 
 run(2e-9) #relax
 
-Hx = -24.6E-3 / mu0
-Hy =   4.3E-3 / mu0
-Hz =   0      / mu0 
-setv('H_ext', [Hx, Hy, Hz])
+Bx = -24.6E-3
+By =   4.3E-3
+Bz =   0      
+setv('B_ext', [Bx, By, Bz])
 setv('alpha', 0.02)
 setv('dt', 0.2e-12)
 
