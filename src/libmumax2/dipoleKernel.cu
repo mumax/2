@@ -22,7 +22,7 @@ __device__ float getDipoleKernelElement(int N0, int N1, int N2, int comp, int a,
   float *dev_qd_P_10_Y = &dev_qd_P_10[Y*10];
   float *dev_qd_P_10_Z = &dev_qd_P_10[Z*10];
   
-  int cutoff = 400;    //square of the cutoff where the interaction is computed for dipole in the center in stead of magnetized volume
+  int cutoff = 10000;    //square of the cutoff where the interaction is computed for dipole in the center in stead of magnetized volume
 
   
   // for elements in Kernel component gxx _________________________________________________________

@@ -61,7 +61,7 @@ func InitDipoleKernel6(size []int, cellsize []float64, periodic []int, accuracy 
 
 func InitRotorKernel(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array) {
   Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
-  Start("kern_d")
+  Start("kern_r")
 
   Assert(len(kern.Array) == 9) // TODO: should be able to change to 6
   CheckSize(kern.Size3D, size)
@@ -97,7 +97,48 @@ func InitRotorKernel(size []int, cellsize []float64, periodic []int, accuracy in
   dev_qd_P_10.Free()*/
   // ______________________________________________________________________________________________
 
-  Stop("kern_d")
+  Stop("kern_r")
+}
+
+func InitPointKernel(size []int, cellsize []float64, periodic []int, kern *host.Array) {
+  Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "periodic:", periodic)
+  Start("kern_p")
+
+  Assert(len(kern.Array) == 3) // TODO: should be able to change to 6
+  CheckSize(kern.Size3D, size)
+
+  // initialization Gauss quadrature points for integrations + copy to gpu ________________________
+  dev_qd_W_10 := make([]cu.DevicePtr, NDevice())
+  dev_qd_P_10 := make([]cu.DevicePtr, NDevice())
+  Initialize_Gauss_quadrature(dev_qd_W_10, dev_qd_P_10, cellsize)
+  // ______________________________________________________________________________________________
+
+  // allocate array to store one component on the devices _________________________________________
+  gpuBuffer := NewArray(3, size) // TODO: allocate mem space for only 1 component
+  // ______________________________________________________________________________________________
+
+  // initialize kernel elements and copy to host __________________________________________________
+  gpuBuffer.Zero()
+  for comp := 0; comp < 3; comp++ {
+    InitPointKernelElement(gpuBuffer.Component(comp), comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+  }
+  gpuBuffer.CopyToHost(kern) // TODO: copy each component separately, saves valuable memory on gpu
+  // ______________________________________________________________________________________________
+
+  // free everything ______________________________________________________________________________
+  gpuBuffer.Free()
+  devices := getDevices()
+  for i := range devices {
+    setDevice(devices[i])
+    dev_qd_W_10[i].Free()
+    dev_qd_W_10[i] = 0
+    dev_qd_P_10[i] = 0
+  }
+  /*  dev_qd_W_10.Free()
+  dev_qd_P_10.Free()*/
+  // ______________________________________________________________________________________________
+
+  Stop("kern_p")
 }
 
 
