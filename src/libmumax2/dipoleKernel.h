@@ -15,8 +15,7 @@ extern "C" {
 
 /// Initialization of the elements of the dipole kernel
 /// @param data: float arrray to store the kernel data
-/// @param co1: Component of the field (0, 1, or 2)
-/// @param co2: Component of the source dipole (0, 1, or 2)
+/// @param comp: Component of the field (XX, YY, ZZ, YZ, XZ, XY, ZY, ZX, YX)
 /// @param N0: x-size of the data array
 /// @param N1: y-size of the data array
 /// @param N2: z-size of the data array
@@ -31,13 +30,12 @@ extern "C" {
 /// @param dev_qd_W_10: float array containing the Gauss quadrature weight for integration (10th order)
 /// @param streams: used streams
 void initFaceKernel6ElementAsync(float **data, 
-                                 int co1,
-                                 int co2,
+                                 int comp,
                                  int N0, int N1, int N2,          
-                                 int N1part,                                /// size of the kernel
-                                 int per0, int per1, int per2,              /// periodicity
-                                 float cellX, float cellY, float cellZ,     /// cell size
-                                 float **dev_qd_P_10, float **dev_qd_W_10,  /// quadrature points and weights
+                                 int N1part,                                
+                                 int per0, int per1, int per2,              
+                                 float cellX, float cellY, float cellZ,     
+                                 float **dev_qd_P_10, float **dev_qd_W_10,  
                                  CUstream *streams
                                 );
 

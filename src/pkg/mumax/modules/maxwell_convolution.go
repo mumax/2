@@ -178,6 +178,9 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	kern := quant.Buffer()
 	accuracy := 8
 	FaceKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+//   gpu.FaceKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+//   fmt.Println("kern: ", kern.Array)
+
 	plan.kern[DIPOLE] = kern
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }

@@ -5,6 +5,7 @@ from math import *
 # test file for maxwell demag field
 
 # thin film
+#setgridsize(32, 32, 1)
 setgridsize(32, 32, 1)
 #setgridsize(20, 20, 1)
 setcellsize(5e-9, 5e-9, 2e-9)

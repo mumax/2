@@ -9,11 +9,12 @@
 extern "C" {
 #endif
 
+
 /// @author Ben Van de Wiele
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
-__device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int a, int b, int c, int per0, int per1, int per2, 
+__device__ float getKernelElement(int N0, int N1, int N2, int comp, int a, int b, int c, int per0, int per1, int per2, 
                                   float cellX, float cellY, float cellZ, float *dev_qd_P_10, float *dev_qd_W_10){
 
   float result = 0.0f;
@@ -25,7 +26,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
   
   // for elements in Kernel component gxx _________________________________________________________
-    if (co1==0 && co2==0){
+    if (comp==0){
 
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
@@ -60,7 +61,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gxy _________________________________________________________
-    if (co1==0 && co2==1){
+    if (comp==5){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -89,12 +90,13 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
         }
 
       }
+      result = 0.0f;
     }
   // ______________________________________________________________________________________________
 
 
   // for elements in Kernel component gyx (should be same result as gxy) __________________________
-    if (co1==1 && co2==0){
+    if (comp==8){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -128,7 +130,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gxz _________________________________________________________
-    if (co1==0 && co2==2){
+    if (comp==4){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -162,7 +164,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gzx (should be same result as gxz) __________________________
-    if (co1==2 && co2==0){
+    if (comp==7){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -196,7 +198,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gyy _________________________________________________________
-    if (co1==1 && co2==1){
+    if (comp==1){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -230,7 +232,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gyz _________________________________________________________
-    if (co1==1 && co2==2){
+    if (comp==3){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -264,7 +266,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gzy _________________________________________________________
-    if (co1==1 && co2==2){
+    if (comp==6){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -298,7 +300,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
   // for elements in Kernel component gzz _________________________________________________________
-    if (co1==2 && co2==2){
+    if (comp==2){
       for(int cnta=-per0; cnta<=per0; cnta++)
       for(int cntb=-per1; cntb<=per1; cntb++)
       for(int cntc=-per2; cntc<=per2; cntc++){
@@ -338,7 +340,7 @@ __device__ float getKernelElement(int N0, int N1, int N2, int co1, int co2, int 
 
 
 
-__global__ void initFaceKernel6ElementKern (float *data, int co1, int co2, 
+__global__ void initFaceKernel6ElementKern (float *data, int comp, 
                                             int N0, int N1, int N2, int N1part,
                                             int per0, int per1, int per2,
                                             float cellX, float cellY, float cellZ,
@@ -356,29 +358,29 @@ __global__ void initFaceKernel6ElementKern (float *data, int co1, int co2,
     for (int i=0; i<(N0+1)/2; i++){     // this also works in the 2D case
       if (j2<N1/2){
           data[i*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, co1, co2, i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0)
           data[(N0-i)*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, co1, co2, -i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, -i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (k>0)
           data[i*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, co1, co2, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0 && k>0)
           data[(N0-i)*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, co1, co2, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, i, j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
       if (j2>N1/2){
           data[i*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, co1, co2, i, N1-j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0)
           data[(N0-i)*N12 + j*N2 + k] = 
-            getKernelElement(N0, N1, N2, co1, co2, -i, N1-j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, -i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (k>0)
           data[i*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, co1, co2, i, N1-j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
         if (i>0 && k>0)
           data[(N0-i)*N12 + j*N2 + N2-k] = 
-            getKernelElement(N0, N1, N2, co1, co2, i, N1-j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+            getKernelElement(N0, N1, N2, comp, i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
     }
     
@@ -389,7 +391,7 @@ __global__ void initFaceKernel6ElementKern (float *data, int co1, int co2,
 
 
 
-void initFaceKernel6ElementAsync(float **data, int co1, int co2,            /// data array and component
+void initFaceKernel6ElementAsync(float **data, int comp,                    /// data array and component
                                  int N0, int N1, int N2, int N1part,        /// size of the kernel
                                  int per0, int per1, int per2,              /// periodicity
                                  float cellX, float cellY, float cellZ,     /// cell size
@@ -405,7 +407,7 @@ void initFaceKernel6ElementAsync(float **data, int co1, int co2,            /// 
   for (int dev = 0; dev < NDev; dev++) {
     gpu_safe(cudaSetDevice(deviceId(dev)));
     initFaceKernel6ElementKern <<<gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> 
-      (data[dev], co1, co2, N0, N1, N2, N1part, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10[dev], dev_qd_W_10[dev], dev, NDev);
+      (data[dev], comp, N0, N1, N2, N1part, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10[dev], dev_qd_W_10[dev], dev, NDev);
   }
 }
 
