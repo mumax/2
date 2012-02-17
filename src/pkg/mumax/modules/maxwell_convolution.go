@@ -203,8 +203,8 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 
 	kern := quant.Buffer()
 	accuracy := 8
-	//RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-	gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	//gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern) // leaks memory??
 	//   fmt.Println("kern: ", kern.Array[3])
 	plan.kern[ROTOR] = kern
 	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)
