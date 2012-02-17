@@ -85,7 +85,6 @@ func SwapXYZ(array []float64) {
 //	YZ <-> XY
 //	XZ <-> XZ
 //	XY <-> YZ 
-// TODO: cannot handle non-symmetric matrices
 func SwapIndex(index, dim int) int {
 	switch dim {
 	default:
