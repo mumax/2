@@ -158,8 +158,8 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
-	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-	//   gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	//PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
 	//   fmt.Println("kern: ", kern.Array[0])
 	plan.kern[CHARGE] = kern
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
@@ -203,8 +203,8 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 
 	kern := quant.Buffer()
 	accuracy := 8
-	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-	//   gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	//RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	//   fmt.Println("kern: ", kern.Array[3])
 	plan.kern[ROTOR] = kern
 	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)

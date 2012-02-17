@@ -3,9 +3,9 @@ from mumax2 import *
 
 # Standard Problem 4
 
-Nx = 128 * 2
-Ny = 32 * 2
-Nz = 1 * 2
+Nx = 128 
+Ny = 64
+Nz = 1 
 setgridsize(Nx, Ny, Nz)
 setcellsize(500e-9/Nx, 125e-9/Ny, 3e-9/Nz)
 
