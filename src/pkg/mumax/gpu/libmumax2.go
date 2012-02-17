@@ -643,48 +643,46 @@ func InitDipoleKernel6Element(gpuBuffer *Array, comp int, periodic []int, cellSi
 
 }
 
-
 func InitRotorKernelElement(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
 
-  C.initRotorKernelElementAsync(
-    (**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
-    C.int(comp),
-    C.int(gpuBuffer.size3D[0]),
-    C.int(gpuBuffer.size3D[1]),
-    C.int(gpuBuffer.size3D[2]),
-    C.int(gpuBuffer.partSize[1]),
-    C.int(periodic[0]),
-    C.int(periodic[1]),
-    C.int(periodic[2]),
-    C.float(cellSize[0]),
-    C.float(cellSize[1]),
-    C.float(cellSize[2]),
-    (**C.float)(unsafe.Pointer(&dev_qd_P_10[0])),
-    (**C.float)(unsafe.Pointer(&dev_qd_W_10[0])),
-    (*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
-  gpuBuffer.Stream.Sync()
+	C.initRotorKernelElementAsync(
+		(**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
+		C.int(comp),
+		C.int(gpuBuffer.size3D[0]),
+		C.int(gpuBuffer.size3D[1]),
+		C.int(gpuBuffer.size3D[2]),
+		C.int(gpuBuffer.partSize[1]),
+		C.int(periodic[0]),
+		C.int(periodic[1]),
+		C.int(periodic[2]),
+		C.float(cellSize[0]),
+		C.float(cellSize[1]),
+		C.float(cellSize[2]),
+		(**C.float)(unsafe.Pointer(&dev_qd_P_10[0])),
+		(**C.float)(unsafe.Pointer(&dev_qd_W_10[0])),
+		(*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
+	gpuBuffer.Stream.Sync()
 }
-
 
 func InitPointKernelElement(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
 
-  C.initPointKernelElementAsync(
-    (**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
-    C.int(comp),
-    C.int(gpuBuffer.size3D[0]),
-    C.int(gpuBuffer.size3D[1]),
-    C.int(gpuBuffer.size3D[2]),
-    C.int(gpuBuffer.partSize[1]),
-    C.int(periodic[0]),
-    C.int(periodic[1]),
-    C.int(periodic[2]),
-    C.float(cellSize[0]),
-    C.float(cellSize[1]),
-    C.float(cellSize[2]),
-    (**C.float)(unsafe.Pointer(&dev_qd_P_10[0])),
-    (**C.float)(unsafe.Pointer(&dev_qd_W_10[0])),
-    (*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
-  gpuBuffer.Stream.Sync()
+	C.initPointKernelElementAsync(
+		(**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
+		C.int(comp),
+		C.int(gpuBuffer.size3D[0]),
+		C.int(gpuBuffer.size3D[1]),
+		C.int(gpuBuffer.size3D[2]),
+		C.int(gpuBuffer.partSize[1]),
+		C.int(periodic[0]),
+		C.int(periodic[1]),
+		C.int(periodic[2]),
+		C.float(cellSize[0]),
+		C.float(cellSize[1]),
+		C.float(cellSize[2]),
+		(**C.float)(unsafe.Pointer(&dev_qd_P_10[0])),
+		(**C.float)(unsafe.Pointer(&dev_qd_W_10[0])),
+		(*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
+	gpuBuffer.Stream.Sync()
 }
 
 // Computes the uniaxial anisotropy field, stores in h.

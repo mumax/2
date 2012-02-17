@@ -124,7 +124,6 @@ func FaceKernel6(size []int, cellsize []float64, periodic []int, accuracy int, k
 	Stop("kern_d")
 }
 
-
 // Magnetostatic field at position r (integer, number of cellsizes away from source) for a given source magnetization direction m (X, Y, or
 // s = source direction (x, y, z)
 //func faceIntegral(B, R *vector, cellsize []float64, s int, accuracy int) {

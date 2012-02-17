@@ -159,8 +159,8 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 
 	kern := quant.Buffer()
 	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-//   gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-//   fmt.Println("kern: ", kern.Array[0])
+	//   gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	//   fmt.Println("kern: ", kern.Array[0])
 	plan.kern[CHARGE] = kern
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
 }
@@ -179,11 +179,13 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 
 	kern := quant.Buffer()
 	accuracy := 8
-	FaceKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-//   gpu.initDipoleKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-//   fmt.Println("kern: ", kern.Array[4])
+	// !!!!!!!! 
+	//FaceKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	gpu.InitDipoleKernel6(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	//   fmt.Println("kern: ", kern.Array[4])
 
 	plan.kern[DIPOLE] = kern
+	//plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }
 
@@ -202,8 +204,8 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	kern := quant.Buffer()
 	accuracy := 8
 	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-//   gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-//   fmt.Println("kern: ", kern.Array[3])
+	//   gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	//   fmt.Println("kern: ", kern.Array[3])
 	plan.kern[ROTOR] = kern
 	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)
 }
@@ -266,6 +268,11 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 //// Loads a sub-kernel at position pos in the 3x7 global kernel matrix.
 //// The symmetry and real/imaginary/complex properties are taken into account to reduce storage.
 func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, realness int) {
+
+	for i := range kernel.Array {
+		Debug("kernel", TensorIndexStr[i], ":", kernel.Array[i], "\n\n\n")
+	}
+
 	//Assert(kernel.NComp() == 9) // full tensor
 	if kernel.NComp() > 3 {
 		testedsymm := MatrixSymmetry(kernel)
