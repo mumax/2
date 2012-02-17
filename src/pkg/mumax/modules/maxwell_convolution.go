@@ -158,8 +158,8 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
-	//PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-	gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	//gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern) // seems to leak memory?
 	//   fmt.Println("kern: ", kern.Array[0])
 	plan.kern[CHARGE] = kern
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
