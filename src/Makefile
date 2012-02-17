@@ -3,6 +3,7 @@ dirs=\
 	libtensor\
 	pkg\
 	mumax2\
+	template\
 	muqueue\
 	python\
 

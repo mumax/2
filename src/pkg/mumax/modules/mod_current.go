@@ -17,16 +17,26 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("current", "Electrical currents", LoadCurrent)
+	RegisterModule("current", "Electrical currents", LoadCalculatedCurrentDensity)
 }
 
-func LoadCurrent(e *Engine) {
+// loads the current density
+func LoadUserDefinedCurrentDensity(e *Engine) {
 	if e.HasQuant("j") {
 		return
 	}
+	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
+}
+
+// calculate current density
+func LoadCalculatedCurrentDensity(e *Engine) {
+	if e.HasQuant("diff_rho") {
+		return
+	}
 	LoadCoulomb(e)
+	LoadUserDefinedCurrentDensity(e)
+	j := e.Quant("j")
 	E := e.Quant("E")
-	j := e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
 	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ohm*m"), "electrical resistivity")
 	drho := e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
 
@@ -37,7 +47,6 @@ func LoadCurrent(e *Engine) {
 	j.SetUpdater(&JUpdater{j: j, E: E, r: r})
 	drho.SetUpdater(&DRhoUpdater{drho: drho, j: j})
 }
-
 
 // Updates time derivative of charge density
 type DRhoUpdater struct {
@@ -50,7 +59,6 @@ func (u *DRhoUpdater) Update() {
 	gpu.DiffRhoAsync(drho, u.j.Array(), e.CellSize(), e.Periodic(), drho.Stream)
 	drho.Stream.Sync()
 }
-
 
 // Updates current density
 type JUpdater struct {

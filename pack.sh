@@ -5,9 +5,11 @@
 cp -f src/Optimize.inc src/Make.inc
 
 clean_output="rm -rf examples/*.out tests/*.out src/*.mod/tests/*.out"
-make clean && make -j 4 && make test && make -C src/muview && make doc && $clean_output 
+make clean && make -j 4 && make test && make -C src/libomf && make -C src/muview && make doc && $clean_output 
 
-if [ $? ]; then
+if (( $?==0 )); then
+	echo build ok;
+else
 	echo failed;
 	exit; 
 fi
@@ -30,6 +32,6 @@ rm -rf $tarball.tar.gz
 rm -rf $dir/mumax2
 tar cv $dir | gzip > $tarball
 
-rm -rf $dir
+#rm -rf $dir
 
 cp -f src/Debug.inc src/Make.inc

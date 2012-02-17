@@ -113,7 +113,10 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 func convertArg(v interface{}, typ reflect.Type) reflect.Value {
 	switch typ.Kind() {
 	case reflect.Int:
-		AssertMsg(float64(int(v.(float64))) == v.(float64), "need 32-bit integer") // make sure it actually fits in an int
+		if float64(int(v.(float64))) != v.(float64) {
+			// make sure it actually fits in an int
+			panic(InputErrF("need 32-bit integer: ", v.(float64)))
+		}
 		return reflect.ValueOf(int(v.(float64)))
 	case reflect.Float32:
 		return reflect.ValueOf(float32(v.(float64)))

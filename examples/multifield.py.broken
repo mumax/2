@@ -48,7 +48,7 @@ setv('t', 0)        # re-set time to 0 so output starts at 0
 setv('dt', 0.2e-12)
 
 # MULTI-FIELD EXAMPLE:
-# Here we introduce new quantities H_1 and H_2, added to H.
+# Here we introduce a new quantity B_ext2, to be added to B_ext
 # Infinitely many can be added.
 add_to('H', 'H_1')
 add_to('H', 'H_2')
