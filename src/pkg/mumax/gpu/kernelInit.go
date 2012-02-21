@@ -32,28 +32,25 @@ func InitDipoleKernel6(size []int, cellsize []float64, periodic []int, accuracy 
 	// ______________________________________________________________________________________________
 
 	// allocate array to store one component on the devices _________________________________________
-	gpuBuffer := NewArray(9, size) // TODO: allocate mem space for only 1 component
+	gpuBuffer := NewArray(1, size)
+	defer gpuBuffer.Free()
 	// ______________________________________________________________________________________________
 
 	// initialize kernel elements and copy to host __________________________________________________
-	gpuBuffer.Zero()
 	for comp := 0; comp < 9; comp++ {
-		InitDipoleKernel6Element(gpuBuffer.Component(comp), comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+		gpuBuffer.Zero()
+		InitDipoleKernel6Element(gpuBuffer, comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+		gpuBuffer.CopyToHost(kern.Component(comp))
 	}
-	gpuBuffer.CopyToHost(kern) // TODO: copy each component separately, saves valuable memory on gpu
 	// ______________________________________________________________________________________________
 
 	// free everything ______________________________________________________________________________
-	gpuBuffer.Free()
 	devices := getDevices()
 	for i := range devices {
 		setDevice(devices[i])
 		dev_qd_W_10[i].Free()
-		dev_qd_W_10[i] = 0
-		dev_qd_P_10[i] = 0
+		dev_qd_P_10[i].Free()
 	}
-	/*  dev_qd_W_10.Free()
-	dev_qd_P_10.Free()*/
 	// ______________________________________________________________________________________________
 
 	Stop("kern_d")
@@ -73,28 +70,25 @@ func InitRotorKernel(size []int, cellsize []float64, periodic []int, accuracy in
 	// ______________________________________________________________________________________________
 
 	// allocate array to store one component on the devices _________________________________________
-	gpuBuffer := NewArray(9, size) // TODO: allocate mem space for only 1 component
+	gpuBuffer := NewArray(1, size)
+	defer gpuBuffer.Free()
 	// ______________________________________________________________________________________________
 
 	// initialize kernel elements and copy to host __________________________________________________
-	gpuBuffer.Zero()
 	for comp := 0; comp < 9; comp++ {
-		InitRotorKernelElement(gpuBuffer.Component(comp), comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+		gpuBuffer.Zero()
+		InitRotorKernelElement(gpuBuffer, comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+		gpuBuffer.CopyToHost(kern.Component(comp))
 	}
-	gpuBuffer.CopyToHost(kern) // TODO: copy each component separately, saves valuable memory on gpu
 	// ______________________________________________________________________________________________
 
 	// free everything ______________________________________________________________________________
-	gpuBuffer.Free()
 	devices := getDevices()
 	for i := range devices {
 		setDevice(devices[i])
 		dev_qd_W_10[i].Free()
-		dev_qd_W_10[i] = 0
-		dev_qd_P_10[i] = 0
+		dev_qd_P_10[i].Free()
 	}
-	/*  dev_qd_W_10.Free()
-	dev_qd_P_10.Free()*/
 	// ______________________________________________________________________________________________
 
 	Stop("kern_r")
@@ -114,28 +108,25 @@ func InitPointKernel(size []int, cellsize []float64, periodic []int, kern *host.
 	// ______________________________________________________________________________________________
 
 	// allocate array to store one component on the devices _________________________________________
-	gpuBuffer := NewArray(3, size) // TODO: allocate mem space for only 1 component
+	gpuBuffer := NewArray(1, size)
+	defer gpuBuffer.Free()
 	// ______________________________________________________________________________________________
 
 	// initialize kernel elements and copy to host __________________________________________________
-	gpuBuffer.Zero()
 	for comp := 0; comp < 3; comp++ {
-		InitPointKernelElement(gpuBuffer.Component(comp), comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+		gpuBuffer.Zero()
+		InitPointKernelElement(gpuBuffer, comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+		gpuBuffer.CopyToHost(kern.Component(comp))
 	}
-	gpuBuffer.CopyToHost(kern) // TODO: copy each component separately, saves valuable memory on gpu
 	// ______________________________________________________________________________________________
 
 	// free everything ______________________________________________________________________________
-	gpuBuffer.Free()
 	devices := getDevices()
 	for i := range devices {
 		setDevice(devices[i])
 		dev_qd_W_10[i].Free()
-		dev_qd_W_10[i] = 0
-		dev_qd_P_10[i] = 0
+		dev_qd_P_10[i].Free()
 	}
-	/*  dev_qd_W_10.Free()
-	dev_qd_P_10.Free()*/
 	// ______________________________________________________________________________________________
 
 	Stop("kern_p")
@@ -185,10 +176,6 @@ func Initialize_Gauss_quadrature(dev_qd_W_10, dev_qd_P_10 []cu.DevicePtr, cellSi
 		cu.MemcpyHtoD(cu.DevicePtr(dev_qd_P_10[i]), cu.HostPtr(unsafe.Pointer(&host_qd_P_10[0])), 30*SIZEOF_FLOAT)
 	}
 	// ______________________________________________________________________________________________
-
-	std_qd_P_10 = nil
-	host_qd_P_10 = nil
-	host_qd_W_10 = nil
 
 	return
 }
