@@ -33,6 +33,8 @@ func clientMain() {
 	initOutputDir(outdir)
 	initLogger(outdir)
 	LogFile(WELCOME)
+	hostname, _ := os.Hostname()
+	Debug("Hostname:", hostname)
 	Debug("Go", runtime.Version())
 	command := *flag_command
 
