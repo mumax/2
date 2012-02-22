@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math"
 	"unsafe"
+	"runtime"
 )
 
 // Full Maxwell Electromagnetic field solver.
@@ -104,6 +105,7 @@ func (plan *MaxwellPlan) EnableCoulomb(rho *Quant) {
 	plan.loadChargeKernel()
 	plan.EInMul[RHO] = 1 / Epsilon0
 	plan.EInput[RHO] = rho.Array()
+	runtime.GC()
 }
 
 // Enable Demagnetizing field
@@ -114,6 +116,7 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	plan.BInput[MY] = m.Array().Component(Y)
 	plan.BInput[MZ] = m.Array().Component(Z)
 	// multipliers set on the fly
+	runtime.GC()
 }
 
 func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
@@ -126,6 +129,7 @@ func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.EInMul[JX] = -1
 	plan.EInMul[JY] = -1
 	plan.EInMul[JZ] = -1
+	runtime.GC()
 }
 
 func (plan *MaxwellPlan) EnableOersted(j *Quant) {
@@ -138,6 +142,7 @@ func (plan *MaxwellPlan) EnableOersted(j *Quant) {
 	plan.BInMul[JX] = Mu0
 	plan.BInMul[JY] = Mu0
 	plan.BInMul[JZ] = Mu0
+	runtime.GC()
 }
 
 const (
@@ -154,7 +159,9 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	quant := NewQuant("kern_charge", VECTOR, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced electrostatic kernel")
-	if DEBUG{e.AddQuant(quant)}
+	if DEBUG {
+		e.AddQuant(quant)
+	}
 
 	kern := quant.Buffer()
 	//PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
@@ -173,7 +180,9 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	quant := NewQuant("kern_dipole", TENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced dipole kernel")
-	if DEBUG{e.AddQuant(quant)}
+	if DEBUG {
+		e.AddQuant(quant)
+	}
 
 	kern := quant.Buffer()
 	accuracy := 8
@@ -196,7 +205,9 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
 	quant := NewQuant("kern_rotor", TENS, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced rotor kernel")
-	if DEBUG{e.AddQuant(quant)}
+	if DEBUG {
+		e.AddQuant(quant)
+	}
 
 	kern := quant.Buffer()
 	accuracy := 8
