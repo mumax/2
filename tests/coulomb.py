@@ -27,5 +27,5 @@ q=1*vol
 Ewant = -1 * q/(4*pi*epsilon0*r*r)
 echo('have ' +  str(Ehave) + ' want '+ str(Ewant))
 
-if abs(Ehave - Ewant) / abs(Ewant) > 1e-5:
+if abs(Ehave - Ewant) / abs(Ewant) > 1e-4:
 	exit(-1)

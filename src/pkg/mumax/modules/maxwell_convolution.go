@@ -158,8 +158,8 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	e.AddQuant(quant)
 
 	kern := quant.Buffer()
-	PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-	//gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern) // seems to leak memory?
+	//PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
+	gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
 	//   fmt.Println("kern: ", kern.Array[0])
 	plan.kern[CHARGE] = kern
 	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
@@ -203,8 +203,8 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 
 	kern := quant.Buffer()
 	accuracy := 8
-	RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-	//gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern) // leaks memory??
+	//RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	//   fmt.Println("kern: ", kern.Array[3])
 	plan.kern[ROTOR] = kern
 	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)
@@ -269,9 +269,9 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 //// The symmetry and real/imaginary/complex properties are taken into account to reduce storage.
 func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, realness int) {
 
-	for i := range kernel.Array {
-		Debug("kernel", TensorIndexStr[i], ":", kernel.Array[i], "\n\n\n")
-	}
+	//	for i := range kernel.Array {
+	//		Debug("kernel", TensorIndexStr[i], ":", kernel.Array[i], "\n\n\n")
+	//	}
 
 	//Assert(kernel.NComp() == 9) // full tensor
 	if kernel.NComp() > 3 {
@@ -298,6 +298,9 @@ func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, re
 	fullFFTPlan := gpu.NewDefaultFFT(logic, logic)
 	defer fullFFTPlan.Free()
 
+	// Maximum of all elements gives idea of scale.
+	max := maxAbs(kernel.List)
+
 	// FFT all components
 	for k := 0; k < 9; k++ {
 		i, j := IdxToIJ(k) // fills diagonal first, then upper, then lower
@@ -318,7 +321,7 @@ func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, re
 		AssertMsg(plan.fftMul[i+pos][j] == 0, "Likewise")
 
 		// ignore zeros
-		if k < kernel.NComp() && IsZero(kernel.Comp[k]) {
+		if k < kernel.NComp() && IsZero(kernel.Comp[k], max) {
 			Debug("kernel", TensorIndexStr[k], " == 0")
 			continue
 		}
@@ -352,22 +355,33 @@ func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, re
 	}
 
 	// debug
-	var dbg [7][3]string
-	for i := range dbg {
-		for j := range dbg[i] {
-			dbg[i][j] = fmt.Sprint(unsafe.Pointer(plan.fftKern[i][j]), "*", plan.fftMul[i][j])
+	if DEBUG {
+		var dbg [7][3]string
+		for i := range dbg {
+			for j := range dbg[i] {
+				dbg[i][j] = fmt.Sprint(unsafe.Pointer(plan.fftKern[i][j]), "*", plan.fftMul[i][j])
+			}
 		}
+		Debug("maxwell convplan kernel:", dbg)
 	}
-	Debug("maxwell convplan kernel:", dbg)
 }
 
-func IsZero(array []float32) bool {
+const zero_tolerance = 1e-5
+
+// list is considered zero if all elements are 
+// at least a factorzero_tolerance smaller than max.
+func IsZero(array []float32, max float32) bool {
+	return (maxAbs(array) / max) < zero_tolerance
+}
+
+// maximum absolute value of all elements
+func maxAbs(array []float32) (max float32) {
 	for _, x := range array {
-		if x != 0 {
-			return false
+		if Abs32(x) > max {
+			max = Abs32(x)
 		}
 	}
-	return true
+	return
 }
 
 // arr[i] *= scale

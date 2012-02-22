@@ -72,7 +72,7 @@ func (e Bug) String() string {
 
 // Shorthand for Bug(fmt.Sprint(msg...))
 func BugF(msg ...interface{}) Bug {
-	return Bug(sprint(msg...))
+	return BugF(sprint(msg...))
 }
 
 // Empty function implements interface{Bug()}
