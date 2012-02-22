@@ -153,9 +153,8 @@ func (plan *MaxwellPlan) loadChargeKernel() {
 	}
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
-	// TODO: do not add to engine if debug is off?
 	quant := NewQuant("kern_charge", VECTOR, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced electrostatic kernel")
-	e.AddQuant(quant)
+	if DEBUG{e.AddQuant(quant)}
 
 	kern := quant.Buffer()
 	//PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
@@ -173,9 +172,8 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	}
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
-	// TODO: do not add to engine if debug is off?
 	quant := NewQuant("kern_dipole", TENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced dipole kernel")
-	e.AddQuant(quant)
+	if DEBUG{e.AddQuant(quant)}
 
 	kern := quant.Buffer()
 	accuracy := 8
@@ -197,9 +195,8 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 	}
 	e := GetEngine()
 	// DEBUG: add the kernel as orphan quant, so we can output it.
-	// TODO: do not add to engine if debug is off?
 	quant := NewQuant("kern_rotor", TENS, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced rotor kernel")
-	e.AddQuant(quant)
+	if DEBUG{e.AddQuant(quant)}
 
 	kern := quant.Buffer()
 	accuracy := 8
