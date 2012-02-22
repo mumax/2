@@ -74,6 +74,9 @@ __device__ float getRotorKernelElement(int N0, int N1, int N2, int comp, int a, 
                     ( (i*cellX) * __powf(r2,-1.5f) );
         }
         
+        if (r2_int==0)
+          result = 0.0;
+        
       }
       if (comp==3)
         result *= 1.0f/4.0f/3.14159265f;
@@ -114,6 +117,9 @@ __device__ float getRotorKernelElement(int N0, int N1, int N2, int comp, int a, 
                     ( (j*cellX) * __powf(r2,-1.5f) );
         }
         
+        if (r2_int==0)
+          result = 0.0;
+        
       }
       if (comp==4)
         result *= -1.0f/4.0f/3.14159265f;
@@ -153,6 +159,11 @@ __device__ float getRotorKernelElement(int N0, int N1, int N2, int comp, int a, 
           result += cellX * cellY * cellZ *
                     ( (k*cellX) * __powf(r2,-1.5f) );
         }
+        
+        if (r2_int==0)
+          result = 0.0;
+
+       
       }
       if (comp==5)
         result *= 1.0f/4.0f/3.14159265f;
