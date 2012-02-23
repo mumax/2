@@ -52,7 +52,7 @@ func initCUDA() {
 	Debug("Initializing CUDA")
 	runtime.LockOSThread()
 	Debug("Locked OS Thread")
-	cu.Init()
+	cu.Init(0)
 }
 
 // Write LaTeX documentation for the module.

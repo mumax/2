@@ -73,7 +73,7 @@ func initMultiGPUCgo() {
 func printMultiGPUInfo() {
 	for i := range _useDevice {
 		dev := cu.DeviceGet(_useDevice[i])
-		Log("device", i, "( PCI", dev.GetAttribute(cu.A_PCI_DEVICE_ID), ")", dev.GetName(), ",", dev.TotalMem()/(1024*1024), "MiB")
+		Log("device", i, "( PCI", dev.Attribute(cu.PCI_DEVICE_ID), ")", dev.Name(), ",", dev.TotalMem()/(1024*1024), "MiB")
 	}
 
 }
@@ -81,13 +81,13 @@ func printMultiGPUInfo() {
 // set up device properties
 func initMultiGPUProperties() {
 	dev := cu.DeviceGet(_useDevice[0])
-	maxThreadsPerBlock = dev.GetAttribute(cu.A_MAX_THREADS_PER_BLOCK)
-	maxBlockDim[0] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_X)
-	maxBlockDim[1] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_Y)
-	maxBlockDim[2] = dev.GetAttribute(cu.A_MAX_BLOCK_DIM_Z)
-	maxGridDim[0] = dev.GetAttribute(cu.A_MAX_GRID_DIM_X)
-	maxGridDim[1] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Y)
-	maxGridDim[2] = dev.GetAttribute(cu.A_MAX_GRID_DIM_Z)
+	maxThreadsPerBlock = dev.Attribute(cu.MAX_THREADS_PER_BLOCK)
+	maxBlockDim[0] = dev.Attribute(cu.MAX_BLOCK_DIM_X)
+	maxBlockDim[1] = dev.Attribute(cu.MAX_BLOCK_DIM_Y)
+	maxBlockDim[2] = dev.Attribute(cu.MAX_BLOCK_DIM_Z)
+	maxGridDim[0] = dev.Attribute(cu.MAX_GRID_DIM_X)
+	maxGridDim[1] = dev.Attribute(cu.MAX_GRID_DIM_Y)
+	maxGridDim[2] = dev.Attribute(cu.MAX_GRID_DIM_Z)
 	Debug("Max", maxThreadsPerBlock, "threads per block, max", maxGridDim, "x", maxBlockDim, "threads per GPU")
 }
 
@@ -108,8 +108,8 @@ func initMultiGPUPeerAccess() {
 		Debug("Enabling device peer-to-peer access")
 		for i := range _useDevice { //_deviceCtxs {
 			//dev := cu.DeviceGet(_useDevice[i])
-			//Debug("Device ", i, "UNIFIED_ADDRESSING:", dev.GetAttribute(cu.A_UNIFIED_ADDRESSING))
-			//if dev.GetAttribute(cu.A_UNIFIED_ADDRESSING) != 1 {
+			//Debug("Device ", i, "UNIFIED_ADDRESSING:", dev.GetAttribute(cu.UNIFIED_ADDRESSING))
+			//if dev.GetAttribute(cu.UNIFIED_ADDRESSING) != 1 {
 			//	panic(ERR_UNIFIED_ADDR)
 			//}
 			for j := range _useDevice {

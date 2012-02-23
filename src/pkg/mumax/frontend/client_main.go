@@ -42,7 +42,7 @@ func clientMain() {
 	Debug("Initializing CUDA")
 	runtime.LockOSThread()
 	Debug("Locked OS Thread")
-	cu.Init()
+	cu.Init(0)
 
 	initMultiGPU()
 

@@ -50,7 +50,7 @@ func initCUDA() {
 	Debug("Initializing CUDA")
 	runtime.LockOSThread()
 	Debug("Locked OS Thread")
-	cu.Init()
+	cu.Init(0)
 }
 
 // Do not start interpreter subprocess but wait for commands on Stdin.
