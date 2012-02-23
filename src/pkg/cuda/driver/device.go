@@ -11,10 +11,8 @@ import "C"
 
 import ()
 
-
 // CUDA Device number.
 type Device int
-
 
 // Returns the compute capability of the device.
 func DeviceComputeCapability(device Device) (major, minor int) {
@@ -33,7 +31,6 @@ func (device Device) ComputeCapability() (major, minor int) {
 	return DeviceComputeCapability(device)
 }
 
-
 // Returns in a device handle given an ordinal in the range [0, DeviceGetCount()-1].
 func DeviceGet(ordinal int) Device {
 	var device C.CUdevice
@@ -43,7 +40,6 @@ func DeviceGet(ordinal int) Device {
 	}
 	return Device(device)
 }
-
 
 // Gets the value of a device attribute.
 func DeviceGetAttribute(attrib DeviceAttribute, dev Device) int {
@@ -60,7 +56,6 @@ func (dev Device) Attribute(attrib DeviceAttribute) int {
 	return DeviceGetAttribute(attrib, dev)
 }
 
-
 // Returns the number of devices with compute capability greater than or equal to 1.0 that are available for execution.
 func DeviceGetCount() int {
 	var count C.int
@@ -70,7 +65,6 @@ func DeviceGetCount() int {
 	}
 	return int(count)
 }
-
 
 // Gets the name of the device.
 func DeviceGetName(dev Device) string {
@@ -88,7 +82,6 @@ func DeviceGetName(dev Device) string {
 func (dev Device) Name() string {
 	return DeviceGetName(dev)
 }
-
 
 // Device properties
 type DevProp struct {
@@ -147,7 +140,6 @@ func DeviceTotalMem(device Device) int64 {
 	}
 	return int64(bytes)
 }
-
 
 type DeviceAttribute int
 

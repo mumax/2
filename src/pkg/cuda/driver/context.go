@@ -38,7 +38,6 @@ func (ctx *Context) Destroy() {
 	*ctx = 0
 }
 
-
 // Returns the API version to create the context.
 func CtxGetApiVersion(ctx Context) (version int) {
 	var cversion C.uint
@@ -55,7 +54,6 @@ func (ctx Context) ApiVersion() (version int) {
 	return CtxGetApiVersion(ctx)
 }
 
-
 // Gets the current active context.
 func CtxGetCurrent() Context {
 	var ctx C.CUcontext
@@ -66,7 +64,6 @@ func CtxGetCurrent() Context {
 	return Context(unsafe.Pointer(ctx))
 }
 
-
 // Returns the ordinal of the current context's device.
 func CtxGetDevice() Device {
 	var dev C.CUdevice
@@ -76,7 +73,6 @@ func CtxGetDevice() Device {
 	}
 	return Device(dev)
 }
-
 
 // Sets the current active context.
 func CtxSetCurrent(ctx Context) {
@@ -90,7 +86,6 @@ func CtxSetCurrent(ctx Context) {
 func (ctx Context) SetCurrent() {
 	CtxSetCurrent(ctx)
 }
-
 
 // Blocks until the device has completed all preceding requested tasks, if the context was created with the CU_CTX_SCHED_BLOCKING_SYNC flag.
 func CtxSynchronize() {

@@ -41,7 +41,6 @@ func (s *Stream) Destroy() {
 	*s = 0
 }
 
-
 // Returns Success if all operations have completed, ErrorNotReady otherwise
 func StreamQuery(stream Stream) Error {
 	return Error(C.cudaStreamQuery(C.cudaStream_t(unsafe.Pointer(stream))))
@@ -51,7 +50,6 @@ func StreamQuery(stream Stream) Error {
 func (s Stream) Query() Error {
 	return StreamQuery(s)
 }
-
 
 // Blocks until the stream has completed.
 func StreamSynchronize(stream Stream) {
