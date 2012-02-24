@@ -17,7 +17,7 @@ import (
 	. "mumax/common"
 	"runtime"
 	"mumax/host"
-	//	"mumax/gpu"
+	"reflect"
 	"path"
 	"fmt"
 	"os"
@@ -144,6 +144,17 @@ func (a API) SetValue(quantity string, value []float64) {
 	a.SetV(quantity, value)
 }
 
+// Used to set a quantity as a function of time. Usage:
+//	SetPointwise("Quant", time0, [value0])
+//	SetPointwise("Quant", time1, [value1])
+//	SetPointwise("Quant", time2, [value2])
+//	...
+// Will make the quantity vary as a function of time, using
+// piecewise linear interpolation between the defined time-value pairs.
+// It is a good idea to end with something like:
+//	SetPointwise("Quant", 9999, [0])
+// to define the value as zero for time = infinity (after a pulse, e.g.),
+// because the function has to be defined during the entire simulation.
 func (a API) SetPointwise(quantity string, time float64, value []float64) {
 	e := a.Engine
 	q := e.Quant(quantity)
@@ -157,8 +168,9 @@ func (a API) SetPointwise(quantity string, time float64, value []float64) {
 
 	pointwise, ok := u.(*PointwiseUpdater)
 	if !ok {
-		panic(InputErrF("Can not set time-dependent", quantity, ", it is already determined in an other way [", u, "]"))
+		panic(InputErrF("Can not set time-dependent", quantity, ", it is already determined in an other way:", reflect.TypeOf(u)))
 	}
+
 	SwapXYZ(value)
 	pointwise.Append(time, value) // swap!
 
