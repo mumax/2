@@ -25,10 +25,12 @@ autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>", "m_error", "dt"], "m.txt", 10e-12)
 
 steps(2)
+run(1e-9)
 
-add_to("H_eff", "H1")
-add_to("H_eff", "H2")
-add_to("H_eff", "H3")
+add_to("H_eff", "H_ext")
+add_to("H_ext", "H1")
+add_to("H_ext", "H2")
+add_to("H_ext", "H3")
 
 Hx = -24.6E-3 / mu0
 Hy =   4.3E-3 / mu0
@@ -42,4 +44,5 @@ setv('alpha', 0.02)
 setv('dt', 0.2e-12)
 
 steps(2)
+run(1e-9)
 

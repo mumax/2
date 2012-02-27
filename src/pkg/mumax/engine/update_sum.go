@@ -46,10 +46,13 @@ func (u *SumUpdater) addTerms() {
 			parMul := parent.multiplier[c]
 			sumMul := sum.multiplier[c]
 			sumComp := sum.array.Component(c)
-			//Debug("gpu.Madd", sumComp, sumComp, parComp, float32(parMul/sumMul))
-			weight := float32((weight * parMul) / sumMul)
-			if weight != 0 {
-				gpu.Madd(sumComp, sumComp, parComp, weight) // divide by sum's multiplier!
+			if !sumComp.IsNil() {
+				weight := float32((weight * parMul) / sumMul)
+				if weight != 0 {
+					gpu.Madd(sumComp, sumComp, parComp, weight) // divide by sum's multiplier!
+				}
+			} else { // target is value
+				sum.multiplier[c] += parent.multiplier[c]
 			}
 		}
 	}
