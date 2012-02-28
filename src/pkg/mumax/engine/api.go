@@ -530,10 +530,21 @@ func (a API) OutputDirectory() string {
 // E.g.: Add_To("H", "H_1") adds a new external field
 // H_1 that will be added to H.
 func (a API) Add_To(sumQuantity, newQuantity string) {
+
 	e := a.Engine
 	sumQuant := e.Quant(sumQuantity)
+	sumUpd, ok := sumQuant.GetUpdater().(*SumUpdater)
+	if !ok {
+		panic(InputErrF("Add_To: quantity ", sumQuant.Name(), " is not of type 'sum', nothing can be added to it."))
+	}
 	term := e.AddNewQuant(newQuantity, sumQuant.NComp(), MASK, sumQuant.Unit())
-	AddTermToQuant(sumQuant, term)
+	sumUpd.AddParent(term.Name())
+	Log("Added new quantity", term.FullName(), "to", sumQuant.Name())
+
+	//e := a.Engine
+	//sumQuant := e.Quant(sumQuantity)
+	//term := e.AddNewQuant(newQuantity, sumQuant.NComp(), MASK, sumQuant.Unit())
+	//AddTermToQuant(sumQuant, term)
 }
 
 // Add a new quantity to the multi-physics engine, its
