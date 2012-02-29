@@ -93,6 +93,7 @@ func (s *RK12Solver) Step() {
 	// and invalidate them.
 
 	// stage 0
+	t0 := e.time.Scalar()
 	for i := range equation {
 		y := equation[i].output[0]
 		dy := equation[i].input[0]
@@ -100,61 +101,89 @@ func (s *RK12Solver) Step() {
 		checkUniform(dyMul)
 		s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later
+		s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
 
-		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // initial euler step
-
-		y.Invalidate()
 	}
 
-	// Advance time
-	e.time.SetScalar(e.time.Scalar() + dt)
+	const maxTry = 10 // undo at most this many bad steps
+	const headRoom = 1.5 // tolerate this error
+	for try := 0; try < maxTry; try++ {
 
-	// update inputs again
-	for i := range equation {
-		equation[i].input[0].Update()
-	}
-
-	// stage 1
-	minFactor := 2.0
-	for i := range equation {
-		y := equation[i].output[0]
-		dy := equation[i].input[0]
-		dyMul := dy.multiplier
-
-		h := float32(dt * dyMul[0])
-		gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.dybuffer[i], -0.5*h, y.Array().Stream) // corrected step
-		y.Array().Sync()
-
-		// error estimate
-		stepDiff := s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]) * h
-		err := float64(stepDiff)
-		s.err[i].SetScalar(err)
-		if err > s.peakErr[i].Scalar() {
-			s.peakErr[i].SetScalar(err)
+		// initial euler step
+		for i := range equation {
+			y := equation[i].output[0]
+			dy := equation[i].input[0]
+			dyMul := dy.multiplier
+			if try > 0{
+				y.Array().CopyFromDevice(s.y0buffer[i])
+				dy.Array().CopyFromDevice(s.dybuffer[i])
+			}
+			gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0]))
+			y.Invalidate()
 		}
-		factor := s.maxErr[i].Scalar() / err
 
-		// TODO: give user the control:
-		if factor < 0.01 {
-			factor = 0.01
+		// Advance time
+		e.time.SetScalar(t0 + dt)
+
+		// update inputs again
+		for i := range equation {
+			equation[i].input[0].Update()
 		}
-		if factor < minFactor {
-			minFactor = factor
-		} // take minimum time increase factor of all eqns.
 
+		// stage 1
+		badStep := false
+		minFactor := 2.0
+		for i := range equation {
+			y := equation[i].output[0]
+			dy := equation[i].input[0]
+			dyMul := dy.multiplier
+
+			h := float32(dt * dyMul[0])
+			gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.dybuffer[i], -0.5*h, y.Array().Stream) // corrected step
+			y.Array().Sync()
+
+			// error estimate
+			stepDiff := s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]) * h
+			err := float64(stepDiff)
+			s.err[i].SetScalar(err)
+			maxErr := s.maxErr[i].Scalar()
+			if err > headRoom * maxErr {
+				badStep = true
+			}
+			if !badStep && try != maxTry - 1 && err > s.peakErr[i].Scalar() {
+				// peak error should be that of good step, unless last trial which will not be undone
+				s.peakErr[i].SetScalar(err)
+			}
+			factor := maxErr / err
+
+			// TODO: give user the control:
+			if factor < 0.01 {
+				factor = 0.01
+			}
+			if factor < minFactor {
+				minFactor = factor
+			} // take minimum time increase factor of all eqns.
+
+			y.Invalidate()
+		}
+
+		// Set new time step but do not go beyond min/max bounds
+		newDt := dt * minFactor
+		if newDt < s.minDt.Scalar() {
+			newDt = s.minDt.Scalar()
+		}
+		if newDt > s.maxDt.Scalar() {
+			newDt = s.maxDt.Scalar()
+		}
+		e.dt.SetScalar(newDt)
+		if !badStep{break}
+	} // end try
+
+	for i:=range equation{
 		Pool.Recycle(&s.dybuffer[i])
-		y.Invalidate()
+		Pool.Recycle(&s.y0buffer[i])
 	}
-
-	// Set new time step but do not go beyond min/max bounds
-	newDt := dt * minFactor
-	if newDt < s.minDt.Scalar() {
-		newDt = s.minDt.Scalar()
-	}
-	if newDt > s.maxDt.Scalar() {
-		newDt = s.maxDt.Scalar()
-	}
-	e.dt.SetScalar(newDt)
 
 	// advance time step
 	e.step.SetScalar(e.step.Scalar() + 1)
