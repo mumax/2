@@ -63,9 +63,10 @@ func LoadRK12(e *Engine) {
 func (s *RK12Solver) Dependencies() (children, parents []string) {
 	children = []string{"dt", "step", "t"}
 	parents = []string{"dt", "mindt", "maxdt"}
-	for i := range s.error {
+	for i := range s.err {
 		parents = append(parents, s.maxErr[i].Name())
-		children = append(children, s.error[i].Name())
+		parents = append(parents, s.peakErr[i].Name())
+		children = append(children, s.err[i].Name())
 	}
 	return
 }
@@ -126,9 +127,12 @@ func (s *RK12Solver) Step() {
 
 		// error estimate
 		stepDiff := s.diff[i].MaxDiff(dy.Array(), s.buffer[i]) * h
-		error := float64(stepDiff)
-		s.error[i].SetScalar(error)
-		factor := s.maxErr[i].Scalar() / error
+		err := float64(stepDiff)
+		s.err[i].SetScalar(err)
+		if err > s.peakErr[i].Scalar() {
+			s.peakErr[i].SetScalar(err)
+		}
+		factor := s.maxErr[i].Scalar() / err
 
 		// TODO: give user the control:
 		if factor < 0.01 {
