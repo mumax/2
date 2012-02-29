@@ -24,6 +24,7 @@ type RK12Solver struct {
 	diff     []gpu.Reductor
 	minDt    *Quant
 	maxDt    *Quant
+	badSteps *Quant
 }
 
 // Load the solver into the Engine
@@ -37,6 +38,7 @@ func LoadRK12(e *Engine) {
 	s.maxDt = e.AddNewQuant("maxdt", SCALAR, VALUE, Unit("s"), "Maximum time step")
 	s.maxDt.SetVerifier(Positive)
 	s.maxDt.SetScalar(1e38)
+	s.badSteps = e.AddNewQuant("badsteps", SCALAR, VALUE, Unit(""), "Number of time steps that had to be re-done")
 
 	equation := e.equation
 	s.dybuffer = make([]*gpu.Array, len(equation))
@@ -63,7 +65,7 @@ func LoadRK12(e *Engine) {
 
 // Declares this solver's special dependencies
 func (s *RK12Solver) Dependencies() (children, parents []string) {
-	children = []string{"dt", "step", "t"}
+	children = []string{"dt", "step", "t", "badsteps"}
 	parents = []string{"dt", "mindt", "maxdt"}
 	for i := range s.err {
 		parents = append(parents, s.maxErr[i].Name())
@@ -106,8 +108,8 @@ func (s *RK12Solver) Step() {
 
 	}
 
-	const maxTry = 10 // undo at most this many bad steps
-	const headRoom = 1.5 // tolerate this error
+	const maxTry = 3 // undo at most this many bad steps
+	const headRoom = 0.8
 	for try := 0; try < maxTry; try++ {
 
 		// initial euler step
@@ -115,7 +117,7 @@ func (s *RK12Solver) Step() {
 			y := equation[i].output[0]
 			dy := equation[i].input[0]
 			dyMul := dy.multiplier
-			if try > 0{
+			if try > 0 { // restore previous initial conditions
 				y.Array().CopyFromDevice(s.y0buffer[i])
 				dy.Array().CopyFromDevice(s.dybuffer[i])
 			}
@@ -148,14 +150,15 @@ func (s *RK12Solver) Step() {
 			err := float64(stepDiff)
 			s.err[i].SetScalar(err)
 			maxErr := s.maxErr[i].Scalar()
-			if err > headRoom * maxErr {
+			if err > maxErr {
+				s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 				badStep = true
 			}
-			if !badStep && try != maxTry - 1 && err > s.peakErr[i].Scalar() {
+			if (!badStep || try == maxTry-1) && err > s.peakErr[i].Scalar() {
 				// peak error should be that of good step, unless last trial which will not be undone
 				s.peakErr[i].SetScalar(err)
 			}
-			factor := maxErr / err
+			factor := (maxErr * headRoom) / err
 
 			// TODO: give user the control:
 			if factor < 0.01 {
@@ -166,6 +169,7 @@ func (s *RK12Solver) Step() {
 			} // take minimum time increase factor of all eqns.
 
 			y.Invalidate()
+			//if badStep{break} // do not waste time on other equations
 		}
 
 		// Set new time step but do not go beyond min/max bounds
@@ -177,10 +181,12 @@ func (s *RK12Solver) Step() {
 			newDt = s.maxDt.Scalar()
 		}
 		e.dt.SetScalar(newDt)
-		if !badStep{break}
+		if !badStep {
+			break
+		}
 	} // end try
 
-	for i:=range equation{
+	for i := range equation {
 		Pool.Recycle(&s.dybuffer[i])
 		Pool.Recycle(&s.y0buffer[i])
 	}

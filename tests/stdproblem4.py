@@ -14,14 +14,14 @@ setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
 setv('alpha', 1)
 setv('dt', 1e-15)
-setv('m_maxerror', 1./3000)
+setv('m_maxerror', 1./100)
 
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
 autosave("m", "omf", ["Text"], 200e-12)
-autotabulate(["t", "<m>", "m_error", "m_peakerror", "dt", "maxtorque"], "m.txt", 10e-12)
+autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 10e-12)
 savegraph("graph.png")
 
 #save('kern_dipole.xx', 'gplot', [])
