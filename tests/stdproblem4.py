@@ -22,6 +22,7 @@ setarray('m', m)
 
 autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>", "m_error", "m_peakerror", "dt", "maxtorque"], "m.txt", 10e-12)
+savegraph("graph.png")
 
 #save('kern_dipole.xx', 'gplot', [])
 #save('kern_dipole.xy', 'gplot', [])
@@ -45,4 +46,3 @@ setv('dt', 1e-15)
 run(1e-9)
 
 printstats()
-savegraph("graph.png")

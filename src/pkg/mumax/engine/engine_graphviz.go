@@ -56,10 +56,10 @@ func (e *Engine) WriteDot(out io.Writer) {
 		if e.solver != nil {
 			children, parents := e.solver.Dependencies()
 			for _, c := range children {
-				fmt.Fprintln(out, "cluster0 ->", c, ";")
+				fmt.Fprintln(out, "subgraph cluster0 ->", c, ";")
 			}
 			for _, p := range parents {
-				fmt.Fprintln(out, p, "-> cluster0;")
+				fmt.Fprintln(out, p, "-> subgraph cluster0;")
 			}
 		}
 		fmt.Fprintln(out, "{rank=sink;", "subgraph cluster0", "};")

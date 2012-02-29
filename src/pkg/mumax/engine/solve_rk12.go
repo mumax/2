@@ -65,8 +65,7 @@ func (s *RK12Solver) Dependencies() (children, parents []string) {
 	parents = []string{"dt", "mindt", "maxdt"}
 	for i := range s.err {
 		parents = append(parents, s.maxErr[i].Name())
-		parents = append(parents, s.peakErr[i].Name())
-		children = append(children, s.err[i].Name())
+		children = append(children, s.peakErr[i].Name(), s.err[i].Name())
 	}
 	return
 }
