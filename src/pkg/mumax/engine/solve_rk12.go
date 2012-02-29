@@ -16,13 +16,14 @@ import (
 )
 
 type RK12Solver struct {
-	buffer  []*gpu.Array
-	err     []*Quant // error estimates for each equation
-	peakErr []*Quant // maximum error for each equation
-	maxErr  []*Quant // maximum error for each equation
-	diff    []gpu.Reductor
-	minDt   *Quant
-	maxDt   *Quant
+	y0buffer []*gpu.Array // initial value
+	dybuffer []*gpu.Array // initial derivative
+	err      []*Quant     // error estimates for each equation
+	peakErr  []*Quant     // maximum error for each equation
+	maxErr   []*Quant     // maximum error for each equation
+	diff     []gpu.Reductor
+	minDt    *Quant
+	maxDt    *Quant
 }
 
 // Load the solver into the Engine
@@ -38,7 +39,8 @@ func LoadRK12(e *Engine) {
 	s.maxDt.SetScalar(1e38)
 
 	equation := e.equation
-	s.buffer = make([]*gpu.Array, len(equation))
+	s.dybuffer = make([]*gpu.Array, len(equation))
+	s.y0buffer = make([]*gpu.Array, len(equation))
 	s.err = make([]*Quant, len(equation))
 	s.peakErr = make([]*Quant, len(equation))
 	s.maxErr = make([]*Quant, len(equation))
@@ -96,8 +98,8 @@ func (s *RK12Solver) Step() {
 		dy := equation[i].input[0]
 		dyMul := dy.multiplier
 		checkUniform(dyMul)
-		s.buffer[i] = Pool.Get(y.NComp(), y.Size3D())
-		s.buffer[i].CopyFromDevice(dy.Array()) // save for later
+		s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later
 
 		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // initial euler step
 
@@ -109,7 +111,6 @@ func (s *RK12Solver) Step() {
 
 	// update inputs again
 	for i := range equation {
-		Assert(equation[i].kind == EQN_PDE1)
 		equation[i].input[0].Update()
 	}
 
@@ -121,11 +122,11 @@ func (s *RK12Solver) Step() {
 		dyMul := dy.multiplier
 
 		h := float32(dt * dyMul[0])
-		gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.buffer[i], -0.5*h, y.Array().Stream) // corrected step
+		gpu.MAdd2Async(y.Array(), dy.Array(), 0.5*h, s.dybuffer[i], -0.5*h, y.Array().Stream) // corrected step
 		y.Array().Sync()
 
 		// error estimate
-		stepDiff := s.diff[i].MaxDiff(dy.Array(), s.buffer[i]) * h
+		stepDiff := s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]) * h
 		err := float64(stepDiff)
 		s.err[i].SetScalar(err)
 		if err > s.peakErr[i].Scalar() {
@@ -141,7 +142,7 @@ func (s *RK12Solver) Step() {
 			minFactor = factor
 		} // take minimum time increase factor of all eqns.
 
-		Pool.Recycle(&s.buffer[i])
+		Pool.Recycle(&s.dybuffer[i])
 		y.Invalidate()
 	}
 
