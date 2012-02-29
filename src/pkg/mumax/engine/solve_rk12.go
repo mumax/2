@@ -160,9 +160,13 @@ func (s *RK12Solver) Step() {
 			}
 			factor := (maxErr * headRoom) / err
 
+			// do not increase/cut too much
 			// TODO: give user the control:
-			if factor < 0.01 {
-				factor = 0.01
+			if factor > 1.5 {
+				factor = 1.5
+			}
+			if factor < 0.1 {
+				factor = 0.1
 			}
 			if factor < minFactor {
 				minFactor = factor
@@ -181,7 +185,7 @@ func (s *RK12Solver) Step() {
 			newDt = s.maxDt.Scalar()
 		}
 		e.dt.SetScalar(newDt)
-		if !badStep {
+		if !badStep || newDt == s.minDt.Scalar() {
 			break
 		}
 	} // end try
