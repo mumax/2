@@ -37,12 +37,12 @@ import (
 // Quantities are the nodes of an acyclic graph representing the differential
 // equation to be solved.
 type Quant struct {
-	name        string            // Unique identifier
-	array       gpu.Array         // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
-	multiplier  []float64         // Point-wise multiplication coefficients for array, dimensionfull.
-	nComp       int               // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
-	upToDate    bool              // Flags if this quantity needs to be updated
-	updater     Updater           // Called to update this quantity
+	name       string    // Unique identifier
+	array      gpu.Array // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
+	multiplier []float64 // Point-wise multiplication coefficients for array, dimensionfull.
+	nComp      int       // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
+	upToDate   bool      // Flags if this quantity needs to be updated
+	updater    Updater   // Called to update this quantity
 	//invalidator Invalidator       // Called before each Invalidate()
 	verifier    func(q *Quant)    // Called to verify user input
 	children    map[string]*Quant // Quantities this one depends on, indexed by name
@@ -416,9 +416,9 @@ func (q *Quant) Update() {
 // all its children (which depend on this node) to false.
 func (q *Quant) Invalidate() {
 	// invalidator is called before actual invalidate!
-//	if q.invalidator != nil {
-//		q.invalidator.Invalidate()
-//	}
+	//	if q.invalidator != nil {
+	//		q.invalidator.Invalidate()
+	//	}
 
 	if q.upToDate {
 		q.invalidates++

@@ -21,6 +21,7 @@ GOFILES=\
 	update_sum.go\
 	update_addterm.go\
 	update_reduce.go\
+	update_peak.go\
 	sumnode.go\
 	zeropad.go\
 	verify.go\

@@ -573,6 +573,15 @@ func (a API) New_MaxNorm(newQuantity, inputQuantity string) {
 	New.SetUpdater(NewMaxNormUpdater(In, New)) // also sets dependency
 }
 
+func (a API) New_Peak(newQuantity, inputQuantity string) {
+	e := a.Engine
+	In := e.Quant(inputQuantity)
+	checkKind(In, VALUE)
+	checkComp(In, 1)
+	New := e.AddNewQuant(newQuantity, SCALAR, VALUE, In.Unit())
+	New.SetUpdater(NewPeakUpdater(In, New)) // also sets dependency
+}
+
 //________________________________________________________________________________ misc
 
 // Saves an image file of the physics graph using the given file name.
