@@ -24,16 +24,17 @@ import (
 
 // Load time derivative of quant if not yet present
 func (e *Engine) AddTimeDerivative(q *Quant) {
-	name := "d" + q.Name() + "_" + "dt"
-	if e.HasQuant(name) {
-		return
-	}
-	Assert(q.Kind() == FIELD)
-	diff := e.AddNewQuant(name, q.NComp(), FIELD, "("+q.Unit()+")/s", "time derivative of "+q.Name())
-	e.Depends(name, q.Name(), "t", "step")
-	updater := newDerivativeUpdater(q, diff)
-	diff.SetUpdater(updater)
-	diff.SetInvalidator(updater)
+	panic("//")
+//	name := "d" + q.Name() + "_" + "dt"
+//	if e.HasQuant(name) {
+//		return
+//	}
+//	Assert(q.Kind() == FIELD)
+//	diff := e.AddNewQuant(name, q.NComp(), FIELD, "("+q.Unit()+")/s", "time derivative of "+q.Name())
+//	e.Depends(name, q.Name(), "t", "step")
+//	updater := newDerivativeUpdater(q, diff)
+//	diff.SetUpdater(updater)
+//	diff.SetInvalidator(updater)
 }
 
 type derivativeUpdater struct {
