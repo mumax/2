@@ -22,7 +22,7 @@ func NewPeakUpdater(input, peak *Quant) Updater {
 }
 
 func (u *PeakUpdater) Update() {
-	if u.input.Scalar() > u.peak.Scalar() {
+	if u.input.Scalar() > u.peak.multiplier[0] {
 		u.peak.SetScalar(u.input.Scalar())
 	}
 }
