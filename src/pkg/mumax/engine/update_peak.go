@@ -18,6 +18,7 @@ type PeakUpdater struct {
 }
 
 func NewPeakUpdater(input, peak *Quant) Updater {
+	GetEngine().Depends(peak.Name(), input.Name())
 	return &PeakUpdater{input, peak}
 }
 

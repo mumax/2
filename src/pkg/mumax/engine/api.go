@@ -579,7 +579,7 @@ func (a API) New_Peak(newQuantity, inputQuantity string) {
 	checkKind(In, VALUE)
 	checkComp(In, 1)
 	New := e.AddNewQuant(newQuantity, SCALAR, VALUE, In.Unit())
-	New.SetUpdater(NewPeakUpdater(In, New)) // also sets dependency
+	New.SetUpdater(NewPeakUpdater(In, New))
 }
 
 //________________________________________________________________________________ misc
