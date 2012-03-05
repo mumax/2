@@ -11,9 +11,9 @@ package common
 // Author: Arne Vansteenkiste
 
 import (
-	"path"
-	"os"
 	"fmt"
+	"os"
+	"path"
 )
 
 // Check if array sizes are equal. Panics if arrays a and b are different. 
@@ -86,7 +86,7 @@ func GetExecDir() string {
 // If a and b are nil, the returned error is nil.
 // If either is not nil, it is returned.
 // If both are not nil, the first one is returned.
-func ErrCat(a, b os.Error) os.Error {
+func ErrCat(a, b error) error {
 	if a != nil {
 		return a
 	}

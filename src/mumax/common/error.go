@@ -13,10 +13,7 @@ package common
 // Bug: this is not the user's fault. A crash report should be generated.
 // Author: Arne Vansteenkiste
 
-import (
-	"os"
-	"fmt"
-)
+import "fmt"
 
 // We define different error types so a recover() after
 // panic() can determine (with a type assertion)
@@ -80,7 +77,7 @@ func (e *Bug) Bug() {
 }
 
 // Exits with the exit code if the error is not nil.
-func CheckErr(err os.Error, code int) {
+func CheckErr(err error, code int) {
 	if err == nil {
 		return
 	}
@@ -88,26 +85,26 @@ func CheckErr(err os.Error, code int) {
 	default:
 		panic(err)
 	case ERR_IO:
-		panic(IOErr(err.String()))
+		panic(IOErr(err.Error()))
 	case ERR_INPUT:
-		panic(InputErr(err.String()))
+		panic(InputErr(err.Error()))
 	case ERR_BUG:
-		panic(Bug(err.String()))
+		panic(Bug(err.Error()))
 	}
 }
 
 // Raises IOErr if err != nil
-func CheckIO(err os.Error) {
+func CheckIO(err error) {
 	CheckErr(err, ERR_IO)
 }
 
 // Raises InputErr if err != nil
-func CheckInput(err os.Error) {
+func CheckInput(err error) {
 	CheckErr(err, ERR_INPUT)
 }
 
 // Raises Bug if err != nil
-func CheckBug(err os.Error) {
+func CheckBug(err error) {
 	CheckErr(err, ERR_BUG)
 }
 

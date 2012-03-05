@@ -16,7 +16,7 @@ import (
 
 // Safe strconv.Atof32
 func Atof32(s string) float32 {
-	f, err := strconv.Atof32(s)
+	f, err := strconv.ParseFloat(s, 32)
 	if err != nil {
 		panic(InputErr(err.String()))
 	}
@@ -34,7 +34,7 @@ func Atoi(s string) int {
 
 // Safe strconv.Atob
 func Atob(str string) bool {
-	b, err := strconv.Atob(str)
+	b, err := strconv.ParseBool(str)
 	if err != nil {
 		panic(InputErr(err.String()))
 	}
@@ -43,7 +43,7 @@ func Atob(str string) bool {
 
 // Safe strconv.Atoi64
 func Atoi64(str string) int64 {
-	i, err := strconv.Atoi64(str)
+	i, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
 		panic(InputErr(err.String()))
 	}
@@ -52,7 +52,7 @@ func Atoi64(str string) int64 {
 
 // Safe strconv.Atof64
 func Atof64(str string) float64 {
-	i, err := strconv.Atof64(str)
+	i, err := strconv.ParseFloat(str, 64)
 	if err != nil {
 		panic(InputErr(err.String()))
 	}

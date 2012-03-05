@@ -11,11 +11,12 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"io"
 	"image"
+	"image/color"
 	"image/png"
+	"io"
 	"math"
+	. "mumax/common"
 )
 
 func init() {
@@ -71,7 +72,7 @@ func DrawVectors(arr [][][][]float32) *image.NRGBA {
 	Assert(len(arr) == 3)
 	h, w := len(arr[0][0]), len(arr[0][0][0])
 	d := len(arr[0])
-	img := image.NewNRGBA(w, h)
+	img := image.NewNRGBA(image.Rect(0, 0, w, h))
 	for i := 0; i < h; i++ {
 		for j := 0; j < w; j++ {
 			var x, y, z float32 = 0., 0., 0.
@@ -96,7 +97,7 @@ func DrawScalars(arr [][][]float32, min, max float32) *image.NRGBA {
 
 	h, w := len(arr[0]), len(arr[0][0])
 	d := len(arr)
-	img := image.NewNRGBA(w, h)
+	img := image.NewNRGBA(image.Rect(0, 0, w, h))
 
 	for i := 0; i < h; i++ {
 		for j := 0; j < w; j++ {
@@ -112,7 +113,7 @@ func DrawScalars(arr [][][]float32, min, max float32) *image.NRGBA {
 	return img
 }
 
-func GreyMap(min, max, value float32) image.NRGBAColor {
+func GreyMap(min, max, value float32) color.NRGBA {
 	color := (value - min) / (max - min)
 	if color > 1. {
 		color = 1.
@@ -121,10 +122,10 @@ func GreyMap(min, max, value float32) image.NRGBAColor {
 		color = 0.
 	}
 	color8 := uint8(255 * color)
-	return image.NRGBAColor{color8, color8, color8, 255}
+	return color.NRGBA{color8, color8, color8, 255}
 }
 
-func HSLMap(x, y, z float32) image.NRGBAColor {
+func HSLMap(x, y, z float32) color.NRGBA {
 	s := fsqrt(x*x + y*y + z*z)
 	l := 0.5*z + 0.5
 	h := float32(math.Atan2(float64(y), float64(x)))
@@ -136,7 +137,7 @@ func fsqrt(number float32) float32 {
 }
 
 // h = 0..2pi, s=0..1, l=0..1
-func HSL(h, s, l float32) image.NRGBAColor {
+func HSL(h, s, l float32) color.NRGBA {
 	if s > 1 {
 		s = 1
 	}
@@ -206,7 +207,7 @@ func HSL(h, s, l float32) image.NRGBAColor {
 	}
 
 	R, G, B := uint8(255*r), uint8(255*g), uint8(255*b)
-	return image.NRGBAColor{R, G, B, 255}
+	return color.NRGBA{R, G, B, 255}
 }
 
 // modulo

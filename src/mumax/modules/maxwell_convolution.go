@@ -15,14 +15,14 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
+	"fmt"
+	"math"
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 	"mumax/host"
-	"fmt"
-	"math"
-	"unsafe"
 	"runtime"
+	"unsafe"
 )
 
 // Full Maxwell Electromagnetic field solver.
@@ -425,8 +425,8 @@ func MatrixSymmetry(matrix *host.Array) int {
 			comp1 := matrix.Comp[idx1]
 			comp2 := matrix.Comp[idx2]
 			for x := range comp1 {
-				if math.Fabs(float64(comp1[x])) > max {
-					max = math.Fabs(float64(comp1[x]))
+				if math.Abs(float64(comp1[x])) > max {
+					max = math.Abs(float64(comp1[x]))
 				}
 				total++
 				if comp1[x] == comp2[x] {

@@ -26,13 +26,13 @@ func testMain() {
 
 	Log("Testing CUDA")
 	N := 1000
-	start := time.Nanoseconds()
+	start := time.Now()
 
 	for i := 0; i < N; i++ {
 		a.CopyFromDevice(b)
 	}
 
-	t := float64(time.Nanoseconds()-start) / 1e9
+	t := float64(time.Now().Sub(start)) / 1e9
 	bw := float64(int64(Prod(size))*int64(N)*SIZEOF_FLOAT) / t
 	bw /= 1e9
 	Log("Multi-GPU bandwidth:", float32(bw), "GB/s")

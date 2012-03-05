@@ -11,9 +11,9 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
+	"math/rand"
 	. "mumax/common"
 	"mumax/host"
-	"rand"
 	"runtime"
 	//   "fmt"
 
@@ -53,7 +53,6 @@ func (conv *ConvPlan) Init(dataSize []int, kernel []*host.Array, fftKern *Array)
 
 	// init fft
 	conv.fftIn.Init(3, FFTOutputSize(logicSize), DO_ALLOC) // TODO: FFTPlan.OutputSize()
-
 
 	conv.fft = NewDefaultFFT(dataSize, logicSize)
 

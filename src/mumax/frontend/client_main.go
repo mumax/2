@@ -11,12 +11,12 @@ package frontend
 // Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	cu "cuda/driver"
 	"fmt"
-	"path"
-	"exec"
+	. "mumax/common"
 	"os"
+	"os/exec"
+	"path"
 	"runtime"
 )
 

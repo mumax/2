@@ -11,14 +11,13 @@ package frontend
 // between mumax and a scripting language.
 // Author: Arne Vansteenkiste
 
-
 import (
-	. "mumax/common"
-	"mumax/engine"
 	"fmt"
 	"io"
-	"exec"
+	. "mumax/common"
+	"mumax/engine"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -96,10 +95,10 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 		exitstat := 666 // dummy value 
 		err := proc.Wait()
 		if err != nil {
-			if msg, ok := err.(*os.Waitmsg); ok {
+			if msg, ok := err.(*exec.ExitError); ok {
 				exitstat = msg.ExitStatus()
 			} else {
-				panic(InputErr(err.String()))
+				panic(InputErr(err.Error()))
 			}
 		} else {
 			exitstat = 0
@@ -119,7 +118,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 // this function hangs when the subprocess does not open the fifos.
 func (c *Client) openFifos() {
 	Debug("Opening FIFOs will block until child process opens the other end")
-	var err os.Error
+	var err error
 	c.outfifo, err = os.OpenFile(c.outputDir+"/"+OUTFIFO, os.O_WRONLY, 0666)
 	CheckErr(err, ERR_BUG)
 	c.infifo, err = os.OpenFile(c.outputDir+"/"+INFIFO, os.O_RDONLY, 0666)
@@ -164,7 +163,7 @@ func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
 	defer func() { waiter <- 1 }() // signal completion
 	var bytes [BUFSIZE]byte
 	buf := bytes[:]
-	var err os.Error = nil
+	var err error = nil
 	n := 0
 	for err == nil {
 		n, err = in.Read(buf)

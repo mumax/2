@@ -13,16 +13,16 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	cu "cuda/driver"
-	"mumax/gpu"
-	"strings"
-	"exec"
-	"runtime"
-	"os"
-	"io"
 	"fmt"
+	"io"
+	. "mumax/common"
+	"mumax/gpu"
+	"os"
+	"os/exec"
+	"runtime"
 	"sort"
+	"strings"
 )
 
 // INTERNAL: generates LaTeX files with documentation.

@@ -10,10 +10,9 @@ package frontend
 // This file implements some basic I/O functions.
 
 import (
-	. "mumax/common"
 	"io"
-	"os"
-	"exec"
+	. "mumax/common"
+	"os/exec"
 	"strings"
 )
 
@@ -50,15 +49,15 @@ func readChar(in io.Reader) (char byte, eof bool) {
 	var buffer [1]byte
 
 	n := 0
-	var err os.Error
+	var err error
 	for n == 0 {
 		n, err = in.Read(buffer[:])
 		if err != nil {
-			if err == os.EOF {
+			if err == io.EOF {
 				eof = true
 				return
 			} else {
-				panic(IOErr(err.String()))
+				panic(IOErr(err.Error()))
 			}
 		}
 	}

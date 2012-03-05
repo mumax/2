@@ -28,11 +28,11 @@ package gpu
 // TODO: move to engine/ (?)
 
 import (
+	"fmt"
+	"math/rand"
 	. "mumax/common"
 	"mumax/host"
-	"rand"
 	"runtime"
-	"fmt"
 	"unsafe"
 )
 

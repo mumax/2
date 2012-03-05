@@ -14,16 +14,15 @@ import ()
 //TODO: move to package omf
 
 import (
-	. "mumax/common"
-	"mumax/host"
-	"mumax/engine"
-	"io"
 	"bufio"
-	. "strings"
-	"strconv"
-	"unsafe"
 	"fmt"
-	"os"
+	"io"
+	. "mumax/common"
+	"mumax/engine"
+	"mumax/host"
+	"strconv"
+	. "strings"
+	"unsafe"
 )
 
 func init() {
@@ -83,9 +82,9 @@ func (i *Info) DescGet(key string) interface{} {
 // Safe way to get a float from Desc
 func (i *Info) DescGetFloat32(key string) float32 {
 	value := i.DescGet(key)
-	fl, err := strconv.Atof32(value.(string))
+	fl, err := strconv.ParseFloat(value.(string), 32)
 	if err != nil {
-		panic("Could not parse " + key + " to float32: " + err.String())
+		panic("Could not parse " + key + " to float32: " + err.Error())
 	}
 	return fl
 }
@@ -233,23 +232,23 @@ type BlockingReader struct {
 	In io.Reader
 }
 
-func (r *BlockingReader) Read(p []byte) (n int, err os.Error) {
+func (r *BlockingReader) Read(p []byte) (n int, err error) {
 	n, err = r.In.Read(p)
 	if err != nil {
-		if err == os.EOF {
+		if err == io.EOF {
 			return
 		} else {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 	}
 	if n < len(p) {
 		_, err = r.Read(p[n:])
 	}
 	if err != nil {
-		if err == os.EOF {
+		if err == io.EOF {
 			return
 		} else {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 	}
 	n = len(p)

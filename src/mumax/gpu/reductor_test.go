@@ -12,10 +12,10 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
+	"math/rand"
 	. "mumax/common"
 	"mumax/host"
 	"testing"
-	"rand"
 )
 
 func TestReduceSum(test *testing.T) {

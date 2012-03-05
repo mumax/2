@@ -12,8 +12,8 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
+	"math/rand"
 	"testing"
-	"rand"
 )
 
 func TestAddClosure(test *testing.T) {
@@ -91,7 +91,6 @@ func TestAddClosure(test *testing.T) {
 //		}
 //	}
 //}
-
 
 func BenchmarkAddClosure(bench *testing.B) {
 	bench.StopTimer()

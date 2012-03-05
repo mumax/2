@@ -11,14 +11,13 @@ package frontend
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"runtime"
-	"mumax/host"
-	"io"
-	"os"
-	"json"
+	"encoding/json"
 	"fmt"
+	"io"
+	. "mumax/common"
+	"mumax/host"
 	"reflect"
+	"runtime"
 )
 
 // An RPC server using simple JSON encoding.
@@ -54,7 +53,7 @@ func (j *jsonRPC) Run() {
 	for {
 		v := new(interface{})
 		err := j.Decode(v)
-		if err == os.EOF {
+		if err == io.EOF {
 			break
 		}
 		CheckErr(err, ERR_IO)

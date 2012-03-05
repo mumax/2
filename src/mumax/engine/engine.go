@@ -10,8 +10,8 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	"fmt"
+	. "mumax/common"
 	"path"
 	"strings"
 	"time"
@@ -477,8 +477,8 @@ const UPDATE_DASH = 150 * 1e6
 
 // INTERNAL: show live progress: steps, t, dt, outputID
 func (e *Engine) updateDash() {
-	t := time.Nanoseconds()
-	if t-lastdash > UPDATE_DASH {
+	t := time.Now()
+	if t.Sub(lastdash) > UPDATE_DASH {
 		lastdash = t
 		Dashboard(" step", e.step.multiplier[0],
 			"t:", float32(e.time.multiplier[0]), "s",
@@ -557,7 +557,7 @@ func (e *Engine) AutoFilename(quant, format string) string {
 func (e *Engine) RemoveHandle(handle int) {
 	found := false
 	if _, ok := e.crontabs[handle]; ok {
-		e.crontabs[handle] = nil, false
+		delete(e.crontabs, handle)
 		found = true
 	}
 	// TODO: if handles are used by other objects than crontabs, find them here

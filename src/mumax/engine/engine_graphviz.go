@@ -12,11 +12,11 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"strings"
-	"exec"
 	"fmt"
 	"io"
+	. "mumax/common"
+	"os/exec"
+	"strings"
 )
 
 // Write .dot file for graphviz, 

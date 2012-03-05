@@ -8,8 +8,8 @@
 package gpu
 
 import (
+	"math/rand"
 	"testing"
-	"rand"
 )
 
 func TestAdd(test *testing.T) {
