@@ -19,7 +19,7 @@ import (
 func CallAsync(function string, config *LaunchConfig, arguments ...interface{}) {
 	ConfigureCall(config.GridDim, config.BlockDim, config.SharedMem, config.Stream) // TODO: inline
 	for _, arg := range arguments {
-		argvalue := reflect.NewValue(arg)
+		argvalue := reflect.ValueOf(arg)
 		addr := argvalue.UnsafeAddr()
 		size := uint(argvalue.Type().Size())
 		SetupArgument(addr, size, 0)
