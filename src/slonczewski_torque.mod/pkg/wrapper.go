@@ -20,7 +20,7 @@ import (
 )
 
 func LLSlon(stt *gpu.Array, m *gpu.Array, p, alpha, Msat *gpu.Array,
-gamma float32, aj float32, bj float32, Pol float32, j *gpu.Array) {
+	gamma float32, aj float32, bj float32, Pol float32, j *gpu.Array) {
 
 	// Bookkeeping
 	CheckSize(j.Size3D(), m.Size3D())

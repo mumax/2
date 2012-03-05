@@ -19,8 +19,8 @@ import (
 )
 
 func ScaleNoise(noise, alphaMask *gpu.Array,
-tempMask *gpu.Array, alphaKB2tempMul float32,
-mSatMask *gpu.Array, mu0VgammaDtMsatMul float32) {
+	tempMask *gpu.Array, alphaKB2tempMul float32,
+	mSatMask *gpu.Array, mu0VgammaDtMsatMul float32) {
 	CheckSize(noise.Size4D(), alphaMask.Size4D())
 	C.temperature_scaleNoise(
 		(**C.float)(unsafe.Pointer(&(noise.Pointers()[0]))),

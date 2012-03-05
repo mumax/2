@@ -11,10 +11,10 @@ package temperature_brown
 // Author: Arne Vansteenkiste
 
 import (
+	"cuda/curand"
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	"cuda/curand"
 )
 
 // Register this module
