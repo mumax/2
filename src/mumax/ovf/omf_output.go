@@ -153,22 +153,22 @@ func writeOmfText(out io.Writer, tens *host.Array) {
 				for c := 0; c < tens.NComp(); c++ {
 					_, err := fmt.Fprint(out, data[SwapIndex(c, tens.NComp())][i][j][k], " ") // converts to user space.
 					if err != nil {
-						panic(IOErr(err.String()))
+						panic(IOErr(err.Error()))
 					}
 				}
 				_, err := fmt.Fprint(out, "\n")
 				if err != nil {
-					panic(IOErr(err.String()))
+					panic(IOErr(err.Error()))
 				}
 			}
 			//	_, err := fmt.Fprint(out, "\n")
 			//	if err != nil {
-			//		panic(IOErr(err.String()))
+			//		panic(IOErr(err.Error()))
 			//	}
 		}
 		//_, err := fmt.Fprint(out, "\n")
 		//if err != nil {
-		//	panic(IOErr(err.String()))
+		//	panic(IOErr(err.Error()))
 		//}
 	}
 

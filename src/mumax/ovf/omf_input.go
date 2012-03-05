@@ -86,7 +86,7 @@ func (i *Info) DescGetFloat32(key string) float32 {
 	if err != nil {
 		panic("Could not parse " + key + " to float32: " + err.Error())
 	}
-	return fl
+	return float32(fl)
 }
 
 func readDataText(in io.Reader, t *host.Array) {
