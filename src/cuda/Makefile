@@ -1,9 +1,14 @@
-dirs=\
-	driver\
-	runtime\
-	cufft\
-	curand\
+GOPATH=$(CURDIR)/../..
+all:
+	echo GOPATH=$(GOPATH)
+	go build cuda/driver
 
-all:$(dirs)
-
-include ../GoDirs.pkg
+#dirs=\
+#	driver\
+#	runtime\
+#	cufft\
+#	curand\
+#
+#all:$(dirs)
+#
+#include ../GoDirs.pkg
