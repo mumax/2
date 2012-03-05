@@ -511,7 +511,7 @@ func (e *Engine) SaveAs(q *Quant, format string, options []string, filename stri
 func (e *Engine) AutoSave(quant string, format string, options []string, period float64) (handle int) {
 	checkKinds(e.Quant(quant), MASK, FIELD)
 	handle = e.NewHandle()
-	e.crontabs[handle] = &AutoSave{quant, format, options, period, 0}
+	e.crontabs[handle] = &AutoSave{quant, format, options, period, e.time.Scalar(), 0}
 	Log("Auto-save", quant, "every", period, "s", "(handle ", handle, ")")
 	return handle
 }

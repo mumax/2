@@ -17,12 +17,14 @@ type AutoSave struct {
 	format  string   // Format to save in
 	options []string // Output format options
 	period  float64  // How often to save
+	start   float64  // Starting point
 	count   int      // Number of times it has been saved
 }
 
 // Called by the eninge
 func (a *AutoSave) Notify(e *Engine) {
-	if e.time.Scalar()-float64(a.count)*a.period >= a.period {
+	t := e.time.Scalar() - a.start
+	if t-float64(a.count)*a.period >= a.period {
 		e.SaveAs(e.Quant(a.quant), a.format, a.options, e.AutoFilename(a.quant, a.format))
 		a.count++
 	}

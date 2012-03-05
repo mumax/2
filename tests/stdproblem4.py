@@ -20,8 +20,6 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-autosave("m", "omf", ["Text"], 200e-12)
-autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 10e-12)
 savegraph("graph.png")
 
 #save('kern_dipole.xx', 'gplot', [])
@@ -35,6 +33,9 @@ savegraph("graph.png")
 #save('kern_dipole.zz', 'gplot', [])
 
 run(2e-9) #relax
+
+autosave("m", "omf", ["Text"], 200e-12)
+autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 10e-12)
 
 Bx = -24.6E-3
 By =   4.3E-3
