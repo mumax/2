@@ -58,10 +58,10 @@ func Buffer(out io.Writer) *bufio.Writer {
 // Makes a directory.
 // The permission is the same as the parent directory.
 func Mkdir(filename string) {
-	perm := Permission(Parent(filename))
-	err := os.Mkdir(filename, perm)
+	//perm := Permission(Parent(filename))
+	err := os.Mkdir(filename, os.ModeDir)
 	if err != nil {
-		panic(IOErr(err.String()))
+		panic(IOErr(err.Error()))
 	}
 }
 
@@ -80,7 +80,7 @@ func FileExists(file string) bool {
 func Readlink(name string) string {
 	str, err := os.Readlink(name)
 	if err != nil {
-		panic(IOErr(err.String()))
+		panic(IOErr(err.Error()))
 	}
 	return str
 }
@@ -98,10 +98,10 @@ func Parent(filename string) string {
 }
 
 // returns the file's permissions
-func Permission(filename string) uint32 {
-	stat, err := os.Stat(filename)
-	if err != nil {
-		panic(IOErr(err.String()))
-	}
-	return stat.Permission()
-}
+//func Permission(filename string) uint32 {
+//	stat, err := os.Stat(filename)
+//	if err != nil {
+//		panic(IOErr(err.Error()))
+//	}
+//	return stat.Permission()
+//}

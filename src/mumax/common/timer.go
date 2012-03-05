@@ -24,7 +24,18 @@ func (t *Timer) Start() {
 	if t.StartNanos != 0 {
 		panic(Bug("Timer.Start: already running"))
 	}
-	t.StartNanos = time.Now()
+	t.StartNanos = Now()
+}
+
+var time0 time.Time
+var time0_init bool
+
+func Now() int64{
+	if !time0_init{
+		time0 = time.Now()
+		time0_init = true
+	}
+	return int64(time.Now().Sub(time0))
 }
 
 // Stop the timer
