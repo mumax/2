@@ -39,7 +39,7 @@ func Write(out io.Writer, a *host.Array) {
 func writeInt(out io.Writer, i int) {
 	_, err := out.Write((*[4]byte)(unsafe.Pointer(&i))[:])
 	if err != nil {
-		panic(IOErr(err.String()))
+		panic(IOErr(err.Error()))
 	}
 }
 
@@ -53,7 +53,7 @@ func writeData(out io.Writer, data []float32) {
 	for i := 0; i < len(data); i += block {
 		_, err := out.Write((*[4 * block]byte)(unsafe.Pointer(&data[i]))[:])
 		if err != nil {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 		count += block
 	}
@@ -61,7 +61,7 @@ func writeData(out io.Writer, data []float32) {
 	for i := count; i < len(data); i++ {
 		_, err := out.Write((*[4]byte)(unsafe.Pointer(&data[i]))[:])
 		if err != nil {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 	}
 }

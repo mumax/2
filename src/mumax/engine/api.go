@@ -15,6 +15,7 @@ package engine
 import (
 	"fmt"
 	. "mumax/common"
+	"mumax/gpu"
 	"mumax/host"
 	"os"
 	"path"
@@ -346,7 +347,7 @@ func (a API) SetScalarUniformRegion(quant string, initValues []float32) {
 	q.assureAlloc()
 	qArray := q.Array()
 	regionArray := a.Engine.Quant("regionDefinition").Array()
-	InitScalarQuantUniformRegion(initValues, qArray, regionArray)
+	gpu.InitScalarQuantUniformRegion(initValues, qArray, regionArray)
 	q.Invalidate()
 }
 
@@ -365,7 +366,7 @@ func (a API) SetVectorUniformRegion(quant string, initValuesX, initValuesY, init
 	Log("Set uniformly vector field", quant)
 	q.assureAlloc()
 	regions := a.Engine.Quant("regionDefinition")
-	InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
+	gpu.InitVectorQuantUniformRegion(q.Array(), regions.Array(), initValuesX, initValuesY, initValuesZ)
 	q.Invalidate()
 }
 
@@ -411,7 +412,7 @@ func (a API) SetVectorVortexRegion(quant string, regionsToProceed, center, axis,
 		}
 	}
 	//gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionsToProceed, center, axis, cellsize, polarity, chirality, maxRadius)
-	InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionP, center, axis, cellsize, polarity, chirality, maxRadius)
+	gpu.InitVectorQuantVortexRegion(q.Array(), regions.Array(), regionP, center, axis, cellsize, polarity, chirality, maxRadius)
 	q.Invalidate()
 }
 
@@ -436,7 +437,7 @@ func (a API) SetScalarQuantRandomUniformRegion(quant string, regionsToProceed []
 			regionP = append(regionP, true)
 		}
 	}
-	InitScalarQuantRandomUniformRegion(q.Array(), regions.Array(), regionP, max, min)
+	gpu.InitScalarQuantRandomUniformRegion(q.Array(), regions.Array(), regionP, max, min)
 	q.Invalidate()
 }
 
@@ -459,7 +460,7 @@ func (a API) SetVectorQuantRandomUniformRegion(quant string, regionsToProceed []
 			regionP = append(regionP, true)
 		}
 	}
-	InitVectorQuantRandomUniformRegion(q.Array(), regions.Array(), regionP)
+	gpu.InitVectorQuantRandomUniformRegion(q.Array(), regions.Array(), regionP)
 	q.Invalidate()
 }
 

@@ -47,7 +47,7 @@ func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 
 	err := png.Encode(out, image)
 	if err != nil {
-		panic(IOErr(err.String()))
+		panic(IOErr(err.Error()))
 	}
 }
 
@@ -114,14 +114,14 @@ func DrawScalars(arr [][][]float32, min, max float32) *image.NRGBA {
 }
 
 func GreyMap(min, max, value float32) color.NRGBA {
-	color := (value - min) / (max - min)
-	if color > 1. {
-		color = 1.
+	col := (value - min) / (max - min)
+	if col > 1. {
+		col = 1.
 	}
-	if color < 0. {
-		color = 0.
+	if col < 0. {
+		col = 0.
 	}
-	color8 := uint8(255 * color)
+	color8 := uint8(255 * col)
 	return color.NRGBA{color8, color8, color8, 255}
 }
 

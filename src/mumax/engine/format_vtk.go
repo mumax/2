@@ -75,7 +75,7 @@ func writeVTKPoints(out io.Writer, dataformat string) {
 					z := (float32)(k) * (float32)(cellsize[X])
 					_, err := fmt.Fprint(out, x, " ", y, " ", z, " ")
 					if err != nil {
-						panic(IOErr(err.String()))
+						panic(IOErr(err.Error()))
 					}
 					//fmt.Fprint(out, " \n")
 				}

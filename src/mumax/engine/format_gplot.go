@@ -46,27 +46,27 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 				z := float64(k) * cellsize[Z]
 				_, err := fmt.Fprint(out, z, " ", y, " ", x, "\t")
 				if err != nil {
-					panic(IOErr(err.String()))
+					panic(IOErr(err.Error()))
 				}
 				for c := 0; c < ncomp; c++ {
 					_, err := fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
 					if err != nil {
-						panic(IOErr(err.String()))
+						panic(IOErr(err.Error()))
 					}
 				}
 				_, err = fmt.Fprint(out, "\n")
 				if err != nil {
-					panic(IOErr(err.String()))
+					panic(IOErr(err.Error()))
 				}
 			}
 			_, err := fmt.Fprint(out, "\n")
 			if err != nil {
-				panic(IOErr(err.String()))
+				panic(IOErr(err.Error()))
 			}
 		}
 		_, err := fmt.Fprint(out, "\n")
 		if err != nil {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 	}
 

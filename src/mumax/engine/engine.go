@@ -14,7 +14,6 @@ import (
 	. "mumax/common"
 	"path"
 	"strings"
-	"time"
 )
 
 // The global simulation engine
@@ -477,8 +476,8 @@ const UPDATE_DASH = 150 * 1e6
 
 // INTERNAL: show live progress: steps, t, dt, outputID
 func (e *Engine) updateDash() {
-	t := time.Now()
-	if t.Sub(lastdash) > UPDATE_DASH {
+	t := Nanoseconds()
+	if t - lastdash > UPDATE_DASH {
 		lastdash = t
 		Dashboard(" step", e.step.multiplier[0],
 			"t:", float32(e.time.multiplier[0]), "s",
