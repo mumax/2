@@ -10,9 +10,9 @@ package gpu
 // Authors: Arne Vansteenkiste and Ben Van de Wiele
 
 import (
-	. "mumax/common"
-	cu "cuda/driver"
 	"cuda/cufft"
+	cu "cuda/driver"
+	. "mumax/common"
 	// 		"fmt"
 	//   "cuda/runtime"
 )
@@ -99,7 +99,6 @@ func (fft *FFTPlan4) init(dataSize, logicSize []int) {
 			fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, strideX, []int{1}, strideX, cufft.C2C, batchX)
 			fft.planX[0].SetStream(uintptr(fft.Stream[0]))
 		} //--------------------------------------------
-
 
 	} else { // multi-gpu implementation
 
@@ -443,7 +442,6 @@ func (fft *FFTPlan4) Inverse(in, out *Array) {
 		//Stop("INV_fftY")
 		//   fmt.Println("")
 		//   fmt.Println("ffty:", transp2.LocalCopy().Array)
-
 
 		for c := range chunks {
 			ExtractBlockZ(&(chunks[c]), transp2, c)

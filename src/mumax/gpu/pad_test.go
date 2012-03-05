@@ -136,7 +136,6 @@ func TestCopyPadZ(test *testing.T) {
 	CopyPadZ(c, b)
 	//	fmt.Println("CopyPadZ", c.LocalCopy().Array)
 
-
 	C := c.LocalCopy().Array
 	for c := range B {
 		for i := range B[c] {

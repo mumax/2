@@ -12,9 +12,9 @@ package gpu
 // TODO: Whenever it is included in CUFFT: use strided FFT for R2C to include the transpose into the FFT.
 
 import (
-	. "mumax/common"
-	cu "cuda/driver"
 	"cuda/cufft"
+	cu "cuda/driver"
+	. "mumax/common"
 	//   "cuda/runtime"
 )
 
@@ -121,7 +121,6 @@ func (fft *FFTPlan5) init(dataSize, logicSize []int) {
 			fft.planX[0] = cufft.PlanMany([]int{fft.logicSize[0]}, []int{1}, stride, []int{1}, stride, cufft.C2C, batchX)
 			fft.planX[0].SetStream(uintptr(fft.Stream[0])) // TODO: change
 		} //--------------------------------------------
-
 
 	} else { // multi-gpu implementation
 
@@ -409,7 +408,6 @@ func (fft *FFTPlan5) Inverse(in, out *Array) {
 		}
 		fft.Sync()
 		//Stop("INV_fftY")
-
 
 		for c := range chunks {
 			ExtractBlockZ(&(chunks[c]), transp2, c)

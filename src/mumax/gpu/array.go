@@ -11,12 +11,12 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
+	cu "cuda/driver"
+	"fmt"
+	"math"
 	. "mumax/common"
 	"mumax/host"
-	cu "cuda/driver"
 	"unsafe"
-	"math"
-	"fmt"
 )
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.

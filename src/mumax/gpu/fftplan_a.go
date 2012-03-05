@@ -10,10 +10,10 @@ package gpu
 // Author: Arne Vansteenkiste and Ben Van de Wiele
 
 import (
-	. "mumax/common"
-	cu "cuda/driver"
 	"cuda/cufft"
+	cu "cuda/driver"
 	"fmt"
+	. "mumax/common"
 )
 
 type FFTPlan struct {

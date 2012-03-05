@@ -10,9 +10,9 @@ package gpu
 // Authors: Arne Vansteenkiste and Ben Van de Wiele
 
 import (
-	. "mumax/common"
-	cu "cuda/driver"
 	"cuda/cufft"
+	cu "cuda/driver"
+	. "mumax/common"
 	// 		"fmt"
 )
 

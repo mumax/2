@@ -12,10 +12,10 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	cu "cuda/driver"
-	"testing"
 	"fmt"
+	. "mumax/common"
+	"testing"
 )
 
 func BenchmarkCopyDtoD1M(bench *testing.B) {

@@ -10,9 +10,9 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	cu "cuda/driver"
 	"flag"
+	. "mumax/common"
 )
 
 //const BIG = 16 * 1024 * 1024

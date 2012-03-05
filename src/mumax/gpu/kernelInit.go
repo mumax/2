@@ -11,10 +11,10 @@ package gpu
 // Author: Ben Van de Wiele
 
 import (
+	cu "cuda/driver"
 	. "mumax/common"
 	"mumax/host"
 	"unsafe"
-	cu "cuda/driver"
 	//   "fmt"
 )
 

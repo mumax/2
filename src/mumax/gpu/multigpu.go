@@ -14,11 +14,11 @@ package gpu
 import "C"
 
 import (
-	. "mumax/common"
 	cu "cuda/driver"
 	cuda "cuda/runtime"
-	"unsafe"
 	"fmt"
+	. "mumax/common"
+	"unsafe"
 )
 
 // INTERNAL: List of GPU ids to use for multi-GPU operation. E.g.: {0,1,2,3}

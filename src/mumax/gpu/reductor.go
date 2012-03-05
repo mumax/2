@@ -8,10 +8,10 @@
 package gpu
 
 import (
+	"fmt"
+	"math"
 	. "mumax/common"
 	"mumax/host"
-	"math"
-	"fmt"
 )
 
 // A Reductor stores the necessary buffers to reduce data on the multi-GPU.

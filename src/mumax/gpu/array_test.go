@@ -10,11 +10,11 @@ package gpu
 // Author: Arne Vansteenkiste
 
 import (
+	"fmt"
 	. "mumax/common"
 	"mumax/host"
 	"runtime"
 	"testing"
-	"fmt"
 )
 
 // Test repeated alloc/free.

@@ -11,12 +11,14 @@
 
 package gpu
 
+//#cgo LDFLAGS:-L. -lmumax2
+//#cgo CFLAGS:-I/usr/local/cuda/include/ -I../../libmumax2
 //#include "libmumax2.h"
 import "C"
 
 import (
-	. "mumax/common"
 	cu "cuda/driver"
+	. "mumax/common"
 	"unsafe"
 )
 
@@ -619,7 +621,6 @@ func KernelMulMicromag2D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftK
 //     (*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 //     C.int(fftMx.partLen3D))
 // }
-
 
 func InitDipoleKernel6Element(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
 
