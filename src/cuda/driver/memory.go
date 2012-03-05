@@ -10,8 +10,8 @@ package driver
 import "C"
 
 import (
-	"unsafe"
 	"fmt"
+	"unsafe"
 )
 
 type DevicePtr uintptr
@@ -83,6 +83,7 @@ func MemcpyDtoDAsync(dst, src DevicePtr, bytes int64, stream Stream) {
 		panic(err)
 	}
 }
+
 // Copies a number of bytes from host to device.
 func MemcpyHtoD(dst DevicePtr, src HostPtr, bytes int64) {
 	err := Result(C.cuMemcpyHtoD(C.CUdeviceptr(dst), unsafe.Pointer(src), C.size_t(bytes)))

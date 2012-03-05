@@ -12,11 +12,11 @@ package engine
 // Author: Rémy Lassalle-Balier
 
 import (
-	. "mumax/common"
-	"unsafe"
-	"io"
 	"fmt"
+	"io"
+	. "mumax/common"
 	"strings"
+	"unsafe"
 )
 
 func init() {

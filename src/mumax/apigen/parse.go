@@ -14,11 +14,11 @@
 package apigen
 
 import (
-	. "mumax/common"
-	"io/ioutil"
-	"strings"
 	"fmt"
+	"io/ioutil"
+	. "mumax/common"
 	"os"
+	"strings"
 )
 
 type header struct {

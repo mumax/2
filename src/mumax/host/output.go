@@ -10,10 +10,10 @@ package host
 // Auhtor: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"unsafe"
 	"fmt"
 	"io"
+	. "mumax/common"
+	"unsafe"
 )
 
 func (tens *Array) WriteAscii(out io.Writer) {

@@ -9,15 +9,14 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 	"strconv"
+	"strings"
 )
-
 
 func main() {
 	flag.Parse()
@@ -77,8 +76,8 @@ func main() {
 				Error("Not all {key}'s were specified.")
 				// TODO: it might be nice to show which ones...
 			}
-			out, err := os.OpenFile(d.name + d.ext, os.O_WRONLY | os.O_CREATE, 0666)
-			if err != nil{
+			out, err := os.OpenFile(d.name+d.ext, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
 				Error(err)
 			}
 			out.Write([]byte(d.content))
@@ -119,7 +118,6 @@ func GenerateValues(flag string) []string {
 	return []string{flag}
 }
 
-
 func Range(start, stop, step string) []string {
 	rnge := []string{}
 
@@ -132,7 +130,6 @@ func Range(start, stop, step string) []string {
 	return rnge
 }
 
-
 func Atof(a string) float64 {
 	f, err := strconv.Atof64(a)
 	if err != nil {
@@ -140,7 +137,6 @@ func Atof(a string) float64 {
 	}
 	return f
 }
-
 
 type Document struct {
 	content string

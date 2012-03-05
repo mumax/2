@@ -8,12 +8,12 @@ package main
 // Client main loop
 
 import (
-	. "mumax/common"
-	"strings"
-	"rpc"
 	"fmt"
+	. "mumax/common"
 	"os"
 	"path"
+	"rpc"
+	"strings"
 )
 
 func clientMain(args []string) {

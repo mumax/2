@@ -17,7 +17,6 @@ import (
 var Pool ArrayPool
 
 type ArrayPool struct {
-
 }
 
 func (p *ArrayPool) Get(nComp int, size []int) *gpu.Array {

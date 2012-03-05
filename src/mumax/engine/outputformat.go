@@ -10,8 +10,8 @@ package engine
 // Auhtor: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	"io"
+	. "mumax/common"
 )
 
 // A general output format for space-dependent quantities.

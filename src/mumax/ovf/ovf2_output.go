@@ -13,13 +13,13 @@ package ovf
 // Author: Arne Vansteenkiste
 
 import (
+	"fmt"
+	"io"
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/host"
-	"unsafe"
-	"io"
-	"fmt"
 	"strings"
+	"unsafe"
 )
 
 func init() {

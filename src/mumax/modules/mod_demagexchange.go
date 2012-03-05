@@ -124,6 +124,7 @@ func (u *exchKernUpdater) Update() {
 	// Fast, so no wisdom needed here
 	Exch6NgbrKernel(kernsize, e.CellSize(), u.exchKern.Buffer()) //, exRange)
 }
+
 //____________________________________________________________________ demag+exchange kernel
 
 // Update demag+exchange kernel (cpu)

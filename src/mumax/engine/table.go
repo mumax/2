@@ -10,9 +10,9 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"io"
 	"fmt"
+	"io"
+	. "mumax/common"
 )
 
 // Table refers to an open data table 

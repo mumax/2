@@ -7,7 +7,6 @@ package main
 
 // Implementation of "drain and fill" command
 
-
 import ()
 
 func init() {

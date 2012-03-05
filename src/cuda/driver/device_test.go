@@ -5,8 +5,8 @@
 package driver
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestDevice(t *testing.T) {

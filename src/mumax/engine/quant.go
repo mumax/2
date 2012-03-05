@@ -12,12 +12,12 @@ package engine
 // Author: Arne Vansteenkiste.
 
 import (
+	"fmt"
+	"math"
 	. "mumax/common"
 	"mumax/gpu"
 	"mumax/host"
 	"sync"
-	"fmt"
-	"math"
 )
 
 // A quantity represents a scalar/vector/tensor field,value or mask.

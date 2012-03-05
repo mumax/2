@@ -125,6 +125,7 @@ func freeDevice(job *Job, n *Node) []int {
 	}
 	return nil
 }
+
 // finds a free node suited for the job.
 // in case of multiple GPUs, they should be
 // successive and aligned (to efficiently support GTX590s, e.g.)

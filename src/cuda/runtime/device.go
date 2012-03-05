@@ -12,8 +12,8 @@ package runtime
 import "C"
 
 import (
-	"unsafe"
 	"fmt"
+	"unsafe"
 )
 
 // Returns the device number on which the host thread executes device code. 

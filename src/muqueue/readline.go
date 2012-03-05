@@ -6,8 +6,8 @@
 package main
 
 import (
-	. "mumax/common"
 	"io"
+	. "mumax/common"
 	"os"
 )
 

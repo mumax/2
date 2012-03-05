@@ -8,10 +8,10 @@ package main
 // Implementation of "dump" command
 
 import (
-	. "mumax/common"
+	"bytes"
 	"fmt"
 	"io"
-	"bytes"
+	. "mumax/common"
 )
 
 func init() {

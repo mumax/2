@@ -11,9 +11,9 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
-	"io"
 	"fmt"
+	"io"
+	. "mumax/common"
 )
 
 func init() {

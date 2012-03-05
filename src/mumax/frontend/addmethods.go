@@ -9,8 +9,8 @@ package frontend
 
 import (
 	"reflect"
-	"unicode"
 	"strings"
+	"unicode"
 )
 
 // Adds all public methods of receiver to map

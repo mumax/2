@@ -8,17 +8,17 @@
 package frontend
 
 import (
+	cu "cuda/driver"
+	"flag"
+	"fmt"
 	. "mumax/common"
 	"mumax/gpu"
-	cu "cuda/driver"
+	"os"
 	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
-	"time"
-	"fmt"
-	"os"
-	"flag"
 	"strings"
+	"time"
 )
 
 // command-line flags (more in engine/main.go)
@@ -267,7 +267,7 @@ func initTimeout() {
 }
 
 const (
-	WELCOME  = `
+	WELCOME = `
  MuMax 2.0.1865 alpha
  (C) Arne Vansteenkiste, Ben Van de Wiele
      (Dynamat/EELAB Ghent University, Belgium), and

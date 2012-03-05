@@ -14,13 +14,13 @@
 package apigen
 
 import (
+	"flag"
+	"fmt"
 	. "mumax/common"
 	"mumax/engine"
 	"mumax/frontend"
-	"flag"
-	"reflect"
-	"fmt"
 	"os"
+	"reflect"
 	"sort"
 )
 

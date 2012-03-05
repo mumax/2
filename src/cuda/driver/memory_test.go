@@ -5,10 +5,10 @@
 package driver
 
 import (
-	"testing"
-	"unsafe"
 	"fmt"
 	"math"
+	"testing"
+	"unsafe"
 )
 
 func TestMalloc(t *testing.T) {

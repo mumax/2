@@ -10,14 +10,13 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+	"fmt"
 	. "mumax/common"
 	"mumax/gpu"
-	"fmt"
 )
 
 // Euler solver
 type EulerSolver struct {
-
 }
 
 func (s *EulerSolver) Step() {

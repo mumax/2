@@ -8,8 +8,8 @@
 package engine
 
 import (
-	. "mumax/common"
 	"fmt"
+	. "mumax/common"
 )
 
 // A physics module. Loading it adds various quantity nodes to the engine.

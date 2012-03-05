@@ -15,9 +15,9 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
+	"io"
 	. "mumax/common"
 	"mumax/host"
-	"io"
 	"unsafe"
 )
 

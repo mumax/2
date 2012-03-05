@@ -10,8 +10,8 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	"io"
+	. "mumax/common"
 )
 
 func init() {

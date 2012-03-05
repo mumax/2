@@ -6,9 +6,9 @@
 package main
 
 import (
-	. "mumax/common"
-	"fmt"
 	"exec"
+	"fmt"
+	. "mumax/common"
 	"os"
 )
 

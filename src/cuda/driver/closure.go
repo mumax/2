@@ -7,11 +7,10 @@ package driver
 // This file implements "closures", wrappers around a cuda function + argument list + launch configuration.
 // The low-level func LaunchKernel() is rather arcane to use.
 
-
 import (
-	"unsafe"
-	"reflect"
 	"fmt"
+	"reflect"
+	"unsafe"
 )
 
 // Wraps a CUDA Function, argument list, launch configuration and stream.

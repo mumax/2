@@ -8,9 +8,9 @@ package main
 // Job entry
 
 import (
-	. "mumax/common"
 	"exec"
 	"fmt"
+	. "mumax/common"
 	"os"
 )
 

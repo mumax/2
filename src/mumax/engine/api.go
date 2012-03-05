@@ -12,15 +12,14 @@ package engine
 //
 //	NOTE: Here the user input (X,Y,Z) is changed to internal input (Z,Y,X)
 
-
 import (
-	. "mumax/common"
-	"runtime"
-	"mumax/host"
-	"reflect"
-	"path"
 	"fmt"
+	. "mumax/common"
+	"mumax/host"
 	"os"
+	"path"
+	"reflect"
+	"runtime"
 )
 
 // The API methods are accessible to the end-user through scripting languages.
@@ -81,6 +80,7 @@ func (a API) GetPeriodic() (x, y, z int) {
 	p := a.Engine.Periodic()
 	return p[Z], p[Y], p[X] // convert to internal axes
 }
+
 // Load a physics module.
 func (a API) Load(name string) {
 	a.Engine.LoadModule(name)
@@ -275,6 +275,7 @@ func (a API) GetS(quantity string) float64 {
 func (a API) GetScalar(quantity string) float64 {
 	return a.GetS(quantity)
 }
+
 // Gets a space-dependent quantity. If the quantity uses a mask,
 // the result is equal to GetMask() * GetValue()
 func (a API) GetArray(quantity string) *host.Array {
@@ -471,6 +472,7 @@ func (a API) Save(quantity string, format string, options []string) {
 	filename := a.Engine.AutoFilename(quantity, format)
 	a.Engine.SaveAs(quant, format, options, filename)
 }
+
 // Saves a space-dependent quantity, once. Uses the specified format and file name.
 func (a API) SaveAs(quantity string, format string, options []string, filename string) {
 	a.Engine.SaveAs(a.Engine.Quant(quantity), format, options, filename)

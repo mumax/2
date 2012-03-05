@@ -5,9 +5,9 @@
 package runtime
 
 import (
-	"testing"
-	"runtime"
 	"fmt"
+	"runtime"
+	"testing"
 )
 
 func TestDevice(t *testing.T) {

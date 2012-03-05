@@ -54,7 +54,6 @@ func LoadBField(e *Engine) {
 // Updates the E field in a single convolution
 // taking into account all possible sources.
 type EFieldUpdater struct {
-
 }
 
 func newEFieldUpdater() Updater {
@@ -65,10 +64,10 @@ func newEFieldUpdater() Updater {
 func (u *EFieldUpdater) Update() {
 	maxwell.UpdateE()
 }
+
 // Updates the E field in a single convolution
 // taking into account all possible sources.
 type BFieldUpdater struct {
-
 }
 
 func newBFieldUpdater() Updater {

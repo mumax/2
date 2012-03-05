@@ -11,9 +11,9 @@ package modules
 // Author: Arne Vansteenkiste, Ben Van de Wiele
 
 import (
+	"math"
 	. "mumax/common"
 	"mumax/host"
-	"math"
 )
 
 // Many-neighbor exchange kernel
@@ -31,7 +31,6 @@ func ExchKernel(size []int, cellsize []float64, kern *host.Array, range2 float64
 	N := int(range2)
 	Assert(float64(N) == range2)
 	R := int(math.Sqrt(range2) + 1) // upper bound for range in number of cells
-
 
 	var totalWeight float64
 	for i := 1; i <= N; i++ {

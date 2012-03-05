@@ -65,7 +65,6 @@ func Launch(entry string) {
 //
 //}
 
-
 type FuncAttributes struct {
 	// Size (bytes) of statically allocated shared memory per block.
 	SharedSizeBytes uint

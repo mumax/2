@@ -9,8 +9,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	. "mumax/common"
+	"strings"
 )
 
 func init() {

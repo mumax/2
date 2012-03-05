@@ -11,9 +11,9 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
+	"math"
 	. "mumax/common"
 	"mumax/host"
-	"math"
 )
 
 // Calculates the electrostatic kernel for unit charge density:

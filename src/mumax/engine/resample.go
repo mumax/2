@@ -82,7 +82,6 @@ func Resample(in *host.Array, size2 []int) *host.Array {
 //	}
 //}
 
-
 func min(a, b int) int {
 	if a < b {
 		return a

@@ -5,7 +5,6 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-
 package apigen
 
 import (
@@ -20,9 +19,9 @@ type Lang interface {
 	WriteHeader(out io.Writer) //Write the header of the source file
 	WriteFooter(out io.Writer) // Write the footer of the source file
 	WriteFunc(out io.Writer,
-	name string,
-	comment []string,
-	argNames []string,
-	argTypes []reflect.Type,
-	returnTypes []reflect.Type) // Write a function wrapper to the source file
+		name string,
+		comment []string,
+		argNames []string,
+		argTypes []reflect.Type,
+		returnTypes []reflect.Type) // Write a function wrapper to the source file
 }

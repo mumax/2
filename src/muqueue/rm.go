@@ -7,10 +7,9 @@ package main
 
 // Implementation of "rm" command
 
-
 import (
-	. "mumax/common"
 	"fmt"
+	. "mumax/common"
 )
 
 func init() {

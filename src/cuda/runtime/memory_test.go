@@ -5,8 +5,8 @@
 package runtime
 
 import (
-	"testing"
 	"runtime"
+	"testing"
 	"unsafe"
 )
 

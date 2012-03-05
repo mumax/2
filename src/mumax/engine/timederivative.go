@@ -14,9 +14,9 @@ package engine
 // TODO: fix
 
 import (
+	"math"
 	. "mumax/common"
 	"mumax/gpu"
-	"math"
 )
 
 // TODO: multipliers??
