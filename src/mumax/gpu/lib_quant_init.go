@@ -5,17 +5,15 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-// This file wraps libmultigpu.so.
-// Author: Arne Vansteenkiste
+// Author: Rémy
 
-package engine
+package gpu
 
 //#include "libmumax2.h"
 import "C"
 
 import (
 	. "mumax/common"
-	. "mumax/gpu"
 	"unsafe"
 )
 
