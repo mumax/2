@@ -5,11 +5,12 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
+
 package common
 
 import (
-	"fmt"
 	"time"
+	"fmt"
 )
 
 // Non-thread safe timer for debugging.
@@ -24,18 +25,7 @@ func (t *Timer) Start() {
 	if t.StartNanos != 0 {
 		panic(Bug("Timer.Start: already running"))
 	}
-	t.StartNanos = Now()
-}
-
-var time0 time.Time
-var time0_init bool
-
-func Now() int64{
-	if !time0_init{
-		time0 = time.Now()
-		time0_init = true
-	}
-	return int64(time.Now().Sub(time0))
+	t.StartNanos = time.Nanoseconds()
 }
 
 // Stop the timer
@@ -43,7 +33,7 @@ func (t *Timer) Stop() {
 	if t.StartNanos == 0 {
 		panic(Bug("Timer.Stop: not running"))
 	}
-	t.TotalNanos += (time.Now().Sub(t.StartNanos))
+	t.TotalNanos += (time.Nanoseconds() - t.StartNanos)
 	t.Count++
 	t.StartNanos = 0
 }
@@ -54,7 +44,7 @@ func (t *Timer) Seconds() float64 {
 	if t.StartNanos == 0 { //not running for the moment
 		return float64(t.TotalNanos) / 1e9
 	} // running for the moment
-	return float64(t.TotalNanos+time.Now()-t.StartNanos) / 1e9
+	return float64(t.TotalNanos+time.Nanoseconds()-t.StartNanos) / 1e9
 }
 
 // Average number of seconds per call.
