@@ -11,8 +11,8 @@ package common
 // Errors are wrapped in mumax IOErr's and cause a panic.
 
 import (
-	"io"
 	"bufio"
+	"io"
 	"os"
 	"path"
 )

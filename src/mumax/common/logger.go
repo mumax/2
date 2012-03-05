@@ -12,9 +12,9 @@ package common
 // Author: Arne Vansteenkiste
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"fmt"
 )
 
 // Global debug flag.
