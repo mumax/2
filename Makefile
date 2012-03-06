@@ -20,7 +20,7 @@ test:
 
 .PHONY: doc
 doc:
-	make -C examples
+	#make -C examples
 	make -C doc
 	ln -sf doc/manual/manual.pdf mumax2-manual.pdf
 

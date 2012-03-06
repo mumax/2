@@ -5,7 +5,8 @@
 cp -f src/Optimize.inc src/Make.inc
 
 clean_output="rm -rf examples/*.out tests/*.out src/*.mod/tests/*.out"
-make clean && make -j 4 && make test && make -C src/libomf && make -C src/muview && make doc && $clean_output 
+#make clean && make -j 4 && make test && make -C src/libomf && make -C src/muview && make doc && $clean_output 
+make clean && make -j 4 && make -C src/libomf && make -C src/muview && make doc && $clean_output 
 
 if (( $?==0 )); then
 	echo build ok;
