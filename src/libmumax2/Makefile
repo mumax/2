@@ -3,17 +3,12 @@ include ../Make.inc
 MY_CUFILES_WERRORLESS = random.cu				 		# my cuda files to be compiled without Werror flag
 CU_OFILES_WERRORLESS  = $(MY_CUFILES_WERRORLESS:.cu=.o) # my cuda object compiled without Werror flag
 
-MY_CUFILES   = $(filter-out $(wildcard $(MY_CUFILES_WERRORLESS)), $(wildcard *.cu))  # my cuda files
-#MY_CUFILES   = $(wildcard *.cu)					 # my cuda files
-MOD_CUFILES  = $(wildcard ../*.mod/cuda/*.cu)    # module cuda files
-CUFILES      = $(MY_CUFILES) $(MOD_CUFILES)      # all cuda files
+CUFILES   = $(filter-out $(wildcard $(MY_CUFILES_WERRORLESS)), $(wildcard *.cu))  # my cuda files
 CPPFILES     = $(wildcard *.cpp)                 # my c++ files
 CU_HFILES    = $(CUFILES:.cu=.h)                 # cuda only header files
 CU_HFILES   += $(MY_CUFILES_WERRORLESS:.cu=.h)                 # cuda only header files
 HFILES       = $(CUHFILES) $(CPPFILES:.cpp=.h)   # all header files
-MY_CU_OFILES = $(MY_CUFILES:.cu=.o)              # my cuda objects
-MOD_CU_OFILES= $(MOD_CUFILES:.cu=.o)             # module cuda objects
-CU_OFILES    = $(MY_CU_OFILES) $(MOD_CU_OFILES)  # all cuda objects
+CU_OFILES    = $(CUFILES:.cu=.o)              # my cuda objects
 CPP_OFILES   = $(CPPFILES:.cpp=.o)               # c++ objects
 OFILES       = $(CU_OFILES) $(CPP_OFILES)\
 			   $(CU_OFILES_WERRORLESS)           # all objects
