@@ -96,7 +96,9 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 		err := proc.Wait()
 		if err != nil {
 			if msg, ok := err.(*exec.ExitError); ok {
-				exitstat = msg.ExitStatus()
+				if msg.ProcessState.Success(){exitstat=0}else{exitstat=1}
+				// TODO: extract unix exit status
+				//exitstat = msg.ExitStatus()
 			} else {
 				panic(InputErr(err.Error()))
 			}
@@ -159,7 +161,7 @@ func pollFile(fname string) (waiter chan (int)) {
 
 // pipes standard output/err of the command to the logger
 // typically called in a separate goroutine
-func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
+func logStream(prefix string, in io.Reader, stderr bool, waiter chan int) {
 	defer func() { waiter <- 1 }() // signal completion
 	var bytes [BUFSIZE]byte
 	buf := bytes[:]
@@ -168,7 +170,7 @@ func logStream(prefix string, in io.Reader, error bool, waiter chan int) {
 	for err == nil {
 		n, err = in.Read(buf)
 		if n != 0 {
-			if error {
+			if stderr {
 				Err(prefix, string(buf[:n]))
 			} else {
 				Log(prefix, string(buf[:n]))

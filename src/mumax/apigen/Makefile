@@ -1,23 +1,7 @@
-include $(GOROOT)/src/Make.inc
-PKGDIR=$(GOROOT)/pkg/$(GOOS)_$(GOARCH)
+export GOPATH=$(CURDIR)/../../..
 
-# to make tests run
-LD_LIBRARY_PATH+=:../../../../lib
+all:
+	go build
 
-TARG=mumax/apigen
-
-GOFILES=\
-	apigen.go\
-	parse.go\
-	lang.go\
-	python.go \
-	tex.go\
-	#c.go\
-	#java.go\
-	#lua.go\
-
-CGOFILES=\
-
-CLEANFILES+=$(PKGDIR)/$(TARG).a $(PKGDIR)/cgo_$(TARG).so mumax2.py mumax2.pyc Mumax2.java Mumax2.class mumax2.lua
-	
-include $(GOROOT)/src/Make.pkg
+clean:
+	go clean

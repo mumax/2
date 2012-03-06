@@ -20,7 +20,7 @@ func AddMethods(methods map[string]reflect.Value, receiver_ interface{}) {
 	typ := reflect.TypeOf(receiver_)
 	for i := 0; i < typ.NumMethod(); i++ {
 		name := typ.Method(i).Name
-		if unicode.IsUpper(int(name[0])) {
+		if unicode.IsUpper(rune(name[0])) {
 			methods[ConvertCase(name)] = receiver.Method(i)
 		}
 	}

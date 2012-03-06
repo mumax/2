@@ -18,7 +18,6 @@ import (
 	"runtime/debug"
 	"runtime/pprof"
 	"strings"
-	"time"
 )
 
 // command-line flags (more in engine/main.go)
@@ -36,7 +35,7 @@ var (
 	flag_help      *bool   = flag.Bool("h", false, "Print help and exit")
 	flag_version   *bool   = flag.Bool("v", false, "Print version info and exit")
 	flag_test      *bool   = flag.Bool("test", false, "Test CUDA and exit")
-	flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
+	//flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
 	flag_gpus      *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
 	flag_sched     *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
 	flag_fft       *string = flag.String("fft", "5", "Override the FFT implementation (advanced)")
@@ -57,7 +56,7 @@ func Main() {
 
 	DEBUG = *flag_debug
 
-	initTimeout()
+	//initTimeout()
 
 	if *flag_cpuprof != "" {
 		f, err := os.Create(*flag_cpuprof)
@@ -240,31 +239,32 @@ func getCrashStack() string {
 }
 
 // sets up a timeout that will kill mumax when it runs too long
-func initTimeout() {
-	timeout := *flag_timeout
-	t := 0.
-	if timeout != "" {
-		switch timeout[len(timeout)-1] {
-		default:
-			t = Atof64(timeout)
-		case 's':
-			t = Atof64(timeout[:len(timeout)-1])
-		case 'h':
-			t = 3600 * Atof64(timeout[:len(timeout)-1])
-		case 'd':
-			t = 24 * 3600 * Atof64(timeout[:len(timeout)-1])
-		}
-	}
-	if t != 0 {
-		Log("Timeout: ", t, "s")
-		go func() {
-			time.Sleep(int64(1e9 * t))
-			Log("Timeout reached:", timeout)
-			cleanup()
-			os.Exit(ERR_IO)
-		}()
-	}
-}
+// TODO: does not work because Go runtime does not schedule round-robin.
+//func initTimeout() {
+//	timeout := *flag_timeout
+//	t := 0.
+//	if timeout != "" {
+//		switch timeout[len(timeout)-1] {
+//		default:
+//			t = Atof64(timeout)
+//		case 's':
+//			t = Atof64(timeout[:len(timeout)-1])
+//		case 'h':
+//			t = 3600 * Atof64(timeout[:len(timeout)-1])
+//		case 'd':
+//			t = 24 * 3600 * Atof64(timeout[:len(timeout)-1])
+//		}
+//	}
+//	if t != 0 {
+//		Log("Timeout: ", t, "s")
+//		go func() {
+//			time.Sleep(int64(1e9 * t))
+//			Log("Timeout reached:", timeout)
+//			cleanup()
+//			os.Exit(ERR_IO)
+//		}()
+//	}
+//}
 
 const (
 	WELCOME = `
