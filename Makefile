@@ -5,12 +5,14 @@ all:
 	go install mumax2-bin
 	go install apigen
 	go install texgen
-	bin/apigen
 
 .PHONY: clean
 clean:
 	make clean -C src/libmumax2
-	go clean
+	rm -rf pkg/*
+	rm -rf bin/mumax2-bin
+	rm -rf bin/apigen
+	rm -rf bin/texgen
 
 .PHONY: test
 test:

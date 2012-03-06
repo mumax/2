@@ -36,9 +36,9 @@ var (
 	flag_version   *bool   = flag.Bool("v", false, "Print version info and exit")
 	flag_test      *bool   = flag.Bool("test", false, "Test CUDA and exit")
 	//flag_timeout   *string = flag.String("timeout", "", "Set a maximum run time. Units s,h,d are recognized.")
-	flag_gpus      *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
-	flag_sched     *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
-	flag_fft       *string = flag.String("fft", "5", "Override the FFT implementation (advanced)")
+	flag_gpus  *string = flag.String("gpu", "all", "Which GPUs to use. gpu=0, gpu=0:3, gpu=1,2,3, gpu=all")
+	flag_sched *string = flag.String("sched", "auto", "CUDA scheduling: auto|spin|yield|sync")
+	flag_fft   *string = flag.String("fft", "5", "Override the FFT implementation (advanced)")
 )
 
 // Mumax2 main function
@@ -268,7 +268,7 @@ func getCrashStack() string {
 
 const (
 	WELCOME = `
- MuMax 2.0.1865 alpha
+ MuMax 2.0.1892 alpha
  (C) Arne Vansteenkiste, Ben Van de Wiele
      (Dynamat/EELAB Ghent University, Belgium), and
      Rémy Lassalle-Balier, Graham Rowlands, Mykola Dvornik.

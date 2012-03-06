@@ -12,7 +12,7 @@ echo 'Running unit tests'
 fortune 2> /dev/null
 
 # Nicely format all go source files
-gofmt -w src/pkg/*/*/*.go src/*.mod/pkg/*.go
+#gofmt -w src/*/*.go src/*.mod/pkg/*.go
 
 # Run all unit tests
 rm test.log -rf

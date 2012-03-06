@@ -96,7 +96,11 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 		err := proc.Wait()
 		if err != nil {
 			if msg, ok := err.(*exec.ExitError); ok {
-				if msg.ProcessState.Success(){exitstat=0}else{exitstat=1}
+				if msg.ProcessState.Success() {
+					exitstat = 0
+				} else {
+					exitstat = 1
+				}
 				// TODO: extract unix exit status
 				//exitstat = msg.ExitStatus()
 			} else {
