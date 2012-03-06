@@ -1,7 +1,8 @@
 all: mumax2.py
 
+.PHONY: mumax2.py
 mumax2.py: mumax2.py.tail 
-	./apigen.sh $(CURDIR)/../pkg/mumax/engine/api.go
+	./apigen.sh $(CURDIR)/../mumax/engine/api.go
 	mv mumax2.py mumax2.py.head
 	cat mumax2.py.head mumax2.py.tail > mumax2.py
 	rm -f mumax2.py.head

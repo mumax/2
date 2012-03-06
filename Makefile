@@ -3,6 +3,9 @@ include src/Make.inc
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
 	go install mumax2-bin
+	go install apigen
+	go install texgen
+	bin/apigen
 
 .PHONY: clean
 clean:
