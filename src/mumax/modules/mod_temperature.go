@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package temperature_brown
+package modules
 
 // Simple module for thermal fluctuations according to Brown.
 // Author: Arne Vansteenkiste
@@ -100,6 +100,6 @@ func (u *TempBrownUpdater) Update() {
 	mu0VgammaDtMsatMul := float32(Mu0 * V * gamma * dt * mSatMul)
 
 	for c := 0; c < 3; c++ {
-		ScaleNoise(&(noise.Comp[c]), alphaMask, tempMask, alphaKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
+		gpu.ScaleNoise(&(noise.Comp[c]), alphaMask, tempMask, alphaKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
 	}
 }

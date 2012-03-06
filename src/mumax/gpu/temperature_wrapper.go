@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package temperature_brown
+package gpu
 
 // CGO wrappers for temperature.cu
 // Author: Arne Vansteenkiste
@@ -14,13 +14,12 @@ package temperature_brown
 import "C"
 import (
 	. "mumax/common"
-	"mumax/gpu"
 	"unsafe"
 )
 
-func ScaleNoise(noise, alphaMask *gpu.Array,
-	tempMask *gpu.Array, alphaKB2tempMul float32,
-	mSatMask *gpu.Array, mu0VgammaDtMsatMul float32) {
+func ScaleNoise(noise, alphaMask *Array,
+	tempMask *Array, alphaKB2tempMul float32,
+	mSatMask *Array, mu0VgammaDtMsatMul float32) {
 	CheckSize(noise.Size4D(), alphaMask.Size4D())
 	C.temperature_scaleNoise(
 		(**C.float)(unsafe.Pointer(&(noise.Pointers()[0]))),
