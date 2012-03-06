@@ -1,4 +1,5 @@
 include src/Make.inc
+export GOPATH=$(CURDIR)
 
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
