@@ -5,14 +5,14 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package slonczewski_torque
+package modules
 
 // Module implementing Slonczewski spin transfer torque.
 // Authors: Graham Rowlands, Arne Vansteenkiste
 
 import (
 	. "mumax/engine"
-	"mumax/modules"
+	"mumax/gpu"
 )
 
 // Register this module
@@ -28,7 +28,7 @@ func LoadSlonczewskiTorque(e *Engine) {
 	e.AddNewQuant("bj", SCALAR, VALUE, Unit(""), "Field-Like term")
 	e.AddNewQuant("p", VECTOR, FIELD, Unit(""), "Polarization Vector")
 	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization Efficiency")
-	modules.LoadUserDefinedCurrentDensity(e)
+	LoadUserDefinedCurrentDensity(e)
 	//e.AddNewQuant("curr", SCALAR, FIELD, Unit("A/m2"), "Current density")
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
 
@@ -60,6 +60,6 @@ func (u *slonczewskiUpdater) Update() {
 	gamma := e.Quant("gamma").Scalar()
 	msat := e.Quant("Msat")
 
-	LLSlon(stt.Array(), m.Array(), p.Array(), alpha.Array(), msat.Array(),
+	gpu.LLSlon(stt.Array(), m.Array(), p.Array(), alpha.Array(), msat.Array(),
 		float32(gamma), float32(aj), float32(bj), float32(pol), curr.Array())
 }

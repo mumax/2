@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package slonczewski_torque
+package gpu
 
 // CGO wrappers for slonczewski_torque.cu
 // Author: Graham Rowlands, Arne Vansteenkiste
@@ -15,12 +15,11 @@ import "C"
 
 import (
 	. "mumax/common"
-	"mumax/gpu"
 	"unsafe"
 )
 
-func LLSlon(stt *gpu.Array, m *gpu.Array, p, alpha, Msat *gpu.Array,
-	gamma float32, aj float32, bj float32, Pol float32, j *gpu.Array) {
+func LLSlon(stt *Array, m *Array, p, alpha, Msat *Array,
+	gamma float32, aj float32, bj float32, Pol float32, j *Array) {
 
 	// Bookkeeping
 	CheckSize(j.Size3D(), m.Size3D())
