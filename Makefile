@@ -3,9 +3,9 @@ export GOPATH=$(CURDIR)
 
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
-	go install -x mumax2-bin
-	go install apigen
-	go install texgen
+	go install -v mumax2-bin
+	go install -v apigen
+	go install -v texgen
 
 .PHONY: clean
 clean:

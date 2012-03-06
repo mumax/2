@@ -1,4 +1,9 @@
 export GOPATH=$(CURDIR)/../..
-all:
-	echo GOPATH=$(GOPATH)
-	go build mumax/frontend
+
+DIRS=apigen common engine frontend gpu host modules ovf queue
+
+all: $(DIRS)
+
+.PHONY: $(DIRS)
+$(DIRS): 
+		go install -v mumax/$@
