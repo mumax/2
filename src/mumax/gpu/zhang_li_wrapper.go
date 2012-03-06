@@ -5,7 +5,7 @@
 //  Note that you are welcome to modify this code under the condition that you do not remove any 
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
-package zhang_li_torque
+package gpu
 
 // CGO wrappers for zhang-li_torque.cu
 // Author: Rémy Lassalle-Balier
@@ -15,7 +15,6 @@ import "C"
 
 import (
 	. "mumax/common"
-	. "mumax/gpu"
 	"unsafe"
 )
 
