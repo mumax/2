@@ -1,3 +1,7 @@
-export GOPATH=$(CURDIR)/../..
+export GOPATH=$(CURDIR)/../../..
+
 all:
-	go build
+	go install -v
+
+clean:
+	go clean
