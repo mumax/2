@@ -20,15 +20,15 @@ type OutputFormat interface {
 	Write(out io.Writer, q *Quant, options []string) // Writes the quantity buffer to out
 }
 
-func init() {
-	outputformats = make(map[string]OutputFormat)
-}
 
 // global map of registered output formats
 var outputformats map[string]OutputFormat
 
 // registers an output format
 func RegisterOutputFormat(format OutputFormat) {
+	if outputformats == nil{
+		outputformats = make(map[string]OutputFormat)
+	}
 	outputformats[format.Name()] = format
 }
 
