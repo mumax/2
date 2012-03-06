@@ -19,7 +19,7 @@ OFILES       = $(CU_OFILES) $(CPP_OFILES)\
 			   $(CU_OFILES_WERRORLESS)           # all objects
 
 
-all: libmumax2.so libmumax2.h link
+all: libmumax2.so libmumax2.h
 
 $(CU_OFILES): %.o: %.cu %.h
 	$(NVCC) -c -I. $(@:.o=.cu) -o $(@)

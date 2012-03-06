@@ -1,12 +1,17 @@
 include src/Make.inc
 
-dirs=\
-	src\
-	tests\
+all:
+	$(MAKE) --no-print-directory --directory=src/libmumax2 
+	go install mumax2-bin
 
-CLEANFILES+=*.log
+.PHONY: clean
+clean:
+	make clean -C src/libmumax2
+	go clean
 
-all: $(dirs) githooks
+.PHONY: test
+test:
+	echo todo	
 
 .PHONY: doc
 doc:
@@ -18,5 +23,4 @@ doc:
 githooks:
 	ln -sf $(CURDIR)/misc/pre-commit .git/hooks 
 
-include src/Dirs.pkg
 
