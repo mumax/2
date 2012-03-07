@@ -268,7 +268,7 @@ func getCrashStack() string {
 
 const (
 	WELCOME = `
- MuMax 2.0.1892 alpha
+ MuMax 2.0.1912 alpha
  (C) Arne Vansteenkiste, Ben Van de Wiele
      (Dynamat/EELAB Ghent University, Belgium), and
      Rémy Lassalle-Balier, Graham Rowlands, Mykola Dvornik.
