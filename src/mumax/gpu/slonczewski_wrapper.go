@@ -18,14 +18,22 @@ import (
 	"unsafe"
 )
 
-func LLSlon(stt *Array, m *Array, p, alpha, Msat *Array,
-	gamma float32, aj float32, bj float32, Pol float32, j *Array) {
+//  void slonczewski_async(float** sttx, float** stty, float** sttz, 
+//			 float** mx, float** my, float** mz, 
+//			 float** px, float** py, float** pz,
+//			 float pxMul, float pyMul, float pzMul,
+//			 float aj, float bj, float Pol,
+//			 float** jx, float IeMul,
+//			 int NPart, 
+//			 CUstream* stream)
+
+func LLSlon(stt, m, p *Array, pMul []float64, aj, bj, Pol float32, jx *Array, IeMul float32) {
 
 	// Bookkeeping
-	CheckSize(j.Size3D(), m.Size3D())
+	//CheckSize(j.Size3D(), m.Size3D())
 	CheckSize(p.Size3D(), m.Size3D())
-	CheckSize(alpha.Size3D(), m.Size3D())
-	CheckSize(Msat.Size3D(), m.Size3D())
+	//CheckSize(alpha.Size3D(), m.Size3D())
+	//CheckSize(Msat.Size3D(), m.Size3D())
 
 	// Calling the CUDA functions
 	C.slonczewski_async(
@@ -41,16 +49,16 @@ func LLSlon(stt *Array, m *Array, p, alpha, Msat *Array,
 		(**C.float)(unsafe.Pointer(&(p.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(p.Comp[Z].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(alpha.Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(Msat.Pointers()[0]))),
-
-		(C.float)(gamma),
+		(C.float)(pMul[X]),
+		(C.float)(pMul[Y]),
+		(C.float)(pMul[Z]),
 		(C.float)(aj),
 		(C.float)(bj),
 		(C.float)(Pol),
 
 		// The program X component is the user Z component!
 		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
+		(C.float)(IeMul),
 
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))

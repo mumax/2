@@ -18,11 +18,12 @@ extern "C" {
   void slonczewski_async(float** sttx, float** stty, float** sttz, 
 			 float** mx, float** my, float** mz, 
 			 float** px, float** py, float** pz,
-			 float** alpha, float** Msat,
-			 float gamma, float aj, float bj, float Pol,
-			 float **curr, 
-			 int NPart, ///< total number of floats per gpu.
+			 float pxMul, float pyMul, float pzMul,
+			 float aj, float bj, float Pol,
+			 float** jx, float jxMul,
+			 int NPart, 
 			 CUstream* stream);
+
 #ifdef __cplusplus
 }
 #endif

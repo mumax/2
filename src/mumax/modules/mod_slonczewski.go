@@ -29,11 +29,9 @@ func LoadSlonczewskiTorque(e *Engine) {
 	e.AddNewQuant("p", VECTOR, FIELD, Unit(""), "Polarization Vector")
 	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization Efficiency")
 	LoadUserDefinedCurrentDensity(e)
-	//e.AddNewQuant("curr", SCALAR, FIELD, Unit("A/m2"), "Current density")
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	//e.Depends("stt", "aj", "bj", "p", "pol", "curr", "m", "gamma", "Msat")
 	e.Depends("stt", "aj", "bj", "p", "pol", "j", "m", "gamma", "Msat")
 
 	// ============ Updating the torque =============
