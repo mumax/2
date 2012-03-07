@@ -30,10 +30,8 @@ import (
 func LLSlon(stt, m, p *Array, pMul []float64, aj, bj, Pol float32, jx *Array, IeMul float32) {
 
 	// Bookkeeping
-	//CheckSize(j.Size3D(), m.Size3D())
 	CheckSize(p.Size3D(), m.Size3D())
-	//CheckSize(alpha.Size3D(), m.Size3D())
-	//CheckSize(Msat.Size3D(), m.Size3D())
+	Assert(jx.NComp() == 1)
 
 	// Calling the CUDA functions
 	C.slonczewski_async(
@@ -57,7 +55,7 @@ func LLSlon(stt, m, p *Array, pMul []float64, aj, bj, Pol float32, jx *Array, Ie
 		(C.float)(Pol),
 
 		// The program X component is the user Z component!
-		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(jx.Pointers()[0]))),
 		(C.float)(IeMul),
 
 		(C.int)(m.PartLen3D()),

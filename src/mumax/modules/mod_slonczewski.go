@@ -11,6 +11,7 @@ package modules
 // Authors: Graham Rowlands, Arne Vansteenkiste
 
 import (
+	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
@@ -47,17 +48,16 @@ type slonczewskiUpdater struct {
 
 func (u *slonczewskiUpdater) Update() {
 	e := GetEngine()
+	cellSize := e.CellSize()
 	stt := u.stt
 	m := e.Quant("m")
-	alpha := e.Quant("alpha")
 	aj := e.Quant("aj").Scalar()
 	bj := e.Quant("bj").Scalar()
 	p := e.Quant("p")
 	pol := e.Quant("pol").Scalar()
 	curr := e.Quant("j")
-	gamma := e.Quant("gamma").Scalar()
-	msat := e.Quant("Msat")
 
-	gpu.LLSlon(stt.Array(), m.Array(), p.Array(), alpha.Array(), msat.Array(),
-		float32(gamma), float32(aj), float32(bj), float32(pol), curr.Array())
+	gpu.LLSlon(stt.Array(), m.Array(), p.Array(), p.Multiplier(), 
+		float32(aj), float32(bj), float32(pol), 
+		curr.Array().Component(X), float32(cellSize[Y]*cellSize[Z]/E ))
 }
