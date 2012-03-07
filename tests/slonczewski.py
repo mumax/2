@@ -20,7 +20,7 @@ setv('Pol',0.56)
 setv('Msat', 800e3)
 setmask('Msat', ellipse())
 setv('Aex', 1.3e-11)
-setv('alpha', 0.5)
+setv('alpha', 0.01)
 
 setv('dt', 1e-15)
 setv('maxdt', 1e-12)

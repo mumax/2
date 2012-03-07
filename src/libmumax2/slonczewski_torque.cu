@@ -45,7 +45,7 @@ extern "C" {
 	  float Ie = IeMul;
 	  if(jx != NULL){ Ie *= jx[I]; }
 	
-      float factor = (Pol * Ie) / (aj + bj * cosTheta);
+      float factor = -(Pol * Ie) / (aj + bj * cosTheta); // magic minus sign.
 
       sttx[I] = factor * mxpxm_x;
       stty[I] = factor * mxpxm_y;

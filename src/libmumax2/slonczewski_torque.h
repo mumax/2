@@ -15,12 +15,12 @@
 extern "C" {
 #endif
 
-  void slonczewski_async(float** sttx, float** stty, float** sttz, 
-			 float** mx, float** my, float** mz, 
-			 float** px, float** py, float** pz,
-			 float pxMul, float pyMul, float pzMul,
-			 float aj, float bj, float Pol,
-			 float** jx, float jxMul,
+  void slonczewski_async(float** sttx, float** stty, float** sttz,  ///< output
+			 float** mx, float** my, float** mz,  ///< magnetization
+			 float** px, float** py, float** pz, ///< fixed layer
+			 float pxMul, float pyMul, float pzMul, ///< multipliers for fixed layer
+			 float aj, float bj, float Pol, 
+			 float** jx, float jxMul, ///< out-of-plane current density
 			 int NPart, 
 			 CUstream* stream);
 
