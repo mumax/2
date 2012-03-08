@@ -174,6 +174,19 @@ func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
 	out.Stream.Sync()
 }
 
+// Partial dot products (see reduce.h)
+func PartialSDot(in1, in2, out *Array, blocks, threadsPerBlock, N int) {
+	C.partialSDotAsync(
+		(**C.float)(unsafe.Pointer(&in1.pointer[0])),
+		(**C.float)(unsafe.Pointer(&in2.pointer[0])),
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		C.int(blocks),
+		C.int(threadsPerBlock),
+		C.int(N),
+		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+	out.Stream.Sync()
+}
+
 // Partial maxima (see reduce.h)
 func PartialMax(in, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialMaxAsync(

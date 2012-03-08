@@ -126,6 +126,60 @@ __global__ void _gpu_sum_kernel(float* g_idata, float* g_odata, unsigned int n) 
       g_odata[blockIdx.x] = sdata[0];
 }
 
+/// Single-precision dot product
+template <unsigned int blockSize, bool nIsPow2>
+__global__ void _gpu_sum_kernel(float* g_idata, float* g_idata2, float* g_odata, unsigned int n) {
+  float* sdata = SharedMemory<float>();
+
+  // perform first level of reduction,
+  // reading from global memory, writing to shared memory
+  unsigned int tid = threadIdx.x;
+  unsigned int i = blockIdx.x*blockSize*2 + threadIdx.x;
+  unsigned int gridSize = blockSize*2*gridDim.x;
+
+  float mySum = 0;
+
+  // we reduce multiple elements per thread.  The number is determined by the
+  // number of active thread blocks (via gridDim).  More blocks will result
+  // in a larger gridSize and therefore fewer elements per thread
+  while (i < n)
+  {
+    mySum += g_idata[i] * g_idata2[i];
+    // ensure we don't read out of bounds -- this is optimized away for powerOf2 sized arrays
+    if (nIsPow2 || i + blockSize < n)
+      mySum += g_idata[i+blockSize] * g_idata2[i+blockSize];
+    i += gridSize;
+  }
+
+  // each thread puts its local sum into shared memory
+  sdata[tid] = mySum;
+  __syncthreads();
+
+
+  // do reduction in shared mem
+  if (blockSize >= 512) { if (tid < 256) { mySum = mySum + sdata[tid + 256]; sdata[tid] = mySum; } __syncthreads(); }
+  if (blockSize >= 256) { if (tid < 128) { mySum = mySum + sdata[tid + 128]; sdata[tid] = mySum; } __syncthreads(); }
+  if (blockSize >= 128) { if (tid <  64) { mySum = mySum + sdata[tid +  64]; sdata[tid] = mySum; } __syncthreads(); }
+
+  if (tid < 32)
+    {
+      // now that we are using warp-synchronous programming (below)
+      // we need to declare our shared memory volatile so that the compiler
+      // doesn't reorder stores to it and induce incorrect behavior.
+      volatile float* smem = sdata;
+      if (blockSize >=  64) { mySum = mySum + smem[tid + 32]; smem[tid] = mySum;  }
+      if (blockSize >=  32) { mySum = mySum + smem[tid + 16]; smem[tid] = mySum;  }
+      if (blockSize >=  16) { mySum = mySum + smem[tid +  8]; smem[tid] = mySum;  }
+      if (blockSize >=   8) { mySum = mySum + smem[tid +  4]; smem[tid] = mySum;  }
+      if (blockSize >=   4) { mySum = mySum + smem[tid +  2]; smem[tid] = mySum;  }
+      if (blockSize >=   2) { mySum = mySum + smem[tid +  1]; smem[tid] = mySum;  }
+    }
+    // write result for this block to global mem
+    if (tid == 0)
+      g_odata[blockIdx.x] = sdata[0];
+}
+
+
 /// This kernel takes a partial maximum
 template <unsigned int blockSize, bool nIsPow2>
 __global__ void _gpu_max_kernel(float* g_idata, float* g_odata, unsigned int n) {
@@ -524,7 +578,55 @@ void partialSumAsync(float** input, float** output, int blocks, int threadsPerBl
 }
 
 
+// single-GPU
+void partialSDotAsync1(float* d_idata, float* d_idata2, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+  dim3 dimBlock(threads, 1, 1);
+  dim3 dimGrid(blocks, 1, 1);
 
+  // when there is only one warp per block, we need to allocate two warps
+  // worth of shared memory so that we don't index shared memory out of bounds
+  int smemSize = (threads <= 32) ? 2 * threads * sizeof(float) : threads * sizeof(float);
+
+  if (isPow2(size))
+  {
+    switch (threads)
+    {
+      case 512: _gpu_sum_kernel<512, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 256: _gpu_sum_kernel<256, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 128: _gpu_sum_kernel<128, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  64: _gpu_sum_kernel< 64, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  32: _gpu_sum_kernel< 32, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  16: _gpu_sum_kernel< 16, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   8: _gpu_sum_kernel<  8, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   4: _gpu_sum_kernel<  4, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   2: _gpu_sum_kernel<  2, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   1: _gpu_sum_kernel<  1, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+    }
+  }
+  else
+  {
+    switch (threads)
+    {
+      case 512: _gpu_sum_kernel<512, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 256: _gpu_sum_kernel<256, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 128: _gpu_sum_kernel<128, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  64: _gpu_sum_kernel< 64, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  32: _gpu_sum_kernel< 32, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  16: _gpu_sum_kernel< 16, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   8: _gpu_sum_kernel<  8, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   4: _gpu_sum_kernel<  4, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   2: _gpu_sum_kernel<  2, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   1: _gpu_sum_kernel<  1, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+    }
+  }
+}
+
+void partialSDotAsync(float** input1, float** input2, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		partialSDotAsync1(input1[dev], input2[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
+	}
+}
 
 
 // single-GPU

@@ -78,6 +78,20 @@ func (r *Reductor) Sum(in *Array) float32 {
 	return sum
 }
 
+// Takes the dot product of all elements of the arrays.
+func (r *Reductor) Dot(in1, in2 *Array) float32 {
+	r.checkSize(in1)
+	r.checkSize(in2)
+	PartialSDot(in1, in2, &(r.devbuffer), r.blocks, r.threads, r.N)
+	// reduce further on CPU
+	(&r.devbuffer).CopyToHost(&r.hostbuffer)
+	var sum float32
+	for _, num := range r.hostbuffer.List {
+		sum += num
+	}
+	return sum
+}
+
 // Takes the maximum of all elements of the array.
 func (r *Reductor) Max(in *Array) float32 {
 	r.checkSize(in)
