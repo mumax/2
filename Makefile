@@ -6,6 +6,9 @@ all:
 	go install -v mumax2-bin
 	go install -v apigen
 	go install -v texgen
+	make -C src/python
+	make -C src/libomf
+	make -C src/muview
 
 .PHONY: clean
 clean:
@@ -14,6 +17,7 @@ clean:
 	rm -rf bin/mumax2-bin
 	rm -rf bin/apigen
 	rm -rf bin/texgen
+	make clean -C src/python
 
 .PHONY: test
 test:

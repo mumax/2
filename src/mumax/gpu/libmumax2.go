@@ -11,7 +11,7 @@
 
 package gpu
 
-//#cgo LDFLAGS:-L. -lmumax2
+//#cgo LDFLAGS:-L../../libmumax2 -lmumax2
 //#cgo CFLAGS:-I/usr/local/cuda/include/ -I../../libmumax2
 //#include "libmumax2.h"
 import "C"
