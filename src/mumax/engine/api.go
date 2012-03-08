@@ -550,6 +550,16 @@ func (a API) Add_To(sumQuantity, newQuantity string) {
 	//AddTermToQuant(sumQuant, term)
 }
 
+func (a API) Add_Dot(dotQuantity, inputQuant1, inputQuant2 string) {
+	e := a.Engine
+	inQuant1 := e.Quant(inputQuant1)
+	inQuant2 := e.Quant(inputQuant2)
+	unit := "(" + inQuant1.Unit() + ")*(" + inQuant2.Unit() + ")"
+	dotQuant := e.AddNewQuant(dotQuantity, SCALAR, VALUE, unit)
+	dotQuant.SetUpdater(NewSDotUpdater(dotQuant, inQuant1, inQuant2))
+	Log("Added new dot product:", dotQuantity, "=", inputQuant1, "·", inputQuant2)
+}
+
 // Add a new quantity to the multi-physics engine, its
 // value is the maximum of the absolute value of inputQuantity.
 // E.g.: New_MaxAbs("max_torque", "torque") adds a new quantity
