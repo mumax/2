@@ -18,26 +18,46 @@ import (
 type SDotUpdater struct {
 	sum              *Quant
 	parent1, parent2 *Quant
+	scaling          float64
 	reduce           gpu.Reductor
 }
 
 // takes dot product
-func NewSDotUpdater(sum, parent1, parent2 *Quant) Updater {
+func NewSDotUpdater(sum, parent1, parent2 *Quant, scaling float64) Updater {
 	u := new(SDotUpdater)
 	u.sum = sum
 	u.parent1 = parent1
 	u.parent2 = parent2
+	u.scaling = scaling
 	u.reduce.Init(1, GetEngine().GridSize())
 	GetEngine().Depends(sum.Name(), parent1.Name(), parent2.Name())
 	return u
 }
 
 func (u *SDotUpdater) Update() {
-	for c := 0; c < u.sum.NComp(); c++ {
-		par1Comp := u.parent1.array.Component(c)
-		par2Comp := u.parent2.array.Component(c)
-		par1Mul := u.parent1.multiplier[c]
-		par2Mul := u.parent2.multiplier[c]
-		u.sum.multiplier[c] = float64(u.reduce.Dot(par1Comp, par2Comp)) * par1Mul * par2Mul
+	parent1 := u.parent1
+	parent2 := u.parent2
+
+	if !parent1.IsSpaceDependent() {
+		parent1, parent2 = parent2, parent1
+	}
+
+	u.sum.multiplier[0] = 0
+	if parent2.IsSpaceDependent() {
+		for c := 0; c < u.parent1.NComp(); c++ {
+			par1Mul := u.parent1.multiplier[c]
+			par2Mul := u.parent2.multiplier[c]
+			par1Comp := u.parent1.array.Component(c)
+			par2Comp := u.parent2.array.Component(c)
+			u.sum.multiplier[0] += float64(u.reduce.Dot(par1Comp, par2Comp)) * par1Mul * par2Mul * u.scaling
+		}
+	} else {
+		for c := 0; c < u.parent1.NComp(); c++ {
+			par1Mul := u.parent1.multiplier[c]
+			par2Mul := u.parent2.multiplier[c]
+			par1Comp := u.parent1.array.Component(c)
+			//fmt.Println("u.sum.multiplier[0] += ", float64(u.reduce.Sum(par1Comp)) , par1Mul , par2Mul , u.scaling)
+			u.sum.multiplier[0] += float64(u.reduce.Sum(par1Comp)) * par1Mul * par2Mul * u.scaling
+		}
 	}
 }
