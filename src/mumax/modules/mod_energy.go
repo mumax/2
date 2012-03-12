@@ -24,7 +24,7 @@ func LoadEnergy(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
 
-	LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", 1/Mu0, "Zeeman energy")
+	LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", -e.CellVolume()/Mu0, "Zeeman energy")
 }
 
 func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string){

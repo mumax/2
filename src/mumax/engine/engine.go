@@ -191,6 +191,11 @@ func (e *Engine) CellSize() []float64 {
 	return e.cellSize
 }
 
+// FD cell volume in m³
+func (e *Engine) CellVolume() float64 {
+	return e.cellSize_[0] * e.cellSize_[1] * e.cellSize_[2]
+}
+
 // Sets the periodicity in each dimension
 func (e *Engine) SetPeriodic(p []int) {
 	Debug("Engine.SetPeriodic", p)
