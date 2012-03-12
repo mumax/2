@@ -24,20 +24,35 @@ func LoadEnergy(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
 
-	if e.HasQuant("B_ext"){
-		LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", -e.CellVolume(), "Zeeman energy")
+	total := e.AddNewQuant("E", SCALAR, VALUE, Unit("J"), "Sum of all calculated energy terms (this is the total energy only if all relevant energy terms are loaded")
+	sumUpd := NewSumUpdater(total).(*SumUpdater)
+	total.SetUpdater(sumUpd)
+
+	if e.HasQuant("B_ext") {
+		term := LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", -e.CellVolume(), "Zeeman energy")
+		Log("Loaded Zeeman energy E_zeeman")
+		sumUpd.AddParent(term.Name())
 	}
 
-	if e.HasQuant("H_ex"){
-		LoadEnergyTerm(e, "E_ex", "m", "H_ex", -0.5*e.CellVolume()*Mu0, "Exchange energy")
+	if e.HasQuant("H_ex") {
+		term := LoadEnergyTerm(e, "E_ex", "m", "H_ex", -0.5*e.CellVolume()*Mu0, "Exchange energy")
+		Log("Loaded exchange energy E_ex")
+		sumUpd.AddParent(term.Name())
+	}
+
+	// WARNING: this assumes B is only B_demag.
+	if e.HasQuant("B") {
+		term := LoadEnergyTerm(e, "E_demag", "m", "B", -0.5*e.CellVolume(), "Demag energy")
+		Log("Loaded demag energy E_demag")
+		sumUpd.AddParent(term.Name())
 	}
 }
 
-func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string){
+func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string) *Quant {
 	Energy := e.AddNewQuant(out, SCALAR, VALUE, Unit("J"), desc)
 	e.Depends(out, in1, in2)
 	m := e.Quant(in1)
 	H := e.Quant(in2)
 	Energy.SetUpdater(NewSDotUpdater(Energy, m, H, weight))
+	return Energy
 }
-

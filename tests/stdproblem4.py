@@ -33,6 +33,8 @@ autosave("m", "omf", ["Text"], 200e-12)
 autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 10e-12)
 autotabulate(["t", "E_zeeman"], "Ezeeman.txt", 10e-12)
 autotabulate(["t", "E_ex"], "Eex.txt", 10e-12)
+autotabulate(["t", "E_demag"], "Edemag.txt", 10e-12)
+autotabulate(["t", "E"], "E.txt", 10e-12)
 
 Bx = -24.6E-3
 By =   4.3E-3

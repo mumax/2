@@ -57,7 +57,7 @@ func (u *slonczewskiUpdater) Update() {
 	pol := e.Quant("pol").Scalar()
 	curr := e.Quant("j")
 
-	gpu.LLSlon(stt.Array(), m.Array(), p.Array(), p.Multiplier(), 
-		float32(aj), float32(bj), float32(pol), 
-		curr.Array().Component(X), float32(cellSize[Y]*cellSize[Z]/E ))
+	gpu.LLSlon(stt.Array(), m.Array(), p.Array(), p.Multiplier(),
+		float32(aj), float32(bj), float32(pol),
+		curr.Array().Component(X), float32(cellSize[Y]*cellSize[Z]/E))
 }

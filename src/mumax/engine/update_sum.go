@@ -32,27 +32,40 @@ func (u *SumUpdater) Update() {
 
 func (u *SumUpdater) zero() {
 	u.sum.array.Zero()
+	if !u.sum.IsSpaceDependent() {
+		for i := range u.sum.multiplier {
+			u.sum.multiplier[i] = 0
+		}
+	}
 }
 
 func (u *SumUpdater) addTerms() {
 	// TODO: optimize for 0,1,2 or more parents
 	sum := u.sum
 	parents := u.parents
-	for i := range parents {
-		parent := parents[i]
-		weight := u.weight[i]
-		for c := 0; c < sum.NComp(); c++ {
-			parComp := parent.array.Component(c)
-			parMul := parent.multiplier[c]
-			sumMul := sum.multiplier[c]
-			sumComp := sum.array.Component(c)
-			if !sumComp.IsNil() {
-				weight := float32((weight * parMul) / sumMul)
-				if weight != 0 {
-					gpu.Madd(sumComp, sumComp, parComp, weight) // divide by sum's multiplier!
+	if sum.IsSpaceDependent() {
+		for i := range parents {
+			parent := parents[i]
+			weight := u.weight[i]
+			for c := 0; c < sum.NComp(); c++ {
+				parComp := parent.array.Component(c)
+				parMul := parent.multiplier[c]
+				sumMul := sum.multiplier[c]
+				sumComp := sum.array.Component(c)
+				if !sumComp.IsNil() {
+					weight := float32((weight * parMul) / sumMul)
+					if weight != 0 {
+						gpu.Madd(sumComp, sumComp, parComp, weight) // divide by sum's multiplier!
+					}
+				} else { // target is value
+					sum.multiplier[c] += parent.multiplier[c]
 				}
-			} else { // target is value
-				sum.multiplier[c] += parent.multiplier[c]
+			}
+		}
+	} else {
+		for p, parent := range parents {
+			for c := range sum.multiplier {
+				sum.multiplier[c] += parent.multiplier[c] * u.weight[p]
 			}
 		}
 	}

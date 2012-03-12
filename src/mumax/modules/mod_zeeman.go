@@ -29,4 +29,3 @@ func LoadZeeman(e *Engine) {
 	sum.MAddParent("B_ext", 1/Mu0)
 	e.Depends("H_eff", "B_ext")
 }
-
