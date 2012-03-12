@@ -42,7 +42,7 @@ type MaxwellPlan struct {
 	BInput      [7]*gpu.Array    // input quantities for magnetic field (rhoB, mx, my, mz, jx, jy, jz)
 	EInMul      [7]float64       // E input multipliers (epsillon0 etc)
 	BInMul      [7]float64       // B input multipliers (mu0 etc)
-	BExt, EExt  *Quant           // external B/E field
+	//BExt, EExt  *Quant           // external B/E field
 	dBdt, dEdt  *Quant           // time derivative of field
 	E, B        *Quant           // E/B fields
 	// TODO: time derivatives could be taken in FFT space, but this complicates external fields
@@ -220,7 +220,7 @@ func (plan *MaxwellPlan) loadRotorKernel() {
 
 // Calculate the electric field plan.E
 func (plan *MaxwellPlan) UpdateE() {
-	plan.update(&plan.EInput, &plan.EInMul, plan.E.Array(), plan.EExt)
+	plan.update(&plan.EInput, &plan.EInMul, plan.E.Array(), nil)//plan.EExt)
 }
 
 // Calculate the magnetic field plan.B
@@ -232,7 +232,7 @@ func (plan *MaxwellPlan) UpdateB() {
 		plan.BInMul[MY] = msat.Multiplier()[0] * Mu0
 		plan.BInMul[MZ] = msat.Multiplier()[0] * Mu0
 	}
-	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), plan.BExt)
+	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), nil)//plan.BExt)
 }
 
 // calculate E or B
@@ -265,11 +265,13 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 		out.Zero()
 	}
 	// add external field
+	if ext != nil{
 	for c := 0; c < 3; c++ {
 		mul := float32(ext.Multiplier()[c])
 		if mul != 0 {
 			gpu.Madd(out.Component(c), out.Component(c), ext.Array().Component(c), mul)
 		}
+	}
 	}
 }
 
