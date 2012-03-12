@@ -128,7 +128,7 @@ __global__ void _gpu_sum_kernel(float* g_idata, float* g_odata, unsigned int n) 
 
 /// Single-precision dot product
 template <unsigned int blockSize, bool nIsPow2>
-__global__ void _gpu_sum_kernel(float* g_idata, float* g_idata2, float* g_odata, unsigned int n) {
+__global__ void _gpu_sdot_kernel(float* g_idata, float* g_idata2, float* g_odata, unsigned int n) {
   float* sdata = SharedMemory<float>();
 
   // perform first level of reduction,
@@ -591,32 +591,32 @@ void partialSDotAsync1(float* d_idata, float* d_idata2, float* d_odata, int bloc
   {
     switch (threads)
     {
-      case 512: _gpu_sum_kernel<512, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case 256: _gpu_sum_kernel<256, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case 128: _gpu_sum_kernel<128, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case  64: _gpu_sum_kernel< 64, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case  32: _gpu_sum_kernel< 32, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case  16: _gpu_sum_kernel< 16, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   8: _gpu_sum_kernel<  8, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   4: _gpu_sum_kernel<  4, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   2: _gpu_sum_kernel<  2, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   1: _gpu_sum_kernel<  1, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 512: _gpu_sdot_kernel<512, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 256: _gpu_sdot_kernel<256, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 128: _gpu_sdot_kernel<128, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  64: _gpu_sdot_kernel< 64, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  32: _gpu_sdot_kernel< 32, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  16: _gpu_sdot_kernel< 16, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   8: _gpu_sdot_kernel<  8, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   4: _gpu_sdot_kernel<  4, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   2: _gpu_sdot_kernel<  2, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   1: _gpu_sdot_kernel<  1, true><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
     }
   }
   else
   {
     switch (threads)
     {
-      case 512: _gpu_sum_kernel<512, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case 256: _gpu_sum_kernel<256, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case 128: _gpu_sum_kernel<128, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case  64: _gpu_sum_kernel< 64, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case  32: _gpu_sum_kernel< 32, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case  16: _gpu_sum_kernel< 16, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   8: _gpu_sum_kernel<  8, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   4: _gpu_sum_kernel<  4, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   2: _gpu_sum_kernel<  2, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
-      case   1: _gpu_sum_kernel<  1, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 512: _gpu_sdot_kernel<512, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 256: _gpu_sdot_kernel<256, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case 128: _gpu_sdot_kernel<128, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  64: _gpu_sdot_kernel< 64, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  32: _gpu_sdot_kernel< 32, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case  16: _gpu_sdot_kernel< 16, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   8: _gpu_sdot_kernel<  8, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   4: _gpu_sdot_kernel<  4, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   2: _gpu_sdot_kernel<  2, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
+      case   1: _gpu_sdot_kernel<  1, false><<< dimGrid, dimBlock, smemSize, stream>>>(d_idata, d_idata2, d_odata, size); break;
     }
   }
 }
