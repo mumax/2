@@ -17,14 +17,20 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("micromag/energy", "Micromagnetic energy terms", LoadEnergy)
+	RegisterModule("micromag/energy", "Micromagnetic energy terms **of fields loaded before this module**.", LoadEnergy)
 }
 
 func LoadEnergy(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
 
-	LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", -e.CellVolume()/Mu0, "Zeeman energy")
+	if e.HasQuant("B_ext"){
+		LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", -e.CellVolume(), "Zeeman energy")
+	}
+
+	if e.HasQuant("H_ex"){
+		LoadEnergyTerm(e, "E_ex", "m", "H_ex", -0.5*e.CellVolume()*Mu0, "Exchange energy")
+	}
 }
 
 func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string){
