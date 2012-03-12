@@ -46,6 +46,12 @@ func LoadEnergy(e *Engine) {
 		Log("Loaded demag energy E_demag")
 		sumUpd.AddParent(term.Name())
 	}
+
+	if e.HasQuant("H_anis") {
+		term := LoadEnergyTerm(e, "E_anis", "m", "H_anis", -e.CellVolume()*Mu0, "Anisotropy energy")
+		Log("Loaded anisotropy energy E_anis")
+		sumUpd.AddParent(term.Name())
+	}
 }
 
 func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string) *Quant {
