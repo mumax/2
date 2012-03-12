@@ -25,6 +25,7 @@ func LoadMicromag(e *Engine) {
 	e.LoadModule("demag")
 	e.LoadModule("exchange6")
 	e.LoadModule("llg")
+	e.LoadModule("zeeman")
 	e.LoadModule("solver/rk12")
 	e.Quant("dt").SetScalar(1e-15)
 	e.Quant("mindt").SetScalar(1e-15)
