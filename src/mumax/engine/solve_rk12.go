@@ -60,6 +60,12 @@ func LoadRK12(e *Engine) {
 		s.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s.maxErr[i].SetVerifier(Positive)
+
+		// TODO: recycle?
+		y := equation[i].output[0]
+		s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
+
 	}
 }
 
@@ -101,9 +107,9 @@ func (s *RK12Solver) Step() {
 		dy := equation[i].input[0]
 		dyMul := dy.multiplier
 		checkUniform(dyMul)
-		s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		//s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later
-		s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		//s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
 
 	}
@@ -190,10 +196,10 @@ func (s *RK12Solver) Step() {
 		}
 	} // end try
 
-	for i := range equation {
-		Pool.Recycle(&s.dybuffer[i])
-		Pool.Recycle(&s.y0buffer[i])
-	}
+//	for i := range equation {
+//		Pool.Recycle(&s.dybuffer[i])
+//		Pool.Recycle(&s.y0buffer[i])
+//	}
 
 	// advance time step
 	e.step.SetScalar(e.step.Scalar() + 1)
