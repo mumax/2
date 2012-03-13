@@ -23,6 +23,10 @@ mkdir $dir
 rm -f $tarball
 rm -rf examples/*.out tests/*.out
 rm -f test.log
+rm -f src/libmumax2/*.o
+rm -f src/libomf/*.o
+rm -f src/muview/*.o
+rm -rf pkg/
 files=$(ls | grep -v pack.sh)
 cp -rv $files $dir
 
