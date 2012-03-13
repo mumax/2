@@ -675,6 +675,15 @@ func (a API) Echo(str string) {
 	Log(str)
 }
 
+// Should be called at the end of each input file to make
+// sure the input script does not terminate too early.
+func (a API) Sync(){
+	// The simple act of calling a function (any function)
+	// causes the front-end RPC to synchronize the scripting
+	// language and mumax.
+	Log("Syncing")
+}
+
 // DEBUG: reads an array from a file.
 func (a API) ReadFile(filename string) *host.Array {
 	return ReadFile(filename)

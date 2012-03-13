@@ -55,4 +55,4 @@ autosave("m", "omf", ["Text"], 50e-12)
 
 # run simulation
 run(2e-12) 
-
+sync()

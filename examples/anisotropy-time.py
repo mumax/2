@@ -7,4 +7,4 @@ setcellsize(5e-9, 5e-9, 20e-9)
 load('micromagnetism')
 load('anisotropy/uniaxial')
 
-
+sync()

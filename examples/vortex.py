@@ -61,4 +61,4 @@ autosave("m", "png", [], 50e-12)
 
 # run simulation
 run(1e-9) 
-
+sync()

@@ -104,4 +104,4 @@ autosave("m", "omf", ["Text"], 20e-12)
 autotabulate(["t", "<m>", "<B_ext>", "<B_ext2>"], "m.txt", 1e-12)
 
 run(0.1e-9)
-
+sync()
