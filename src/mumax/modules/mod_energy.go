@@ -59,6 +59,25 @@ func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string
 	e.Depends(out, in1, in2)
 	m := e.Quant(in1)
 	H := e.Quant(in2)
-	Energy.SetUpdater(NewSDotUpdater(Energy, m, H, weight))
+	Energy.SetUpdater(NewEnergyUpdater(Energy, m, H, e.Quant("msat"), weight))
 	return Energy
+}
+
+type EnergyUpdater struct{
+	*SDotUpdater
+	energy *Quant
+	msat *Quant
+}
+
+func NewEnergyUpdater(result, m, H, msat *Quant, weight float64)Updater{
+	u:=new(EnergyUpdater)
+	u.SDotUpdater = NewSDotUpdater(result, m, H, weight).(*SDotUpdater)
+	u.energy = result
+	u.msat = msat
+	return u
+}
+
+func(u*EnergyUpdater)Update(){
+	u.SDotUpdater.Update()
+	u.energy.Multiplier()[0] *= u.msat.Multiplier()[0]
 }

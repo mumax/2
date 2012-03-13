@@ -25,7 +25,7 @@ func LoadUserDefinedCurrentDensity(e *Engine) {
 	if e.HasQuant("j") {
 		return
 	}
-	e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "electrical current density")
+	e.AddNewQuant("j", VECTOR, MASK, Unit("A/m2"), "electrical current density")
 }
 
 // calculate current density

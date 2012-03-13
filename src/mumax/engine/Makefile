@@ -5,3 +5,6 @@ all:
 
 clean:
 	go clean
+
+opt:
+	go tool 6g -m *.go
