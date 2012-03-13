@@ -196,10 +196,10 @@ func (s *RK12Solver) Step() {
 		}
 	} // end try
 
-//	for i := range equation {
-//		Pool.Recycle(&s.dybuffer[i])
-//		Pool.Recycle(&s.y0buffer[i])
-//	}
+	//	for i := range equation {
+	//		Pool.Recycle(&s.dybuffer[i])
+	//		Pool.Recycle(&s.y0buffer[i])
+	//	}
 
 	// advance time step
 	e.step.SetScalar(e.step.Scalar() + 1)
