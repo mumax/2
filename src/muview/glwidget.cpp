@@ -440,7 +440,7 @@ void HSLToRGB(float h, float s, float l, GLfloat *color){
 	while(h > 2 * PI){
 		h -= 2 * PI;
 	}
-	h = h * (180.0 / PI / 60.0);
+	h = h * (PI / 3.0);
 
 	// chroma
 	float c = 0;
@@ -450,7 +450,7 @@ void HSLToRGB(float h, float s, float l, GLfloat *color){
 		c = (2 - 2*l) * s;
 	}
 
-	float x = c * (1 - abs(fmod(h, 2)-1));
+	float x = c * (1 - fabs(fmodf(h, 2.)-1.));
 	float r = 0.;
 	float g = 0.;
 	float b = 0.;

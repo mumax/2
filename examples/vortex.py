@@ -58,6 +58,7 @@ for i in range(N):
 autotabulate(["t", "<m>"], "m.txt", 10e-12)
 # Save the full magnetization every 10ps.
 autosave("m", "png", [], 50e-12)
+autosave("m", "omf", ["Text"], 50e-12)
 
 # run simulation
 run(1e-9) 
