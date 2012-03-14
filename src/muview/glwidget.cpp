@@ -424,73 +424,65 @@ void angleToRGB(float angle, GLfloat *color)
 
 }
 
-
-/// @author Arne Vansteenkiste
-void HSLToRGB(float h, float s, float l, GLfloat *color){
-
-	if(s > 1){
-		s = 1;
-	}
-	if(l > 1){
-		l = 1;
-	}
-	while(h < 0){
-		h += 2 * PI;
-	}
-	while(h > 2 * PI){
-		h -= 2 * PI;
-	}
-	h = h * (PI / 3.0);
-
-	// chroma
-	float c = 0;
-	if(l <= 0.5){
-		c = 2 * l * s;
-	} else {
-		c = (2 - 2*l) * s;
-	}
-
-	float x = c * (1 - fabs(fmodf(h, 2.)-1.));
-	float r = 0.;
-	float g = 0.;
-	float b = 0.;
-
-	if( 0 <= h && h < 1)
-		r=c; g=x;  b=0.;
-	if( 1 <= h && h < 2)
-		r=x; g=c; b=0.;
-	if( 2 <= h && h < 3)
-		r=0; g=c; b=x;
-	if( 3 <= h && h < 4)
-		r=0; g=x; b=c;
-	if( 4 <= h && h < 5)
-		r= x;g=0.;b=c;
-	if( 5 <= h && h < 6)
-		r=c;g=0.;b=x;
-
-	float m = l - 0.5*c;
-	r = r+m;
-	g = g+m;
-	b = b+m;
-
-	if(r > 1.){
-		r = 1.;
-	}
-	if(g > 1.){
-		g = 1.;
-	}
-	if(b > 1.){
-		b = 1.;
-	}
-	if(r < 0.){
-		r = 0.;
-	}
-	if(g < 0.){
-		g = 0.;
-	}
-	if(b < 0.){
-		b = 0.;
-	}
+/// Taken form http://www.geekymonkey.com/Programming/CSharp/RGB2HSL_HSL2RGB.htm
+void HSLToRGB(float h, float sl, float l, GLfloat *color){
+			h = (h + PI)/(2 * PI);
+            double v;
+            double r,g,b;
+ 
+            r = l;   // default to gray
+            g = l;
+            b = l;
+            v = (l <= 0.5) ? (l * (1.0 + sl)) : (l + sl - l * sl);
+            if (v > 0)
+            {
+                  double m;
+                  double sv;
+                  int sextant;
+                  double fract, vsf, mid1, mid2;
+ 
+                  m = l + l - v;
+                  sv = (v - m ) / v;
+                  h *= 6.0;
+                  sextant = (int)h;
+                  fract = h - sextant;
+                  vsf = v * sv * fract;
+                  mid1 = m + vsf;
+                  mid2 = v - vsf;
+                  switch (sextant)
+                  {
+                        case 0:
+                              r = v;
+                              g = mid1;
+                              b = m;
+                              break;
+                        case 1:
+                              r = mid2;
+                              g = v;
+                              b = m;
+                              break;
+                        case 2:
+                              r = m;
+                              g = v;
+                              b = mid1;
+                              break;
+                        case 3:
+                              r = m;
+                              g = mid2;
+                              b = v;
+                              break;
+                        case 4:
+                              r = mid1;
+                              g = m;
+                              b = v;
+                              break;
+                        case 5:
+                              r = v;
+                              g = m;
+                              b = mid2;
+                              break;
+                  }
+            }
 
 	color[0] = r;
 	color[1] = g;
