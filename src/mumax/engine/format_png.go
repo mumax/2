@@ -148,7 +148,7 @@ func HSL(h, s, l float32) color.NRGBA {
 		h += 2 * math.Pi
 	}
 	for h > 2*math.Pi {
-		h -= math.Pi
+		h -= 2*math.Pi
 	}
 	h = h * (180.0 / math.Pi / 60.0)
 

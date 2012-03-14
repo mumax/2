@@ -414,3 +414,90 @@ void angleToRGB(float angle, GLfloat *color)
   }
 
 }
+
+
+/// @author Arne Vansteenkiste
+void HSLToRGB(float h, float s, float l, GLfloat *color){
+
+	if(s > 1){
+		s = 1;
+	}
+	if(l > 1){
+		l = 1;
+	}
+	while(h < 0){
+		h += 2 * PI;
+	}
+	while(h > 2 * PI){
+		h -= 2 * PI;
+	}
+	h = h * (180.0 / PI / 60.0);
+
+	// chroma
+	float c = 0;
+	if(l <= 0.5){
+		c = 2 * l * s;
+	} else {
+		c = (2 - 2*l) * s;
+	}
+
+	float x = c * (1 - abs(fmod(h, 2)-1));
+	float r = 0.;
+	float g = 0.;
+	float b = 0.;
+
+	if( 0 <= h && h < 1)
+		r=c; g=x;  b=0.;
+	if( 1 <= h && h < 2)
+		r=x; g=c; b=0.;
+	if( 2 <= h && h < 3)
+		r=0; g=c; b=x;
+	if( 3 <= h && h < 4)
+		r=0; g=x; b=c;
+	if( 4 <= h && h < 5)
+		r= x;g=0.;b=c;
+	if( 5 <= h && h < 6)
+		r=c;g=0.;b=x;
+
+	float m = l - 0.5*c;
+	r = r+m;
+	g = g+m;
+	b = b+m;
+
+	if(r > 1.){
+		r = 1.;
+	}
+	if(g > 1.){
+		g = 1.;
+	}
+	if(b > 1.){
+		b = 1.;
+	}
+	if(r < 0.){
+		r = 0.;
+	}
+	if(g < 0.){
+		g = 0.;
+	}
+	if(b < 0.){
+		b = 0.;
+	}
+
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+
+}
+
+// modulo
+float fmod(float number, float mod) {
+	while(number < mod){
+		number += mod;
+	}
+	while(number >= mod){
+		number -= mod;
+	}
+	return number;
+}
+
+
