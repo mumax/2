@@ -269,7 +269,16 @@ void GLWidget::paintGL()
 
 		    //GLfloat color[3] = {sin(phi), cos(phi), cos(phi+1.0f)};
 		    GLfloat color[3];
-		    angleToRGB(phi, color);
+		    //angleToRGB(phi, color);
+			
+			float x = (*dataPtr)[i][j][k][0]/mag;
+			float y = (*dataPtr)[i][j][k][1]/mag;
+			float z = (*dataPtr)[i][j][k][2]/mag;
+			float s = sqrt(x*x + y*y + z*z);
+			float l = 0.5*z + 0.5;
+			float h = atan2(y, x);
+		    HSLToRGB(h, s, l, color);
+
 		    glMaterialfv(GL_FRONT, GL_DIFFUSE, color);
 		    glMaterialfv(GL_FRONT, GL_AMBIENT, color);
 		    glColor3fv(color);
@@ -489,15 +498,5 @@ void HSLToRGB(float h, float s, float l, GLfloat *color){
 
 }
 
-// modulo
-float fmod(float number, float mod) {
-	while(number < mod){
-		number += mod;
-	}
-	while(number >= mod){
-		number -= mod;
-	}
-	return number;
-}
 
 

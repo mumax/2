@@ -6,6 +6,7 @@
 #include "OMFContainer.h"
 
 void angleToRGB(float angle, GLfloat *color);
+void HSLToRGB(float h, float s, float l, GLfloat *color);
 
 class GLWidget : public QGLWidget
 {
