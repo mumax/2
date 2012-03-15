@@ -22,9 +22,8 @@ __device__ float getDipoleKernelElement(int N0, int N1, int N2, int comp, int a,
   float *dev_qd_P_10_Y = &dev_qd_P_10[Y*10];
   float *dev_qd_P_10_Z = &dev_qd_P_10[Z*10];
   
-  int cutoff = 10000;    //square of the cutoff where the interaction is computed for dipole in the center in stead of magnetized volume
+  int cutoff = 1000000000;    //square of the cutoff where the interaction is computed for dipole in the center in stead of magnetized volume
 
-  
   // for elements in Kernel component gxx _________________________________________________________
     if (comp==0){
 
@@ -58,7 +57,41 @@ __device__ float getDipoleKernelElement(int N0, int N1, int N2, int comp, int a,
       }
     }
   // ______________________________________________________________________________________________
-
+  
+//   // for elements in Kernel component gxx _________________________________________________________
+//     if (comp==0){
+// 
+//       for(int cnta=-per0; cnta<=per0; cnta++)
+//       for(int cntb=-per1; cntb<=per1; cntb++)
+//       for(int cntc=-per2; cntc<=per2; cntc++){
+// 
+//         int i = a + cnta*N0/2;
+//         int j = b + cntb*N1/2;
+//         int k = c + cntc*N2/2;
+//         int r2_int = i*i+j*j+k*k;
+// 
+//         if (r2_int<cutoff){
+//           float x1 = (i + 0.5f) * cellX;
+//           float x2 = (i - 0.5f) * cellX;
+//           for (int cnt2=0; cnt2<10; cnt2++){
+//             float y = j * cellY + dev_qd_P_10_Y[cnt2];
+//             for (int cnt3=0; cnt3<10; cnt3++){
+//               float z = k * cellZ + dev_qd_P_10_Z[cnt3];
+//               result += cellY * cellZ / 4.0f * dev_qd_W_10[cnt2] * dev_qd_W_10[cnt3] *
+//                 ( x1*__powf(x1*x1+y*y+z*z, -1.5f) - x2*__powf(x2*x2+y*y+z*z, -1.5f));
+//             }
+//           }
+//         }
+//         else{
+//           float r2 = (i*cellX)*(i*cellX) + (j*cellY)*(j*cellY) + (k*cellZ)*(k*cellZ);
+//           result += cellX * cellY * cellZ *
+//                     (1.0f/ __powf(r2,1.5f) - 3.0f* (i*cellX) * (i*cellX) * __powf(r2,-2.5f));
+//         }
+//         
+//       }
+//     }
+//   // ______________________________________________________________________________________________
+// 
 
   // for elements in Kernel component gxy _________________________________________________________
     if (comp==5){
@@ -346,6 +379,14 @@ __global__ void initDipoleKernel6ElementKern (float *data, int comp,
                                             float *dev_qd_P_10, float *dev_qd_W_10, 
                                             int dev, int NDev){
 
+//   int N0b, N1b, N2b
+  if (per0>0)
+    N0 = 2*N0;
+  if (per1>0)
+    N1 = 2*N1;
+  if (per2>0)
+    N2 = 2*N2;
+  
   int j = blockIdx.y * blockDim.y + threadIdx.y;
   int k = blockIdx.x * blockDim.x + threadIdx.x;
   int j2 = dev*N1part+j;

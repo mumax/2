@@ -1,8 +1,8 @@
 from mumax2 import *
 from mumax2_magstate import *
 
-Nx = 128
-Ny = 128
+Nx = 8
+Ny = 8
 Nz = 1
 
 setgridsize(Nx, Ny, Nz)
@@ -13,6 +13,8 @@ setperiodic(1, 1, 0)
 
 load('micromagnetism')
 load('solver/rk12')
+
+save('kern_dipole.xx', 'txt', [])
 
 setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
@@ -35,4 +37,5 @@ autosave('m', 'omf', ['text'], 250e-12)
 run_until_smaller('maxtorque', 1e-3 * gets('gamma') * 800e3)
 
 saveas('m', 'omf', ['Text'], 'vortexX.omf')
+saveas('m', 'png', [], 'vortexX.png')
 
