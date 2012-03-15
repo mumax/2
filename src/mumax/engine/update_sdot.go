@@ -11,7 +11,6 @@ package engine
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/common"
 	"mumax/gpu"
 )
 
