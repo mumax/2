@@ -34,5 +34,5 @@ setcell('m', 0, Ny/2, 0, [0, 0, 1])
 autosave('m', 'omf', ['text'], 250e-12)
 run_until_smaller('maxtorque', 1e-3 * gets('gamma') * 800e3)
 
-save('m', 'omf', ['Text'], 'vortexX.omf')
+saveas('m', 'omf', ['Text'], 'vortexX.omf')
 
