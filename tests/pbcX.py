@@ -9,7 +9,7 @@ setgridsize(Nx, Ny, Nz)
 length=1000e-9
 thickness=50e-9
 setcellsize(length/Nx, length/Ny, thickness/Nz)
-setperiodic(1, 0, 0)
+setperiodic(1, 1, 0)
 
 load('micromagnetism')
 load('solver/rk12')

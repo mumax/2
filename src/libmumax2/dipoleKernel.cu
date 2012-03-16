@@ -352,7 +352,42 @@ __global__ void initDipoleKernel6ElementKern (float *data, int comp,
 
   int N12 = N1part*N2;
   
+  
+  int maxi = (per0>0)? (N0+1)/2 : (N0+1)/2-1;
+  int maxk = (per2>0)? (N2+1)/2 : (N2+1)/2-1;
+  int minj = (per1>0)? N1/2-1 : N1/2;
+    
+  if (j<N1part && k<N2/2){              
 
+    for (int i=0; i<(N0+1)/2; i++){     // this also works in the 2D case
+      if (j2<N1/2){
+          data[i*N12 + j*N2 + k] += 
+            getDipoleKernelElement(N0, N1, N2, comp, i, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+        if (i<maxi)
+          data[(N0-i-1)*N12 + j*N2 + k] += 
+            getDipoleKernelElement(N0, N1, N2, comp, -i-1, j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+        if (k<maxk)
+          data[i*N12 + j*N2 + N2-k-1] += 
+            getDipoleKernelElement(N0, N1, N2, comp, i, j2, -k-1, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+        if (i<maxi && k<maxk)
+          data[(N0-i-1)*N12 + j*N2 + N2-k-1] += 
+            getDipoleKernelElement(N0, N1, N2, comp, -i-1, j2, -k-1, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+      }
+      if (j2>minj){
+          data[i*N12 + j*N2 + k] += 
+            getDipoleKernelElement(N0, N1, N2, comp, i, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+        if (i<maxi)
+          data[(N0-i-1)*N12 + j*N2 + k] += 
+            getDipoleKernelElement(N0, N1, N2, comp, -i-1, -N1+j2, k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+        if (k<maxk)
+          data[i*N12 + j*N2 + N2-k-1] += 
+            getDipoleKernelElement(N0, N1, N2, comp, i, -N1+j2, -k-1, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+        if (i<maxi && k<maxk)
+          data[(N0-i-1)*N12 + j*N2 + N2-k-1] += 
+            getDipoleKernelElement(N0, N1, N2, comp, -i-1, -N1+j2, -k-1, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
+      }
+    }
+/*
   if (j<N1part && k<N2/2){              
 
     for (int i=0; i<(N0+1)/2; i++){     // this also works in the 2D case
@@ -382,7 +417,7 @@ __global__ void initDipoleKernel6ElementKern (float *data, int comp,
           data[(N0-i)*N12 + j*N2 + N2-k] += 
             getDipoleKernelElement(N0, N1, N2, comp, -i, -N1+j2, -k, per0, per1, per2, cellX, cellY, cellZ, dev_qd_P_10, dev_qd_W_10);
       }
-    }
+    }*/
 
     
   }
