@@ -131,9 +131,9 @@ func Range(start, stop, step string) []string {
 }
 
 func Atof(a string) float64 {
-	f, err := strconv.Atof64(a)
+	f, err := strconv.ParseFloat(a, 64)
 	if err != nil {
-		Error("Parsing " + a + ": " + err.String())
+		Error("Parsing " + a + ": " + err.Error())
 	}
 	return f
 }

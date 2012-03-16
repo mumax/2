@@ -7,6 +7,7 @@ all:
 	go install -v apigen
 	go install -v texgen
 	go install -v muqueue
+	go install -v template
 	make -C src/python
 	make -C src/libomf
 	make -C src/muview
