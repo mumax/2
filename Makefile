@@ -6,6 +6,7 @@ all:
 	go install -v mumax2-bin
 	go install -v apigen
 	go install -v texgen
+	go install -v muqueue
 	make -C src/python
 	make -C src/libomf
 	make -C src/muview

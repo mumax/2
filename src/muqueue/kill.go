@@ -37,7 +37,7 @@ func kill(user *User, args []string) (resp string) {
 		if err == nil {
 			resp += "killed job " + job.String() + "\n"
 		} else {
-			resp += "kill job " + pid + ": " + err.String() + "\n"
+			resp += "kill job " + pid + ": " + err.Error() + "\n"
 		}
 	}
 	return

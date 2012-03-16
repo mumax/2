@@ -8,11 +8,12 @@ package main
 // Server main loop
 
 import (
+	"errors"
 	"fmt"
-	"http"
 	"net"
+	"net/http"
+	"net/rpc"
 	"os"
-	"rpc"
 	"runtime/debug"
 	"strings"
 )
@@ -52,11 +53,11 @@ type RPC int // dummy type
 
 // passes the command to the scheduler, who will
 // callback whenever he's ready.
-func (r *RPC) Call(args []string, resp *string) (err os.Error) {
+func (r *RPC) Call(args []string, resp *string) (err error) {
 	defer func() {
 		e := recover()
 		if e != nil {
-			err = os.NewError(fmt.Sprint(e))
+			err = errors.New(fmt.Sprint(e))
 		}
 	}()
 	respChan := make(chan string)

@@ -10,9 +10,9 @@ package main
 import (
 	"fmt"
 	. "mumax/common"
+	"net/rpc"
 	"os"
 	"path"
-	"rpc"
 	"strings"
 )
 

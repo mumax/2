@@ -8,9 +8,9 @@ package main
 // Implementation of "add" command
 
 import (
-	"exec"
 	"fmt"
 	. "mumax/common"
+	"os/exec"
 	"path"
 )
 

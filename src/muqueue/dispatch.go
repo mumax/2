@@ -6,10 +6,9 @@
 package main
 
 import (
-	"exec"
 	"fmt"
 	. "mumax/common"
-	"os"
+	"os/exec"
 )
 
 // Starts the job
@@ -50,7 +49,7 @@ func dispatch(job *Job, node *Node, dev []int) string {
 }
 
 // Reports the job done
-func undispatch(job *Job, exitStatus os.Error) {
+func undispatch(job *Job, exitStatus error) {
 
 	// set job status
 	job.err = exitStatus

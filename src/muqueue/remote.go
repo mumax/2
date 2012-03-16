@@ -47,7 +47,7 @@ func remoteAdd(args []string) string {
 	gpus := args[1]
 	ndev, err := strconv.Atoi(gpus)
 	if err != nil {
-		return err.String()
+		return err.Error()
 	}
 	group := args[2]
 	login := args[3:]

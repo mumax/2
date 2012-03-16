@@ -13,7 +13,7 @@ import (
 )
 
 // Exits with optional message if error is non-nil
-func check(err os.Error, msg ...interface{}) {
+func check(err error, msg ...interface{}) {
 	if err != nil {
 		fmt.Fprint(os.Stderr, msg...)
 		fmt.Fprintln(os.Stderr, " ", err)

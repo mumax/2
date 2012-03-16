@@ -8,7 +8,6 @@ package main
 import (
 	"io"
 	. "mumax/common"
-	"os"
 )
 
 //
@@ -28,23 +27,23 @@ type BlockingReader struct {
 	In io.Reader
 }
 
-func (r *BlockingReader) Read(p []byte) (n int, err os.Error) {
+func (r *BlockingReader) Read(p []byte) (n int, err error) {
 	n, err = r.In.Read(p)
 	if err != nil {
-		if err == os.EOF {
+		if err == io.EOF {
 			return
 		} else {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 	}
 	if n < len(p) {
 		_, err = r.Read(p[n:])
 	}
 	if err != nil {
-		if err == os.EOF {
+		if err == io.EOF {
 			return
 		} else {
-			panic(IOErr(err.String()))
+			panic(IOErr(err.Error()))
 		}
 	}
 	n = len(p)

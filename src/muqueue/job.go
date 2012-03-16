@@ -8,10 +8,9 @@ package main
 // Job entry
 
 import (
-	"exec"
 	"fmt"
 	. "mumax/common"
-	"os"
+	"os/exec"
 )
 
 type Job struct {
@@ -21,7 +20,7 @@ type Job struct {
 	status  int       // queued, running, finished, failed
 	node    *Node     // node this job is running on
 	dev     []int     // devices this job is running on
-	err     os.Error  // error message, if any
+	err     error     // error message, if any
 	ndev    int       // number of requested devices
 	nice    int       // priority
 	cmd     *exec.Cmd // command that is running this job
@@ -29,7 +28,7 @@ type Job struct {
 
 type JobStatus struct {
 	*Job
-	exitStatus os.Error
+	exitStatus error
 }
 
 // job status
@@ -61,7 +60,7 @@ func (j *Job) String() string {
 	}
 	err := ""
 	if j.err != nil {
-		err = RED + BOLD + j.err.String() + RESET
+		err = RED + BOLD + j.err.Error() + RESET
 	}
 	return fmt.Sprint(printID(j.id),
 		" ", statusStr[j.status],
@@ -78,7 +77,7 @@ func (j *Job) LongString() string {
 	}
 	err := ""
 	if j.err != nil {
-		err = j.err.String()
+		err = j.err.Error()
 	}
 	return fmt.Sprint(printID(j.id), " ",
 		"nice", j.nice, "]",
