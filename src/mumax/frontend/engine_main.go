@@ -14,6 +14,7 @@ import (
 	"fmt"
 	. "mumax/common"
 	"os"
+	"bufio"
 	"runtime"
 )
 
@@ -42,7 +43,7 @@ func engineMain() {
 	}
 
 	var client Client
-	client.Init("-", outdir, "")
+	client.Init(outdir)
 	client.RunSlave()
 }
 
@@ -56,6 +57,7 @@ func initCUDA() {
 // Do not start interpreter subprocess but wait for commands on Stdin.
 // Used when mumax is the subprocess.
 func (c *Client) RunSlave() {
-	c.ipc.Init(os.Stdin, os.Stdout, c.api)
+	wflush := bufio.NewWriter(os.Stdout)
+	c.ipc.Init(os.Stdin, os.Stdout, *wflush, c.api)
 	c.ipc.Run()
 }

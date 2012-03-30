@@ -67,7 +67,7 @@ __global__ void kernelMulMicromag3DKern(float* fftMx,  float* fftMy,  float* fft
   return;
 }
 
-void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
+__export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
                               CUstream* stream, int partLen3D){

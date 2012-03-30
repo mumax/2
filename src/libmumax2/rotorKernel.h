@@ -29,7 +29,7 @@ extern "C" {
 /// @param dev_qd_P_10: float array containing the Gauss quadrature points for integration (10th order)
 /// @param dev_qd_W_10: float array containing the Gauss quadrature weight for integration (10th order)
 /// @param streams: used streams
-void initRotorKernelElementAsync(float **data, 
+__declspec(dllexport) void initRotorKernelElementAsync(float **data, 
                                  int comp,
                                  int N0, int N1, int N2,          
                                  int N1part,                                

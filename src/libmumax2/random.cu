@@ -41,7 +41,7 @@ __global__ void initScalarQuantRandomUniformRegionKern(float* S,
 }
 
 
-void initScalarQuantRandomUniformRegionAsync(float** S,
+__export__ void initScalarQuantRandomUniformRegionAsync(float** S,
 										     float** regions,
 										     bool* host_regionsToProceed,
 										     int regionNum,
@@ -98,7 +98,7 @@ __global__ void initVectorQuantRandomUniformRegionKern(float* Sx, float* Sy, flo
 }
 
 
-void initVectorQuantRandomUniformRegionAsync(float** Sx, float** Sy, float** Sz,
+__export__ void initVectorQuantRandomUniformRegionAsync(float** Sx, float** Sy, float** Sz,
 											 float** regions,
 											 bool* host_regionsToProceed,
 											 int regionNum,

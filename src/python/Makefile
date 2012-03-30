@@ -1,8 +1,10 @@
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../libmumax2
+
 all: mumax2.py
 
 .PHONY: mumax2.py
 mumax2.py: mumax2.py.tail 
-	./apigen.sh $(CURDIR)/../mumax/engine/api.go
+	../../bin/apigen.exe $(CURDIR)/../mumax/engine/api.go
 	mv mumax2.py mumax2.py.head
 	cat mumax2.py.head mumax2.py.tail > mumax2.py
 	rm -f mumax2.py.head

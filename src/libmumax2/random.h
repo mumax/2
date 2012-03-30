@@ -10,7 +10,10 @@
 #define _RANDOM_H_
 
 #include <cuda.h>
+
+#ifndef _WIN32
 #include <stdbool.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +30,7 @@ extern "C" {
 /// @param Npart number of elements per in each array (i.e. len(mx[0])
 /// @param max (float) maximum value of the randomly generated numbers
 /// @param min (float) minimum value of the randomly generated numbers
-void initScalarQuantRandomUniformRegionAsync(float** S,
+__declspec(dllexport) void initScalarQuantRandomUniformRegionAsync(float** S,
 											 float** regions,
 											 bool* host_regionsToProceed,
 											 int regionNum,
@@ -46,7 +49,7 @@ void initScalarQuantRandomUniformRegionAsync(float** S,
 /// @param regionNum number of regions set in the region system
 /// @param stream multi-GPU streams for asynchronous execution
 /// @param Npart number of elements per in each array (i.e. len(mx[0])
-void initVectorQuantRandomUniformRegionAsync(float** Sx, float** Sy, float** Sz,
+__declspec(dllexport) void initVectorQuantRandomUniformRegionAsync(float** Sx, float** Sy, float** Sz,
 											 float** regions,
 											 bool* host_regionsToProceed,
 											 int regionNum,

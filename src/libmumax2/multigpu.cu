@@ -8,7 +8,7 @@ extern "C" {
 int _Ngpu = 0;
 int* _gpuIds = NULL;
 
-void setUsedGPUs(int* gpuIds, int Ngpu){
+__export__ void setUsedGPUs(int* gpuIds, int Ngpu){
 	assert(_Ngpu==0);
 	assert(_gpuIds == NULL);
 	_Ngpu = Ngpu;

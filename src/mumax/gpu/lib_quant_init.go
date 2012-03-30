@@ -9,6 +9,7 @@
 
 package gpu
 
+//#cgo CFLAGS:-IC:/opt/cuda/v4.1/include -Wno-error -I .././libmumax2
 //#include "libmumax2.h"
 import "C"
 

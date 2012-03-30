@@ -52,7 +52,7 @@ __global__ void temperature_scaleKern(float* noise,
 }
 
 
-void temperature_scaleNoise(float** noise,
+__export__ void temperature_scaleNoise(float** noise,
 			   	float** alphaMask, 
 			   	float** tempMask, float alphaKB2tempMul,
 			   	float** mSatMask, 

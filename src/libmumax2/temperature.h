@@ -20,7 +20,7 @@ extern "C" {
 /// @param temp mask for the temperature
 /// @param alphaKB2tempMul multiplier for alpha * temperature * 2 * Boltzmann constant.
 /// @param m0VgammaDtMSatMul Mu_zero * cell volume * gyromagnetic ratio * time step * MSat multiplier.
-void temperature_scaleNoise(float** noise,
+__declspec(dllexport) void temperature_scaleNoise(float** noise,
 			   	float** alpha,
 			   	float** temp, float alphaKB2tempMul,
 			   	float** mSat, float mu0VgammaDtMSatMul,

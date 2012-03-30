@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
-void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz, 
+__declspec(dllexport) void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
                           float **Ku1_map, float **MSat_map, float Ku2_Mu0Msat_mul, 
                           float **anisU_mapx, float anisU_mulx,

@@ -60,7 +60,7 @@ __global__ void initVectorQuantVortexRegionKern(float* Sx, float* Sy, float* Sz,
 	}
 }
 
-void initVectorQuantVortexRegionAsync(float** Sx, float** Sy, float** Sz,
+__export__ void initVectorQuantVortexRegionAsync(float** Sx, float** Sy, float** Sz,
 									  float** regions,
 									  bool* host_regionsToProceed,
 									  float centerX, float centerY, float centerZ,

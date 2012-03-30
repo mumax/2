@@ -17,7 +17,7 @@ extern "C" {
 /// dst[i] = dst[i] + hani(m[i]) in units [mSat]      uniaxial case
 /// anisotropy constants devided by [mSat]
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
-void addHaniUniaxialAsync(float **hx, float **hy, float **hz, 
+__declspec(dllexport) void addHaniUniaxialAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
 <<<<<<< HEAD
                           float **Ku_map, float Ku_mul, 
@@ -34,7 +34,7 @@ void addHaniUniaxialAsync(float **hx, float **hy, float **hz,
 /// dst[i] = dst[i] + hani(m[i])  in units [mSat]     cubic case
 /// anisotropy constants devided by [mSat]
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
-void addHaniCubicAsync(float **hx, float **hy, float **hz, 
+__declspec(dllexport) void addHaniCubicAsync(float **hx, float **hy, float **hz, 
                        float **mx, float **my, float **mz, 
 <<<<<<< HEAD
                        float **K1_map, float K1_mul, 

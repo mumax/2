@@ -22,7 +22,7 @@ __global__ void initScalarQuantUniformRegionKern(float* S, float* regions, float
 }
 
 
-void initScalarQuantUniformRegionAsync(float** S, float** regions, float* host_initValues, int initValNum, CUstream* stream, int Npart) {
+__export__ void initScalarQuantUniformRegionAsync(float** S, float** regions, float* host_initValues, int initValNum, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	float* dev_initValues;
@@ -60,7 +60,7 @@ __global__ void initVectorQuantUniformRegionKern(float* Sx, float* Sy, float* Sz
 }
 
 
-void initVectorQuantUniformRegionAsync(float** Sx, float** Sy, float** Sz, float** regions, float* host_initValuesX, float* host_initValuesY, float* host_initValuesZ, int initValNum, CUstream* stream, int Npart) {
+__export__ void initVectorQuantUniformRegionAsync(float** Sx, float** Sy, float** Sz, float** regions, float* host_initValuesX, float* host_initValuesY, float* host_initValuesZ, int initValNum, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	float* dev_initValuesX;

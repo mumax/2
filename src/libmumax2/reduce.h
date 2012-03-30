@@ -29,7 +29,7 @@ extern "C" {
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialSumAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialSumAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 /// Multi-GPU Dot product
@@ -48,7 +48,7 @@ void partialSDotAsync(float** input1, float** input2, float** output, int blocks
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialMaxAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialMaxAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 /// Multi-GPU partial minimum.
@@ -58,7 +58,7 @@ void partialMaxAsync(float** input, float** output, int blocksPerGPU, int thread
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialMinAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialMinAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 /// Multi-GPU partial maximum of absolute values.
@@ -68,7 +68,7 @@ void partialMinAsync(float** input, float** output, int blocksPerGPU, int thread
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialMaxAbsAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialMaxAbsAsync(float** input, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 /// Multi-GPU partial maximum difference between arrays (max(abs(a[i]-b[i]))).
@@ -78,7 +78,7 @@ void partialMaxAbsAsync(float** input, float** output, int blocksPerGPU, int thr
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialMaxDiffAsync(float** a, float** b, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialMaxDiffAsync(float** a, float** b, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 /// Multi-GPU partial maximum Euclidian norm squared of 3-vector(max(x[i]**2+y[i]**2+z[i]**2)).
@@ -90,7 +90,7 @@ void partialMaxDiffAsync(float** a, float** b, float** output, int blocksPerGPU,
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 /// Multi-GPU partial maximum Euclidian norm squared of 3-vector(max( (x1[i]-x2[i])**2 + (y1[i]-y2[i])**2 + (z1[i]-z2[i])**2) ).
@@ -105,7 +105,7 @@ void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialMaxNorm3SqDiffAsync(float** x1, float** y1, float** z1, float** x2, float** y2, float** z2, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+__declspec(dllexport) void partialMaxNorm3SqDiffAsync(float** x1, float** y1, float** z1, float** x2, float** y2, float** z2, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
 
 #ifdef __cplusplus

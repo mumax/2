@@ -528,7 +528,7 @@ extern "C" {
 #endif
 
 // single-GPU
-void partialSumAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialSumAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -570,7 +570,7 @@ void partialSumAsync1(float* d_idata, float* d_odata, int blocks, int threads, i
   }
 }
 
-void partialSumAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+__export__ void partialSumAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialSumAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
@@ -630,7 +630,7 @@ void partialSDotAsync(float** input1, float** input2, float** output, int blocks
 
 
 // single-GPU
-void partialMaxAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialMaxAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -673,7 +673,7 @@ void partialMaxAsync1(float* d_idata, float* d_odata, int blocks, int threads, i
 }
 
 
-void partialMaxAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+__export__ void partialMaxAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialMaxAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
@@ -684,7 +684,7 @@ void partialMaxAsync(float** input, float** output, int blocks, int threadsPerBl
 
 
 
-void partialMinAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialMinAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -727,7 +727,7 @@ void partialMinAsync1(float* d_idata, float* d_odata, int blocks, int threads, i
 }
 
 
-void partialMinAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+__export__ void partialMinAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialMinAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
@@ -738,7 +738,7 @@ void partialMinAsync(float** input, float** output, int blocks, int threadsPerBl
 
 
 // Single-GPU
-void partialMaxAbsAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialMaxAbsAsync1(float* d_idata, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -781,7 +781,7 @@ void partialMaxAbsAsync1(float* d_idata, float* d_odata, int blocks, int threads
 }
 
 
-void partialMaxAbsAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+__export__ void partialMaxAbsAsync(float** input, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialMaxAbsAsync1(input[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
@@ -791,7 +791,7 @@ void partialMaxAbsAsync(float** input, float** output, int blocks, int threadsPe
 
 
 // Single-GPU
-void partialMaxDiffAsync1(float* a, float* b, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialMaxDiffAsync1(float* a, float* b, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -834,7 +834,7 @@ void partialMaxDiffAsync1(float* a, float* b, float* d_odata, int blocks, int th
 }
 
 
-void partialMaxDiffAsync(float** a, float** b, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
+__export__ void partialMaxDiffAsync(float** a, float** b, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialMaxDiffAsync1(a[dev], b[dev], output[dev], blocks, threadsPerBlock, N, stream[dev]);
@@ -843,7 +843,7 @@ void partialMaxDiffAsync(float** a, float** b, float** output, int blocks, int t
 
 
 // Single-GPU
-void partialMaxNorm3SqAsync1(float* x, float* y, float* z, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialMaxNorm3SqAsync1(float* x, float* y, float* z, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -886,7 +886,7 @@ void partialMaxNorm3SqAsync1(float* x, float* y, float* z, float* d_odata, int b
 }
 
 
-void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams){
+__export__ void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialMaxNorm3SqAsync1(x[dev], y[dev], z[dev], output[dev], blocksPerGPU, threadsPerBlockPerGPU, NPerGPU, streams[dev]);
@@ -895,7 +895,7 @@ void partialMaxNorm3SqAsync(float** x, float** y, float** z, float** output, int
 
 
 // Single-GPU
-void partialMaxNorm3SqDiffAsync1(float* x1, float* y1, float* z1,float* x2, float* y2, float* z2, float* d_odata, int blocks, int threads, int size, CUstream stream) {
+__export__ void partialMaxNorm3SqDiffAsync1(float* x1, float* y1, float* z1,float* x2, float* y2, float* z2, float* d_odata, int blocks, int threads, int size, CUstream stream) {
   dim3 dimBlock(threads, 1, 1);
   dim3 dimGrid(blocks, 1, 1);
 
@@ -937,7 +937,7 @@ void partialMaxNorm3SqDiffAsync1(float* x1, float* y1, float* z1,float* x2, floa
   }
 }
 
-void partialMaxNorm3SqDiffAsync(float** x1, float** y1, float** z1, float** x2, float** y2, float** z2, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams){
+__export__ void partialMaxNorm3SqDiffAsync(float** x1, float** y1, float** z1, float** x2, float** y2, float** z2, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams){
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		partialMaxNorm3SqDiffAsync1(x1[dev], y1[dev], z1[dev], x2[dev], y2[dev], z2[dev], output[dev], blocksPerGPU, threadsPerBlockPerGPU, NPerGPU, streams[dev]);

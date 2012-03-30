@@ -26,7 +26,7 @@ __global__ void insertBlockZKern(float* dst, int D2, float* src, int S0, int S1,
 }
 
 
-void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams){
+__export__ void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
@@ -57,7 +57,7 @@ __global__ void extractBlockZKern(float* dst, int D0, int D1, int D2, float *src
 }
 
 
-void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams){
+__export__ void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
@@ -82,7 +82,7 @@ __global__ void zeroArrayKern(float *A, int N){
   }
 }
 
-void zeroArrayAsync(float **A, int length, CUstream *streams){
+__export__ void zeroArrayAsync(float **A, int length, CUstream *streams){
 
   dim3 gridSize, blockSize;
   make1dconf(length, &gridSize, &blockSize);
@@ -125,7 +125,7 @@ __global__ void copyPad3DKern(float* dst, int D0, int D1, int D2, float* src, in
   }
 }
 
-void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams){
+__export__ void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
 
@@ -169,7 +169,7 @@ __global__ void copyPadZKern(float* dst, int D2, float* src, int S0, int S1, int
   }
 }
 
-void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams){
+__export__ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams){
 
 #define BLOCKSIZE 16 ///@todo use device properties
 

@@ -20,7 +20,7 @@ extern "C" {
 /// |Hx|   |Kxx Kxy Kxz|   |Mx|
 /// |Hy| = |Kxy Kyy Kyz| * |My|
 /// |Hz|   |Kxz Kyz Kzz|   |Mz|
-void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
+__declspec(dllexport) void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
                               CUstream* stream, int partLen3D);

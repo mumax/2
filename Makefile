@@ -1,4 +1,5 @@
 include src/Make.inc
+
 export GOPATH=$(CURDIR)
 
 all:
@@ -9,18 +10,26 @@ all:
 	go install -v muqueue
 	go install -v template
 	make -C src/python
+ifndef SystemRoot	
 	make -C src/libomf
 	make -C src/muview
+endif
 
 .PHONY: clean
-clean:
-	make clean -C src/libmumax2
+clean:	
 	rm -rf pkg/*
+ifndef SystemRoot	
 	rm -rf bin/mumax2-bin
 	rm -rf bin/apigen
 	rm -rf bin/texgen
+else
+	rm -rf bin/mumax2-bin.exe
+	rm -rf bin/apigen.exe
+	rm -rf bin/texgen.exe
+	rm -rf bin/libmumax2.dll
+endif	
 	make clean -C src/python
-
+	make clean -C src/libmumax2
 .PHONY: test
 test:
 	echo todo	

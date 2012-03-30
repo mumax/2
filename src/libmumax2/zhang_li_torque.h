@@ -37,7 +37,7 @@ extern "C" {
 /// @param dt_gilb dt * gilbert factor
 /// @param N0 number of elements along x axis
 /// @param N1Part number of elements along y axis dealt with on this device (the structure is sliced for multiGPU purpose along Y-axis)
-void spintorque_deltaMAsync(float** mx, float** my, float** mz,
+__declspec(dllexport) void spintorque_deltaMAsync(float** mx, float** my, float** mz,
         				   float** hx, float** hy, float** hz,
                            float** alpha,
                            float** bj,

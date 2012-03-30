@@ -40,9 +40,10 @@ func InitMultiGPU(devices []int, flags uint) {
 	printMultiGPUInfo()
 	initMultiGPUProperties()
 	initMultiGPUPeerAccess()
-
+	
 	stream0 := make([]cu.Stream, NDevice())
 	STREAM0 = Stream(stream0)
+	
 }
 
 // init global _useDevice

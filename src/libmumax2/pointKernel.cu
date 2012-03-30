@@ -201,7 +201,7 @@ __global__ void initPointKernelElementKern (float *data, int comp,
 
 
 
-void initPointKernelElementAsync(float **data, int comp,                    /// data array and component
+__export__ void initPointKernelElementAsync(float **data, int comp,                    /// data array and component
                                  int N0, int N1, int N2, int N1part,        /// size of the kernel
                                  int per0, int per1, int per2,              /// periodicity
                                  float cellX, float cellY, float cellZ,     /// cell size

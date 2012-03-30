@@ -1,18 +1,31 @@
 include ../Make.inc
 
 MY_CUFILES_WERRORLESS = random.cu				 		# my cuda files to be compiled without Werror flag
+ifndef SystemRoot
 CU_OFILES_WERRORLESS  = $(MY_CUFILES_WERRORLESS:.cu=.o) # my cuda object compiled without Werror flag
+else
+CU_OFILES_WERRORLESS  = $(MY_CUFILES_WERRORLESS:.cu=.obj)
+endif
 
 CUFILES   = $(filter-out $(wildcard $(MY_CUFILES_WERRORLESS)), $(wildcard *.cu))  # my cuda files
 CPPFILES     = $(wildcard *.cpp)                 # my c++ files
 CU_HFILES    = $(CUFILES:.cu=.h)                 # cuda only header files
 CU_HFILES   += $(MY_CUFILES_WERRORLESS:.cu=.h)                 # cuda only header files
 HFILES       = $(CUHFILES) $(CPPFILES:.cpp=.h)   # all header files
-CU_OFILES    = $(CUFILES:.cu=.o)              # my cuda objects
-CPP_OFILES   = $(CPPFILES:.cpp=.o)               # c++ objects
+
+ifndef SystemRoot
+CU_OFILES    = $(CUFILES:.cu=.o)              	# my cuda objects
+CPP_OFILES   = $(CPPFILES:.cpp=.o)              # c++ objects
+else
+CU_OFILES    = $(CUFILES:.cu=.obj)              
+CPP_OFILES   = $(CPPFILES:.cpp=.obj)  
+endif
+
 OFILES       = $(CU_OFILES) $(CPP_OFILES)\
 			   $(CU_OFILES_WERRORLESS)           # all objects
 
+
+ifndef SystemRoot
 
 all: libmumax2.so libmumax2.h
 
@@ -34,7 +47,39 @@ libmumax2.h: $(CU_HFILES) multigpu.h
 	$(foreach hfile, $(CU_HFILES),  echo \#include "\""$(hfile)"\"" >> libmumax2.h;)
 	echo \#include \"multigpu.h\" >> libmumax2.h
 	cat libmumax2.h.tail >> libmumax2.h	
+	
+else
 
+all: libmumax2.lib libmumax2.h
+
+$(CU_OFILES): %.obj: %.cu %.h
+	$(NVCC) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -c -I. $(@:.obj=.cu) -o $(@)
+
+$(CU_OFILES_WERRORLESS): %.obj: %.cu %.h
+	$(NVCCWERRORLESS) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -c -I. $(@:.obj=.cu) -o $(@)
+
+$(CPP_OFILES): %.obj: %.cpp %.h
+	 $(CC) /D_USRDLL /DDLL_EXPORTS -c $(@:.obj=.cpp) -o $(@)
+
+libmumax2.lib: $(OFILES) 
+	echo " *** USING DEBUG FLAGS *** "
+	$(NVCC) --shared --linker-options -DLL $(OFILES) -o libmumax2.dll
+	
+	echo " *** Win32 DLL NEEDS TO BE CONVERTED TO GNU FORMAT *** "
+	pexports libmumax2.dll | sed "s/^_//" > libmumax2.def
+	dlltool -U -d libmumax2.def -l libmumax2.a
+	rm -f libmumax2.a
+	cp libmumax2.dll ../../bin/
+	
+libmumax2.h: $(CU_HFILES) multigpu.h
+	cp libmumax2.h.head libmumax2.h.bak
+	$(foreach hfile, $(CU_HFILES), echo #include "$(hfile)" >> libmumax2.h.bak)
+	echo #include "multigpu.h" >> libmumax2.h.bak
+	cat libmumax2.h.tail >> libmumax2.h.bak
+	cat libmumax2.h.bak | sed "s/echo /\n/g" >> libmumax2.h
+	
+endif
+	
 .PHONY: link
 link:
 	ln -sf $(CURDIR)/libmumax2.so ../pkg/mumax/gpu
@@ -42,7 +87,12 @@ link:
 
 .PHONY: clean
 clean:
+ifndef SystemRoot
 	rm -f *.o *.so libmumax2.h ../*.mod/cuda/*.o
+else
+	rm -f *.def *.exp *.obj *.lib *.dll *.pdb libmumax2.h 
+	rm -f -R ../*.mod/cuda/*.obj
+endif
 
 install: all
 

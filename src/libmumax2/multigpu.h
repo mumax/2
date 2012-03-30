@@ -12,7 +12,7 @@ int nDevice();
 /// E.g.: when GPUs 2 and 3 are used, deviceId(0) will return 2.
 int deviceId(int i);
 
-void setUsedGPUs(int* gpuIds, int Ngpu);
+__declspec(dllexport) void setUsedGPUs(int* gpuIds, int Ngpu);
 
 #ifdef __cplusplus
 }

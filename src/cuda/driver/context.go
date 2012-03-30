@@ -6,8 +6,8 @@ package driver
 
 // This file implements CUDA driver context management
 
-//#cgo LDFLAGS:-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia/ -L/usr/lib64/nvidia/ -L/usr/lib/nvidia-current/ -lcuda -lcudart
-//#cgo CFLAGS:-I/usr/local/cuda/include/
+//#cgo LDFLAGS:-LC:/opt/cuda/v4.1/lib/x64 -lcuda -lcudart
+//#cgo CFLAGS:-IC:/opt/cuda/v4.1/include -Wno-error
 //#include <cuda.h>
 import "C"
 import "unsafe"

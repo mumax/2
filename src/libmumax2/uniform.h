@@ -24,7 +24,7 @@ extern "C" {
 /// @note The scalar value must be uniform in eqch region.
 /// @param stream multi-GPU streams for asynchronous execution
 /// @param Npart number of elements per in each array (i.e. len(mx[0])
-void initScalarQuantUniformRegionAsync(float** S, float** regions, float* initValues, int initValNum, CUstream* stream, int Npart);
+__declspec(dllexport) void initScalarQuantUniformRegionAsync(float** S, float** regions, float* initValues, int initValNum, CUstream* stream, int Npart);
 
 /// Initialise the vector quantity S = (Sx,Sy,Sz) using region system (value is uniform in each region)
 ///
@@ -38,7 +38,7 @@ void initScalarQuantUniformRegionAsync(float** S, float** regions, float* initVa
 /// @note The scalar value must be uniform in eqch region.
 /// @param stream multi-GPU streams for asynchronous execution
 /// @param Npart number of elements per in each array (i.e. len(mx[0])
-void initVectorQuantUniformRegionAsync(float** Sx, float** Sy, float** Sz, float** regions, float* host_initValuesX, float* host_initValuesY, float* host_initValuesZ, int initValNum, CUstream* stream, int Npart);
+__declspec(dllexport) void initVectorQuantUniformRegionAsync(float** Sx, float** Sy, float** Sz, float** regions, float* host_initValuesX, float* host_initValuesY, float* host_initValuesZ, int initValNum, CUstream* stream, int Npart);
 
 
 #ifdef __cplusplus

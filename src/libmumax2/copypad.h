@@ -20,7 +20,7 @@ extern "C" {
 /// @param S0: source X size, same as dst X size
 /// @param S1: source Y size per GPU, same as dst Y size
 /// @param S2: source Z size , <= D2
-void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
+__declspec(dllexport) void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
 /// Copy+zero pad a 3D matrix in all directions: only to be used when 1 device is used.
 /// @param dst: destination arrays
@@ -32,7 +32,7 @@ void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2,
 /// @param S1: source Y size , <= D1
 /// @param S2: source Z size , <= D2
 /// @param Ncomp: number of array components
-void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams);
+__declspec(dllexport) void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams);
 
 
 /// Insert from src into a block in dst
@@ -40,13 +40,13 @@ void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, in
 ///	2x2 src, block = 1, 2x6 dst:
 ///	[ 0 0  S1 S2  0 0 ]
 ///	[ 0 0  S3 S4  0 0 ]
-void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
+__declspec(dllexport) void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
 
 /// Put an array to zero with (sub)sizes [NO, N1part, N2]
-void zeroArrayAsync(float **A, int N, CUstream *streams);
+__declspec(dllexport) void zeroArrayAsync(float **A, int N, CUstream *streams);
 
 // /// Put a part of an array on 1 GPU to zero
-// void zeroArrayPartAsync(float **A, int length, int dev, CUstream streams){
+// __declspec(dllexport) void zeroArrayPartAsync(float **A, int length, int dev, CUstream streams){
 
 
 /// Extract from src a block to dst
@@ -54,7 +54,7 @@ void zeroArrayAsync(float **A, int N, CUstream *streams);
 /// 2x2 dst, block = 1, 2x6 src:
 /// [ 0 0  D1 D2  0 0 ]
 /// [ 0 0  D3 D4  0 0 ]
-void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams);
+__declspec(dllexport) void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams);
 
 #ifdef __cplusplus
 }

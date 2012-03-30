@@ -62,7 +62,7 @@ __global__ void transposeComplexYZKernel(complex* output, complex* input, int N1
 }
 
 
-void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, int N2, CUstream* stream){
+__export__ void transposeComplexYZAsyncPart(float** output, float** input, int N0, int N1, int N2, CUstream* stream){
     N2 /= 2; // number of complex
     dim3 gridsize((N2-1) / BLOCKSIZE + 1, (N1-1) / BLOCKSIZE + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
     dim3 blocksize(BLOCKSIZE, BLOCKSIZE, 1);
@@ -117,7 +117,7 @@ __global__ void transposeComplexYZSingleGPUFWKernel(complex* output, complex* in
 }
 
 
-void transposeComplexYZSingleGPUFWAsync(float** output, float** input, int N0, int N1, int N2, int N2out, CUstream* stream){
+__export__ void transposeComplexYZSingleGPUFWAsync(float** output, float** input, int N0, int N1, int N2, int N2out, CUstream* stream){
     N2 /= 2; // number of complex
     N2out /= 2;
     dim3 gridsize((N2-1) / BLOCKSIZE + 1, (N1-1) / BLOCKSIZE + 1, 1); // integer division rounded UP. Yes it has to be N2, N1
@@ -172,7 +172,7 @@ __global__ void transposeComplexYZSingleGPUINVKernel(complex* output, complex* i
 }
 
 
-void transposeComplexYZSingleGPUINVAsync(float** output, float** input, int N0, int N1, int N2, int N1out, CUstream* stream){
+__export__ void transposeComplexYZSingleGPUINVAsync(float** output, float** input, int N0, int N1, int N2, int N1out, CUstream* stream){
 
    int N2in = N1out;    // number of complex numbers
    N2 /= 2; // number of complex

@@ -126,7 +126,7 @@ __global__ void kernelMulMicromag3D2Kern(
   return;
 }
 
-void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+__export__ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
                               float** outx, float** outy, float** outz,
@@ -234,7 +234,7 @@ __global__ void kernelMulMicromag2D2Kern(
   return;
 }
 
-void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+__export__ void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
                               float** outx, float** outy, float** outz,
                               CUstream* stream, int* partSize){

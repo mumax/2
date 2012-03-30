@@ -255,7 +255,7 @@ __global__ void diffRhoKern(float* drho, float* jx, float* jy, float* jz,
 
 
 #define BLOCKSIZE 16
-void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, 
+__export__ void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float** Ey, float** Ez, float** rMap, float rMul, 
 						int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, 
 						CUstream* streams){
 
@@ -300,7 +300,7 @@ void currentDensityAsync(float** jx, float** jy, float** jz, float** Ex, float**
 
 
 
-void diffRhoAsync(float** drho, float** jx, float** jy, float** jz,
+__export__ void diffRhoAsync(float** drho, float** jx, float** jy, float** jz,
 				  float cellx, float celly, float cellz,
                   int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, 
                   CUstream* streams){

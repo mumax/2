@@ -19,7 +19,7 @@ __global__ void addKern(float* dst, float* a, float* b, int Npart) {
 }
 
 
-void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart) {
+__export__ void addAsync(float** dst, float** a, float** b, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -45,7 +45,7 @@ __global__ void maddKern(float* dst, float* a, float* b, float mulB, int Npart) 
 }
 
 
-void maddAsync(float** dst, float** a, float** b, float mulB, CUstream* stream, int Npart) {
+__export__ void maddAsync(float** dst, float** a, float** b, float mulB, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -69,7 +69,7 @@ __global__ void madd1Kern(float* a, float* b, float mulB, int Npart) {
 }
 
 
-void madd1Async(float** a, float** b, float mulB, CUstream* stream, int Npart) {
+__export__ void madd1Async(float** a, float** b, float mulB, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -102,7 +102,7 @@ __global__ void madd2Kern(float* a, float* b, float mulB, float* c, float mulC, 
 }
 
 
-void madd2Async(float** a, float** b, float mulB, float** c, float mulC, CUstream* stream, int Npart) {
+__export__ void madd2Async(float** a, float** b, float mulB, float** c, float mulC, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -131,7 +131,7 @@ __global__ void cmaddKern(float* dst, float a, float b, float* kern, float* src,
   return;
 }
 
-void cmaddAsync(float** dst, float a, float b, float** kern, float** src, CUstream* stream, int NComplexPart){
+__export__ void cmaddAsync(float** dst, float a, float b, float** kern, float** src, CUstream* stream, int NComplexPart){
 	dim3 gridSize, blockSize;
 	make1dconf(NComplexPart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -148,7 +148,7 @@ __global__ void linearCombination2Kern(float* dst, float* a, float mulA, float* 
 	}
 }
 
-void linearCombination2Async(float** dst, float** a, float mulA, float** b, float mulB, CUstream* stream, int NPart){
+__export__ void linearCombination2Async(float** dst, float** a, float mulA, float** b, float mulB, CUstream* stream, int NPart){
 	dim3 gridSize, blockSize;
 	make1dconf(NPart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
@@ -167,7 +167,7 @@ __global__ void linearCombination3Kern(float* dst, float* a, float mulA, float* 
 	}
 }
 
-void linearCombination3Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, CUstream* stream, int NPart){
+__export__ void linearCombination3Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, CUstream* stream, int NPart){
 	dim3 gridSize, blockSize;
 	make1dconf(NPart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {

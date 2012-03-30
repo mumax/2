@@ -42,7 +42,7 @@ extern "C" {
 /// @param Nx number of elements along x axis
 /// @param NyPart number of elements along y axis dealt with on this device (the structure is sliced for multiGPU purpose along Y-axis)
 /// @param Nz number of elements along z axis
-void initVectorQuantVortexRegionAsync(float** Sx, float** Sy, float** Sz,
+__declspec(dllexport) void initVectorQuantVortexRegionAsync(float** Sx, float** Sy, float** Sz,
 									  float** regions,
 									  bool* host_regionsToProceed,
 									  float centerX, float centerY, float centerZ,

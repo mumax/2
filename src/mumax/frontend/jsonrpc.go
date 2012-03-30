@@ -14,10 +14,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"bufio"
 	. "mumax/common"
 	"mumax/host"
 	"reflect"
 	"runtime"
+	"bytes"
 )
 
 // An RPC server using simple JSON encoding.
@@ -29,6 +31,8 @@ import (
 type jsonRPC struct {
 	in  io.Reader
 	out io.Writer
+	flush bufio.Writer
+	
 	*json.Decoder
 	*json.Encoder
 	receiver interface{}
@@ -37,9 +41,10 @@ type jsonRPC struct {
 
 // Sets up the RPC to read JSON-encoded function calls from in and return
 // the result via out. All public methods of the receiver are made accessible.
-func (j *jsonRPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
+func (j *jsonRPC) Init(in io.Reader, out io.Writer, flush bufio.Writer, receiver interface{}) {
 	j.in = in
 	j.out = out
+	j.flush = flush
 	j.Decoder = json.NewDecoder(in)
 	j.Encoder = json.NewEncoder(out)
 	j.receiver = receiver
@@ -51,6 +56,9 @@ func (j *jsonRPC) Init(in io.Reader, out io.Writer, receiver interface{}) {
 // encodes the return values back to j.out.
 func (j *jsonRPC) Run() {
 	for {
+		wbuf := new(bytes.Buffer) 
+		jsonc := json.NewEncoder(wbuf)
+		
 		v := new(interface{})
 		err := j.Decode(v)
 		if err == io.EOF {
@@ -58,15 +66,20 @@ func (j *jsonRPC) Run() {
 		}
 		CheckErr(err, ERR_IO)
 
-		if array, ok := (*v).([]interface{}); ok {
-			//Debug("call:", array)
+		if array, ok := (*v).([]interface{}); ok {		
 			Assert(len(array) == 2)
 			ret := j.Call(array[0].(string), array[1].([]interface{}))
 			convertOutput(ret)
-			j.Encode(ret)
+			//j.Encode(ret)
+			jsonc.Encode(ret)
+			j.flush.WriteString(wbuf.String() + "<<< End of mumax message >>>")
+			j.flush.Flush()
+			// 
+			// wbuf now has JSON cPRC call
 		} else {
 			panic(IOErr(fmt.Sprint("json: ", *v)))
 		}
+		Debug("Request processed.")
 	}
 }
 
@@ -92,12 +105,16 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 
 	// call
 	// convert []interface{} to []reflect.Value  
+	Debug("Making call to MuMax backend")
+	
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
 		argvals[i] = convertArg(args[i], f.Type().In(i))
 	}
 	retVals := f.Call(argvals)
-
+	
+	Debug("Successful call to MuMax backend")
+	
 	// convert []reflect.Value to []interface{}
 	ret := make([]interface{}, len(retVals))
 	for i := range retVals {

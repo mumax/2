@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-  void slonczewski_async(float** sttx, float** stty, float** sttz,  ///< output
+  __declspec(dllexport) void slonczewski_async(float** sttx, float** stty, float** sttz,  ///< output
 			 float** mx, float** my, float** mz,  ///< magnetization
 			 float** px, float** py, float** pz, ///< fixed layer
 			 float pxMul, float pyMul, float pzMul, ///< multipliers for fixed layer

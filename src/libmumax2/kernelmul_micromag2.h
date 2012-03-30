@@ -21,7 +21,7 @@ extern "C" {
 /// |outx|   |Kxx Kxy Kxz|   |Mx|
 /// |outy| = |Kxy Kyy Kyz| * |My|
 /// |outz|   |Kxz Kyz Kzz|   |Mz|
-void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+__declspec(dllexport) void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
                               float** outx, float** outy, float** outz,
@@ -36,7 +36,7 @@ void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
 /// |outx|   |Kxx Kxy Kxz|   |Mx|
 /// |outy| = |Kxy Kyy Kyz| * |My|
 /// |outz|   |Kxz Kyz Kzz|   |Mz|
-void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+__declspec(dllexport) void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
                               float** outx, float** outy, float** outz,
                               CUstream* stream, int* partSize);

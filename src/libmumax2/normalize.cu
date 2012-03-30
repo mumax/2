@@ -42,7 +42,7 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 }
 
 
-void normalizeAsync(float** mx, float** my, float** mz, float** norm_map, CUstream* stream, int Npart) {
+__export__ void normalizeAsync(float** mx, float** my, float** mz, float** norm_map, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
