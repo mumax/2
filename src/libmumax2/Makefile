@@ -64,11 +64,6 @@ $(CPP_OFILES): %.obj: %.cpp %.h
 libmumax2.lib: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) --shared --linker-options -DLL $(OFILES) -o libmumax2.dll
-	
-	echo " *** Win32 DLL NEEDS TO BE CONVERTED TO GNU FORMAT *** "
-	pexports libmumax2.dll | sed "s/^_//" > libmumax2.def
-	dlltool -U -d libmumax2.def -l libmumax2.a
-	rm -f libmumax2.a
 	cp libmumax2.dll ../../bin/
 	
 libmumax2.h: $(CU_HFILES) multigpu.h

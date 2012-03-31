@@ -21,6 +21,7 @@ import (
 	"net"
 	"bufio"
 	"strings"
+	"io"
 )
 
 // run the input files given on the command line
@@ -31,7 +32,7 @@ func clientMain() {
 		fmt.Println(WELCOME)
 	}
 
-	//infile := inputFile()
+	infile := inputFile()
 	//outdir := outputDir(infile)
 	outdir := "."
 	
@@ -66,6 +67,13 @@ func clientMain() {
 	}
 	Debug("Done.")
 	
+	if infile != "" {
+		Debug("Starting script engine for " + infile)
+		logWait := make(chan int)
+		startSubcommand(infile, logWait)
+		Debug("Done.")
+	}
+		
 	for {
 		Debug("Waiting for clients...")
 		wire, err1 := ln.Accept()
@@ -88,11 +96,12 @@ func outputDir(inputFile string) string {
 // make the output dir
 func initOutputDir(outputDir string) {
 	if *flag_force {
-		err := exec.Command("rm", "-rf", outputDir).Run() //syscommand("rm", []string{"-rf", outputDir})
+		err := os.RemoveAll(outputDir)
 		if err != nil {
-			Log("rm -rf", outputDir, ":", err)
+			Log("os.RemoveAll", outputDir, ":", err)
 		}
 	}
+	
 	if outputDir !="." {
 		os.Mkdir(outputDir, 0777)
 	}
@@ -128,6 +137,7 @@ func ServeClient(wire net.Conn) {
 		
 	Debug(ClientName + " is connected")	
 	Debug("Client asks to write into: " + ClientPath)
+	initOutputDir(ClientPath)
 	
 	s_ln, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -199,6 +209,79 @@ func commandForFile(file string) (command string, args []string) {
 	}
 	panic(Bug("unreachable"))
 	return "", nil
+}
+
+// IO buffer size
+const BUFSIZE = 4096
+
+// pipes standard output/err of the command to the logger
+// typically called in a separate goroutine
+func logStream(prefix string, in io.Reader, stderr bool, waiter chan int) {
+	defer func() { waiter <- 1 }() // signal completion
+	var bytes [BUFSIZE]byte
+	buf := bytes[:]
+	var err error = nil
+	n := 0
+	for err == nil {
+		n, err = in.Read(buf)
+		if n != 0 {
+			if stderr {
+				Err(prefix, string(buf[:n]))
+			} else {
+				Log(prefix, string(buf[:n]))
+			}
+		} // TODO: no printLN
+	}
+	Debug("logStream done: ", err)
+}
+
+// run the sub-command (e.g. python) to interpret the script file
+// it will first hang while trying to open the FIFOs
+func startSubcommand(inputFile string, logWait chan int) (command string, waiter chan (int)) {
+
+	// CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", c.outputDir), ERR_IO)
+
+	var args []string
+	command, args = commandForFile(inputFile) // e.g.: "python"
+	Debug("Starting",command,"with following flags",args)
+	proc := exec.Command(command, args...) //:= subprocess(command, args)
+	Debug("Done.")
+	stderr, err4 := proc.StderrPipe()
+	CheckErr(err4, ERR_IO)
+	stdout, err5 := proc.StdoutPipe()
+	CheckErr(err5, ERR_IO)
+	CheckErr(proc.Start(), ERR_IO)
+
+	go logStream("["+command+"]", stderr, true, logWait)
+	go logStream("["+command+"]", stdout, false, logWait)
+
+	Debug(command, "PID:", proc.Process.Pid)
+	
+	// start waiting for sub-command asynchronously and
+	// use a channel to signal sub-command completion
+	/*waiter = make(chan (int))
+	go func() {
+		exitstat := 666 // dummy value 
+		err := proc.Wait()
+		if err != nil {
+			if msg, ok := err.(*exec.ExitError); ok {
+				if msg.ProcessState.Success() {
+					exitstat = 0
+				} else {
+					exitstat = 1
+				}
+				// TODO: extract unix exit status
+				//exitstat = msg.ExitStatus()
+			} else {
+				panic(InputErr(err.Error()))
+			}
+		} else {
+			exitstat = 0
+		}
+		waiter <- exitstat // send exit status to signal completion 
+	}()*/
+
+	return
 }
 
 const (
