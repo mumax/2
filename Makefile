@@ -11,8 +11,8 @@ all:
 	go install -v template
 	make -C src/python
 ifndef SystemRoot	
-	make -C src/libomf
-	make -C src/muview
+	# make -C src/libomf
+	# make -C src/muview
 endif
 
 .PHONY: clean

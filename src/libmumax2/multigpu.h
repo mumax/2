@@ -1,6 +1,8 @@
 #ifndef _MULTIGPU_H_
 #define _MULTIGPU_H_
 
+#include "cross_platform.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,7 +14,7 @@ int nDevice();
 /// E.g.: when GPUs 2 and 3 are used, deviceId(0) will return 2.
 int deviceId(int i);
 
-__declspec(dllexport) void setUsedGPUs(int* gpuIds, int Ngpu);
+DLLEXPORT void setUsedGPUs(int* gpuIds, int Ngpu);
 
 #ifdef __cplusplus
 }

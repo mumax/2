@@ -8,6 +8,8 @@
 #define _KERNELMUL_MICROMAG2_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +23,7 @@ extern "C" {
 /// |outx|   |Kxx Kxy Kxz|   |Mx|
 /// |outy| = |Kxy Kyy Kyz| * |My|
 /// |outz|   |Kxz Kyz Kzz|   |Mz|
-__declspec(dllexport) void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+DLLEXPORT void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz,
                               float** fftKyz, float** fftKxz, float** fftKxy,
                               float** outx, float** outy, float** outz,
@@ -36,7 +38,7 @@ __declspec(dllexport) void kernelMulMicromag3D2Async(float** fftMx,  float** fft
 /// |outx|   |Kxx Kxy Kxz|   |Mx|
 /// |outy| = |Kxy Kyy Kyz| * |My|
 /// |outz|   |Kxz Kyz Kzz|   |Mz|
-__declspec(dllexport) void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
+DLLEXPORT void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
                               float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
                               float** outx, float** outy, float** outz,
                               CUstream* stream, int* partSize);

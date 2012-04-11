@@ -10,12 +10,14 @@
 #define _SLONCZEWSKI_TORQUE_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  __declspec(dllexport) void slonczewski_async(float** sttx, float** stty, float** sttz,  ///< output
+  DLLEXPORT void slonczewski_async(float** sttx, float** stty, float** sttz,  ///< output
 			 float** mx, float** my, float** mz,  ///< magnetization
 			 float** px, float** py, float** pz, ///< fixed layer
 			 float pxMul, float pyMul, float pzMul, ///< multipliers for fixed layer

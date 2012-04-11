@@ -8,6 +8,7 @@
 #define _COPYPAD_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,7 @@ extern "C" {
 /// @param S0: source X size, same as dst X size
 /// @param S1: source Y size per GPU, same as dst Y size
 /// @param S2: source Z size , <= D2
-__declspec(dllexport) void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
+DLLEXPORT void copyPadZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, CUstream* streams);
 
 /// Copy+zero pad a 3D matrix in all directions: only to be used when 1 device is used.
 /// @param dst: destination arrays
@@ -32,7 +33,7 @@ __declspec(dllexport) void copyPadZAsync(float** dst, int D2, float** src, int S
 /// @param S1: source Y size , <= D1
 /// @param S2: source Z size , <= D2
 /// @param Ncomp: number of array components
-__declspec(dllexport) void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams);
+DLLEXPORT void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams);
 
 
 /// Insert from src into a block in dst
@@ -40,13 +41,13 @@ __declspec(dllexport) void copyPad3DAsync(float** dst, int D0, int D1, int D2, f
 ///	2x2 src, block = 1, 2x6 dst:
 ///	[ 0 0  S1 S2  0 0 ]
 ///	[ 0 0  S3 S4  0 0 ]
-__declspec(dllexport) void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
+DLLEXPORT void insertBlockZAsync(float** dst, int D2, float** src, int S0, int S1Part, int S2, int block, CUstream* streams);
 
 /// Put an array to zero with (sub)sizes [NO, N1part, N2]
-__declspec(dllexport) void zeroArrayAsync(float **A, int N, CUstream *streams);
+DLLEXPORT void zeroArrayAsync(float **A, int N, CUstream *streams);
 
 // /// Put a part of an array on 1 GPU to zero
-// __declspec(dllexport) void zeroArrayPartAsync(float **A, int length, int dev, CUstream streams){
+// DLLEXPORT void zeroArrayPartAsync(float **A, int length, int dev, CUstream streams){
 
 
 /// Extract from src a block to dst
@@ -54,7 +55,7 @@ __declspec(dllexport) void zeroArrayAsync(float **A, int N, CUstream *streams);
 /// 2x2 dst, block = 1, 2x6 src:
 /// [ 0 0  D1 D2  0 0 ]
 /// [ 0 0  D3 D4  0 0 ]
-__declspec(dllexport) void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams);
+DLLEXPORT void extractBlockZAsync(float **dst, int D0, int D1Part, int D2, float **src, int S2, int block, CUstream *streams);
 
 #ifdef __cplusplus
 }

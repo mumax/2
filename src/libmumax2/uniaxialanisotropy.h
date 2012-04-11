@@ -9,13 +9,15 @@
 #define _UNIAXIALANISOTROPY_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
-__declspec(dllexport) void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz, 
+DLLEXPORT void uniaxialAnisotropyAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
                           float **Ku1_map, float **MSat_map, float Ku2_Mu0Msat_mul, 
                           float **anisU_mapx, float anisU_mulx,

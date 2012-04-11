@@ -8,6 +8,8 @@
 #define _TEMPERATURE_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +22,7 @@ extern "C" {
 /// @param temp mask for the temperature
 /// @param alphaKB2tempMul multiplier for alpha * temperature * 2 * Boltzmann constant.
 /// @param m0VgammaDtMSatMul Mu_zero * cell volume * gyromagnetic ratio * time step * MSat multiplier.
-__declspec(dllexport) void temperature_scaleNoise(float** noise,
+DLLEXPORT void temperature_scaleNoise(float** noise,
 			   	float** alpha,
 			   	float** temp, float alphaKB2tempMul,
 			   	float** mSat, float mu0VgammaDtMSatMul,

@@ -8,6 +8,8 @@
 #define _NORMALIZE_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +19,7 @@ extern "C" {
 /// Normalizes a vector array.
 /// @param mx, my, mz: Components of vector array to normalize
 /// @param norm_map: desired norm, may contain NULL pointers
-__declspec(dllexport) void normalizeAsync(float** mx, float** my, float** mz, float** norm_map, CUstream* stream, int Npart);
+DLLEXPORT void normalizeAsync(float** mx, float** my, float** mz, float** norm_map, CUstream* stream, int Npart);
 
 
 #ifdef __cplusplus

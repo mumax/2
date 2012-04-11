@@ -11,12 +11,14 @@
 #define _ZHANGLINEW_TORQUE_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-__declspec(dllexport)  void zhangli_async(float** sttx, float** stty, float** sttz, 
+DLLEXPORT  void zhangli_async(float** sttx, float** stty, float** sttz, 
 			 float** mx, float** my, float** mz, 
 			 float** jx, float** jy, float** jz,
 			 const float pred, const float pret,

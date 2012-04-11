@@ -9,6 +9,8 @@
 #define _CURRENT_H_
 
 #include <cuda.h>
+#include "cross_platform.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,14 +24,14 @@ extern "C" {
 // @param rMUl multiplier for resistivity
 // @param periodic0,periodic1,periodic2 periodic boundary conditions
 // @param streams cuda stream PER GPU
-__declspec(dllexport) void currentDensityAsync(float** jx, float** jy, float** jz,
+DLLEXPORT void currentDensityAsync(float** jx, float** jy, float** jz,
                          float** Ex, float** Ey, float** Ez, 
                          float** rMap, float rMul, 
                          int N0, int N1Part, int N2,
                          int periodic0, int periodic1, int periodic2, 
                          CUstream* streams);
 
-__declspec(dllexport) void diffRhoAsync(float** drho,
+DLLEXPORT void diffRhoAsync(float** drho,
 				  float** jx, float** jy, float** jz,
 				  float cellx, float celly, float cellz,
                   int N0, int N1Part, int N2,
