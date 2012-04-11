@@ -30,28 +30,29 @@ extern "C" {
 					 int sx, int sy,
 					 int sz, int syz,					  	 
 					 float i12csx_2, float i12csy_2, float i12csz_2,
-					 int NPart)
+					 int i)
   {
-		
-	int I = threadindex;
-				
-    if (I < NPart){ // Thread configurations are usually too large...
+			
+	//int i = blockIdx.x * blockDim.x + threadIdx.x;
+	int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int k = blockIdx.y * blockDim.y + threadIdx.y;			
+	
+	
+    if (i < sx && j < sy && k < sz){ // 3D now:)
+	
+	  int x0 = i * syz + j * sz + k;
 	  
-	  float3 m = make_float3(mx[I], my[I], mz[I]);
+	  float3 m = make_float3(mx[x0], my[x0], mz[x0]);
 	
 	  float msat2 = dotf(m, m);
 		
 		if (msat2 == 0.0f) 
 		{
-			sttx[I] = 0.0f;
-			stty[I] = 0.0f;
-			sttz[I] = 0.0f;
+			sttx[x0] = 0.0f;
+			stty[x0] = 0.0f;
+			sttz[x0] = 0.0f;
 			return;
-		}  
-	  	
-		int k = blockIdx.x * blockDim.x + threadIdx.x;
-		int j = blockIdx.y * blockDim.y + threadIdx.y;
-		int i = blockIdx.z * blockDim.z + threadIdx.z;	
+		}  	
 		
       // First-order derivative 5-points stencil
 	   
@@ -90,7 +91,6 @@ extern "C" {
 						 zf1 + comm, 
 						 zf2 + comm);
 
-	  int x0 = comm + k;
 	  	
 	  // Let's use 5-point stencil to avoid problems at the boundaries
 	  
@@ -156,35 +156,39 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			 CUstream* stream)
   {
 
-    // 1D configuration
-    //dim3 gridSize, blockSize;
-    //make1dconf(NPart, &gridSize, &blockSize);
-	// 3D instead
+	// 3D
 	
-	dim3 gridSize(divUp(sz, BLOCKSIZE), divUp(sy, BLOCKSIZE), divUp(sx, BLOCKSIZE));
-    dim3 blockSize(BLOCKSIZE, BLOCKSIZE, BLOCKSIZE);
-	printf("[ZLSTT DEBUG] The grid size: %d x %d x %d\n", sz, sy, sx);
+	dim3 gridSize(divUp(sy, BLOCKSIZE), divUp(sz, BLOCKSIZE));
+    dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
+	
+	// FUCKING THREADS PER BLOCK LIMITATION
+	check3dconf(gridSize, blockSize);
+	
+	//printf("[ZLSTT DEBUG] The grid size: %d x %d x %d\n", sx, sy, sz);
 	
 	float i12csx_2 = 1.0f / (12.0f * csx * csz);
 	float i12csy_2 = 1.0f / (12.0f * csy * csy);
 	float i12csz_2 = 1.0f / (12.0f * csz * csz);
 	
-	printf("[ZLSTT DEBUG] Step Prefactors are: %f & %f & %f\n", i12csx_2, i12csy_2, i12csz_2);
-	printf("[ZLSTT DEBUG] Prefactors are: %f & %f\n", pred, pret);
+	//printf("[ZLSTT DEBUG] Step Prefactors are: %f & %f & %f\n", i12csx_2, i12csy_2, i12csz_2);
+	//printf("[ZLSTT DEBUG] GridSize is: %d x %d x %d\n", gridSize.x, gridSize.y, gridSize.z);
+	//printf("[ZLSTT DEBUG] Prefactors are: %f & %f\n", pred, pret);
 	
 	int syz = sy * sz;
 	
     int nDev = nDevice();
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
-	    zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
-											   mx[dev], my[dev], mz[dev],											   
-											   jx[dev], jy[dev], jz[dev], 
-											   pred, pret,
-											   sx, sy,
-											   sz, syz,										   
-											   i12csx_2, i12csy_2, i12csz_2, 
-											   NPart);
+		for (int i = 0; i < sx; i++) {
+			zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
+												   mx[dev], my[dev], mz[dev],											   
+												   jx[dev], jy[dev], jz[dev], 
+												   pred, pret,
+												   sx, sy,
+												   sz, syz,										   
+												   i12csx_2, i12csy_2, i12csz_2, 
+												   i);
+		}
     } // end dev < nDev loop
 										  
 										  

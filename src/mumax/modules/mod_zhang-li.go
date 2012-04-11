@@ -8,7 +8,7 @@
 package modules
 
 // Module implementing Slonczewski spin transfer torque.
-// Authors: Graham Rowlands, Arne Vansteenkiste
+// Authors: Mykola Dvornik, Arne Vansteenkiste
 
 import (
 	. "mumax/common"
@@ -25,13 +25,13 @@ func LoadZhangLiMADTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	// ============ New Quantities =============
-	e.AddNewQuant("ee", SCALAR, VALUE, Unit(""), "Degree of non-adiabadicity")
-	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization degree of the spin-current")
+	e.AddNewQuant("xi", SCALAR, VALUE, Unit(""), "Degree of non-adiabadicity")
+	e.AddNewQuant("polarisation", SCALAR, VALUE, Unit(""), "Polarization degree of the spin-current")
 	LoadUserDefinedCurrentDensity(e)
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Zhang-Li Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	e.Depends("stt", "ee", "pol", "j", "m")
+	e.Depends("stt", "xi", "polarisation", "j", "m")
 
 	// ============ Updating the torque =============
 	stt.SetUpdater(&ZhangLiUpdater{stt: stt})
@@ -51,8 +51,8 @@ func (u *ZhangLiUpdater) Update() {
 	sizeMesh := e.GridSize()
 	stt := u.stt
 	m := e.Quant("m")
-	ee := e.Quant("ee").Scalar()
-	pol := e.Quant("pol").Scalar()
+	ee := e.Quant("xi").Scalar()
+	pol := e.Quant("polarisation").Scalar()
 	curr := e.Quant("j")
 	pred := pol * MuB / (E * (1 + ee * ee))
 	pret := ee * pred

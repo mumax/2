@@ -13,14 +13,12 @@ NVCC+=\
   --compiler-options -Werror\
   --compiler-options -fPIC\
   --use_fast_math\
-  -arch=sm_20\
   
 NVCCWERRORLESS=nvcc
 NVCCWERRORLESS+=\
   --compiler-options -Wall\
   --compiler-options -fPIC\
   --use_fast_math\
-  -arch=sm_20\
 
 # flags for the gcc compiler
 # As CUDA is delivered only in 32 bits on Os X, architecture is forced to i386 on Darwin platform
@@ -57,7 +55,6 @@ NVCC+=\
   -m64\
   -O3\
   --use_fast_math\
-  -arch=sm_20\
   --compiler-options -W4\
   --compiler-options -Zi\
   --compiler-options -Ox\
@@ -76,7 +73,6 @@ NVCCWERRORLESS+=\
   -m64\
   -O3\
   --use_fast_math\
-  -arch=sm_20\
   --compiler-options -W4\
   --compiler-options -Zi\
   --compiler-options -Ox\
