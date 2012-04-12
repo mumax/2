@@ -2,7 +2,7 @@
 #define _CROSSPLATFORM_H
 
 #if defined _WIN32 || defined __CYGWIN__
-  #ifdef BUILDING_DLL
+  #ifdef _USRDLL
     #ifdef __GNUC__
       #define DLLEXPORT __attribute__ ((dllexport))
     #else

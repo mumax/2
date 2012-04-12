@@ -41,7 +41,7 @@ DLLEXPORT void partialSumAsync(float** input, float** output, int blocksPerGPU, 
 /// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
 /// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
 /// @param streams array of cuda streams on each device for async execution                                         
-void partialSDotAsync(float** input1, float** input2, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream);
+DLLEXPORT void partialSDotAsync(float** input1, float** input2, float** output, int blocks, int threadsPerBlock, int N, CUstream* stream);
 
 /// Multi-GPU partial maximum.
 /// @param input input data parts for each GPU. each array size is NPerGPU
