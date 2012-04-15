@@ -13,16 +13,18 @@ setgridsize(Nx, Ny, Nz)
 sizeX = 100e-9
 sizeY = 100e-9
 sizeZ = 10e-9
-setcellsize(sizeX/Nx, sizeY/Ny, sizeZ/Nz)
+
+csX = (sizeX/Nx)
+csY = (sizeY/Ny)
+csZ = (sizeZ/Nz)
+print str(csX),"x",str(csY),"x",str(csZ)
+setcellsize(csX, csY, csZ)
 
 load('micromagnetism')
 load('solver/rk12')
 load('zhang-li')
 
 savegraph("graph.png")
-
-setv('xi',0.05)
-setv('polarisation',1.0)
 
 setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
@@ -32,23 +34,48 @@ setv('dt', 1e-15)
 setv('maxdt', 1e-12)
 setv('m_maxerror', 1./500)
 
-m=[ [[[1]]], [[[1]]], [[[0]]] ]
-setarray('m', m)
 
 # Set a initial magnetisation which will relax into a vortex
-mValues = {"all":1.0}
-InitVortexRegionVectorQuant('m', mValues, [sizeX/2,sizeY/2,0.0], [0.0,0.0,1.0], 1, 1, 0 )
+mv = makearray(3, Nx, Ny, Nz)
 
-run(1e-9)
+for m in range(Nx):
+    for n in range(Ny):
+        for o in range(Nz):
+		
+            xx = float(m) * csX - 50.0e-9
+            yy = 50.0e-9 - float(n) * csY
+            print str(xx),":",str(yy)
+   
+			
+            mv[0][m][n][o] = yy
+            mv[1][m][n][o] = xx
+            mv[2][m][n][o] = 40.0e-9
+
+setarray('m', mv)
+
+save("m","png",[])
+save("m","omf",[])
+
+run(2e-9)
+
+save("m","png",[])
+save("m","omf",[])
 
 setv('alpha', 0.1)
+setv('xi',0.05)
+setv('polarisation',1.0)
 
+j = makearray(3, Nx, Ny, Nz)
 
-j=makearray(3, 1, 1, 1)
-j[0][0][0][0] = 0
-j[1][0][0][0] = 0
-j[2][0][0][0] = 1e12 # Z component
-setarray('j', j)
+for m in range(Nx):
+    for n in range(Ny):
+        for o in range(Nz):
+            j[0][m][n][o] = 1.0
+            j[1][m][n][o] = 0.0
+            j[2][m][n][o] = 0.0
+
+setv('j', [1e12, 0, 0])
+setmask('j', j)
 
 autosave("m", "png", [], 50e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)

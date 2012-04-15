@@ -14,6 +14,7 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
+	"math"
 )
 
 // Register this module
@@ -31,7 +32,7 @@ func LoadZhangLiMADTorque(e *Engine) {
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Zhang-Li Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	e.Depends("stt", "xi", "polarisation", "j", "m")
+	e.Depends("stt", "xi", "polarisation", "j", "m", "msat")
 
 	// ============ Updating the torque =============
 	stt.SetUpdater(&ZhangLiUpdater{stt: stt})
@@ -52,9 +53,14 @@ func (u *ZhangLiUpdater) Update() {
 	stt := u.stt
 	m := e.Quant("m")
 	ee := e.Quant("xi").Scalar()
+	msat := e.Quant("msat") // it is pointwise!!!!!!!!!!!! keep uniform multiplier for TESTING ONLY
 	pol := e.Quant("polarisation").Scalar()
-	curr := e.Quant("j")
-	pred := pol * MuB / (E * (1 + ee * ee))
+	curr := e.Quant("j") // it is pointwise!!!!!!!!!!!! keep uniform multiplier for TESTING ONLY
+	
+	njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
+	nmsatn := msat.Multiplier()[0]
+	
+	pred := pol * MuB * njn / (E * nmsatn * (1 + ee * ee)) 
 	pret := ee * pred
 	
 	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), float32(pred), float32(pret), int32(sizeMesh[X]), int32(sizeMesh[Y]), int32(sizeMesh[Z]), float32(cellSize[X]), float32(cellSize[X]), float32(cellSize[X]))
