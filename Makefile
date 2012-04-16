@@ -4,7 +4,7 @@ export GOPATH=$(CURDIR)
 
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
-	go install -v mumax2-bin
+	go install -v --gccgoflags '-Ofast -march=native' mumax2-bin
 	go install -v apigen
 	go install -v texgen
 	go install -v muqueue
