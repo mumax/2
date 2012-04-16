@@ -4,9 +4,9 @@
 from mumax2 import *
 from mumax2_geom import *
 
-Nx = 32
-Ny = 32
-Nz = 1
+Nx = 64
+Ny = 64
+Nz = 8
 setgridsize(Nx, Ny, Nz)
 
 # physical size in meters
@@ -17,7 +17,7 @@ sizeZ = 10e-9
 csX = (sizeX/Nx)
 csY = (sizeY/Ny)
 csZ = (sizeZ/Nz)
-print str(csX),"x",str(csY),"x",str(csZ)
+
 setcellsize(csX, csY, csZ)
 
 load('micromagnetism')
@@ -44,7 +44,7 @@ for m in range(Nx):
 		
             xx = float(m) * csX - 50.0e-9
             yy = 50.0e-9 - float(n) * csY
-            # print str(xx),":",str(yy)
+            print str(xx),":",str(yy)
    
 			
             mv[0][m][n][o] = yy

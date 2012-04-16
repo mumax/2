@@ -63,5 +63,5 @@ func (u *ZhangLiUpdater) Update() {
 	pred := pol * MuB * njn / (E * nmsatn * (1 + ee * ee)) 
 	pret := ee * pred
 	
-	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), float32(pred), float32(pret), int32(sizeMesh[X]), int32(sizeMesh[Y]), int32(sizeMesh[Z]), float32(cellSize[X]), float32(cellSize[X]), float32(cellSize[X]))
+	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), float32(pred), float32(pret), int32(sizeMesh[X]), int32(sizeMesh[Y]), int32(sizeMesh[Z]), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]))
 }

@@ -150,7 +150,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			 CUstream* stream)
   {
 
-	// 3D
+	// 3D :)
 	
 	dim3 gridSize(divUp(sy, BLOCKSIZE), divUp(sz, BLOCKSIZE));
     dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
@@ -165,6 +165,13 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 	int syz = sy * sz;
 	
     int nDev = nDevice();
+	
+	/*cudaEvent_t start,stop;
+	float time;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	cudaEventRecord(start,0);*/
+	
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
 		// perhaps 16*8*8 block size to get rid of this loop
@@ -180,7 +187,13 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 		}
     } // end dev < nDev loop
 										  
-										  
+	/*cudaEventRecord(stop,0);
+	cudaEventSynchronize(stop);
+	cudaEventElapsedTime(&time, start, stop);
+	cudaEventDestroy(start);
+	cudaEventDestroy(stop);
+	printf("Zhang-Li kernel requires: %f ms\n",time);*/
+	
   }
 
   // ========================================
