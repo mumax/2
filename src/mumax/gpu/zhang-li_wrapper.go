@@ -55,9 +55,9 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret f
 		(C.float)(pred),
 		(C.float)(pret),
 		
-		(C.int)(m.size3D[X]),
-		(C.int)(m.size3D[Y]),
-		(C.int)(m.size3D[Z]),
+		(C.int)(m.partSize[X]),
+		(C.int)(m.partSize[Y]),
+		(C.int)(m.partSize[Z]),
 		
 		(C.float)(cellsizeX),
 		(C.float)(cellsizeY),
