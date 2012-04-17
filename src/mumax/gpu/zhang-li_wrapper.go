@@ -27,12 +27,15 @@ import (
 //			 int NPart,
 //			 CUstream* stream);
 
-func LLZhangLi(stt *Array, m *Array, j *Array, pred float32, pret float32, sizeX int32, sizeY int32, sizeZ int32, cellsizeX float32, cellsizeY float32, cellsizeZ float32) {
+func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret float32, sizeX int32, sizeY int32, sizeZ int32, cellsizeX float32, cellsizeY float32, cellsizeZ float32) {
 
 	// Bookkeeping
 	CheckSize(j.Size3D(), m.Size3D())
+	CheckSize(msat.Size3D(), m.Size3D())
+	
 	Assert(j.NComp() == 3)
-
+	Assert(msat.NComp() == 1)
+	
 	// Calling the CUDA functions
 	C.zhangli_async(
 		(**C.float)(unsafe.Pointer(&(stt.Comp[X].Pointers()[0]))),
@@ -46,7 +49,9 @@ func LLZhangLi(stt *Array, m *Array, j *Array, pred float32, pret float32, sizeX
 		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
-
+		
+		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
+		
 		(C.float)(pred),
 		(C.float)(pret),
 		

@@ -21,6 +21,7 @@ extern "C" {
 DLLEXPORT  void zhangli_async(float** sttx, float** stty, float** sttz, 
 			 float** mx, float** my, float** mz, 
 			 float** jx, float** jy, float** jz,
+			 float** msat,
 			 const float pred, const float pret,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz, 
