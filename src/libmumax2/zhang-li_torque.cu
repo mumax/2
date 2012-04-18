@@ -239,12 +239,11 @@ extern "C" {
 	  // Perhaps for performance need to take into account special cases where j || to x, y or z  
 	  
 	  float4 MM;
-
-	  
-	  MM.x = (yi.x >= 0 && lmx == NULL) ? mx[yn.x] : lmx[yn.x];
-	  MM.y = (yi.y >= 0 && lmx == NULL) ? mx[yn.y] : lmx[yn.y];
-	  MM.z = (yi.z < size.y && rmx == NULL) ? mx[yn.z] : rmx[yn.z];
-	  MM.w = (yi.w < size.y && rmx == NULL) ? mx[yn.w] : rmx[yn.w];
+  
+	  MM.x = (yi.x >= 0 || lmx == NULL) ? mx[yn.x] : lmx[yn.x];
+	  MM.y = (yi.y >= 0 || lmx == NULL) ? mx[yn.y] : lmx[yn.y];
+	  MM.z = (yi.z < size.y || rmx == NULL) ? mx[yn.z] : rmx[yn.z];
+	  MM.w = (yi.w < size.y || rmx == NULL) ? mx[yn.w] : rmx[yn.w];
 	 	  	    
 	  float3 dmdx = 	make_float3(mstep.x * (mx[xn.x] - 8.0f * mx[xn.y] + 8.0f * mx[xn.z] - mx[xn.w]),
 									mstep.y * (MM.x - 8.0f * MM.y + 8.0f * MM.z - MM.w),
@@ -350,7 +349,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 		// calculate dev neighbours
 		
 		int ld = (dev - 1 >= 0) ? dev - 1 : nDev - dev - 1;
-		int rd = (dev + 1 < nDev) ? dev + 1 : dev - nDev;
+		int rd = (dev + 1 < nDev) ? dev + 1 : dev + 1 - nDev;
 				
 		float* lmx = mx[ld]; 
 		float* lmy = my[ld];
@@ -372,6 +371,8 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 				rmz = NULL;
 			}
 		}
+		
+		printf("Devices ara: %d\t%d\t%d\n", ld, dev, rd);
 		
 		for (int i = 0; i < sx; i++) {
 			/*zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
