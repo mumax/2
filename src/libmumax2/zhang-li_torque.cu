@@ -8,7 +8,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+	// mod
+	int Mod(int a, int b){
+		return (a%b+b)%b;
+	}
+	
 	// dot product
 	inline __host__ __device__ float dotf(float3 a, float3 b)
 	{ 
@@ -141,6 +145,7 @@ extern "C" {
 					 float2 pre,
 					 int4 size,		
 					 float3 mstep,
+					 int3 pbc,
 					 int i)
   {	
 	
@@ -164,17 +169,48 @@ extern "C" {
 	  int xb1 = i - 1;
 	  int xf1 = i + 1;
 	  int xf2 = i + 2;
-	  int4 xi = make_int4(xb2, xb1, xf1, xf2);
 	  
-	  int yb2 = (j-2 >= 0)? j-2 : j;
-	  int yb1 = (j-1 >= 0)? j-1 : j;
-	  int yf1 = (j+1 < size.y)? j+1 : j;
-	  int yf2 = (j+2 < size.y)? j+2 : j;
+	  int yb2 = j - 2;
+	  int yb1 = j - 1;
+	  int yf1 = j + 1;
+	  int yf2 = j + 2; 
+	   
+	  int zb2 = k - 2;
+	  int zb1 = k - 1;
+	  int zf1 = k + 1;
+	  int zf2 = k + 2;
 	  
-	  int zb2 = (k-2 >= 0)? k-2 : k;
-	  int zb1 = (k-1 >= 0)? k-1 : k;
-	  int zf1 = (k+1 < size.z)? k+1 : k;
-	  int zf2 = (k+2 < size.z)? k+2 : k;
+	  int4 yi = make_int4(yb2, yb1, yf1, yf2);		  
+	  
+	  xb2 = (xb2 < 0)? pbc.x * (size.x - xb2) : xb2;
+	  xb1 = (xb1 < 0)? pbc.x * (size.x - xb1) : xb1;
+	  xf1 = (pbc.x && xf1 >= size.x)? xf1 - size.x : xf1;
+	  xf2 = (pbc.x && xf2 >= size.x)? xf2 - size.x : xf2;
+
+	  yb2 = (yb2 < 0)? pbc.y * (size.y - yb2) : yb2;
+	  yb1 = (yb1 < 0)? pbc.y * (size.y - yb1) : yb1;
+	  yf1 = (yf1 >= size.y)? yf1 - size.y : yf1;
+	  yf2 = (yf2 >= size.y)? yf2 - size.y : yf2;
+	 	  
+	  zb2 = (zb2 < 0)? pbc.z * (size.z - zb2) : zb2;
+	  zb1 = (zb1 < 0)? pbc.z * (size.z - zb1) : zb1;
+	  zf1 = (pbc.z && zf1 >= size.z)? zf1 - size.z : zf1;
+	  zf2 = (pbc.z && zf2 >= size.z)? zf2 - size.z : zf2;
+	 
+  	  //xb2 = (xb2 >= 0)? xb2 : i;
+	  //xb1 = (xb1 >= 0)? xb1 : i;
+	  xf1 = (xf1 < size.x)? xf1 : i;
+	  xf2 = (xf2 < size.x)? xf2 : i;
+	  
+	  //yb2 = (yb2 < 0)? j : yb2;
+	  //yb1 = (yb1 < 0)? j : yb1;
+	  yf1 = (yf1 >= size.y)? j : yf1;
+	  yf2 = (yf2 >= size.y)? j : yf2;
+		  
+      //zb2 = (zb2 >= 0)? zb2 : k;
+	  //zb1 = (zb1 >= 0)? zb1 : k;
+	  zf1 = (zf1 < size.z)? zf1 : k;
+	  zf2 = (zf2 < size.z)? zf2 : k;	  
 	  
 	  int comm = j * size.z + k;
 	  
@@ -203,38 +239,36 @@ extern "C" {
 	  // CUDA does not have vec3 operators like GLSL has, except of .xxx, 
 	  // Perhaps for performance need to take into account special cases where j || to x, y or z  
 	  
-	  float4 Mx_x;
-	  float4 My_x;
-	  float4 Mz_x;
+	  float4 MM;
+
 	  
-	  Mx_x.x = (xi.x >= 0) ? mx[xn.x] : lmx[(2 - xi.x)*size.w + j * size.z + k];
-	  Mx_x.y = (xi.y >= 0) ? mx[xn.y] : lmx[(2 - xi.y)*size.w + j * size.z + k];
-	  Mx_x.z = (xi.z < size.x) ? mx[xn.z] : rmx[(xi.z - size.x)*size.w + j * size.z + k];
-	  Mx_x.w = (xi.w < size.x) ? mx[xn.w] : rmx[(xi.w - size.x)*size.w + j * size.z + k];
-	  
-	  My_x.x = (xi.x >= 0) ? my[xn.x] : lmy[(2 - xi.x)*size.w + j * size.z + k];
-	  My_x.y = (xi.y >= 0) ? my[xn.y] : lmy[(2 - xi.y)*size.w + j * size.z + k];
-	  My_x.z = (xi.z < size.x) ? my[xn.z] : rmy[(xi.z - size.x)*size.w + j * size.z + k];
-	  My_x.w = (xi.w < size.x) ? my[xn.w] : rmy[(xi.w - size.x)*size.w + j * size.z + k];
-	  
-	  Mz_x.x = (xi.x >= 0) ? mz[xn.x] : lmz[(2 - xi.x)*size.w + j * size.z + k];
-	  Mz_x.y = (xi.y >= 0) ? mz[xn.y] : lmz[(2 - xi.y)*size.w + j * size.z + k];
-	  Mz_x.z = (xi.z < size.x) ? mz[xn.z] : rmz[(xi.z - size.x)*size.w + j * size.z + k];
-	  Mz_x.w = (xi.w < size.x) ? mz[xn.w] : rmz[(xi.w - size.x)*size.w + j * size.z + k];
-	  
-	  
-	  
-	  float3 dmdx = 	make_float3(mstep.x * (Mx_x.x - 8.0f * Mx_x.y + 8.0f * Mx_x.z - Mx_x.w),
-									mstep.y * (mx[yn.x] - 8.0f * mx[yn.y] + 8.0f * mx[yn.z] - mx[yn.w]),
+	  MM.x = (yi.x >= 0 || lmx == NULL) ? mx[yn.x] : lmx[yn.x];
+	  MM.y = (yi.y >= 0 || lmx == NULL) ? mx[yn.y] : lmx[yn.y];
+	  MM.z = (yi.z < size.y || rmx == NULL) ? mx[yn.z] : rmx[yn.z];
+	  MM.w = (yi.w < size.y || rmx == NULL) ? mx[yn.w] : rmx[yn.w];
+	 	  	    
+	  float3 dmdx = 	make_float3(mstep.x * (mx[xn.x] - 8.0f * mx[xn.y] + 8.0f * mx[xn.z] - mx[xn.w]),
+									mstep.y * (MM.x - 8.0f * MM.y + 8.0f * MM.z - MM.w),
 									mstep.z * (mx[zn.x] - 8.0f * mx[zn.y] + 8.0f * mx[zn.z] - mx[zn.w]));
+									
+      MM.x = (yi.x >= 0 || lmx == NULL) ? my[yn.x] : lmy[yn.x];
+	  MM.y = (yi.y >= 0 || lmx == NULL) ? my[yn.y] : lmy[yn.y];
+	  MM.z = (yi.z < size.y || rmx == NULL) ? my[yn.z] : rmy[yn.z];
+	  MM.w = (yi.w < size.y || rmx == NULL) ? my[yn.w] : rmy[yn.w];
 								      
-	  float3 dmdy = 	make_float3(mstep.x * (My_x.x - 8.0f * My_x.y + 8.0f * My_x.z - My_x.w),
-								    mstep.y * (my[yn.x] - 8.0f * my[yn.y] + 8.0f * my[yn.z] - my[yn.w]),
+	  float3 dmdy = 	make_float3(mstep.x * (my[xn.x] - 8.0f * my[xn.y] + 8.0f * my[xn.z] - my[xn.w]),
+								    mstep.y * (MM.x - 8.0f * MM.y + 8.0f * MM.z - MM.w),
 									mstep.z * (my[zn.x] - 8.0f * my[zn.y] + 8.0f * my[zn.z] - my[zn.w]));
+									
+	  MM.x = (yi.x >= 0 || lmx == NULL) ? mz[yn.x] : lmz[yn.x];
+	  MM.y = (yi.y >= 0 || lmx == NULL) ? mz[yn.y] : lmz[yn.y];
+	  MM.z = (yi.z < size.y || rmx == NULL) ? mz[yn.z] : rmz[yn.z];
+	  MM.w = (yi.w < size.y || rmx == NULL) ? mz[yn.w] : rmz[yn.w]; 								
+	  								
 										
-	  float3 dmdz = 	make_float3(mstep.x * (Mz_x.x - 8.0f * Mz_x.y + 8.0f * Mz_x.z - Mz_x.w),
-									mstep.y * (mz[yn.x] - 8.0f * mz[yn.y] + 8.0f * mz[yn.z] - mz[yn.w]),
-								    mstep.z * (mz[zn.x] - 8.0f * mz[zn.y] + 8.0f * mz[zn.z] - mz[zn.w]));  
+	  float3 dmdz = 	make_float3(mstep.x * (mz[xn.x] - 8.0f * mz[xn.y] + 8.0f * mz[xn.z] - mz[xn.w]),
+									mstep.y * (MM.x - 8.0f * MM.y + 8.0f * MM.z - MM.w),
+								    mstep.z * (mz[zn.x] - 8.0f * mz[zn.y] + 8.0f * mz[zn.z] - mz[zn.w])); 
 		
 	  // Don't see a point of such overkill, nevertheless:
 	  
@@ -265,7 +299,9 @@ extern "C" {
   }
 
   
-  #define BLOCKSIZE 16
+#define BLOCKSIZE 16
+
+
   
 __export__  void zhangli_async(float** sttx, float** stty, float** sttz, 
 			 float** mx, float** my, float** mz, 
@@ -274,6 +310,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			 const float pred, const float pret,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
+			 const int pbc_x, const int pbc_y, const int pbc_z, 
 			 int NPart,
 			 CUstream* stream)
   {
@@ -296,98 +333,44 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 	float3 mstep = make_float3(i12csx, i12csy, i12csz);	
 	int4 size = make_int4(sx, sy, sz, syz);
 	float2 pre = make_float2(pred, pret);
+	int3 pbc = make_int3(pbc_x, pbc_y, pbc_z);
 	
     int nDev = nDevice();
-	
-	int N = sx * sy * sz;	
-	//size of boundary region with +2 wrapping
-	int bcsize = sy * sz * 2 * sizeof(float);
-	
-	int roffset = 0 / sizeof(int); // CUDA POINTER IS WORD PADDED
-	int loffset = (N - bcsize) / sizeof(int); //CUDA POINTER IS WORD PADDED
-	
-	
 		
-	cudaEvent_t start,stop;
+	/*cudaEvent_t start,stop;
 	float time;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
-	cudaEventRecord(start,0);
-	
-	// Here I would use redicolous multi-GPU/PBC approach
-	// The point is to demonstrate technology, which could find it way to the mumax core.
-	// The idea is to allocate boundary buffers for stt, m, j, msat and transfer them with p2p before launching kernel.
-	// If it works, the idea is to wrap all mumax buffers with boundary regions(+2 or +4). Do calculations localy on the device (without P2P) and then
-    // Swap boundary regions between the devices using P2P.
-	
-	float** lmx; 
-	float** lmy;
-	float** lmz;
-	float** rmx;
-	float** rmy;
-	float** rmz;
-	
-	lmx = (float**)malloc(nDev * sizeof(float*));
-	lmy = (float**)malloc(nDev * sizeof(float*));
-	lmz = (float**)malloc(nDev * sizeof(float*));
-
-	rmx = (float**)malloc(nDev * sizeof(float*));
-	rmy = (float**)malloc(nDev * sizeof(float*));
-	rmz = (float**)malloc(nDev * sizeof(float*));
-	
-	for (int i = 0; i < nDev; i++) {
-		lmx[i] = (float*)malloc(sizeof(float*));
-		lmy[i] = (float*)malloc(sizeof(float*));
-		lmz[i] = (float*)malloc(sizeof(float*));	
-		rmx[i] = (float*)malloc(sizeof(float*));
-		rmy[i] = (float*)malloc(sizeof(float*));
-		rmz[i] = (float*)malloc(sizeof(float*));
+	cudaEventRecord(start,0);*/
 		
-		// Needs async allocation instead
-		cudaMalloc(&lmx[i], bcsize);
-		cudaMalloc(&lmy[i], bcsize);
-		cudaMalloc(&lmz[i], bcsize);
-		cudaMalloc(&rmx[i], bcsize);
-		cudaMalloc(&rmy[i], bcsize);
-		cudaMalloc(&rmz[i], bcsize);
-		
-	}
-	
 	
 	
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));	 
 	  		
 		// calculate dev neighbours
+				
+		float* lmx = mx[Mod(dev-1, nDev)]; 
+		float* lmy = my[Mod(dev-1, nDev)];
+		float* lmz = mz[Mod(dev-1, nDev)];
+
+		float* rmx = mx[Mod(dev+1, nDev)]; 
+		float* rmy = my[Mod(dev+1, nDev)];
+		float* rmz = mz[Mod(dev+1, nDev)];
 		
-		int ldev = dev - 1;
-		int rdev =  dev + 1;
-		
-		// take pbc into account
-		//rdev = (rdev != nDev && !pbcz) ? rdev : 0;
-		//ldev = (ldev != -1 && !pbcz) ? ldev : nDev-1;
-		
-		// m 
-		if (rdev != nDev) {
-			cudaMemcpy(rmx[dev], mx[rdev] + roffset, bcsize, cudaMemcpyDefault);
-			cudaMemcpy(rmy[dev], my[rdev] + roffset, bcsize, cudaMemcpyDefault);
-			cudaMemcpy(rmz[dev], mz[rdev] + roffset, bcsize, cudaMemcpyDefault);			
+		if(pbc_y == 0){             
+			if(dev == 0){
+				lmx = NULL;
+				lmy = NULL;
+				lmz = NULL;			
+			}
+			if(dev == nDev-1){
+				rmx = NULL;
+				rmy = NULL;
+				rmz = NULL;
+			}
 		}
-		else {
-			cudaMemset(rmx[dev], 0, bcsize);
-			cudaMemset(rmy[dev], 0, bcsize);
-			cudaMemset(rmz[dev], 0, bcsize);		
-		}
-		if (ldev != -1) {
-			cudaMemcpy(lmx[dev], mx[rdev] + loffset, bcsize, cudaMemcpyDefault);
-			cudaMemcpy(lmy[dev], my[rdev] + loffset, bcsize, cudaMemcpyDefault);
-			cudaMemcpy(lmz[dev], mz[rdev] + loffset, bcsize, cudaMemcpyDefault);			
-		}
-		else {
-			cudaMemset(lmx[dev], 0, bcsize);
-			cudaMemset(lmy[dev], 0, bcsize);
-			cudaMemset(lmz[dev], 0, bcsize);
-		}
+			
 		
 		for (int i = 0; i < sx; i++) {
 			/*zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
@@ -398,37 +381,29 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 												   size,
 												   mstep,
 												   i);*/
+												   
 			zhangli_deltaMKernMGPU<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
 												   mx[dev], my[dev], mz[dev],
-												   lmx[dev], lmy[dev], lmz[dev],
-												   rmx[dev], rmy[dev], rmz[dev],
+												   lmx, lmy, lmz,
+												   rmx, rmy, rmz,
 												   jx[dev], jy[dev], jz[dev], 
-												   msat[dev],
+												   msat[dev],												   
 												   pre,
 												   size,
 												   mstep,
+												   pbc,
 												   i);
 		}
 
     } // end dev < nDev loop
 	
-	for (int i = 0; i < nDev; i++) {
-
-		cudaFree(lmx[i]);
-		cudaFree(lmy[i]);
-		cudaFree(lmz[i]);
-		cudaFree(rmx[i]);
-		cudaFree(rmy[i]);
-		cudaFree(rmz[i]);
-		
-	}	
 	
-	cudaEventRecord(stop,0);
+	/*cudaEventRecord(stop,0);
 	cudaEventSynchronize(stop);
 	cudaEventElapsedTime(&time, start, stop);
 	cudaEventDestroy(start);
 	cudaEventDestroy(stop);
-	printf("Zhang-Li kernel requires: %f ms\n",time);
+	printf("Zhang-Li kernel requires: %f ms\n",time);*/
 	
   }
   

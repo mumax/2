@@ -25,6 +25,7 @@ DLLEXPORT  void zhangli_async(float** sttx, float** stty, float** sttz,
 			 const float pred, const float pret,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz, 
+			 const int pbc_x, const int pbc_y, const int pbc_z,
 			 int NPart,
 			 CUstream* stream);
 			 

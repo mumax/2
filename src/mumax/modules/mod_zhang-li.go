@@ -56,6 +56,7 @@ func (u *ZhangLiUpdater) Update() {
 	msat := e.Quant("msat") // it is pointwise
 	pol := e.Quant("polarisation").Scalar()
 	curr := e.Quant("j") // could be pointwise
+	pbc := e.Periodic()
 	
 	njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
 	nmsatn := msat.Multiplier()[0]
@@ -63,5 +64,5 @@ func (u *ZhangLiUpdater) Update() {
 	pred := pol * MuB * njn / (E * nmsatn * (1 + ee * ee)) 
 	pret := ee * pred
 	
-	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), int32(sizeMesh[X]), int32(sizeMesh[Y]), int32(sizeMesh[Z]), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]))
+	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), int32(sizeMesh[X]), int32(sizeMesh[Y]), int32(sizeMesh[Z]), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
 }
