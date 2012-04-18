@@ -181,20 +181,20 @@ extern "C" {
 	  
 	  int4 yi = make_int4(yb2, yb1, yf1, yf2);		  
 	  
-	  xb2 = (pbc.x && xb2 < 0)? size.x + xb2 : xb2; // backward coordinates are negative
-	  xb1 = (pbc.x && xb1 < 0)? size.x + xb1 : xb1;
-	  xf1 = (pbc.x && xf1 >= size.x)? xf1 - size.x : xf1;
-	  xf2 = (pbc.x && xf2 >= size.x)? xf2 - size.x : xf2;
+	  xb2 = (pbc.x == 1 && xb2 < 0)? size.x + xb2 : xb2; // backward coordinates are negative
+	  xb1 = (pbc.x == 1 && xb1 < 0)? size.x + xb1 : xb1;
+	  xf1 = (pbc.x == 1 && xf1 >= size.x)? xf1 - size.x : xf1;
+	  xf2 = (pbc.x == 1 && xf2 >= size.x)? xf2 - size.x : xf2;
 
 	  yb2 = (lmx == NULL && yb2 >= 0)? yb2 : size.y + yb2;
 	  yb1 = (lmx == NULL && yb1 >= 0)? yb1 : size.y + yb1;
 	  yf1 = (rmx == NULL && yf1 < size.y)? yf1 : yf1 - size.y;
 	  yf2 = (rmx == NULL && yf2 < size.y)? yf2 : yf2 - size.y;
 	 	  
-	  zb2 = (pbc.z && zb2 < 0)? (size.z + zb2) : zb2;
-	  zb1 = (pbc.z && zb1 < 0)? (size.z + zb1) : zb1;
-	  zf1 = (pbc.z && zf1 >= size.z)? zf1 - size.z : zf1;
-	  zf2 = (pbc.z && zf2 >= size.z)? zf2 - size.z : zf2;
+	  zb2 = (pbc.z == 1 && zb2 < 0)? (size.z + zb2) : zb2;
+	  zb1 = (pbc.z == 1 && zb1 < 0)? (size.z + zb1) : zb1;
+	  zf1 = (pbc.z == 1 && zf1 >= size.z)? zf1 - size.z : zf1;
+	  zf2 = (pbc.z == 1 && zf2 >= size.z)? zf2 - size.z : zf2;
 	 
   	  xb2 = (xb2 >= 0)? xb2 : i;
 	  xb1 = (xb1 >= 0)? xb1 : i;
@@ -211,9 +211,7 @@ extern "C" {
 	  zf1 = (zf1 < size.z)? zf1 : k;
 	  zf2 = (zf2 < size.z)? zf2 : k;	  
 	  
-	  int comm = j * size.z + k;
-	  
-	  	   
+	  int comm = j * size.z + k;	   
 	  int4 xn = make_int4(xb2 * size.w + comm, 
 						  xb1 * size.w + comm, 
 						  xf1 * size.w + comm, 
@@ -348,8 +346,8 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 	  		
 		// calculate dev neighbours
 		
-		int ld = (dev - 1 >= 0) ? dev - 1 : nDev - dev - 1;
-		int rd = (dev + 1 < nDev) ? dev + 1 : dev + 1 - nDev;
+		int ld = Mod(dev - 1, nDev);
+		int rd = Mod(dev + 1, nDev);
 				
 		float* lmx = mx[ld]; 
 		float* lmy = my[ld];
@@ -372,7 +370,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			}
 		}
 		
-		printf("Devices ara: %d\t%d\t%d\n", ld, dev, rd);
+		printf("Devices are: %d\t%d\t%d\n", ld, dev, rd);
 		
 		for (int i = 0; i < sx; i++) {
 			/*zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
