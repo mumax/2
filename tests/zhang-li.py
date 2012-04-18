@@ -56,7 +56,7 @@ setarray('m', mv)
 save("m","png",[])
 save("m","omf",[])
 
-run(10e-9)
+run(1e-9)
 
 save("m","png",[])
 save("m","omf",[])
