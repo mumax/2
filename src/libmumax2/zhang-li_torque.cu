@@ -186,10 +186,10 @@ extern "C" {
 	  xf1 = (pbc.x && xf1 >= size.x)? xf1 - size.x : xf1;
 	  xf2 = (pbc.x && xf2 >= size.x)? xf2 - size.x : xf2;
 
-	  yb2 = (lmx != NULL && yb2 < 0)? size.y + yb2 : yb2;
-	  yb1 = (lmx != NULL && yb1 < 0)? size.y + yb1 : yb1;
-	  yf1 = (rmx != NULL && yf1 >= size.y)? yf1 - size.y : yf1;
-	  yf2 = (rmx != NULL && yf2 >= size.y)? yf2 - size.y : yf2;
+	  yb2 = (lmx == NULL && yb2 >= 0)? yb2 : size.y + yb2;
+	  yb1 = (lmx == NULL && yb1 >= 0)? yb1 : size.y + yb1;
+	  yf1 = (rmx == NULL && yf1 < size.y)? yf1 : yf1 - size.y;
+	  yf2 = (rmx == NULL && yf2 < size.y)? yf2 : yf2 - size.y;
 	 	  
 	  zb2 = (pbc.z && zb2 < 0)? (size.z + zb2) : zb2;
 	  zb1 = (pbc.z && zb1 < 0)? (size.z + zb1) : zb1;
@@ -201,10 +201,10 @@ extern "C" {
 	  xf1 = (xf1 < size.x)? xf1 : i;
 	  xf2 = (xf2 < size.x)? xf2 : i;
 	  
-	  yb2 = (yb2 < 0)? j : yb2;
-	  yb1 = (yb1 < 0)? j : yb1;
-	  yf1 = (yf1 >= size.y)? j : yf1;
-	  yf2 = (yf2 >= size.y)? j : yf2;
+	  yb2 = (yb2 >= 0)? yb2 : j;
+	  yb1 = (yb1 >= 0)? yb1 : j;
+	  yf1 = (yf1 < size.y)? yf1 : j;
+	  yf2 = (yf2 < size.y)? yf2 : j;
 		  
       zb2 = (zb2 >= 0)? zb2 : k;
 	  zb1 = (zb1 >= 0)? zb1 : k;
@@ -241,10 +241,10 @@ extern "C" {
 	  float4 MM;
 
 	  
-	  MM.x = (yi.x >= 0 || lmx == NULL) ? mx[yn.x] : lmx[yn.x];
-	  MM.y = (yi.y >= 0 || lmx == NULL) ? mx[yn.y] : lmx[yn.y];
-	  MM.z = (yi.z < size.y || rmx == NULL) ? mx[yn.z] : rmx[yn.z];
-	  MM.w = (yi.w < size.y || rmx == NULL) ? mx[yn.w] : rmx[yn.w];
+	  MM.x = (yi.x >= 0 && lmx == NULL) ? mx[yn.x] : lmx[yn.x];
+	  MM.y = (yi.y >= 0 && lmx == NULL) ? mx[yn.y] : lmx[yn.y];
+	  MM.z = (yi.z < size.y && rmx == NULL) ? mx[yn.z] : rmx[yn.z];
+	  MM.w = (yi.w < size.y && rmx == NULL) ? mx[yn.w] : rmx[yn.w];
 	 	  	    
 	  float3 dmdx = 	make_float3(mstep.x * (mx[xn.x] - 8.0f * mx[xn.y] + 8.0f * mx[xn.z] - mx[xn.w]),
 									mstep.y * (MM.x - 8.0f * MM.y + 8.0f * MM.z - MM.w),
@@ -372,7 +372,6 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 				rmz = NULL;
 			}
 		}
-			
 		
 		for (int i = 0; i < sx; i++) {
 			/*zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
