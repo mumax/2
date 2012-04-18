@@ -161,8 +161,7 @@ extern "C" {
 	  
 	  
 	  float3 m = make_float3(mx[x0], my[x0], mz[x0]);		
-		 	
- 
+		 
       // First-order derivative 5-points stencil
 	   
 	  int xb2 = i - 2;
@@ -182,18 +181,18 @@ extern "C" {
 	  
 	  int4 yi = make_int4(yb2, yb1, yf1, yf2);		  
 	  
-	  xb2 = (pbc.x && xb2 < 0)? size.x - xb2 : xb2;
-	  xb1 = (pbc.x && xb1 < 0)? size.x - xb1 : xb1;
+	  xb2 = (pbc.x && xb2 < 0)? size.x + xb2 : xb2; // backward coordinates are negative
+	  xb1 = (pbc.x && xb1 < 0)? size.x + xb1 : xb1;
 	  xf1 = (pbc.x && xf1 >= size.x)? xf1 - size.x : xf1;
 	  xf2 = (pbc.x && xf2 >= size.x)? xf2 - size.x : xf2;
 
-	  yb2 = (lmx != NULL && yb2 < 0)? size.y - yb2 : yb2;
-	  yb1 = (lmx != NULL && yb1 < 0)? size.y - yb1 : yb1;
+	  yb2 = (lmx != NULL && yb2 < 0)? size.y + yb2 : yb2;
+	  yb1 = (lmx != NULL && yb1 < 0)? size.y + yb1 : yb1;
 	  yf1 = (rmx != NULL && yf1 >= size.y)? yf1 - size.y : yf1;
 	  yf2 = (rmx != NULL && yf2 >= size.y)? yf2 - size.y : yf2;
 	 	  
-	  zb2 = (pbc.z && zb2 < 0)? (size.z - zb2) : zb2;
-	  zb1 = (pbc.z && zb1 < 0)? (size.z - zb1) : zb1;
+	  zb2 = (pbc.z && zb2 < 0)? (size.z + zb2) : zb2;
+	  zb1 = (pbc.z && zb1 < 0)? (size.z + zb1) : zb1;
 	  zf1 = (pbc.z && zf1 >= size.z)? zf1 - size.z : zf1;
 	  zf2 = (pbc.z && zf2 >= size.z)? zf2 - size.z : zf2;
 	 
