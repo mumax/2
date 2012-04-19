@@ -183,11 +183,11 @@ extern "C" {
 	  xb1 = (pbc.x == 1 && xb1 < 0)? size.x + xb1 : xb1;
 	  xf1 = (pbc.x == 1 && xf1 >= size.x)? xf1 - size.x : xf1;
 	  xf2 = (pbc.x == 1 && xf2 >= size.x)? xf2 - size.x : xf2;
-
-	  yb2 = (lmx == NULL && yb2 >= 0)? yb2 : size.y + yb2;
-	  yb1 = (lmx == NULL && yb1 >= 0)? yb1 : size.y + yb1;
-	  yf1 = (rmx == NULL && yf1 < size.y)? yf1 : yf1 - size.y;
-	  yf2 = (rmx == NULL && yf2 < size.y)? yf2 : yf2 - size.y;
+	  
+	  yb2 = (lmx == NULL && yb2 < 0)? j : yb2;
+	  yb1 = (lmx == NULL && yb1 < 0)? j : yb1;
+	  yf1 = (rmx == NULL && yf1 > size.y - 1)? j : yf1;
+	  yf2 = (rmx == NULL && yf2 > size.y - 1)? j : yf2;
 	 	  
 	  zb2 = (pbc.z == 1 && zb2 < 0)? (size.z + zb2) : zb2;
 	  zb1 = (pbc.z == 1 && zb1 < 0)? (size.z + zb1) : zb1;
@@ -199,10 +199,11 @@ extern "C" {
 	  xf1 = (xf1 < size.x)? xf1 : i;
 	  xf2 = (xf2 < size.x)? xf2 : i;
 	  
-	  yb2 = (yb2 >= 0)? yb2 : j;
-	  yb1 = (yb1 >= 0)? yb1 : j;
-	  yf1 = (yf1 < size.y)? yf1 : j;
-	  yf2 = (yf2 < size.y)? yf2 : j;
+	  yb2 = (yb2 >= 0)? yb2 : size.y + yb2;
+	  yb1 = (yb1 >= 0)? yb1 : size.y + yb1;
+	  yf1 = (yf1 < size.y)? yf1 : yf1 - size.y;
+	  yf2 = (yf2 < size.y)? yf2 : yf2 - size.y;
+	  
 		  
       zb2 = (zb2 >= 0)? zb2 : k;
 	  zb1 = (zb1 >= 0)? zb1 : k;
@@ -305,7 +306,6 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
 			 const int pbc_x, const int pbc_y, const int pbc_z, 
-			 int NPart,
 			 CUstream* stream)
   {
 
@@ -372,7 +372,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 		
 		for (int i = 0; i < sx; i++) {
 			/*zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
-												   mx[dev], my[dev], mz[dev],											   
+												   mx[dev], my[dev], mz[dev]s,											   
 												   jx[dev], jy[dev], jz[dev], 
 												   msat[dev],
 												   pre,

@@ -35,7 +35,7 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret f
 	
 	Assert(j.NComp() == 3)
 	Assert(msat.NComp() == 1)
-	Debug("Part size:",m.PartSize()[X],"x",m.PartSize()[Y],"x",m.PartSize()[Z])
+	//Debug("Part size:",m.PartSize()[X],"x",m.PartSize()[Y],"x",m.PartSize()[Z])
 	
 	// Calling the CUDA functions
 	C.zhangli_async(
@@ -68,6 +68,5 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret f
 		(C.int)(pbc[Y]),
 		(C.int)(pbc[Z]),
 		
-		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
 }
