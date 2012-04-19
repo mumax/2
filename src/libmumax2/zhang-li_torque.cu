@@ -46,11 +46,9 @@ extern "C" {
     if (m_sat != 0.0f && j < size.y && k < size.z){ // 3D now:)
 	   
 	   m_sat = 1.0f / m_sat;
-	  
-	  
+	    
 	  float3 m = make_float3(mx[x0], my[x0], mz[x0]);		
-		 	
- 
+		 	 
       // First-order derivative 5-points stencil
 	   
 	  int xb2 = (i-2 >= 0)? i-2 : i;
@@ -370,7 +368,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			}
 		}
 		
-		printf("Devices are: %d\t%d\t%d\n", ld, dev, rd);
+		// printf("Devices are: %d\t%d\t%d\n", ld, dev, rd);
 		
 		for (int i = 0; i < sx; i++) {
 			/*zhangli_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  

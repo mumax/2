@@ -49,7 +49,6 @@ func (u *ZhangLiUpdater) Update() {
 	e := GetEngine()
 	
 	cellSize := e.CellSize()	
-	sizeMesh := e.GridSize()
 	stt := u.stt
 	m := e.Quant("m")
 	ee := e.Quant("xi").Scalar()
@@ -64,5 +63,5 @@ func (u *ZhangLiUpdater) Update() {
 	pred := pol * MuB * njn / (E * nmsatn * (1 + ee * ee)) 
 	pret := ee * pred
 	
-	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), int32(sizeMesh[X]), int32(sizeMesh[Y]), int32(sizeMesh[Z]), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
+	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
 }
