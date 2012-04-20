@@ -178,38 +178,37 @@ extern "C" {
 	  int zf2 = k + 2;
 	  
 	  int4 yi = make_int4(yb2, yb1, yf1, yf2);		  
-	  
-	  xb2 = (pbc.x == 1 && xb2 < 0)? size.x + xb2 : xb2; // backward coordinates are negative
-	  xb1 = (pbc.x == 1 && xb1 < 0)? size.x + xb1 : xb1;
-	  xf1 = (pbc.x == 1 && xf1 >= size.x)? xf1 - size.x : xf1;
-	  xf2 = (pbc.x == 1 && xf2 >= size.x)? xf2 - size.x : xf2;
-	  
+
+	  xb2 = (pbc.x == 0 && xb2 < 0)? i : xb2; // backward coordinates are negative
+	  xb1 = (pbc.x == 0 && xb1 < 0)? i : xb1;
+	  xf1 = (pbc.x == 0 && xf1 >= size.x)? i : xf1;
+	  xf2 = (pbc.x == 0 && xf2 >= size.x)? i : xf2;
+	  	  
 	  yb2 = (lmx == NULL && yb2 < 0)? j : yb2;
 	  yb1 = (lmx == NULL && yb1 < 0)? j : yb1;
-	  yf1 = (rmx == NULL && yf1 > size.y - 1)? j : yf1;
-	  yf2 = (rmx == NULL && yf2 > size.y - 1)? j : yf2;
+	  yf1 = (rmx == NULL && yf1 >= size.y)? j : yf1;
+	  yf2 = (rmx == NULL && yf2 >= size.y)? j : yf2;
 	 	  
-	  zb2 = (pbc.z == 1 && zb2 < 0)? (size.z + zb2) : zb2;
-	  zb1 = (pbc.z == 1 && zb1 < 0)? (size.z + zb1) : zb1;
-	  zf1 = (pbc.z == 1 && zf1 >= size.z)? zf1 - size.z : zf1;
-	  zf2 = (pbc.z == 1 && zf2 >= size.z)? zf2 - size.z : zf2;
-	 
-  	  xb2 = (xb2 >= 0)? xb2 : i;
-	  xb1 = (xb1 >= 0)? xb1 : i;
-	  xf1 = (xf1 < size.x)? xf1 : i;
-	  xf2 = (xf2 < size.x)? xf2 : i;
+	  zb2 = (pbc.z == 0 && zb2 < 0)? k : zb2;
+	  zb1 = (pbc.z == 0 && zb1 < 0)? k : zb1;
+	  zf1 = (pbc.z == 0 && zf1 >= size.z)? k : zf1;
+	  zf2 = (pbc.z == 0 && zf2 >= size.z)? k : zf2;
+	 	  
+	  xb2 = (xb2 >= 0)? xb2 : size.x + xb2;
+	  xb1 = (xb1 >= 0)? xb1 : size.x + xb1;
+	  xf1 = (xf1 < size.x)? xf1 : xf1 - size.x;
+	  xf2 = (xf2 < size.x)? xf2 : xf2 - size.x;
 	  
 	  yb2 = (yb2 >= 0)? yb2 : size.y + yb2;
 	  yb1 = (yb1 >= 0)? yb1 : size.y + yb1;
 	  yf1 = (yf1 < size.y)? yf1 : yf1 - size.y;
 	  yf2 = (yf2 < size.y)? yf2 : yf2 - size.y;
 	  
-		  
-      zb2 = (zb2 >= 0)? zb2 : k;
-	  zb1 = (zb1 >= 0)? zb1 : k;
-	  zf1 = (zf1 < size.z)? zf1 : k;
-	  zf2 = (zf2 < size.z)? zf2 : k;	  
-	  
+	  zb2 = (zb2 >= 0)? zb2 : size.z + zb2;
+	  zb1 = (zb1 >= 0)? zb1 : size.z + zb1;
+	  zf1 = (zf1 < size.z)? zf1 : zf1 - size.z;
+	  zf2 = (zf2 < size.z)? zf2 : zf2 - size.z;
+	  	  
 	  int comm = j * size.z + k;	   
 	  int4 xn = make_int4(xb2 * size.w + comm, 
 						  xb1 * size.w + comm, 
