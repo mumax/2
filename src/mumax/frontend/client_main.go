@@ -16,12 +16,13 @@ import (
 	. "mumax/common"
 	"os"
 	"os/exec"
-	"path"
 	"runtime"
+	"path"
 	"net"
 	"bufio"
 	"strings"
 	"io"
+	"path/filepath"
 )
 
 
@@ -33,13 +34,14 @@ func clientMain() {
 	if !*flag_silent {
 		fmt.Println(WELCOME)
 	}
-
-	infile := inputFile()
-	//outdir := outputDir(infile)
-	outdir := "."
+	 
 	
+	infile := inputFile()	
+	outdir := GetOutputDir(infile)
+		
 	initOutputDir(outdir)
 	initLogger(outdir)
+	
 	LogFile(WELCOME)
 	hostname, _ := os.Hostname()
 	Debug("Hostname:", hostname)
@@ -133,9 +135,12 @@ func clientMain() {
 
 
 // return the output directory
-func outputDir(inputFile string) string {
+func GetOutputDir(inputFile string) string {
 	if *flag_outputdir != "" {
 		return *flag_outputdir
+	}
+	if inputFile == "" {
+		return filepath.Dir(filepath.Clean(os.Args[0]))
 	}
 	return inputFile + ".out"
 }
@@ -257,6 +262,14 @@ func ServeClient(m_out *bufio.Writer, clientctl chan int, ClientName string, Cli
 	client.Init(ClientPath)
 	client.Run()
 }*/
+
+// return the output directory
+func outputDir(inputFile string) string {
+        if *flag_outputdir != "" {
+                return *flag_outputdir
+        }
+        return inputFile + ".out"
+}
 
 // initialize the logger
 func initLogger(outputDir string) {
