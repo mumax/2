@@ -618,9 +618,9 @@ func (e *Engine) Stats() string {
 
 func valid(b bool) string {
 	if b {
-		return "✓"
+		return "OK"
 	}
-	return "✗"
+	return "X"
 }
 
 func fill(s interface{}) string {

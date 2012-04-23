@@ -67,4 +67,4 @@ run(1e-9)
 
 printstats()
 savegraph("graph.png") # see stdprobl4.py.out/graph.dot.png
-sync()
+quit()

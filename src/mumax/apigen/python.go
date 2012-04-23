@@ -78,6 +78,8 @@ def call(command, args):
 
 End='<<< End of mumax message >>>'
 
+## Retrieving message until the EOM statement
+# @note Internal use only.
 def recvall(the_socket):
     total_data=[];data=''
     while True:
@@ -94,6 +96,45 @@ def recvall(the_socket):
                     total_data.pop()
                     break
     return ''.join(total_data)
+	
+## Asks MuMax2 to exit
+# @note Internal use only
+def quit():
+	global s_sock
+	global M_HOST
+	global M_PORT
+	global initialized
+	if (initialized == 1):
+		s_sock.close()
+	
+	e_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
+	e_sock.connect((M_HOST,M_PORT))
+	
+	cmsg = 'exit:' + '\n'
+	print 'Sending termination request to master: ' + cmsg	
+	e_sock.sendall(cmsg)
+	e_sock.close()
+	return
+
+## Asks MuMax2 to terminate
+# @note Internal use only
+def terminate():	
+	global s_sock
+	global M_HOST
+	global M_PORT
+	global initialized
+	if (initialized == 1):
+		s_sock.close()
+	
+	e_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
+	e_sock.connect((M_HOST,M_PORT))
+	
+	cmsg = 'terminate:' + '\n'
+	print 'Sending termination request to master: ' + cmsg	
+	e_sock.sendall(cmsg)
+	e_sock.close()
+	e_sock.close()
+	return	
 `)
 }
 

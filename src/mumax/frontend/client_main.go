@@ -24,6 +24,8 @@ import (
 	"io"
 )
 
+
+
 // run the input files given on the command line
 func clientMain() {
 	//defer fmt.Println(RESET)
@@ -58,6 +60,9 @@ func clientMain() {
 		return
 	}
 	
+	//masterctl := make(chan int)
+	clientctl := make(chan int)
+	
 	m_addr := SERVERADDR + ":" + PORT	
 	Debug("Starting local MuMax server on " + m_addr + " ...")
 	
@@ -73,17 +78,59 @@ func clientMain() {
 		startSubcommand(infile, logWait)
 		Debug("Done.")
 	}
-		
-	for {
+	
+	exit := NOTRUNNING
+	clientsnmb := 0	
+	for {	
 		Debug("Waiting for clients...")
-		wire, err1 := ln.Accept()
-		if err1 != nil {
+		wire, err := ln.Accept()
+		if err != nil {
 			Debug("[WARNING] One of the clients has failed to connect.")
 			continue
 		}	
-		go ServeClient(wire)
+		m_in := bufio.NewReader(wire)
+		m_out := bufio.NewWriter(wire)
+		
+		// Reads Client's name and path to the script file if any
+		
+		cmsg, err := m_in.ReadString('\n')
+		if err != nil {
+			Debug("[WARNING] Client has failed to send its name and path to the script")
+			return
+		}
+		
+		cmsg_slice := strings.Split(cmsg,":")
+		
+		ClientName := cmsg_slice[0]	
+		// This approach is not universal at all
+		ClientPath := strings.TrimSpace(cmsg_slice[1]) + ".out"
+		
+		if ClientName == "exit" {
+			Debug("Exit request from the client...")
+			exit = EXIT
+			break	
+		}
+		
+		if ClientName == "terminate" {
+			Debug("Termination request from the client...")
+			exit = TERMINATE
+			break
+		}
+		clientsnmb++
+		go ServeClient(m_out, clientctl, ClientName, ClientPath)	
+	}	
+	Debug("There are",clientsnmb,"connected clients:")
+	if exit == EXIT {
+		for i:=0; i < clientsnmb; i++ {
+			Debug("Waiting for client no.",i,"...")
+			<-clientctl
+			Debug("Done.")
+		}
 	}	
 }
+
+
+
 
 // return the output directory
 func outputDir(inputFile string) string {
@@ -116,24 +163,7 @@ func initOutputDir(outputDir string) {
 }
 
 // Gets the response from the client and starts the slave server
-func ServeClient(wire net.Conn) {
-
-	m_in := bufio.NewReader(wire)
-	m_out := bufio.NewWriter(wire)
-	
-	// Reads Client's name and path to the script file if any
-	
-	cmsg, err := m_in.ReadString('\n')
-	if err != nil {
-		Debug("[WARNING] Client has failed to send its name and path to the script")
-		return
-	}
-	
-	cmsg_slice := strings.Split(cmsg,":")
-	
-	ClientName := cmsg_slice[0]	
-	// This approach is not universal at all
-	ClientPath := strings.TrimSpace(cmsg_slice[1]) + ".out"
+func ServeClient(m_out *bufio.Writer, clientctl chan int, ClientName string, ClientPath string) {
 		
 	Debug(ClientName + " is connected")	
 	Debug("Client asks to write into: " + ClientPath)
@@ -163,7 +193,70 @@ func ServeClient(wire net.Conn) {
 	client.wire = s_wire
 	client.Init(ClientPath)
 	client.Run()
+	clientctl <- NOTRUNNING
 }
+
+// Gets the response from the client and starts the slave server
+/*func ServeClient(wire net.Conn, masterctl chan int) {
+	
+	m_in := bufio.NewReader(wire)
+	m_out := bufio.NewWriter(wire)
+	
+	// Reads Client's name and path to the script file if any
+	
+	cmsg, err := m_in.ReadString('\n')
+	if err != nil {
+		Debug("[WARNING] Client has failed to send its name and path to the script")
+		return
+	}
+	
+	cmsg_slice := strings.Split(cmsg,":")
+	
+	ClientName := cmsg_slice[0]	
+	// This approach is not universal at all
+	ClientPath := strings.TrimSpace(cmsg_slice[1]) + ".out"
+	
+	if ClientName == "exit" {
+		Debug("Exit request...")
+		masterctl <- EXIT
+		return
+	
+	}
+	
+	if ClientName == "terminate" {
+		Debug("Termination request...")
+		masterctl <- TERMINATE
+		return
+	}
+	Debug(ClientName + " is connected")	
+	Debug("Client asks to write into: " + ClientPath)
+	initOutputDir(ClientPath)
+	
+	s_ln, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		Debug("[WARNING] MuMax has failed to start slave server")
+		return
+	}
+	
+	s_addr	:= s_ln.Addr().String()
+	Debug("The slave server is started on: " + s_addr)
+	addr_msg := s_ln.Addr().String() + EOM
+	m_out.WriteString(addr_msg)
+	m_out.Flush()
+	
+	Debug("Waiting " + ClientName + " to respond to slave server...")	
+	s_wire, err := s_ln.Accept()
+	if err != nil {
+		Debug("[WARNING]" + ClientName + " has failed to connect")
+		return
+	}	
+	Debug("Done.")
+	
+	var client Client	
+	client.wire = s_wire
+	client.Init(ClientPath)
+	client.Run()
+}*/
 
 // initialize the logger
 func initLogger(outputDir string) {
@@ -291,4 +384,9 @@ const (
 	PORT		  = "3655"
 	SERVERADDR    = "localhost"
 	EOM		      = "<<< End of mumax message >>>"
+	
+	NOTRUNNING = 0				// CLIENT IS NOT RUNNING
+	RUNNING = 1					// CLIENT IS RUNNING
+	TERMINATE = 255				// CLIENT ASKS MUMAX2 TO TERMINATE ALL THE CLIENTS
+	EXIT = 254					// CLIENT ASKS MUMAX2 TO EXIT, ENSURING THAT ALL OTHER JOBS HAVE BEEN DONE
 )

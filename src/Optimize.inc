@@ -7,8 +7,7 @@ export LDFLAGS = $LDFLAGS:'./libmumax2'
 ifndef SystemRoot
 
 NVCC=nvcc
- 
-NVCC=nvcc 
+  
 NVCC+=\
   --compiler-options -Wall\
   --compiler-options -Werror\
@@ -103,4 +102,5 @@ CC+=\
  /Zi\
  /fp:fast\
  /arch:AVX\
+ 
  endif
