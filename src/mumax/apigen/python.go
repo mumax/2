@@ -31,50 +31,44 @@ import json
 import sys
 import socket
 
-infifo = 0
-outfifo = 0
+
 m_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 initialized = 0
 outputdir = ""
-M_HOST, M_PORT = "localhost", 3655
+M_ADDR = ""
+M_HOST, M_PORT = "", 0
 
 ## Initializes the communication with mumax2.
 # @note Internal use only
 def init():
-	global infifo
-	global outfifo
 	global outputdir
-	global s_sock
 	global m_sock
 	global initialized
 	global M_HOST
 	global M_PORT
 	
 	# get the output directory from environment
-	# outputdir=os.environ["MUMAX2_OUTPUTDIR"] + "/"	
+	outputdir=os.environ["MUMAX2_OUTPUTDIR"] + "/"	
+	M_ADDR = os.environ["MUMAX2_ADDR"]
+	
+	print 'MuMax grants connection on: ' + M_ADDR
+	
+	m_name = M_ADDR.split(':')
+	M_HOST = m_name[0]
+	M_PORT = int(m_name[1])
+	
 	m_sock.connect((M_HOST,M_PORT))
 	initialized = 1
-	cmsg = 'python:'+ sys.argv[0] + '\n'
-	print 'Sending back to master: ' + cmsg	
-	m_sock.sendall(cmsg)
-	s_addr = recvall(m_sock)
-	print 'MuMax grants connection on: ' + s_addr
-	s_name = s_addr.split(':')
-	S_HOST = s_name[0]
-	S_PORT = int(s_name[1])
-	m_sock.close()
-	s_sock.connect((S_HOST, S_PORT))	
-	print 'python frontend is initialized'
+		
+#	print 'python frontend is initialized'
 
 ## Calls a mumax2 command and returns the result as string.
 # @note Internal use only.
 def call(command, args):
 	if (initialized == 0):
 		init()
-	s_sock.sendall(json.dumps([command, args])+'\n')
-	# return json.loads(s_sock.recv(4096))
-	return json.loads(recvall(s_sock))
+	m_sock.sendall(json.dumps([command, args])+'\n')
+	return json.loads(recvall(m_sock))
 
 End='<<< End of mumax message >>>'
 
@@ -96,45 +90,7 @@ def recvall(the_socket):
                     total_data.pop()
                     break
     return ''.join(total_data)
-	
-## Asks MuMax2 to exit
-# @note Internal use only
-def quit():
-	global s_sock
-	global M_HOST
-	global M_PORT
-	global initialized
-	if (initialized == 1):
-		s_sock.close()
-	
-	e_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
-	e_sock.connect((M_HOST,M_PORT))
-	
-	cmsg = 'exit:' + '\n'
-	print 'Sending termination request to master: ' + cmsg	
-	e_sock.sendall(cmsg)
-	e_sock.close()
-	return
-
-## Asks MuMax2 to terminate
-# @note Internal use only
-def terminate():	
-	global s_sock
-	global M_HOST
-	global M_PORT
-	global initialized
-	if (initialized == 1):
-		s_sock.close()
-	
-	e_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
-	e_sock.connect((M_HOST,M_PORT))
-	
-	cmsg = 'terminate:' + '\n'
-	print 'Sending termination request to master: ' + cmsg	
-	e_sock.sendall(cmsg)
-	e_sock.close()
-	e_sock.close()
-	return	
+		
 `)
 }
 

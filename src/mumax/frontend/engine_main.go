@@ -43,7 +43,7 @@ func engineMain() {
 	}
 
 	var client Client
-	client.Init(outdir)
+	client.Init("-", outdir)
 	client.RunSlave()
 }
 

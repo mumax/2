@@ -12,28 +12,49 @@ package frontend
 // Author: Arne Vansteenkiste
 
 import (
-	//"fmt"
+	"fmt"
 	. "mumax/common"
 	"mumax/engine"
 	"net"
+	"path"
 	"bufio"
 	"time"
+	"os"
+	"os/exec"
 )
 
 type Client struct {
-	outputDir string
+	inputFile			 string
+	outputDir 			 string
+	commAddr 			 string
 	ipc                  jsonRPC
 	api                  engine.API
 	wire			 	 net.Conn
+	server				 net.Listener
 	logWait              chan int // channel to wait for completion of go logStream()
 }
 
 // Initializes the mumax client to parse infile, write output
 // to outdir and connect to a server over conn.
-func (c *Client) Init(outputDir string) {
+
+func (c *Client) Init(inputfile string, outputDir string) {
+
+	Debug("Trying to establish TCP server...")
+	m_s, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		Debug("[WARNING] MuMax has failed to start slave server")
+		return
+	}
+	c.server = m_s
+	c.commAddr = c.server.Addr().String()
+	Debug("The TCP connection is grangted to:", c.commAddr)
+	Debug("Done.")
+	
+	c.inputFile = inputfile
 	c.outputDir = outputDir
 	
-	// CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", c.outputDir), ERR_IO)
+	CheckErr(os.Setenv("MUMAX2_ADDR", c.commAddr), ERR_IO)
+	
 	engine.Init()
 	engine.GetEngine().SetOutputDirectory(outputDir)
 	c.api = engine.API{engine.GetEngine()}
@@ -41,17 +62,120 @@ func (c *Client) Init(outputDir string) {
 
 // Start interpreter sub-command and communicate over fifos in the output dir.
 func (c *Client) Run() {
-
+	c.logWait = make(chan int)
+	
+	command, waiter := c.startSubcommand()
+	
+	s_wire,err := c.server.Accept()
+	if err != nil {
+		Debug("Client has failed to connect!")
+		return
+	}	
+	c.wire = s_wire
+		
 	s_infifo := bufio.NewReader(c.wire)
 	s_outflush := bufio.NewWriter(c.wire) 	
 	s_outfifo := s_outflush
 	
 	c.ipc.Init(s_infifo, s_outfifo, *s_outflush, c.api)
 	c.ipc.Run()
+	
+	// wait for the sub-command to exit
+	Debug("Waiting for subcommand ", command, "to exit")
+	exitstat := <-waiter
+
+	if exitstat != 0 {
+			panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
+	}
+	
+	//Housekeeping
+	
+	c.wire.Close()
+	c.server.Close()	
 	Debug("Client is now disconnected")	
+	
+	
+	// wait for full pipe of sub-command output to the logger
+	// not sure if this has much effect.
+	
+	<-c.logWait // stderr
+	<-c.logWait // stdout (or the other way around ;-)
 	
 }
 
+// run the sub-command (e.g. python) to interpret the script file
+// it will first hang while trying to open the FIFOs
+func (c *Client) startSubcommand() (command string, waiter chan (int)) {
+
+	CheckErr(os.Setenv("MUMAX2_OUTPUTDIR", c.outputDir), ERR_IO)
+
+	var args []string
+	command, args = commandForFile(c.inputFile) // e.g.: "python"
+	Debug("Starting",command,"with following flags",args)
+	proc := exec.Command(command, args...) //:= subprocess(command, args)
+	Debug("Done.")
+	stderr, err4 := proc.StderrPipe()
+	CheckErr(err4, ERR_IO)
+	stdout, err5 := proc.StdoutPipe()
+	CheckErr(err5, ERR_IO)
+	CheckErr(proc.Start(), ERR_IO)
+
+	go logStream("["+command+"]", stderr, true, c.logWait)
+	go logStream("["+command+"]", stdout, false, c.logWait)
+
+	Debug(command, "PID:", proc.Process.Pid)
+	
+	// start waiting for sub-command asynchronously and
+	// use a channel to signal sub-command completion
+	waiter = make(chan (int))
+	go func() {
+		exitstat := 666 // dummy value 
+		err := proc.Wait()
+		if err != nil {
+			if msg, ok := err.(*exec.ExitError); ok {
+				if msg.ProcessState.Success() {
+					exitstat = 0
+				} else {
+					exitstat = 1
+				}
+				// TODO: extract unix exit status
+				//exitstat = msg.ExitStatus()
+			} else {
+				panic(InputErr(err.Error()))
+			}
+		} else {
+			exitstat = 0
+		}
+		waiter <- exitstat // send exit status to signal completion 
+	}()
+
+	return
+}
+
+// given a file name (e.g. file.py)
+// this returns a command to run the file (e.g. python file.py, java File)
+func commandForFile(file string) (command string, args []string) {
+	if *flag_command != "" {
+		return *flag_command, []string{file}
+	}
+	if file == "" {
+		panic(IOErr("no input file"))
+	}
+	switch path.Ext(file) {
+	default:
+		panic(InputErr("Cannot handle files with extension " + path.Ext(file)))
+	case ".py":
+		return "python", []string{file}
+		//case ".java":
+		//	return GetExecDir() + "javaint", []string{file}
+		//case ".class":
+		//	return "java", []string{ReplaceExt(file, "")}
+		//case ".lua":
+		//	return "lua", []string{file}
+	}
+	panic(Bug("unreachable"))
+	return "", nil
+}
 
 // returns a channel that will signal when the file has appeared
 func pollFile(fname string) (waiter chan (int)) {

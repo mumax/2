@@ -83,5 +83,3 @@ autotabulate(["t", "<m>"], "m.txt", 50e-12)
 run(10.0e-9)
 
 printstats()
-
-quit()
