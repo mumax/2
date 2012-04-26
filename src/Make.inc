@@ -9,7 +9,6 @@ ifndef SystemRoot
 NVCC=nvcc
   
 NVCC+=\
-  --compiler-options -Wall\
   --compiler-options -Werror\
   --compiler-options -fPIC\
   --use_fast_math\
@@ -19,7 +18,6 @@ NVCC+=\
   
 NVCCWERRORLESS=nvcc
 NVCCWERRORLESS+=\
-  --compiler-options -Wall\
   --compiler-options -fPIC\
   --use_fast_math\
   -arch=sm_21\
