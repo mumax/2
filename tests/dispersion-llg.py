@@ -45,11 +45,11 @@ save("m","ovf",[])
 
 setv('alpha', 0.01)
 
-# setv('t', 0)
-# setv('dt', 0.001e-12)
+setv('t', 0)
+setv('dt', 0.001e-12)
 
 
-#add_to('H_eff','Brf')
+add_to('H_eff','Brf')
 
 rfmask = makearray(3, Nx, Ny, Nz)
 rfmask[0][0][0][0] = 0
@@ -61,7 +61,9 @@ rfmask[2][1][0][0] = 0
 rfmask[0][2][0][0] = 0
 rfmask[1][2][0][0] = 1
 rfmask[2][2][0][0] = 0
-#setmask('Brf',rfmask)
+setmask('Brf',rfmask)
+
+save("Brf","png",[])
 
 tt = 3e-12 # 1/2*tt = bandwidth ~166 GHz
 
@@ -79,7 +81,7 @@ for i in range(N):
             By = Brf0 * sin(arg) / arg
         else:
             By = Brf0
-        #setpointwise('Brf', t, [0, By / mu0, 0])
+        setpointwise('Brf', t, [0, By / mu0, 0])
 	
 TT = N * tt
 
