@@ -27,7 +27,7 @@ extern "C" {
 	
   // ========================================
    
-  __global__ void zhangli_deltaMKern(float* sttx, float* stty, float* sttz, 
+/*  __global__ void zhangli_deltaMKern(float* sttx, float* stty, float* sttz, 
 					 float* mx, float* my, float* mz,					 
 					 float* jx, float* jy, float* jz,
 					 float* msat,
@@ -131,7 +131,7 @@ extern "C" {
       stty[x0] = m_sat*((pre.x * mxdmxm.y) + (pre.y * dmdjxm.y));
       sttz[x0] = m_sat*((pre.x * mxdmxm.z) + (pre.y * dmdjxm.z));   
     } 
-  }
+  }*/
 
   
  __global__ void zhangli_deltaMKernMGPU(float* sttx, float* stty, float* sttz,
@@ -143,7 +143,7 @@ extern "C" {
 					 float2 pre,
 					 int4 size,		
 					 float3 mstep,
-					 int3 pbc,
+					 int2 pbc,
 					 int i)
   {	
 	
@@ -189,10 +189,10 @@ extern "C" {
 	  yf1 = (rmx == NULL && yf1 >= size.y)? j : yf1;
 	  yf2 = (rmx == NULL && yf2 >= size.y)? j : yf2;
 	 	  
-	  zb2 = (pbc.z == 0 && zb2 < 0)? k : zb2;
-	  zb1 = (pbc.z == 0 && zb1 < 0)? k : zb1;
-	  zf1 = (pbc.z == 0 && zf1 >= size.z)? k : zf1;
-	  zf2 = (pbc.z == 0 && zf2 >= size.z)? k : zf2;
+	  zb2 = (pbc.y == 0 && zb2 < 0)? k : zb2;
+	  zb1 = (pbc.y == 0 && zb1 < 0)? k : zb1;
+	  zf1 = (pbc.y == 0 && zf1 >= size.z)? k : zf1;
+	  zf2 = (pbc.y == 0 && zf2 >= size.z)? k : zf2;
 	 	  
 	  xb2 = (xb2 >= 0)? xb2 : size.x + xb2;
 	  xb1 = (xb1 >= 0)? xb1 : size.x + xb1;
@@ -326,9 +326,9 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 	float3 mstep = make_float3(i12csx, i12csy, i12csz);	
 	int4 size = make_int4(sx, sy, sz, syz);
 	float2 pre = make_float2(pred, pret);
-	int3 pbc = make_int3(pbc_x, pbc_y, pbc_z);
+	int2 pbc = make_int2(pbc_x, pbc_z);
 	
-    int nDev = nDevice();
+	int nDev = nDevice();
 		
 	/*cudaEvent_t start,stop;
 	float time;
