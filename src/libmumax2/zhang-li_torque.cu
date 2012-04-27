@@ -4,26 +4,12 @@
 #include "gpu_safe.h"
 #include "stdio.h"
 #include <cuda.h>
+#include "common_func.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-	// mod
-	int Mod(int a, int b){
-		return (a%b+b)%b;
-	}
-	
-	// dot product
-	inline __host__ __device__ float dotf(float3 a, float3 b)
-	{ 
-		return a.x * b.x + a.y * b.y + a.z * b.z;
-	}
 
-	// cross product
-	inline __host__ __device__ float3 crossf(float3 a, float3 b)
-	{ 
-		return make_float3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); 
-	}
 	
   // ========================================
    
