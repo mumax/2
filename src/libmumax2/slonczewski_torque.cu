@@ -3,6 +3,7 @@
 #include "gpu_conf.h"
 #include "gpu_safe.h"
 #include <cuda.h>
+#include "common_func.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,45 +12,60 @@ extern "C" {
 
   __global__ void slonczewski_deltaMKern(float* sttx, float* stty, float* sttz, 
 					 float* mx, float* my, float* mz, 
+					 float* msat, 
 					 float* px, float* py, float* pz,
-					 float pxMul, float pyMul, float pzMul,
-					 float* jx,  float IeMul,
-					 float aj, float bj, float Pol, 
+					 float* jx, float* jy, float* jz,
+					 float3 pMul,
+					 float3 pre,
+					 float3 meshSize,
 					 int NPart)
   {
     
     int I = threadindex;
-	if (I < NPart){ // Thread configurations are usually too large...
+    float Ms = msat[I]; 
+	if (Ms > 0.0f && I < NPart){ // Thread configurations are usually too large...
 
-      float m_x = mx[I];
-      float m_y = my[I];
-      float m_z = mz[I];
-	  
-      float p_x = pxMul;
-	  if(px != NULL){ p_x *= px[I]; }
-      float p_y = pyMul;
-	  if(py != NULL){ p_y *= py[I]; }
-      float p_z = pzMul;
-	  if(pz != NULL){ p_z *= pz[I]; }
-
-      float pxm_x = -p_y * m_z + m_y * p_z;
-      float pxm_y =  p_x * m_z - m_x * p_z;
-      float pxm_z = -p_x * m_y + m_x * p_y;
+      Ms = 1.0f / Ms;
+      pre.y *= Ms;
+      pre.z *= Ms;
       
-      float mxpxm_x = -pxm_y * m_z + m_y * pxm_z;
-      float mxpxm_y =  pxm_x * m_z - m_x * pxm_z;
-      float mxpxm_z = -pxm_x * m_y + m_x * pxm_y;
-
-	  float cosTheta = m_x*p_x + m_y*p_y + m_z*p_z;
-
-	  float Ie = IeMul;
-	  if(jx != NULL){ Ie *= jx[I]; }
-	
-      float factor = -(Pol * Ie) / (aj + bj * cosTheta); // magic minus sign.
-
-      sttx[I] = factor * mxpxm_x;
-      stty[I] = factor * mxpxm_y;
-      sttz[I] = factor * mxpxm_z;
+      float3 m = make_float3(mx[I], my[I], mz[I]);
+	  
+      float p_x = (px != NULL) ? pMul.x * px[I] : pMul.x;
+      float p_y = (py != NULL) ? pMul.y * py[I] : pMul.y;
+      float p_z = (pz != NULL) ? pMul.z * pz[I] : pMul.z;
+    
+      float3 p = make_float3(p_x, p_y, p_z);
+      float npn = len(p);
+      
+      float3 pxm = crossf(p, m); // minus
+      float3 mxpxm = crossf(pxm, m); // plus
+      
+      float pdotm = dotf(p,m);
+      
+      float j_x = (jx != NULL) ? jx[I] : 0.0f;
+	  float j_y = (jy != NULL) ? jy[I] : 0.0f;
+	  float j_z = (jz != NULL) ? jz[I] : 0.0f;
+	  
+	  float3 J = make_float3(j_x, j_y, j_z);
+	  float nJn = len(J);
+	  
+	  pre.y *= (nJn * npn);
+	  pre.z *= nJn;
+	  
+	  // get thinkness of free layer
+	  
+	  float flt = dotf(meshSize, normalize(J));
+	  flt = (flt != 0.0f) ? 1.0f / flt : 1.0f;
+	  
+      float epsilon = pre.x / ((1.0f + pre.x) + (1.0f - pre.x) * pdotm);
+      
+      pre.y *= (epsilon * flt);
+      pre.z *= flt;
+      
+      sttx[I] = pre.y * mxpxm.x + pre.z * pxm.x;
+      stty[I] = pre.y * mxpxm.y + pre.z * pxm.y;
+      sttz[I] = pre.y * mxpxm.z + pre.z * pxm.z;
       
     } 
   }
@@ -58,10 +74,12 @@ extern "C" {
   
   void slonczewski_async(float** sttx, float** stty, float** sttz, 
 			 float** mx, float** my, float** mz, 
+			 float** msat,
 			 float** px, float** py, float** pz,
+			 float** jx, float** jy, float** jz,
 			 float pxMul, float pyMul, float pzMul,
-			 float aj, float bj, float Pol,
-			 float** jx, float IeMul,
+			 float lambda2, float beta_prime, float pre_field,
+			 float meshSizeX,float meshSizeY, float meshSizeZ, 
 			 int NPart, 
 			 CUstream* stream)
   {
@@ -69,16 +87,20 @@ extern "C" {
     // 1D configuration
     dim3 gridSize, blockSize;
     make1dconf(NPart, &gridSize, &blockSize);
-
+    float3 meshSize = make_float3(meshSizeX, meshSizeY, meshSizeZ);
+    float3 pre = make_float3(lambda2, beta_prime, pre_field);
+    float3 pMul = make_float3(pxMul, pyMul, pzMul);
     int nDev = nDevice();
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
 	    slonczewski_deltaMKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (sttx[dev], stty[dev], sttz[dev],  
-										       mx[dev], my[dev], mz[dev],  
+										       mx[dev], my[dev], mz[dev],
+										       msat[dev],  
 										       px[dev], py[dev], pz[dev],
-											   pxMul, pyMul, pzMul,
-											   jx[dev], IeMul,
-										       aj, bj, Pol, 
+										       jx[dev], jy[dev], jz[dev],
+											   pMul,
+											   pre,
+										       meshSize, 
 										       NPart);
     } // end dev < nDev loop
 										  

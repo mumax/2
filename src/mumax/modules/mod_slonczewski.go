@@ -8,12 +8,13 @@
 package modules
 
 // Module implementing Slonczewski spin transfer torque.
-// Authors: Graham Rowlands, Arne Vansteenkiste
+// Authors: Mykol Dvornik, Graham Rowlands, Arne Vansteenkiste
 
 import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
+	"math"
 )
 
 // Register this module
@@ -25,15 +26,15 @@ func LoadSlonczewskiTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	// ============ New Quantities =============
-	e.AddNewQuant("aj", SCALAR, VALUE, Unit(""), "In-Plane term")
-	e.AddNewQuant("bj", SCALAR, VALUE, Unit(""), "Field-Like term")
+	e.AddNewQuant("lambda", SCALAR, VALUE, Unit(""), "In-Plane term")
 	e.AddNewQuant("p", VECTOR, FIELD, Unit(""), "Polarization Vector")
-	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization Efficiency")
+	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization efficiency")
+	e.AddNewQuant("epsilon_prime", SCALAR, VALUE, Unit(""), "Field-like term")
 	LoadUserDefinedCurrentDensity(e)
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	e.Depends("stt", "aj", "bj", "p", "pol", "j", "m", "gamma", "Msat")
+	e.Depends("stt", "lambda", "p", "pol", "epsilon_prime", "j", "m", "gamma", "Msat", "gamma")
 
 	// ============ Updating the torque =============
 	stt.SetUpdater(&slonczewskiUpdater{stt: stt})
@@ -48,16 +49,27 @@ type slonczewskiUpdater struct {
 
 func (u *slonczewskiUpdater) Update() {
 	e := GetEngine()
-	cellSize := e.CellSize()
+
+	worldSize := e.WorldSize()
+	
 	stt := u.stt
 	m := e.Quant("m")
-	aj := e.Quant("aj").Scalar()
-	bj := e.Quant("bj").Scalar()
-	p := e.Quant("p")
+	msat := e.Quant("msat")
 	pol := e.Quant("pol").Scalar()
+	lambda := e.Quant("lambda").Scalar()
+	epsilon_prime := e.Quant("epsilon_prime").Scalar()
+	p := e.Quant("p")
 	curr := e.Quant("j")
-
-	gpu.LLSlon(stt.Array(), m.Array(), p.Array(), p.Multiplier(),
-		float32(aj), float32(bj), float32(pol),
-		curr.Array().Component(X), float32(cellSize[Y]*cellSize[Z]/E))
+	gamma := e.Quant("gamma").Scalar()
+	
+	
+    njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
+	nmsatn := msat.Multiplier()[0]
+    
+    beta := H_bar * gamma * njn / (Mu0 * E * nmsatn)
+    beta_prime := pol * beta  //beta_prime does not contain 
+    pre_fld := beta * epsilon_prime
+	lambda2 := lambda * lambda
+	
+	gpu.LLSlon(stt.Array(), m.Array(), msat.Array(), p.Array(), curr.Array(), p.Multiplier(), float32(lambda2), float32(beta_prime), float32(pre_fld), worldSize)
 }

@@ -1,9 +1,9 @@
 /**
   * @file
   * This file implements Slonczewski spin torque
-  * See Slonczewski JMMM 159 (1996) L1-L7
+  * See Slonczewski JMMM 159 (1996) L1-L7 and 
   *
-  * @author Graham Rowlands, Arne Vansteenkiste
+  * @author Mykola Dvorni, Graham Rowlands, Arne Vansteenkiste
   */
 
 #ifndef _SLONCZEWSKI_TORQUE_H_
@@ -17,12 +17,14 @@
 extern "C" {
 #endif
 
-  DLLEXPORT void slonczewski_async(float** sttx, float** stty, float** sttz,  ///< output
-			 float** mx, float** my, float** mz,  ///< magnetization
-			 float** px, float** py, float** pz, ///< fixed layer
-			 float pxMul, float pyMul, float pzMul, ///< multipliers for fixed layer
-			 float aj, float bj, float Pol, 
-			 float** jx, float jxMul, ///< out-of-plane current density
+  DLLEXPORT void slonczewski_async(float** sttx, float** stty, float** sttz, 
+			 float** mx, float** my, float** mz, 
+			 float** msat,
+			 float** px, float** py, float** pz,
+			 float** jx, float** jy, float** jz,
+			 float pxMul, float pyMul, float pzMul,
+			 float lambda2, float beta_prime, float pre_field,
+			 float meshSizeX,float meshSizeY, float meshSizeZ, 
 			 int NPart, 
 			 CUstream* stream);
 
