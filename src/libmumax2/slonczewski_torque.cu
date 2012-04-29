@@ -22,7 +22,8 @@ extern "C" {
   {
     
     int I = threadindex;
-    float Ms = msat[I]; 
+    float Ms = (msat != NULL ) ? msat[I] : 1.0f;
+    
 	if (Ms > 0.0f && I < NPart){ // Thread configurations are usually too large...
 
       Ms = 1.0f / Ms;
@@ -43,24 +44,26 @@ extern "C" {
       
       float pdotm = dotf(p,m);
       
-      float j_x = (jx != NULL) ? jx[I] : 0.0f;
-	  float j_y = (jy != NULL) ? jy[I] : 0.0f;
-	  float j_z = (jz != NULL) ? jz[I] : 0.0f;
+      float j_x = (jx != NULL) ? jx[I] : 1.0f / sqrtf(3.0f);
+	  float j_y = (jy != NULL) ? jy[I] : 1.0f / sqrtf(3.0f);
+	  float j_z = (jz != NULL) ? jz[I] : 1.0f / sqrtf(3.0f);
 	  
 	  float3 J = make_float3(j_x, j_y, j_z);
 	  float nJn = len(J);
 	  
-	  pre.y *= (nJn * npn);
+	  pre.y *= nJn;
 	  pre.z *= nJn;
 	  
-	  // get thinkness of free layer
+	  // get effective thinkness of free layer
 	  
 	  float flt = dotf(meshSize, normalize(J));
 	  flt = (flt != 0.0f) ? 1.0f / flt : 1.0f;
 	  
-      float epsilon = pre.x / ((1.0f + pre.x) + (1.0f - pre.x) * pdotm);
+      float epsilon = npn * pre.x / ((1.0f + pre.x) + (1.0f - pre.x) * pdotm);
       
-      pre.y *= (epsilon * flt);
+      pre.y *= epsilon;
+
+      pre.y *= flt;
       pre.z *= flt;
       
       sttx[I] = pre.y * mxpxm.x + pre.z * pxm.x;

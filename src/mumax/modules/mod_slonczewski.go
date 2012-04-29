@@ -65,7 +65,7 @@ func (u *slonczewskiUpdater) Update() {
 	
     njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
 	nmsatn := msat.Multiplier()[0]
-    
+	
     beta := H_bar * gamma * njn / (Mu0 * E * nmsatn)
     beta_prime := pol * beta  //beta_prime does not contain 
     pre_fld := beta * epsilon_prime

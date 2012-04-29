@@ -56,6 +56,7 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float6
 		(C.float)(pMul[X]),
 		(C.float)(pMul[Y]),
 		(C.float)(pMul[Z]),
+		
 		(C.float)(lambda2),
 		(C.float)(beta_prime),
 		(C.float)(pre_field),
