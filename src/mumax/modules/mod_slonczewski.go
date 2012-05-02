@@ -70,6 +70,7 @@ func (u *slonczewskiUpdater) Update() {
     beta_prime := pol * beta  //beta_prime does not contain 
     pre_fld := beta * epsilon_prime
 	lambda2 := lambda * lambda
-	
+	Debug("beta_prime:",beta_prime," pre_fld:",pre_fld," lambda:",lambda2,"P:", p.Multiplier())
+
 	gpu.LLSlon(stt.Array(), m.Array(), msat.Array(), p.Array(), curr.Array(), p.Multiplier(), float32(lambda2), float32(beta_prime), float32(pre_fld), worldSize)
 }
