@@ -139,7 +139,14 @@ extern "C" {
 	
 	float m_sat = (msat != NULL) ? msat[x0] : 1.0f;
 	
-    if (m_sat != 0.0f && j < size.y && k < size.z){ // 3D now:)
+	if (m_sat == 0.0f) {
+      sttx[I] = 0.0f;
+      stty[I] = 0.0f;
+      sttz[I] = 0.0f;    
+      return;
+    }
+    
+    if (j < size.y && k < size.z){ // 3D now:)
 	   
 	   m_sat = 1.0f / m_sat;
 	  
