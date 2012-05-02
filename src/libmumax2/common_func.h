@@ -34,8 +34,7 @@ inline __host__ __device__ float len(float3 a){
 
 // normalize the 3-components vector
 inline __host__ __device__ float3 normalize(float3 a){
-    float veclen = 1.0f / len(a);
-    veclen = (veclen != 0.0f) ? veclen : 0.0f;
+    float veclen = (len(a) != 0.0f) ? 1.0f / len(a) : 0.0f;
 	return make_float3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
 
