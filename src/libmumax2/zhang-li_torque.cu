@@ -140,9 +140,9 @@ extern "C" {
 	float m_sat = (msat != NULL) ? msat[x0] : 1.0f;
 	
 	if (m_sat == 0.0f) {
-      sttx[I] = 0.0f;
-      stty[I] = 0.0f;
-      sttz[I] = 0.0f;    
+      sttx[x0] = 0.0f;
+      stty[x0] = 0.0f;
+      sttz[x0] = 0.0f;    
       return;
     }
     
