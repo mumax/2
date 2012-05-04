@@ -27,7 +27,7 @@ import (
 //			 int NPart, 
 //			 CUstream* stream)
 
-func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64) {
+func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float64, jMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64) {
 
 	// Bookkeeping
 	CheckSize(p.Size3D(), m.Size3D())
@@ -56,6 +56,10 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float6
 		(C.float)(pMul[X]),
 		(C.float)(pMul[Y]),
 		(C.float)(pMul[Z]),
+		
+		(C.float)(jMul[X]),
+		(C.float)(jMul[Y]),
+		(C.float)(jMul[Z]),
 		
 		(C.float)(lambda2),
 		(C.float)(beta_prime),

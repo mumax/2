@@ -10,12 +10,13 @@ extern "C" {
 #endif
   // ========================================
 
-  __global__ void slonczewski_deltaMKern(float* sttx, float* stty, float* sttz, 
-					 float* mx, float* my, float* mz, 
-					 float* msat, 
-					 float* px, float* py, float* pz,
-					 float* jx, float* jy, float* jz,
+  __global__ void slonczewski_deltaMKern(float* __restrict__ sttx, float* __restrict__ stty, float* __restrict__ sttz, 
+					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz, 
+					 float* __restrict__ msat, 
+					 float* __restrict__ px, float* __restrict__ py, float* __restrict__ pz,
+					 float* __restrict__ jx, float* __restrict__ jy, float* __restrict__ jz,
 					 float3 pMul,
+					 float3 jMul,
 					 float3 pre,
 					 float3 meshSize,
 					 int NPart) 
@@ -44,16 +45,19 @@ extern "C" {
       float p_z = (pz != NULL) ? pMul.z * pz[I] : pMul.z;
     
       float3 p = make_float3(p_x, p_y, p_z);
-      float npn = len(p);
+      
+      //float npn = len(p);
+      
+      p = normalize(p);
       
       float3 pxm = crossf(p, m); // minus
-      float3 mxpxm = crossf(pxm, m); // plus
+      float3 mxpxm = crossf(m, pxm); // plus
       
       float pdotm = dotf(p,m);
       
-      float j_x = (jx != NULL) ? jx[I] : 1.0f / sqrtf(3.0f);
-	  float j_y = (jy != NULL) ? jy[I] : 1.0f / sqrtf(3.0f);
-	  float j_z = (jz != NULL) ? jz[I] : 1.0f / sqrtf(3.0f);
+      float j_x = (jx != NULL) ? jx[I] * jMul.x : jMul.x;
+	  float j_y = (jy != NULL) ? jy[I] * jMul.y : jMul.y;
+	  float j_z = (jz != NULL) ? jz[I] * jMul.z : jMul.z;
 	  
 	  float3 J = make_float3(j_x, j_y, j_z);
 	  float nJn = len(J);
@@ -66,7 +70,9 @@ extern "C" {
 	  float free_layer_thickness = dotf(meshSize, normalize(J));
 	  free_layer_thickness = (free_layer_thickness != 0.0f) ? 1.0f / free_layer_thickness : 1.0f;
 	  
-      float epsilon = npn * pre.x / ((1.0f + pre.x) + (1.0f - pre.x) * pdotm);
+      //float epsilon = npn * pre.x / ((pre.x + 1.0f) + (pre.x - 1.0f) * pdotm);
+      
+      float epsilon = pre.x / ((pre.x + 1.0f) + (pre.x - 1.0f) * pdotm);
       
       pre.y *= epsilon;
 
@@ -88,6 +94,7 @@ extern "C" {
 			 float** px, float** py, float** pz,
 			 float** jx, float** jy, float** jz,
 			 float pxMul, float pyMul, float pzMul,
+			 float jxMul, float jyMul, float jzMul,
 			 float lambda2, float beta_prime, float pre_field,
 			 float meshSizeX,float meshSizeY, float meshSizeZ, 
 			 int NPart, 
@@ -100,6 +107,8 @@ extern "C" {
     float3 meshSize = make_float3(meshSizeX, meshSizeY, meshSizeZ);
     float3 pre = make_float3(lambda2, beta_prime, pre_field);
     float3 pMul = make_float3(pxMul, pyMul, pzMul);
+    float3 jMul = make_float3(jxMul, jyMul, jzMul);
+    
     int nDev = nDevice();
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
@@ -109,6 +118,7 @@ extern "C" {
 										       px[dev], py[dev], pz[dev],
 										       jx[dev], jy[dev], jz[dev],
 											   pMul,
+											   jMul,
 											   pre,
 										       meshSize, 
 										       NPart);

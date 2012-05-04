@@ -14,7 +14,7 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	"math"
+	//"math"
 )
 
 // Register this module
@@ -27,7 +27,7 @@ func LoadSlonczewskiTorque(e *Engine) {
 
 	// ============ New Quantities =============
 	e.AddNewQuant("lambda", SCALAR, VALUE, Unit(""), "In-Plane term")
-	e.AddNewQuant("p", VECTOR, FIELD, Unit(""), "Polarization Vector")
+	e.AddNewQuant("p", VECTOR, MASK , Unit(""), "Polarization Vector")
 	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization efficiency")
 	e.AddNewQuant("epsilon_prime", SCALAR, VALUE, Unit(""), "Field-like term")
 	LoadUserDefinedCurrentDensity(e)
@@ -63,14 +63,16 @@ func (u *slonczewskiUpdater) Update() {
 	gamma := e.Quant("gamma").Scalar()
 	
 	
-    njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
+    //njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
+    
 	nmsatn := msat.Multiplier()[0]
+	//Debug("Reduced Planck's constant:", H_bar)
 	
-    beta := H_bar * gamma * njn / (Mu0 * E * nmsatn)
+    beta := H_bar * gamma / (Mu0 * E * nmsatn) // njn is missing
     beta_prime := pol * beta  //beta_prime does not contain 
     pre_fld := beta * epsilon_prime
 	lambda2 := lambda * lambda
-	Debug("beta_prime:",beta_prime," pre_fld:",pre_fld," lambda:",lambda2,"P:", p.Multiplier())
+	//Debug("beta_prime:",beta_prime," pre_fld:",pre_fld," lambda:",lambda2,"P:", p.Multiplier(), "J:", curr.Multiplier(), "wSize:", worldSize)
 
-	gpu.LLSlon(stt.Array(), m.Array(), msat.Array(), p.Array(), curr.Array(), p.Multiplier(), float32(lambda2), float32(beta_prime), float32(pre_fld), worldSize)
+	gpu.LLSlon(stt.Array(), m.Array(), msat.Array(), p.Array(), curr.Array(), p.Multiplier(), curr.Multiplier(), float32(lambda2), float32(beta_prime), float32(pre_fld), worldSize)
 }
