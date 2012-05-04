@@ -68,7 +68,8 @@ def call(command, args):
 	if (initialized == 0):
 		init()
 	m_sock.sendall(json.dumps([command, args])+'\n')
-	return json.loads(recvall(m_sock))
+	resp = recvall(m_sock)	     
+	return json.loads(resp)
 
 End='<<< End of mumax message >>>'
 
@@ -78,6 +79,8 @@ def recvall(the_socket):
     total_data=[];data=''
     while True:
             data=the_socket.recv(8192)
+            if data == '':
+                sys.exit(1)
             if End in data:
                 total_data.append(data[:data.find(End)])
                 break

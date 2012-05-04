@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"time"
 	"os"
+	//"syscall"
 	"os/exec"
 )
 
@@ -62,6 +63,19 @@ func (c *Client) Init(inputfile string, outputDir string) {
 
 // Start interpreter sub-command and communicate over fifos in the output dir.
 func (c *Client) Run() {
+
+    defer func() {
+        Debug("Shutdown server...")
+         
+        err1 := c.wire.Close()
+        CheckErr(err1, ERR_IO)
+        
+	    err2 := c.server.Close()
+	    CheckErr(err2, ERR_IO)
+	    
+	    Debug("Done.")
+    }()
+    
 	c.logWait = make(chan int)
 	
 	command, waiter := c.startSubcommand()
