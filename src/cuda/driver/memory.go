@@ -188,7 +188,7 @@ func MemHostUnregister(ptr HostPtr) {
 	}
 }
 
-type MemHostRegisterFlag int
+type MemHostRegisterFlag uint
 
 // Flag for MemHostRegister
 const (
