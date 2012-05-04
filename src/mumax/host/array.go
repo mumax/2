@@ -1,4 +1,4 @@
-//  This file is part of MuMax, a high-performance micromagnetic simulator.
+    //  This file is part of MuMax, a high-performance micromagnetic simulator.
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
@@ -11,8 +11,10 @@ package host
 // Author: Arne Vansteenkiste
 
 import (
+    // cu "cuda/driver"
 	. "mumax/common"
 	"sync"
+	//"unsafe"
 )
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
@@ -23,6 +25,8 @@ type Array struct {
 	Size         [4]int          // INTERNAL {components, size0, size1, size2}
 	Size4D       []int           // {components, size0, size1, size2}
 	Size3D       []int           // {size0, size1, size2}
+	SizeInElements int64         // The total number of elements in the array
+	SizeInBytes    int64         // The total size of the array in bytes
 	sync.RWMutex                 // mutex for safe concurrent access to this array
 }
 
@@ -37,6 +41,11 @@ func (t *Array) Init(components int, size3D []int) {
 	t.Size[3] = size3D[2]
 	t.Size4D = t.Size[:]
 	t.Size3D = t.Size[1:]
+	
+	t.SizeInElements = int64(components) * int64(size3D[0]) * int64(size3D[1]) * int64(size3D[2])
+	t.SizeInBytes = int64(SIZEOF_FLOAT) * t.SizeInElements
+	
+	//cu.MemHostRegister(cu.HostPtr(&t.List[0]), t.SizeInBytes, cu.MEMHOSTREGISTER_PORTABLE)
 }
 
 // Allocates an returns a new Array
