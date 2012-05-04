@@ -12,6 +12,35 @@ import "unsafe"
 
 import ()
 
+
+type HostRegisterType uint32
+
+// Memory copy flag for Memcpy
+const (
+	HostRegisterPortable     HostRegisterType = C.cudaHostRegisterPortable
+	HostRegisterMapped       HostRegisterType = C.cudaHostRegisterMapped
+)
+
+// Low-level page-locking of paged memory buffer.
+// Must be explicitly unregistered with HostUnregister
+func HostRegister(buffer uintptr, bytes int64, memtype HostRegisterType) {
+	err := Error(C.cudaHostRegister((unsafe.Pointer)(buffer), C.size_t(bytes), C.uint(memtype)))
+	if err != Success {
+		panic(err)
+	}
+	return
+}
+
+// Low-level page-ulocking of locked memory buffer.
+func HostUnregister(buffer uintptr) {
+	err := Error(C.cudaHostUnregister((unsafe.Pointer)(buffer)))
+	if err != Success {
+		panic(err)
+	}
+	return
+}
+
+
 // Low-level memory allocation. Not memory-safe and not garbage collected.
 // Must be freed with Free().
 // NewArray() provides a memory-safe and garbage collected alternative.
