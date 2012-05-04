@@ -91,4 +91,7 @@ const (
 	ErrorIncompatibleDriverContext  Error = C.cudaErrorIncompatibleDriverContext
 	ErrorStartupFailure             Error = C.cudaErrorStartupFailure
 	ErrorApiFailureBase             Error = C.cudaErrorApiFailureBase
+	ErrorHostMemoryAlreadyRegistered    Error = C.cudaErrorHostMemoryAlreadyRegistered
+	ErrorHostMemoryNotRegistered    Error = C.cudaErrorHostMemoryNotRegistered
+	ErrorOperatingSystem            Error = C.cudaErrorOperatingSystem
 )
