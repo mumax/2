@@ -6,7 +6,7 @@ QT      += opengl
 CONFIG  += qxt
 QXT     += core gui
 
-LIBS    += -lglut -L../libomf -lomf -lQxtCore -lQxtGui
+LIBS    += -lglut -L../libomf -lomf -lQxtCore -lQxtGui -lGLU
 
 INCLUDEPATH += ../libomf /usr/include/qxt/QxtCore /usr/include/qxt/QxtGui
 
