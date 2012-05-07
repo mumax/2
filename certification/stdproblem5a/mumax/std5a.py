@@ -4,10 +4,10 @@ from math import *
 
 Nx = 64
 Ny = 32
-Nz = 1
+Nz = 2
 
-sX = 320e-9
-sY = 160e-9
+sX = 160e-9
+sY = 80e-9
 sZ = 5e-9
  
 setgridsize(Nx, Ny, Nz)
@@ -94,31 +94,13 @@ px = cos(prad)
 py = sin(prad)
 
 J = -0.008  # total current in amps
-cr = 25.0e-9 # radius of contact
-cr2 = cr * cr
-carea = sX * sY # pi * cr2
-jc = J / carea  
 
-ncr = 2.0 * cr / sX
-ncr2 = ncr**2
+carea = sX * sY
+jc = J / carea  
 
 print "Current density is: " +  str(jc) + "\n"
  
-j = makearray(3, Nx, Ny, Nz)
-
-for m in range(Nx):
-    xx = float(m)/float(Nx)
-    for n in range(Ny):
-        yy = float(n)/float(Ny)
-        rr = (xx-0.5)**2 + (yy-0.5)**2
-        jj = 1.0
-        if (rr > ncr2) :
-            jj = 1.0
-        for o in range(Nz):
-            j[0][m][n][o] = 0.0
-            j[1][m][n][o] = 0.0
-            j[2][m][n][o] = jj
-
+j=[ [[[0]]], [[[0]]], [[[1]]] ]
 setmask('j', j)
 setv('j', [0, 0, jc])
 save("j","ovf",[])

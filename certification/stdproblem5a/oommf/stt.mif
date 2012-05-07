@@ -9,7 +9,7 @@ set basename stt
 Parameter Ms 800e3
 Parameter A   13e-12
 
-Parameter Happ 0.1 ;# Field in kOe
+Parameter Happ 0.0 ;# Field in kOe
 set Happ [expr {$Happ*1e6/(4*$pi)}]  ;# Convert to A/m
 
 Parameter Happ_angle 180.  ;# Direction of applied field, in degrees
@@ -18,8 +18,8 @@ set Happ_angle [expr {$Happ_angle*$pi/180.}]
 Parameter mp_theta 1.0 ;# Direction of mp, in degrees
 set mp_theta [expr {$mp_theta*$pi/180.}]
 
-set length 320e-9
-set width  160e-9
+set length 160e-9
+set width   80e-9
 set thick   5e-9
 
 set Nx 64
