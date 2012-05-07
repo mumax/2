@@ -105,15 +105,16 @@ func (c *Client) Run() {
 	    var status int
 	    status = <-waiter
 	    if (status != 0) {
-	            swait <- status
-	            panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat))) 
+	            swait <- status 
 	            return
 	    }
+	    swait <- 0
 	}()
 	
 	status := <- swait
 	if status != 0 {
-	    Debug("Connection failed")
+		Debug("Connection failed")
+	    panic(InputErr(fmt.Sprint(command, " exited with status ", status))) 
 	    return
 	}
 	//c.wire = s_wire
