@@ -334,16 +334,6 @@ void Window::updateWatchedFiles(const QString& str) {
                         watchedFiles[fullPath] = info.lastModified();
                     }
                 }
-
-                //waitForFinishedFiles();
-                //QTimer *timer = new QTimer(this);
-                //connect(timer, SIGNAL(timeout()), this, SLOT());
-                //timer->start(50);
-
-                //filenames.append(dirFile);
-                //omfCache.push_back(readOMF((dirString+dirFile).toStdString(), tempHeader));
-                //qDebug() << QString("Pushed file!") << (dirString+dirFile);
-                //changed = false;
             }
     }
 
@@ -360,46 +350,6 @@ void Window::updateWatchedFiles(const QString& str) {
         }
         // Refresh the animation bar
         adjustAnimSlider();
-    }
-
-}
-
-void Window::waitForFinishedFiles() {
-
-    bool changed = false;
-
-    QMap<QString, QDateTime> temp(watchedFiles);
-    QMap<QString, QDateTime>::const_iterator i = temp.constBegin();
-    while (i != temp.constEnd()) {
-         QFileInfo info(i.key());
-         if (i.value()!=info.lastModified()) {
-             qDebug() << QString("File Changed") << i.key()<< info.lastModified();
-             watchedFiles[i.key()] = info.lastModified();
-         } else {
-             watchedFiles.remove(i.key());
-             filenames.append(info.fileName());
-             OMFHeader tempHeader = OMFHeader();
-             //omfCache.push_back(readOMF((i.key()).toStdString(), tempHeader));
-             qDebug() << QString("Pushed") << i.key();
-             changed = true;
-         }
-         ++i;
-    }
-
-    if (changed) {
-
-
-        noFollowUpdate = false;
-        if (!noFollowUpdate) {
-            // Update the Display with the first element
-            glWidget->updateData(omfCache.back());
-
-            // Update the top overlay
-            glWidget->updateTopOverlay(filenames.back());
-        }
-        // Refresh the animation bar
-        adjustAnimSlider();
-        qDebug() << QString("Updated Display");
     }
 
 }
@@ -463,7 +413,7 @@ void Window::openDir()
 
 void Window::watchDir()
 {
-  QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+  QString dir = QFileDialog::getExistingDirectory(this, tr("Watch Directory"),
                                                  "/home",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
@@ -547,9 +497,11 @@ void Window::createActions()
   connect(openFilesAct, SIGNAL(triggered()), this, SLOT(openFiles()));
 
   openDirAct  = new QAction(tr("&Open Dir"), this);
+  openDirAct->setShortcut( QKeySequence(Qt::CTRL + Qt::Key_D) );
   connect(openDirAct, SIGNAL(triggered()), this, SLOT(openDir()));
 
-  watchDirAct  = new QAction(tr("&Watch Dir"), this);
+  watchDirAct  = new QAction(tr("&Follow Dir"), this);
+  watchDirAct->setShortcut( QKeySequence(Qt::CTRL + Qt::Key_F) );
   connect(watchDirAct, SIGNAL(triggered()), this, SLOT(watchDir()));
 }
 

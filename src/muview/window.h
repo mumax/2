@@ -48,8 +48,6 @@ private slots:
   void watchDir();
   void toggleDisplay();
   void updateWatchedFiles(const QString& str);
-  void waitForFinishedFiles();
-
   void settings();
   void about();
   void updateDisplayData(int index);
