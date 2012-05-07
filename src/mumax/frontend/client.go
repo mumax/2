@@ -31,7 +31,9 @@ type Client struct {
 	ipc                  jsonRPC
 	api                  engine.API
 	wire			 	 net.Conn
+	isWireAlive          int
 	server				 net.Listener
+	isServerAlive        int
 	logWait              chan int // channel to wait for completion of go logStream()
 }
 
@@ -39,7 +41,8 @@ type Client struct {
 // to outdir and connect to a server over conn.
 
 func (c *Client) Init(inputfile string, outputDir string) {
-
+    c.isServerAlive = 0;
+    c.isWireAlive = 0;
 	Debug("Trying to establish TCP server...")
 	m_s, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -50,6 +53,7 @@ func (c *Client) Init(inputfile string, outputDir string) {
 	c.commAddr = c.server.Addr().String()
 	Debug("The TCP connection is grangted to:", c.commAddr)
 	Debug("Done.")
+	c.isServerAlive = 1;
 	
 	c.inputFile = inputfile
 	c.outputDir = outputDir
@@ -66,13 +70,15 @@ func (c *Client) Run() {
 
     defer func() {
         Debug("Shutdown server...")
-         
-        err1 := c.wire.Close()
-        CheckErr(err1, ERR_IO)
+        if c.isWireAlive == 1 {
+            err1 := c.wire.Close()
+            CheckErr(err1, ERR_IO)
+        }
         
-	    err2 := c.server.Close()
-	    CheckErr(err2, ERR_IO)
-	    
+        if c.isServerAlive == 1 {
+	        err2 := c.server.Close()
+	        CheckErr(err2, ERR_IO)
+	    }
 	    Debug("Done.")
     }()
     
@@ -80,13 +86,39 @@ func (c *Client) Run() {
 	
 	command, waiter := c.startSubcommand()
 	
-	s_wire,err := c.server.Accept()
-	if err != nil {
-		Debug("Client has failed to connect!")
-		return
-	}	
-	c.wire = s_wire
+	swait := make(chan int)
+	
 		
+	go func(){	
+	    Debug("Waiting for client...")
+	    var err error
+	    c.wire,err = c.server.Accept()
+	    if err != nil {
+		    Debug("Client has failed to connect!")
+		    swait <- 1
+		    return
+	    }
+	    swait <- 0
+	}()	
+	
+	go func() {
+	    var status int
+	    status = <-waiter
+	    if (status==1) {
+	            Debug("Subcommand crashed!")
+	            swait <- 1
+	            return
+	    }
+	}()
+	
+	status := <- swait
+	if status == 1 {
+	    Debug("Connection failed")
+	    return
+	}
+	//c.wire = s_wire
+	c.isWireAlive = 1;
+	
 	s_infifo := bufio.NewReader(c.wire)
 	s_outflush := bufio.NewWriter(c.wire) 	
 	s_outfifo := s_outflush
@@ -96,6 +128,7 @@ func (c *Client) Run() {
 	
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
+	
 	exitstat := <-waiter
 
 	if exitstat != 0 {
@@ -105,7 +138,10 @@ func (c *Client) Run() {
 	//Housekeeping
 	
 	c.wire.Close()
+	c.isWireAlive = 0;
 	c.server.Close()	
+	c.isServerAlive = 0;
+	
 	Debug("Client is now disconnected")	
 	
 	
