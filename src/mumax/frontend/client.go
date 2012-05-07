@@ -104,15 +104,15 @@ func (c *Client) Run() {
 	go func() {
 	    var status int
 	    status = <-waiter
-	    if (status==1) {
-	            Debug("Subcommand crashed!")
-	            swait <- 1
+	    if (status != 0) {
+	            swait <- status
+	            panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat))) 
 	            return
 	    }
 	}()
 	
 	status := <- swait
-	if status == 1 {
+	if status != 0 {
 	    Debug("Connection failed")
 	    return
 	}
@@ -129,7 +129,7 @@ func (c *Client) Run() {
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
 	
-	exitstat := <-waiter
+	exitstat := <-swait
 
 	if exitstat != 0 {
 			panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
