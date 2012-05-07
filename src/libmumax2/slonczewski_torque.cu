@@ -5,6 +5,7 @@
 #include <cuda.h>
 #include "common_func.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,13 +13,15 @@ extern "C" {
 
   __global__ void slonczewski_deltaMKern(float* __restrict__ sttx, float* __restrict__ stty, float* __restrict__ sttz, 
 					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz, 
-					 float* __restrict__ msat, 
+					 float* __restrict__ msat,
 					 float* __restrict__ px, float* __restrict__ py, float* __restrict__ pz,
 					 float* __restrict__ jx, float* __restrict__ jy, float* __restrict__ jz,
+					 float* __restrict__ alphaMsk, 
 					 float3 pMul,
 					 float3 jMul,
 					 float3 pre,
 					 float3 meshSize,
+					 float alphaMul,
 					 int NPart) 
   {
     
@@ -35,50 +38,52 @@ extern "C" {
 	if (I < NPart){ // Thread configurations are usually too large...
 
       Ms = 1.0f / Ms;
+          
       pre.y *= Ms;
       pre.z *= Ms;
-      
+       
       float3 m = make_float3(mx[I], my[I], mz[I]);
-	  
+      
       float p_x = (px != NULL) ? pMul.x * px[I] : pMul.x;
       float p_y = (py != NULL) ? pMul.y * py[I] : pMul.y;
-      float p_z = (pz != NULL) ? pMul.z * pz[I] : pMul.z;
-    
-      float3 p = make_float3(p_x, p_y, p_z);
-      
-      //float npn = len(p);
-      
+      float p_z = (pz != NULL) ? pMul.z * pz[I] : pMul.z;  
+        
+      float3 p = make_float3(p_x, p_y, p_z);  
+                   
       p = normalize(p);
+       
+      float3 pxm = crossf(p, m); // plus
+      float3 mxpxm = crossf(m, pxm); // plus 
       
-      float3 pxm = crossf(p, m); // minus
-      float3 mxpxm = crossf(m, pxm); // plus
-      
-      float pdotm = dotf(p,m);
-      
+      float  pdotm = dotf(p, m);
+           
       float j_x = (jx != NULL) ? jx[I] * jMul.x : jMul.x;
 	  float j_y = (jy != NULL) ? jy[I] * jMul.y : jMul.y;
 	  float j_z = (jz != NULL) ? jz[I] * jMul.z : jMul.z;
 	  
 	  float3 J = make_float3(j_x, j_y, j_z);
-	  float nJn = len(J);
-	  
+	  float nJn = len(J);   
+	  J = normalize(J);
+	  float Jdir = dotf(make_float3(1.0f,1.0f,1.0f), J);
+	  float Jsign = Jdir / fabsf(Jdir); 
+	  nJn *= Jsign; 
 	  pre.y *= nJn;
 	  pre.z *= nJn;
 	  
 	  // get effective thinkness of free layer
 	  
-	  float free_layer_thickness = dotf(meshSize, normalize(J));
-	  free_layer_thickness = (free_layer_thickness != 0.0f) ? 1.0f / free_layer_thickness : 1.0f;
+	  float free_layer_thickness = fabsf(dotf(meshSize, J)); 
+	  free_layer_thickness = (free_layer_thickness != 0.0f) ? 1.0f / free_layer_thickness : 0.0f;
+	  pre.y *= free_layer_thickness;
+	  pre.z *= free_layer_thickness; 
 	  
-      //float epsilon = npn * pre.x / ((pre.x + 1.0f) + (pre.x - 1.0f) * pdotm);
-      
       float epsilon = pre.x / ((pre.x + 1.0f) + (pre.x - 1.0f) * pdotm);
-      
       pre.y *= epsilon;
-
-      pre.y *= free_layer_thickness;
-      pre.z *= free_layer_thickness;
       
+      float alpha = (alphaMsk != NULL) ? 1.0f/(1.0f + alphaMsk[I] * alphaMul * alphaMsk[I] * alphaMul) : 1.0f/(1.0f + alphaMul * alphaMul); 
+      pre.y *= alpha;
+      pre.z *= alpha;
+     
       sttx[I] = pre.y * mxpxm.x + pre.z * pxm.x;
       stty[I] = pre.y * mxpxm.y + pre.z * pxm.y;
       sttz[I] = pre.y * mxpxm.z + pre.z * pxm.z;
@@ -93,10 +98,12 @@ extern "C" {
 			 float** msat,
 			 float** px, float** py, float** pz,
 			 float** jx, float** jy, float** jz,
+			 float** alphamsk,
 			 float pxMul, float pyMul, float pzMul,
 			 float jxMul, float jyMul, float jzMul,
 			 float lambda2, float beta_prime, float pre_field,
 			 float meshSizeX,float meshSizeY, float meshSizeZ, 
+			 float alphaMul,
 			 int NPart, 
 			 CUstream* stream)
   {
@@ -117,10 +124,12 @@ extern "C" {
 										       msat[dev],  
 										       px[dev], py[dev], pz[dev],
 										       jx[dev], jy[dev], jz[dev],
+										       alphamsk[dev],
 											   pMul,
 											   jMul,
 											   pre,
-										       meshSize, 
+										       meshSize,
+										       alphaMul, 
 										       NPart);
     } // end dev < nDev loop
 										  

@@ -27,12 +27,14 @@ import (
 //			 int NPart, 
 //			 CUstream* stream)
 
-func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float64, jMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64) {
+func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array, pMul []float64, jMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64, alphaMul []float64) {
 
 	// Bookkeeping
 	CheckSize(p.Size3D(), m.Size3D())
 	Assert(j.NComp() == 3)
-
+    Assert(msat.NComp() == 1)
+    Assert(alpha.NComp() == 1)
+    
 	// Calling the CUDA functions
 	C.slonczewski_async(
 		(**C.float)(unsafe.Pointer(&(stt.Comp[X].Pointers()[0]))),
@@ -53,6 +55,8 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float6
 		(**C.float)(unsafe.Pointer(&(j.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
 
+        (**C.float)(unsafe.Pointer(&(alpha.Comp[X].Pointers()[0]))),        
+        
 		(C.float)(pMul[X]),
 		(C.float)(pMul[Y]),
 		(C.float)(pMul[Z]),
@@ -68,6 +72,8 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, pMul []float6
         (C.float)(worldSize[X]),
         (C.float)(worldSize[Y]),
         (C.float)(worldSize[Z]),
+        
+        (C.float)(alphaMul[X]),
         
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))

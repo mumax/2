@@ -22,10 +22,12 @@ extern "C" {
 			 float** msat,
 			 float** px, float** py, float** pz,
 			 float** jx, float** jy, float** jz,
+			 float** alphamsk,
 			 float pxMul, float pyMul, float pzMul,
 			 float jxMul, float jyMul, float jzMul,
 			 float lambda2, float beta_prime, float pre_field,
 			 float meshSizeX,float meshSizeY, float meshSizeZ, 
+			 float alphaMul,
 			 int NPart, 
 			 CUstream* stream);
 

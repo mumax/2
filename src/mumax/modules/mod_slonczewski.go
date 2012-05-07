@@ -34,7 +34,7 @@ func LoadSlonczewskiTorque(e *Engine) {
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	e.Depends("stt", "lambda", "p", "pol", "epsilon_prime", "j", "m", "gamma", "Msat", "gamma")
+	e.Depends("stt", "lambda", "p", "pol", "epsilon_prime", "j", "m", "gamma", "msat", "gamma", "alpha")
 
 	// ============ Updating the torque =============
 	stt.SetUpdater(&slonczewskiUpdater{stt: stt})
@@ -60,19 +60,17 @@ func (u *slonczewskiUpdater) Update() {
 	epsilon_prime := e.Quant("epsilon_prime").Scalar()
 	p := e.Quant("p")
 	curr := e.Quant("j")
+	alpha := e.Quant("alpha")
 	gamma := e.Quant("gamma").Scalar()
 	
 	
     //njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
     
 	nmsatn := msat.Multiplier()[0]
-	//Debug("Reduced Planck's constant:", H_bar)
 	
     beta := H_bar * gamma / (Mu0 * E * nmsatn) // njn is missing
     beta_prime := pol * beta  //beta_prime does not contain 
     pre_fld := beta * epsilon_prime
 	lambda2 := lambda * lambda
-	//Debug("beta_prime:",beta_prime," pre_fld:",pre_fld," lambda:",lambda2,"P:", p.Multiplier(), "J:", curr.Multiplier(), "wSize:", worldSize)
-
-	gpu.LLSlon(stt.Array(), m.Array(), msat.Array(), p.Array(), curr.Array(), p.Multiplier(), curr.Multiplier(), float32(lambda2), float32(beta_prime), float32(pre_fld), worldSize)
+	gpu.LLSlon(stt.Array(), m.Array(), msat.Array(), p.Array(), curr.Array(), alpha.Array(), p.Multiplier(), curr.Multiplier(), float32(lambda2), float32(beta_prime), float32(pre_fld), worldSize, alpha.Multiplier())
 }
