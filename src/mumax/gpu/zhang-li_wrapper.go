@@ -69,4 +69,6 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret f
 		(C.int)(pbc[Z]),
 		
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
+		
+		stt.Stream.Sync()
 }
