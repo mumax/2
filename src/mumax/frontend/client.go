@@ -104,7 +104,7 @@ func (c *Client) Run() {
 	go func() {
 	    var status int
 	    status = <-waiter
-	    if (status != 0) {
+	    if (status != 0) {  
 	            swait <- status 
 	            return
 	    }
