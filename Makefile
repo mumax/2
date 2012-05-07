@@ -30,6 +30,8 @@ else
 endif	
 	make clean -C src/python
 	make clean -C src/libmumax2
+	make clean -C src/libomf
+	make clean -C src/muview
 .PHONY: test
 test:
 	echo todo	
