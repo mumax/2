@@ -340,10 +340,11 @@ func (q *Quant) Buffer() *host.Array {
 	array := q.Array()
 	if q.buffer == nil {
 		q.allocBuffer()
-	}
-
+	} 
 	// copy
 	buffer := q.buffer
+	buffer.Pin()
+	
 	if array.IsNil() {
 		for c := range buffer.Comp {
 			comp := buffer.Comp[c]
@@ -372,7 +373,7 @@ func (q *Quant) allocBuffer() {
 	if q.buffer != nil {
 		panic(Bug("Buffer already allocated"))
 	}
-	q.buffer = host.NewArray(q.NComp(), q.Array().Size3D())
+	q.buffer = host.NewArrayPinned(q.NComp(), q.Array().Size3D())
 }
 
 //____________________________________________________________________ tree walk

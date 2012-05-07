@@ -11,10 +11,10 @@ package host
 // Author: Arne Vansteenkiste
 
 import (
-    // cu "cuda/driver"
+    cu "cuda/driver"
 	. "mumax/common"
 	"sync"
-	//"unsafe"
+	"unsafe"
 )
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
@@ -27,6 +27,7 @@ type Array struct {
 	Size3D       []int           // {size0, size1, size2}
 	SizeInElements int64         // The total number of elements in the array
 	SizeInBytes    int64         // The total size of the array in bytes
+	isPinned       int           // Indicates that array is pinned to GPU
 	sync.RWMutex                 // mutex for safe concurrent access to this array
 }
 
@@ -43,16 +44,33 @@ func (t *Array) Init(components int, size3D []int) {
 	t.Size3D = t.Size[1:]
 	
 	t.SizeInElements = int64(components) * int64(size3D[0]) * int64(size3D[1]) * int64(size3D[2])
-	t.SizeInBytes = int64(SIZEOF_FLOAT) * t.SizeInElements
-	
-	//cu.MemHostRegister(cu.HostPtr(&t.List[0]), t.SizeInBytes, cu.MEMHOSTREGISTER_PORTABLE)
+	t.SizeInBytes = int64(SIZEOF_FLOAT) * t.SizeInElements	
+	t.isPinned = 0
 }
 
 // Allocates an returns a new Array
 func NewArray(components int, size3D []int) *Array {
 	t := new(Array)
 	t.Init(components, size3D)
+	t.isPinned = 0;
 	return t
+}
+
+func NewArrayPinned(components int, size3D []int) *Array {
+	t := new(Array)
+	t.Init(components, size3D)
+	cu.MemHostRegister(cu.HostPtr(unsafe.Pointer(&t.List[0])), t.SizeInBytes, cu.MEMHOSTREGISTER_PORTABLE)
+	Debug("Successfully pinned.")
+	t.isPinned = 1;
+	return t
+}
+
+func (a *Array) Pin() {
+    if a.isPinned == 0 {
+        cu.MemHostRegister(cu.HostPtr(unsafe.Pointer(&a.List[0])), a.SizeInBytes, cu.MEMHOSTREGISTER_PORTABLE)
+	    Debug("Successfully pinned.")
+	    a.isPinned = 1 
+	}
 }
 
 func (a *Array) Rank() int {
@@ -77,5 +95,6 @@ func (a *Array) Component(component int) *Array {
 	comp.List = a.Comp[component]
 	comp.Array = Slice4D(comp.List, comp.Size4D)
 	comp.Comp = Slice2D(comp.List, []int{1, Prod(comp.Size3D)})
+	comp.isPinned = 0
 	return comp
 }
