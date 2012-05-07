@@ -29,27 +29,27 @@ func LoadZhangLiMADTorque(e *Engine) {
 	e.AddNewQuant("xi", SCALAR, VALUE, Unit(""), "Degree of non-adiabadicity")
 	e.AddNewQuant("polarisation", SCALAR, VALUE, Unit(""), "Polarization degree of the spin-current")
 	LoadUserDefinedCurrentDensity(e)
-	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Zhang-Li Spin Transfer Torque")
+	zzt := e.AddNewQuant("zzt", VECTOR, FIELD, Unit("/s"), "Zhang-Li Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	e.Depends("stt", "xi", "polarisation", "j", "m", "msat")
+	e.Depends("zzt", "xi", "polarisation", "j", "m", "msat")
 
 	// ============ Updating the torque =============
-	stt.SetUpdater(&ZhangLiUpdater{stt: stt})
+	zzt.SetUpdater(&ZhangLiUpdater{zzt: zzt})
 
 	// Add spin-torque to LLG torque
-	AddTermToQuant(e.Quant("torque"), stt)
+	AddTermToQuant(e.Quant("torque"), zzt)
 }
 
 type ZhangLiUpdater struct {
-	stt *Quant
+	zzt *Quant
 }
 
 func (u *ZhangLiUpdater) Update() {
 	e := GetEngine()
 	
 	cellSize := e.CellSize()	
-	stt := u.stt
+	zzt := u.zzt
 	m := e.Quant("m")
 	ee := e.Quant("xi").Scalar()
 	msat := e.Quant("msat") // it is pointwise
@@ -63,5 +63,5 @@ func (u *ZhangLiUpdater) Update() {
 	pred := pol * MuB * njn / (E * nmsatn * (1 + ee * ee)) 
 	pret := ee * pred
 	
-	gpu.LLZhangLi(stt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
+	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
 }
