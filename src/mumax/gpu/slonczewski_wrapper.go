@@ -77,4 +77,6 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
         
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
+		
+		stt.Stream.Sync()
 }
