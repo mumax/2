@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QWidget>
+#include <QMap>
+#include <QString>
+#include <QDateTime>
 
 // Other parts of the interface
 #include "preferences.h"
@@ -23,6 +26,11 @@ class QActionGroup;
 class QLabel;
 class QMenu;
 
+// Other
+class QFileSystemWatcher;
+//class QString;
+// class QDateTime;
+
 class Window : public QMainWindow
 {
   Q_OBJECT
@@ -37,8 +45,9 @@ protected:
 private slots:
   void openFiles();
   void openDir();
+  void watchDir(const QString& str);
   void toggleDisplay();
-
+  void updateWatchedFiles(const QString& str);
   void settings();
   void about();
   void updateDisplayData(int index);
@@ -58,6 +67,7 @@ private:
   QAction *attachToMumax;
   QAction *settingsAct;
   QAction *aboutAct;
+  QAction *watchDirAct;
 
   QActionGroup *displayType;
   QAction *conesAct;
@@ -92,6 +102,11 @@ private:
   // Storage and caching
   std::vector<array_ptr> omfCache;
   QStringList filenames;
+
+  // Watch dirs
+  QFileSystemWatcher *watcher;
+  QMap<QString, QDateTime> watchedFiles;
+  bool noFollowUpdate;
 };
 
 #endif
