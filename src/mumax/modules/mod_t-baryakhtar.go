@@ -30,7 +30,7 @@ func LoadTBaryakhtarDamp(e *Engine) {
 	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
 
 	// ============ Dependencies =============
-	e.Depends("bdt", "beta", "m", "msat", "Aex", "H_eff")
+	e.Depends("bdt", "beta", "m", "msat", "Aex", "H_eff", "gamma", "alpha")
 
 	// ============ Updating the torque =============
 	bdt.SetUpdater(&TBaryakhtarUpdater{bdt: bdt})
@@ -53,11 +53,26 @@ func (u *TBaryakhtarUpdater) Update() {
 	msat := e.Quant("msat") // it is pointwise
 	heff := e.Quant("H_eff")
 	aex := e.Quant("Aex")
+	gamma := e.Quant("gamma").Scalar()
+	alpha := e.Quant("alpha")
 	pbc := e.Periodic()
 	
 	nmsatn := msat.Multiplier()[0]
+	naexn := aex.Multiplier()[0]
 	
-	pred := beta * aex.Multiplier()[0] / (Mu0 * nmsatn * nmsatn) 
-	
-	gpu.LLGBt(bdt.Array(), m.Array(), heff.Array(), msat.Array(), aex.Array(), float32(pred), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
+	pred := beta * gamma * naexn / (Mu0 * nmsatn * nmsatn) 
+	Debug("pred", pred)
+	gpu.LLGBtAsync(bdt.Array(), 
+	          m.Array(), 
+	          heff.Array(), 
+	          msat.Array(), 
+	          aex.Array(), 
+	          alpha.Array(),
+	          float32(alpha.Multiplier()[0]),
+	          float32(pred), 
+	          float32(cellSize[X]), 
+	          float32(cellSize[Y]), 
+	          float32(cellSize[Z]), 
+	          pbc)
+    bdt.Array().Sync()
 }

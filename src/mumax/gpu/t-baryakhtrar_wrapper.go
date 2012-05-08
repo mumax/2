@@ -19,7 +19,7 @@ import (
 )
 
 
-func LLGBt(t *Array, m *Array, h *Array, msat *Array, aex *Array, pre float32, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLGBtAsync(t *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Array, alphaMul float32, pre float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
 
 	// Bookkeeping
 	CheckSize(h.Size3D(), m.Size3D())
@@ -28,7 +28,7 @@ func LLGBt(t *Array, m *Array, h *Array, msat *Array, aex *Array, pre float32, c
 	Assert(h.NComp() == 3)
 	Assert(msat.NComp() == 1)
 	Assert(aex.NComp() == 1)
-	//Debug("Part size:",m.PartSize()[X],"x",m.PartSize()[Y],"x",m.PartSize()[Z])
+	Assert(alpha.NComp() == 1)
 	
 	// Calling the CUDA functions
 	C.tbaryakhtar_async(
@@ -47,6 +47,10 @@ func LLGBt(t *Array, m *Array, h *Array, msat *Array, aex *Array, pre float32, c
 		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
 		
 		(**C.float)(unsafe.Pointer(&(aex.Comp[X].Pointers()[0]))),
+			
+		(**C.float)(unsafe.Pointer(&(alpha.Comp[X].Pointers()[0]))),
+		
+		(C.float)(alphaMul),
 		
 		(C.float)(pre),
 		

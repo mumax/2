@@ -18,11 +18,13 @@
 extern "C" {
 #endif
 
-DLLEXPORT  void tbaryakhtar_async(float** tx, float** ty, float** tz, 
-			 float** mx, float** my, float** mz, 
-			 float** hx, float** hy, float** hz,
-			 float** msat,
-			 float** Aex,
+DLLEXPORT  void tbaryakhtar_async(float** tx, float**  ty, float**  tz, 
+			 float**  mx, float**  my, float**  mz, 
+			 float**  hx, float**  hy, float**  hz,
+			 float**  msat,
+			 float**  AexMsk,
+			 float**  alphaMsk,
+			 const float alphaMul,
 			 const float pre,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
