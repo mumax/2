@@ -23,6 +23,12 @@ public slots:
   void setXRotation(int angle);
   void setYRotation(int angle);
   void setZRotation(int angle);
+  void setXCom(float val);
+  void setYCom(float val);
+  void setZCom(float val);
+  void setXLoc(float val);
+  void setYLoc(float val);
+  void setZLoc(float val);
   void setXSliceLow(int low);
   void setYSliceLow(int low);
   void setZSliceLow(int low);
@@ -39,6 +45,7 @@ signals:
   void xRotationChanged(int angle);
   void yRotationChanged(int angle);
   void zRotationChanged(int angle);
+  void COMChanged(float val);
 
 protected:
   void initializeGL();
@@ -52,6 +59,9 @@ private:
   int xRot;
   int yRot;
   int zRot;
+  float xLoc;
+  float yLoc;
+  float zLoc;
   float zoom;
 
   QPoint lastPos;

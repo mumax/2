@@ -15,9 +15,9 @@
 GLWidget::GLWidget(QWidget *parent)
   : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
-  xRot = 0;
-  yRot = 0;
-  zRot = 0;
+  xRot = xLoc = 0;
+  yRot = yLoc = 0;
+  zRot = xLoc = 0;
   usePtr = false;
   displayOn = false;
   topOverlayOn = true;
@@ -90,6 +90,60 @@ void GLWidget::setZRotation(int angle)
     emit zRotationChanged(angle);
     updateGL();
   }
+}
+
+void GLWidget::setXCom(float val)
+{
+    if (xcom != val) {
+        xcom = val;
+        emit COMChanged(val);
+        updateGL();
+    }
+}
+
+void GLWidget::setYCom(float val)
+{
+    if (ycom != val) {
+        ycom = val;
+        emit COMChanged(val);
+        updateGL();
+    }
+}
+
+void GLWidget::setZCom(float val)
+{
+    if (zcom != val) {
+        zcom = val;
+        emit COMChanged(val);
+        updateGL();
+    }
+}
+
+void GLWidget::setXLoc(float val)
+{
+    if (xLoc != val) {
+        xLoc = val;
+        emit COMChanged(val);
+        updateGL();
+    }
+}
+
+void GLWidget::setYLoc(float val)
+{
+    if (yLoc != val) {
+        yLoc = val;
+        emit COMChanged(val);
+        updateGL();
+    }
+}
+
+void GLWidget::setZLoc(float val)
+{
+    if (zLoc != val) {
+        zLoc = val;
+        emit COMChanged(val);
+        updateGL();
+    }
 }
 
 void GLWidget::setXSliceLow(int low)
@@ -228,14 +282,13 @@ void GLWidget::paintGL()
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-  glTranslatef(0.0, 0.0, -10.0 + zoom);
+  glTranslatef(xLoc, yLoc, -10.0 + zoom);
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
-  //std::cout << "Zoom: " << zoom << std::endl;
 
   if (displayOn) {
-    //std::cout << "DISPLAY!" << std::endl;
+
     const long unsigned int *size = dataPtr->shape();
     int xnodes = size[0];
     int ynodes = size[1];
@@ -337,6 +390,9 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
   } else if (event->buttons() & Qt::RightButton) {
     setXRotation(xRot + 8 * dy);
     setZRotation(zRot + 8 * dx);
+  } else if (event->buttons() & Qt::MiddleButton) {
+      setXLoc(xLoc + 0.2*dx);
+      setYLoc(yLoc - 0.2*dy);
   }
   lastPos = event->pos();
 }
@@ -352,7 +408,6 @@ void GLWidget::wheelEvent(QWheelEvent *event)
 
 void GLWidget::drawInstructions(QPainter *painter)
 {
-  //QString text = tr("Hello OpenGL World");
   QString text = topOverlayText;
   QFontMetrics metrics = QFontMetrics(font());
   int border = qMax(4, metrics.leading());
@@ -360,14 +415,10 @@ void GLWidget::drawInstructions(QPainter *painter)
   QRect rect = metrics.boundingRect(0, 0, width() - 2*border, int(height()*0.125),
 				    Qt::AlignCenter | Qt::TextWordWrap, text);
 
-  //std::cout << width() << "\t" << rect.height()+2*border << std::endl;
-    
   painter->setRenderHint(QPainter::TextAntialiasing);
   painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
 		    QColor(0, 0, 0, 127));
   painter->setPen(Qt::white);
-  //painter->fillRect(QRect(0, 0, width(), rect.height() + 2*border),
-  //                  QColor(0, 0, 0, 127));
   painter->drawText((width() - rect.width())/2, border,
 		    rect.width(), rect.height(),
 		    Qt::AlignLeft | Qt::TextWordWrap, text);
