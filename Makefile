@@ -34,8 +34,13 @@ endif
 	make clean -C src/muview
 .PHONY: test
 test:
-	echo todo	
-
+	echo todo
+		
+.PHONY: tidy	
+tidy:
+	@find * | egrep "#" | xargs rm -f
+	@find * | egrep "\~" | xargs rm -f
+	
 .PHONY: doc
 doc:
 
