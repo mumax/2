@@ -66,5 +66,5 @@ func (u *torqueUpdater) Update() {
 	for i := range multiplier {
 		multiplier[i] = γ
 	}
-	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Scalar()))
+	gpu.Torque(u.τ.Array(), u.m.Array(), u.H.Array(), u.α.Array(), float32(u.α.Multiplier()[0]))
 }
