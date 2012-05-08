@@ -1,2 +1,5 @@
 libmumax2.h
 *.obj
+*.*~
+*.cu~
+*.h~

@@ -16,5 +16,6 @@ _obj
 graph.dot
 *.pro.user
 *.pyc
+*.*~
 mumax2-manual.pdf
 mumax2.tar.gz
