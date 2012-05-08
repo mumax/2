@@ -268,12 +268,12 @@ func getCrashStack() string {
 
 const (
 	WELCOME = `
- MuMax 2.0.1942 beta
- (C) Arne Vansteenkiste, Ben Van de Wiele
-     (Dynamat/EELAB Ghent University, Belgium), and
-     Rémy Lassalle-Balier, Graham Rowlands, Mykola Dvornik.
+ MuMax 2.0.2014 RC1
+ (C) Arne Vansteenkiste, Ben Van de Wiele, Mykola Dvornik
+     (Dynamat/EELAB Ghent University, Belgium),
+     Rémy Lassalle-Balier, Graham Rowlands.
 
-  This is a BETA VERSION for testing purposes.
+  This is a RELEASE CANDIDATE version.
 
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
