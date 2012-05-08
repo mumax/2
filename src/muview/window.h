@@ -45,7 +45,7 @@ protected:
 private slots:
   void openFiles();
   void openDir();
-  void watchDir();
+  void watchDir(const QString& str);
   void toggleDisplay();
   void updateWatchedFiles(const QString& str);
   void settings();

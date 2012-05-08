@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFileSystemWatcher>
+#include <QSignalMapper>
 #include "glwidget.h"
 #include "window.h"
 #include <QDebug>
@@ -118,46 +119,52 @@ Window::Window(int argc, char *argv[])
       rawList << argv[i];
     }
 
-    QStringList allLoadedFiles;
-    foreach (QString item, rawList)
-      {
-	QFileInfo info(item);
-	if (!info.exists()) {
-	  std::cout << "File " << item.toStdString() << " does not exist" << std::endl;
-	} else {
-	  // Push our new content...
-	  if (info.isDir()) {
-	    QDir chosenDir(item);
-	    QString dirString = chosenDir.path()+"/";
-	    QStringList filters;
-	    filters << "*.omf" << "*.ovf";
-	    chosenDir.setNameFilters(filters);
-	    QStringList dirFiles = chosenDir.entryList();
+    if (rawList.contains(QString("-w"))) {
+        if (rawList.indexOf("-w") < (rawList.length() - 1))  {
+            watchDir(rawList[rawList.indexOf("-w")+1]);
+        }
+    } else {
+        QStringList allLoadedFiles;
+        foreach (QString item, rawList)
+        {
+            QFileInfo info(item);
+            if (!info.exists()) {
+                std::cout << "File " << item.toStdString() << " does not exist" << std::endl;
+            } else {
+                // Push our new content...
+                if (info.isDir()) {
+                    QDir chosenDir(item);
+                    QString dirString = chosenDir.path()+"/";
+                    QStringList filters;
+                    filters << "*.omf" << "*.ovf";
+                    chosenDir.setNameFilters(filters);
+                    QStringList dirFiles = chosenDir.entryList();
 
-	    OMFHeader tempHeader = OMFHeader();
-	    foreach (QString file, dirFiles)
-	      {  
-		allLoadedFiles << file;
-		omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
-	      }
+                    OMFHeader tempHeader = OMFHeader();
+                    foreach (QString file, dirFiles)
+                    {
+                        allLoadedFiles << file;
+                        omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+                    }
 
-	  } else {
-	    // just a normal file
-	    OMFHeader tempHeader = OMFHeader();
-	    allLoadedFiles << item;
-	    omfCache.push_back(readOMF(item.toStdString(), tempHeader));
-	  }
-	}
-      }
-    // persistent storage of filenames for top overlay
-    filenames = allLoadedFiles;
+                } else {
+                    // just a normal file
+                    OMFHeader tempHeader = OMFHeader();
+                    allLoadedFiles << item;
+                    omfCache.push_back(readOMF(item.toStdString(), tempHeader));
+                }
+            }
+        }
+        // persistent storage of filenames for top overlay
+        filenames = allLoadedFiles;
 
-    // Update the Display with the first element
-    glWidget->updateData(omfCache.front());
-    // Update the top overlay
-    glWidget->updateTopOverlay(filenames.front());
-    // Refresh the animation bar
-    adjustAnimSlider();
+        // Update the Display with the first element
+        glWidget->updateData(omfCache.front());
+        // Update the top overlay
+        glWidget->updateTopOverlay(filenames.front());
+        // Refresh the animation bar
+        adjustAnimSlider();
+    }
   }
 }
 
@@ -411,12 +418,18 @@ void Window::openDir()
     }
 }
 
-void Window::watchDir()
+void Window::watchDir(const QString& str)
 {
-  QString dir = QFileDialog::getExistingDirectory(this, tr("Watch Directory"),
-                                                 "/home",
-                                                 QFileDialog::ShowDirsOnly
-                                                 | QFileDialog::DontResolveSymlinks);
+    QString dir;
+    // Don't show a dialog if we get this message from the command line
+    if (str == "") {
+     dir = QFileDialog::getExistingDirectory(this, tr("Watch Directory"),
+                                                     "/home",
+                                                     QFileDialog::ShowDirsOnly
+                                                     | QFileDialog::DontResolveSymlinks);
+    } else {
+        dir = str;
+    }
 
   if (dir != "")
     {
@@ -436,36 +449,35 @@ void Window::watchDir()
       // persistent storage of filenames for top overlay
       filenames = dirFiles;
 
-      // Clear the cache of pre-existing elements
-      while (!omfCache.empty()) {
-        omfCache.pop_back();
+      if (filenames.length()>0) {
+          // Clear the cache of pre-existing elements
+          while (!omfCache.empty()) {
+              omfCache.pop_back();
+          }
+
+          // Qt macro for looping over files
+          OMFHeader tempHeader = OMFHeader();
+          foreach (QString file, dirFiles)
+          {
+              //std::cout << (dirString+file).toStdString() << std::endl;
+              // Push our new content...
+              omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+          }
+
+          // Update the Display with the first element
+          glWidget->updateData(omfCache.front());
+
+          // Update the top overlay
+          glWidget->updateTopOverlay(filenames.front());
+
+          // Refresh the animation bar
+          adjustAnimSlider();
       }
-
-      // Qt macro for looping over files
-      OMFHeader tempHeader = OMFHeader();
-      foreach (QString file, dirFiles)
-        {
-          //std::cout << (dirString+file).toStdString() << std::endl;
-          // Push our new content...
-          omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
-        }
-
-      // Update the Display with the first element
-      glWidget->updateData(omfCache.front());
-
-      // Update the top overlay
-      glWidget->updateTopOverlay(filenames.front());
-
-      // Refresh the animation bar
-      adjustAnimSlider();
-
       // Now the callbacks
       QObject::connect(watcher, SIGNAL(directoryChanged(QString)),
               this, SLOT(updateWatchedFiles(QString)));
-//      QObject::connect(waiter,  SIGNAL(fileChanged(QString)),
-//              this, SLOT(waitForFinishedFiles(QString)));
-
     }
+
 }
 
 void Window::toggleDisplay() {
@@ -500,8 +512,11 @@ void Window::createActions()
   openDirAct->setShortcut( QKeySequence(Qt::CTRL + Qt::Key_D) );
   connect(openDirAct, SIGNAL(triggered()), this, SLOT(openDir()));
 
+  QSignalMapper* signalMapper = new QSignalMapper (this);
   watchDirAct  = new QAction(tr("&Follow Dir"), this);
   watchDirAct->setShortcut( QKeySequence(Qt::CTRL + Qt::Key_F) );
-  connect(watchDirAct, SIGNAL(triggered()), this, SLOT(watchDir()));
+  connect(watchDirAct, SIGNAL(triggered()), signalMapper, SLOT(map()));
+  signalMapper->setMapping (watchDirAct, "") ;
+  connect (signalMapper, SIGNAL(mapped(QString)), this, SLOT(watchDir(QString))) ;
 }
 
