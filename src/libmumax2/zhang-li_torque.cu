@@ -120,12 +120,13 @@ extern "C" {
   }*/
 
   
- __global__ void zhangli_deltaMKernMGPU(float* sttx, float* stty, float* sttz,
-					 float* mx, float* my, float* mz,
-					 float* lmx, float* lmy, float* lmz,
-					 float* rmx, float* rmy, float* rmz,
-					 float* jx, float* jy, float* jz,
-					 float* msat,
+ __global__ void zhangli_deltaMKernMGPU(float* __restrict__ sttx, float* __restrict__ stty, float* __restrict__ sttz,
+					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
+					 float* __restrict__ lmx, float* __restrict__ lmy, float* __restrict__ lmz,
+					 float* __restrict__ rmx, float* __restrict__ rmy, float* __restrict__ rmz,
+					 float* __restrict__ jx, float* __restrict__ jy, float* __restrict__ jz,
+					 float* __restrict__ msat,
+					 float3 jMul,
 					 float2 pre,
 					 int4 size,		
 					 float3 mstep,
@@ -261,20 +262,21 @@ extern "C" {
 	  
 	  float3 j0 = make_float3(0.0f, 0.0f, 0.0f);
 	  
-	  j0.x = (jx != NULL)? jx[x0] : 0.0f; 
-	  j0.y = (jy != NULL)? jy[x0] : 0.0f;  
-	  j0.z = (jz != NULL)? jz[x0] : 0.0f;
+	  j0.x = (jx != NULL)? jx[x0] * jMul.x : jMul.x; 
+	  j0.y = (jy != NULL)? jy[x0] * jMul.y : jMul.y;  
+	  j0.z = (jz != NULL)? jz[x0] * jMul.z : jMul.z;
 	  
+	  float njn = len(j0);
+      float3 nj0 = normalize(j0);
+      
 	  //-------------------------------------------------//
-	  		  
+	  pre.x *= njn;
+	  pre.y *= njn;
 	  
-	  float3 dmdj = make_float3(dotf(dmdx, j0),
-								dotf(dmdy, j0),
-								dotf(dmdz, j0));
-							
-	  
-	  
-	  
+	  float3 dmdj = make_float3(dotf(dmdx, nj0),
+								dotf(dmdy, nj0),
+								dotf(dmdz, nj0));
+							  		  
       float3 dmdjxm = crossf(dmdj, m); // with minus in it
       
       float3 mxdmxm = crossf(m, dmdjxm); // with minus from [dmdj x m]
@@ -294,10 +296,11 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 			 float** mx, float** my, float** mz, 
 			 float** jx, float** jy, float** jz,
 			 float** msat,
+			 const float jMul_x, const float jMul_y, const float jMul_z,
 			 const float pred, const float pret,
 			 const int sx, const int sy, const int sz,
-			 const float csx, const float csy, const float csz,
-			 const int pbc_x, const int pbc_y, const int pbc_z, 
+			 const float csx, const float csy, const float csz, 
+			 const int pbc_x, const int pbc_y, const int pbc_z,
 			 CUstream* stream)
   {
 
@@ -316,7 +319,8 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 	int syz = sy * sz;
 	
 		
-	float3 mstep = make_float3(i12csx, i12csy, i12csz);	
+	float3 mstep = make_float3(i12csx, i12csy, i12csz);
+	float3 jMul = make_float3(jMul_x, jMul_y, jMul_z);
 	int4 size = make_int4(sx, sy, sz, syz);
 	float2 pre = make_float2(pred, pret);
 	int2 pbc = make_int2(pbc_x, pbc_z);
@@ -377,7 +381,8 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
 												   lmx, lmy, lmz,
 												   rmx, rmy, rmz,
 												   jx[dev], jy[dev], jz[dev], 
-												   msat[dev],												   
+												   msat[dev],	
+												   jMul,											   
 												   pre,
 												   size,
 												   mstep,

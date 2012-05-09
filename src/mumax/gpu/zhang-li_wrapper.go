@@ -27,7 +27,7 @@ import (
 //			 int NPart,
 //			 CUstream* stream);
 
-func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret float32, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, jMul []float64, pred float32, pret float32, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
 
 	// Bookkeeping
 	CheckSize(j.Size3D(), m.Size3D())
@@ -52,6 +52,10 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, pred float32, pret f
 		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
 		
 		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
+		
+		(C.float)(jMul[X]),
+		(C.float)(jMul[Y]),
+		(C.float)(jMul[Z]),
 		
 		(C.float)(pred),
 		(C.float)(pret),

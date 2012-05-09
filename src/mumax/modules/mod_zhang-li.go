@@ -14,7 +14,7 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	"math"
+	//"math"
 )
 
 // Register this module
@@ -57,11 +57,11 @@ func (u *ZhangLiUpdater) Update() {
 	curr := e.Quant("j") // could be pointwise
 	pbc := e.Periodic()
 	
-	njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
+	//njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
 	nmsatn := msat.Multiplier()[0]
 	
-	pred := pol * MuB * njn / (E * nmsatn * (1 + ee * ee)) 
+	pred := pol * MuB / (E * nmsatn * (1 + ee * ee)) 
 	pret := ee * pred
 	
-	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
+	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), curr.Multiplier(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
 }
