@@ -24,31 +24,4 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MUMAX2BIN/../src/libmumax2
 export PYTHONPATH=$PYTHONPATH:$MUMAX2BIN/../src/python
 #echo PYTHONPATH: $PYTHONPATH
 
-launchMumax=0
-outputDir=""
-overrideDir=""
-for i in ${ARGV[@]}
-do
-    if [ "$i" == "-d" ] ; then
-	launchMumax=1
-    fi
-    if [[ $i =~ ^-o=* ]] ; then
-	overrideDir=$(echo $i | sed 's/-o=//')
-    fi
-    if [[ $i =~ ^[^-].* ]] ; then
-	# non-flagged arg must be input file
-	outputDir="$i.out"
-    fi
-done
-
-if [ "$overrideDir" != "" ] ; then
-    outputDir=$overrideDir
-fi
-
-if [ $launchMumax == 1 ] ; then
-   $MUMAX2BIN/muview -w $outputDir &
-fi
-
-ARGV=( ${ARGV[@]/-d/} )
-
 exec $MUMAX2BIN/mumax2-bin $ARGV
