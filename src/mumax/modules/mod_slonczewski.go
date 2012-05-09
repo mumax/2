@@ -26,10 +26,13 @@ func LoadSlonczewskiTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	// ============ New Quantities =============
-	e.AddNewQuant("lambda", SCALAR, VALUE, Unit(""), "In-Plane term")
+	labmda := e.AddNewQuant("lambda", SCALAR, VALUE, Unit(""), "In-Plane term")
+	labmda.SetScalar(1.0)
 	e.AddNewQuant("p", VECTOR, MASK , Unit(""), "Polarization Vector")
-	e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization efficiency")
-	e.AddNewQuant("epsilon_prime", SCALAR, VALUE, Unit(""), "Field-like term")
+	pol := e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization efficiency")
+	pol.SetScalar(1.0)
+	epsilon_prime := e.AddNewQuant("epsilon_prime", SCALAR, VALUE, Unit(""), "Field-like term")
+	epsilon_prime.SetScalar(0.0)
 	LoadUserDefinedCurrentDensity(e)
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
 
