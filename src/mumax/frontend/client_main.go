@@ -81,23 +81,27 @@ func GetOutputDir(inputFile string) string {
 
 // make the output dir
 func initOutputDir(outputDir string) {
+    
 	if *flag_force {
-		err := os.RemoveAll(outputDir)
-		if err != nil {
-			Log("os.RemoveAll", outputDir, ":", err)
-		}
+        err := os.RemoveAll(outputDir)
+        if err != nil {
+	        Log("os.RemoveAll", outputDir, ":", err)
+        }
 	}
 	
-	if outputDir !="." {
-		os.Mkdir(outputDir, 0777)
+	if *flag_dontrun {
+	    _, err := os.Stat(outputDir)
+        if !os.IsNotExist(err) {
+            CheckIO(err)   
+        } 
 	}
-	
-	/*errOut := os.Mkdir(outputDir, 0777)
+		
+	errOut := os.Mkdir(outputDir, 0777)
 	if outputDir != "." {
 		CheckIO(errOut)
 	} else {
 		Log(errOut)
-	}*/
+	}
 	
 }
 
