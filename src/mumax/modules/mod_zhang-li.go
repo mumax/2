@@ -26,8 +26,10 @@ func LoadZhangLiMADTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	// ============ New Quantities =============
-	e.AddNewQuant("xi", SCALAR, VALUE, Unit(""), "Degree of non-adiabadicity")
-	e.AddNewQuant("polarisation", SCALAR, VALUE, Unit(""), "Polarization degree of the spin-current")
+	xi := e.AddNewQuant("xi", SCALAR, VALUE, Unit(""), "Degree of non-adiabadicity")
+	xi.SetScalar(0.05)
+	pol := e.AddNewQuant("polarisation", SCALAR, VALUE, Unit(""), "Polarization degree of the spin-current")
+	pol.SetScalar(1.0)
 	LoadUserDefinedCurrentDensity(e)
 	zzt := e.AddNewQuant("zzt", VECTOR, FIELD, Unit("/s"), "Zhang-Li Spin Transfer Torque")
 
