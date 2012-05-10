@@ -495,6 +495,10 @@ func (q *Quant) String() string {
 	return fmt.Sprint(q.Name(), q.Buffer().Array)
 }
 
+func (q *Quant) SetUpToDate(status bool) {
+	   q.upToDate = status
+}
+
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.
 //func (q *Quant) FieldValue() *host.Array {
