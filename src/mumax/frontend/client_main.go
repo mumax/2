@@ -57,12 +57,8 @@ func clientMain() {
 		return
 	}
 	
-	//masterctl := make(chan int)
-	clientctl := make(chan int)
-	
-	go ServeClient(clientctl, infile, outdir)		
-	
-	<-clientctl	
+	ServeClient(infile, outdir)		
+		
 }
 
 
@@ -106,12 +102,11 @@ func initOutputDir(outputDir string) {
 }
 
 // Gets the response from the client and starts the slave server
-func ServeClient(clientctl chan int, inputfile string, ClientPath string) {
+func ServeClient(inputfile string, ClientPath string) {
 	
 	var client Client	
 	client.Init(inputfile, ClientPath)
 	client.Run()
-	clientctl <- NOTRUNNING
 }
 
 // Gets the response from the client and starts the slave server
