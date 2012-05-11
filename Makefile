@@ -40,6 +40,11 @@ test:
 tidy:
 	@find * | egrep "#" | xargs rm -f
 	@find * | egrep "\~" | xargs rm -f
+
+.PHONY: love	
+love:
+	@echo Oh, yeah
+	@echo Do it again to MuMax2!
 	
 .PHONY: doc
 doc:
