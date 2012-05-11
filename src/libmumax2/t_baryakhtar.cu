@@ -19,6 +19,7 @@ extern "C" {
 					 float* __restrict__ AexMsk,
 					 float* __restrict__ alphaMsk,
 					 const float alphaMul,
+					 const float msat0Mul,
 					 const float pred,
 					 const float pre,
 					 const float pret,
@@ -33,7 +34,7 @@ extern "C" {
 	int x0 = i * size.w + j * size.z + k;
 		    
 	float m_sat = (msat != NULL) ? msat[x0] : 1.0f;
-		
+	
 	if (m_sat == 0.0f){
 	    tx[x0] = 0.0f;
 	    ty[x0] = 0.0f;
@@ -48,19 +49,20 @@ extern "C" {
 	    
         float A = (AexMsk != NULL) ? AexMsk[x0] : 1.0f;
         float alpha = (alphaMsk != NULL) ? alphaMsk[x0] * alphaMul : alphaMul;
+        float prel =  pre * A / (m_sat * m_sat); // pre is without Gilbert gamma
+            
+        m_sat = pred * A / (m_sat * m_sat * (1.0f + alpha * alpha)); // pred is with Gilbert's gamma
+        
+        
         
         /*if (x0 == 100) {
 	        printf("msat: %e  ", m_sat);
 	        printf("pre: %e  ", pre);
 	        printf("A: %e  ", A);
-	        printf("alpha: %e  ", alpha);
+	        printf("alpha: %e  \n", alpha);
+	        printf("prel: %e  ", prel);
 	    }*/
 	    
-	    
-        m_sat = pred * A / (m_sat * m_sat * (1.0f + alpha * alpha)); // pred is with Gilbert's gamma
-        
-        float prel =  pre * A / (m_sat * m_sat); // pre is without Gilbert gamma
-        
         float3 m = make_float3(mx[x0], my[x0], mz[x0]);		
         
         // Longitudinal part
@@ -182,13 +184,23 @@ extern "C" {
         
 		// Longitudinal part			
 	    float le = prel * dotf(m, ddh); // Lambda_e * (m, laplace(h) 
-	    l[x0] = lr - le; 
+	    /*if (x0 == 100){
+	        printf("lr-le: %e\n", lr-le);
+	        printf("mx: %e\n", m.x);
+	        printf("my: %e\n", m.y);
+	        printf("mz: %e\n", m.z);
+	        printf("prel: %e\n", prel);
+	        printf("ddh.x: %e\n", ddh.x);
+	        printf("ddh.y: %e\n", ddh.y);
+	        printf("ddh.z: %e\n", ddh.z);   
+	    }*/
+	    
+	    l[x0] = (lr - le)/msat0Mul; 
 	    //*****************    	  
 	    
         float3 ddhxm = crossf(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
 
-        float3 mxddhxm = crossf(m, ddhxm); // with plus from [ddh x m]
-       
+        float3 mxddhxm = crossf(m, ddhxm); // with plus from [ddh x m]    
          
         tx[x0] = m_sat * mxddhxm.x;
         ty[x0] = m_sat * mxddhxm.y;
@@ -211,6 +223,7 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float**  AexMsk,
 			 float**  alphaMsk,
 			 const float alphaMul,
+			 const float msat0Mul, 
 			 const float pred,
 			 const float pre,
 			 const float pret,
@@ -292,6 +305,7 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 												   AexMsk[dev],							 
 												   alphaMsk[dev],
 												   alphaMul,
+												   msat0Mul,
 												   pred,
 												   pre,
 												   pret,

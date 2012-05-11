@@ -32,7 +32,12 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.AddNewQuant("blambda", SCALAR, VALUE, Unit(""), "Baryakhtar's relativistic relaxation constant")
 	
 	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
-    bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("/s"), "Baryakhtar's longitudinal relaxation term")
+    bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("m/As"), "Baryakhtar's longitudinal relaxation term")
+    bdt.Multiplier()[0] = 1.0
+    bdt.Multiplier()[1] = 1.0
+    bdt.Multiplier()[2] = 1.0
+    
+    bdl.Multiplier()[0] = 1.0
 	// ============ Dependencies =============
 	e.Depends("bdt", "beta", "m", "msat0", "Aex", "H_eff", "gamma", "alpha", "blambda")
     e.Depends("bdl", "beta", "m", "msat0", "Aex", "H_eff", "gamma", "alpha", "blambda")
@@ -40,7 +45,8 @@ func LoadBaryakhtarTorques(e *Engine) {
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{bdt: bdt, bdl: bdl}
 	bdt.SetUpdater(upd)
-    bdl.SetUpdater(upd)
+    bdl.SetUpdater(upd) 
+    AddTermToQuant(e.Quant("torque"), bdt)
 }
 
 type BaryakhtarUpdater struct {
@@ -52,13 +58,14 @@ func (u *BaryakhtarUpdater) Update() {
 	e := GetEngine()	
 	cellSize := e.CellSize()	
 	bdt := u.bdt
-	bdl := u.bdt
+	bdl := u.bdl
 	m := e.Quant("m")
 	beta := e.Quant("beta").Scalar()
 	msat := e.Quant("msat0") // it is pointwise
 	heff := e.Quant("H_eff")
 	aex := e.Quant("Aex")
 	gamma := e.Quant("gamma").Scalar()
+	msat0 := e.Quant("msat0")
 	alpha := e.Quant("alpha")
 	pbc := e.Periodic()
 	blambda := e.Quant("blambda").Scalar()
@@ -77,6 +84,7 @@ func (u *BaryakhtarUpdater) Update() {
                     aex.Array(), 
                     alpha.Array(),
                     float32(alpha.Multiplier()[0]),
+                    float32(msat0.Multiplier()[0]),
                     float32(pred), 
                     float32(pre),
                     float32(blambda),
@@ -85,8 +93,8 @@ func (u *BaryakhtarUpdater) Update() {
                     float32(cellSize[Z]), 
                     pbc)
                     
-    bdt.Array().Sync()
-    
+    bdt.Array().Sync()    
+     
     bdt.SetUpToDate(true)
     bdl.SetUpToDate(true)
 }

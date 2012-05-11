@@ -19,7 +19,7 @@ import (
 )
 
 
-func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Array, alphaMul float32, pred float32, pre float32, pret float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Array, alphaMul float32, msat0Mul float32, pred float32, pre float32, pret float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
 
 	// Bookkeeping
 	CheckSize(h.Size3D(), m.Size3D())
@@ -54,6 +54,8 @@ func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, aex *Array,
 		(**C.float)(unsafe.Pointer(&(alpha.Comp[X].Pointers()[0]))),
 		
 		(C.float)(alphaMul),
+		
+		(C.float)(msat0Mul),
 		
 		(C.float)(pred),
 		(C.float)(pre),
