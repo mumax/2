@@ -35,6 +35,20 @@ extern "C" {
       return;
     }
     
+    float j_x = (jx != NULL) ? jx[I] * jMul.x : jMul.x;
+    float j_y = (jy != NULL) ? jy[I] * jMul.y : jMul.y;
+    float j_z = (jz != NULL) ? jz[I] * jMul.z : jMul.z;
+
+    float3 J = make_float3(j_x, j_y, j_z);
+    float nJn = len(J);
+    
+    if (nJn == 0.0f) {
+      sttx[I] = 0.0f;
+      stty[I] = 0.0f;
+      sttz[I] = 0.0f;    
+      return;  
+    }
+	  
 	if (I < NPart){ // Thread configurations are usually too large...
 
       Ms = 1.0f / Ms;
@@ -57,12 +71,6 @@ extern "C" {
       
       float  pdotm = dotf(p, m);
            
-      float j_x = (jx != NULL) ? jx[I] * jMul.x : jMul.x;
-	  float j_y = (jy != NULL) ? jy[I] * jMul.y : jMul.y;
-	  float j_z = (jz != NULL) ? jz[I] * jMul.z : jMul.z;
-	  
-	  float3 J = make_float3(j_x, j_y, j_z);
-	  float nJn = len(J);   
 	  J = normalize(J);
 	  float Jdir = dotf(make_float3(1.0f,1.0f,1.0f), J);
 	  float Jsign = Jdir / fabsf(Jdir); 
