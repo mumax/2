@@ -22,20 +22,20 @@ func init() {
 }
 
 func LoadLongField(e *Engine) {
-	LoadHField(e)
-	LoadMagnetization(e)
-	kappa := e.AddNewQuant("kappa", SCALAR, VALUE, Unit(""), "longitudinal exchange relaxation rate")
-	Hlf := e.AddNewQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "exchange field")
-	Msat0 := e.AddNewQuant("Msat0", SCALAR, MASK, Unit("A/m"), "the initial distribution of the saturation magnetization")
+    e.LoadModule("llg")
+	kappa := e.AddNewQuant("kappa", SCALAR, VALUE, Unit(""), "longitudinal magnetic susceptibility")
+	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
+	msat0 := e.AddNewQuant("msat0", SCALAR, MASK, Unit("A/m"), "the initial distribution of the saturation magnetization")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
-	e.Depends("H_lf", "kappa", "Msat", "m", "Msat0")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, Msat: e.Quant("msat"), Msat0: Msat0})
+	e.Depends("H_lf", "kappa", "Msat", "m", "msat0")
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, Msat: e.Quant("msat"), msat0: msat0})
+
 }
 
 type LongFieldUpdater struct {
-	m, kappa, Hlf, Msat, Msat0 *Quant
+	m, kappa, Hlf, Msat, msat0 *Quant
 }
 
 func (u *LongFieldUpdater) Update() {
@@ -44,10 +44,10 @@ func (u *LongFieldUpdater) Update() {
 	kappa := u.kappa.Scalar()
 	Hlf := u.Hlf
 	Msat := u.Msat
-    Msat0 := u.Msat0
+    msat0 := u.msat0
 	stream := u.Hlf.Array().Stream
 	kappa = 0.5 / kappa;
 	
-	gpu.LongFieldAsync(Hlf.Array(), m.Array(), Msat.Array(), Msat0.Array(), kappa, Msat.Multiplier()[0], Msat0.Multiplier()[0], stream)
+	gpu.LongFieldAsync(Hlf.Array(), m.Array(), Msat.Array(), msat0.Array(), kappa, Msat.Multiplier()[0], msat0.Multiplier()[0], stream)
 	stream.Sync()
 }

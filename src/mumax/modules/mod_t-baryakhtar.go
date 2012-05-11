@@ -7,7 +7,7 @@
 
 package modules
 
-// Module implementing Slonczewski spin transfer torque.
+// Module implementing transverse and longitudinal Baryakhtar's' torques.
 // Authors: Mykola Dvornik, Arne Vansteenkiste
 
 import (
@@ -19,60 +19,74 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("t-baryakhtar", "Baryakhtar's perpendicular relaxation term", LoadTBaryakhtarDamp)
+	RegisterModule("baryakhtar", "Baryakhtar's relaxation term", LoadBaryakhtarTorques)
 }
 
-func LoadTBaryakhtarDamp(e *Engine) {
+func LoadBaryakhtarTorques(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
-
+    e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
+    LoadHField(e)
 	// ============ New Quantities =============
-	e.AddNewQuant("beta", SCALAR, VALUE, Unit(""), "Perpendicular Relaxation Rate")
-	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
 
-	// ============ Dependencies =============
-	e.Depends("bdt", "beta", "m", "msat", "Aex", "H_eff", "gamma", "alpha")
-
-	// ============ Updating the torque =============
-	bdt.SetUpdater(&TBaryakhtarUpdater{bdt: bdt})
-
-	// Add spin-torque to LLG torque
-	AddTermToQuant(e.Quant("torque"), bdt)
-}
-
-type TBaryakhtarUpdater struct {
-	bdt *Quant
-}
-
-func (u *TBaryakhtarUpdater) Update() {
-	e := GetEngine()
+	e.AddNewQuant("beta", SCALAR, VALUE, Unit(""), "Baryakhtar's exchange relaxation constant")
+	e.AddNewQuant("blambda", SCALAR, VALUE, Unit(""), "Baryakhtar's relativistic relaxation constant")
 	
+	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
+    bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("/s"), "Baryakhtar's longitudinal relaxation term")
+	// ============ Dependencies =============
+	e.Depends("bdt", "beta", "m", "msat0", "Aex", "H_eff", "gamma", "alpha", "blambda")
+    e.Depends("bdl", "beta", "m", "msat0", "Aex", "H_eff", "gamma", "alpha", "blambda")
+    
+	// ============ Updating the torque =============
+	upd := &BaryakhtarUpdater{bdt: bdt, bdl: bdl}
+	bdt.SetUpdater(upd)
+    bdl.SetUpdater(upd)
+}
+
+type BaryakhtarUpdater struct {
+	bdt, bdl *Quant
+}
+
+func (u *BaryakhtarUpdater) Update() {
+
+	e := GetEngine()	
 	cellSize := e.CellSize()	
 	bdt := u.bdt
+	bdl := u.bdt
 	m := e.Quant("m")
 	beta := e.Quant("beta").Scalar()
-	msat := e.Quant("msat") // it is pointwise
+	msat := e.Quant("msat0") // it is pointwise
 	heff := e.Quant("H_eff")
 	aex := e.Quant("Aex")
 	gamma := e.Quant("gamma").Scalar()
 	alpha := e.Quant("alpha")
 	pbc := e.Periodic()
+	blambda := e.Quant("blambda").Scalar()
 	
 	nmsatn := msat.Multiplier()[0]
 	naexn := aex.Multiplier()[0]
 	
-	pred := beta * gamma * naexn / (Mu0 * nmsatn * nmsatn) 
-	Debug("pred", pred)
+	pre := beta * naexn / (Mu0 * nmsatn * nmsatn) 
+	pred := gamma * pre 
+	
 	gpu.LLGBtAsync(bdt.Array(), 
-	          m.Array(), 
-	          heff.Array(), 
-	          msat.Array(), 
-	          aex.Array(), 
-	          alpha.Array(),
-	          float32(alpha.Multiplier()[0]),
-	          float32(pred), 
-	          float32(cellSize[X]), 
-	          float32(cellSize[Y]), 
-	          float32(cellSize[Z]), 
-	          pbc)
+                    bdl.Array(),
+                    m.Array(), 
+                    heff.Array(), 
+                    msat.Array(), 
+                    aex.Array(), 
+                    alpha.Array(),
+                    float32(alpha.Multiplier()[0]),
+                    float32(pred), 
+                    float32(pre),
+                    float32(blambda),
+                    float32(cellSize[X]), 
+                    float32(cellSize[Y]), 
+                    float32(cellSize[Z]), 
+                    pbc)
+                    
     bdt.Array().Sync()
+    
+    bdt.SetUpToDate(true)
+    bdl.SetUpToDate(true)
 }

@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-  DLLEXPORT  void long_field_async(float** hx, float** hy, float** hz, 
+DLLEXPORT    void long_field_async(float** hx, float** hy, float** hz, 
 			 float** mx, float** my, float** mz, 
 			 float** msat,
 			 float** msat0, 

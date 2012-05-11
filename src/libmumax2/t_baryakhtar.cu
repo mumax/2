@@ -10,6 +10,7 @@ extern "C" {
 #endif
    
  __global__ void tbaryakhtar_delta2HKernMGPU(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
+                     float* __restrict__ l,
 					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
 					 float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
 					 float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
@@ -18,7 +19,9 @@ extern "C" {
 					 float* __restrict__ AexMsk,
 					 float* __restrict__ alphaMsk,
 					 const float alphaMul,
+					 const float pred,
 					 const float pre,
+					 const float pret,
 					 const int4 size,		
 					 const float3 mstep,
 					 const int3 pbc,
@@ -35,6 +38,8 @@ extern "C" {
 	    tx[x0] = 0.0f;
 	    ty[x0] = 0.0f;
 	    tz[x0] = 0.0f;
+	    
+	    l[x0] = 0.0f;
 	    return;
 	}
 	
@@ -51,11 +56,22 @@ extern "C" {
 	        printf("alpha: %e  ", alpha);
 	    }*/
 	    
-        //m_sat = pre * gammaG * A / (m_sat * m_sat * (1.0f + alpha * alpha));
-        m_sat = pre * A / (m_sat * m_sat * (1.0f + alpha * alpha));
-                  
+	    
+        m_sat = pred * A / (m_sat * m_sat * (1.0f + alpha * alpha)); // pred is with Gilbert's gamma
+        
+        float prel =  pre * A / (m_sat * m_sat); // pre is without Gilbert gamma
+        
         float3 m = make_float3(mx[x0], my[x0], mz[x0]);		
-
+        
+        // Longitudinal part
+        
+        float3 h = make_float3(hx[x0], hy[x0], hz[x0]);
+        
+        float lr = pret * dotf(h, m); // lambda * (H, m)   
+        
+        // Transverse part    
+         
+        
         // Second-order derivative 5-points stencil
 
         int xb2 = i - 2;
@@ -163,14 +179,22 @@ extern "C" {
 
 	          
         float3 ddh = make_float3(dhxdr2.x + dhxdr2.y + dhxdr2.z, dhydr2.x + dhydr2.y + dhydr2.z, dhzdr2.x + dhzdr2.y + dhzdr2.z);
-						            	  
+        
+		// Longitudinal part			
+	    float le = prel * dotf(m, ddh); // Lambda_e * (m, laplace(h) 
+	    l[x0] = lr - le; 
+	    //*****************    	  
+	    
         float3 ddhxm = crossf(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
 
         float3 mxddhxm = crossf(m, ddhxm); // with plus from [ddh x m]
-            	  
+       
+         
         tx[x0] = m_sat * mxddhxm.x;
         ty[x0] = m_sat * mxddhxm.y;
-        tz[x0] = m_sat * mxddhxm.z;   
+        tz[x0] = m_sat * mxddhxm.z;  
+        
+
     } 
   }
 
@@ -180,13 +204,16 @@ extern "C" {
 
   
 __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz, 
+             float** l,
 			 float**  mx, float**  my, float**  mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 float**  msat,
 			 float**  AexMsk,
 			 float**  alphaMsk,
 			 const float alphaMul,
+			 const float pred,
 			 const float pre,
+			 const float pret,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
 			 const int pbc_x, const int pbc_y, const int pbc_z, 
@@ -256,6 +283,7 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 		for (int i = 0; i < sx; i++) {
 												   
 			tbaryakhtar_delta2HKernMGPU<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],  
+			                                       l[dev],
 												   mx[dev], my[dev], mz[dev],												   
 												   hx[dev], hy[dev], hz[dev],
 												   lhx, lhy, lhz,
@@ -264,7 +292,9 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 												   AexMsk[dev],							 
 												   alphaMsk[dev],
 												   alphaMul,
+												   pred,
 												   pre,
+												   pret,
 												   size,
 												   mstep,
 												   pbc,

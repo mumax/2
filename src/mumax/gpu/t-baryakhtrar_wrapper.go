@@ -19,12 +19,13 @@ import (
 )
 
 
-func LLGBtAsync(t *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Array, alphaMul float32, pre float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Array, alphaMul float32, pred float32, pre float32, pret float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
 
 	// Bookkeeping
 	CheckSize(h.Size3D(), m.Size3D())
-	CheckSize(msat.Size3D(), m.Size3D())
+	//CheckSize(msat.Size3D(), m.Size3D())
 	
+	//Assert(l.NComp() == 1)
 	Assert(h.NComp() == 3)
 	Assert(msat.NComp() == 1)
 	Assert(aex.NComp() == 1)
@@ -35,7 +36,9 @@ func LLGBtAsync(t *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Ar
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Z].Pointers()[0]))),
-
+        
+        (**C.float)(unsafe.Pointer(&(l.Comp[X].Pointers()[0]))),
+		
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[0]))),
@@ -52,7 +55,9 @@ func LLGBtAsync(t *Array, m *Array, h *Array, msat *Array, aex *Array, alpha *Ar
 		
 		(C.float)(alphaMul),
 		
+		(C.float)(pred),
 		(C.float)(pre),
+		(C.float)(pret),
 		
 		(C.int)(h.PartSize()[X]),
 		(C.int)(h.PartSize()[Y]),
