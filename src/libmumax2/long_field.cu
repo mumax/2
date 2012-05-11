@@ -42,13 +42,23 @@ extern "C" {
       
       float m2 = dotf(m,m);
       float mult = (1.0f - m2 * (ms * ms)/(ms0 * ms0)) * kappa;// kappa is actually 0.5/kappa! 
-      
+
       float3 h = make_float3(0.0f,0.0f,0.0f);
       
       h.x = mult * M.x;
       h.y = mult * M.y;
       h.z = mult * M.z;
-       
+      
+      /*if (I == 100) {
+        printf("mult: %e\n", mult);
+        printf("hx: %e\n", h.x);
+        printf("hx: %e\n", h.y);
+        printf("hx: %e\n", h.z);
+        printf("m2: %e\n", m2);
+        printf("ms: %e\n", ms);
+        printf("ms0: %e\n", ms0);
+      }*/  
+      
       hx[I] = h.x;
       hy[I] = h.y;
       hz[I] = h.z;      

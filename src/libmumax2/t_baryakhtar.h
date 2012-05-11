@@ -26,13 +26,14 @@ DLLEXPORT  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float**  AexMsk,
 			 float**  alphaMsk,
 			 const float alphaMul,
+			 const float msat0Mul, 
 			 const float pred,
 			 const float pre,
 			 const float pret,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
 			 const int pbc_x, const int pbc_y, const int pbc_z, 
-			 CUstream* stream);
+			 CUstream* stream); 
 			 
 #ifdef __cplusplus
 }
