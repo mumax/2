@@ -16,13 +16,9 @@ extern "C" {
 					 float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
 					 float* __restrict__ rhx, float* __restrict__ rhy, float* __restrict__ rhz,	 
 					 float* __restrict__ msat,
-					 float* __restrict__ AexMsk,
-					 float* __restrict__ alphaMsk,
-					 const float alphaMul,
-					 const float msat0Mul,
-					 const float pred,
-					 const float pre,
-					 const float pret,
+					 const float msatMul,
+					 const float lambda,
+					 const float lambda_e,
 					 const int4 size,		
 					 const float3 mstep,
 					 const int3 pbc,
@@ -33,7 +29,7 @@ extern "C" {
 	int k = blockIdx.y * blockDim.y + threadIdx.y;			
 	int x0 = i * size.w + j * size.z + k;
 		    
-	float m_sat = (msat != NULL) ? msat[x0] : 1.0f;
+	float m_sat = (msat != NULL) ? msat[x0] * msatMul : msatMul;
 	
 	if (m_sat == 0.0f){
 	    tx[x0] = 0.0f;
@@ -46,14 +42,65 @@ extern "C" {
 	
     if (j < size.y && k < size.z){ // 3D now:)
         
+	    m_sat = 1.0f / m_sat;             
+        
+        float5 cfx = make_float5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
+	    float5 cfy = make_float5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
+	    float5 cfz = make_float5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
 	    
-        float A = (AexMsk != NULL) ? AexMsk[x0] : 1.0f;
-        float alpha = (alphaMsk != NULL) ? alphaMsk[x0] * alphaMul : alphaMul;
-        float prel =  pre * A / (m_sat * m_sat); // pre is without Gilbert gamma
-            
-        m_sat = pred * A / (m_sat * m_sat * (1.0f + alpha * alpha)); // pred is with Gilbert's gamma
+	    float3 mmstep = mstep;
+	    
+	    if (pbc.x == 0 && i <= 1) {
+            cfx.x = +0.0f;
+            cfx.y = +0.0f;
+            cfx.z = +1.0f;
+            cfx.w = -2.0f;
+            cfx.t = +1.0f;
+            mmstep.x *= 12.0f;
+        }
         
-        
+        if (pbc.x == 0 && i >= size.x - 2) {
+            cfx.x = +1.0f;
+            cfx.y = -2.0f;
+            cfx.z = +1.0f;
+            cfx.w = +0.0f;
+            cfx.t = +0.0f;
+            mmstep.x *= 12.0f;
+        }  
+              
+
+        if (pbc.y == 0 && j <= 1) {
+            cfy.x = +0.0f;
+            cfy.y = +0.0f;
+            cfy.z = +1.0f;
+            cfy.w = -2.0f;
+            cfy.t = +1.0f;
+            mmstep.y *= 12.0f;
+        }
+        if (pbc.y == 0 && j >= size.y - 2) {
+            cfy.x = +1.0f;
+            cfy.y = -2.0f;
+            cfy.z = +1.0f;
+            cfy.w = +0.0f;
+            cfy.t = +0.0f;
+            mmstep.y *= 12.0f;
+        }
+        if (pbc.z == 0 && k <= 1) {
+            cfz.x = +0.0f;
+            cfz.y = +0.0f;
+            cfz.z = +1.0f;
+            cfz.w = -2.0f;
+            cfz.t = +1.0f;
+            mmstep.z *= 12.0f;
+        }
+        if (pbc.z == 0 && k >= size.z - 2) {
+            cfz.x = +1.0f;
+            cfz.y = -2.0f;
+            cfz.z = +1.0f;
+            cfz.w = +0.0f;
+            cfz.t = +0.0f;
+            mmstep.z *= 12.0f;
+        }
         
         /*if (x0 == 100) {
 	        printf("msat: %e  ", m_sat);
@@ -69,7 +116,7 @@ extern "C" {
         
         float3 h = make_float3(hx[x0], hy[x0], hz[x0]);
         
-        float lr = pret * dotf(h, m); // lambda * (H, m)   
+        float lr = lambda * dotf(h, m); // lambda * (H, m)   
         
         // Transverse part    
          
@@ -97,17 +144,22 @@ extern "C" {
         xb1 = (pbc.x == 0 && xb1 < 0)? i : xb1;
         xf1 = (pbc.x == 0 && xf1 >= size.x)? i : xf1;
         xf2 = (pbc.x == 0 && xf2 >= size.x)? i : xf2;
-          
+        
+        /*if (i == 0)
+        {   
+           printf("cfx: %e %e %e %e %e\n", cfx.x, cfx.y, cfx.z, cfx.w, cfx.t);
+        }*/
+        
         yb2 = (lhx == NULL && yb2 < 0)? j : yb2;
         yb1 = (lhx == NULL && yb1 < 0)? j : yb1;
         yf1 = (rhx == NULL && yf1 >= size.y)? j : yf1;
         yf2 = (rhx == NULL && yf2 >= size.y)? j : yf2;
-          
+
         zb2 = (pbc.z == 0 && zb2 < 0)? k : zb2;
         zb1 = (pbc.z == 0 && zb1 < 0)? k : zb1;
         zf1 = (pbc.z == 0 && zf1 >= size.z)? k : zf1;
         zf2 = (pbc.z == 0 && zf2 >= size.z)? k : zf2;
-          
+                
         xb2 = (xb2 >= 0)? xb2 : size.x + xb2;
         xb1 = (xb1 >= 0)? xb1 : size.x + xb1;
         xf1 = (xf1 < size.x)? xf1 : xf1 - size.x;
@@ -144,9 +196,8 @@ extern "C" {
 				          zf2 + comm);
 
 
-        // Let's use 5-point stencil to avoid problems at the boundaries
+        // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
         // CUDA does not have vec3 operators like GLSL has, except of .xxx, 
-        // Perhaps for performance need to take into account special cases where j || to x, y or z  
 
         float4 HH;
 
@@ -155,18 +206,18 @@ extern "C" {
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
           	    
-        float3 dhxdr2 = 	make_float3(mstep.x * (-hx[xn.x] + 16.0f * hx[xn.y] - 30.0f * hx[x0] + 16.0f * hx[xn.z] - hx[xn.w]),
-							        mstep.y * (-HH.x + 16.0f * HH.y - 30.0f * hx[x0] + 16.0f * HH.z - HH.w),
-							        mstep.z * (-hx[zn.x] + 16.0f * hx[zn.y] - 30.0f * hx[x0] + 16.0f * hx[zn.z] - hx[zn.w]));
+        float3 dhxdr2 = 	make_float3(mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx[x0] + cfx.w * hx[xn.z] + cfx.t * hx[xn.w]),
+							            mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx[x0] + cfy.w * HH.z     + cfy.t * HH.w),
+							            mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx[x0] + cfz.w * hx[zn.z] + cfz.t * hx[zn.w]));
 							
         HH.x = (yi.x >= 0 || lhx == NULL) ? hy[yn.x] : lhy[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hy[yn.y] : lhy[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hy[yn.w] : rhy[yn.w];
 						              
-        float3 dhydr2 = 	make_float3(mstep.x * (-hy[xn.x] + 16.0f * hy[xn.y] - 30.0f * hy[x0] + 16.0f * hy[xn.z] - hy[xn.w]),
-						            mstep.y * (-HH.x + 16.0f * HH.y - 30.0f * hy[x0] + 16.0f * HH.z - HH.w),
-							        mstep.z * (-hy[zn.x] + 16.0f * hy[zn.y] - 30.0f * hy[x0] + 16.0f * hy[zn.z] - hy[zn.w]));
+        float3 dhydr2 = 	make_float3(mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy[x0] + cfx.w * hy[xn.z] + cfx.t * hy[xn.w]),
+						                mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy[x0] + cfy.w * HH.z     + cfy.t * HH.w),
+							            mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy[x0] + cfz.w * hy[zn.z] + cfz.t * hy[zn.w]));
 							
         HH.x = (yi.x >= 0 || lhx == NULL) ? hz[yn.x] : lhz[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hz[yn.y] : lhz[yn.y];
@@ -174,37 +225,66 @@ extern "C" {
         HH.w = (yi.w < size.y || rhx == NULL) ? hz[yn.w] : rhz[yn.w]; 								
 							
 								
-        float3 dhzdr2 = 	make_float3(mstep.x * (-hz[xn.x] + 16.0f * hz[xn.y] - 30.0f * hz[x0] + 16.0f * hz[xn.z] - hz[xn.w]),
-							        mstep.y * (-HH.x + 16.0f * HH.y - 30.0f * hz[x0] + 16.0f * HH.z - HH.w),
-						            mstep.z * (-hz[zn.x] + 16.0f * hz[zn.y] - 30.0f * hz[x0] + 16.0f * hz[zn.z] - hz[zn.w])); 
+        float3 dhzdr2 = 	make_float3(mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz[x0] + cfx.w * hz[xn.z] + cfx.t * hz[xn.w]),
+							            mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz[x0] + cfy.w * HH.z     + cfy.t * HH.w),
+						                mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz[x0] + cfz.w * hz[zn.z] + cfz.t * hz[zn.w])); 
 
 
-	          
+	            
         float3 ddh = make_float3(dhxdr2.x + dhxdr2.y + dhxdr2.z, dhydr2.x + dhydr2.y + dhydr2.z, dhzdr2.x + dhzdr2.y + dhzdr2.z);
-        
-		// Longitudinal part			
-	    float le = prel * dotf(m, ddh); // Lambda_e * (m, laplace(h) 
+        /*if (i==0 && j==0 && k==0) {
+            printf("m_sat: %e\n", m_sat);
+            printf("hxb2: %e\n", hx[xn.x]);
+            printf("hxb1: %e\n", hx[xn.y]);
+            printf("hx: %e\n", hx[x0]);
+            printf("hxf2: %e\n", hx[xn.z]);
+            printf("hxf2: %e\n", hx[xn.w]);
+            printf("hx2: %e\n", hx[3*size.w]);
+            printf("hxb2: %e\n", hx[yn.x]);
+            printf("hxb1: %e\n", hx[yn.y]);
+            printf("hx: %e\n", hx[x0]);
+            printf("hxf2: %e\n", hx[yn.z]);
+            printf("hxf2: %e\n", hx[yn.w]);
+            printf("hx2: %e\n", hx[3*size.z]);
+            printf("hxb2: %e\n", hx[zn.x]);
+            printf("hxb1: %e\n", hx[zn.y]);
+            printf("hx: %e\n", hx[x0]);
+            printf("hx2: %e\n", hx[zn.z]);
+            printf("hx2: %e\n", hx[zn.w]);
+            printf("hx2: %e\n", hx[k+3]);
+            
+            printf("ddh.x: %e\n", ddh.x);
+            printf("ddh.y: %e\n", ddh.y);
+            printf("ddh.z: %e\n", ddh.z);
+            
+        }*/
+		// Longitudinal part
+					
+	    float le = lambda_e * dotf(m, ddh); // Lambda_e * (m, laplace(h)  
+	    l[x0] = (le - lr) / msatMul; // -lr + le, since normalize m/As to 1/s, -gammaLL is in multiplier
+	    
+	    //*****************    	  
 	    /*if (x0 == 100){
-	        printf("lr-le: %e\n", lr-le);
-	        printf("mx: %e\n", m.x);
-	        printf("my: %e\n", m.y);
+	        printf("lr: %e\n", lr);
+	        printf("le: %e\n", le); 
+	        printf("mx: %e\n", m.x); 
+	        printf("my: %e\n", m.y); 
 	        printf("mz: %e\n", m.z);
-	        printf("prel: %e\n", prel);
-	        printf("ddh.x: %e\n", ddh.x);
-	        printf("ddh.y: %e\n", ddh.y);
+	        printf("ddh.x: %e\n", ddh.x); 
+	        printf("ddh.y: %e\n", ddh.y); 
 	        printf("ddh.z: %e\n", ddh.z);   
 	    }*/
 	    
-	    l[x0] = (lr - le)/msat0Mul; 
-	    //*****************    	  
-	    
         float3 ddhxm = crossf(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
 
-        float3 mxddhxm = crossf(m, ddhxm); // with plus from [ddh x m]    
-         
-        tx[x0] = m_sat * mxddhxm.x;
-        ty[x0] = m_sat * mxddhxm.y;
-        tz[x0] = m_sat * mxddhxm.z;  
+        float3 _mxddhxm = crossf(ddhxm, m); // with plus from [ddh x m]    
+        
+        float3 mxh = crossf(m, h);
+        float3 mxmxh = crossf(m, mxh);
+        
+        tx[x0] = mxh.x + m_sat * (lambda * mxmxh.x  + lambda_e * _mxddhxm.x);
+        ty[x0] = mxh.y + m_sat * (lambda * mxmxh.y  + lambda_e * _mxddhxm.y);
+        tz[x0] = mxh.z + m_sat * (lambda * mxmxh.z  + lambda_e * _mxddhxm.z);  
         
 
     } 
@@ -220,13 +300,9 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float**  mx, float**  my, float**  mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 float**  msat,
-			 float**  AexMsk,
-			 float**  alphaMsk,
-			 const float alphaMul,
-			 const float msat0Mul, 
-			 const float pred,
-			 const float pre,
-			 const float pret,
+			 const float msatMul, 
+			 const float lambda,
+			 const float lambda_e,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
 			 const int pbc_x, const int pbc_y, const int pbc_z, 
@@ -302,13 +378,9 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 												   lhx, lhy, lhz,
 												   rhx, rhy, rhz,
 												   msat[dev],
-												   AexMsk[dev],							 
-												   alphaMsk[dev],
-												   alphaMul,
-												   msat0Mul,
-												   pred,
-												   pre,
-												   pret,
+												   msatMul,
+												   lambda,
+												   lambda_e,
 												   size,
 												   mstep,
 												   pbc,

@@ -19,34 +19,34 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("baryakhtar", "Baryakhtar's relaxation term", LoadBaryakhtarTorques)
+	RegisterModule("baryakhtar", "Baryakhtar's-Ivanov relaxation term", LoadBaryakhtarTorques)
 }
 
 func LoadBaryakhtarTorques(e *Engine) {
-	e.LoadModule("llg") // needed for alpha, hfield, ...
+	//e.LoadModule("llg") // needed for alpha, hfield, ...
     e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
     LoadHField(e)
 	// ============ New Quantities =============
 
-	e.AddNewQuant("beta", SCALAR, VALUE, Unit(""), "Baryakhtar's exchange relaxation constant")
-	e.AddNewQuant("blambda", SCALAR, VALUE, Unit(""), "Baryakhtar's relativistic relaxation constant")
-	
+	e.AddNewQuant("lambda", SCALAR, VALUE, Unit("A/m"), "Landau-Lifshits relaxation constant")
+	e.AddNewQuant("lambda_e", SCALAR, VALUE, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
+	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
 	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
-    bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("m/As"), "Baryakhtar's longitudinal relaxation term")
-    bdt.Multiplier()[0] = 1.0
-    bdt.Multiplier()[1] = 1.0
-    bdt.Multiplier()[2] = 1.0
+    bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("/s"), "Baryakhtar's longitudinal relaxation term")
+    //bdt.Multiplier()[0] = 1.0
+    //bdt.Multiplier()[1] = 1.0
+    //bdt.Multiplier()[2] = 1.0
     
-    bdl.Multiplier()[0] = 1.0
+    //bdl.Multiplier()[0] = 1.0
 	// ============ Dependencies =============
-	e.Depends("bdt", "beta", "m", "msat0", "Aex", "H_eff", "gamma", "alpha", "blambda")
-    e.Depends("bdl", "beta", "m", "msat0", "Aex", "H_eff", "gamma", "alpha", "blambda")
+	e.Depends("bdt", "m", "msat", "H_eff", "gamma_LL", "lambda", "lambda_e")
+    e.Depends("bdl", "m", "msat", "H_eff", "gamma_LL", "lambda", "lambda_e")
     
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{bdt: bdt, bdl: bdl}
 	bdt.SetUpdater(upd)
     bdl.SetUpdater(upd) 
-    AddTermToQuant(e.Quant("torque"), bdt)
+    //AddTermToQuant(e.Quant("torque"), bdt)
 }
 
 type BaryakhtarUpdater struct {
@@ -60,41 +60,39 @@ func (u *BaryakhtarUpdater) Update() {
 	bdt := u.bdt
 	bdl := u.bdl
 	m := e.Quant("m")
-	beta := e.Quant("beta").Scalar()
-	msat := e.Quant("msat0") // it is pointwise
+	lambda := e.Quant("lambda").Scalar()
+    lambda_e := e.Quant("lambda_e").Scalar()
+	msat := e.Quant("msat") // it is pointwise
 	heff := e.Quant("H_eff")
-	aex := e.Quant("Aex")
-	gamma := e.Quant("gamma").Scalar()
-	msat0 := e.Quant("msat0")
-	alpha := e.Quant("alpha")
+	gammaLL := e.Quant("gamma_LL").Scalar()	
 	pbc := e.Periodic()
-	blambda := e.Quant("blambda").Scalar()
 	
-	nmsatn := msat.Multiplier()[0]
-	naexn := aex.Multiplier()[0]
 	
-	pre := beta * naexn / (Mu0 * nmsatn * nmsatn) 
-	pred := gamma * pre 
+	// put lambda in multiplier to avoid additional multiplications
+	multiplierBDT := bdt.Multiplier()
+	for i := range multiplierBDT {
+		multiplierBDT[i] = -gammaLL
+	}
+	
+	multiplierBDL := bdl.Multiplier()
+	for i := range multiplierBDL {
+		multiplierBDL[i] = -gammaLL
+	}
 	
 	gpu.LLGBtAsync(bdt.Array(), 
                     bdl.Array(),
                     m.Array(), 
                     heff.Array(), 
-                    msat.Array(), 
-                    aex.Array(), 
-                    alpha.Array(),
-                    float32(alpha.Multiplier()[0]),
-                    float32(msat0.Multiplier()[0]),
-                    float32(pred), 
-                    float32(pre),
-                    float32(blambda),
+                    msat.Array(),
+                    float32(msat.Multiplier()[0]),
+                    float32(lambda), 
+                    float32(lambda_e),
                     float32(cellSize[X]), 
                     float32(cellSize[Y]), 
                     float32(cellSize[Z]), 
                     pbc)
                     
-    bdt.Array().Sync()    
-     
+    bdt.Array().Sync()
     bdt.SetUpToDate(true)
     bdl.SetUpToDate(true)
 }

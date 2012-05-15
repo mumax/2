@@ -19,6 +19,26 @@
 #endif
 
 // mod
+struct float5 {
+    float x;
+    float y;
+    float z;
+    float w;
+    float t;
+};
+
+typedef struct float5 float5;
+
+inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float t){
+    float5 a;
+    a.x = x;
+    a.y = y;
+    a.z = z;
+    a.w = w;
+    a.t = t;
+    return a;
+} 
+
 inline __host__ __device__ int Mod(int a, int b){
 	return (a%b+b)%b;
 }
