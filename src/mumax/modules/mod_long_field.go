@@ -22,7 +22,7 @@ func init() {
 }
 
 func LoadLongField(e *Engine) {
-    e.LoadModule("llg")
+    LoadHField(e)
 	kappa := e.AddNewQuant("kappa", SCALAR, VALUE, Unit(""), "longitudinal magnetic susceptibility")
 	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
 	msat0 := e.AddNewQuant("msat0", SCALAR, MASK, Unit("A/m"), "the initial distribution of the saturation magnetization")

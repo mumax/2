@@ -31,6 +31,7 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 		float scale;
 		if (Mnorm != 0.f){
 			scale = norm / Mnorm;
+			scale = 1.0f / Mnorm;
 		}else{
 			scale = 0.f;
 		}
