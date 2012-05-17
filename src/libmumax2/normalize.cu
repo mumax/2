@@ -30,7 +30,7 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 		float Mnorm = sqrtf(Mx*Mx + My*My + Mz*Mz);
 		float scale;
 		if (Mnorm != 0.f){
-			scale = norm / Mnorm;
+			//scale = norm / Mnorm;
 			scale = 1.0f / Mnorm;
 		}else{
 			scale = 0.f;

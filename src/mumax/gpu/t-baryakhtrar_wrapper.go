@@ -53,9 +53,9 @@ func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, msatMul flo
 		(C.float)(lambda),
 		(C.float)(lambda_e),
 		
-		(C.int)(h.PartSize()[X]),
-		(C.int)(h.PartSize()[Y]),
-		(C.int)(h.PartSize()[Z]),
+		(C.int)(t.PartSize()[X]),
+		(C.int)(t.PartSize()[Y]),
+		(C.int)(t.PartSize()[Z]),
 		
 		(C.float)(cellsizeX),
 		(C.float)(cellsizeY),

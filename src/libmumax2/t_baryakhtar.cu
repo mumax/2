@@ -232,59 +232,24 @@ extern "C" {
 
 	            
         float3 ddh = make_float3(dhxdr2.x + dhxdr2.y + dhxdr2.z, dhydr2.x + dhydr2.y + dhydr2.z, dhzdr2.x + dhzdr2.y + dhzdr2.z);
-        /*if (i==0 && j==0 && k==0) {
-            printf("m_sat: %e\n", m_sat);
-            printf("hxb2: %e\n", hx[xn.x]);
-            printf("hxb1: %e\n", hx[xn.y]);
-            printf("hx: %e\n", hx[x0]);
-            printf("hxf2: %e\n", hx[xn.z]);
-            printf("hxf2: %e\n", hx[xn.w]);
-            printf("hx2: %e\n", hx[3*size.w]);
-            printf("hxb2: %e\n", hx[yn.x]);
-            printf("hxb1: %e\n", hx[yn.y]);
-            printf("hx: %e\n", hx[x0]);
-            printf("hxf2: %e\n", hx[yn.z]);
-            printf("hxf2: %e\n", hx[yn.w]);
-            printf("hx2: %e\n", hx[3*size.z]);
-            printf("hxb2: %e\n", hx[zn.x]);
-            printf("hxb1: %e\n", hx[zn.y]);
-            printf("hx: %e\n", hx[x0]);
-            printf("hx2: %e\n", hx[zn.z]);
-            printf("hx2: %e\n", hx[zn.w]);
-            printf("hx2: %e\n", hx[k+3]);
-            
-            printf("ddh.x: %e\n", ddh.x);
-            printf("ddh.y: %e\n", ddh.y);
-            printf("ddh.z: %e\n", ddh.z);
-            
-        }*/
+
 		// Longitudinal part
 					
 	    float le = lambda_e * dotf(m, ddh); // Lambda_e * (m, laplace(h)  
-	    l[x0] = (le - lr) / msatMul; // -lr + le, since normalize m/As to 1/s, -gammaLL is in multiplier
+	    l[x0] = (lr - le) / msatMul; // lr - le, since normalize m/As to 1/s, gammaLL is in multiplier
 	    
 	    //*****************    	  
-	    /*if (x0 == 100){
-	        printf("lr: %e\n", lr);
-	        printf("le: %e\n", le); 
-	        printf("mx: %e\n", m.x); 
-	        printf("my: %e\n", m.y); 
-	        printf("mz: %e\n", m.z);
-	        printf("ddh.x: %e\n", ddh.x); 
-	        printf("ddh.y: %e\n", ddh.y); 
-	        printf("ddh.z: %e\n", ddh.z);   
-	    }*/
 	    
         float3 ddhxm = crossf(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
 
-        float3 _mxddhxm = crossf(ddhxm, m); // with plus from [ddh x m]    
+        float3 mxddhxm = crossf(m, ddhxm); // with plus from [ddh x m]    
         
-        float3 mxh = crossf(m, h);
-        float3 mxmxh = crossf(m, mxh);
+        float3 _mxh = crossf(h, m);
+        float3 _mxmxh = crossf(m, _mxh);
         
-        tx[x0] = mxh.x + m_sat * (lambda * mxmxh.x  + lambda_e * _mxddhxm.x);
-        ty[x0] = mxh.y + m_sat * (lambda * mxmxh.y  + lambda_e * _mxddhxm.y);
-        tz[x0] = mxh.z + m_sat * (lambda * mxmxh.z  + lambda_e * _mxddhxm.z);  
+        tx[x0] = _mxh.x + m_sat * (lambda * _mxmxh.x  + lambda_e * mxddhxm.x);
+        ty[x0] = _mxh.y + m_sat * (lambda * _mxmxh.y  + lambda_e * mxddhxm.y);
+        tz[x0] = _mxh.z + m_sat * (lambda * _mxmxh.z  + lambda_e * mxddhxm.z);  
         
 
     } 
