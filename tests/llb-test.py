@@ -45,25 +45,25 @@ msat = makearray(1,Nx,Ny,Nz)
 for kk in range(Nz):
     for jj in range(Ny):
         for ii in range(Nx):
-            msat[0][ii][jj][kk] = 1.0
+            msat[0][ii][jj][kk] = 0.2
 
 setmask('msat',msat)
-setv('dt', 1e-15)
+setv('dt', 1e-16)
 setv('lambda', 8e3)
-setv('kappa', 1e-3)
-setv('lambda_e', 0)
+setv('kappa', 5e-4)
+setv('lambda_e', 0.0)
 
 autosave("m", "png", [], 10e-15)
 autosave("m", "ovf", [], 10e-15)
 autosave("bdl", "gplot", [], 10e-15)
 autosave("bdl", "png", [], 10e-15)
-autotabulate(["t", "<m>"], "m.txt", 10e-15)
+#autotabulate(["t", "<m>"], "m.txt", 10e-15)
 autotabulate(["t", "<msat>"], "msat.txt", 10e-15)
-autotabulate(["t", "<bdl>"], "bdl.txt", 10e-15)
-autotabulate(["t", "<bdt>"], "bdt.txt", 10e-15)
-autotabulate(["t", "<H_lf>"], "hlf.txt", 10e-15)
+#autotabulate(["t", "<bdl>"], "bdl.txt", 10e-15)
+#autotabulate(["t", "<bdt>"], "bdt.txt", 10e-15)
+#autotabulate(["t", "<H_lf>"], "hlf.txt", 10e-15)
 
-run(100e-12)
+run(25e-12)
 save("bdl","gplot",[])
 #step()
 save("H_eff","txt",[])

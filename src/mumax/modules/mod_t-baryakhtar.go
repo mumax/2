@@ -23,7 +23,7 @@ func init() {
 }
 
 func LoadBaryakhtarTorques(e *Engine) {
-	//e.LoadModule("llg") // needed for alpha, hfield, ...
+
     e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
     LoadHField(e)
 	// ============ New Quantities =============
@@ -71,12 +71,12 @@ func (u *BaryakhtarUpdater) Update() {
 	// put lambda in multiplier to avoid additional multiplications
 	multiplierBDT := bdt.Multiplier()
 	for i := range multiplierBDT {
-		multiplierBDT[i] = -gammaLL
+		multiplierBDT[i] = gammaLL
 	}
 	
 	multiplierBDL := bdl.Multiplier()
 	for i := range multiplierBDL {
-		multiplierBDL[i] = -gammaLL
+		multiplierBDL[i] = gammaLL
 	}
 	
 	gpu.LLGBtAsync(bdt.Array(), 
