@@ -1,9 +1,9 @@
-#!/gnuplot
+#!/usr/local/bin/gnuplot -persist
 #
 #    
 #    	G N U P L O T
 #    	Version 4.6 patchlevel 0    last modified 2012-03-04 
-#    	Build System: MS-Windows 32 bit 
+#    	Build System: Linux x86_64
 #    
 #    	Copyright (C) 1986-1993, 1998, 2004, 2007-2012
 #    	Thomas Williams, Colin Kelley and many others
@@ -11,8 +11,8 @@
 #    	gnuplot home:     http://www.gnuplot.info
 #    	faq, bugs, etc:   type "help FAQ"
 #    	immediate help:   type "help"  (plot window: hit 'h')
-# set terminal wxt 0 enhanced
-# set output
+# set terminal svg size 600,480 fixed enhanced fname 'Arial'  fsize 12 butt solid 
+# set output 'std5.svg'
 unset clip points
 set clip one
 unset clip two
@@ -31,7 +31,7 @@ set timefmt x2 "%d/%m/%y,%H:%M"
 set x2data 
 set boxwidth
 set style fill  empty border
-set style rectangle back fc lt -3 fillstyle   solid 1.00 border lt -1
+set style rectangle back fc  lt -3 fillstyle   solid 1.00 border lt -1
 set style circle radius graph 0.02, first 0, 0 
 set style ellipse size graph 0.05, 0.03, first 0 angle 0 units xy
 set dummy x,y
@@ -45,7 +45,7 @@ set format r "% g"
 set angles radians
 unset grid
 set raxis
-set key title ""
+set key title "" font "Arial, 14"
 set key inside right top vertical Right noreverse enhanced autotitles nobox
 set key noinvert samplen 4 spacing 1 width 0 height 0 
 set key maxcolumns 0 maxrows 0
@@ -94,9 +94,9 @@ set mx2tics default
 set my2tics default
 set mcbtics default
 set xtics border in scale 1,0.5 mirror norotate  offset character 0, 0, 0 autojustify
-set xtics autofreq  norangelimit
+set xtics autofreq  norangelimit font "Arial, 14"
 set ytics border in scale 1,0.5 mirror norotate  offset character 0, 0, 0 autojustify
-set ytics autofreq  norangelimit
+set ytics autofreq  norangelimit font "Arial, 14"
 set ztics border in scale 1,0.5 nomirror norotate  offset character 0, 0, 0 autojustify
 set ztics autofreq  norangelimit
 set nox2tics
@@ -115,13 +115,13 @@ set trange [ * : * ] noreverse nowriteback
 set urange [ * : * ] noreverse nowriteback
 set vrange [ * : * ] noreverse nowriteback
 set xlabel "Time (ns)" 
-set xlabel  offset character 0, 0, 0 font "" textcolor lt -1 norotate
+set xlabel  offset character 0, 0, 0 font "Arial,16" textcolor lt -1 norotate
 set x2label "" 
 set x2label  offset character 0, 0, 0 font "" textcolor lt -1 norotate
 set xrange [ 0.00000 : 10.0000 ] noreverse nowriteback
 set x2range [ * : * ] noreverse nowriteback
 set ylabel "Net magnetization (10^6 A/m)" 
-set ylabel  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
+set ylabel  offset character -2, 0, 0 font "Arial,16" textcolor lt -1 rotate by -270
 set y2label "" 
 set y2label  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
 set yrange [ * : * ] noreverse nowriteback
@@ -132,12 +132,12 @@ set zrange [ * : * ] noreverse nowriteback
 set cblabel "" 
 set cblabel  offset character 0, 0, 0 font "" textcolor lt -1 rotate by -270
 set cbrange [ * : * ] noreverse nowriteback
-set zero 1e-008
+set zero 1e-08
 set lmargin  -1
-set bmargin  -1
+set bmargin at screen 0.15
 set rmargin  -1
 set tmargin  -1
-set locale "English_United Kingdom.1252"
+set locale "en_US.UTF-8"
 set pm3d explicit at s
 set pm3d scansautomatic
 set pm3d interpolate 1,1 flush begin noftriangles nohidden3d corners2color mean
@@ -151,5 +151,5 @@ set fontpath
 set psdir
 set fit noerrorvariables
 GNUTERM = "wxt"
-plot 'm.txt' u ($1*1e9):($2*0.8) w lp t "<Mx>", 'm.txt' u ($1*1e9):($3*0.8) w lp t "<My>", 'm.txt' u ($1*1e9):($4*0.8) w lp t "<Mz>"
+plot 'm.txt' u ($1*1e9):($2*0.8) w lp t "<M_x>", 'm.txt' u ($1*1e9):($3*0.8) w lp t "<M_y>", 'm.txt' u ($1*1e9):($4*0.8) w lp t "<M_z>"
 #    EOF

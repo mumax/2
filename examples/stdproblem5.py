@@ -64,7 +64,7 @@ tabulate(["t", "<m>"], "m.txt")
 setv('xi',0.05)
 setv('polarisation',1.0)
 save("m","png",[])
-
+save("m","vtk",[])
 j = makearray(3, Nx, Ny, Nz)
 for m in range(Nx):
     for n in range(Ny):
@@ -76,7 +76,8 @@ for m in range(Nx):
 setv('j', [1e12, 0, 0])
 setmask('j', j)
 
-autosave("m", "png", [], 50e-12)
+#autosave("m", "png", [], 10e-12)
+autosave("m", "gplot", [], 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)
 
 run(10.0e-9)

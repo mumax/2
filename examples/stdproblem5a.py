@@ -141,7 +141,8 @@ setv('p', [px, py, 0])
 save("p","ovf",[])
 
 # Save the magnetization to PNG files every 1 ps
-autosave("m", "png", [], 1e-12)
+#autosave("m", "png", [], 1e-12)
+autosave("m", "gplot", [], 1e-12)
 # Tabulate net magnetization every 1 ps, similar to OOMMF's mmGraph
 autotabulate(["t", "<m>"], "m.txt", 1e-12)
 
