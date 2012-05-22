@@ -26,6 +26,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
     e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
     LoadHField(e)
+    LoadMagnetization(e)
 	// ============ New Quantities =============
 
 	e.AddNewQuant("beta", SCALAR, VALUE, Unit(""), "Baryakhtar's exchange relaxation constant")

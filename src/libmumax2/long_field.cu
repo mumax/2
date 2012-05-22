@@ -22,7 +22,8 @@ extern "C" {
   {
     
     int I = threadindex;
-    float ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
+    real ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
+    
     if (ms0 == 0.0f) {
       hx[I] = 0.0f;
       hy[I] = 0.0f;
@@ -31,27 +32,16 @@ extern "C" {
     }
     
     if (I < NPart){ // Thread configurations are usually too large...
-      float ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
+      real ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
       
       float3 m = make_float3(mx[I], my[I], mz[I]);
-      float3 M = make_float3(0.0f,0.0f,0.0f);
-      
-      M.x = ms * m.x;
-      M.y = ms * m.y;
-      M.z = ms * m.z;
-      
-      float m2 = dotf(m,m);
-      float mult = (1.0f - m2 * (ms * ms)/(ms0 * ms0)) * kappa;// kappa is actually 0.5/kappa! 
-      
-      float3 h = make_float3(0.0f,0.0f,0.0f);
-      
-      h.x = mult * M.x;
-      h.y = mult * M.y;
-      h.z = mult * M.z;
-       
-      hx[I] = h.x;
-      hy[I] = h.y;
-      hz[I] = h.z;      
+        
+      real mult = kappa * (1.0f - (ms*ms)/(ms0*ms0));// kappa is actually 0.5/kappa! 
+             
+      hx[I] = mult * ms * m.x;
+      hy[I] = mult * ms * m.y;
+      hz[I] = mult * ms * m.z;      
+
     } 
   }
 
