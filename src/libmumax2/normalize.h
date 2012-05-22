@@ -25,4 +25,5 @@ DLLEXPORT void normalizeAsync(float** mx, float** my, float** mz, float** norm_m
 #ifdef __cplusplus
 }
 #endif
+
 #endif
