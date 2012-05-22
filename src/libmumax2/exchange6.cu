@@ -4,7 +4,7 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
-
+#include "common_func.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,7 +23,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
   
   if (j < N1Part && k < N2){
 
-	float mSat_mask;
+	real mSat_mask;
 	if (mSat_map ==NULL){
 		mSat_mask = 1.0f;
 	}else{
@@ -33,7 +33,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 		}
 	}
 
-    float Aex2_Mu0Msat; // 2 * Aex / Mu0 * Msat
+    real Aex2_Mu0Msat; // 2 * Aex / Mu0 * Msat
     if (Aex_map==NULL){
       Aex2_Mu0Msat = Aex2_Mu0Msat_mul / mSat_mask;
 	}else{
@@ -42,8 +42,8 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 
 
 
-	float m0 = m[I]; // mag component of central cell 
-	float m1, m2 ;   // mag component of neighbors in 2 directions
+	real m0 = m[I]; // mag component of central cell 
+	real m1, m2 ;   // mag component of neighbors in 2 directions
 	
     // neighbors in X direction
 	int idx;
@@ -69,7 +69,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
     } 
 	m2 = m[idx]; 
 
-    float H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
+    real H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
 
     // neighbors in Z direction
     if (k-1 >= 0){
@@ -130,10 +130,6 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 }
 
 
-int mod(int a, int b){
-	return (a%b+b)%b;
-}
-
 #define BLOCKSIZE 16
 __export__ void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float** msat, float** aex, float Aex2_mu0MsatMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams){
 
@@ -160,8 +156,8 @@ __export__ void exchange6Async(float** hx, float** hy, float** hz, float** mx, f
 			gpu_safe(cudaSetDevice(deviceId(dev)));
 	
 			// set up adjacent parts
-			float* mPart0 = M[mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
-			float* mPart2 = M[mod(dev+1, nDev)];  // parts wrap around...
+			float* mPart0 = M[Mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+			float* mPart2 = M[Mod(dev+1, nDev)];  // parts wrap around...
 			if(periodic1 == 0){                     // unless there are no PBCs...
 				if(dev == 0){
 					mPart0 = NULL;
