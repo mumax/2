@@ -4,10 +4,9 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
+#include "common_func.h"
 
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 ///@internal
 __global__ void normalizeKern(float* mx, float* my, float* mz, 
@@ -16,28 +15,29 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 	if (i < Npart) {
 
 		// reconstruct norm from map
-		float norm = 1.0f;
-		
-		if(norm_map != NULL){
+		real norm;
+		if(norm_map == NULL){
+			norm = 1.0f;
+		}else{
 			norm = norm_map[i];
 		}
 
-    	float Mx = mx[i];
-    	float My = my[i];
-    	float Mz = mz[i];
+    	real Mx = mx[i];
+    	real My = my[i];
+    	real Mz = mz[i];
     
-		float Mnorm = sqrtf(Mx*Mx + My*My + Mz*Mz);
-		float scale = (norm == 0.0f) ? norm : 1.0f;
-		
-		if (Mnorm != 0.0f){
-			scale = scale / Mnorm;
+		real Mnorm = sqrt(Mx*Mx + My*My + Mz*Mz);
+		real scale;
+		if (Mnorm != 0.0){
+			//scale = norm / Mnorm;
+			scale = 1.0 / Mnorm;
 		}else{
-			scale = 0.0f;
+			scale = 0.0;
 		}
 		
-        float m_x = Mx * scale;
-        float m_y = My * scale;
-        float m_z = Mz * scale;
+        real m_x = Mx * scale;
+        real m_y = My * scale;
+        real m_z = Mz * scale;
         
 		mx[i] = m_x;
 		my[i] = m_y;
@@ -59,6 +59,4 @@ __export__ void normalizeAsync(float** mx, float** my, float** mz, float** norm_
 	}
 }
 
-#ifdef __cplusplus
 }
-#endif
