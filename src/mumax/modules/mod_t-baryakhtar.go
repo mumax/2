@@ -26,6 +26,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 
     e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
     LoadHField(e)
+    LoadMagnetization(e)
 	// ============ New Quantities =============
 
 	e.AddNewQuant("lambda", SCALAR, VALUE, Unit("A/m"), "Landau-Lifshits relaxation constant")

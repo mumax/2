@@ -29,7 +29,7 @@ extern "C" {
 	int k = blockIdx.y * blockDim.y + threadIdx.y;			
 	int x0 = i * size.w + j * size.z + k;
 		    
-	float m_sat = (msat != NULL) ? msat[x0] * msatMul : msatMul;
+	real m_sat = (msat != NULL) ? msat[x0] * msatMul : msatMul;
 	
 	if (m_sat == 0.0f){
 	    tx[x0] = 0.0f;
@@ -44,62 +44,62 @@ extern "C" {
         
 	    m_sat = 1.0f / m_sat;             
         
-        float5 cfx = make_float5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
-	    float5 cfy = make_float5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
-	    float5 cfz = make_float5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
+        real5 cfx = make_real5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
+	    real5 cfy = make_real5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
+	    real5 cfz = make_real5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
 	    
-	    float3 mmstep = mstep;
+	    real3 mmstep = make_real3(mstep.x, mstep.y, mstep.z);
 	    
 	    if (pbc.x == 0 && i <= 1) {
-            cfx.x = +0.0f;
-            cfx.y = +0.0f;
-            cfx.z = +1.0f;
-            cfx.w = -2.0f;
-            cfx.t = +1.0f;
-            mmstep.x *= 12.0f;
+            cfx.x = +0.0;
+            cfx.y = +0.0;
+            cfx.z = +1.0;
+            cfx.w = -2.0;
+            cfx.t = +1.0;
+            mmstep.x *= 12.0;
         }
         
         if (pbc.x == 0 && i >= size.x - 2) {
-            cfx.x = +1.0f;
-            cfx.y = -2.0f;
-            cfx.z = +1.0f;
-            cfx.w = +0.0f;
-            cfx.t = +0.0f;
-            mmstep.x *= 12.0f;
+            cfx.x = +1.0;
+            cfx.y = -2.0;
+            cfx.z = +1.0;
+            cfx.w = +0.0;
+            cfx.t = +0.0;
+            mmstep.x *= 12.0;
         }  
               
 
         if (pbc.y == 0 && j <= 1) {
-            cfy.x = +0.0f;
-            cfy.y = +0.0f;
-            cfy.z = +1.0f;
-            cfy.w = -2.0f;
-            cfy.t = +1.0f;
-            mmstep.y *= 12.0f;
+            cfy.x = +0.0;
+            cfy.y = +0.0;
+            cfy.z = +1.0;
+            cfy.w = -2.0;
+            cfy.t = +1.0;
+            mmstep.y *= 12.0;
         }
         if (pbc.y == 0 && j >= size.y - 2) {
-            cfy.x = +1.0f;
-            cfy.y = -2.0f;
-            cfy.z = +1.0f;
-            cfy.w = +0.0f;
-            cfy.t = +0.0f;
-            mmstep.y *= 12.0f;
+            cfy.x = +1.0;
+            cfy.y = -2.0;
+            cfy.z = +1.0;
+            cfy.w = +0.0;
+            cfy.t = +0.0;
+            mmstep.y *= 12.0;
         }
         if (pbc.z == 0 && k <= 1) {
-            cfz.x = +0.0f;
-            cfz.y = +0.0f;
-            cfz.z = +1.0f;
-            cfz.w = -2.0f;
-            cfz.t = +1.0f;
-            mmstep.z *= 12.0f;
+            cfz.x = +0.0;
+            cfz.y = +0.0;
+            cfz.z = +1.0;
+            cfz.w = -2.0;
+            cfz.t = +1.0;
+            mmstep.z *= 12.0;
         }
         if (pbc.z == 0 && k >= size.z - 2) {
-            cfz.x = +1.0f;
-            cfz.y = -2.0f;
-            cfz.z = +1.0f;
-            cfz.w = +0.0f;
-            cfz.t = +0.0f;
-            mmstep.z *= 12.0f;
+            cfz.x = +1.0;
+            cfz.y = -2.0;
+            cfz.z = +1.0;
+            cfz.w = +0.0;
+            cfz.t = +0.0;
+            mmstep.z *= 12.0;
         }
         
         /*if (x0 == 100) {
@@ -110,13 +110,13 @@ extern "C" {
 	        printf("prel: %e  ", prel);
 	    }*/
 	    
-        float3 m = make_float3(mx[x0], my[x0], mz[x0]);		
+        real3 m = make_real3(mx[x0], my[x0], mz[x0]);		
         
         // Longitudinal part
         
-        float3 h = make_float3(hx[x0], hy[x0], hz[x0]);
+        real3 h = make_real3(hx[x0], hy[x0], hz[x0]);
         
-        float lr = lambda * dotf(h, m); // lambda * (H, m)   
+        real lr = lambda * dot(h, m); // lambda * (H, m)   
         
         // Transverse part    
          
@@ -199,14 +199,14 @@ extern "C" {
         // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
         // CUDA does not have vec3 operators like GLSL has, except of .xxx, 
 
-        float4 HH;
+        real4 HH;
 
         HH.x = (yi.x >= 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hx[yn.y] : lhx[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
           	    
-        float3 dhxdr2 = 	make_float3(mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx[x0] + cfx.w * hx[xn.z] + cfx.t * hx[xn.w]),
+        real3 dhxdr2 = 	make_real3(mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx[x0] + cfx.w * hx[xn.z] + cfx.t * hx[xn.w]),
 							            mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx[x0] + cfy.w * HH.z     + cfy.t * HH.w),
 							            mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx[x0] + cfz.w * hx[zn.z] + cfz.t * hx[zn.w]));
 							
@@ -215,7 +215,7 @@ extern "C" {
         HH.z = (yi.z < size.y || rhx == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hy[yn.w] : rhy[yn.w];
 						              
-        float3 dhydr2 = 	make_float3(mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy[x0] + cfx.w * hy[xn.z] + cfx.t * hy[xn.w]),
+        real3 dhydr2 = 	make_real3(mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy[x0] + cfx.w * hy[xn.z] + cfx.t * hy[xn.w]),
 						                mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy[x0] + cfy.w * HH.z     + cfy.t * HH.w),
 							            mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy[x0] + cfz.w * hy[zn.z] + cfz.t * hy[zn.w]));
 							
@@ -225,32 +225,54 @@ extern "C" {
         HH.w = (yi.w < size.y || rhx == NULL) ? hz[yn.w] : rhz[yn.w]; 								
 							
 								
-        float3 dhzdr2 = 	make_float3(mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz[x0] + cfx.w * hz[xn.z] + cfx.t * hz[xn.w]),
+        real3 dhzdr2 = 	make_real3(mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz[x0] + cfx.w * hz[xn.z] + cfx.t * hz[xn.w]),
 							            mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz[x0] + cfy.w * HH.z     + cfy.t * HH.w),
 						                mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz[x0] + cfz.w * hz[zn.z] + cfz.t * hz[zn.w])); 
 
 
 	            
-        float3 ddh = make_float3(dhxdr2.x + dhxdr2.y + dhxdr2.z, dhydr2.x + dhydr2.y + dhydr2.z, dhzdr2.x + dhzdr2.y + dhzdr2.z);
+        real3 ddh = make_real3(dhxdr2.x + dhxdr2.y + dhxdr2.z, dhydr2.x + dhydr2.y + dhydr2.z, dhzdr2.x + dhzdr2.y + dhzdr2.z);
 
 		// Longitudinal part
 					
-	    float le = lambda_e * dotf(m, ddh); // Lambda_e * (m, laplace(h)  
+	    real le = lambda_e * dot(m, ddh); // Lambda_e * (m, laplace(h)  
 	    l[x0] = (lr - le) / msatMul; // lr - le, since normalize m/As to 1/s, gammaLL is in multiplier
+	    /*if (x0 == 0) {
+	        printf("lr: %e\n",lr);
+	        printf("le: %e\n",le);
+	        printf("lr-le: %e\n",(lr-le)/msatMul);
+	        printf("m: %e\n", msatMul);
+	    }*/
+ 	    //*****************    	  
 	    
-	    //*****************    	  
-	    
-        float3 ddhxm = crossf(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
+        real3 ddhxm = cross(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
 
-        float3 mxddhxm = crossf(m, ddhxm); // with plus from [ddh x m]    
+        real3 mxddhxm = cross(m, ddhxm); // with plus from [ddh x m]    
         
-        float3 _mxh = crossf(h, m);
-        float3 _mxmxh = crossf(m, _mxh);
+        real3 _mxh = cross(h, m);
+        real3 _mxmxh = cross(m, _mxh);
         
         tx[x0] = _mxh.x + m_sat * (lambda * _mxmxh.x  + lambda_e * mxddhxm.x);
         ty[x0] = _mxh.y + m_sat * (lambda * _mxmxh.y  + lambda_e * mxddhxm.y);
         tz[x0] = _mxh.z + m_sat * (lambda * _mxmxh.z  + lambda_e * mxddhxm.z);  
         
+        /*if (x0 == 0) {
+            printf("mx: %e\n",m.x);
+	        printf("my: %e\n",m.y);
+	        printf("mz: %e\n",m.z);
+	        
+	        printf("hx: %e\n",h.x);
+	        printf("hy: %e\n",h.y);
+	        printf("hz: %e\n",h.z);
+	        
+	        printf("mxhx: %e\n",_mxh.x);
+	        printf("mxhy: %e\n",_mxh.y);
+	        printf("mxhz: %e\n",_mxh.z);
+	        
+	        printf("mxmxhx: %e\n",_mxmxh.x);
+	        printf("mxmxhy: %e\n",_mxmxh.y);
+	        printf("mxmxhz: %e\n",_mxmxh.z);
+	    }*/
 
     } 
   }
