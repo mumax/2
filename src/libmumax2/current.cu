@@ -5,7 +5,7 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
-
+#include "common_func.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -269,10 +269,10 @@ __export__ void currentDensityAsync(float** jx, float** jy, float** jz, float** 
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 
 		// set up adjacent parts
-		float* EyPart0 = Ey[mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
-		float* EyPart2 = Ey[mod(dev+1, nDev)];  // parts wrap around...
-		float* rPart0 = rMap[mod(dev-1, nDev)];
-		float* rPart2 = rMap[mod(dev+1, nDev)];
+		float* EyPart0 = Ey[Mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+		float* EyPart2 = Ey[Mod(dev+1, nDev)];  // parts wrap around...
+		float* rPart0 = rMap[Mod(dev-1, nDev)];
+		float* rPart2 = rMap[Mod(dev+1, nDev)];
 		if(periodic1 == 0){                     // unless there are no PBCs...
 			if(dev == 0){
 				EyPart0 = NULL;
@@ -313,8 +313,8 @@ __export__ void diffRhoAsync(float** drho, float** jx, float** jy, float** jz,
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 
 		// set up adjacent parts
-		float* jyPart0 = jy[mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
-		float* jyPart2 = jy[mod(dev+1, nDev)];  // parts wrap around...
+		float* jyPart0 = jy[Mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+		float* jyPart2 = jy[Mod(dev+1, nDev)];  // parts wrap around...
 		if(periodic1 == 0){                     // unless there are no PBCs...
 			if(dev == 0){
 				jyPart0 = NULL;
