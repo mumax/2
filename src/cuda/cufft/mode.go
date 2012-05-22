@@ -4,7 +4,7 @@
 
 package cufft
 
-//#cgo LDFLAGS:-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia/ -L/usr/lib64/nvidia/ -L/usr/lib/nvidia-current/ -LC:/opt/cuda/v4.2/lib/x64 -lcuda -lcudart -lcufft
+//#cgo LDFLAGS:-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia/ -L/usr/lib64/nvidia/ -L/usr/lib64/nvidia/lib64 -L/usr/lib/nvidia-current/ -LC:/opt/cuda/v4.2/lib/x64 -lcuda -lcudart -lcufft
 //#cgo CFLAGS:-I/usr/local/cuda/include/ -IC:/opt/cuda/v4.2/include -Wno-error
 //#include <cufft.h>
 import "C"
