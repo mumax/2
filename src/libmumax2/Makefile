@@ -30,18 +30,18 @@ ifndef SystemRoot
 all: libmumax2.so libmumax2.h
 
 $(CU_OFILES): %.o: %.cu %.h
-	$(NVCC) -c -I. $(@:.o=.cu) -o $(@)
+	$(NVCC) -dc -I. $(@:.o=.cu) -o $(@)
 
 $(CU_OFILES_WERRORLESS): %.o: %.cu %.h
-	$(NVCCWERRORLESS) -c -I. $(@:.o=.cu) -o $(@)
+	$(NVCCWERRORLESS) -dc -I. $(@:.o=.cu) -o $(@)
 
 $(CPP_OFILES): %.o: %.cpp %.h
-	 $(CC) -fPIC -c $(@:.o=.cpp) -o $(@)
+	$(CC) -fPIC -c $(@:.o=.cpp) -o $(@)
 
 libmumax2.so: $(OFILES) 
 	echo " *** USING DEBUG FLAGS *** "
 	$(NVCC) -shared $(OFILES) -o libmumax2.so
-
+    
 libmumax2.h: $(CU_HFILES) multigpu.h
 	cp libmumax2.h.head libmumax2.h
 	$(foreach hfile, $(CU_HFILES),  echo \#include "\""$(hfile)"\"" >> libmumax2.h;)
