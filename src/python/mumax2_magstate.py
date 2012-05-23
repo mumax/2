@@ -7,7 +7,7 @@ from mumax2 import *
 def vortex(c,p):
 	Nx,Ny,Nz = getgridsize()
 	Cx,Cy,Cz = getcellsize()
-	m= [[[[0 for x in range(Nz)] for x in range(Ny)] for x in range(Nx)] for c in range(3)]
+	m= [[[[0 for x in range(Nz)] for x in range(Ny)] for x in range(Nx)] for comp in range(3)]
 
 	# set circulation
 	for i in range(0,Nx):
