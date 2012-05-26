@@ -30,10 +30,10 @@ ifndef SystemRoot
 all: libmumax2.so libmumax2.h
 
 $(CU_OFILES): %.o: %.cu %.h
-	$(NVCC) -dc -I. $(@:.o=.cu) -o $(@)
+	$(NVCC) -c -I. $(@:.o=.cu) -o $(@)
 
 $(CU_OFILES_WERRORLESS): %.o: %.cu %.h
-	$(NVCCWERRORLESS) -dc -I. $(@:.o=.cu) -o $(@)
+	$(NVCCWERRORLESS) -c -I. $(@:.o=.cu) -o $(@)
 
 $(CPP_OFILES): %.o: %.cpp %.h
 	$(CC) -fPIC -c $(@:.o=.cpp) -o $(@)
