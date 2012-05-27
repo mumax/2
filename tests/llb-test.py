@@ -8,7 +8,8 @@ Ny = 32
 Nz = 2
 setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
-#setperiodic(1, 1, 0)
+
+
 
 #load('exchange6')
 #load('demag')
@@ -18,15 +19,15 @@ setcellsize(5e-9, 5e-9, 5e-9)
 
 # LLG 
 load('exchange6')
+setperiodic(32, 32, 0)
 load('demag')
 load('zeeman')
 load('llb')
 
 
 load('solver/rk12')
-setv('m_maxerror', 1./3000)
-setv('msat_maxerror', 1./3000)
-
+setv('m_maxerror', 1./500)
+setv('msat_maxerror', 1./500)
 
 # Py
 msat = makearray(1,Nx,Ny,Nz)            
