@@ -572,7 +572,7 @@ func extract(src *host.Array, realness int) *host.Array {
 	Debug("FFT Kernel max part", realness, ":", maxgood)
 	Debug("FFT Kernel max part", other, ":", maxbad)
 	Debug("FFT Kernel max bad/good part=", maxbad/maxgood)
-	if maxbad/maxgood > 1e-4 { // TODO: is this reasonable?
+	if maxbad/maxgood > 1e-5 { // TODO: is this reasonable?
 		panic(BugF("FFT Kernel max bad/good part=", maxbad/maxgood))
 	}
 	return dst
