@@ -30,7 +30,7 @@ func LoadLongField(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
-	e.Depends("H_lf", "kappa", "Msat", "m", "msat0")
+	e.Depends("H_lf", "kappa", "msat", "m", "msat0")
 	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, Msat: e.Quant("msat"), msat0: msat0})
 
 }

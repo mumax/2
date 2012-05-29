@@ -34,7 +34,7 @@ extern "C" {
     if (I < NPart){ // Thread configurations are usually too large...
       real ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
       
-      float3 m = make_float3(mx[I], my[I], mz[I]);
+      real3 m = make_real3(mx[I], my[I], mz[I]);
         
       real mult = kappa * (1.0f - (ms*ms)/(ms0*ms0));// kappa is actually 0.5/kappa! 
              
