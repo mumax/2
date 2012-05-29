@@ -7,7 +7,7 @@
 #include "common_func.h"
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif  
    
  __global__ void tbaryakhtar_delta2HKernMGPU(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
                      float* __restrict__ l,
@@ -42,15 +42,15 @@ extern "C" {
 	
     if (j < size.y && k < size.z){ // 3D now:)
         
-	    m_sat = 1.0f / m_sat;             
+	    m_sat = 1.0 / m_sat;             
         
-        real5 cfx = make_real5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
-	    real5 cfy = make_real5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
-	    real5 cfz = make_real5(-1.0f, +16.0f, -30.0f, +16.0f, -1.0f);
+        real5 cfx = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
+	    real5 cfy = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
+	    real5 cfz = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
 	    
 	    real3 mmstep = make_real3(mstep.x, mstep.y, mstep.z);
 	    
-	    if (pbc.x == 0 && i <= 1) {
+	    /*if (pbc.x == 0 && i <= 1) {
             cfx.x = +0.0;
             cfx.y = +0.0;
             cfx.z = +1.0;
@@ -100,7 +100,7 @@ extern "C" {
             cfz.w = +0.0;
             cfz.t = +0.0;
             mmstep.z *= 12.0;
-        }
+        }*/
         
         /*if (x0 == 100) {
 	        printf("msat: %e  ", m_sat);
@@ -195,7 +195,6 @@ extern "C" {
 				          zf1 + comm, 
 				          zf2 + comm);
 
-
         // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
         // CUDA does not have vec3 operators like GLSL has, except of .xxx, 
 
@@ -206,18 +205,18 @@ extern "C" {
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
           	    
-        real3 dhxdr2 = 	make_real3(mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx[x0] + cfx.w * hx[xn.z] + cfx.t * hx[xn.w]),
-							            mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx[x0] + cfy.w * HH.z     + cfy.t * HH.w),
-							            mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx[x0] + cfz.w * hx[zn.z] + cfz.t * hx[zn.w]));
+        real ddhx  =  mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx[x0] + cfx.w * hx[xn.z] + cfx.t * hx[xn.w])
+			        + mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx[x0] + cfy.w * HH.z     + cfy.t * HH.w)
+			        + mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx[x0] + cfz.w * hx[zn.z] + cfz.t * hx[zn.w]);
 							
         HH.x = (yi.x >= 0 || lhx == NULL) ? hy[yn.x] : lhy[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hy[yn.y] : lhy[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hy[yn.w] : rhy[yn.w];
 						              
-        real3 dhydr2 = 	make_real3(mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy[x0] + cfx.w * hy[xn.z] + cfx.t * hy[xn.w]),
-						                mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy[x0] + cfy.w * HH.z     + cfy.t * HH.w),
-							            mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy[x0] + cfz.w * hy[zn.z] + cfz.t * hy[zn.w]));
+        real ddhy  =  mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy[x0] + cfx.w * hy[xn.z] + cfx.t * hy[xn.w])
+					+ mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy[x0] + cfy.w * HH.z     + cfy.t * HH.w)
+					+ mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy[x0] + cfz.w * hy[zn.z] + cfz.t * hy[zn.w]);
 							
         HH.x = (yi.x >= 0 || lhx == NULL) ? hz[yn.x] : lhz[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hz[yn.y] : lhz[yn.y];
@@ -225,54 +224,72 @@ extern "C" {
         HH.w = (yi.w < size.y || rhx == NULL) ? hz[yn.w] : rhz[yn.w]; 								
 							
 								
-        real3 dhzdr2 = 	make_real3(mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz[x0] + cfx.w * hz[xn.z] + cfx.t * hz[xn.w]),
-							            mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz[x0] + cfy.w * HH.z     + cfy.t * HH.w),
-						                mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz[x0] + cfz.w * hz[zn.z] + cfz.t * hz[zn.w])); 
+        real ddhz  =  mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz[x0] + cfx.w * hz[xn.z] + cfx.t * hz[xn.w])
+					 + mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz[x0] + cfy.w * HH.z     + cfy.t * HH.w)
+	                 + mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz[x0] + cfz.w * hz[zn.z] + cfz.t * hz[zn.w]); 
 
-
+        /*if (j == 5 && k == 5) {
+            printf("hx_z_b2: %e\n", hx[zn.x]);
+            printf("hx_z_b1: %e\n", hx[zn.y]);
+            printf("hx_z_f1: %e\n", hx[zn.z]);
+            printf("hx_z_f2: %e\n", hx[zn.w]);
+            
+            printf("hy_z_b2: %e\n", hy[zn.x]);
+            printf("hy_z_b1: %e\n", hy[zn.y]);
+            printf("hy_z_f1: %e\n", hy[zn.z]);
+            printf("hy_z_f2: %e\n", hy[zn.w]);
+            
+            printf("hz_z_b2: %e\n", hy[zn.x]);
+            printf("hz_z_b1: %e\n", hy[zn.y]);
+            printf("hz_z_f1: %e\n", hy[zn.z]);
+            printf("hz_z_f2: %e\n", hy[zn.w]);
+            
+        }*/
 	            
-        real3 ddh = make_real3(dhxdr2.x + dhxdr2.y + dhxdr2.z, dhydr2.x + dhydr2.y + dhydr2.z, dhzdr2.x + dhzdr2.y + dhzdr2.z);
-
+        real3 ddh = make_real3(ddhx, ddhy, ddhz);
+        
+	    
 		// Longitudinal part
 					
 	    real le = lambda_e * dot(m, ddh); // Lambda_e * (m, laplace(h)  
-	    l[x0] = (lr - le) / msatMul; // lr - le, since normalize m/As to 1/s, gammaLL is in multiplier
-	    /*if (x0 == 0) {
-	        printf("lr: %e\n",lr);
-	        printf("le: %e\n",le);
-	        printf("lr-le: %e\n",(lr-le)/msatMul);
-	        printf("m: %e\n", msatMul);
-	    }*/
- 	    //*****************    	  
+	    l[x0] = (lr - le) / msatMul; // lr - le, since normalize m/As to 1/s, gammaLL is in multiplier 	  
 	    
         real3 ddhxm = cross(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
 
         real3 mxddhxm = cross(m, ddhxm); // with plus from [ddh x m]    
         
+        /*if (j == 5 && k == 5) {
+	        printf("mxddhxm_x: %e\n",mxddhxm.x);
+	        printf("mxddhxm_y: %e\n",mxddhxm.y);
+	        printf("mxddhxm_z: %e\n",mxddhxm.z);
+	        
+	        printf("ddh_x: %e\n",ddh.x);
+	        printf("ddh_y: %e\n",ddh.y);
+	        printf("ddh_z: %e\n",ddh.z);
+	        
+	        printf("dhxdr2_z: %e\n",dhxdr2.z);
+	        printf("dhydr2_z: %e\n",dhydr2.z);
+	        printf("dhzdr2_z: %e\n",dhzdr2.z);
+	        
+	        printf("dhxdr2_y: %e\n",dhxdr2.y);
+	        printf("dhydr2_y: %e\n",dhydr2.y);
+	        printf("dhzdr2_y: %e\n",dhzdr2.y);
+	        
+	        printf("dhxdr2_x: %e\n",dhxdr2.x);
+	        printf("dhydr2_x: %e\n",dhydr2.x);
+	        printf("dhzdr2_x: %e\n",dhzdr2.x);
+	        
+	    }*/
+	    
         real3 _mxh = cross(h, m);
         real3 _mxmxh = cross(m, _mxh);
         
-        tx[x0] = _mxh.x + m_sat * (lambda * _mxmxh.x  + lambda_e * mxddhxm.x);
-        ty[x0] = _mxh.y + m_sat * (lambda * _mxmxh.y  + lambda_e * mxddhxm.y);
-        tz[x0] = _mxh.z + m_sat * (lambda * _mxmxh.z  + lambda_e * mxddhxm.z);  
-        
-        /*if (x0 == 0) {
-            printf("mx: %e\n",m.x);
-	        printf("my: %e\n",m.y);
-	        printf("mz: %e\n",m.z);
-	        
-	        printf("hx: %e\n",h.x);
-	        printf("hy: %e\n",h.y);
-	        printf("hz: %e\n",h.z);
-	        
-	        printf("mxhx: %e\n",_mxh.x);
-	        printf("mxhy: %e\n",_mxh.y);
-	        printf("mxhz: %e\n",_mxh.z);
-	        
-	        printf("mxmxhx: %e\n",_mxmxh.x);
-	        printf("mxmxhy: %e\n",_mxmxh.y);
-	        printf("mxmxhz: %e\n",_mxmxh.z);
-	    }*/
+        real preLL = m_sat * lambda;
+        real preB = m_sat * lambda_e;
+                
+        tx[x0] = _mxh.x + preLL * _mxmxh.x  + preB * mxddhxm.x;
+        ty[x0] = _mxh.y + preLL * _mxmxh.y  + preB * mxddhxm.y;
+        tz[x0] = _mxh.z + preLL * _mxmxh.z  + preB * mxddhxm.z;  
 
     } 
   }
