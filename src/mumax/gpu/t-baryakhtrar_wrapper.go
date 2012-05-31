@@ -31,6 +31,9 @@ func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, aex *Array,
 	Assert(aex.NComp() == 1)
 	Assert(alpha.NComp() == 1)
 	
+	if t.PartSize()[X] < 4 || t.PartSize()[Y] < 4 || t.PartSize()[Z] < 4 {
+	    panic("For LLB dimensions should have >= 4 cells!")
+	}
 	// Calling the CUDA functions
 	C.tbaryakhtar_async(
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),

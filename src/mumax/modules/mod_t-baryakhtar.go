@@ -29,9 +29,10 @@ func LoadBaryakhtarTorques(e *Engine) {
     LoadMagnetization(e)
 	// ============ New Quantities =============
 
-	e.AddNewQuant("beta", SCALAR, VALUE, Unit(""), "Baryakhtar's exchange relaxation constant")
-	e.AddNewQuant("blambda", SCALAR, VALUE, Unit(""), "Baryakhtar's relativistic relaxation constant")
-	
+	e.AddNewQuant("lambda", SCALAR, VALUE, Unit("A/m"), "Landau-Lifshits relaxation constant")
+	e.AddNewQuant("lambda_e", SCALAR, VALUE, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
+	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
+	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
     bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("/s"), "Baryakhtar's longitudinal relaxation term")
 	// ============ Dependencies =============
@@ -62,10 +63,7 @@ func (u *BaryakhtarUpdater) Update() {
 	gamma := e.Quant("gamma").Scalar()
 	alpha := e.Quant("alpha")
 	pbc := e.Periodic()
-	blambda := e.Quant("blambda").Scalar()
-	
-	nmsatn := msat.Multiplier()[0]
-	naexn := aex.Multiplier()[0]
+	//debug_h := e.Quant("debug_h")
 	
 	pre := beta * naexn / (Mu0 * nmsatn * nmsatn) 
 	pred := gamma * pre 
