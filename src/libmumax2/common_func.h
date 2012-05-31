@@ -22,9 +22,9 @@
 struct float5 {
     float x;
     float y;
-    float z;
+    float z;    
     float w;
-    float t;
+    float v;
 };
 
 typedef struct float5 float5;
@@ -36,7 +36,7 @@ struct real5 {
     real y;
     real z;
     real w;
-    real t;
+    real v;
 };
 
 typedef real5 real5;
@@ -58,27 +58,27 @@ struct real3 {
 
 typedef real3 real3;
 
-inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float t){
+inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float v){
     float5 a;
     a.x = x;
     a.y = y;
     a.z = z;
     a.w = w;
-    a.t = t;
+    a.v = v;
     return a;
 } 
 
-inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real t){
+inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real v){
     real5 a;
     a.x = x;
     a.y = y;
     a.z = z;
     a.w = w;
-    a.t = t;
+    a.v = v;
     return a;
 }
 
-inline __host__ __device__ real4 make_real4(real x, real y, real z, real w, real t){
+inline __host__ __device__ real4 make_real4(real x, real y, real z, real w){
     real4 a;
     a.x = x;
     a.y = y;

@@ -32,6 +32,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.AddNewQuant("lambda", SCALAR, VALUE, Unit("A/m"), "Landau-Lifshits relaxation constant")
 	e.AddNewQuant("lambda_e", SCALAR, VALUE, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
 	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
+	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
     bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("/s"), "Baryakhtar's longitudinal relaxation term")
     //bdt.Multiplier()[0] = 1.0
@@ -67,7 +68,7 @@ func (u *BaryakhtarUpdater) Update() {
 	heff := e.Quant("H_eff")
 	gammaLL := e.Quant("gamma_LL").Scalar()	
 	pbc := e.Periodic()
-	
+	//debug_h := e.Quant("debug_h")
 	
 	// put lambda in multiplier to avoid additional multiplications
 	multiplierBDT := bdt.Multiplier()
