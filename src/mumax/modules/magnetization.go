@@ -15,6 +15,7 @@ import (
 )
 
 // Load the magnetization and MSat, if not yet present.
+
 func LoadMagnetization(e *Engine) {
 	if !e.HasQuant("m") {
 		m := e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")

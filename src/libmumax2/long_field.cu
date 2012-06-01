@@ -12,11 +12,9 @@ extern "C" {
   // ========================================
 
   __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz, 
-					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz, 
-					 float* __restrict__ msatMsk,
+					 float* __restrict__ Mx, float* __restrict__ My, float* __restrict__ Mz, 
 					 float* __restrict__ msat0Msk,
 					 float kappa,
-					 float msatMul,
 					 float msat0Mul,
 					 int NPart) 
   {
@@ -32,26 +30,26 @@ extern "C" {
     }
     
     if (I < NPart){ // Thread configurations are usually too large...
-      real ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
-      
-      real3 m = make_real3(mx[I], my[I], mz[I]);
+    
+      real3 M = make_real3(Mx[I], My[I], Mz[I]);
         
-      real mult = kappa * (1.0f - (ms*ms)/(ms0*ms0));// kappa is actually 0.5/kappa! 
+      real MM = dot(M,M);
+      real MMS = ms0 * ms0;
+      
+      real mult = kappa * (1.0f - (MM/MMS));// kappa is actually 0.5/kappa! 
              
-      hx[I] = mult * ms * m.x;
-      hy[I] = mult * ms * m.y;
-      hz[I] = mult * ms * m.z;      
+      hx[I] = mult * M.x;
+      hy[I] = mult * M.y;
+      hz[I] = mult * M.z;      
     } 
   }
 
   #define BLOCKSIZE 16
   
   void long_field_async(float** hx, float** hy, float** hz, 
-			 float** mx, float** my, float** mz, 
-			 float** msat,
-			 float** msat0,
+			 float** Mx, float** My, float** Mz, 
+			 float** msat0, 
 			 float kappa,
-			 float msatMul,
 			 float msat0Mul,    
 			 int NPart, 
 			 CUstream* stream)
@@ -65,11 +63,9 @@ extern "C" {
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));
 	    long_field_Kern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (hx[dev], hy[dev], hz[dev],  
-										       mx[dev], my[dev], mz[dev],
-										       msat[dev], 
+										       Mx[dev], My[dev], Mz[dev], 
 										       msat0[dev], 
 										       kappa, 
-										       msatMul,
 										       msat0Mul,
 										       NPart);
     } // end dev < nDev loop

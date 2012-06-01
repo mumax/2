@@ -19,7 +19,7 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("baryakhtar", "Baryakhtar's-Ivanov relaxation term", LoadBaryakhtarTorques)
+	RegisterModule("baryakhtar", "Baryakhtar-Ivanov relaxation term", LoadBaryakhtarTorques)
 }
 
 func LoadBaryakhtarTorques(e *Engine) {
@@ -27,66 +27,52 @@ func LoadBaryakhtarTorques(e *Engine) {
     e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
     LoadHField(e)
     LoadMagnetization(e)
+    LoadFullMagnetization(e)
 	// ============ New Quantities =============
 
 	e.AddNewQuant("lambda", SCALAR, VALUE, Unit("A/m"), "Landau-Lifshits relaxation constant")
 	e.AddNewQuant("lambda_e", SCALAR, VALUE, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
 	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
 	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
-	bdt := e.AddNewQuant("bdt", VECTOR, FIELD, Unit("/s"), "Baryakhtar's perpendicular relaxation term")
-    bdl := e.AddNewQuant("bdl", SCALAR, FIELD, Unit("/s"), "Baryakhtar's longitudinal relaxation term")
-    //bdt.Multiplier()[0] = 1.0
-    //bdt.Multiplier()[1] = 1.0
-    //bdt.Multiplier()[2] = 1.0
-    
-    //bdl.Multiplier()[0] = 1.0
+	btorque := e.AddNewQuant("btorque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
+	
 	// ============ Dependencies =============
-	e.Depends("bdt", "m", "msat", "H_eff", "gamma_LL", "lambda", "lambda_e")
-    e.Depends("bdl", "m", "msat", "H_eff", "gamma_LL", "lambda", "lambda_e")
+	e.Depends("btorque", "Mf", "H_eff", "gamma_LL", "lambda", "lambda_e","msat0")
     
 	// ============ Updating the torque =============
-	upd := &BaryakhtarUpdater{bdt: bdt, bdl: bdl}
-	bdt.SetUpdater(upd)
-    bdl.SetUpdater(upd) 
-    //AddTermToQuant(e.Quant("torque"), bdt)
+	upd := &BaryakhtarUpdater{btorque: btorque}
+	btorque.SetUpdater(upd)
 }
 
 type BaryakhtarUpdater struct {
-	bdt, bdl *Quant
+	btorque *Quant
 }
 
 func (u *BaryakhtarUpdater) Update() {
 
 	e := GetEngine()	
 	cellSize := e.CellSize()	
-	bdt := u.bdt
-	bdl := u.bdl
-	m := e.Quant("m")
+	btorque := u.btorque
+	M := e.Quant("Mf")
 	lambda := e.Quant("lambda").Scalar()
     lambda_e := e.Quant("lambda_e").Scalar()
-	msat := e.Quant("msat") // it is pointwise
 	heff := e.Quant("H_eff")
 	gammaLL := e.Quant("gamma_LL").Scalar()	
 	pbc := e.Periodic()
+	msat0 := e.Quant("msat0")
 	//debug_h := e.Quant("debug_h")
 	
 	// put lambda in multiplier to avoid additional multiplications
-	multiplierBDT := bdt.Multiplier()
-	for i := range multiplierBDT {
-		multiplierBDT[i] = gammaLL
+	multiplierBT := btorque.Multiplier()
+	for i := range multiplierBT {
+		multiplierBT[i] = gammaLL
 	}
 	
-	multiplierBDL := bdl.Multiplier()
-	for i := range multiplierBDL {
-		multiplierBDL[i] = gammaLL
-	}
-	
-	gpu.LLGBtAsync(bdt.Array(), 
-                    bdl.Array(),
-                    m.Array(), 
+	gpu.LLGBtAsync(btorque.Array(), 
+                    M.Array(), 
                     heff.Array(), 
-                    msat.Array(),
-                    float32(msat.Multiplier()[0]),
+                    msat0.Array(),
+                    float32(msat0.Multiplier()[0]),
                     float32(lambda), 
                     float32(lambda_e),
                     float32(cellSize[X]), 
@@ -94,7 +80,5 @@ func (u *BaryakhtarUpdater) Update() {
                     float32(cellSize[Z]), 
                     pbc)
                     
-    bdt.Array().Sync()
-    bdt.SetUpToDate(true)
-    bdl.SetUpToDate(true)
+    btorque.Array().Sync()
 }

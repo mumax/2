@@ -32,12 +32,11 @@ func LoadLLB(e *Engine) {
 
 	LoadHField(e)
 	LoadMagnetization(e)
+	LoadFullMagnetization(e)
 	
     e.LoadModule("baryakhtar")
     
-    e.AddPDE1("m", "bdt")
-	e.AddPDE1("msat", "bdl")
-
+    e.AddPDE1("Mf", "btorque")
 }
 
 
