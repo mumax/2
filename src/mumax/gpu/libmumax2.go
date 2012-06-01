@@ -162,6 +162,26 @@ func Normalize(m, normMap *Array) {
 	m.Stream.Sync()
 }
 
+// Decompose vector to unit vector and length
+func Decompose(Mf *Array, m *Array, msat *Array, msatMul float32) {
+	C.decomposeAsync(
+		(**C.float)(unsafe.Pointer(&(Mf.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(Mf.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(Mf.Comp[Z].pointer[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(msat.pointer[0]))),
+		
+		C.float(msatMul),
+		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))),
+		C.int(m.partLen3D))
+	m.Stream.Sync()
+}
+
+
 // Partial sums (see reduce.h)
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialSumAsync(
