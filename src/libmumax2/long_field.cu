@@ -36,7 +36,7 @@ extern "C" {
       real MM = dot(M,M);
       real MMS = ms0 * ms0;
       
-      real mult = kappa * (1.0f - (MM/MMS));// kappa is actually 0.5/kappa! 
+      real mult = kappa * (MMS - MM) / MMS;// kappa is actually 0.5/kappa! 
              
       hx[I] = mult * M.x;
       hy[I] = mult * M.y;

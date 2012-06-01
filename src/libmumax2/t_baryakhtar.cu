@@ -282,8 +282,8 @@ extern "C" {
         real Msat = len(M);
                       
         tx[x0] = _MxH.x + Msat * (lambda * H.x  - lambda_e * ddH.x);
-        ty[x0] = _MxH.y + Msat * (lambda * H.x  - lambda_e * ddH.y);
-        tz[x0] = _MxH.z + Msat * (lambda * H.x  - lambda_e * ddH.z);  
+        ty[x0] = _MxH.y + Msat * (lambda * H.y  - lambda_e * ddH.y);
+        tz[x0] = _MxH.z + Msat * (lambda * H.z  - lambda_e * ddH.z);  
 
     } 
   }
