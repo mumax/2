@@ -19,39 +19,34 @@ import (
 )
 
 
-func LLGBtAsync(t *Array, l *Array, m *Array, h *Array, msat *Array, msatMul float32, lambda float32, lambda_e float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLGBtAsync(t *Array, M *Array, h *Array, msat0 *Array, msat0Mul float32, lambda float32, lambda_e float32, cellsizeX float32,cellsizeY float32, cellsizeZ float32, pbc []int) {
 
-	// Bookkeeping
-	CheckSize(h.Size3D(), m.Size3D())
+	// Bookkeeping 
+	CheckSize(h.Size3D(), M.Size3D())
 	//CheckSize(msat.Size3D(), m.Size3D())
 	
 	//Assert(l.NComp() == 1)
 	Assert(h.NComp() == 3)
-	Assert(msat.NComp() == 1)
 	
-	if t.PartSize()[X] < 4 || t.PartSize()[Y] < 4 || t.PartSize()[Z] < 4 {
+	/*if t.PartSize()[X] < 4 || t.PartSize()[Y] < 4 || t.PartSize()[Z] < 4 {
 	    panic("For LLB dimensions should have >= 4 cells!")
-	}
+	}*/
 	// Calling the CUDA functions
 	C.tbaryakhtar_async(
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Z].Pointers()[0]))),
-        
-        (**C.float)(unsafe.Pointer(&(l.Comp[X].Pointers()[0]))),
-		
-		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[0]))),
+    
+		(**C.float)(unsafe.Pointer(&(M.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(M.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(M.Comp[Z].Pointers()[0]))),
 
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Z].Pointers()[0]))),
 		
-		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
-		
-		
-		(C.float)(msatMul),
+		(**C.float)(unsafe.Pointer(&(msat0.Comp[X].Pointers()[0]))),
+		(C.float)(msat0Mul),
 		
 		(C.float)(lambda),
 		(C.float)(lambda_e),
