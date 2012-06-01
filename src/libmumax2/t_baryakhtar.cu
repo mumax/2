@@ -10,18 +10,14 @@ extern "C" {
 #endif  
    
  __global__ void tbaryakhtar_delta2HKernMGPU(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
-                     float* __restrict__ l,
-					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
+					 float* __restrict__ Mx, float* __restrict__ My, float* __restrict__ Mz,
 					 float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
 					 float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
-					 float* __restrict__ rhx, float* __restrict__ rhy, float* __restrict__ rhz,	 
-					 float* __restrict__ msat,
-					 float* __restrict__ AexMsk,
-					 float* __restrict__ alphaMsk,
-					 const float alphaMul,
-					 const float pred,
-					 const float pre,
-					 const float pret,
+					 float* __restrict__ rhx, float* __restrict__ rhy, float* __restrict__ rhz,
+					 float* __restrict__ msat0,
+					 const float msat0Mul,
+					 const float lambda,
+					 const float lambda_e,
 					 const int4 size,		
 					 const float3 mstep,
 					 const int3 pbc,
@@ -32,14 +28,12 @@ extern "C" {
 	int k = blockIdx.y * blockDim.y + threadIdx.y;			
 	int x0 = i * size.w + j * size.z + k;
 		    
-	real m_sat = (msat != NULL) ? msat[x0] * msatMul : msatMul;
+	real m_sat = (msat0 != NULL) ? msat0[x0] : 1.0;
 	
-	if (m_sat == 0.0f){
+	if (m_sat == 0.0){
 	    tx[x0] = 0.0f;
 	    ty[x0] = 0.0f;
 	    tz[x0] = 0.0f;
-	    
-	    l[x0] = 0.0f;
 	    return;
 	}
 	
@@ -111,17 +105,8 @@ extern "C" {
 
         }
      
-        real3 m = make_real3(mx[x0], my[x0], mz[x0]);		
-        
-        // Longitudinal part
-        
-        real3 h = make_real3(hx[x0], hy[x0], hz[x0]);
-        
-        real lr = lambda * dot(h, m); // lambda * (H, m)   
-        
-        // Transverse part    
-         
-        
+        real3 M = make_real3(Mx[x0], My[x0], Mz[x0]);		
+          
         // Second-order derivative 5-points stencil
 
         int xb2 = i - 2;
@@ -227,9 +212,10 @@ extern "C" {
 	                 + mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz[x0] + cfz.w * hz[zn.z] + cfz.v * hz[zn.w]); 
 
 	            
-        real3 ddh = make_real3(ddhx, ddhy, ddhz);
+        real3 ddH = make_real3(ddhx, ddhy, ddhz);
+        real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
         
-	    /*if (i==8 && j == 8 && k == 8) {
+	    /*if (i==0 && j == 0 && k == 0) {
 	        printf("ddh.x: %e\n",ddh.x);
 	        printf("ddh.y: %e\n",ddh.y);
 	        printf("ddh.z: %e\n",ddh.z);
@@ -290,31 +276,14 @@ extern "C" {
 	        
 	        
 	    }*/
-	    
-		// Longitudinal part
-					
-	    real le = 0.0f;//lambda_e * dot(m, ddh); // Lambda_e * (m, laplace(h)  
-	    l[x0] = m_sat * (lr - le) / msatMul; // lr - le, since normalize m/As to 1/s, gammaLL is in multiplier 	  
-	    
-        real3 ddhxm = cross(m, ddh); // no minus in it, but it was an interesting behaviour when damping is pumping
-
-        real3 mxddhxm = cross(m, ddhxm); // with plus from [ddh x m]    
-         
-        real3 _mxh = cross(h, m);
-        real3 _mxmxh = cross(m, _mxh);
-        
-        real preLL = lambda;
-        real preB = lambda_e;
-        
-        /*if (i==0 && j == 0 && k == 0) {
-	        printf("mxddhxm.x: %e\n",mxddhxm.x);
-	        printf("mxddhxm.y: %e\n",mxddhxm.y);
-	        printf("mxddhxm.z: %e\n",mxddhxm.z);
-	    }*/
 	          
-        tx[x0] = _mxh.x + preLL * _mxmxh.x  + preB * mxddhxm.x;
-        ty[x0] = _mxh.y + preLL * _mxmxh.y  + preB * mxddhxm.y;
-        tz[x0] = _mxh.z + preLL * _mxmxh.z  + preB * mxddhxm.z;  
+        real3 _MxH = cross(H, M);
+        
+        real Msat = len(M);
+                      
+        tx[x0] = _MxH.x + Msat * (lambda * H.x  - lambda_e * ddH.x);
+        ty[x0] = _MxH.y + Msat * (lambda * H.x  - lambda_e * ddH.y);
+        tz[x0] = _MxH.z + Msat * (lambda * H.x  - lambda_e * ddH.z);  
 
     } 
   }
@@ -325,16 +294,12 @@ extern "C" {
 
   
 __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz, 
-             float** l,
-			 float**  mx, float**  my, float**  mz, 
+			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
-			 float**  msat,
-			 float**  AexMsk,
-			 float**  alphaMsk,
-			 const float alphaMul,
-			 const float pred,
-			 const float pre,
-			 const float pret,
+			 float**  msat0,
+			 const float msat0Mul,
+			 const float lambda,
+			 const float lambda_e,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
 			 const int pbc_x, const int pbc_y, const int pbc_z, 
@@ -404,18 +369,14 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 		for (int i = 0; i < sx; i++) {
 												   
 			tbaryakhtar_delta2HKernMGPU<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],  
-			                                       l[dev],
-												   mx[dev], my[dev], mz[dev],												   
+												   Mx[dev], My[dev], Mz[dev],												   
 												   hx[dev], hy[dev], hz[dev],
 												   lhx, lhy, lhz,
 												   rhx, rhy, rhz,
-												   msat[dev],
-												   AexMsk[dev],							 
-												   alphaMsk[dev],
-												   alphaMul,
-												   pred,
-												   pre,
-												   pret,
+												   msat0[dev],
+												   msat0Mul,
+												   lambda,
+												   lambda_e,
 												   size,
 												   mstep,
 												   pbc,
