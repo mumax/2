@@ -33,10 +33,13 @@ extern "C" {
     
       real3 M = make_real3(Mx[I], My[I], Mz[I]);
         
-      real MM = dot(M,M);
-      real MMS = ms0 * ms0;
+      //real MM = dot(M,M);
+      //real MMS = ms0 * ms0;
+      real Ms = len(M);
+      real ratio = Ms/ms0;
       
-      real mult = kappa * (MMS - MM) / MMS;// kappa is actually 0.5/kappa! 
+      
+      real mult = kappa * (1.0 - ratio * ratio);// kappa is actually 0.5/kappa! 
              
       hx[I] = mult * M.x;
       hy[I] = mult * M.y;
