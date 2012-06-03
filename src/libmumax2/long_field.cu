@@ -22,7 +22,7 @@ extern "C" {
     int I = threadindex;
     real ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
     
-    if (ms0 == 0.0f) {
+    if (ms0 == 0.0) {
       hx[I] = 0.0f;
       hy[I] = 0.0f;
       hz[I] = 0.0f;    
@@ -40,7 +40,7 @@ extern "C" {
       
       
       real mult = kappa * (1.0 - ratio * ratio);// kappa is actually 0.5/kappa! 
-             
+         
       hx[I] = mult * M.x;
       hy[I] = mult * M.y;
       hz[I] = mult * M.z;      
