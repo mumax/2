@@ -328,6 +328,11 @@ func (a API) GetCell(quant string, x, y, z int) []float64 {
 func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	q := a.Engine.Quant(quant)
 	SwapXYZ(value)
+	pointers := q.Array().DevicePtr()
+	if pointers[0] == 0 {
+	    panic(InputErr(fmt.Sprint("You are attempting to call setcell() before array for qunatity is allocated. Please consider setmask() instead.")))
+	}
+	//q.assureAlloc()
 	for c := range value {
 		q.Array().Set(c, z, y, x, float32(value[c]))
 	}
