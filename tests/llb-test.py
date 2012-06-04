@@ -3,13 +3,13 @@ from mumax2 import *
 # Test for LLB
 # see I. Radu et al., PRL 102, 117201 (2009)
   
-Nx = 128
-Ny = 128
+Nx = 32
+Ny = 32
 Nz = 4
 
 setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
-setperiodic(16,16,0)
+#setperiodic(16,16,0)
 
 # LLB 
 load('exchange6')
@@ -17,8 +17,8 @@ load('demag')
 load('zeeman')
 load('llb')
 
-load('solver/rk12')
-setv('Mf_maxerror', 1./500)
+load('solver/bdf_euler')
+#setv('Mf_maxerror', 1./500)
 
 savegraph("graph.png")
 
@@ -58,11 +58,11 @@ for kk in range(Nz):
 setmask('msat0', msat0) 
 setv('msat0', 800e3)
 
-setv('dt', 1e-18)
-setv('maxdt',1e-12)
+setv('dt', 1e-15)
+#setv('maxdt',1e-12)
 setv('lambda', 0.01)
-setv('kappa', 5e-5)
-setv('lambda_e', 1e-6)
+setv('kappa', 1e-4)
+setv('lambda_e', 0)
 
 Mf = makearray(3,Nx,Ny,Nz) 
 for kk in range(Nz):
