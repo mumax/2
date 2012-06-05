@@ -14,15 +14,15 @@ import (
 	. "mumax/engine"
 )
 
-// Register this module
-func init() {
-	RegisterModule("oersted", "Oersted field of electrical current", LoadOersted)
-}
-
-//TODO: j with multiplier Mu0 to get order of magnitude right?
-func LoadOersted(e *Engine) {
-	LoadBField(e)
-	LoadUserDefinedCurrentDensity(e)
-	e.Depends("B", "j")
-	maxwell.EnableOersted(e.Quant("j"))
-}
+//// Register this module
+//func init() {
+//	RegisterModule("oersted", "Oersted field of electrical current", LoadOersted)
+//}
+//
+////TODO: j with multiplier Mu0 to get order of magnitude right?
+//func LoadOersted(e *Engine) {
+//	LoadBField(e)
+//	LoadUserDefinedCurrentDensity(e)
+//	e.Depends("B", "j")
+//	maxwell.EnableOersted(e.Quant("j"))
+//}

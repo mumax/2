@@ -10,20 +10,20 @@ package modules
 // Module for Faraday's law.
 // Author: Arne Vansteenkiste
 
-import (
-	. "mumax/engine"
-)
-
-// Register this module
-func init() {
-	RegisterModule("faraday", "Faraday's law", LoadFaraday)
-}
-
-// Load Faraday's law
-func LoadFaraday(e *Engine) {
-	LoadBField(e)
-	LoadEField(e)
-	e.AddTimeDerivative(e.Quant("B"))
-	maxwell.EnableFaraday(e.Quant("dB_dt"))
-	e.Depends("E", "dB_dt")
-}
+//import (
+//	. "mumax/engine"
+//)
+//
+//// Register this module
+//func init() {
+//	RegisterModule("faraday", "Faraday's law", LoadFaraday)
+//}
+//
+//// Load Faraday's law
+//func LoadFaraday(e *Engine) {
+//	LoadBField(e)
+//	LoadEField(e)
+//	e.AddTimeDerivative(e.Quant("B"))
+//	maxwell.EnableFaraday(e.Quant("dB_dt"))
+//	e.Depends("E", "dB_dt")
+//}
