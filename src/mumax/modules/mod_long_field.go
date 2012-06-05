@@ -30,24 +30,25 @@ func LoadLongField(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
-	e.Depends("H_lf", "kappa", "msat0", "Mf")
-	Hlf.SetUpdater(&LongFieldUpdater{M: e.Quant("Mf"), kappa: kappa, Hlf: Hlf, msat0: msat0})
+	e.Depends("H_lf", "kappa", "msat0", "msat", "m")
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, msat0: msat0, msat: e.Quant("msat")})
 
 }
 
 type LongFieldUpdater struct {
-	M, kappa, Hlf, msat0 *Quant
+	m, kappa, Hlf, msat0, msat *Quant
 }
 
 func (u *LongFieldUpdater) Update() {
 	//e := GetEngine()
-	M := u.M
+	m := u.m
 	kappa := u.kappa.Scalar()
 	Hlf := u.Hlf
     msat0 := u.msat0
+    msat := u.msat
 	stream := u.Hlf.Array().Stream
 	kappa = 0.5 / kappa;
 	
-	gpu.LongFieldAsync(Hlf.Array(), M.Array(), msat0.Array(), kappa, msat0.Multiplier()[0], stream)
+	gpu.LongFieldAsync(Hlf.Array(), m.Array(), msat.Array(), msat0.Array(), kappa, msat.Multiplier()[0], msat0.Multiplier()[0], stream)
 	stream.Sync()
 }

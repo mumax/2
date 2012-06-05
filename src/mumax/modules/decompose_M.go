@@ -14,14 +14,14 @@ import (
 )
 
 type decomposeMUpdater struct {
-	Mf *Quant
+	mf *Quant
 }
 
 func (u *decomposeMUpdater) Update() {
     e := GetEngine()
     m := e.Quant("m")
     msat := e.Quant("Msat")
-	gpu.Decompose(u.Mf.Array(), 
+	gpu.Decompose(u.mf.Array(), 
 	              m.Array(), 
 	              msat.Array(), 
 	              float32(msat.Multiplier()[0]))
