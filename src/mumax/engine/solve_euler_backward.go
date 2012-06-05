@@ -20,6 +20,7 @@ type BDFEuler struct {
 	ybuffer []*gpu.Array // initial derivative
 	y0buffer []*gpu.Array // initial derivative
 	err      []*Quant     // error estimates for each equation
+	maxErr   []*Quant     // error estimates for each equation
 	diff     []gpu.Reductor
 	iterations *Quant
 }
@@ -46,12 +47,13 @@ func (s *BDFEuler) Step() {
 		dyMul := dy.multiplier
 		h := float32(dt * dyMul[0])
 		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
-		
 		gpu.Madd(y.Array(), s.y0buffer[i], dy.Array(), h)
-		
 		y.Invalidate()
+		s.iterations.SetScalar(s.iterations.Scalar() + 1)
 		
-	    for err > 0.1 {
+		// Do higher order approximation until converges
+		maxErr := s.maxErr[i].Scalar()
+	    for err > maxErr {
 	        equation[i].input[0].Update()
 	        y = equation[i].output[0]
 		    dy = equation[i].input[0]
@@ -87,13 +89,14 @@ func init() {
 
 func LoadBDFEuler(e *Engine) {
     s := new(BDFEuler)
-	s.iterations = e.AddNewQuant("iterations", SCALAR, VALUE, Unit(""), "Number of iterations per step")
-
+	s.iterations = e.AddNewQuant("bdf_iterations", SCALAR, VALUE, Unit(""), "Number of iterations per step")
+    
 	equation := e.equation
 	s.ybuffer = make([]*gpu.Array, len(equation))
 	s.y0buffer = make([]*gpu.Array, len(equation))
 	
 	s.err = make([]*Quant, len(equation))
+	s.maxErr = make([]*Quant, len(equation))
 	s.diff = make([]gpu.Reductor, len(equation))
 
 	for i := range equation {
@@ -103,9 +106,12 @@ func LoadBDFEuler(e *Engine) {
 		out := eqn.output[0]
 		unit := out.Unit()
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
+		s.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
-
+        s.maxErr[i].SetVerifier(Positive)
+        
 		// TODO: recycle?
+		
 		y := equation[i].output[0]
 		s.ybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
