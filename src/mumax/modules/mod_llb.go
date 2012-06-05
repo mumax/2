@@ -36,7 +36,7 @@ func LoadLLB(e *Engine) {
 	
     e.LoadModule("baryakhtar")
     
-    e.AddPDE1("Mf", "btorque")
+    e.AddPDE1("mf", "btorque")
 }
 
 

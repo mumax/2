@@ -33,7 +33,7 @@ __global__ void decomposeKern(float* Mx, float* My, float* Mz,
     	my[i] = M.y / Ms;
     	mz[i] = M.z / Ms;
         
-        msat[i] = Ms / msatMul;
+        msat[i] = Ms;// / msatMul;
         
 	}
 }
