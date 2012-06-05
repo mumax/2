@@ -1,7 +1,7 @@
 /**
   * @file
   *
-  * @author Arne Vansteenkiste, Ben Van de Wiele
+  * @author Ben Van de Wiele
   */
 
 #ifndef _KERNELMUL_MICROMAG2_H_
