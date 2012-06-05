@@ -10,10 +10,10 @@ package modules
 // Module for Oersted fields
 // Author: Arne Vansteenkiste
 
-import (
-	. "mumax/engine"
-)
-
+//import (
+//	. "mumax/engine"
+//)
+//
 //// Register this module
 //func init() {
 //	RegisterModule("oersted", "Oersted field of electrical current", LoadOersted)

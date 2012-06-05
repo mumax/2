@@ -19,13 +19,13 @@ wire = makearray(3, Nx, Ny, Nz)
 j=Ny/2
 k=Nz/2
 for i in range(0,Nx):
-	wire[0][i][j][k] = jx
+	wire[0][i][j][k] = 1
 
-#setv('j', [1, 0, 0]) 
-setarray('j', wire)
+setv('j', [jx, 0, 0]) 
+setmask('j', wire)
 
-save('j', 'omf', ['Text'], 'j.omf')
-save('B', 'omf', ['Text'], 'B.omf')
+save('j', 'omf', ['Text'])
+save('B', 'omf', ['Text'])
 
 B=getarray('B')
 i=Nx/2
