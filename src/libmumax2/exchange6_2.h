@@ -1,12 +1,12 @@
 /**
   * @file
-  * This file implements 6-neighbor exchange
+  * This file implements 6-neighbor exchange using shared memory
   *
   * @author Ben Van de Wiele
   */
 
-#ifndef _EXCHANGE6_H_
-#define _EXCHANGE6_H_
+#ifndef _EXCHANGE6_2_H_
+#define _EXCHANGE6_2_H_
 
 #include <cuda.h>
 #include "cross_platform.h"

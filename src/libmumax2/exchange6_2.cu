@@ -1,4 +1,5 @@
-#include "exchange6.h"
+#include "exchange6_2.h"
+#include "common_func.h"
 
 #include "multigpu.h"
 #include <cuda.h>
@@ -254,7 +255,7 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
   active_out = (j<N1Part) && (k<N2);
 
   mPartm = 1;   // m refers to Main block
-  if (k==N2) {k= (periodic_Z) ? k=0 : k=N2-1;}       // adjust for PBCs, Neumann boundary conditions if no PBCs
+  if (k==N2) {k= (periodic_Z) ? k=0 : k=N2-1;}          // adjust for PBCs, Neumann boundary conditions if no PBCs
   if (j==N1Part){ 
     if (periodic_Y) { mPartm=2; j=0; }
     else { j=N1Part-1; }
@@ -301,9 +302,9 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
 
 
 
-int mod(int a, int b){
-	return (a%b+b)%b;
-}
+// int mod(int a, int b){
+// 	return (a%b+b)%b;
+// }
 
 
 
@@ -332,8 +333,8 @@ __export__ void exchange6_2Async(float** hx, float** hy, float** hz, float** mx,
 		for (int dev = 0; dev < nDev; dev++) {
 			gpu_safe(cudaSetDevice(deviceId(dev)));
 			// set up adjacent parts
-			float* mPart0 = M[mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
-			float* mPart2 = M[mod(dev+1, nDev)];  // parts wrap around...
+			float* mPart0 = M[Mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
+			float* mPart2 = M[Mod(dev+1, nDev)];  // parts wrap around...
       if (N0>1)
         exchange6_3DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N0, N1Part, N2, periodic0, periodic1, periodic2, cellx_2, celly_2, cellz_2);
       else
