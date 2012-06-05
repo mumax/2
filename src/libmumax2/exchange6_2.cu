@@ -67,8 +67,8 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
     k = blockIdx.x*EXCH_BLOCK_X + k;                    //global indices
 
     mParth = 1;
-    if (k==-1) {k= (periodic_Z) ? k=Nz-1 : k=0;   }     // adjust for PBCs, Neumann boundary conditions if no PBCs
-    if (k==Nz) {k= (periodic_Z) ? k=0    : k=Nz-1;}
+    if (k==-1) {k= (periodic_Z) ? k=N2-1 : k=0;   }     // adjust for PBCs, Neumann boundary conditions if no PBCs
+    if (k==N2) {k= (periodic_Z) ? k=0    : k=N2-1;}
     if (j==-1){ 
       if (periodic_Y) { mParth=0; j=N1Part-1; }
       else { j=0; }
@@ -78,9 +78,9 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
       else { j=N1Part-1; }
     }
 
-    indg_h = j*Nz + k;                                  // global halo index
+    indg_h = j*N2 + k;                                  // global halo index
 
-    halo = (j>=0) && (j<N1Part) && (k>=0) && (k<Nz);
+    halo = (j>=0) && (j<N1Part) && (k>=0) && (k<N2);
   }
 // -------------------------------------------------------------------------------------
 
@@ -95,47 +95,47 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
 
   j = blockIdx.y*EXCH_BLOCK_Y + j;                      // global indices
   k = blockIdx.x*EXCH_BLOCK_X + k;
-  indg_out = j*Nz + k;
-  active_out = (j<N1Part) && (k<Nz);
+  indg_out = j*N2 + k;
+  active_out = (j<N1Part) && (k<N2);
 
   mPartm = 1;
-  if (k==Nz) {k= (periodic_Z) ? k=0 : k=Nz-1;}       // adjust for PBCs, Neumann boundary conditions if no PBCs
+  if (k==N2) {k= (periodic_Z) ? k=0 : k=N2-1;}       // adjust for PBCs, Neumann boundary conditions if no PBCs
   if (j==N1Part){ 
     if (periodic_Y) { mPartm=2; j=0; }
     else { j=N1Part-1; }
   }
 
-  indg_in = j*Nz + k;
-  active_in = (j<N1Part) && (k<Nz);
+  indg_in = j*N2 + k;
+  active_in = (j<N1Part) && (k<N2);
 // -------------------------------------------------------------------------------------
 
 
 // if periodic_X: read last yz-plane of array ------------------------------------------
   if (periodic_X){
     if (active_in) 
-      m_sh[ind  ] = mPart[mPartm][indg_in + Nx_minus_1*Nyz];
+      m_sh[ind  ] = mParts[mPartm][indg_in + Nx_minus_1*Nyz];
     if (halo) 
-      m_sh[ind_h] = mPart[mParth][indg_h + Nx_minus_1*Nyz];
+      m_sh[ind_h] = mParts[mParth][indg_h + Nx_minus_1*Nyz];
   }
 // -------------------------------------------------------------------------------------
 
 // read first yz plane of array --------------------------------------------------------
   if (active_in) 
-    m_sh[ind   + I_OFF] = mPart[mPartm][indg_in];
+    m_sh[ind   + I_OFF] = mParts[mPartm][indg_in];
   if (halo) 
-    m_sh[ind_h + I_OFF] = mPart[mParth][indg_h];
+    m_sh[ind_h + I_OFF] = mParts[mParth][indg_h];
 // -------------------------------------------------------------------------------------
 
 
 // perform the actual exchange computations --------------------------------------------
-  for (i=0; i<Nx; i++) {
+  for (i=0; i<N0; i++) {
 
     if (active_in) {
 
       // define prefactor based on central cell (!!)
       if ( mSat_map!=NULL ){ 
         mSat_mask = mSat_map[indg_in];
-        if (mSat_mask==0.0f) { mSat_mask==1.0f; }     // do not divide by zero
+        if (mSat_mask==0.0f) { mSat_mask=1.0f; }     // do not divide by zero
       }
       if ( mSat_map!=NULL || Aex_map!=NULL )
         Aex2_Mu0Msat = (Aex2_Mu0Msat_mul / mSat_mask) * Aex_map[indg_in];     // 2 * Aex / Mu0 * Msat
@@ -147,9 +147,9 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
       m_sh[ind - I_OFF] = m_sh[ind];                  // shift the two existing planes
       m_sh[ind]         = m_sh[ind + I_OFF];
       if (i<Nx_minus_1)
-        m_sh[ind + I_OFF] = mPart[mPartm][indg_in];   // read new plane
+        m_sh[ind + I_OFF] = mParts[mPartm][indg_in];   // read new plane
       else if (periodic_X!=0)
-        m_sh[ind + I_OFF] = mPart[mPartm][indg_in - Nx_minus_1*Nyz];      // PBCs
+        m_sh[ind + I_OFF] = mParts[mPartm][indg_in - Nx_minus_1*Nyz];      // PBCs
       else
         m_sh[ind + I_OFF] = m_sh[ind];                // Neumann boundary conditions
     }
@@ -159,9 +159,9 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
       m_sh[ind_h - I_OFF] = m_sh[ind_h];              // shift planes
       m_sh[ind_h]         = m_sh[ind_h + I_OFF];
       if (i<Nx_minus_1)
-        m_sh[ind_h + I_OFF] = mPart[mParth][indg_h];  // read new plane
+        m_sh[ind_h + I_OFF] = mParts[mParth][indg_h];  // read new plane
       else if (periodic_X!=0)
-        m_sh[ind_h + I_OFF] = mPart[mParth][indg_h - Nx_minus_1*Nyz];     //PBCs
+        m_sh[ind_h + I_OFF] = mParts[mParth][indg_h - Nx_minus_1*Nyz];     //PBCs
       else
         m_sh[ind_h + I_OFF] = m_sh[ind_h];            // Neumann boundary conditions
     }
@@ -182,18 +182,14 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
 
 
 
-
-
 __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Aex_map, float Aex2_Mu0Msat_mul, float* mPart0, float* mPart2,
                                   int N1Part, int N2,
                                   int periodic_Y, int periodic_Z,
                                   float celly_2, float cellz_2){
 
-  float *hptr, result;
-  int i, j, k, ind, ind_h, indg_in, indg_out, indg_h, active_in, active_out, mParth, mPartm;
+  float result;
+  int j, k, ind, ind_h, indg_in, indg_out, indg_h, active_in, active_out, mParth, mPartm;
 
-  int Nyz = N1Part*N2; 
-  int Nx_minus_1 = N0-1;
   int cnt = threadIdx.y*EXCH_BLOCK_X + threadIdx.x;
   
   float *mParts[3];
@@ -228,8 +224,8 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
     k = blockIdx.x*EXCH_BLOCK_X + k;                    //global indices
 
     mParth = 1; // h refers to halo
-    if (k==-1) {k= (periodic_Z) ? k=Nz-1 : k=0;   }     // adjust for PBCs, Neumann boundary conditions if no PBCs
-    if (k==Nz) {k= (periodic_Z) ? k=0    : k=Nz-1;}
+    if (k==-1) {k= (periodic_Z) ? k=N2-1 : k=0;   }     // adjust for PBCs, Neumann boundary conditions if no PBCs
+    if (k==N2) {k= (periodic_Z) ? k=0    : k=N2-1;}
     if (j==-1){ 
       if (periodic_Y) { mParth=0; j=N1Part-1; }
       else { j=0; }
@@ -239,9 +235,9 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
       else { j=N1Part-1; }
     }
 
-    indg_h = j*Nz + k;                                  // global halo index
+    indg_h = j*N2 + k;                                  // global halo index
 
-    halo = (j>=0) && (j<N1Part) && (k>=0) && (k<Nz);
+    halo = (j>=0) && (j<N1Part) && (k>=0) && (k<N2);
   }
 // -------------------------------------------------------------------------------------
 
@@ -254,26 +250,26 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
 
   j = blockIdx.y*EXCH_BLOCK_Y + j;                      // global indices
   k = blockIdx.x*EXCH_BLOCK_X + k;
-  indg_out = j*Nz + k;
-  active_out = (j<N1Part) && (k<Nz);
+  indg_out = j*N2 + k;
+  active_out = (j<N1Part) && (k<N2);
 
   mPartm = 1;   // m refers to Main block
-  if (k==Nz) {k= (periodic_Z) ? k=0 : k=Nz-1;}       // adjust for PBCs, Neumann boundary conditions if no PBCs
+  if (k==N2) {k= (periodic_Z) ? k=0 : k=N2-1;}       // adjust for PBCs, Neumann boundary conditions if no PBCs
   if (j==N1Part){ 
     if (periodic_Y) { mPartm=2; j=0; }
     else { j=N1Part-1; }
   }
 
-  indg_in = j*Nz + k;
-  active_in = (j<N1Part) && (k<Nz);
+  indg_in = j*N2 + k;
+  active_in = (j<N1Part) && (k<N2);
 // -------------------------------------------------------------------------------------
 
 
 // read first yz plane of array --------------------------------------------------------
   if (active_in) 
-    m_sh[ind  ] = mPart[mPartm][indg_in];
+    m_sh[ind  ] = mParts[mPartm][indg_in];
   if (halo) 
-    m_sh[ind_h] = mPart[mParth][indg_h];
+    m_sh[ind_h] = mParts[mParth][indg_h];
 // -------------------------------------------------------------------------------------
   __syncthreads();
 
@@ -284,7 +280,7 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
     // define prefactor based on central cell (!!)
     if ( mSat_map!=NULL ){ 
       mSat_mask = mSat_map[indg_in];
-      if (mSat_mask==0.0f) { mSat_mask==1.0f; }     // do not divide by zero
+      if (mSat_mask==0.0f) { mSat_mask=1.0f; }     // do not divide by zero
     }
     if ( mSat_map!=NULL || Aex_map!=NULL )
       Aex2_Mu0Msat = (Aex2_Mu0Msat_mul / mSat_mask) * Aex_map[indg_in];     // 2 * Aex / Mu0 * Msat

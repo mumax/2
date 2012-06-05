@@ -46,6 +46,7 @@ func (u *exch6Updater) Update() {
 
 	Aex2_mu0MsatMul := (2 * u.Aex.Multiplier()[0]) / (Mu0 * Msat.Multiplier()[0])
 	stream := u.Hex.Array().Stream
-	gpu.Exchange6Async(Hex.Array(), m.Array(), Msat.Array(), Aex.Array(), Aex2_mu0MsatMul, e.CellSize(), e.Periodic(), stream)
+// 	gpu.Exchange6Async(Hex.Array(), m.Array(), Msat.Array(), Aex.Array(), Aex2_mu0MsatMul, e.CellSize(), e.Periodic(), stream)
+  gpu.Exchange6_2Async(Hex.Array(), m.Array(), Msat.Array(), Aex.Array(), Aex2_mu0MsatMul, e.CellSize(), e.Periodic(), stream)
 	stream.Sync()
 }
