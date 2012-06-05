@@ -27,7 +27,7 @@ Mf = makearray(3,Nx,Ny,Nz)
 for kk in range(Nz):
     for jj in range(Ny):
         for ii in range(Nx):
-            Mf[0][ii][jj][kk] = 8.0e5
+            Mf[0][ii][jj][kk] = 1.0
             Mf[1][ii][jj][kk] = 0.0
             Mf[2][ii][jj][kk] = 0.0
 setarray('Mf',Mf)
@@ -68,7 +68,7 @@ Mf = makearray(3,Nx,Ny,Nz)
 for kk in range(Nz):
     for jj in range(Ny):
         for ii in range(Nx):
-            Mf[0][ii][jj][kk] = 1.6e5
+            Mf[0][ii][jj][kk] = 0.2
             Mf[1][ii][jj][kk] = 0.0
             Mf[2][ii][jj][kk] = 0.0
 setarray('Mf',Mf)

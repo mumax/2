@@ -38,7 +38,7 @@ extern "C" {
 	}
 	
     if (j < size.y && k < size.z){ // 3D now:)
-        
+            
 	    //m_sat = 1.0 / m_sat;             
         
         real5 cfx = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
@@ -105,7 +105,7 @@ extern "C" {
 
         }
      
-        real3 M = make_real3(Mx[x0], My[x0], Mz[x0]);		
+        real3 m = make_real3(Mx[x0], My[x0], Mz[x0]);		
           
         // Second-order derivative 5-points stencil
 
@@ -277,13 +277,21 @@ extern "C" {
 	        
 	    }*/
 	          
-        real3 _MxH = cross(H, M);
+        real3 _mxH = cross(H, m);
         
-        real Msat = len(M);
-                      
-        tx[x0] = _MxH.x + Msat * (lambda * H.x  - lambda_e * ddH.x);
-        ty[x0] = _MxH.y + Msat * (lambda * H.y  - lambda_e * ddH.y);
-        tz[x0] = _MxH.z + Msat * (lambda * H.z  - lambda_e * ddH.z);  
+        /*if (x0 == 100) {
+            printf("Ms: %e\n",Msat);
+            printf("lambda: %e\n",lambda);
+            printf("lambda_e: %e\n",lambda_e);
+            printf("Mx: %e\n",M.x);
+            printf("My: %e\n",M.y);
+            printf("Mz: %e\n",M.z);
+            
+        } */            
+        
+        tx[x0] = _mxH.x + (lambda * H.x  - lambda_e * ddH.x);
+        ty[x0] = _mxH.y + (lambda * H.y  - lambda_e * ddH.y);
+        tz[x0] = _mxH.z + (lambda * H.z  - lambda_e * ddH.z);  
 
     } 
   }

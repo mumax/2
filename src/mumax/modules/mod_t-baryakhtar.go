@@ -37,7 +37,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	btorque := e.AddNewQuant("btorque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 	
 	// ============ Dependencies =============
-	e.Depends("btorque", "Mf", "H_eff", "gamma_LL", "lambda", "lambda_e","msat0")
+	e.Depends("btorque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e","msat0")
     
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{btorque: btorque}
@@ -53,7 +53,7 @@ func (u *BaryakhtarUpdater) Update() {
 	e := GetEngine()	
 	cellSize := e.CellSize()	
 	btorque := u.btorque
-	M := e.Quant("Mf")
+	m := e.Quant("mf")
 	lambda := e.Quant("lambda").Scalar()
     lambda_e := e.Quant("lambda_e").Scalar()
 	heff := e.Quant("H_eff")
@@ -71,7 +71,7 @@ func (u *BaryakhtarUpdater) Update() {
 	}
 	
 	gpu.LLGBtAsync(btorque.Array(), 
-                    M.Array(), 
+                    m.Array(), 
                     heff.Array(), 
                     msat0.Array(),
                     float32(msat0.Multiplier()[0]),
