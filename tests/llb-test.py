@@ -18,7 +18,7 @@ load('zeeman')
 load('llb')
 
 load('solver/bdf_euler')
-#setv('Mf_maxerror', 1./500)
+setv('mf_maxerror', 1.0e-7)
 
 savegraph("graph.png")
 
@@ -76,9 +76,10 @@ setarray('Mf',Mf)
 autosave("m", "gplot", [], 10e-15)
 autosave("msat", "gplot", [], 10e-15)
 autosave("Mf","gplot", [], 10e-15)
-autotabulate(["t", "<m>"], "m.txt", 1e-16)
-autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
-autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
+#autotabulate(["t", "<m>"], "m.txt", 1e-16)
+autotabulate(["t", "bdf_iterations"], "i.txt", 1e-15)
+#autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
+#autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
 
 
 run(100e-12)
