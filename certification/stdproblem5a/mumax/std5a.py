@@ -76,6 +76,14 @@ setv('t', 0)
 
 load('slonczewski')
 
+t_fl = makearray(1,Nx,Ny,Nz)
+for m in range(Nx):
+    for n in range(Ny):
+        for o in range(Nz):
+            t_fl[0][m][n][o] = 1.0
+setmask('t_fl', t_fl)
+setv('t_fl', sZ)
+
 setv('lambda',1.0)
 setv('Pol',0.5669)
 setv('epsilon_prime', 0.0)

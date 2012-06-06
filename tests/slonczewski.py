@@ -12,11 +12,20 @@ sZ = 3.0e-9
 setgridsize(Nx, Ny, Nz)
 setcellsize(5e-9, 5e-9, 5e-9)
 
+
 load('micromagnetism')
 load('solver/rk12')
 load('slonczewski')
 
 savegraph("graph.png")
+
+t_fl = makearray(1,Nx,Ny,Nz)
+for m in range(Nx):
+    for n in range(Ny):
+        for o in range(Nz):
+            t_fl[0][m][n][o] = 1.0
+setmask('t_fl', t_fl)
+setv('t_fl', sZ)
 
 setv('lambda',2.0)
 setv('Pol',0.4)

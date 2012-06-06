@@ -94,6 +94,15 @@ setv('t', 0)
 # Load slonczewski module
 load('slonczewski')
 
+# Define thickness of free layer pointwise, 0 value bypasses slonczewski
+t_fl = makearray(1,Nx,Ny,Nz)
+for m in range(Nx):
+    for n in range(Ny):
+        for o in range(Nz):
+            t_fl[0][m][n][o] = 1.0
+setmask('t_fl', t_fl)
+setv('t_fl', sZ)
+
 # Define labmda which controlls dot(m,p) see OOMMF manual
 setv('lambda',1.0)
 # Define polarization efficiency
