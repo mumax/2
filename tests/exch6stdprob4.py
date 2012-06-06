@@ -35,7 +35,7 @@ m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
 
-saveas('kern_dipole', 'gplot', [], 'kern.gplot')
+save('kern_dipole', 'gplot', [], 'kern.gplot')
 autosave("m", "omf", ["Text"], 200e-12)
 autosave("H_ex", "omf", ["Text"], 200e-12)
 autosave("H_ex", "gplot", [], 200e-12)
