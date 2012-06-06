@@ -25,10 +25,11 @@ extern "C" {
 __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Aex_map, float Aex2_Mu0Msat_mul, float* mPart0, float* mPart2,
                                   int N0, int N1Part, int N2,
                                   int periodic_X, int periodic_Y, int periodic_Z,
-                                  float cellx_2, float celly_2, float cellz_2){
+                                  float cellx_2, float celly_2, float cellz_2,
+                                  int dev, int nDev){
 
   float *hptr, result;
-  int i, j, k, ind, ind_h, indg_in, indg_out, indg_h, active_in, active_out, mParth, mPartm;
+  int i, j, k, ind, ind_h, indg_in, indg_out, indg_h, active_in, active_out, mParth, mPartm, shifth;
 
   int Nyz = N1Part*N2; 
   int Nx_minus_1 = N0-1;
@@ -70,14 +71,20 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
     mParth = 1;
     if (k==-1) {k= (periodic_Z) ? k=N2-1 : k=0;   }     // adjust for PBCs, Neumann boundary conditions if no PBCs
     if (k==N2) {k= (periodic_Z) ? k=0    : k=N2-1;}
-    if (j==-1){ 
+/*    if (j==-1){ 
       if (periodic_Y) { mParth=0; j=N1Part-1; }
       else { j=0; }
     }
     if (j==N1Part){ 
       if (periodic_Y) { mParth=2; j=0; }
       else { j=N1Part-1; }
-    }
+    }*/
+    if (j==-1)
+      if ( (!periodic_Y) && (dev==0) ) { j=0; }
+      else { j=N1Part-1; mParth=0; }
+    if (j==N1Part)
+      if ( (!periodic_Y) && (dev==nDev-1) ) { j=N1Part-1; }
+      else { j=0; mParth=2; }
 
     indg_h = j*N2 + k;                                  // global halo index
 
@@ -186,7 +193,8 @@ __global__ void exchange6_3DKern (float* h, float* m, float* mSat_map, float* Ae
 __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Aex_map, float Aex2_Mu0Msat_mul, float* mPart0, float* mPart2,
                                   int N1Part, int N2,
                                   int periodic_Y, int periodic_Z,
-                                  float celly_2, float cellz_2){
+                                  float celly_2, float cellz_2,
+                                  int dev, int nDev){
 
   float result;
   int j, k, ind, ind_h, indg_in, indg_out, indg_h, active_in, active_out, mParth, mPartm;
@@ -218,7 +226,7 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
       k = (cnt%2)*(EXCH_BLOCK_X+1) - 1;
     }
 
-    ind_h  = (j+1)*J_OFF + k+1 ;                // shared memory halo index
+    ind_h  = (j+1)*J_OFF + k+1 ;                        // shared memory halo index
     m_sh[ind_h] = 0.0f;                                 // initialize to zero
 
     j = blockIdx.y*EXCH_BLOCK_Y + j;
@@ -227,15 +235,13 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
     mParth = 1; // h refers to halo
     if (k==-1) {k= (periodic_Z) ? k=N2-1 : k=0;   }     // adjust for PBCs, Neumann boundary conditions if no PBCs
     if (k==N2) {k= (periodic_Z) ? k=0    : k=N2-1;}
-    if (j==-1){ 
-      if (periodic_Y) { mParth=0; j=N1Part-1; }
-      else { j=0; }
-    }
-    if (j==N1Part){ 
-      if (periodic_Y) { mParth=2; j=0; }
-      else { j=N1Part-1; }
-    }
-
+    if (j==-1)
+      if ( (!periodic_Y) && (dev==0) ) { j=0; }
+      else { j=N1Part-1; mParth=0; }
+    if (j==N1Part)
+      if ( (!periodic_Y) && (dev==nDev-1) ) { j=N1Part-1; }
+      else { j=0; mParth=2; }
+        
     indg_h = j*N2 + k;                                  // global halo index
 
     halo = (j>=0) && (j<N1Part) && (k>=0) && (k<N2);
@@ -301,13 +307,6 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
 
 
 
-
-// int mod(int a, int b){
-// 	return (a%b+b)%b;
-// }
-
-
-
 #define BLOCKSIZE 16
 __export__ void exchange6_2Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float** msat, float** aex, float Aex2_mu0MsatMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams){
 
@@ -331,7 +330,7 @@ __export__ void exchange6_2Async(float** hx, float** hy, float** hz, float** mx,
 		if (c==2){H = hz; M = mz;}
 
 		for (int dev = 0; dev < nDev; dev++) {
-      
+
 			gpu_safe(cudaSetDevice(deviceId(dev)));
       
 			// set up adjacent parts
@@ -339,11 +338,10 @@ __export__ void exchange6_2Async(float** hx, float** hy, float** hz, float** mx,
 			float* mPart2 = M[Mod(dev+1, nDev)];  // parts wrap around...
 			
       if (N0>1)
-        exchange6_3DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N0, N1Part, N2, periodic0, periodic1, periodic2, cellx_2, celly_2, cellz_2);
+        exchange6_3DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N0, N1Part, N2, periodic0, periodic1, periodic2, cellx_2, celly_2, cellz_2, dev, nDev);
       else
-        exchange6_2DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N1Part, N2, periodic1, periodic2, celly_2, cellz_2);
+        exchange6_2DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N1Part, N2, periodic1, periodic2, celly_2, cellz_2, dev, nDev);    
     }
-
   }
 }
 
