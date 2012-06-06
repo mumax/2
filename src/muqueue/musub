@@ -1,2 +1,0 @@
-#!/bin/bash
-(echo $USER $@ | netcat localhost 2527) || echo Could not connect to server
