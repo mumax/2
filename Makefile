@@ -7,7 +7,6 @@ all:
 	go install -v --gccgoflags '-Ofast -march=native' mumax2-bin
 	go install -v apigen
 	go install -v texgen
-	go install -v muqueue
 	go install -v template
 	make -C src/python
 ifndef SystemRoot	
