@@ -24,6 +24,6 @@ m[0][0][0][0] = 1
 m[1][1][0][0] = 1
 setarray('m', m)
 
-save('H_ex', 'gplot', [], 'H_ex.gplot')
-save('m', 'gplot', [], 'm.gplot')
+saveas('H_ex', 'txt', [], 'H_ex.txt')
+saveas('m', 'txt', [], 'm.txt')
 
