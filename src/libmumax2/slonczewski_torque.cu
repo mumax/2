@@ -17,24 +17,19 @@ extern "C" {
 					 float* __restrict__ px, float* __restrict__ py, float* __restrict__ pz,
 					 float* __restrict__ jx, float* __restrict__ jy, float* __restrict__ jz,
 					 float* __restrict__ alphaMsk, 
+                     float* __restrict__ t_flMsk, 
 					 float3 pMul,
 					 float3 jMul,
 					 float3 pre,
 					 float3 meshSize,
 					 float alphaMul,
+                     float t_flMul,
 					 int NPart) 
   {
     
     int I = threadindex;
     float Ms = (msat != NULL ) ? msat[I] : 1.0f;
-    
-    if (Ms == 0.0f) {
-      sttx[I] = 0.0f;
-      stty[I] = 0.0f;
-      sttz[I] = 0.0f;    
-      return;
-    }
-    
+        
     float j_x = (jx != NULL) ? jx[I] * jMul.x : jMul.x;
     float j_y = (jy != NULL) ? jy[I] * jMul.y : jMul.y;
     float j_z = (jz != NULL) ? jz[I] * jMul.z : jMul.z;
@@ -42,7 +37,9 @@ extern "C" {
     float3 J = make_float3(j_x, j_y, j_z);
     float nJn = len(J);
     
-    if (nJn == 0.0f) {
+    float free_layer_thickness = (t_flMsk != NULL) ? t_flMsk[I] * t_flMul : t_flMul;
+    
+    if (nJn == 0.0f || Ms == 0.0f || free_layer_thickness == 0.0f) {
       sttx[I] = 0.0f;
       stty[I] = 0.0f;
       sttz[I] = 0.0f;    
@@ -50,7 +47,8 @@ extern "C" {
     }
 	  
 	if (I < NPart){ // Thread configurations are usually too large...
-
+      
+      free_layer_thickness = 1.0f / free_layer_thickness;
       Ms = 1.0f / Ms;
           
       pre.y *= Ms;
@@ -80,8 +78,9 @@ extern "C" {
 	  
 	  // get effective thinkness of free layer
 	  
-	  float free_layer_thickness = fabsf(dotf(meshSize, J)); 
-	  free_layer_thickness = (free_layer_thickness != 0.0f) ? 1.0f / free_layer_thickness : 0.0f;
+	  //float free_layer_thickness = fabsf(dotf(meshSize, J)); 
+	  //free_layer_thickness = (free_layer_thickness != 0.0f) ? 1.0f / free_layer_thickness : 0.0f;
+	  
 	  pre.y *= free_layer_thickness;
 	  pre.z *= free_layer_thickness; 
 	  
@@ -107,11 +106,13 @@ extern "C" {
 			 float** px, float** py, float** pz,
 			 float** jx, float** jy, float** jz,
 			 float** alphamsk,
+             float** t_flmsk,
 			 float pxMul, float pyMul, float pzMul,
 			 float jxMul, float jyMul, float jzMul,
 			 float lambda2, float beta_prime, float pre_field,
 			 float meshSizeX,float meshSizeY, float meshSizeZ, 
 			 float alphaMul,
+             float t_flMul,
 			 int NPart, 
 			 CUstream* stream)
   {
@@ -133,11 +134,13 @@ extern "C" {
 										       px[dev], py[dev], pz[dev],
 										       jx[dev], jy[dev], jz[dev],
 										       alphamsk[dev],
+                                               t_flmsk[dev],
 											   pMul,
 											   jMul,
 											   pre,
 										       meshSize,
 										       alphaMul, 
+                                               t_flMul,
 										       NPart);
     } // end dev < nDev loop
 										  

@@ -27,7 +27,7 @@ import (
 //			 int NPart, 
 //			 CUstream* stream)
 
-func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array, pMul []float64, jMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64, alphaMul []float64) {
+func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array, t_fl *Array, pMul []float64, jMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64, alphaMul []float64, t_flMul []float64) {
 
 	// Bookkeeping
 	CheckSize(p.Size3D(), m.Size3D())
@@ -57,6 +57,8 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
 
         (**C.float)(unsafe.Pointer(&(alpha.Comp[X].Pointers()[0]))),        
         
+        (**C.float)(unsafe.Pointer(&(t_fl.Comp[X].Pointers()[0]))),  
+
 		(C.float)(pMul[X]),
 		(C.float)(pMul[Y]),
 		(C.float)(pMul[Z]),
@@ -74,7 +76,8 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
         (C.float)(worldSize[Z]),
         
         (C.float)(alphaMul[X]),
-        
+        (C.float)(t_flMul[X]),
+
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
 		
