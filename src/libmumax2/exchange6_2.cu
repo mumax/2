@@ -337,7 +337,6 @@ __export__ void exchange6_2Async(float** hx, float** hy, float** hz, float** mx,
 			// set up adjacent parts
 			float* mPart0 = M[Mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
 			float* mPart2 = M[Mod(dev+1, nDev)];  // parts wrap around...
-			
       if (N0>1)
         exchange6_3DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N0, N1Part, N2, periodic0, periodic1, periodic2, cellx_2, celly_2, cellz_2);
       else
