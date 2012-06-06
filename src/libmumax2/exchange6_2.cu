@@ -218,7 +218,7 @@ __global__ void exchange6_2DKern (float* h, float* m, float* mSat_map, float* Ae
       k = (cnt%2)*(EXCH_BLOCK_X+1) - 1;
     }
 
-    ind_h  = I_OFF + (j+1)*J_OFF + k+1 ;                // shared memory halo index
+    ind_h  = (j+1)*J_OFF + k+1 ;                // shared memory halo index
     m_sh[ind_h] = 0.0f;                                 // initialize to zero
 
     j = blockIdx.y*EXCH_BLOCK_Y + j;
@@ -331,10 +331,13 @@ __export__ void exchange6_2Async(float** hx, float** hy, float** hz, float** mx,
 		if (c==2){H = hz; M = mz;}
 
 		for (int dev = 0; dev < nDev; dev++) {
+      
 			gpu_safe(cudaSetDevice(deviceId(dev)));
+      
 			// set up adjacent parts
 			float* mPart0 = M[Mod(dev-1, nDev)];  // adjacent part for smaller Y reps. larger Y
 			float* mPart2 = M[Mod(dev+1, nDev)];  // parts wrap around...
+			
       if (N0>1)
         exchange6_3DKern<<<gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(H[dev], M[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, mPart0, mPart2, N0, N1Part, N2, periodic0, periodic1, periodic2, cellx_2, celly_2, cellz_2);
       else
