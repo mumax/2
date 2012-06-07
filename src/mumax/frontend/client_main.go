@@ -81,29 +81,61 @@ func GetOutputDir(inputFile string) string {
 
 // make the output dir
 func initOutputDir(outputDir string) {
-    
+    	
+	_, rooterr := os.Stat(outputDir)
+	
 	if *flag_force {
-        err := os.RemoveAll(outputDir)
-        if err != nil {
-	        Log("os.RemoveAll", outputDir, ":", err)
+	    if !os.IsNotExist(rooterr) {
+	        if outputDir != "." {
+                err := filepath.Walk(outputDir, RemoveDirContent(outputDir))
+                if err != nil {
+	                Log("filepath.Walk", outputDir, ":", err)
+
+                }
+            }
         }
 	}
 	
-	if *flag_dontrun {
-	    _, err := os.Stat(outputDir)
-        if !os.IsNotExist(err) {
-            CheckIO(err)   
+    if *flag_dontrun {
+        errOut := os.Mkdir(outputDir, 0777)
+        if outputDir != "." {
+                CheckIO(errOut)
+        } else {
+                Log(errOut)
         } 
-	}
-		
-	errOut := os.Mkdir(outputDir, 0777)
-	if outputDir != "." {
-		CheckIO(errOut)
-	} else {
-		Log(errOut)
-	}
-	
+    }
+    
+    _, rooterr1 := os.Stat(outputDir)
+    if os.IsNotExist(rooterr1) {       
+        errOut := os.Mkdir(outputDir, 0777)
+        if outputDir != "." {
+                CheckIO(errOut)
+        } else {
+                Log(errOut)
+        }
+    } 	
 }
+
+func RemoveDirContent(outputDir string) filepath.WalkFunc { 
+
+        return func(path string, info os.FileInfo, err error) error { 
+            if path != outputDir { 
+                if info.IsDir() {
+                    err := os.RemoveAll(path)
+                    if err != nil {
+	                    Log("os.RemoveAll", outputDir, ":", err)
+                    }  
+                } else {
+                    err := os.Remove(path)
+                    if err != nil {
+	                    Log("os.Remove", outputDir, ":", err)
+                    }    
+                }  
+            }
+            return nil 
+        }
+}
+
 
 // Gets the response from the client and starts the slave server
 func ServeClient(clientctl chan int, inputfile string, ClientPath string) {
