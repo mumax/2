@@ -27,7 +27,13 @@ type BDFEuler struct {
 
 func (s *BDFEuler) Step() {
 	e := GetEngine()
+	
 	equation := e.equation
+	
+	for i := range equation {
+        equation[i].input[0].Update()
+    }
+    
 	// get dt here to avoid updates later on.
 	dt := engine.dt.Scalar()
     // Advance time and update all inputs  
@@ -77,8 +83,11 @@ func (s *BDFEuler) Step() {
 }
 
 func (s *BDFEuler) Dependencies() (children, parents []string) {
-	children = []string{"t", "step", "iterations"}
+	children = []string{"t", "step", "bdf_iterations"}
 	parents = []string{"dt"}
+	for i := range s.err {
+		parents = append(parents, s.maxErr[i].Name())
+	}
 	return
 }
 

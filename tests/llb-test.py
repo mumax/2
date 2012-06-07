@@ -73,12 +73,12 @@ for kk in range(Nz):
             Mf[2][ii][jj][kk] = 0.0
 setarray('Mf',Mf)
             
-autosave("m", "gplot", [], 10e-15)
-autosave("msat", "gplot", [], 10e-15)
-autosave("Mf","gplot", [], 10e-15)
+#autosave("m", "gplot", [], 10e-15)
+#autosave("msat", "gplot", [], 10e-15)
+#autosave("Mf","gplot", [], 10e-15)
 #autotabulate(["t", "<m>"], "m.txt", 1e-16)
 autotabulate(["t", "bdf_iterations"], "i.txt", 1e-15)
-#autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
+autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
 #autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
 
 
