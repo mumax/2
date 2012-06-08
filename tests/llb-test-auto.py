@@ -20,6 +20,7 @@ load('llb')
 load('solver/bdf_euler_auto')
 setv('mf_maxiterations', 10)
 setv('mf_maxerror', 1e-6)
+setv('mf_maxitererror', 0.001)
 
 savegraph("graph.png")
 

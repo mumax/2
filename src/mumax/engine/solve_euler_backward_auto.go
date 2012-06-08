@@ -24,7 +24,7 @@ type BDFEulerAuto struct {
 	dy0buffer []*gpu.Array // the value of quantity derivative at the begining of the step
 	err      []*Quant     // error estimates for each equation
 	maxErr   []*Quant     // maximum error per step for each equation
-	//maxIterErr []*Quant     // error iterator error estimates for each equation
+	maxIterErr []*Quant     // error iterator error estimates for each equation
 	maxIter  []*Quant     // maximum number of iterations per step
 	newDt    []float64   // 
 	diff     []gpu.Reductor
@@ -79,10 +79,10 @@ func (s *BDFEulerAuto) Step() {
 		    s.iterations.SetScalar(iter)
             
 		    // Do higher order approximation until converges
-		    maxErr := s.maxErr[i].Scalar()
+		    maxIterErr := s.maxIterErr[i].Scalar()
 		    maxIter := s.maxIter[i].Scalar()
 		     
-	        for err > maxErr {
+	        for err > maxIterErr {
 	            
 	            equation[i].input[0].Update()
 	            y = equation[i].output[0]
@@ -105,9 +105,22 @@ func (s *BDFEulerAuto) Step() {
 	            }
 			    s.iterations.SetScalar(iter)
             }
-            //Debug("Iteration error:", err)
             
-            errRatio := math.Abs(err / maxErr)
+            
+            // Let us compare Euler and final BDF Euler
+            StepErr := float64(s.diff[i].MaxDiff(dy.Array(), s.dy0buffer[i]) * h)
+            maxStepErr := s.maxErr[i].Scalar() 
+            errRatio := math.Abs(StepErr / maxStepErr)
+            Debug("Step error:", errRatio)
+            // If iterator reported bad step then correct timestep futher
+            if isBadStep > 0 {
+                errRatio = errRatio * math.Abs(err / maxIterErr)
+            }        
+            
+            // If correction is to large then there is a badstep
+            if (errRatio > 2) {
+                isBadStep = isBadStep + 1
+            }
             
             step_corr := math.Pow(float64(errRatio), -0.2)
             
@@ -141,6 +154,7 @@ func (s *BDFEulerAuto) Dependencies() (children, parents []string) {
 	for i := range s.err {
 		parents = append(parents, s.maxErr[i].Name())
 		parents = append(parents, s.maxIter[i].Name())
+		parents = append(parents, s.maxIterErr[i].Name())
 	}
 	return
 }
@@ -161,7 +175,7 @@ func LoadBDFEulerAuto(e *Engine) {
 	
 	s.err = make([]*Quant, len(equation))
 	s.maxErr = make([]*Quant, len(equation))
-	//s.maxIterErr = make([]*Quant, len(equation))
+	s.maxIterErr = make([]*Quant, len(equation))
 	s.maxIter = make([]*Quant, len(equation))
 	s.diff = make([]gpu.Reductor, len(equation))
     s.newDt = make([]float64, len(equation))
@@ -174,11 +188,12 @@ func LoadBDFEulerAuto(e *Engine) {
 		unit := out.Unit()
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s.maxIterErr[i] = e.AddNewQuant(out.Name()+"_maxIterError", SCALAR, VALUE, unit, "The maximum error of iterator"+out.Name())
 		s.maxIter[i] = e.AddNewQuant(out.Name()+"_maxIterations", SCALAR, VALUE, unit, "Maximum number of iterations per step"+out.Name())
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		
         s.maxErr[i].SetVerifier(Positive)
-        //s.maxIterErr[i].SetVerifier(Positive)
+        s.maxIterErr[i].SetVerifier(Positive)
         s.maxIter[i].SetVerifier(Positive)
         
 		// TODO: recycle?
