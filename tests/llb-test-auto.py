@@ -18,9 +18,9 @@ load('zeeman')
 load('llb')
 
 load('solver/bdf_euler_auto')
-setv('mf_maxiterations', 10)
+setv('mf_maxiterations', 5)
 setv('mf_maxerror', 1e-6)
-setv('mf_maxitererror', 0.001)
+setv('mf_maxitererror', 1e-6)
 
 savegraph("graph.png")
 
@@ -60,11 +60,11 @@ for kk in range(Nz):
 setmask('msat0', msat0) 
 setv('msat0', 800e3)
 
-setv('dt', 1e-15)
+setv('dt', 1e-18)
 #setv('maxdt',1e-12)
 setv('lambda', 0.01)
 setv('kappa', 1e-4)
-setv('lambda_e', 0)
+setv('lambda_e', 0.0)
 
 Mf = makearray(3,Nx,Ny,Nz) 
 for kk in range(Nz):
@@ -75,17 +75,18 @@ for kk in range(Nz):
             Mf[2][ii][jj][kk] = 0.0
 setarray('Mf',Mf)
             
-#autosave("m", "gplot", [], 10e-15)
+#autosave("m", "gplot", [], 1e-15)
 #autosave("msat", "gplot", [], 10e-15)
 #autosave("Mf","gplot", [], 10e-15)
-#autotabulate(["t", "<m>"], "m.txt", 1e-16)
-autotabulate(["t", "bdf_iterations"], "i.txt", 1e-15)
-autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
+autotabulate(["t", "<m>"], "m.txt", 1e-12)
+autotabulate(["t", "badsteps"], "badsteps.txt", 1e-12)
+autotabulate(["t", "bdf_iterations"], "i.txt", 1e-12)
+autotabulate(["t", "<msat>"], "msat.txt", 1e-12)
+#autotabulate(["t", "dt"], "dt.txt", 1e-15)
 #autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
 
-
-run(100e-12)
-
+run(1e-9)
+step()
 printstats()
 
 sync()
