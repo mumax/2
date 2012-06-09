@@ -222,12 +222,12 @@ extern "C" {
 	            
         real3 ddH = make_real3(ddhx, ddhy, ddhz);
         real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
-    
-	    if (i < 4 && j < 4 && k < 4) {
+        
+	    /*if (i == 16 && j == 16 && k == 16) {
 	        printf("(%d, %d, %d)\tddh.x: %e\n",i,j,k,ddH.x);
 	        printf("(%d, %d, %d)\tddh.y: %e\n",i,j,k,ddH.y);
 	        printf("(%d, %d, %d)\tddh.z: %e\n",i,j,k,ddH.z);
-	        /*printf("hx_xb2: %e\n",hx[xn.x]);
+	        printf("hx_xb2: %e\n",hx[xn.x]);
 	        printf("hx_xb1: %e\n",hx[xn.y]);
 	        printf("hx_x: %e\n",  hx[x0]);
 	        printf("hx_xf1: %e\n",hx[xn.z]);
@@ -279,8 +279,8 @@ extern "C" {
 	        printf("hz_zb1: %e\n",hz[zn.y]);
 	        printf("hz_z: %e\n",  hz[x0]);
 	        printf("hz_zf1: %e\n",hz[zn.z]);
-	        printf("hz_zf2: %e\n",hz[zn.w]);*/      
-	    }
+	        printf("hz_zf2: %e\n",hz[zn.w]);      
+	    }*/
 	          
         real3 _mxH = cross(H, m);
                     
