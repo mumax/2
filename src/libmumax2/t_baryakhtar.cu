@@ -45,6 +45,10 @@ extern "C" {
 	    real5 cfy = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
 	    real5 cfz = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
 	    
+	    real5 cflb = make_real5(+0.0, +0.0, +1.0, -2.0, +1.0);
+        real5 cfrb = make_real5(+1.0, -2.0, +1.0, +0.0, +0.0);
+	    
+	    
 	    /*real5 cfx = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
 	    real5 cfy = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
 	    real5 cfz = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);*/
@@ -53,54 +57,53 @@ extern "C" {
 	    real3 mmstep = make_real3(mstep.x, mstep.y, mstep.z);
 	    
 	    if (pbc.x == 0 && i <= 1) {
-            cfx.x = +0.0;
-            cfx.y = +0.0;
-            cfx.z = +1.0;
-            cfx.w = -2.0;
-            cfx.v = +1.0;
+            cfx.x = cflb.x;
+            cfx.y = cflb.y;
+            cfx.z = cflb.z;
+            cfx.w = cflb.w;
+            cfx.v = cflb.v;
             mmstep.x *= 12.0;
         }
         
         if (pbc.x == 0 && i >= size.x - 2) {
-            cfx.x = +1.0;
-            cfx.y = -2.0;
-            cfx.z = +1.0;
-            cfx.w = +0.0;
-            cfx.v = +0.0;
+            cfx.x = cfrb.x;
+            cfx.y = cfrb.y;
+            cfx.z = cfrb.z;
+            cfx.w = cfrb.w;
+            cfx.v = cfrb.v;
             mmstep.x *= 12.0;
         }  
               
-
-        if (pbc.y == 0 && j <= 1) {
-            cfy.x = +0.0;
-            cfy.y = +0.0;
-            cfy.z = +1.0;
-            cfy.w = -2.0;
-            cfy.v = +1.0;
+        if (lhx == NULL && j <= 1) {
+            cfy.x = cflb.x;
+            cfy.y = cflb.y;
+            cfy.z = cflb.z;
+            cfy.w = cflb.w;
+            cfy.v = cflb.v;
             mmstep.y *= 12.0;
         }
-        if (pbc.y == 0 && j >= size.y - 2) {
-            cfy.x = +1.0;
-            cfy.y = -2.0;
-            cfy.z = +1.0;
-            cfy.w = +0.0;
-            cfy.v = +0.0;
+        if (rhx == NULL && j >= size.y - 2) {
+            cfy.x = cfrb.x;
+            cfy.y = cfrb.y;
+            cfy.z = cfrb.z;
+            cfy.w = cfrb.w;
+            cfy.v = cfrb.v;
             mmstep.y *= 12.0;
         }
         if (pbc.z == 0 && k <= 1) {
-            cfz.x = +0.0;
-            cfz.y = +0.0;
-            cfz.z = +1.0;
-            cfz.w = -2.0;
-            cfz.v = +1.0;
+            cfz.x = cflb.x;
+            cfz.y = cflb.y;
+            cfz.z = cflb.z;
+            cfz.w = cflb.w;
+            cfz.v = cflb.v;
             mmstep.z *= 12.0;
         }
         if (pbc.z == 0 && k >= size.z - 2) {
-            cfz.x = +1.0;
-            cfz.y = -2.0;
-            cfz.z = +1.0;
-            cfz.w = +0.0;
-            cfz.v = +0.0;
+            cfz.x = cfrb.x;
+            cfz.y = cfrb.y;
+            cfz.z = cfrb.z;
+            cfz.w = cfrb.w;
+            cfz.v = cfrb.v;
             mmstep.z *= 12.0;
         }
      
@@ -130,7 +133,7 @@ extern "C" {
         xf1 = (pbc.x == 0 && xf1 >= size.x)? i : xf1;
         xf2 = (pbc.x == 0 && xf2 >= size.x)? i : xf2;
         
-        
+        yb2 = (lhx == NULL && yb2 < 0)? j : yb2;
         yb1 = (lhx == NULL && yb1 < 0)? j : yb1;
         yf1 = (rhx == NULL && yf1 >= size.y)? j : yf1;
         yf2 = (rhx == NULL && yf2 >= size.y)? j : yf2;
@@ -212,10 +215,10 @@ extern "C" {
         real3 ddH = make_real3(ddhx, ddhy, ddhz);
         real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
         
-	    /*if (i==0 && j == 0 && k == 0) {
-	        printf("ddh.x: %e\n",ddh.x);
-	        printf("ddh.y: %e\n",ddh.y);
-	        printf("ddh.z: %e\n",ddh.z);
+	    /*if (i == 16 && j == 16 && k == 16) {
+	        printf("(%d, %d, %d)\tddh.x: %e\n",i,j,k,ddH.x);
+	        printf("(%d, %d, %d)\tddh.y: %e\n",i,j,k,ddH.y);
+	        printf("(%d, %d, %d)\tddh.z: %e\n",i,j,k,ddH.z);
 	        printf("hx_xb2: %e\n",hx[xn.x]);
 	        printf("hx_xb1: %e\n",hx[xn.y]);
 	        printf("hx_x: %e\n",  hx[x0]);
@@ -268,24 +271,11 @@ extern "C" {
 	        printf("hz_zb1: %e\n",hz[zn.y]);
 	        printf("hz_z: %e\n",  hz[x0]);
 	        printf("hz_zf1: %e\n",hz[zn.z]);
-	        printf("hz_zf2: %e\n",hz[zn.w]);
-	        
-	        
-	        
+	        printf("hz_zf2: %e\n",hz[zn.w]);      
 	    }*/
 	          
         real3 _mxH = cross(H, m);
-        
-        /*if (x0 == 100) {
-            printf("Ms: %e\n",Msat);
-            printf("lambda: %e\n",lambda);
-            printf("lambda_e: %e\n",lambda_e);
-            printf("Mx: %e\n",M.x);
-            printf("My: %e\n",M.y);
-            printf("Mz: %e\n",M.z);
-            
-        } */            
-        
+                    
         tx[x0] = _mxH.x + (lambda * H.x  - lambda_e * ddH.x);
         ty[x0] = _mxH.y + (lambda * H.y  - lambda_e * ddH.y);
         tz[x0] = _mxH.z + (lambda * H.z  - lambda_e * ddH.z);  
