@@ -160,66 +160,72 @@ extern "C" {
           
         int comm = j * size.z + k;	   
         int4 xn = make_int4(xb2 * size.w + comm, 
-				          xb1 * size.w + comm, 
-				          xf1 * size.w + comm, 
-				          xf2 * size.w + comm); 
+				            xb1 * size.w + comm, 
+				            xf1 * size.w + comm, 
+				            xf2 * size.w + comm); 
 				         
 
         comm = i * size.w + k; 
         int4 yn = make_int4(yb2 * size.z + comm, 
-				          yb1 * size.z + comm, 
-				          yf1 * size.z + comm, 
-				          yf2 * size.z + comm);
+				            yb1 * size.z + comm, 
+				            yf1 * size.z + comm, 
+				            yf2 * size.z + comm);
 
 
         comm = i * size.w + j * size.z;
         int4 zn = make_int4(zb2 + comm, 
-				          zb1 + comm, 
-				          zf1 + comm, 
-				          zf2 + comm);
+				            zb1 + comm, 
+				            zf1 + comm, 
+				            zf2 + comm);
 
         // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
-        // CUDA does not have vec3 operators like GLSL has, except of .xxx, 
-        
+                
         real4 HH;
-
+        
+        real hx_x0 = hx[x0];
+        
         HH.x = (yi.x >= 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hx[yn.y] : lhx[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
-                	    
-        real ddhx  =  mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx[x0] + cfx.w * hx[xn.z] + cfx.v * hx[xn.w])
-			        + mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx[x0] + cfy.w * HH.z     + cfy.v * HH.w)
-			        + mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx[x0] + cfz.w * hx[zn.z] + cfz.v * hx[zn.w]);
-							
+                
+        real ddhx_x = (size.x > 3) ? mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx_x0 + cfx.w * hx[xn.z] + cfx.v * hx[xn.w]) : 0.0;
+        real ddhx_y = (size.y > 3) ? mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx_x0 + cfy.w * HH.z     + cfy.v * HH.w)     : 0.0;
+        real ddhx_z = (size.z > 3) ? mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx_x0 + cfz.w * hx[zn.z] + cfz.v * hx[zn.w]) : 0.0; 
+        real ddhx  = ddhx_x + ddhx_y + ddhx_z;
+        
+        real hy_x0 = hy[x0];
+        	
         HH.x = (yi.x >= 0 || lhy == NULL) ? hy[yn.x] : lhy[yn.x];
         HH.y = (yi.y >= 0 || lhy == NULL) ? hy[yn.y] : lhy[yn.y];
         HH.z = (yi.z < size.y || rhy == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhy == NULL) ? hy[yn.w] : rhy[yn.w];
 		        				              
-        real ddhy  =  mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy[x0] + cfx.w * hy[xn.z] + cfx.v * hy[xn.w])
-					+ mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy[x0] + cfy.w * HH.z     + cfy.v * HH.w)
-					+ mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy[x0] + cfz.w * hy[zn.z] + cfz.v * hy[zn.w]);
-							
+        real ddhy_x = (size.x > 3) ? mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy_x0 + cfx.w * hy[xn.z] + cfx.v * hy[xn.w]) : 0.0;
+        real ddhy_y = (size.y > 3) ? mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy_x0 + cfy.w * HH.z     + cfy.v * HH.w)     : 0.0;
+        real ddhy_z = (size.z > 3) ? mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy_x0 + cfz.w * hy[zn.z] + cfz.v * hy[zn.w]) : 0.0; 
+        real ddhy  = ddhy_x + ddhy_y + ddhy_z;
+		
+		real hz_x0 = hz[x0];
+		
         HH.x = (yi.x >= 0 || lhz == NULL) ? hz[yn.x] : lhz[yn.x];
         HH.y = (yi.y >= 0 || lhz == NULL) ? hz[yn.y] : lhz[yn.y];
         HH.z = (yi.z < size.y || rhz == NULL) ? hz[yn.z] : rhz[yn.z];
         HH.w = (yi.w < size.y || rhz == NULL) ? hz[yn.w] : rhz[yn.w]; 								
-		            				
-								
-        real ddhz  =   mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz[x0] + cfx.w * hz[xn.z] + cfx.v * hz[xn.w])
-					 + mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz[x0] + cfy.w * HH.z     + cfy.v * HH.w)
-	                 + mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz[x0] + cfz.w * hz[zn.z] + cfz.v * hz[zn.w]); 
-
+		            										
+        real ddhz_x = (size.x > 3) ? mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz_x0 + cfx.w * hz[xn.z] + cfx.v * hz[xn.w]) : 0.0;
+        real ddhz_y = (size.y > 3) ? mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz_x0 + cfy.w * HH.z     + cfy.v * HH.w)     : 0.0;
+        real ddhz_z = (size.z > 3) ? mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz_x0 + cfz.w * hz[zn.z] + cfz.v * hz[zn.w]) : 0.0; 
+        real ddhz  = ddhz_x + ddhz_y + ddhz_z;
 	            
         real3 ddH = make_real3(ddhx, ddhy, ddhz);
         real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
-        
-	    /*if (i == 16 && j == 16 && k == 16) {
+    
+	    if (i < 4 && j < 4 && k < 4) {
 	        printf("(%d, %d, %d)\tddh.x: %e\n",i,j,k,ddH.x);
 	        printf("(%d, %d, %d)\tddh.y: %e\n",i,j,k,ddH.y);
 	        printf("(%d, %d, %d)\tddh.z: %e\n",i,j,k,ddH.z);
-	        printf("hx_xb2: %e\n",hx[xn.x]);
+	        /*printf("hx_xb2: %e\n",hx[xn.x]);
 	        printf("hx_xb1: %e\n",hx[xn.y]);
 	        printf("hx_x: %e\n",  hx[x0]);
 	        printf("hx_xf1: %e\n",hx[xn.z]);
@@ -271,8 +277,8 @@ extern "C" {
 	        printf("hz_zb1: %e\n",hz[zn.y]);
 	        printf("hz_z: %e\n",  hz[x0]);
 	        printf("hz_zf1: %e\n",hz[zn.z]);
-	        printf("hz_zf2: %e\n",hz[zn.w]);      
-	    }*/
+	        printf("hz_zf2: %e\n",hz[zn.w]);*/      
+	    }
 	          
         real3 _mxH = cross(H, m);
                     

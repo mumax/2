@@ -59,9 +59,6 @@ func (s *BDFEulerAuto) Step() {
     
         isBadStep = 0 
 	   	
-	    // Then step all outputs (without intermediate updates!)
-	    // and invalidate them.
-	    // Do initial Euler step with 
         // get dt here to avoid updates later on.
         dt := engine.dt.Scalar()
         // Advance time and update all inputs  
@@ -71,7 +68,8 @@ func (s *BDFEulerAuto) Step() {
 	        err := 1.0e38
 	        iter := 0.0 
 	         
-	        // Do zero order approximation
+	        // Do zero order approximation with Euler method
+	        
 	        y := equation[i].output[0]
 		    dy := equation[i].input[0]
 		    dyMul := dy.multiplier
@@ -165,9 +163,12 @@ func (s *BDFEulerAuto) Step() {
             // Let us compare BDF Euler and BDF Trapezoidal
             // to guess next time step
                          
-            errRatio := math.Abs(maxStepErr / StepErr)    
-             
-            step_corr := math.Pow(float64(errRatio), 0.2)
+            errRatio := math.Abs(maxStepErr / StepErr)
+            step_corr := errRatio  
+              
+            if isBadStep == 0 {
+                step_corr = math.Pow(float64(errRatio), 0.2)
+            }
             
             //Debug("Step corrector:", step_corr) 
              
