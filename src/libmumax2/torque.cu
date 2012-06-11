@@ -5,7 +5,9 @@
 #include "gpu_conf.h"
 #include "gpu_safe.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 ///@internal
 __global__ void torqueKern(float* tx, float* ty, float* tz,
@@ -68,4 +70,6 @@ __export__ void torqueAsync(float** tx, float** ty, float** tz, float** mx, floa
 	}
 }
 
+#ifdef __cplusplus
 }
+#endif

@@ -6,7 +6,9 @@
 #include "gpu_safe.h"
 #include "common_func.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 ///@internal
 __global__ void normalizeKern(float* mx, float* my, float* mz, 
@@ -58,4 +60,6 @@ __export__ void normalizeAsync(float** mx, float** my, float** mz, float** norm_
 	}
 }
 
+#ifdef __cplusplus
 }
+#endif
