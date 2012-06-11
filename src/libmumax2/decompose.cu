@@ -6,7 +6,9 @@
 #include "gpu_safe.h"
 #include "common_func.h"
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 
 ///@internal
 __global__ void decomposeKern(float* Mx, float* My, float* Mz,
@@ -60,4 +62,6 @@ __export__ void decomposeAsync(float** Mx, float** My, float** Mz,
 	}
 }
 
+#ifdef __cplusplus
 }
+#endif
