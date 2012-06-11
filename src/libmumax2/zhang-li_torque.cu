@@ -140,7 +140,13 @@ extern "C" {
 	
 	float m_sat = (msat != NULL) ? msat[x0] : 1.0f;
 	
-	if (m_sat == 0.0f) {
+    float3 j0 = make_float3(0.0f, 0.0f, 0.0f);
+    j0.x = (jx != NULL)? jx[x0] * jMul.x : jMul.x; 
+    j0.y = (jy != NULL)? jy[x0] * jMul.y : jMul.y;  
+    j0.z = (jz != NULL)? jz[x0] * jMul.z : jMul.z;
+    float njn = len(j0);
+	
+	if (m_sat == 0.0f || njn == 0.0f) {
       sttx[x0] = 0.0f;
       stty[x0] = 0.0f;
       sttz[x0] = 0.0f;    
@@ -260,13 +266,6 @@ extern "C" {
 		
 	  // Don't see a point of such overkill, nevertheless:
 	  
-	  float3 j0 = make_float3(0.0f, 0.0f, 0.0f);
-	  
-	  j0.x = (jx != NULL)? jx[x0] * jMul.x : jMul.x; 
-	  j0.y = (jy != NULL)? jy[x0] * jMul.y : jMul.y;  
-	  j0.z = (jz != NULL)? jz[x0] * jMul.z : jMul.z;
-	  
-	  float njn = len(j0);
       float3 nj0 = normalize(j0);
       
 	  //-------------------------------------------------//
