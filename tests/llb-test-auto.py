@@ -64,7 +64,7 @@ setv('dt', 1e-18)
 #setv('maxdt',1e-12)
 setv('lambda', 0.01)
 setv('kappa', 1e-4)
-setv('lambda_e', 0.0)
+setv('lambda_e', 1e-9)
 
 Mf = makearray(3,Nx,Ny,Nz) 
 for kk in range(Nz):
@@ -86,7 +86,6 @@ autotabulate(["t", "<msat>"], "msat.txt", 1e-12)
 #autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
 
 run(1e-9)
-step()
 printstats()
 
 sync()

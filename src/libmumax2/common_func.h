@@ -40,6 +40,18 @@ struct real5 {
 
 typedef real5 real5;
 
+struct real7 {
+    real x;
+    real y;
+    real z;
+    real w;
+    real v;
+    real t;
+    real q;
+};
+
+typedef real7 real7;
+
 struct real4 {
     real x;
     real y;
