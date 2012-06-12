@@ -18,6 +18,8 @@
 #define printf(f, ...) ((void)(f, __VA_ARGS__),0)
 #endif
 
+typedef double real;
+
 struct float5 {
     float x;
     float y;
@@ -28,7 +30,16 @@ struct float5 {
 
 typedef struct float5 float5;
 
-typedef double real;
+struct int6 {
+    int x;
+    int y;
+    int z;    
+    int w;
+    int v;
+    int t;
+};
+
+typedef struct int6 int6;
 
 struct real5 {
     real x;
@@ -38,7 +49,18 @@ struct real5 {
     real v;
 };
 
-typedef real5 real5;
+typedef struct real5 real5;
+
+struct real6 {
+    real x;
+    real y;
+    real z;
+    real w;
+    real v;
+    real t;
+};
+
+typedef struct real6 real6;
 
 struct real7 {
     real x;
@@ -50,7 +72,7 @@ struct real7 {
     real q;
 };
 
-typedef real7 real7;
+typedef struct real7 real7;
 
 struct real4 {
     real x;
@@ -59,7 +81,7 @@ struct real4 {
     real w;
 };
 
-typedef real4 real4;
+typedef struct real4 real4;
 
 struct real3 {
     real x;
@@ -67,7 +89,18 @@ struct real3 {
     real z;
 };
 
-typedef real3 real3;
+typedef struct real3 real3;
+
+inline __host__ __device__ int6 make_int6(int x, int y, int z, int w, int v, int t){
+    int6 a;
+    a.x = x;
+    a.y = y;
+    a.z = z;
+    a.w = w;
+    a.v = v;
+    a.t = t;
+    return a;
+} 
 
 inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float v){
     float5 a;
@@ -79,6 +112,17 @@ inline __host__ __device__ float5 make_float5(float x, float y, float z, float w
     return a;
 } 
 
+inline __host__ __device__ real7 make_real7(real x, real y, real z, real w, real t, real q){
+    real7 a;
+    a.x = x;
+    a.y = y;
+    a.z = z;
+    a.w = w;
+    a.t = t;
+    a.q = q;
+    return a;
+}
+
 inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real v){
     real5 a;
     a.x = x;
@@ -89,12 +133,14 @@ inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real
     return a;
 }
 
-inline __host__ __device__ real4 make_real4(real x, real y, real z, real w){
-    real4 a;
+inline __host__ __device__ real6 make_real6(real x, real y, real z, real w, real v, real t){
+    real6 a;
     a.x = x;
     a.y = y;
     a.z = z;
     a.w = w;
+    a.v = v;
+    a.t = t;
     return a;
 }
 
@@ -106,11 +152,10 @@ inline __host__ __device__ real3 make_real3(real x, real y, real z){
     return a;
 }
 
-// mod
+// Python-like modulus
 inline __host__ __device__ int Mod(int a, int b){
 	return (a%b+b)%b;
 }
-
 
 // dot product
 inline __host__ __device__ float dotf(float3 a, float3 b)
