@@ -16,6 +16,7 @@ import (
 
 // Load the magnetization and MSat, if not yet present.
 func LoadFullMagnetization(e *Engine) {
+    LoadMagnetization(e) 
 	if !e.HasQuant("mf") {
 		mf := e.AddNewQuant("mf", VECTOR, FIELD, Unit(""), "complete magnetization vector reduced by equilibrium value of saturation magnetization")
 		mf.SetUpdater(&decomposeMUpdater{mf: mf})
