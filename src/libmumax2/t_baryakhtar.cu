@@ -41,28 +41,28 @@ extern "C" {
             
 	    //m_sat = 1.0 / m_sat;             
         
-        real5 cfx = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
-	    real5 cfy = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
-	    real5 cfz = make_real5(-1.0, +16.0, -30.0, +16.0, -1.0);
+        
+        real5 cfx = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
+	    real5 cfy = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
+	    real5 cfz = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
+	    
 	    
 	    real5 cflb = make_real5(+0.0, +0.0, +1.0, -2.0, +1.0);
         real5 cfrb = make_real5(+1.0, -2.0, +1.0, +0.0, +0.0);
 	    
-	    
-	    /*real5 cfx = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
+	    /*
+	    real5 cfx = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
 	    real5 cfy = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
-	    real5 cfz = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);*/
+	    real5 cfz = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0); 
+	    */
+	    real3 mmstep = make_real3(lambda_e * mstep.x, lambda_e * mstep.y, lambda_e * mstep.z);
 	    
-	    
-	    real3 mmstep = make_real3(mstep.x, mstep.y, mstep.z);
-	    
-	    if (pbc.x == 0 && i <= 1) {
+	    if (pbc.x == 0 && i < 2) {
             cfx.x = cflb.x;
             cfx.y = cflb.y;
             cfx.z = cflb.z;
             cfx.w = cflb.w;
             cfx.v = cflb.v;
-            mmstep.x *= 12.0;
         }
         
         if (pbc.x == 0 && i >= size.x - 2) {
@@ -71,16 +71,14 @@ extern "C" {
             cfx.z = cfrb.z;
             cfx.w = cfrb.w;
             cfx.v = cfrb.v;
-            mmstep.x *= 12.0;
         }  
               
-        if (lhx == NULL && j <= 1) {
+        if (lhx == NULL && j < 2) {
             cfy.x = cflb.x;
             cfy.y = cflb.y;
             cfy.z = cflb.z;
             cfy.w = cflb.w;
             cfy.v = cflb.v;
-            mmstep.y *= 12.0;
         }
         if (rhx == NULL && j >= size.y - 2) {
             cfy.x = cfrb.x;
@@ -88,15 +86,13 @@ extern "C" {
             cfy.z = cfrb.z;
             cfy.w = cfrb.w;
             cfy.v = cfrb.v;
-            mmstep.y *= 12.0;
         }
-        if (pbc.z == 0 && k <= 1) {
+        if (pbc.z == 0 && k < 2) {
             cfz.x = cflb.x;
             cfz.y = cflb.y;
             cfz.z = cflb.z;
             cfz.w = cflb.w;
             cfz.v = cflb.v;
-            mmstep.z *= 12.0;
         }
         if (pbc.z == 0 && k >= size.z - 2) {
             cfz.x = cfrb.x;
@@ -104,7 +100,6 @@ extern "C" {
             cfz.z = cfrb.z;
             cfz.w = cfrb.w;
             cfz.v = cfrb.v;
-            mmstep.z *= 12.0;
         }
      
         real3 m = make_real3(Mx[x0], My[x0], Mz[x0]);		
@@ -181,50 +176,93 @@ extern "C" {
         // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
                 
         real4 HH;
-        
-        real hx_x0 = hx[x0];
-        
+     
         HH.x = (yi.x >= 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hx[yn.y] : lhx[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
-                
-        real ddhx_x = (size.x > 3) ? mmstep.x * (cfx.x * hx[xn.x] + cfx.y * hx[xn.y] + cfx.z * hx_x0 + cfx.w * hx[xn.z] + cfx.v * hx[xn.w]) : 0.0;
-        real ddhx_y = (size.y > 3) ? mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hx_x0 + cfy.w * HH.z     + cfy.v * HH.w)     : 0.0;
-        real ddhx_z = (size.z > 3) ? mmstep.z * (cfz.x * hx[zn.x] + cfz.y * hx[zn.y] + cfz.z * hx_x0 + cfz.w * hx[zn.z] + cfz.v * hx[zn.w]) : 0.0; 
-        real ddhx  = ddhx_x + ddhx_y + ddhx_z;
         
-        real hy_x0 = hy[x0];
-        	
+        real h_x0 = hx[x0];
+        real h_b2 = hx[xn.x];
+        real h_b1 = hx[xn.y];
+        real h_f1 = hx[xn.z];
+        real h_f2 = hx[xn.w]; 
+        real ddhx_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * h_x0 + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
+        real ddhx_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * h_x0 + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
+        
+        h_x0 = hx[x0];
+        h_b2 = hx[zn.x];
+        h_b1 = hx[zn.y];
+        h_f1 = hx[zn.z];
+        h_f2 = hx[zn.w];
+        real ddhx_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0; 
+        
+        real ddhx  = mmstep.x * ddhx_x + mmstep.y * ddhx_y + mmstep.z * ddhx_z;
+        
+        
+        
         HH.x = (yi.x >= 0 || lhy == NULL) ? hy[yn.x] : lhy[yn.x];
         HH.y = (yi.y >= 0 || lhy == NULL) ? hy[yn.y] : lhy[yn.y];
         HH.z = (yi.z < size.y || rhy == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhy == NULL) ? hy[yn.w] : rhy[yn.w];
-		        				              
-        real ddhy_x = (size.x > 3) ? mmstep.x * (cfx.x * hy[xn.x] + cfx.y * hy[xn.y] + cfx.z * hy_x0 + cfx.w * hy[xn.z] + cfx.v * hy[xn.w]) : 0.0;
-        real ddhy_y = (size.y > 3) ? mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hy_x0 + cfy.w * HH.z     + cfy.v * HH.w)     : 0.0;
-        real ddhy_z = (size.z > 3) ? mmstep.z * (cfz.x * hy[zn.x] + cfz.y * hy[zn.y] + cfz.z * hy_x0 + cfz.w * hy[zn.z] + cfz.v * hy[zn.w]) : 0.0; 
-        real ddhy  = ddhy_x + ddhy_y + ddhy_z;
+        
+        h_x0 = hy[x0];
+        h_b2 = hy[xn.x];
+        h_b1 = hy[xn.y];
+        h_f1 = hy[xn.z];
+        h_f2 = hy[xn.w]; 
+        real ddhy_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * h_x0 + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
+        real ddhy_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * h_x0 + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
+        
+        h_x0 = hy[x0];
+        h_b2 = hy[zn.x];
+        h_b1 = hy[zn.y];
+        h_f1 = hy[zn.z];
+        h_f2 = hy[zn.w];
+        real ddhy_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
+        
+        real ddhy  = mmstep.x * ddhy_x + mmstep.y * ddhy_y + mmstep.z * ddhy_z;
 		
-		real hz_x0 = hz[x0];
-		
-        HH.x = (yi.x >= 0 || lhz == NULL) ? hz[yn.x] : lhz[yn.x];
-        HH.y = (yi.y >= 0 || lhz == NULL) ? hz[yn.y] : lhz[yn.y];
-        HH.z = (yi.z < size.y || rhz == NULL) ? hz[yn.z] : rhz[yn.z];
-        HH.w = (yi.w < size.y || rhz == NULL) ? hz[yn.w] : rhz[yn.w]; 								
-		            										
-        real ddhz_x = (size.x > 3) ? mmstep.x * (cfx.x * hz[xn.x] + cfx.y * hz[xn.y] + cfx.z * hz_x0 + cfx.w * hz[xn.z] + cfx.v * hz[xn.w]) : 0.0;
-        real ddhz_y = (size.y > 3) ? mmstep.y * (cfy.x * HH.x     + cfy.y * HH.y     + cfy.z * hz_x0 + cfy.w * HH.z     + cfy.v * HH.w)     : 0.0;
-        real ddhz_z = (size.z > 3) ? mmstep.z * (cfz.x * hz[zn.x] + cfz.y * hz[zn.y] + cfz.z * hz_x0 + cfz.w * hz[zn.z] + cfz.v * hz[zn.w]) : 0.0; 
-        real ddhz  = ddhz_x + ddhz_y + ddhz_z;
+        h_x0 = hz[x0];
+        h_b2 = hz[xn.x];
+        h_b1 = hz[xn.y];
+        h_f1 = hz[xn.z];
+        h_f2 = hz[xn.w]; 
+        real ddhz_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * h_x0 + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
+        real ddhz_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * h_x0 + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
+        
+        h_x0 = hz[x0];
+        h_b2 = hz[zn.x];
+        h_b1 = hz[zn.y];
+        h_f1 = hz[zn.z];
+        h_f2 = hz[zn.w];
+        real ddhz_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
+        
+        real ddhz  = mmstep.x * ddhz_x + mmstep.y * ddhz_y + mmstep.z * ddhz_z;
 	            
-        real3 ddH = make_real3(ddhx, ddhy, ddhz);
+        real3 le_ddH = make_real3(ddhx, ddhy, ddhz);
         real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
     
-	    if (i < 4 && j < 4 && k < 4) {
-	        printf("(%d, %d, %d)\tddh.x: %e\n",i,j,k,ddH.x);
-	        printf("(%d, %d, %d)\tddh.y: %e\n",i,j,k,ddH.y);
-	        printf("(%d, %d, %d)\tddh.z: %e\n",i,j,k,ddH.z);
+	    if (i == 2 && j == 2 && k == 2) {
+	        printf("(%d, %d, %d)\tddhxx: %e\n",i,j,k,ddhx_x);
+	        printf("(%d, %d, %d)\tddhxy: %e\n",i,j,k,ddhx_y);
+	        printf("(%d, %d, %d)\tddhxz: %e\n",i,j,k,ddhx_z);
+	        printf("(%d, %d, %d)\thxx: %e %e %e %e %e\n",i,j,k,hx[xn.x], hx[xn.y], H.x, hx[xn.z], hx[xn.w]);
+            printf("(%d, %d, %d)\thxy: %e %e %e %e %e\n",i,j,k,hx[yn.x], hx[yn.y], H.x, hx[yn.z], hx[yn.w]);
+            printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hx[zn.x], hx[zn.y], H.x, hx[zn.z], hx[zn.w]);
+            printf("(%d, %d, %d)\tddhxx: %e\n",i,j,k,ddhy_x);
+	        printf("(%d, %d, %d)\tddhxy: %e\n",i,j,k,ddhy_y);
+	        printf("(%d, %d, %d)\tddhxz: %e\n",i,j,k,ddhy_z);
+            printf("(%d, %d, %d)\thxx: %e %e %e %e %e\n",i,j,k,hy[xn.x], hy[xn.y], H.y, hy[xn.z], hy[xn.w]);
+            printf("(%d, %d, %d)\thxy: %e %e %e %e %e\n",i,j,k,hy[yn.x], hy[yn.y], H.y, hy[yn.z], hy[yn.w]);
+            printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hy[zn.x], hy[zn.y], H.y, hy[zn.z], hy[zn.w]);
+            printf("(%d, %d, %d)\tddhxx: %e\n",i,j,k,ddhz_x);
+	        printf("(%d, %d, %d)\tddhxy: %e\n",i,j,k,ddhz_y);
+	        printf("(%d, %d, %d)\tddhxz: %e\n",i,j,k,ddhz_z);
+            printf("(%d, %d, %d)\thxx: %e %e %e %e %e\n",i,j,k,hz[xn.x], hz[xn.y], H.z, hz[xn.z], hz[xn.w]);
+            printf("(%d, %d, %d)\thxy: %e %e %e %e %e\n",i,j,k,hz[yn.x], hz[yn.y], H.z, hz[yn.z], hz[yn.w]);
+            printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hz[zn.x], hz[zn.y], H.z, hz[zn.z], hz[zn.w]);
+            
 	        /*printf("hx_xb2: %e\n",hx[xn.x]);
 	        printf("hx_xb1: %e\n",hx[xn.y]);
 	        printf("hx_x: %e\n",  hx[x0]);
@@ -282,9 +320,9 @@ extern "C" {
 	          
         real3 _mxH = cross(H, m);
                     
-        tx[x0] = _mxH.x + (lambda * H.x  - lambda_e * ddH.x);
-        ty[x0] = _mxH.y + (lambda * H.y  - lambda_e * ddH.y);
-        tz[x0] = _mxH.z + (lambda * H.z  - lambda_e * ddH.z);  
+        tx[x0] = _mxH.x + (lambda * H.x - le_ddH.x);
+        ty[x0] = _mxH.y + (lambda * H.y - le_ddH.y);
+        tz[x0] = _mxH.z + (lambda * H.z - le_ddH.z);  
 
     } 
   }
@@ -315,14 +353,14 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 	// FUCKING THREADS PER BLOCK LIMITATION
 	check3dconf(gridSize, blockSize);
 		
-	float i12csx = 1.0f / (12.0f * csx * csx);
-	float i12csy = 1.0f / (12.0f * csy * csy);
-	float i12csz = 1.0f / (12.0f * csz * csz);
+	float icsx2 = 1.0f / (csx * csx);
+	float icsy2 = 1.0f / (csy * csy);
+	float icsz2 = 1.0f / (csz * csz);
 	
 	int syz = sy * sz;
 	
 		
-	float3 mstep = make_float3(i12csx, i12csy, i12csz);	
+	float3 mstep = make_float3(icsx2, icsy2, icsz2);	
 	int4 size = make_int4(sx, sy, sz, syz);
 	int3 pbc = make_int3(pbc_x, pbc_y, pbc_z);
 	
