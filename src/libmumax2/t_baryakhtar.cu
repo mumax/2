@@ -40,8 +40,7 @@ extern "C" {
     if (j < size.y && k < size.z){ // 3D now:)
             
 	    //m_sat = 1.0 / m_sat;             
-        
-        
+               
         real5 cfx = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
 	    real5 cfy = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
 	    real5 cfz = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
@@ -176,7 +175,7 @@ extern "C" {
         // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
                 
         real4 HH;
-     
+
         HH.x = (yi.x >= 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hx[yn.y] : lhx[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
@@ -198,8 +197,6 @@ extern "C" {
         real ddhx_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0; 
         
         real ddhx  = mmstep.x * ddhx_x + mmstep.y * ddhx_y + mmstep.z * ddhx_z;
-        
-        
         
         HH.x = (yi.x >= 0 || lhy == NULL) ? hy[yn.x] : lhy[yn.x];
         HH.y = (yi.y >= 0 || lhy == NULL) ? hy[yn.y] : lhy[yn.y];

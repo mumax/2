@@ -30,6 +30,7 @@ struct float5 {
 
 typedef struct float5 float5;
 
+
 struct int6 {
     int x;
     int y;
