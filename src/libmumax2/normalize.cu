@@ -16,10 +16,9 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 	if (i < Npart) {
 
 		// reconstruct norm from map
-		float norm;
-		if(norm_map == NULL){
-			norm = 1.0f;
-		}else{
+		float norm = 1.0f;
+		
+		if(norm_map != NULL){
 			norm = norm_map[i];
 		}
 
@@ -28,16 +27,21 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
     	float Mz = mz[i];
     
 		float Mnorm = sqrtf(Mx*Mx + My*My + Mz*Mz);
-		float scale;
-		if (Mnorm != 0.f){
-			scale = norm / Mnorm;
+		float scale = (norm == 0.0f) ? norm : 1.0f;
+		
+		if (Mnorm != 0.0f){
+			scale = scale / Mnorm;
 		}else{
-			scale = 0.f;
+			scale = 0.0f;
 		}
-
-		mx[i] = Mx * scale;
-		my[i] = My * scale;
-		mz[i] = Mz * scale;
+		
+        float m_x = Mx * scale;
+        float m_y = My * scale;
+        float m_z = Mz * scale;
+        
+		mx[i] = m_x;
+		my[i] = m_y;
+		mz[i] = m_z;
 	}
 }
 
