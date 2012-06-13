@@ -1,4 +1,4 @@
-// Copyright 2011 Arne Vansteenkiste (barnex@gmail.com).  All rights reserved.
+    // Copyright 2011 Arne Vansteenkiste (barnex@gmail.com).  All rights reserved.
 // Use of this source code is governed by a freeBSD
 // license that can be found in the LICENSE.txt file.
 
@@ -6,8 +6,8 @@
 
 package curand
 
-//#cgo LDFLAGS:-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia/ -L/usr/lib64/nvidia/ -L/usr/lib/nvidia-current/ -LC:/opt/cuda/v4.2/lib/x64 -lcuda -lcudart -lcurand
-//#cgo CFLAGS:-I/usr/local/cuda/include/ -IC:/opt/cuda/v4.2/include -Wno-error
+//#cgo LDFLAGS:-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/lib/nvidia/ -L/usr/lib64/nvidia/ -L/usr/lib64/nvidia/lib64 -L/usr/lib/nvidia-current/ -LC:/opt/cuda/v4.2/lib/x64 -LC:/opt/cuda/v5.0/lib/x64 -lcuda -lcudart -lcurand
+//#cgo CFLAGS:-I/usr/local/cuda/include/ -IC:/opt/cuda/v4.2/include -IC:/opt/cuda/v5.0/include -Wno-error
 //#include <curand.h>
 import "C"
 
