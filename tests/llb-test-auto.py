@@ -18,7 +18,7 @@ load('zeeman')
 load('llb')
 
 load('solver/bdf_euler_auto')
-setv('mf_maxiterations', 5)
+setv('mf_maxiterations', 20000)
 setv('mf_maxerror', 1e-6)
 setv('mf_maxitererror', 1e-6)
 setv('maxdt', 1e-12)
@@ -67,10 +67,10 @@ setv('msat0', Ms0)
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
 setv('lambda', 0.01)
-setv('kappa', 7e-6)
+setv('kappa', 1e-4)
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 1e-3 * lex
+lambda_e = 0.0 * lex
 setv('lambda_e', lambda_e)
 
 Mf = makearray(3,Nx,Ny,Nz) 
