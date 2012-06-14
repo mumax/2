@@ -1,15 +1,35 @@
 from mumax2 import *
-
+from math import *
 # Test for LLB
 # see I. Radu et al., PRL 102, 117201 (2009)
   
-Nx = 32
-Ny = 32
+Nx = 128
+Ny = 128
 Nz = 4
 
+sX = 256e-9
+sY = 256e-9
+sZ = 10e-9
+
+csX = sX/Nx
+csY = sY/Ny
+csZ = sZ/Nz
 setgridsize(Nx, Ny, Nz)
-setcellsize(5e-9, 5e-9, 5e-9)
-#setperiodic(16,16,0)
+setcellsize(csX, csY, csZ)
+setperiodic(8,8,0)
+
+#optical spot size
+osX = 0.05e-6
+osY = 0.05e-6
+
+cX = sX/2.0
+cY = sY/2.0
+
+sigmaX = 1.0/(2.0*osX*osX)
+sigmaY = 1.0/(2.0*osY*osY)
+
+pre = 1.0 / (2.0 * pi * osX * osY)
+sdepth = 25e-9
 
 # LLB 
 load('exchange6')
@@ -20,7 +40,7 @@ load('llb')
 load('solver/bdf_euler_auto')
 setv('mf_maxiterations', 20000)
 setv('mf_maxerror', 1e-6)
-setv('mf_maxitererror', 1e-6)
+setv('mf_maxitererror', 1e-8)
 setv('maxdt', 1e-12)
 setv('mindt', 1e-30)
 
@@ -57,12 +77,19 @@ setv('B_ext',[Bx,By,Bz])
               
 msat0 = makearray(1,Nx,Ny,Nz)            
 for kk in range(Nz):
+    zz = float(kk) * csZ
     for jj in range(Ny):
+        yy = float(jj)*csY-cY
+        y = yy**2
         for ii in range(Nx):
-            msat0[0][ii][jj][kk] = 1.0
-
-setmask('msat0', msat0) 
-setv('msat0', Ms0)
+            xx = float(ii)*csX-cX
+            x = xx**2
+            arg = -(0.25*x*sigmaX + 0.25*y*sigmaY)
+	    sd = -zz/sdepth
+            scale = 1.0 - 0.2 * exp(arg) * exp(sd) 
+            msat0[0][ii][jj][kk] = scale
+setmask('msat0', msat0)   
+setv('msat0', Ms0) 
 
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
@@ -70,17 +97,26 @@ setv('lambda', 0.01)
 setv('kappa', 1e-4)
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 0.0 * lex
+lambda_e = 5e-3 * lex
 setv('lambda_e', lambda_e)
 
-Mf = makearray(3,Nx,Ny,Nz) 
+Mf = getarray('Mf') 
+Mfd = makearray(3,Nx,Ny,Nz)
 for kk in range(Nz):
+    zz = float(kk) * csZ
     for jj in range(Ny):
+        yy = float(jj)*csY-cY
+        y = yy**2
         for ii in range(Nx):
-            Mf[0][ii][jj][kk] = 0.2
-            Mf[1][ii][jj][kk] = 0.0
-            Mf[2][ii][jj][kk] = 0.0
-setarray('Mf',Mf)
+            xx = float(ii)*csX-cX
+            x = xx**2
+            arg = -(x*sigmaX + y*sigmaY)
+	    sd = -zz / sdepth
+            scale = 1.0 - 0.9*exp(arg) * exp(sd)
+            Mfd[0][ii][jj][kk] = Mf[0][ii][jj][kk] * scale
+            Mfd[1][ii][jj][kk] = Mf[1][ii][jj][kk] * scale
+            Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
+setarray('Mf',Mfd)
             
 autosave("m", "gplot", [], 1e-12)
 autosave("msat", "gplot", [], 1e-12)
