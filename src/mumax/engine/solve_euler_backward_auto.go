@@ -25,7 +25,7 @@ type BDFEulerAuto struct {
 	y1buffer []*gpu.Array // the value of quantity after pedictor step
 	
 	dy0buffer []*gpu.Array // the value of quantity derivative at the begining of the step
-	//dybuffer []*gpu.Array  // the buffer for quantity derivative 
+	dybuffer []*gpu.Array  // the buffer for quantity derivative 
 	err      []*Quant     // error estimates for each equation
 	maxErr   []*Quant     // maximum error per step for each equation
 	maxIterErr []*Quant     // error iterator error estimates for each equation
@@ -49,7 +49,8 @@ func (s *BDFEulerAuto) Step() {
     equation := e.equation
     // save everything in the begining
     topIdx := len(equation) - 1
-
+    const headRoom = 0.8
+    
     for i := range equation {
         equation[i].input[0].Update()
         y := equation[i].output[0]
@@ -57,169 +58,111 @@ func (s *BDFEulerAuto) Step() {
         s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
         s.dy0buffer[i].CopyFromDevice(dy.Array()) // save for later
     }
-
+	
     for isBadStep > 0 { 
-    
-        isBadStep = 0 
-	   	
+        isBadStep = 0    	
         // get dt here to avoid updates later on.
         dt := engine.dt.Scalar()
         // Advance time and update all inputs  
         e.time.SetScalar(t0 + dt)
-          
-	    for i := range equation {
-	        err := 1.0e38
-	        iter := 0.0 
-	         
+        iter := 0 
+	    for i := range equation {	         
 	        // Do zero order approximation with Euler method
 	        y := equation[i].output[0]
-		    dy := equation[i].input[0]
+	        dy := equation[i].input[0]	        
 		    dyMul := dy.multiplier
-		    h := float32(dt * dyMul[0])
-		    
+		    t_step := dt * dyMul[0]
+		    h := float32(t_step)		    
 		    gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], h)
-		    
-		    y.Invalidate()		
+		    y.Invalidate()	  	
 		    iter = iter + 1
-		    s.iterations.SetScalar(s.iterations.Scalar() + 1)
-            
-		    // Do higher order approximation until converges
-		    maxIterErr := s.maxIterErr[i].Scalar()
-		    maxIter := s.maxIter[i].Scalar()
+		    s.iterations.SetScalar(s.iterations.Scalar() + 1)     
+            // Do higher order approximation until converges    
+		    maxIterErr := t_step / s.maxIterErr[i].Scalar()
 		    
-		    // Do predictor: BDF Euler
-	        for err > maxIterErr {
-	            
+	        iter = 0
+	        err := 1.0e38
+		    // Do predictor: BDF Euler	    
+	        for err > maxIterErr { 
 	            equation[i].input[0].Update()
-	            y = equation[i].output[0]
-		        dy = equation[i].input[0]
 	            gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h)
 	            iterationDiff := s.diff[i].MaxDiff(y.Array(), s.ybuffer[i])
-	            err = float64(iterationDiff)              
+	            err_y := float64(iterationDiff)              
 			    s.err[i].SetScalar(err)
-
 	            y.Array().CopyFromDevice(s.ybuffer[i])
-	            y.Invalidate()
-	            
+	            s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later 
+	            y.Invalidate()	  
+	            equation[i].input[0].Update()       
+	            err_dy := float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
+	            err = err_y / err_dy 
 	            iter = iter + 1
-	            s.iterations.SetScalar(s.iterations.Scalar() + 1)
-	            
-	            if iter > maxIter {
+	            s.iterations.SetScalar(s.iterations.Scalar() + 1)	            
+	            /*if iter > maxIter {
 	                isBadStep = isBadStep + 1
 	                s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
+	                Debug("Badstep in Euler")
 	                break
-	            }                		    
+	            }*/               		    
             }
-                 
-            if isBadStep > 0 {
-                maxStepErr := s.maxErr[i].Scalar() 
-                StepErr := err                                                 
-                errRatio := math.Abs(maxStepErr / StepErr) 
-                step_corr := errRatio  
-                                     
-                if step_corr > 1.5 {
-                    step_corr = 1.5
-                }
-                
-                if step_corr < 0.1 {
-                    step_corr = 0.1
-                }
-
-                new_dt := dt * step_corr
-                
-                if new_dt < s.minDt.Scalar() {
-			        new_dt = s.minDt.Scalar()
-		        }
-		        if new_dt > s.maxDt.Scalar() {
-			        new_dt = s.maxDt.Scalar()
-		        }     
-		        
-                s.newDt[i] = new_dt
-                continue
-            }
-            
-            s.y1buffer[i].CopyFromDevice(y.Array()) // save for later
-            
-            // Do corrector: BDF trapezoidal
+            s.y1buffer[i].CopyFromDevice(y.Array()) // save for later                       
+                    
+            iter = 0  
             err = 1e38
-            iter = 0
-            
-	        for err > maxIterErr {
-	        
-	            equation[i].input[0].Update()
-	            y = equation[i].output[0]
-		        dy = equation[i].input[0]
-		        
+            // Do corrector: BDF trapezoidal
+	        for err > maxIterErr {      		        
 		        gpu.Add(s.ybuffer[i], dy.Array(), s.dy0buffer[i])
-	            gpu.Madd(s.ybuffer[i], s.y0buffer[i], s.ybuffer[i], 0.5*h)
-	            
-	            iterationDiff := s.diff[i].MaxDiff(y.Array(), s.ybuffer[i])
-	            
-	            err = float64(iterationDiff)              
+	            gpu.Madd(s.ybuffer[i], s.y0buffer[i], s.ybuffer[i], 0.5*h)	            
+	            iterationDiff := s.diff[i].MaxDiff(y.Array(), s.ybuffer[i])	            
+	            err_y := float64(iterationDiff)              
 			    s.err[i].SetScalar(err)
-
 	            y.Array().CopyFromDevice(s.ybuffer[i])
 	            y.Invalidate()
-	            
-	            iter = iter + 1
-	            s.iterations.SetScalar(s.iterations.Scalar() + 1)
-	            
-	            if iter > 2 {
+	            equation[i].input[0].Update()       
+	            err_dy := float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
+	            err = err_y / err_dy
+	           	iter = iter + 1
+	            s.iterations.SetScalar(s.iterations.Scalar() + 1)	            
+	            /*if iter > 2 {
 	                isBadStep = isBadStep + 1
 	                s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 	                break
-	            }                
-            }
-            
-            maxStepErr := s.maxErr[i].Scalar()
-            
-            StepErr := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i]))
-            
-            if StepErr == 0.0 {
-                StepErr = maxStepErr * 0.8
-            }
-            
+	            }*/           
+            }      
+                
+            maxStepErr := s.maxErr[i].Scalar() 
+            StepErr := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i]))                      
             // step is large then threshould then badstep is reported
             if (StepErr > maxStepErr) {
                 isBadStep = isBadStep + 1
                 s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
-            }
-         
+            }         
             // Let us compare BDF Euler and BDF Trapezoidal
-            // to guess next time step
-                         
-            errRatio := math.Abs(maxStepErr / StepErr)
-            step_corr := errRatio
-              
-            if isBadStep == 0 {
-                if errRatio < 1.0 {
-                    step_corr = math.Pow(float64(errRatio), 0.2)
-                }
-            }
-               
+            // to guess next time step            
+            errRatio := math.Abs(headRoom * maxStepErr / StepErr)
+            step_corr := errRatio  
+            
             if step_corr > 1.5 {
                 step_corr = 1.5
             }
-            
             if step_corr < 0.1 {
                 step_corr = 0.1
             }
-
-            new_dt := dt * step_corr
-            
+            new_dt := dt * step_corr          
             if new_dt < s.minDt.Scalar() {
 			    new_dt = s.minDt.Scalar()
 		    }
 		    if new_dt > s.maxDt.Scalar() {
 			    new_dt = s.maxDt.Scalar()
-		    }     
-		    
+		    }      
             s.newDt[i] = new_dt
 	    }
 	    
 	    sort.Float64s(s.newDt)
 	    nDt := s.newDt[topIdx]
-	    engine.dt.SetScalar(nDt) 
+	    engine.dt.SetScalar(nDt)
+	    if isBadStep >= 3 || nDt == s.minDt.Scalar() {
+	        break //give up
+	    }
     }
 	// Advance step	
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
@@ -260,7 +203,7 @@ func LoadBDFEulerAuto(e *Engine) {
 	s.y0buffer = make([]*gpu.Array, len(equation))
 	s.y1buffer = make([]*gpu.Array, len(equation))
 	s.dy0buffer = make([]*gpu.Array, len(equation))
-	//s.dybuffer = make([]*gpu.Array, len(equation))
+	s.dybuffer = make([]*gpu.Array, len(equation))
 	
 	s.err = make([]*Quant, len(equation))
 	s.maxErr = make([]*Quant, len(equation))
@@ -292,7 +235,7 @@ func LoadBDFEulerAuto(e *Engine) {
 		s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.y1buffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.dy0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
-		//s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
+		s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
 
 	}
 	e.SetSolver(s)
