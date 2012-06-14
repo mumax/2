@@ -173,7 +173,8 @@ extern "C" {
 				            zf2 + comm);
 
         // Let's use 5-point stencil in the bulk and 3-point forward/backward at the boundary
-                
+        real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
+           
         real4 HH;
 
         HH.x = (yi.x >= 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
@@ -181,20 +182,18 @@ extern "C" {
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
         HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
         
-        real h_x0 = hx[x0];
         real h_b2 = hx[xn.x];
         real h_b1 = hx[xn.y];
         real h_f1 = hx[xn.z];
         real h_f2 = hx[xn.w]; 
-        real ddhx_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * h_x0 + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
-        real ddhx_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * h_x0 + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
+        real ddhx_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * H.x + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
+        real ddhx_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.x + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
         
-        h_x0 = hx[x0];
         h_b2 = hx[zn.x];
         h_b1 = hx[zn.y];
         h_f1 = hx[zn.z];
         h_f2 = hx[zn.w];
-        real ddhx_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0; 
+        real ddhx_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.x + cfz.w * h_f1 + cfz.v * h_f2) : 0.0; 
         
         real ddhx  = mmstep.x * ddhx_x + mmstep.y * ddhx_y + mmstep.z * ddhx_z;
         
@@ -203,47 +202,46 @@ extern "C" {
         HH.z = (yi.z < size.y || rhy == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhy == NULL) ? hy[yn.w] : rhy[yn.w];
         
-        h_x0 = hy[x0];
         h_b2 = hy[xn.x];
         h_b1 = hy[xn.y];
         h_f1 = hy[xn.z];
         h_f2 = hy[xn.w]; 
-        real ddhy_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * h_x0 + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
-        real ddhy_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * h_x0 + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
+        real ddhy_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * H.y + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
+        real ddhy_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.y + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
         
-        h_x0 = hy[x0];
         h_b2 = hy[zn.x];
         h_b1 = hy[zn.y];
         h_f1 = hy[zn.z];
         h_f2 = hy[zn.w];
-        real ddhy_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
+        real ddhy_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.y + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
         
         real ddhy  = mmstep.x * ddhy_x + mmstep.y * ddhy_y + mmstep.z * ddhy_z;
 		
-        h_x0 = hz[x0];
         h_b2 = hz[xn.x];
         h_b1 = hz[xn.y];
         h_f1 = hz[xn.z];
         h_f2 = hz[xn.w]; 
-        real ddhz_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * h_x0 + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
-        real ddhz_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * h_x0 + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
+        real ddhz_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * H.z + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
+        real ddhz_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.z + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
         
-        h_x0 = hz[x0];
         h_b2 = hz[zn.x];
         h_b1 = hz[zn.y];
         h_f1 = hz[zn.z];
         h_f2 = hz[zn.w];
-        real ddhz_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * h_x0 + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
+        real ddhz_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.z + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
         
         real ddhz  = mmstep.x * ddhz_x + mmstep.y * ddhz_y + mmstep.z * ddhz_z;
 	            
         real3 le_ddH = make_real3(ddhx, ddhy, ddhz);
-        real3 H = make_real3(hx[x0], hy[x0], hz[x0]);
+        
     
-	    if (i == 2 && j == 2 && k == 2) {
+	    /*if (i == 2 && j == 2 && k == 2) {
 	        printf("(%d, %d, %d)\tddhxx: %e\n",i,j,k,ddhx_x);
 	        printf("(%d, %d, %d)\tddhxy: %e\n",i,j,k,ddhx_y);
 	        printf("(%d, %d, %d)\tddhxz: %e\n",i,j,k,ddhx_z);
+	        printf("(%d, %d, %d)\tcfx: %e %e %e %e %e\n",i,j,k,cfx.x, cfx.y, cfx.z, cfx.w, cfx.v);
+	        printf("(%d, %d, %d)\tcfy: %e %e %e %e %e\n",i,j,k,cfy.x, cfy.y, cfy.z, cfy.w, cfy.v);
+	        printf("(%d, %d, %d)\tcfz: %e %e %e %e %e\n",i,j,k,cfz.x, cfz.y, cfz.z, cfz.w, cfz.v);
 	        printf("(%d, %d, %d)\thxx: %e %e %e %e %e\n",i,j,k,hx[xn.x], hx[xn.y], H.x, hx[xn.z], hx[xn.w]);
             printf("(%d, %d, %d)\thxy: %e %e %e %e %e\n",i,j,k,hx[yn.x], hx[yn.y], H.x, hx[yn.z], hx[yn.w]);
             printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hx[zn.x], hx[zn.y], H.x, hx[zn.z], hx[zn.w]);
@@ -258,68 +256,16 @@ extern "C" {
 	        printf("(%d, %d, %d)\tddhxz: %e\n",i,j,k,ddhz_z);
             printf("(%d, %d, %d)\thxx: %e %e %e %e %e\n",i,j,k,hz[xn.x], hz[xn.y], H.z, hz[xn.z], hz[xn.w]);
             printf("(%d, %d, %d)\thxy: %e %e %e %e %e\n",i,j,k,hz[yn.x], hz[yn.y], H.z, hz[yn.z], hz[yn.w]);
-            printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hz[zn.x], hz[zn.y], H.z, hz[zn.z], hz[zn.w]);
-            
-	        /*printf("hx_xb2: %e\n",hx[xn.x]);
-	        printf("hx_xb1: %e\n",hx[xn.y]);
-	        printf("hx_x: %e\n",  hx[x0]);
-	        printf("hx_xf1: %e\n",hx[xn.z]);
-	        printf("hx_xf2: %e\n",hx[xn.w]);
-	        
-	        printf("hx_yb2: %e\n",hx[yn.x]);
-	        printf("hx_yb1: %e\n",hx[yn.y]);
-	        printf("hx_y: %e\n",  hx[x0]);
-	        printf("hx_yf1: %e\n",hx[yn.z]);
-	        printf("hx_yf2: %e\n",hx[yn.w]);
-	        
-	        printf("hx_zb2: %e\n",hx[zn.x]);
-	        printf("hx_zb1: %e\n",hx[zn.y]);
-	        printf("hx_z: %e\n",  hx[x0]);
-	        printf("hx_zf1: %e\n",hx[zn.z]);
-	        printf("hx_zf2: %e\n",hx[zn.w]);
-	        
-	        printf("hy_xb2: %e\n",hy[xn.x]);
-	        printf("hy_xb1: %e\n",hy[xn.y]);
-	        printf("hy_x: %e\n",  hy[x0]);
-	        printf("hy_xf1: %e\n",hy[xn.z]);
-	        printf("hy_xf2: %e\n",hy[xn.w]);
-	        
-	        printf("hy_yb2: %e\n",hy[yn.x]);
-	        printf("hy_yb1: %e\n",hy[yn.y]);
-	        printf("hy_y: %e\n",  hy[x0]);
-	        printf("hy_yf1: %e\n",hy[yn.z]);
-	        printf("hy_yf2: %e\n",hy[yn.w]);
-	        
-	        printf("hy_zb2: %e\n",hy[zn.x]);
-	        printf("hy_zb1: %e\n",hy[zn.y]);
-	        printf("hy_z: %e\n",  hy[x0]);
-	        printf("hy_zf1: %e\n",hy[zn.z]);
-	        printf("hy_zf2: %e\n",hy[zn.w]);
-	        
-	        printf("hz_xb2: %e\n",hz[xn.x]);
-	        printf("hz_xb1: %e\n",hz[xn.y]);
-	        printf("hz_x: %e\n",  hz[x0]);
-	        printf("hz_xf1: %e\n",hz[xn.z]);
-	        printf("hz_xf2: %e\n",hz[xn.w]);
-	        
-	        printf("hz_yb2: %e\n",hz[yn.x]);
-	        printf("hz_yb1: %e\n",hz[yn.y]);
-	        printf("hz_y: %e\n",  hz[x0]);
-	        printf("hz_yf1: %e\n",hz[yn.z]);
-	        printf("hz_yf2: %e\n",hz[yn.w]);
-	        
-	        printf("hz_zb2: %e\n",hz[zn.x]);
-	        printf("hz_zb1: %e\n",hz[zn.y]);
-	        printf("hz_z: %e\n",  hz[x0]);
-	        printf("hz_zf1: %e\n",hz[zn.z]);
-	        printf("hz_zf2: %e\n",hz[zn.w]);*/      
-	    }
-	          
+            printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hz[zn.x], hz[zn.y], H.z, hz[zn.z], hz[zn.w]); 
+	    }*/
+	    
+	    real nmn = len(m);
+	    
         real3 _mxH = cross(H, m);
                     
-        tx[x0] = _mxH.x + (lambda * H.x - le_ddH.x);
-        ty[x0] = _mxH.y + (lambda * H.y - le_ddH.y);
-        tz[x0] = _mxH.z + (lambda * H.z - le_ddH.z);  
+        tx[x0] = _mxH.x + nmn * (lambda * H.x - le_ddH.x);
+        ty[x0] = _mxH.y + nmn * (lambda * H.y - le_ddH.y);
+        tz[x0] = _mxH.z + nmn * (lambda * H.z - le_ddH.z);  
 
     } 
   }
