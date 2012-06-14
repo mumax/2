@@ -21,9 +21,12 @@ load('solver/bdf_euler_auto')
 setv('mf_maxiterations', 5)
 setv('mf_maxerror', 1e-6)
 setv('mf_maxitererror', 1e-6)
+setv('maxdt', 1e-12)
+setv('mindt', 1e-30)
 
 savegraph("graph.png")
 
+Ms0 = 800e3
 # Py
 Mf = makearray(3,Nx,Ny,Nz)            
 for kk in range(Nz):
@@ -41,9 +44,10 @@ for kk in range(Nz):
             msat[0][ii][jj][kk] = 1.0
 
 setmask('msat', msat) 
-setv('msat', 800e3)        
+setv('msat', Ms0)        
 
-setv('Aex', 1.3e-11)
+Aex = 1.3e-11
+setv('Aex', Aex)
 setv('gamma_LL', 2.211e5)
 
 Bx = 0.0270 # 270 Oe
@@ -58,13 +62,16 @@ for kk in range(Nz):
             msat0[0][ii][jj][kk] = 1.0
 
 setmask('msat0', msat0) 
-setv('msat0', 800e3)
+setv('msat0', Ms0)
 
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
 setv('lambda', 0.01)
-setv('kappa', 1e-4)
-setv('lambda_e', 1e-9)
+setv('kappa', 7e-6)
+lex = Aex / (mu0 * Ms0 * Ms0) 
+print("l_ex^2: "+str(lex)+"\n")
+lambda_e = 1e-3 * lex
+setv('lambda_e', lambda_e)
 
 Mf = makearray(3,Nx,Ny,Nz) 
 for kk in range(Nz):
@@ -75,16 +82,17 @@ for kk in range(Nz):
             Mf[2][ii][jj][kk] = 0.0
 setarray('Mf',Mf)
             
-#autosave("m", "gplot", [], 1e-15)
-#autosave("msat", "gplot", [], 10e-15)
+autosave("m", "gplot", [], 1e-12)
+autosave("msat", "gplot", [], 1e-12)
 #autosave("Mf","gplot", [], 10e-15)
-autotabulate(["t", "<m>"], "m.txt", 1e-12)
-autotabulate(["t", "badsteps"], "badsteps.txt", 1e-12)
-autotabulate(["t", "bdf_iterations"], "i.txt", 1e-12)
-autotabulate(["t", "<msat>"], "msat.txt", 1e-12)
+autotabulate(["t", "<m>"], "m.txt", 1e-18)
+autotabulate(["t", "badsteps"], "badsteps.txt", 1e-18)
+autotabulate(["t", "bdf_iterations"], "i.txt", 1e-18)
+autotabulate(["t", "<msat>"], "msat.txt", 1e-18)
 #autotabulate(["t", "dt"], "dt.txt", 1e-15)
 #autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
 
+#step()
 run(1e-9)
 printstats()
 
