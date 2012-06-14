@@ -82,9 +82,9 @@ func (s *BDFEulerAuto) Step() {
 		    
 	        iter = 0
 	        err := 1.0e38
-		    // Do predictor: BDF Euler	    
-	        for err > maxIterErr { 
-	            equation[i].input[0].Update()
+		    // Do predictor: BDF Euler
+		    equation[i].input[0].Update()	    
+	        for err > maxIterErr {  
 	            gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h)
 	            iterationDiff := s.diff[i].MaxDiff(y.Array(), s.ybuffer[i])
 	            err_y := float64(iterationDiff)              
