@@ -181,6 +181,20 @@ func Decompose(Mf *Array, m *Array, msat *Array, msatMul float32) {
 	m.Stream.Sync()
 }
 
+// Decompose vector to unit vector and length
+func Limit(Mf *Array, limit float32) {
+	C.limiterAsync(
+		(**C.float)(unsafe.Pointer(&(Mf.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(Mf.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(Mf.Comp[Z].pointer[0]))),
+			
+		C.float(limit),
+		(*C.CUstream)(unsafe.Pointer(&(Mf.Stream[0]))),
+		C.int(Mf.partLen3D))
+	Mf.Stream.Sync()
+}
+
+
 
 // Partial sums (see reduce.h)
 func PartialSum(in, out *Array, blocks, threadsPerBlock, N int) {
