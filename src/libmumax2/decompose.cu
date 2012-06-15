@@ -11,9 +11,9 @@ extern "C" {
 #endif
 
 ///@internal
-__global__ void decomposeKern(float* Mx, float* My, float* Mz,
-                              float* mx, float* my, float* mz,
-                              float* msat,   
+__global__ void decomposeKern(float* __restrict__ Mx,float* __restrict__ My, float* __restrict__ Mz,
+                              float* __restrict__ mx,float* __restrict__ my, float* __restrict__ mz,
+                              float* __restrict__ msat,   
 						      float msatMul, 
 						      int Npart) {
 	int i = threadindex;
@@ -21,6 +21,7 @@ __global__ void decomposeKern(float* Mx, float* My, float* Mz,
 
 		// reconstruct norm from map
 		real3 M = make_real3(Mx[i], My[i], Mz[i]);
+		
 		real Ms = len(M);
 		
 		if (Ms == 0.0) {
@@ -30,11 +31,11 @@ __global__ void decomposeKern(float* Mx, float* My, float* Mz,
 		    msat[i] = 0.0;
 		    return; 
 		}
-
+		     	
     	mx[i] = M.x / Ms;
     	my[i] = M.y / Ms;
     	mz[i] = M.z / Ms;
-        
+                
         msat[i] = Ms;// / msatMul;
         
 	}

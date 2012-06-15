@@ -1,9 +1,9 @@
 /**
   * @file
   *
-  * @author Arne Vansteenkiste
+  * @author Mykola Dvornik
   */
-
+  
 #ifndef _DECOMPOSE_H_
 #define _DECOMPOSE_H_
 
