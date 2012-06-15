@@ -38,7 +38,7 @@ load('zeeman')
 load('llb')
 
 load('solver/bdf_euler_auto')
-setv('mf_maxiterations', 20000)
+setv('mf_maxiterations', 5)
 setv('mf_maxerror', 1e-6)
 setv('mf_maxitererror', 1e-8)
 setv('maxdt', 1e-12)
@@ -86,18 +86,18 @@ for kk in range(Nz):
             x = xx**2
             arg = -(0.25*x*sigmaX + 0.25*y*sigmaY)
 	    sd = -zz/sdepth
-            scale = 1.0 - 0.2 * exp(arg) * exp(sd) 
+            scale = 1.0 - 0.1 * exp(arg) * exp(sd) 
             msat0[0][ii][jj][kk] = scale
 setmask('msat0', msat0)   
 setv('msat0', Ms0) 
 
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
-setv('lambda', 0.01)
+setv('lambda', 1e-3)
 setv('kappa', 1e-4)
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 5e-3 * lex
+lambda_e = 1e-5 * lex
 setv('lambda_e', lambda_e)
 
 Mf = getarray('Mf') 
@@ -127,9 +127,9 @@ autotabulate(["t", "bdf_iterations"], "i.txt", 1e-18)
 autotabulate(["t", "<msat>"], "msat.txt", 1e-18)
 #autotabulate(["t", "dt"], "dt.txt", 1e-15)
 #autotabulate(["t", "<Mf>"], "Mf.txt", 1e-16)
-
+tabulate(["t", "<msat>"], "msat.txt")
 #step()
-run(1e-9)
+run(1e-12)
 printstats()
 
 sync()
