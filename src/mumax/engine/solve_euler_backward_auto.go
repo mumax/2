@@ -39,6 +39,7 @@ type BDFEulerAuto struct {
 }
 
 func (s *BDFEulerAuto) Step() {
+    //Debug("Enter solver")
     e := GetEngine()
     t0 := e.time.Scalar()
 
@@ -50,7 +51,7 @@ func (s *BDFEulerAuto) Step() {
     // save everything in the begining
     topIdx := len(equation) - 1
     const headRoom = 0.8
-    
+    //Debug("Update quantities")
     for i := range equation {
         equation[i].input[0].Update()
         y := equation[i].output[0]
@@ -66,7 +67,9 @@ func (s *BDFEulerAuto) Step() {
         // Advance time and update all inputs  
         e.time.SetScalar(t0 + dt)
         iter := 0 
-	    for i := range equation {	         
+        
+	    for i := range equation {
+	        //Debug("Do forward Euler")	         
 	        // Do zero order approximation with Euler method
 	        y := equation[i].output[0]
 	        dy := equation[i].input[0]	        
@@ -79,10 +82,11 @@ func (s *BDFEulerAuto) Step() {
 		    s.iterations.SetScalar(s.iterations.Scalar() + 1)     
             // Do higher order approximation until converges    
 		    maxIterErr := t_step / s.maxIterErr[i].Scalar()
-		    
+		    maxIter := int(s.maxIter[i].Scalar())
 	        iter = 0
 	        err := 1.0e38
 		    // Do predictor: BDF Euler
+		    //Debug("Do backward Euler")
 		    equation[i].input[0].Update()	    
 	        for err > maxIterErr {  
 	            gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h)
@@ -97,17 +101,18 @@ func (s *BDFEulerAuto) Step() {
 	            err = err_y / err_dy 
 	            iter = iter + 1
 	            s.iterations.SetScalar(s.iterations.Scalar() + 1)	            
-	            /*if iter > maxIter {
+	            if iter > maxIter {
 	                isBadStep = isBadStep + 1
 	                s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
-	                Debug("Badstep in Euler")
+	                //Debug("Badstep in Euler")
 	                break
-	            }*/               		    
+	            }               		    
             }
             s.y1buffer[i].CopyFromDevice(y.Array()) // save for later                       
                     
             iter = 0  
             err = 1e38
+            //Debug("Do trapezodila")
             // Do corrector: BDF trapezoidal
 	        for err > maxIterErr {      		        
 		        gpu.Add(s.ybuffer[i], dy.Array(), s.dy0buffer[i])
@@ -122,19 +127,24 @@ func (s *BDFEulerAuto) Step() {
 	            err = err_y / err_dy
 	           	iter = iter + 1
 	            s.iterations.SetScalar(s.iterations.Scalar() + 1)	            
-	            /*if iter > 2 {
+	            if iter > 2 {
 	                isBadStep = isBadStep + 1
 	                s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
+	                //Debug("Badstep in Trapezoidal")
 	                break
-	            }*/           
+	            }          
             }      
                 
             maxStepErr := s.maxErr[i].Scalar() 
-            StepErr := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i]))                      
+            StepErr := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i]))  
+            if (StepErr == 0.0) {
+                StepErr = headRoom * headRoom * maxStepErr
+            }                    
             // step is large then threshould then badstep is reported
             if (StepErr > maxStepErr) {
                 isBadStep = isBadStep + 1
                 s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
+                //Debug("General Badstep")
             }         
             // Let us compare BDF Euler and BDF Trapezoidal
             // to guess next time step            
@@ -156,7 +166,7 @@ func (s *BDFEulerAuto) Step() {
 		    }      
             s.newDt[i] = new_dt
 	    }
-	    
+	    //Debug("Get new timestep")
 	    sort.Float64s(s.newDt)
 	    nDt := s.newDt[topIdx]
 	    engine.dt.SetScalar(nDt)
@@ -164,8 +174,10 @@ func (s *BDFEulerAuto) Step() {
 	        break //give up
 	    }
     }
+    
 	// Advance step	
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
+	Debug("Done")
 }
 
 func (s *BDFEulerAuto) Dependencies() (children, parents []string) {
