@@ -225,14 +225,52 @@ func (plan *MaxwellPlan) UpdateE() {
 
 // Calculate the magnetic field plan.B
 func (plan *MaxwellPlan) UpdateB() {
-	// hack, source should be M, not m
+    
+	// hack, source should be M, not m reduced
+	
+	hasMsat := 0
+	
+	var normM *gpu.Array
+	
 	if GetEngine().HasQuant("Msat") {
+	
+	    hasMsat = 1
+	    
 		msat := GetEngine().Quant("Msat")
 		plan.BInMul[MX] = msat.Multiplier()[0] * Mu0
 		plan.BInMul[MY] = msat.Multiplier()[0] * Mu0
 		plan.BInMul[MZ] = msat.Multiplier()[0] * Mu0
+		
+		sx := plan.BInput[MX].Size3D()[X]
+	    sy := plan.BInput[MX].Size3D()[Y]
+	    sz := plan.BInput[MX].Size3D()[Z]
+	
+	    normM = gpu.NewArray(3, []int{sx, sy, sz})
+	    //Debug("sx:", sx, " sy:", sy, " sz:", sz)
+	    
+	    Debug(normM.Component(X).Size3D())
+	    Debug(normM.Component(Y).Size3D())
+	    Debug(normM.Component(Z).Size3D())
+	    
+	    Debug(plan.BInput[MX].Size3D())
+	    Debug(plan.BInput[MY].Size3D())
+	    Debug(plan.BInput[MZ].Size3D())
+	    
+	    gpu.Mul(normM.Component(X), plan.BInput[MX], msat.Array())
+	    gpu.Mul(normM.Component(Y), plan.BInput[MY], msat.Array())
+	    gpu.Mul(normM.Component(Z), plan.BInput[MZ], msat.Array())
+	
+	    plan.BInput[MX] = normM.Component(X)
+	    plan.BInput[MY] = normM.Component(Y)
+	    plan.BInput[MZ] = normM.Component(Z)
 	}
+	
 	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), nil) //plan.BExt)
+
+	if hasMsat == 1 {
+	    normM.Free()
+	}
+	
 }
 
 // calculate E or B

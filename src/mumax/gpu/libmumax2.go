@@ -34,6 +34,17 @@ func Add(dst, a, b *Array) {
 	dst.Stream.Sync()
 }
 
+func Mul(dst, a, b *Array) {
+	CheckSize(dst.size4D, a.size4D)
+	C.mulAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
 // Asynchronous multiply-add: a += mulB*b
 // b may contain NULL pointers, implemented as all 1's.
 func MAdd1Async(a, b *Array, mulB float32, stream Stream) {
