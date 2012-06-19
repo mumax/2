@@ -15,9 +15,11 @@ extern "C" {
 					 float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
 					 float* __restrict__ rhx, float* __restrict__ rhy, float* __restrict__ rhz,
 					 float* __restrict__ msat0,
+					 float* __restrict__ lambda,
+					 float* __restrict__ lambda_e,
 					 const float msat0Mul,
-					 const float lambda,
-					 const float lambda_e,
+					 const float lambdaMul,
+					 const float lambda_eMul,
 					 const int4 size,		
 					 const float3 mstep,
 					 const int3 pbc,
@@ -55,7 +57,9 @@ extern "C" {
 	    real5 cfy = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
 	    real5 cfz = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0); 
 	    */
-	    real3 mmstep = make_real3(lambda_e * mstep.x, lambda_e * mstep.y, lambda_e * mstep.z);
+	    real l_e = (lambda_e != NULL) ? lambda_e[x0] * lambda_eMul : lambda_eMul;
+	     
+	    real3 mmstep = make_real3(l_e * mstep.x, l_e * mstep.y, l_e * mstep.z);
 	    
 	    if (pbc.x == 0 && i < 2) {
             cfx.x = cflb.x;
@@ -265,11 +269,13 @@ extern "C" {
 	    
 	    real nmn = len(m);
 	    
+	    real l = (lambda != NULL) ? lambda[x0] * lambdaMul : lambdaMul;
+	    
         real3 _mxH = cross(H, m);
-                    
-        tx[x0] = _mxH.x + nmn * (lambda * H.x - le_ddH.x);
-        ty[x0] = _mxH.y + nmn * (lambda * H.y - le_ddH.y);
-        tz[x0] = _mxH.z + nmn * (lambda * H.z - le_ddH.z);  
+                   
+        tx[x0] = _mxH.x + nmn * (l * H.x - le_ddH.x);
+        ty[x0] = _mxH.y + nmn * (l * H.y - le_ddH.y);
+        tz[x0] = _mxH.z + nmn * (l * H.z - le_ddH.z);  
 
     } 
   }
@@ -283,9 +289,11 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 float**  msat0,
+			 float** lambda,
+			 float** lambda_e,
 			 const float msat0Mul,
-			 const float lambda,
-			 const float lambda_e,
+			 const float lambdaMul,
+			 const float lambda_eMul,
 			 const int sx, const int sy, const int sz,
 			 const float csx, const float csy, const float csz,
 			 const int pbc_x, const int pbc_y, const int pbc_z, 
@@ -360,9 +368,11 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 												   lhx, lhy, lhz,
 												   rhx, rhy, rhz,
 												   msat0[dev],
+												   lambda[dev],
+												   lambda_e[dev],
 												   msat0Mul,
-												   lambda,
-												   lambda_e,
+												   lambdaMul,
+												   lambda_eMul,
 												   size,
 												   mstep,
 												   pbc,
