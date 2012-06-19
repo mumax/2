@@ -23,7 +23,6 @@ func init() {
 }
 
 func LoadBaryakhtarTorques(e *Engine) {
-	e.LoadModule("llg") // needed for alpha, hfield, ...
     e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
     LoadHField(e)
     LoadMagnetization(e)
