@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-/// dst[i] = a[i] + b[i]
+/// dst[i] = a[i] * b[i]
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 DLLEXPORT void mulAsync(float** dst, float** a, float** b, CUstream* stream, int Npart);
 

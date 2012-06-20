@@ -4,6 +4,7 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
+#include "common_func.h"
 
 #ifdef __cplusplus
 extern "C" {
