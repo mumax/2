@@ -232,37 +232,37 @@ func (plan *MaxwellPlan) UpdateB() {
 	
 	var normM *gpu.Array
 	
-	if GetEngine().HasQuant("Msat") {
+	if GetEngine().HasQuant("Mf") {
+	    GetEngine().Quant("Mf").Update()
+	}
 	
-	    hasMsat = 1
-	    
+	if GetEngine().HasQuant("Msat") && GetEngine().HasQuant("m")  {
+	
 		msat := GetEngine().Quant("Msat")
+		m := GetEngine().Quant("m")
+		
 		plan.BInMul[MX] = msat.Multiplier()[0] * Mu0
 		plan.BInMul[MY] = msat.Multiplier()[0] * Mu0
 		plan.BInMul[MZ] = msat.Multiplier()[0] * Mu0
 		
-		sx := plan.BInput[MX].Size3D()[X]
-	    sy := plan.BInput[MX].Size3D()[Y]
-	    sz := plan.BInput[MX].Size3D()[Z]
-	
-	    normM = gpu.NewArray(3, []int{sx, sy, sz})
-	    //Debug("sx:", sx, " sy:", sy, " sz:", sz)
+	    if !msat.Array().IsNil() {
 	    
-	    Debug(normM.Component(X).Size3D())
-	    Debug(normM.Component(Y).Size3D())
-	    Debug(normM.Component(Z).Size3D())
-	    
-	    Debug(plan.BInput[MX].Size3D())
-	    Debug(plan.BInput[MY].Size3D())
-	    Debug(plan.BInput[MZ].Size3D())
-	    
-	    gpu.Mul(normM.Component(X), plan.BInput[MX], msat.Array())
-	    gpu.Mul(normM.Component(Y), plan.BInput[MY], msat.Array())
-	    gpu.Mul(normM.Component(Z), plan.BInput[MZ], msat.Array())
-	
-	    plan.BInput[MX] = normM.Component(X)
-	    plan.BInput[MY] = normM.Component(Y)
-	    plan.BInput[MZ] = normM.Component(Z)
+	        hasMsat = 1
+	             
+	        sx := m.Array().Size3D()[X]
+	        sy := m.Array().Size3D()[Y]
+	        sz := m.Array().Size3D()[Z]
+	        
+	        normM = gpu.NewArray(3, []int{sx, sy, sz})
+	        
+	        gpu.Mul(normM.Component(X), m.Array().Component(X), msat.Array())
+	        gpu.Mul(normM.Component(Y), m.Array().Component(Y), msat.Array())
+	        gpu.Mul(normM.Component(Z), m.Array().Component(Z), msat.Array())
+	        
+	        plan.BInput[MX] = normM.Component(X)
+	        plan.BInput[MY] = normM.Component(Y)
+	        plan.BInput[MZ] = normM.Component(Z)
+	    }
 	}
 	
 	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), nil) //plan.BExt)
