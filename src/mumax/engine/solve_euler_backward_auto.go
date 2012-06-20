@@ -177,7 +177,6 @@ func (s *BDFEulerAuto) Step() {
     
 	// Advance step	
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
-	Debug("Done")
 }
 
 func (s *BDFEulerAuto) Dependencies() (children, parents []string) {
