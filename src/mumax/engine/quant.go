@@ -40,6 +40,8 @@ type Quant struct {
 	name       string    // Unique identifier
 	array      gpu.Array // Underlying array of dimensionless values typically of order 1. Holds nil pointers for space-independent quantities.
 	multiplier []float64 // Point-wise multiplication coefficients for array, dimensionfull.
+	automultiplier []float64 // Automatically detected point-wise multiplication coefficients for array, dimensionfull.
+	isMulSet   bool      // Indicates whenever multiplier has been set or not?
 	nComp      int       // Number of components. Defines whether it is a SCALAR, VECTOR, TENSOR,...
 	upToDate   bool      // Flags if this quantity needs to be updated
 	updater    Updater   // Called to update this quantity
@@ -95,7 +97,8 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	q.unit = unit
 	q.cpuOnly = cpuOnly
 	q.initChildrenParents()
-
+    q.isMulSet = false
+    
 	switch kind {
 	// A FIELD is calculated by mumax itself, not settable by the user.
 	// So it should not have a multiplier, but always have allocated storage.
@@ -109,6 +112,7 @@ func (q *Quant) init(name string, nComp int, size3D []int, kind QuantKind, unit 
 	case MASK:
 		q.array.Init(nComp, size3D, false)
 		q.multiplier = zeros(nComp)
+		q.automultiplier = ones(nComp)
 	// A VALUE is space-independent and thus does not have allocated storage.
 	// The value is stored in the multiplier and initialized to zero.
 	case VALUE:
@@ -207,8 +211,13 @@ func (q *Quant) SetValue(val []float64) {
 	checkKinds(q, MASK, VALUE)
 	checkComp(q, len(val))
 	for i, v := range val {
-		q.multiplier[i] = v
-	}
+	    if q.kind == MASK {
+	       q.multiplier[i] = q.automultiplier[i] * v 
+	    } else {
+            q.multiplier[i] = v
+            q.isMulSet = true
+        }
+    }
 	q.Verify()
 	q.Invalidate() //!
 }
@@ -217,6 +226,7 @@ func (q *Quant) SetValue(val []float64) {
 func (q *Quant) SetScalar(val float64) {
 	checkKind(q, VALUE)
 	q.multiplier[0] = val
+	q.isMulSet = true
 	q.Invalidate() //!
 }
 
@@ -224,6 +234,7 @@ func (q *Quant) SetScalar(val float64) {
 func (q *Quant) SetComponent(comp int, val float64) {
 	checkKind(q, VALUE)
 	q.multiplier[comp] = val
+    q.isMulSet = true
 	q.Invalidate() //!
 }
 
@@ -238,10 +249,29 @@ func (q *Quant) SetField(field *host.Array) {
 // Allocates GPU storage when needed.
 func (q *Quant) SetMask(field *host.Array) {
 	checkKind(q, MASK)
+	auto_mul := field.GetMaxAbsValuesPerChannel()	
+	field.NormalizeChannelsSeparately(auto_mul)	
+    q.automultiplier = auto_mul
+    isNonZeroMul := false 
+    mul := ones(q.NComp())
+    for c := 0; c < q.NComp(); c++ {
+        if (q.multiplier[c] != 0.0) {
+            isNonZeroMul = true
+        }
+    }
+    if isNonZeroMul {
+        mul = q.multiplier
+    }
+    q.SetValue(mul)    
+	if field.IsArrayUniform() {
+	    Debug("You are attempting to allocate uniform mask:")
+	    Debug("a) If it is an expected behaviour, then please ignore this message!")
+	    Debug("b) Otherwise, please consider using setv() only instead of setv()+setmask()!")
+	}	
 	q.assureAlloc()
-	//Debug(q.Name(), q.Array())
 	q.Array().CopyFromHost(field)
 	q.Invalidate() //!
+	
 }
 
 // 	sum += parent

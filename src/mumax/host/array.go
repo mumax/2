@@ -15,6 +15,7 @@ import (
 	. "mumax/common"
 	"sync"
 	"unsafe"
+	"math"
 )
 
 // A MuMax Array represents a 3-dimensional array of N-vectors.
@@ -98,3 +99,109 @@ func (a *Array) Component(component int) *Array {
 	comp.isPinned = 0
 	return comp
 }
+
+// Get maximum absolute values per each channel of array
+// The function returns non-absolute values
+func (a *Array) GetMaxAbsValuesPerChannel() []float64 {
+    ncomp := a.NComp()
+    mul := make([]float64, ncomp)
+    
+    for c := 0; c < ncomp; c++ {
+        mul[c] = 0.0
+    }
+    
+    if ncomp != 0 {
+                 
+        sx := a.Size3D[0]
+        sy := a.Size3D[1]
+        sz := a.Size3D[2]
+         
+        val := 0.0
+        aval := 0.0
+        max_aval := math.Inf(-1)
+        max_val := 0.0
+        
+        for c := 0; c < ncomp; c++ {
+            val = 0.0
+            aval = 0.0
+            max_aval = math.Inf(-1)
+            max_val = 0.0
+	        for i := 0; i < sx; i++ {
+		        for j := 0; j < sy; j++ {
+			        for k := 0; k < sz; k++ {    
+			            val = float64(a.Array[c][i][j][k])
+			            aval = math.Abs(val)
+				        if aval > max_aval {
+				            max_aval = aval
+				            max_val = val
+				        }
+			        }
+		        }
+	        }
+	        mul[c] = max_val
+	    }
+    }  
+    return mul
+}
+
+// Normalize each channel of the array by corresponding maximum absolute value
+func (a *Array) NormalizeChannelsSeparately(mul []float64) {
+    ncomp := a.NComp()
+    i_mul := make([]float64, ncomp)
+    for c := 0; c < ncomp; c++ {
+        mul_val := mul[c]
+        if (mul_val != 0.0) {
+            i_mul[c] = 1.0 / mul_val
+        }
+    }
+    
+    if ncomp != 0 {
+                 
+        sx := a.Size3D[0]
+        sy := a.Size3D[1]
+        sz := a.Size3D[2]
+                     
+        for c := 0; c < ncomp; c++ {
+	        for i := 0; i < sx; i++ {
+		        for j := 0; j < sy; j++ {
+			        for k := 0; k < sz; k++ {
+			            a.Array[c][i][j][k] = float32(float64(a.Array[c][i][j][k]) * i_mul[c])
+			        }
+		        }
+	        }
+	    }
+    }  
+}
+
+// Check whenever host array is spatially uniform or not
+func (a *Array) IsArrayUniform() bool {
+
+    isUniform := true
+    
+    ncomp := a.NComp()
+        
+    if ncomp != 0 {
+                 
+        sx := a.Size3D[0]
+        sy := a.Size3D[1]
+        sz := a.Size3D[2]
+                     
+        for c := 0; c < ncomp; c++ {
+            init_val := float64(a.Array[c][0][0][0])
+	        for i := 0; i < sx; i++ {
+		        for j := 0; j < sy; j++ {
+			        for k := 0; k < sz; k++ {
+			            val := float64(a.Array[c][i][j][k])
+			            if (val != init_val) {
+			                isUniform = false
+			                break;
+			            }
+			        }
+		        }
+	        }
+	    }
+    }
+    return isUniform
+}
+
+
