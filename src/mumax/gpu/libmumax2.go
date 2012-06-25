@@ -193,13 +193,17 @@ func Decompose(Mf *Array, m *Array, msat *Array, msatMul float32) {
 }
 
 // Decompose vector to unit vector and length
-func Limit(Mf *Array, limit float32) {
+func Limit(Mf *Array, limitMask *Array, msatMul float32, limitMul float32) {
 	C.limiterAsync(
 		(**C.float)(unsafe.Pointer(&(Mf.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(Mf.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(Mf.Comp[Z].pointer[0]))),
-			
-		C.float(limit),
+		
+		(**C.float)(unsafe.Pointer(&(limitMask.pointer[0]))),
+		
+		C.float(msatMul),
+		C.float(limitMul),
+		
 		(*C.CUstream)(unsafe.Pointer(&(Mf.Stream[0]))),
 		C.int(Mf.partLen3D))
 	Mf.Stream.Sync()
