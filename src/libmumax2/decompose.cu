@@ -33,11 +33,11 @@ __global__ void decomposeKern(float* __restrict__ Mx,float* __restrict__ My, flo
 		    return; 
 		}
 		     	
-    	mx[i] = M.x / Ms;
-    	my[i] = M.y / Ms;
-    	mz[i] = M.z / Ms;
+    		mx[i] = M.x / Ms;
+    		my[i] = M.y / Ms;
+    		mz[i] = M.z / Ms;
                 
-        msat[i] = Ms;
+        	msat[i] = Ms;
         
 	}
 }

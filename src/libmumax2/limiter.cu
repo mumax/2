@@ -14,19 +14,18 @@ extern "C" {
 __global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, float* __restrict__ Mz, 
                             float* __restrict__ limitMask,
                             float msatMul,
-						    float limitMul, 
-						    int Npart) {
+			    float limitMul, 
+			    int Npart) {
 	int i = threadindex;
 	
 	if (i < Npart) {
 
-		// reconstruct norm from map
 		real3 M = make_real3(Mx[i], My[i], Mz[i]);
-				
+
 		real nMn = len(M);
-		
+
 		real limit = (limitMask != NULL) ? limitMask[i] * limitMul : limitMul;
-	
+
 		if (nMn == 0.0 || limit == 0.0) {
 		    Mx[i] = 0.0f;
 		    My[i] = 0.0f;
@@ -36,9 +35,11 @@ __global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, floa
 	    		
 	    real Ms = msatMul * nMn;
 	       			
-        real ratio = Ms / limit;
-               
-		real norm = (ratio > 1.0) ? 1.0 / (ratio * nMn) : 1.0;
+		real ratio = Ms / limit;
+
+		real pre = 1.0 / (ratio * nMn);        
+
+		real norm = (ratio > 1.0) ? pre : 1.0;
 		
 		Mx[i] = M.x * norm;
 		My[i] = M.y * norm;
