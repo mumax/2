@@ -68,7 +68,7 @@ Ms0 = 800e3
 Aex = 1.3e-11
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 1e-4 * lex
+lambda_e = 0.0 * lex
 setv('lambda_e', lambda_e)
 setv('kappa', 1e-4)
 setv('Aex', 1.3e-11)
@@ -80,7 +80,7 @@ setv('dt', 1e-17) # initial time step, will adapt
 
 #relax
 
-setv('lambda', 1.0) # high damping for relax
+setv('lambda', 0.1) # high damping for relax
 autotabulate(["t", "<m>"], "m.txt", 1e-12)
 run(1e-9)
 
