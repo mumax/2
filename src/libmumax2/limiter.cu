@@ -14,8 +14,8 @@ extern "C" {
 __global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, float* __restrict__ Mz, 
                             float* __restrict__ limitMask,
                             float msatMul,
-			    float limitMul, 
-			    int Npart) {
+			                float limitMul, 
+			                int Npart) {
 	int i = threadindex;
 	
 	if (i < Npart) {
@@ -35,11 +35,9 @@ __global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, floa
 	    		
 	    real Ms = msatMul * nMn;
 	       			
-		real ratio = Ms / limit;
+		real ratio = limit / Ms;        
 
-		real pre = 1.0 / (ratio * nMn);        
-
-		real norm = (ratio > 1.0) ? pre : 1.0;
+		real norm = (ratio < 1.0) ? ratio : 1.0;
 		
 		Mx[i] = M.x * norm;
 		My[i] = M.y * norm;
@@ -49,10 +47,10 @@ __global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, floa
 
 
 __export__ void limiterAsync(float** Mx, float** My, float** Mz,
-                            float** limitMask,
-                            float msatMul,
-                            float limitMul,
-                            CUstream* stream, int Npart) {
+                             float** limitMask,
+                             float msatMul,
+                             float limitMul,
+                             CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {

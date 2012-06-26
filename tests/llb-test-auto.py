@@ -33,6 +33,8 @@ sdepth = 25e-9
 
 # LLB 
 load('exchange6')
+setv('ex_fbc', [1, 1, 0])
+
 load('demag')
 load('zeeman')
 load('llb')
@@ -119,12 +121,12 @@ for kk in range(Nz):
 setarray('Mf',Mfd)
 
      
-autosave("m", "gplot", [], 100e-15)
-autosave("msat", "gplot", [], 100e-15)
-autosave("mf", "gplot", [], 100e-15)
+autosave("m", "gplot", [], 1e-12)
+autosave("msat", "gplot", [], 1e-12)
+autosave("mf", "gplot", [], 1e-12)
 autotabulate(["t", "<m>"], "m.txt", 1e-16)
-autotabulate(["t", "badsteps"], "badsteps.txt", 1e-16)
-autotabulate(["t", "bdf_iterations"], "i.txt", 1e-16)
+#autotabulate(["t", "badsteps"], "badsteps.txt", 1e-16)
+#autotabulate(["t", "bdf_iterations"], "i.txt", 1e-16)
 autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
 autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
