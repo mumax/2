@@ -14,6 +14,7 @@ sZ = 10e-9
 csX = sX/Nx
 csY = sY/Ny
 csZ = sZ/Nz
+
 setgridsize(Nx, Ny, Nz)
 setcellsize(csX, csY, csZ)
 setperiodic(8,8,0)
@@ -30,14 +31,20 @@ sigmaY = 1.0/(2.0*osY*osY)
 
 pre = 1.0 / (2.0 * pi * osX * osY)
 sdepth = 25e-9
+# Wrap into hi-damping regions
+
+wR = 200e-9
+cwR = wR * 0.5
+max_Lambda = 5.0
+Lambda = 0.008
+Lambda_slope = 0.5 * (max_Lambda - Lambda)/(sX - wR)
 
 # LLB 
 load('exchange6')
-setv('ex_fbc', [1, 1, 0])
-
 load('demag')
 load('zeeman')
 load('llb')
+load('abc_gilbert')
 
 load('solver/bdf_euler_auto')
 setv('mf_maxiterations', 5)
@@ -120,15 +127,32 @@ for kk in range(Nz):
             Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
 setarray('Mf',Mfd)
 
+abc = makearray(1,Nx,Ny,Nz)            
+for kk in range(Nz):
+    for jj in range(Ny):
+        yy = float(jj)*csY-cY
+        YY = yy**2
+        for ii in range(Nx):
+            xx = float(ii)*csX-cX
+            XX = xx**2
+            R = sqrt(XX + YY)
+            val = Lambda
+            if R > cwR :
+                val = Lambda + Lambda_slope * (R - cwR)
+            abc[0][ii][jj][kk] = val        
+setmask('abc_alpha', abc)
+setv('abc_alpha', 1.0)
+save("abc_alpha","gplot",[])
+
      
-autosave("m", "gplot", [], 1e-12)
-autosave("msat", "gplot", [], 1e-12)
-autosave("mf", "gplot", [], 1e-12)
-autotabulate(["t", "<m>"], "m.txt", 1e-16)
+autosave("m.z", "png", [], 1e-12)
+#autosave("msat", "gplot", [], 1e-12)
+#autosave("mf", "gplot", [], 1e-12)
+#autotabulate(["t", "<m>"], "m.txt", 1e-16)
 #autotabulate(["t", "badsteps"], "badsteps.txt", 1e-16)
 #autotabulate(["t", "bdf_iterations"], "i.txt", 1e-16)
-autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
-autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
+#autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
+#autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
 #save("b", "gplot", [])
 run(1e-9)
