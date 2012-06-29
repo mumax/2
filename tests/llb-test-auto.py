@@ -128,8 +128,8 @@ for kk in range(Nz):
 setarray('Mf',Mfd)
      
 autosave("m", "gplot", [], 1e-12)
-autosave("m", "gplot.gzip", [], 1e-12)
-autosave("m", "gplot.zlib", [], 1e-12)
+autosave("m", "gplot.gz", [], 1e-12)
+autosave("m", "gplot.zip", [], 1e-12)
 
 #autosave("msat", "gplot", [], 1e-12)
 #autosave("mf", "gplot", [], 1e-12)

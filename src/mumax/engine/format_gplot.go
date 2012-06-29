@@ -14,8 +14,6 @@ import (
 	"fmt"
 	"io"
 	. "mumax/common"
-	"compress/gzip"
-	"compress/zlib"
 )
 
 func init() {
@@ -29,19 +27,9 @@ func (f *FormatGPlot) Name() string {
 }
 
 func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
-	if len(options) > 1 {
-		panic(InputErr("gplot accepts only one option"))
-	}
-	
-	if len(options) == 1 {
-	    switch options[0] {
-        case "gzip" :
-            out = gzip.NewWriter(out)
-        case "zlib" :
-            out = zlib.NewWriter(out) 
-        default: 
-            panic(InputErr(fmt.Sprint("Illegal GPLOT options:", options)))
-        }
+
+	if len(options) > 0 {
+		panic(InputErr("gplot accepts no options"))
 	}
 	
 	data := q.Buffer().Array
@@ -82,5 +70,7 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 			panic(IOErr(err.Error()))
 		}
 	}
-
+	
+	if c,ok := out.(io.Closer); ok {c.Close()}
+	
 }
