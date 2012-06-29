@@ -102,11 +102,11 @@ setv('B_ext',[Bx,By,Bz])
               
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
-setv('lambda', 1e-2)
-setv('kappa', 1e-4)
+setv('lambda', 0.008)
+setv('kappa', 2e-4)
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 1e-5 * lex
+lambda_e = 1e-4 * lex
 setv('lambda_e', lambda_e)
 
 Mf = getarray('Mf') 
@@ -126,26 +126,11 @@ for kk in range(Nz):
             Mfd[1][ii][jj][kk] = Mf[1][ii][jj][kk] * scale
             Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
 setarray('Mf',Mfd)
-
-abc = makearray(1,Nx,Ny,Nz)            
-for kk in range(Nz):
-    for jj in range(Ny):
-        yy = float(jj)*csY-cY
-        YY = yy**2
-        for ii in range(Nx):
-            xx = float(ii)*csX-cX
-            XX = xx**2
-            R = sqrt(XX + YY)
-            val = Lambda
-            if R > cwR :
-                val = Lambda + Lambda_slope * (R - cwR)
-            abc[0][ii][jj][kk] = val        
-setmask('abc_alpha', abc)
-setv('abc_alpha', 1.0)
-save("abc_alpha","gplot",[])
-
      
-autosave("m.z", "png", [], 1e-12)
+autosave("m", "gplot", [], 1e-12)
+autosave("m", "gplot.gzip", [], 1e-12)
+autosave("m", "gplot.zlib", [], 1e-12)
+
 #autosave("msat", "gplot", [], 1e-12)
 #autosave("mf", "gplot", [], 1e-12)
 #autotabulate(["t", "<m>"], "m.txt", 1e-16)
@@ -155,7 +140,7 @@ autosave("m.z", "png", [], 1e-12)
 #autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
 #save("b", "gplot", [])
-run(1e-9)
+run(3e-12)
 printstats()
 
 sync()
