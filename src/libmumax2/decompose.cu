@@ -20,6 +20,7 @@ __global__ void decomposeKern(float* __restrict__ Mx,float* __restrict__ My, flo
 	if (i < Npart) {
 
 		// reconstruct norm from map
+		
 		real3 M = make_real3(Mx[i], My[i], Mz[i]);
 		
 		real Ms = len(M);
@@ -32,11 +33,11 @@ __global__ void decomposeKern(float* __restrict__ Mx,float* __restrict__ My, flo
 		    return; 
 		}
 		     	
-    	mx[i] = M.x / Ms;
-    	my[i] = M.y / Ms;
-    	mz[i] = M.z / Ms;
+    		mx[i] = M.x / Ms;
+    		my[i] = M.y / Ms;
+    		mz[i] = M.z / Ms;
                 
-        msat[i] = Ms;// / msatMul;
+        	msat[i] = Ms;
         
 	}
 }

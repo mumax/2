@@ -11,44 +11,55 @@ extern "C" {
 #endif
 
 ///@internal
-__global__ void limiterKern(float* __restrict__ Mx,float* __restrict__ My, float* __restrict__ Mz, 
-						      float limit, 
-						      int Npart) {
+__global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, float* __restrict__ Mz, 
+                            float* __restrict__ limitMask,
+                            float msatMul,
+			                float limitMul, 
+			                int Npart) {
 	int i = threadindex;
+	
 	if (i < Npart) {
 
-		// reconstruct norm from map
 		real3 M = make_real3(Mx[i], My[i], Mz[i]);
-		
-		real Ms = len(M);
-		
-		if (Ms == 0.0) {
+
+		real nMn = len(M);
+
+		real limit = (limitMask != NULL) ? limitMask[i] * limitMul : limitMul;
+
+		if (nMn == 0.0 || limit == 0.0) {
 		    Mx[i] = 0.0f;
 		    My[i] = 0.0f;
 		    Mz[i] = 0.0f;
 		    return;
 		}
-				
-		real norm = (Ms > 1.0) ? 1.0 / Ms : 1.0;
+	    		
+	    real Ms = msatMul * nMn;
+	       			
+		real ratio = limit / Ms;        
+
+		real norm = (ratio < 1.0) ? ratio : 1.0;
 		
 		Mx[i] = M.x * norm;
 		My[i] = M.y * norm;
-		Mz[i] = M.z * norm;
-		     	
+		Mz[i] = M.z * norm;	
 	}
 }
 
 
 __export__ void limiterAsync(float** Mx, float** My, float** Mz,
-                               float limit,
-                               CUstream* stream, int Npart) {
+                             float** limitMask,
+                             float msatMul,
+                             float limitMul,
+                             CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	for (int dev = 0; dev < nDevice(); dev++) {
 		gpu_safe(cudaSetDevice(deviceId(dev)));
 		limiterKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (Mx[dev],My[dev],Mz[dev],
-		                                                                       limit,
-		                                                                       Npart);
+		                                                                     limitMask[dev],
+		                                                                     msatMul,
+		                                                                     limitMul,
+		                                                                     Npart);
 	}
 }
 

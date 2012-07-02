@@ -11,7 +11,7 @@
 
 package gpu
 
-//#cgo LDFLAGS:-L../../libmumax2 -lmumax2
+//#cgo LDFLAGS:-L../../libmumax2 -lmumax2 -L/usr/local/cuda/lib64 -lcudart
 //#cgo CFLAGS:-IC:/opt/cuda/v4.2/include -I../../libmumax2
 //#include "libmumax2.h"
 import "C"
@@ -26,6 +26,17 @@ import (
 func Add(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
 	C.addAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
+func Mul(dst, a, b *Array) {
+	CheckSize(dst.size4D, a.size4D)
+	C.mulAsync(
 		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
@@ -150,6 +161,32 @@ func Torque(τ, m, h, αMap *Array, αMul float32) {
 
 }
 
+// Calculates:
+//	τ = - α m  x (m x H)
+func Gilbert(τ, m, h, αMap *Array, αMul float32) {
+	C.gilbertAsync(
+		(**C.float)(unsafe.Pointer(&(τ.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(τ.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+
+		(**C.float)(unsafe.Pointer(&(αMap.pointer[0]))),
+		(C.float)(αMul),
+
+		(*C.CUstream)(unsafe.Pointer(&(τ.Stream[0]))),
+
+		(C.int)(m.partLen3D))
+	τ.Stream.Sync()
+
+}
+
 // Normalize
 func Normalize(m, normMap *Array) {
 	C.normalizeAsync(
@@ -182,13 +219,17 @@ func Decompose(Mf *Array, m *Array, msat *Array, msatMul float32) {
 }
 
 // Decompose vector to unit vector and length
-func Limit(Mf *Array, limit float32) {
+func Limit(Mf *Array, limitMask *Array, msatMul float32, limitMul float32) {
 	C.limiterAsync(
 		(**C.float)(unsafe.Pointer(&(Mf.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(Mf.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(Mf.Comp[Z].pointer[0]))),
-			
-		C.float(limit),
+		
+		(**C.float)(unsafe.Pointer(&(limitMask.pointer[0]))),
+		
+		C.float(msatMul),
+		C.float(limitMul),
+		
 		(*C.CUstream)(unsafe.Pointer(&(Mf.Stream[0]))),
 		C.int(Mf.partLen3D))
 	Mf.Stream.Sync()

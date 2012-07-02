@@ -8,29 +8,41 @@
 package engine
 
 // Implements output for gnuplot's "splot"
-// Author: Arne Vansteenkiste
+// Author: Mykola Dvornik
 
 import (
-	"fmt"
 	"io"
 	. "mumax/common"
+	"compress/gzip"
 )
 
 func init() {
-	RegisterOutputFormat(&FormatGPlot{})
+	RegisterOutputFormat(&FormatGPlotGZip{})
 }
 
-type FormatGPlot struct{}
+type FormatGPlotGZip struct{}
 
-func (f *FormatGPlot) Name() string {
-	return "gplot"
+func (f *FormatGPlotGZip) Name() string {
+	return "gplot.gz"
 }
 
-func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
-
-	if len(options) > 0 {
-		panic(InputErr("gplot accepts no options"))
+func (f *FormatGPlotGZip) Write(out io.Writer, q *Quant, options []string) {
+    
+    nout, err := gzip.NewWriterLevel(out, gzip.BestSpeed)
+    
+    if err != nil {
+		panic(IOErr(err.Error()))
 	}
+	
+    (new (FormatGPlot)).Write(nout, q, options)
+    
+    nout.Close()
+    
+    /*if len(options) > 0 {
+		panic(InputErr("gplot.gzip accepts no options"))
+	}
+	
+	nout := gzip.NewWriter(out)
 	
 	data := q.Buffer().Array
 	gridsize := q.Array().Size3D()
@@ -45,32 +57,31 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 			y := float64(j) * cellsize[Y]
 			for k := 0; k < gridsize[Z]; k++ {
 				z := float64(k) * cellsize[Z]
-				_, err := fmt.Fprint(out, z, " ", y, " ", x, "\t")
+				_, err := fmt.Fprint(nout, z, " ", y, " ", x, "\t")
 				if err != nil {
 					panic(IOErr(err.Error()))
 				}
 				for c := 0; c < ncomp; c++ {
-					_, err := fmt.Fprint(out, data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
+					_, err := fmt.Fprint(nout, data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
 					if err != nil {
 						panic(IOErr(err.Error()))
 					}
 				}
-				_, err = fmt.Fprint(out, "\n")
+				_, err = fmt.Fprint(nout, "\n")
 				if err != nil {
 					panic(IOErr(err.Error()))
 				}
 			}
-			_, err := fmt.Fprint(out, "\n")
+			_, err := fmt.Fprint(nout, "\n")
 			if err != nil {
 				panic(IOErr(err.Error()))
 			}
 		}
-		_, err := fmt.Fprint(out, "\n")
+		_, err := fmt.Fprint(nout, "\n")
 		if err != nil {
 			panic(IOErr(err.Error()))
 		}
-	}
+	}*/
 	
-	if c,ok := out.(io.Closer); ok {c.Close()}
-	
+    
 }

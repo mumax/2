@@ -26,12 +26,11 @@ func LoadLongField(e *Engine) {
     LoadFullMagnetization(e)
 	kappa := e.AddNewQuant("kappa", SCALAR, VALUE, Unit(""), "longitudinal magnetic susceptibility")
 	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
-	msat0 := e.AddNewQuant("msat0", SCALAR, MASK, Unit("A/m"), "the initial distribution of the saturation magnetization")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
 	e.Depends("H_lf", "kappa", "msat0", "msat", "m")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, msat0: msat0, msat: e.Quant("msat")})
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, msat0: e.Quant("msat0"), msat: e.Quant("msat")})
 
 }
 

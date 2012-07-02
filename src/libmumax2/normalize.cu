@@ -14,6 +14,7 @@ extern "C" {
 __global__ void normalizeKern(float* mx, float* my, float* mz, 
 						   float* norm_map, int Npart) {
 	int i = threadindex;
+	
 	if (i < Npart) {
 
 		// reconstruct norm from map

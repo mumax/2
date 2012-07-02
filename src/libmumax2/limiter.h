@@ -20,8 +20,10 @@ extern "C" {
 /// @param mx, my, mz: Components of vector array to normalize
 /// @param limit: The uper limit of the vector length
 DLLEXPORT void limiterAsync(float** Mx, float** My, float** Mz,
-                               float limit,
-                               CUstream* stream, int Npart);
+                            float** limitMask,
+                            float msatMul,
+                            float limitMul,
+                            CUstream* stream, int Npart);
 
 #ifdef __cplusplus
 }

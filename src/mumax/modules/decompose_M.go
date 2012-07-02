@@ -8,22 +8,27 @@
 package modules
 
 import (
-
+    . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
 
 type decomposeMUpdater struct {
-	mf *Quant
+    mf, msat0 *Quant
 }
 
 func (u *decomposeMUpdater) Update() {
     e := GetEngine()
+    
     m := e.Quant("m")
     msat := e.Quant("Msat")
-    gpu.Limit(u.mf.Array(), float32(1.0))
+    
+    mf := u.mf
+    msat0 := u.msat0
+    
+    gpu.Limit(mf.Array(), msat0.Array(), float32(msat.Multiplier()[0]), float32(msat0.Multiplier()[0]))
 	              
-	gpu.Decompose(u.mf.Array(), 
+	gpu.Decompose(mf.Array(), 
 	              m.Array(), 
 	              msat.Array(), 
 	              float32(msat.Multiplier()[0]))
