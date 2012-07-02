@@ -12,6 +12,7 @@ package modules
 
 import (
 	. "mumax/engine"
+	. "mumax/common"
 	"mumax/gpu"
 )
 
@@ -23,6 +24,8 @@ func init() {
 // loads the current density
 func LoadUserDefinedCurrentDensity(e *Engine) {
 	if e.HasQuant("j") {
+		Debug("Another electrical current module is already loaded! If it is desired behaviour please ignore this message. Otherwise, please remove all other modules!")
+		Debug("Please make sure you add your custom electrical current distibution to the the 'j' quantity")
 		return
 	}
 	e.AddNewQuant("j", VECTOR, MASK, Unit("A/m2"), "electrical current density")
@@ -36,7 +39,7 @@ func LoadCalculatedCurrentDensity(e *Engine) {
 	LoadCoulomb(e)
 	LoadUserDefinedCurrentDensity(e)
 	j := e.Quant("j")
-	E := e.Quant("E")
+	Efield := e.Quant("E")
 	r := e.AddNewQuant("r", SCALAR, MASK, Unit("Ohm*m"), "electrical resistivity")
 	drho := e.AddNewQuant("diff_rho", SCALAR, FIELD, Unit("C/m³s"), "time derivative of electrical charge density")
 
@@ -44,7 +47,7 @@ func LoadCalculatedCurrentDensity(e *Engine) {
 	e.Depends("j", "E", "r")
 	e.AddPDE1("rho", "diff_rho")
 
-	j.SetUpdater(&JUpdater{j: j, E: E, r: r})
+	j.SetUpdater(&JUpdater{j: j, E: Efield, r: r})
 	drho.SetUpdater(&DRhoUpdater{drho: drho, j: j})
 }
 
