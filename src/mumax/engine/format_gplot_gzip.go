@@ -11,7 +11,6 @@ package engine
 // Author: Mykola Dvornik
 
 import (
-	"fmt"
 	"io"
 	. "mumax/common"
 	"compress/gzip"
@@ -28,8 +27,18 @@ func (f *FormatGPlotGZip) Name() string {
 }
 
 func (f *FormatGPlotGZip) Write(out io.Writer, q *Quant, options []string) {
-
-    if len(options) > 0 {
+    
+    nout, err := gzip.NewWriterLevel(out, gzip.BestSpeed)
+    
+    if err != nil {
+		panic(IOErr(err.Error()))
+	}
+	
+    (new (FormatGPlot)).Write(nout, q, options)
+    
+    nout.Close()
+    
+    /*if len(options) > 0 {
 		panic(InputErr("gplot.gzip accepts no options"))
 	}
 	
@@ -72,7 +81,7 @@ func (f *FormatGPlotGZip) Write(out io.Writer, q *Quant, options []string) {
 		if err != nil {
 			panic(IOErr(err.Error()))
 		}
-	}
+	}*/
 	
-    nout.Close()
+    
 }
