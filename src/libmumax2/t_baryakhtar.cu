@@ -41,7 +41,7 @@ extern "C" {
 	
     if (j < size.y && k < size.z){ // 3D now:)
             
-	    //m_sat = 1.0 / m_sat;             
+	    //real one_over_m_sat = 1.0 / m_sat;             
         
         
         real5 cfx = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
@@ -266,16 +266,14 @@ extern "C" {
             printf("(%d, %d, %d)\thxy: %e %e %e %e %e\n",i,j,k,hz[yn.x], hz[yn.y], H.z, hz[yn.z], hz[yn.w]);
             printf("(%d, %d, %d)\thxz: %e %e %e %e %e\n",i,j,k,hz[zn.x], hz[zn.y], H.z, hz[zn.z], hz[zn.w]); 
 	    }*/
-	    
-	    real nmn = len(m);
-	    
+	     
 	    real l = (lambda != NULL) ? lambda[x0] * lambdaMul : lambdaMul;
 	    
         real3 _mxH = cross(H, m);
                    
-        tx[x0] = _mxH.x + nmn * (l * H.x - le_ddH.x);
-        ty[x0] = _mxH.y + nmn * (l * H.y - le_ddH.y);
-        tz[x0] = _mxH.z + nmn * (l * H.z - le_ddH.z);  
+        tx[x0] = _mxH.x + (l * H.x - le_ddH.x);
+        ty[x0] = _mxH.y + (l * H.y - le_ddH.y);
+        tz[x0] = _mxH.z + (l * H.z - le_ddH.z);  
 
     } 
   }

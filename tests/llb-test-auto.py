@@ -127,16 +127,16 @@ for kk in range(Nz):
             Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
 setarray('Mf',Mfd)
      
-autosave("m", "gplot", [], 1e-12)
-autosave("m", "gplot.gz", [], 1e-12)
-autosave("m", "gplot.zip", [], 1e-12)
+#autosave("m", "gplot", [], 1e-12)
+#autosave("m", "gplot.gz", [], 1e-12)
+#autosave("m", "gplot.zip", [], 1e-12)
 
 #autosave("msat", "gplot", [], 1e-12)
 #autosave("mf", "gplot", [], 1e-12)
-#autotabulate(["t", "<m>"], "m.txt", 1e-16)
+autotabulate(["t", "<m>"], "m.txt", 1e-15)
 #autotabulate(["t", "badsteps"], "badsteps.txt", 1e-16)
 #autotabulate(["t", "bdf_iterations"], "i.txt", 1e-16)
-#autotabulate(["t", "<msat>"], "msat.txt", 1e-16)
+autotabulate(["t", "<msat>"], "msat.txt", 1e-15)
 #autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
 #save("b", "gplot", [])
