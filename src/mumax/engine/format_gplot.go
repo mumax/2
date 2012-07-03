@@ -31,7 +31,7 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 	if len(options) > 0 {
 		panic(InputErr("gplot accepts no options"))
 	}
-	
+
 	data := q.Buffer().Array
 	gridsize := q.Array().Size3D()
 	cellsize := GetEngine().CellSize()
@@ -70,7 +70,9 @@ func (f *FormatGPlot) Write(out io.Writer, q *Quant, options []string) {
 			panic(IOErr(err.Error()))
 		}
 	}
-	
-	if c,ok := out.(io.Closer); ok {c.Close()}
-	
+
+	if c, ok := out.(io.Closer); ok {
+		c.Close()
+	}
+
 }

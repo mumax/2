@@ -32,9 +32,9 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
 	// Bookkeeping
 	CheckSize(p.Size3D(), m.Size3D())
 	Assert(j.NComp() == 3)
-    Assert(msat.NComp() == 1)
-    Assert(alpha.NComp() == 1)
-    
+	Assert(msat.NComp() == 1)
+	Assert(alpha.NComp() == 1)
+
 	// Calling the CUDA functions
 	C.slonczewski_async(
 		(**C.float)(unsafe.Pointer(&(stt.Comp[X].Pointers()[0]))),
@@ -44,42 +44,42 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
 
 		(**C.float)(unsafe.Pointer(&(p.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(p.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(p.Comp[Z].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
 
-        (**C.float)(unsafe.Pointer(&(alpha.Comp[X].Pointers()[0]))),        
-        
-        (**C.float)(unsafe.Pointer(&(t_fl.Comp[X].Pointers()[0]))),  
+		(**C.float)(unsafe.Pointer(&(alpha.Comp[X].Pointers()[0]))),
+
+		(**C.float)(unsafe.Pointer(&(t_fl.Comp[X].Pointers()[0]))),
 
 		(C.float)(pMul[X]),
 		(C.float)(pMul[Y]),
 		(C.float)(pMul[Z]),
-		
+
 		(C.float)(jMul[X]),
 		(C.float)(jMul[Y]),
 		(C.float)(jMul[Z]),
-		
+
 		(C.float)(lambda2),
 		(C.float)(beta_prime),
 		(C.float)(pre_field),
 
-        (C.float)(worldSize[X]),
-        (C.float)(worldSize[Y]),
-        (C.float)(worldSize[Z]),
-        
-        (C.float)(alphaMul[X]),
-        (C.float)(t_flMul[X]),
+		(C.float)(worldSize[X]),
+		(C.float)(worldSize[Y]),
+		(C.float)(worldSize[Z]),
+
+		(C.float)(alphaMul[X]),
+		(C.float)(t_flMul[X]),
 
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
-		
-		stt.Stream.Sync()
+
+	stt.Stream.Sync()
 }

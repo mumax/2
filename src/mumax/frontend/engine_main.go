@@ -10,11 +10,11 @@ package frontend
 // This file implements the mumax2's main routines for engine mode.
 
 import (
+	"bufio"
 	cu "cuda/driver"
 	"fmt"
 	. "mumax/common"
 	"os"
-	"bufio"
 	"runtime"
 )
 

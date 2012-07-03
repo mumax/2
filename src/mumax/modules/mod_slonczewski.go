@@ -26,11 +26,11 @@ func LoadSlonczewskiTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	// ============ New Quantities =============
-    e.AddNewQuant("t_fl", SCALAR, MASK, Unit(""), "Free layer thickness")
+	e.AddNewQuant("t_fl", SCALAR, MASK, Unit(""), "Free layer thickness")
 
 	labmda := e.AddNewQuant("lambda", SCALAR, VALUE, Unit(""), "In-Plane term")
 	labmda.SetScalar(1.0)
-	e.AddNewQuant("p", VECTOR, MASK , Unit(""), "Polarization Vector")
+	e.AddNewQuant("p", VECTOR, MASK, Unit(""), "Polarization Vector")
 
 	pol := e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization efficiency")
 	pol.SetScalar(1.0)
@@ -57,7 +57,7 @@ func (u *slonczewskiUpdater) Update() {
 	e := GetEngine()
 
 	worldSize := e.WorldSize()
-	
+
 	stt := u.stt
 	m := e.Quant("m")
 	msat := e.Quant("msat")
@@ -69,28 +69,28 @@ func (u *slonczewskiUpdater) Update() {
 	alpha := e.Quant("alpha")
 	gamma := e.Quant("gamma").Scalar()
 	t_fl := e.Quant("t_fl")
-	
-    //njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
-    
+
+	//njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
+
 	nmsatn := msat.Multiplier()[0]
-	
-    beta := H_bar * gamma / (Mu0 * E * nmsatn) // njn is missing
-    beta_prime := pol * beta  //beta_prime does not contain 
-    pre_fld := beta * epsilon_prime
+
+	beta := H_bar * gamma / (Mu0 * E * nmsatn) // njn is missing
+	beta_prime := pol * beta                   //beta_prime does not contain 
+	pre_fld := beta * epsilon_prime
 	lambda2 := lambda * lambda
-	gpu.LLSlon(stt.Array(), 
-			  m.Array(), 
-			  msat.Array(), 
-			  p.Array(), 
-              curr.Array(), 
-              alpha.Array(), 
-              t_fl.Array(), 
-              p.Multiplier(), 
-              curr.Multiplier(), 
-              float32(lambda2), 
-              float32(beta_prime), 
-              float32(pre_fld),
-              worldSize, 
-              alpha.Multiplier(), 
-              t_fl.Multiplier())
+	gpu.LLSlon(stt.Array(),
+		m.Array(),
+		msat.Array(),
+		p.Array(),
+		curr.Array(),
+		alpha.Array(),
+		t_fl.Array(),
+		p.Multiplier(),
+		curr.Multiplier(),
+		float32(lambda2),
+		float32(beta_prime),
+		float32(pre_fld),
+		worldSize,
+		alpha.Multiplier(),
+		t_fl.Multiplier())
 }

@@ -11,9 +11,9 @@ package engine
 // Author: Mykola Dvornik
 
 import (
+	"compress/gzip"
 	"io"
 	. "mumax/common"
-	"compress/gzip"
 )
 
 func init() {
@@ -27,10 +27,10 @@ func (f *FormatGPlotGZip) Name() string {
 }
 
 func (f *FormatGPlotGZip) Write(out io.Writer, q *Quant, options []string) {
-    nout, err := gzip.NewWriterLevel(out, gzip.BestSpeed)
-    if err != nil {
+	nout, err := gzip.NewWriterLevel(out, gzip.BestSpeed)
+	if err != nil {
 		panic(IOErr(err.Error()))
 	}
-    (new (FormatGPlot)).Write(nout, q, options)
-    nout.Close()    
+	(new(FormatGPlot)).Write(nout, q, options)
+	nout.Close()
 }

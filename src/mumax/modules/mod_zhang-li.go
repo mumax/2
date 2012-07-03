@@ -49,8 +49,8 @@ type ZhangLiUpdater struct {
 
 func (u *ZhangLiUpdater) Update() {
 	e := GetEngine()
-	
-	cellSize := e.CellSize()	
+
+	cellSize := e.CellSize()
 	zzt := u.zzt
 	m := e.Quant("m")
 	ee := e.Quant("xi").Scalar()
@@ -58,12 +58,12 @@ func (u *ZhangLiUpdater) Update() {
 	pol := e.Quant("polarisation").Scalar()
 	curr := e.Quant("j") // could be pointwise
 	pbc := e.Periodic()
-	
+
 	//njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
 	nmsatn := msat.Multiplier()[0]
-	
-	pred := pol * MuB / (E * nmsatn * (1 + ee * ee)) 
+
+	pred := pol * MuB / (E * nmsatn * (1 + ee*ee))
 	pret := ee * pred
-	
+
 	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), curr.Multiplier(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
 }

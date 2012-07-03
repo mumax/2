@@ -13,7 +13,7 @@ import (
 	"fmt"
 	. "mumax/common"
 	"path"
-	"strings"	
+	"strings"
 )
 
 // The global simulation engine
@@ -515,7 +515,7 @@ func (e *Engine) SaveAs(q *Quant, format string, options []string, filename stri
 func (e *Engine) SaveAsAppend(q *Quant, format string, options []string, filename string) {
 	q.Update() //!!
 	checkKinds(q, MASK, FIELD)
-    out := OpenWRAPPENDONLY(e.Relative(filename))
+	out := OpenWRAPPENDONLY(e.Relative(filename))
 	defer out.Close()
 	bufout := Buffer(out)
 	defer bufout.Flush()
@@ -535,7 +535,7 @@ func (e *Engine) AutoSave(quant string, format string, options []string, period 
 func (e *Engine) AutoSaveSingleFile(quant string, format string, options []string, period float64) (handle int) {
 	checkKinds(e.Quant(quant), MASK, FIELD)
 	if format != "dump" {
-	    panic(InputErr("Single File mode is only meaningfull for 'dump' output format!"))
+		panic(InputErr("Single File mode is only meaningfull for 'dump' output format!"))
 	}
 	handle = e.NewHandle()
 	e.crontabs[handle] = &AutoSaveSingleFile{quant, format, options, period, e.time.Scalar(), 0}

@@ -32,11 +32,11 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, jMul []float64, pred
 	// Bookkeeping
 	CheckSize(j.Size3D(), m.Size3D())
 	CheckSize(msat.Size3D(), m.Size3D())
-	
+
 	Assert(j.NComp() == 3)
 	Assert(msat.NComp() == 1)
 	//Debug("Part size:",m.PartSize()[X],"x",m.PartSize()[Y],"x",m.PartSize()[Z])
-	
+
 	// Calling the CUDA functions
 	C.zhangli_async(
 		(**C.float)(unsafe.Pointer(&(stt.Comp[X].Pointers()[0]))),
@@ -50,29 +50,29 @@ func LLZhangLi(stt *Array, m *Array, j *Array, msat *Array, jMul []float64, pred
 		(**C.float)(unsafe.Pointer(&(j.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(j.Comp[Z].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
-		
+
 		(C.float)(jMul[X]),
 		(C.float)(jMul[Y]),
 		(C.float)(jMul[Z]),
-		
+
 		(C.float)(pred),
 		(C.float)(pret),
-		
+
 		(C.int)(m.PartSize()[X]),
 		(C.int)(m.PartSize()[Y]),
 		(C.int)(m.PartSize()[Z]),
-		
+
 		(C.float)(cellsizeX),
 		(C.float)(cellsizeY),
 		(C.float)(cellsizeZ),
-		
+
 		(C.int)(pbc[X]),
 		(C.int)(pbc[Y]),
 		(C.int)(pbc[Z]),
-		
+
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
-		
-		stt.Stream.Sync()
+
+	stt.Stream.Sync()
 }

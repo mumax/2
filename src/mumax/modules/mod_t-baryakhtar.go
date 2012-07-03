@@ -24,10 +24,10 @@ func init() {
 
 func LoadBaryakhtarTorques(e *Engine) {
 
-    e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
-    LoadHField(e)
-    LoadMagnetization(e)
-    LoadFullMagnetization(e)
+	e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
+	LoadHField(e)
+	LoadMagnetization(e)
+	LoadFullMagnetization(e)
 	// ============ New Quantities =============
 
 	e.AddNewQuant("lambda", SCALAR, MASK, Unit("A/m"), "Landau-Lifshits relaxation constant")
@@ -35,10 +35,10 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
 	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
-	
+
 	// ============ Dependencies =============
-	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e","msat0");//,"debug_h")
-    
+	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0") //,"debug_h")
+
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{btorque: btorque}
 	btorque.SetUpdater(upd)
@@ -50,37 +50,37 @@ type BaryakhtarUpdater struct {
 
 func (u *BaryakhtarUpdater) Update() {
 
-	e := GetEngine()	
-	cellSize := e.CellSize()	
+	e := GetEngine()
+	cellSize := e.CellSize()
 	btorque := u.btorque
 	m := e.Quant("mf")
 	lambda := e.Quant("lambda")
-    lambda_e := e.Quant("lambda_e")
+	lambda_e := e.Quant("lambda_e")
 	heff := e.Quant("H_eff")
-	gammaLL := e.Quant("gamma_LL").Scalar()	
+	gammaLL := e.Quant("gamma_LL").Scalar()
 	pbc := e.Periodic()
 	msat0 := e.Quant("msat0")
 	//debug_h := e.Quant("debug_h")
-	
+
 	// put gamma in multiplier to avoid additional multiplications
 	multiplierBT := btorque.Multiplier()
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
 	}
-	
-	gpu.LLGBtAsync(btorque.Array(), 
-                    m.Array(), 
-                    heff.Array(),
-                    msat0.Array(),
-                    lambda.Array(), 
-                    lambda_e.Array(),
-                    float32(msat0.Multiplier()[0]),
-                    float32(lambda.Multiplier()[0]),
-                    float32(lambda_e.Multiplier()[0]),
-                    float32(cellSize[X]), 
-                    float32(cellSize[Y]), 
-                    float32(cellSize[Z]), 
-                    pbc)
-                    
-    btorque.Array().Sync()
+
+	gpu.LLGBtAsync(btorque.Array(),
+		m.Array(),
+		heff.Array(),
+		msat0.Array(),
+		lambda.Array(),
+		lambda_e.Array(),
+		float32(msat0.Multiplier()[0]),
+		float32(lambda.Multiplier()[0]),
+		float32(lambda_e.Multiplier()[0]),
+		float32(cellSize[X]),
+		float32(cellSize[Y]),
+		float32(cellSize[Z]),
+		pbc)
+
+	btorque.Array().Sync()
 }

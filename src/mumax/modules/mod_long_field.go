@@ -22,8 +22,8 @@ func init() {
 }
 
 func LoadLongField(e *Engine) {
-    LoadHField(e)
-    LoadFullMagnetization(e)
+	LoadHField(e)
+	LoadFullMagnetization(e)
 	kappa := e.AddNewQuant("kappa", SCALAR, VALUE, Unit(""), "longitudinal magnetic susceptibility")
 	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
 	hfield := e.Quant("H_eff")
@@ -43,11 +43,11 @@ func (u *LongFieldUpdater) Update() {
 	m := u.m
 	kappa := u.kappa.Scalar()
 	Hlf := u.Hlf
-    msat0 := u.msat0
-    msat := u.msat
+	msat0 := u.msat0
+	msat := u.msat
 	stream := u.Hlf.Array().Stream
-	kappa = 0.5 / kappa;
-	
+	kappa = 0.5 / kappa
+
 	gpu.LongFieldAsync(Hlf.Array(), m.Array(), msat.Array(), msat0.Array(), kappa, msat.Multiplier()[0], msat0.Multiplier()[0], stream)
 	stream.Sync()
 }

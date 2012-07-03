@@ -12,37 +12,37 @@ package frontend
 // Author: Arne Vansteenkiste
 
 import (
+	"bufio"
 	"fmt"
 	. "mumax/common"
 	"mumax/engine"
 	"net"
-	"path"
-	"bufio"
-	"time"
 	"os"
+	"path"
+	"time"
 	//"syscall"
 	"os/exec"
 )
 
 type Client struct {
-	inputFile			 string
-	outputDir 			 string
-	commAddr 			 string
-	ipc                  jsonRPC
-	api                  engine.API
-	wire			 	 net.Conn
-	isWireAlive          int
-	server				 net.Listener
-	isServerAlive        int
-	logWait              chan int // channel to wait for completion of go logStream()
+	inputFile     string
+	outputDir     string
+	commAddr      string
+	ipc           jsonRPC
+	api           engine.API
+	wire          net.Conn
+	isWireAlive   int
+	server        net.Listener
+	isServerAlive int
+	logWait       chan int // channel to wait for completion of go logStream()
 }
 
 // Initializes the mumax client to parse infile, write output
 // to outdir and connect to a server over conn.
 
 func (c *Client) Init(inputfile string, outputDir string) {
-    c.isServerAlive = 0;
-    c.isWireAlive = 0;
+	c.isServerAlive = 0
+	c.isWireAlive = 0
 	Debug("Trying to establish TCP server...")
 	m_s, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -53,13 +53,13 @@ func (c *Client) Init(inputfile string, outputDir string) {
 	c.commAddr = c.server.Addr().String()
 	Debug("The TCP connection is grangted to:", c.commAddr)
 	Debug("Done.")
-	c.isServerAlive = 1;
-	
+	c.isServerAlive = 1
+
 	c.inputFile = inputfile
 	c.outputDir = outputDir
-	
+
 	CheckErr(os.Setenv("MUMAX2_ADDR", c.commAddr), ERR_IO)
-	
+
 	engine.Init()
 	engine.GetEngine().SetOutputDirectory(outputDir)
 	c.api = engine.API{engine.GetEngine()}
@@ -68,90 +68,88 @@ func (c *Client) Init(inputfile string, outputDir string) {
 // Start interpreter sub-command and communicate over fifos in the output dir.
 func (c *Client) Run() {
 
-    defer func() {
-        Debug("Shutdown server...")
-        if c.isWireAlive == 1 {
-            err1 := c.wire.Close()
-            CheckErr(err1, ERR_IO)
-        }
-        
-        if c.isServerAlive == 1 {
-	        err2 := c.server.Close()
-	        CheckErr(err2, ERR_IO)
-	    }
-	    Debug("Done.")
-    }()
-    
-	c.logWait = make(chan int)
-	
-	command, waiter := c.startSubcommand()
-	
-	swait := make(chan int)
-	
-		
-	go func(){	
-	    Debug("Waiting for client...")
-	    var err error
-	    c.wire,err = c.server.Accept()
-	    if err != nil {
-		    Debug("Client has failed to connect!")
-		    swait <- 1
-		    return
-	    }
-	    swait <- 0
-	}()	
-	
-	go func() {
-	    var status int
-	    status = <-waiter
-	    if (status != 0) {  
-	            swait <- status 
-	            return
-	    }
-	    swait <- 0
+	defer func() {
+		Debug("Shutdown server...")
+		if c.isWireAlive == 1 {
+			err1 := c.wire.Close()
+			CheckErr(err1, ERR_IO)
+		}
+
+		if c.isServerAlive == 1 {
+			err2 := c.server.Close()
+			CheckErr(err2, ERR_IO)
+		}
+		Debug("Done.")
 	}()
-	
-	status := <- swait
+
+	c.logWait = make(chan int)
+
+	command, waiter := c.startSubcommand()
+
+	swait := make(chan int)
+
+	go func() {
+		Debug("Waiting for client...")
+		var err error
+		c.wire, err = c.server.Accept()
+		if err != nil {
+			Debug("Client has failed to connect!")
+			swait <- 1
+			return
+		}
+		swait <- 0
+	}()
+
+	go func() {
+		var status int
+		status = <-waiter
+		if status != 0 {
+			swait <- status
+			return
+		}
+		swait <- 0
+	}()
+
+	status := <-swait
 	if status != 0 {
 		Debug("Connection failed")
-	    panic(InputErr(fmt.Sprint(command, " exited with status ", status))) 
-	    return
+		panic(InputErr(fmt.Sprint(command, " exited with status ", status)))
+		return
 	}
 	//c.wire = s_wire
-	c.isWireAlive = 1;
-	
+	c.isWireAlive = 1
+
 	s_infifo := bufio.NewReader(c.wire)
-	s_outflush := bufio.NewWriter(c.wire) 	
+	s_outflush := bufio.NewWriter(c.wire)
 	s_outfifo := s_outflush
-	
+
 	c.ipc.Init(s_infifo, s_outfifo, *s_outflush, c.api)
 	c.ipc.Run()
-	
+
 	// wait for the sub-command to exit
 	Debug("Waiting for subcommand ", command, "to exit")
-	
+
 	exitstat := <-swait
 
 	if exitstat != 0 {
-			panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
+		panic(InputErr(fmt.Sprint(command, " exited with status ", exitstat)))
 	}
-	
+
 	//Housekeeping
-	
+
 	c.wire.Close()
-	c.isWireAlive = 0;
-	c.server.Close()	
-	c.isServerAlive = 0;
-	
-	Debug("Client is now disconnected")	
-	
-	
+	c.isWireAlive = 0
+	c.server.Close()
+	c.isServerAlive = 0
+
+	Debug("Client is now disconnected")
+
 	// wait for full pipe of sub-command output to the logger
 	// not sure if this has much effect.
-	
+
 	<-c.logWait // stderr
 	<-c.logWait // stdout (or the other way around ;-)
-	
+
 }
 
 // run the sub-command (e.g. python) to interpret the script file
@@ -162,7 +160,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 
 	var args []string
 	command, args = commandForFile(c.inputFile) // e.g.: "python"
-	Debug("Starting",command,"with following flags",args)
+	Debug("Starting", command, "with following flags", args)
 	proc := exec.Command(command, args...) //:= subprocess(command, args)
 	Debug("Done.")
 	stderr, err4 := proc.StderrPipe()
@@ -175,7 +173,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	go logStream("["+command+"]", stdout, false, c.logWait)
 
 	Debug(command, "PID:", proc.Process.Pid)
-	
+
 	// start waiting for sub-command asynchronously and
 	// use a channel to signal sub-command completion
 	waiter = make(chan (int))

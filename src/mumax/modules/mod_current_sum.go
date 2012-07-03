@@ -11,9 +11,9 @@ package modules
 // Author: Mykola Dvornik
 
 import (
-	. "mumax/engine"
 	"fmt"
 	. "mumax/common"
+	. "mumax/engine"
 )
 
 // Register this module
@@ -26,7 +26,7 @@ func LoadUserDefinedCurrentDensitySum(e *Engine) {
 	if e.HasQuant("j") {
 		panic(InputErr(fmt.Sprint("You have already loaded another electrical current module, please make sure that this module is loaded first!")))
 	}
-	
+
 	j := e.AddNewQuant("j", VECTOR, FIELD, Unit("A/m2"), "sum of custom electrical current densities")
-	j.SetUpdater(NewSumUpdater(j))	
+	j.SetUpdater(NewSumUpdater(j))
 }

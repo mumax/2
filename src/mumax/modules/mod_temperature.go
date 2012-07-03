@@ -26,8 +26,8 @@ func LoadTempBrown(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	Therm_seed := e.AddNewQuant("Therm_seed", SCALAR, VALUE, Unit(""), `Random seed for H\_therm`)
-    Therm_seed.SetVerifier(Int)
-    
+	Therm_seed.SetVerifier(Int)
+
 	temp := e.AddNewQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
 	temp.SetVerifier(NonNegative)
 	Htherm := e.AddNewQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
@@ -46,16 +46,16 @@ func LoadTempBrown(e *Engine) {
 
 // Updates the thermal field
 type TempBrownUpdater struct {
-	rng    []curand.Generator // Random number generator for each GPU
-	htherm *Quant             // The quantity I will update
-	therm_seed *Quant
+	rng              []curand.Generator // Random number generator for each GPU
+	htherm           *Quant             // The quantity I will update
+	therm_seed       *Quant
 	therm_seed_cache int64
 }
 
 func NewTempBrownUpdater(htherm *Quant, therm_seed *Quant) Updater {
 	u := new(TempBrownUpdater)
-    u.therm_seed = therm_seed
-    u.therm_seed_cache = -1e10 
+	u.therm_seed = therm_seed
+	u.therm_seed_cache = -1e10
 	u.htherm = htherm
 	u.rng = make([]curand.Generator, gpu.NDevice())
 	for dev := range u.rng {
@@ -69,18 +69,18 @@ func NewTempBrownUpdater(htherm *Quant, therm_seed *Quant) Updater {
 // Updates H_therm
 func (u *TempBrownUpdater) Update() {
 	e := GetEngine()
-    
-    therm_seed := int64(u.therm_seed.Scalar())
-    
-    if therm_seed != u.therm_seed_cache {
-        for dev := range u.rng {
-	        seed := therm_seed + int64(dev)
-	        u.rng[dev].SetSeed(seed)
-	    }
-    }
-    
-    u.therm_seed_cache = therm_seed
-     
+
+	therm_seed := int64(u.therm_seed.Scalar())
+
+	if therm_seed != u.therm_seed_cache {
+		for dev := range u.rng {
+			seed := therm_seed + int64(dev)
+			u.rng[dev].SetSeed(seed)
+		}
+	}
+
+	u.therm_seed_cache = therm_seed
+
 	// Nothing to do for zero temperature
 	temp := e.Quant("temp")
 	tempMul := temp.Multiplier()[0]

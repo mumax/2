@@ -340,11 +340,11 @@ func (q *Quant) Buffer() *host.Array {
 	array := q.Array()
 	if q.buffer == nil {
 		q.allocBuffer()
-	} 
+	}
 	// copy
 	buffer := q.buffer
 	buffer.Pin()
-	
+
 	if array.IsNil() {
 		for c := range buffer.Comp {
 			comp := buffer.Comp[c]
@@ -496,7 +496,7 @@ func (q *Quant) String() string {
 }
 
 func (q *Quant) SetUpToDate(status bool) {
-	   q.upToDate = status
+	q.upToDate = status
 }
 
 //// If the quantity represents a space-dependent field, return a host copy of its value.

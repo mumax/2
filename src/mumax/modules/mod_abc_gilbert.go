@@ -19,17 +19,17 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("abc_gilbert", "Artificial Gilbert damping term to use with absorbing boudary conditions", LoadABCGilbert)
+	RegisterModule("abc-gilbert", "Artificial Gilbert damping term to use with absorbing boudary conditions", LoadABCGilbert)
 }
 
 func LoadABCGilbert(e *Engine) {
 	LoadMagnetization(e)
 	LoadHField(e)
-	
+
 	// ============ New Quantities =============
-    e.AddNewQuant("abc_alpha", SCALAR, MASK, Unit(""), "Gilbert damping")
-    e.AddNewQuant("abc_gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
-    e.Quant("abc_gamma").SetScalar(Gamma0)
+	e.AddNewQuant("abc_alpha", SCALAR, MASK, Unit(""), "Gilbert damping")
+	e.AddNewQuant("abc_gamma", SCALAR, VALUE, Unit("m/As"), "gyromag. ratio")
+	e.Quant("abc_gamma").SetScalar(Gamma0)
 	e.Quant("abc_gamma").SetVerifier(NonZero)
 	gilbd := e.AddNewQuant("gilbd", VECTOR, FIELD, Unit("/s"), "Gilbert damping term")
 
@@ -37,13 +37,13 @@ func LoadABCGilbert(e *Engine) {
 	e.Depends("gilbd", "m", "H_eff", "abc_alpha", "abc_gamma")
 
 	// ============ Updating the gilbert term =============
-	
+
 	gilbd.SetUpdater(&abcGilbertUpdater{
 		gilbd: e.Quant("gilbd"),
-		    m: e.Quant("m"),
-		    H: e.Quant("H_eff"),
-		    α: e.Quant("abc_alpha"),
-		    γ: e.Quant("abc_gamma")})
+		m:     e.Quant("m"),
+		H:     e.Quant("H_eff"),
+		α:     e.Quant("abc_alpha"),
+		γ:     e.Quant("abc_gamma")})
 
 	// Add Gilbert Damping to LLG torque
 	AddTermToQuant(e.Quant("torque"), gilbd)

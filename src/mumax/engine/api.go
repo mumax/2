@@ -330,7 +330,7 @@ func (a API) SetCell(quant string, x, y, z int, value []float64) {
 	SwapXYZ(value)
 	pointers := q.Array().DevicePtr()
 	if pointers[0] == 0 {
-	    panic(InputErr(fmt.Sprint("You are attempting to call setcell() before array for qunatity is allocated. Please consider setmask() instead.")))
+		panic(InputErr(fmt.Sprint("You are attempting to call setcell() before array for qunatity is allocated. Please consider setmask() instead.")))
 	}
 	//q.assureAlloc()
 	for c := range value {
@@ -696,7 +696,7 @@ func (a API) Echo(str string) {
 
 // Should be called at the end of each input file to make
 // sure the input script does not terminate too early.
-func (a API) Sync(){
+func (a API) Sync() {
 	// The simple act of calling a function (any function)
 	// causes the front-end RPC to synchronize the scripting
 	// language and mumax.

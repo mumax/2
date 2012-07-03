@@ -18,15 +18,14 @@ import (
 	"unsafe"
 )
 
-
 func LongFieldAsync(hlf *Array, m *Array, msat *Array, msat0 *Array, kappa float64, msatMul float64, msat0Mul float64, stream Stream) {
 
 	// Bookkeeping
 	CheckSize(hlf.Size3D(), m.Size3D())
 	CheckSize(msat0.Size3D(), m.Size3D())
-	
-	Assert(msat0.NComp()== 1)
-    
+
+	Assert(msat0.NComp() == 1)
+
 	// Calling the CUDA functions
 	C.long_field_async(
 		(**C.float)(unsafe.Pointer(&(hlf.Comp[X].Pointers()[0]))),
@@ -36,14 +35,14 @@ func LongFieldAsync(hlf *Array, m *Array, msat *Array, msat0 *Array, kappa float
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[0]))),
-        
-        (**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
-        (**C.float)(unsafe.Pointer(&(msat0.Comp[X].Pointers()[0]))),
-        
+
+		(**C.float)(unsafe.Pointer(&(msat.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(msat0.Comp[X].Pointers()[0]))),
+
 		(C.float)(kappa),
 		(C.float)(msatMul),
 		(C.float)(msat0Mul),
-         
+
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }

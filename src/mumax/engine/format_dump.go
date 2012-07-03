@@ -48,5 +48,5 @@ func (f *FormatDump) Write(out io.Writer, q *Quant, options []string) {
 	writeInt(out, len(data[0]))
 	writeInt(out, len(data[0][0]))
 	writeInt(out, len(data[0][0][0]))
-	out.Write( (*(*[1<<31-1]byte)(unsafe.Pointer(&list[0])))[0:4*len(list)] )
+	out.Write((*(*[1<<31 - 1]byte)(unsafe.Pointer(&list[0])))[0 : 4*len(list)])
 }

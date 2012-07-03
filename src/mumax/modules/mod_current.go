@@ -11,8 +11,8 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
-	. "mumax/engine"
 	. "mumax/common"
+	. "mumax/engine"
 	"mumax/gpu"
 )
 

@@ -11,15 +11,15 @@ package frontend
 // Author: Arne Vansteenkiste
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"bufio"
 	. "mumax/common"
 	"mumax/host"
 	"reflect"
 	"runtime"
-	"bytes"
 )
 
 // An RPC server using simple JSON encoding.
@@ -29,10 +29,10 @@ import (
 // 	Call: ["methodname", [arg1, arg2, ...]]
 // 	Response: [return_value1, return_value2, ...]
 type jsonRPC struct {
-	in  io.Reader
-	out io.Writer
+	in    io.Reader
+	out   io.Writer
 	flush bufio.Writer
-	
+
 	*json.Decoder
 	*json.Encoder
 	receiver interface{}
@@ -56,9 +56,9 @@ func (j *jsonRPC) Init(in io.Reader, out io.Writer, flush bufio.Writer, receiver
 // encodes the return values back to j.out.
 func (j *jsonRPC) Run() {
 	for {
-		wbuf := new(bytes.Buffer) 
+		wbuf := new(bytes.Buffer)
 		jsonc := json.NewEncoder(wbuf)
-		
+
 		v := new(interface{})
 		err := j.Decode(v)
 		if err == io.EOF {
@@ -66,7 +66,7 @@ func (j *jsonRPC) Run() {
 		}
 		CheckErr(err, ERR_IO)
 
-		if array, ok := (*v).([]interface{}); ok {		
+		if array, ok := (*v).([]interface{}); ok {
 			Assert(len(array) == 2)
 			ret := j.Call(array[0].(string), array[1].([]interface{}))
 			convertOutput(ret)
@@ -106,15 +106,15 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	// call
 	// convert []interface{} to []reflect.Value  
 	Debug("Making call to MuMax backend")
-	
+
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
 		argvals[i] = convertArg(args[i], f.Type().In(i))
 	}
 	retVals := f.Call(argvals)
-	
+
 	Debug("Successful call to MuMax backend")
-	
+
 	// convert []reflect.Value to []interface{}
 	ret := make([]interface{}, len(retVals))
 	for i := range retVals {

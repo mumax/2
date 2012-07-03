@@ -12,10 +12,10 @@ package engine
 import ()
 
 import (
+	"image/png"
 	. "mumax/common"
 	"mumax/host"
 	"os"
-	"image/png"
 )
 
 func init() {
@@ -34,8 +34,8 @@ func ReadPNG(fname string) *host.Array {
 
 	inside := host.NewArray(1, []int{1, height, width})
 
-	for i := 0; i<height; i++{
-		for j := 0; j<width; j++{
+	for i := 0; i < height; i++ {
+		for j := 0; j < width; j++ {
 			r, g, b, _ := img.At(j, height-1-i).RGBA()
 			if r+g+b < (0xFFFF*3)/2 {
 				inside.Array[0][0][i][j] = 1
@@ -44,4 +44,3 @@ func ReadPNG(fname string) *host.Array {
 	}
 	return inside
 }
-
