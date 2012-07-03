@@ -127,9 +127,8 @@ for kk in range(Nz):
             Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
 setarray('Mf',Mfd)
      
-#autosave("m", "gplot", [], 1e-12)
-#autosave("m", "gplot.gz", [], 1e-12)
-#autosave("m", "gplot.zip", [], 1e-12)
+autosave("m", "gplot", [], 1e-12)
+autosavesinglefile("m", "dump", [], 1e-12)
 
 #autosave("msat", "gplot", [], 1e-12)
 #autosave("mf", "gplot", [], 1e-12)

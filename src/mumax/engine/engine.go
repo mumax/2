@@ -13,7 +13,7 @@ import (
 	"fmt"
 	. "mumax/common"
 	"path"
-	"strings"
+	"strings"	
 )
 
 // The global simulation engine
@@ -511,12 +511,35 @@ func (e *Engine) SaveAs(q *Quant, format string, options []string, filename stri
 	GetOutputFormat(format).Write(bufout, q, options)
 }
 
+// Append the quantity once in the specified format and file name
+func (e *Engine) SaveAsAppend(q *Quant, format string, options []string, filename string) {
+	q.Update() //!!
+	checkKinds(q, MASK, FIELD)
+    out := OpenWRAPPENDONLY(e.Relative(filename))
+	defer out.Close()
+	bufout := Buffer(out)
+	defer bufout.Flush()
+	GetOutputFormat(format).Write(bufout, q, options)
+}
+
 // Saves the quantity periodically.
 func (e *Engine) AutoSave(quant string, format string, options []string, period float64) (handle int) {
 	checkKinds(e.Quant(quant), MASK, FIELD)
 	handle = e.NewHandle()
 	e.crontabs[handle] = &AutoSave{quant, format, options, period, e.time.Scalar(), 0}
 	Log("Auto-save", quant, "every", period, "s", "(handle ", handle, ")")
+	return handle
+}
+
+// Saves the quantity periodically to single file.
+func (e *Engine) AutoSaveSingleFile(quant string, format string, options []string, period float64) (handle int) {
+	checkKinds(e.Quant(quant), MASK, FIELD)
+	if format != "dump" {
+	    panic(InputErr("Single File mode is only meaningfull for 'dump' output format!"))
+	}
+	handle = e.NewHandle()
+	e.crontabs[handle] = &AutoSaveSingleFile{quant, format, options, period, e.time.Scalar(), 0}
+	Log("Auto-save: single file mode", quant, "every", period, "s", "(handle ", handle, ")")
 	return handle
 }
 
@@ -549,6 +572,18 @@ func (e *Engine) AutoTabulate(quants []string, filename string, period float64) 
 func (e *Engine) AutoFilename(quant, format string) string {
 	filenum := fmt.Sprintf(e.filenameFormat, e.OutputID())
 	filename := quant + filenum + "." + GetOutputFormat(format).Name()
+	dir := ""
+	if e.outputDir != "" {
+		dir = e.outputDir + "/"
+	}
+	return dir + filename
+}
+
+// Generates an automatic file name for the quantity, given the output format (singe file mode).
+// E.g., "dir.out/m.dump"
+// see: outputDir, filenameFormat
+func (e *Engine) AutoFilenameSingleFile(quant, format string) string {
+	filename := quant + "." + GetOutputFormat(format).Name()
 	dir := ""
 	if e.outputDir != "" {
 		dir = e.outputDir + "/"

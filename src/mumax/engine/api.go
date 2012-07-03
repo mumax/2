@@ -496,6 +496,20 @@ func (a API) AutoSave(quantity string, format string, options []string, period f
 	return a.Engine.AutoSave(quantity, format, options, period)
 }
 
+// Saves a space-dependent quantity periodically to a single file, every period (expressed in seconds).
+// Output appears in the output directory with automatically generated file name.
+// E.g., for a quantity named "m", and format "txt" the generated files will be:
+// m.dump, b.dump ...
+// See FilenameFormat() for setting the number of zeros.
+// This function outputs to single file by appending new data to the end of the file.
+// Therefore it is meaningfull only for mumax2's 'dump' binary format.
+// Returns an integer handle that can be used to manipulate the auto-save entry. 
+// E.g. remove(handle) stops auto-saving it.
+// @see filenumberfomat
+func (a API) AutoSaveSingleFile(quantity string, format string, options []string, period float64) (handle int) {
+	return a.Engine.AutoSaveSingleFile(quantity, format, options, period)
+}
+
 // Saves these space-independent quantities, once. 
 // Their values are appended to the file, on one line.
 func (a API) Tabulate(quantities []string, filename string) {

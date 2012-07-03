@@ -27,61 +27,10 @@ func (f *FormatGPlotGZip) Name() string {
 }
 
 func (f *FormatGPlotGZip) Write(out io.Writer, q *Quant, options []string) {
-    
     nout, err := gzip.NewWriterLevel(out, gzip.BestSpeed)
-    
     if err != nil {
 		panic(IOErr(err.Error()))
 	}
-	
     (new (FormatGPlot)).Write(nout, q, options)
-    
-    nout.Close()
-    
-    /*if len(options) > 0 {
-		panic(InputErr("gplot.gzip accepts no options"))
-	}
-	
-	nout := gzip.NewWriter(out)
-	
-	data := q.Buffer().Array
-	gridsize := q.Array().Size3D()
-	cellsize := GetEngine().CellSize()
-	ncomp := len(data)
-
-	// Here we loop over X,Y,Z, not Z,Y,X, because
-	// internal in C-order == external in Fortran-order
-	for i := 0; i < gridsize[X]; i++ {
-		x := float64(i) * cellsize[X]
-		for j := 0; j < gridsize[Y]; j++ {
-			y := float64(j) * cellsize[Y]
-			for k := 0; k < gridsize[Z]; k++ {
-				z := float64(k) * cellsize[Z]
-				_, err := fmt.Fprint(nout, z, " ", y, " ", x, "\t")
-				if err != nil {
-					panic(IOErr(err.Error()))
-				}
-				for c := 0; c < ncomp; c++ {
-					_, err := fmt.Fprint(nout, data[SwapIndex(c, ncomp)][i][j][k], " ") // converts to user space.
-					if err != nil {
-						panic(IOErr(err.Error()))
-					}
-				}
-				_, err = fmt.Fprint(nout, "\n")
-				if err != nil {
-					panic(IOErr(err.Error()))
-				}
-			}
-			_, err := fmt.Fprint(nout, "\n")
-			if err != nil {
-				panic(IOErr(err.Error()))
-			}
-		}
-		_, err := fmt.Fprint(nout, "\n")
-		if err != nil {
-			panic(IOErr(err.Error()))
-		}
-	}*/
-	
-    
+    nout.Close()    
 }

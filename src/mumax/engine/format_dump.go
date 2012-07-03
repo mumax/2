@@ -11,8 +11,9 @@ package engine
 // in the machine's endianess.
 // uses 32-bit words:
 //	0: magic "#d1\n"
-//	1: rank: 4
-//	2:2+rank: sizes for each direction
+//  1: time of the snapshot
+//	2: rank: 4
+//	3:2+rank: sizes for each direction
 //	rest: ieee float data.
 // Author: Arne Vansteenkiste
 
@@ -42,10 +43,10 @@ func (f *FormatDump) Write(out io.Writer, q *Quant, options []string) {
 
 	out.Write([]byte("#d1\n"))
 	writeInt(out, 4) // rank 4
+	writeDouble(out, GetEngine().Quant("t").Scalar())
 	writeInt(out, len(data))
 	writeInt(out, len(data[0]))
 	writeInt(out, len(data[0][0]))
 	writeInt(out, len(data[0][0][0]))
 	out.Write( (*(*[1<<31-1]byte)(unsafe.Pointer(&list[0])))[0:4*len(list)] )
 }
-

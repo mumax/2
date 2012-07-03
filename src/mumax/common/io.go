@@ -39,6 +39,13 @@ func OpenWRONLY(filename string) *os.File {
 }
 
 // Opens the file, panics on error
+func OpenWRAPPENDONLY(filename string) *os.File {
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	CheckIO(err)
+	return f
+}
+
+// Opens the file, panics on error
 func OpenRDONLY(filename string) *os.File {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	CheckIO(err)

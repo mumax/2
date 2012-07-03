@@ -66,12 +66,19 @@ func writeData(out io.Writer, data []float32) {
 	}
 }
 
-//func writeFloat(out io.Writer, f float32) {
-//	_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
-//	if err != nil {
-//		panic(IOErr(err.String()))
-//	}
-//}
+func writeFloat(out io.Writer, f float32) {
+	_, err := out.Write((*[4]byte)(unsafe.Pointer(&f))[:])
+	if err != nil {
+		panic(IOErr(err.Error()))
+	}
+}
+
+func writeDouble(out io.Writer, f float64) {
+	_, err := out.Write((*[8]byte)(unsafe.Pointer(&f))[:])
+	if err != nil {
+		panic(IOErr(err.Error()))
+	}
+}
 
 // Converts the raw int data to a slice of 4 bytes
 //func IntToBytes(i int) []byte {
