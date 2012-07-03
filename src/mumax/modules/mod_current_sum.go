@@ -18,7 +18,7 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("current_sum", "Sum of electrical currents", LoadUserDefinedCurrentDensitySum)
+	RegisterModule("current-sum", "Sum of electrical currents", LoadUserDefinedCurrentDensitySum)
 }
 
 // loads the current density
