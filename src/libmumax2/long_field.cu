@@ -15,7 +15,8 @@ extern "C" {
 					 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
                      float* __restrict__ msatMsk, 
 					 float* __restrict__ msat0Msk,
-					 float kappa,
+					 float* __restrict__ kappaMsk,
+					 float kappaMul,
 					 float msatMul,
 					 float msat0Mul,
 					 int NPart) 
@@ -23,8 +24,9 @@ extern "C" {
     
     int I = threadindex;
     real Ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
+    real kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
     
-    if (Ms0 == 0.0) {
+    if (Ms0 == 0.0 || kappa == 0.0) {
       hx[I] = 0.0f;
       hy[I] = 0.0f;
       hz[I] = 0.0f;    
@@ -32,6 +34,9 @@ extern "C" {
     }
     
     if (I < NPart){ // Thread configurations are usually too large...
+      
+      kappa = 1.0 / kappa;
+      
       real Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
       
       real3 m = make_real3(mx[I], my[I], mz[I]);
@@ -51,11 +56,12 @@ extern "C" {
   void long_field_async(float** hx, float** hy, float** hz, 
 			 float** mx, float** my, float** mz,
 			 float** msat, 
-			 float** msat0, 
-			 float kappa,
+			 float** msat0,
+			 float** kappa, 
+			 float kappaMul,
 			 float msatMul, 
 			 float msat0Mul,    
-			 int NPart, 
+			 int NPart,     
 			 CUstream* stream)
   {
 
@@ -69,8 +75,9 @@ extern "C" {
 	    long_field_Kern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (hx[dev], hy[dev], hz[dev],  
 										       mx[dev], my[dev], mz[dev],
 										       msat[dev], 
-										       msat0[dev], 
-										       kappa,
+										       msat0[dev],
+										       kappa[dev], 
+										       kappaMul,
 										       msatMul, 
 										       msat0Mul,
 										       NPart);
