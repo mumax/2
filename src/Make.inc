@@ -7,20 +7,22 @@ export LDFLAGS = $LDFLAGS:'./libmumax2'
 ifndef SystemRoot
 
 NVCC=nvcc
- 
+  
 NVCC+=\
-  --compiler-options -Wall\
   --compiler-options -Werror\
   --compiler-options -fPIC\
-  --compiler-options -g\
-  -G\
+  --use_fast_math\
+  -arch=sm_21\
+  -Xptxas\
+  -v\
   
 NVCCWERRORLESS=nvcc
 NVCCWERRORLESS+=\
-  --compiler-options -Wall\
   --compiler-options -fPIC\
-  --compiler-options -g\
-  -G\
+  --use_fast_math\
+  -arch=sm_21\
+  -Xptxas\
+  -v\
 
 # flags for the gcc compiler
 # As CUDA is delivered only in 32 bits on Os X, architecture is forced to i386 on Darwin platform
@@ -30,7 +32,7 @@ CC=g++\
 CC+=\
  -I/usr/local/cuda/include\
  -Wall\
- -g\
+ -O3\
 
  
 UNAME := $(shell uname)
@@ -55,31 +57,51 @@ else
 NVCC=nvcc --use-local-env --cl-version 2010
 NVCC+=\
   -m64\
+  -O3\
+  -gencode arch=compute_10,code=sm_10\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_20,code=sm_30\
+  -gencode arch=compute_30,code=sm_30\
+  -Xptxas\
+  -v\
+  --use_fast_math\
   --compiler-options -W4\
   --compiler-options -Zi\
-  --compiler-options -Od\
-  --compiler-options -Gd\
+  --compiler-options -Ox\
+  --compiler-options -Oi\
+  --compiler-options -GL\
   --compiler-options -EHs\
-  --compiler-options -MDd\
   --compiler-options -GS\
-  --compiler-options -fp:precise\
+  --compiler-options -fp:fast\
+  --compiler-options -arch:AVX\
   --compiler-options -DWIN32\
-  --compiler-options -D_DEBUG\
+  --compiler-options -DNDEBUG\
   --compiler-options -D_WINDOWS\
   
 NVCCWERRORLESS=nvcc --use-local-env --cl-version 2010
 NVCCWERRORLESS+=\
   -m64\
+  -O3\
+  -gencode arch=compute_10,code=sm_10\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_20,code=sm_30\
+  -gencode arch=compute_30,code=sm_30\
+  -Xptxas\
+  -v\
+  --use_fast_math\
   --compiler-options -W4\
   --compiler-options -Zi\
-  --compiler-options -Gd\
-  --compiler-options -Od\
+  --compiler-options -Ox\
+  --compiler-options -Oi\
+  --compiler-options -GL\
   --compiler-options -EHs\
-  --compiler-options -MDd\
   --compiler-options -GS\
-  --compiler-options -fp:precise\
+  --compiler-options -fp:fast\
+  --compiler-options -arch:AVX\
   --compiler-options -DWIN32\
-  --compiler-options -D_DEBUG\
+  --compiler-options -DNDEBUG\
   --compiler-options -D_WINDOWS\
 
 CC=cl.exe\
@@ -87,15 +109,16 @@ CC=cl.exe\
 CC+=\
  /I "$(CUDA_INC_PATH)"\
  /DWIN32\
- /D_DEBUG\
+ /DNDEBUG\
  /D_WINDOWS\
  /W4\
- /Od\
+ /Ox\
+ /Oi\
+ /GL\
  /EHsc\
- /MDd\
  /GS\
  /Zi\
- /Gd\
- /fp:precise\
+ /fp:fast\
+ /arch:AVX\
  
  endif
