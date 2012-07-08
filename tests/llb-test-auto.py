@@ -103,7 +103,15 @@ setv('B_ext',[Bx,By,Bz])
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
 setv('lambda', 0.008)
+
+k = makearray(1,Nx,Ny,Nz)            
+for kk in range(Nz):
+    for jj in range(Ny):
+        for ii in range(Nx):
+            k[0][ii][jj][kk] = 1.0
+setmask('kappa', k) 
 setv('kappa', 2e-4)
+
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
 lambda_e = 1e-4 * lex

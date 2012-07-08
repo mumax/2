@@ -11,30 +11,23 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
+      "fmt"
 	. "mumax/engine"
+	. "mumax/common"
 )
 
 // Register this module
 func init() {
-	RegisterModule("micromagnetism", "Basic micromagnetism module", LoadMicromag)
+	RegisterModule("maxtorque", "Calculates maximum torque for the given time", LoadMaxTorque)
 }
 
-func LoadMicromag(e *Engine) {
-	LoadHField(e)
-	LoadMagnetization(e)
-	e.LoadModule("demag")
-	e.LoadModule("exchange6")
-	e.LoadModule("llg")
-	e.LoadModule("zeeman")
-	e.LoadModule("solver/rk12")
-	e.LoadModule("maxtorque")
-	e.Quant("dt").SetScalar(1e-15)
-	e.Quant("mindt").SetScalar(1e-15)
-	e.Quant("m_maxerror").SetScalar(1. / 2000.)
-
-	/*torque := e.Quant("torque")
-
-	maxtorque := e.AddNewQuant("maxtorque", SCALAR, VALUE, torque.Unit(), "Maximum |torque|")
-	e.Depends("maxtorque", "torque")
-	maxtorque.SetUpdater(NewMaxNormUpdater(torque, maxtorque))*/
+func LoadMaxTorque(e *Engine) {
+    if e.HasQuant("torque") {
+	    torque := e.Quant("torque")
+	    maxtorque := e.AddNewQuant("maxtorque", SCALAR, VALUE, torque.Unit(), "Maximum |torque|")
+	    e.Depends("maxtorque", "torque")
+	    maxtorque.SetUpdater(NewMaxNormUpdater(torque, maxtorque))
+	} else {
+	    panic(InputErr(fmt.Sprint("maxtorque module should be loaded after micromagnetic equation module")))
+	}
 }
