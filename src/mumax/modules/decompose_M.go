@@ -14,7 +14,7 @@ import (
 )
 
 type decomposeMUpdater struct {
-	mf, msat0 *Quant
+	mf, msat0, msat_eq *Quant
 }
 
 func (u *decomposeMUpdater) Update() {
@@ -24,9 +24,9 @@ func (u *decomposeMUpdater) Update() {
 	msat := e.Quant("Msat")
 
 	mf := u.mf
-	msat0 := u.msat0
+	msat_eq := u.msat_eq
 
-	gpu.Limit(mf.Array(), msat0.Array(), float32(msat.Multiplier()[0]), float32(msat0.Multiplier()[0]))
+	gpu.Limit(mf.Array(), msat_eq.Array(), float32(msat.Multiplier()[0]), float32(msat_eq.Multiplier()[0]))
 
 	gpu.Decompose(mf.Array(),
 		m.Array(),
