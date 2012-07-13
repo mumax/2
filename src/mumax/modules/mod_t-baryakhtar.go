@@ -33,11 +33,11 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.AddNewQuant("lambda", SCALAR, MASK, Unit("A/m"), "Landau-Lifshits relaxation constant")
 	e.AddNewQuant("lambda_e", SCALAR, MASK, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
 	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
-	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
+	e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 
 	// ============ Dependencies =============
-	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0") //,"debug_h")
+	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0", "debug_h")
 
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{btorque: btorque}
@@ -56,11 +56,11 @@ func (u *BaryakhtarUpdater) Update() {
 	m := e.Quant("mf")
 	lambda := e.Quant("lambda")
 	lambda_e := e.Quant("lambda_e")
-	heff := e.Quant("H_eff")
+	//heff := e.Quant("H_eff")
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	pbc := e.Periodic()
 	msat0 := e.Quant("msat0")
-	//debug_h := e.Quant("debug_h")
+	heff := e.Quant("debug_h")
 
 	// put gamma in multiplier to avoid additional multiplications
 	multiplierBT := btorque.Multiplier()
