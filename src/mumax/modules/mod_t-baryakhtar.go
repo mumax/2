@@ -37,7 +37,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 
 	// ============ Dependencies =============
-	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0", "debug_h")
+	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0")//, "debug_h")
 
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{btorque: btorque}
