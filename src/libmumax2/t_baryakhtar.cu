@@ -28,22 +28,20 @@ extern "C" {
 	
 	int j = blockIdx.x * blockDim.x + threadIdx.x;
 	int k = blockIdx.y * blockDim.y + threadIdx.y;			
-	int x0 = i * size.w + j * size.z + k;
-		    
-	real m_sat = (msat0 != NULL) ? msat0[x0] : 1.0;
-	
-	if (m_sat == 0.0){
-	    tx[x0] = 0.0f;
-	    ty[x0] = 0.0f;
-	    tz[x0] = 0.0f;
-	    return;
-	}
 	
     if (j < size.y && k < size.z){ // 3D now:)
-            
+        
+        int x0 = i * size.w + j * size.z + k;
+		    
+	    real m_sat = (msat0 != NULL) ? msat0[x0] : 1.0;
+	    if (m_sat == 0.0){
+	        tx[x0] = 0.0f;
+	        ty[x0] = 0.0f;
+	        tz[x0] = 0.0f;
+	        return;
+	    }        
+	    
 	    //real one_over_m_sat = 1.0 / m_sat;             
-        
-        
         real5 cfx = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
 	    real5 cfy = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
 	    real5 cfz = make_real5(-1.0 / 12.0, +16.0 / 12.0, -30.0 / 12.0, +16.0 / 12.0, -1.0 / 12.0);
@@ -51,7 +49,6 @@ extern "C" {
 	    
 	    real5 cflb = make_real5(+0.0, +0.0, +1.0, -2.0, +1.0);
         real5 cfrb = make_real5(+1.0, -2.0, +1.0, +0.0, +0.0);
-	    
 	    /*
 	    real5 cfx = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
 	    real5 cfy = make_real5(+0.0, +1.0, -2.0, +1.0, -0.0);
@@ -186,58 +183,52 @@ extern "C" {
         HH.x = (yi.x >= 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
         HH.y = (yi.y >= 0 || lhx == NULL) ? hx[yn.y] : lhx[yn.y];
         HH.z = (yi.z < size.y || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
-        HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];
-        
+        HH.w = (yi.w < size.y || rhx == NULL) ? hx[yn.w] : rhx[yn.w];    
         real h_b2 = hx[xn.x];
         real h_b1 = hx[xn.y];
         real h_f1 = hx[xn.z];
         real h_f2 = hx[xn.w]; 
         real ddhx_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * H.x + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
         real ddhx_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.x + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
-        
         h_b2 = hx[zn.x];
         h_b1 = hx[zn.y];
         h_f1 = hx[zn.z];
         h_f2 = hx[zn.w];
-        real ddhx_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.x + cfz.w * h_f1 + cfz.v * h_f2) : 0.0; 
-        
+        real ddhx_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.x + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;      
         real ddhx  = mmstep.x * ddhx_x + mmstep.y * ddhx_y + mmstep.z * ddhx_z;
-        
-        
-        
+         
         HH.x = (yi.x >= 0 || lhy == NULL) ? hy[yn.x] : lhy[yn.x];
         HH.y = (yi.y >= 0 || lhy == NULL) ? hy[yn.y] : lhy[yn.y];
         HH.z = (yi.z < size.y || rhy == NULL) ? hy[yn.z] : rhy[yn.z];
         HH.w = (yi.w < size.y || rhy == NULL) ? hy[yn.w] : rhy[yn.w];
-        
         h_b2 = hy[xn.x];
         h_b1 = hy[xn.y];
         h_f1 = hy[xn.z];
         h_f2 = hy[xn.w]; 
         real ddhy_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * H.y + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
-        real ddhy_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.y + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
-        
+        real ddhy_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.y + cfy.w * HH.z + cfy.v * HH.w) : 0.0;      
         h_b2 = hy[zn.x];
         h_b1 = hy[zn.y];
         h_f1 = hy[zn.z];
         h_f2 = hy[zn.w];
-        real ddhy_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.y + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
-        
+        real ddhy_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.y + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;       
         real ddhy  = mmstep.x * ddhy_x + mmstep.y * ddhy_y + mmstep.z * ddhy_z;
-		
+			
+		HH.x = (yi.x >= 0 || lhz == NULL) ? hz[yn.x] : lhz[yn.x];
+        HH.y = (yi.y >= 0 || lhz == NULL) ? hz[yn.y] : lhz[yn.y];
+        HH.z = (yi.z < size.y || rhz == NULL) ? hz[yn.z] : rhz[yn.z];
+        HH.w = (yi.w < size.y || rhz == NULL) ? hz[yn.w] : rhz[yn.w];
         h_b2 = hz[xn.x];
         h_b1 = hz[xn.y];
         h_f1 = hz[xn.z];
         h_f2 = hz[xn.w]; 
         real ddhz_x = (size.x > 3) ? (cfx.x * h_b2 + cfx.y * h_b1 + cfx.z * H.z + cfx.w * h_f1 + cfx.v * h_f2) : 0.0;
         real ddhz_y = (size.y > 3) ? (cfy.x * HH.x + cfy.y * HH.y + cfy.z * H.z + cfy.w * HH.z + cfy.v * HH.w) : 0.0;
-        
         h_b2 = hz[zn.x];
         h_b1 = hz[zn.y];
         h_f1 = hz[zn.z];
         h_f2 = hz[zn.w];
         real ddhz_z = (size.z > 3) ? (cfz.x * h_b2 + cfz.y * h_b1 + cfz.z * H.z + cfz.w * h_f1 + cfz.v * h_f2) : 0.0;  
-        
         real ddhz  = mmstep.x * ddhz_x + mmstep.y * ddhz_y + mmstep.z * ddhz_z;
 	            
         real3 le_ddH = make_real3(ddhx, ddhy, ddhz);
