@@ -56,11 +56,11 @@ func (u *BaryakhtarUpdater) Update() {
 	m := e.Quant("mf")
 	lambda := e.Quant("lambda")
 	lambda_e := e.Quant("lambda_e")
-	//heff := e.Quant("H_eff")
+	heff := e.Quant("H_eff")
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	pbc := e.Periodic()
 	msat0 := e.Quant("msat0")
-	heff := e.Quant("debug_h")
+	//heff := e.Quant("debug_h")
 
 	// put gamma in multiplier to avoid additional multiplications
 	multiplierBT := btorque.Multiplier()
