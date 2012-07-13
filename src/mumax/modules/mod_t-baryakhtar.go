@@ -33,7 +33,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.AddNewQuant("lambda", SCALAR, MASK, Unit("A/m"), "Landau-Lifshits relaxation constant")
 	e.AddNewQuant("lambda_e", SCALAR, MASK, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
 	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
-	e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
+	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 
 	// ============ Dependencies =============
