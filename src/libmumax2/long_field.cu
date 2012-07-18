@@ -23,10 +23,10 @@ extern "C" {
   {
     
     int I = threadindex;
-    real Ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
-    real kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
+    float Ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
+    float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
     
-    if (Ms0 == 0.0 || kappa == 0.0) {
+    if (Ms0 == 0.0f || kappa == 0.0f) {
       hx[I] = 0.0f;
       hy[I] = 0.0f;
       hz[I] = 0.0f;    
@@ -35,15 +35,15 @@ extern "C" {
     
     if (I < NPart){ // Thread configurations are usually too large...
       
-      kappa = 1.0 / kappa;
+      kappa = 1.0f / kappa;
       
-      real Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
+      float Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
       
-      real3 m = make_real3(mx[I], my[I], mz[I]);
+      float3 m = make_float3(mx[I], my[I], mz[I]);
       
-      real ratio = Ms/Ms0;
+      float ratio = Ms/Ms0;
        
-      real mult = Ms * kappa * (1.0 - ratio * ratio);// kappa is actually 0.5/kappa! 
+      float mult = Ms * kappa * (1.0f - ratio * ratio);// kappa is actually 0.5/kappa! 
          
       hx[I] = mult * m.x;
       hy[I] = mult * m.y;
