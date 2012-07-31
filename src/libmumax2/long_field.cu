@@ -23,32 +23,33 @@ extern "C" {
   {
     
     int I = threadindex;
-    float Ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
-    float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
-    
-    if (Ms0 == 0.0f || kappa == 0.0f) {
-      hx[I] = 0.0f;
-      hy[I] = 0.0f;
-      hz[I] = 0.0f;    
-      return;
-    }
     
     if (I < NPart){ // Thread configurations are usually too large...
-      
-      kappa = 1.0f / kappa;
-      
-      float Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
-      
-      float3 m = make_float3(mx[I], my[I], mz[I]);
-      
-      float ratio = Ms/Ms0;
-       
-      float mult = Ms * kappa * (1.0f - ratio * ratio);// kappa is actually 0.5/kappa! 
-         
-      hx[I] = mult * m.x;
-      hy[I] = mult * m.y;
-      hz[I] = mult * m.z;      
-    } 
+    
+        float Ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
+        float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
+
+        if (Ms0 == 0.0f || kappa == 0.0f) {
+          hx[I] = 0.0f;
+          hy[I] = 0.0f;
+          hz[I] = 0.0f;    
+          return;
+        }
+        
+        kappa = 1.0f / kappa;
+
+        float Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
+
+        float3 m = make_float3(mx[I], my[I], mz[I]);
+
+        float ratio = Ms/Ms0;
+
+        float mult = Ms * kappa * (1.0f - ratio * ratio);// kappa is actually 0.5/kappa! 
+
+        hx[I] = mult * m.x;
+        hy[I] = mult * m.y;
+        hz[I] = mult * m.z;      
+        } 
   }
 
   #define BLOCKSIZE 16
