@@ -22,9 +22,10 @@ func LongFieldAsync(hlf *Array, m *Array, msat *Array, msat0 *Array, kappa *Arra
 
 	// Bookkeeping
 	CheckSize(hlf.Size3D(), m.Size3D())
-	CheckSize(msat0.Size3D(), m.Size3D())
+	
+	//CheckSize(msat0.Size3D(), m.Size3D()) // since it could be any!
 
-	Assert(msat0.NComp() == 1)
+	//Assert(msat0.NComp() == 1) no clue how it shoud work if mask is not there
 
 	// Calling the CUDA functions
 	C.long_field_async(
