@@ -761,7 +761,7 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
     dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
 		
 	// FUCKING THREADS PER BLOCK LIMITATION
-	check3dconf(gridSize, blockSize);
+	//check3dconf(gridSize, blockSize);
 		
 	float icsx2 = 1.0f / (csx * csx);
 	float icsy2 = 1.0f / (csy * csy);
