@@ -1,9 +1,9 @@
 #include "long_field.h"
 #include "multigpu.h"
+#include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
-#include <cuda.h>
-#include "common_func.h"
+//#include "common_func.h"
 
 
 #ifdef __cplusplus
@@ -52,9 +52,8 @@ extern "C" {
         } 
   }
 
-  #define BLOCKSIZE 16
-  
-  void long_field_async(float** hx, float** hy, float** hz, 
+
+ __export__ void long_field_async(float** hx, float** hy, float** hz, 
 			 float** mx, float** my, float** mz,
 			 float** msat, 
 			 float** msat0,
@@ -65,11 +64,10 @@ extern "C" {
 			 int NPart,     
 			 CUstream* stream)
   {
-
+    printf("NPart is: %d\n", NPart);
     // 1D configuration
     dim3 gridSize, blockSize;
-    make1dconf(NPart, &gridSize, &blockSize);
-    
+	make1dconf(NPart, &gridSize, &blockSize);
     int nDev = nDevice();
     for (int dev = 0; dev < nDev; dev++) {
       gpu_safe(cudaSetDevice(deviceId(dev)));

@@ -738,8 +738,6 @@ __global__ void tbaryakhtar_HdeltaHKernMGPUfloat(float* __restrict__ tx, float* 
   
 #define BLOCKSIZE 16
 
-
-  
 __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz, 
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
