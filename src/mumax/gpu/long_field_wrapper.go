@@ -45,6 +45,6 @@ func LongFieldAsync(hlf *Array, m *Array, msat *Array, msat0 *Array, kappa *Arra
 		(C.float)(msatMul),
 		(C.float)(msat0Mul),
 
-		(C.int)(m.PartLen3D()),
+		(C.int)(hlf.partLen3D),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
