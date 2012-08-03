@@ -64,7 +64,7 @@ extern "C" {
 			 int NPart,     
 			 CUstream* stream)
   {
-    printf("NPart is: %d\n", NPart);
+    //printf("NPart is: %d\n", NPart);
     // 1D configuration
     dim3 gridSize, blockSize;
 	make1dconf(NPart, &gridSize, &blockSize);
