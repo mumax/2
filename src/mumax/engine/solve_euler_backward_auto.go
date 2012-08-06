@@ -15,6 +15,7 @@ import (
 	. "mumax/common"
 	"mumax/gpu"
 	"sort"
+	"container/list"
 )
 
 // Naive Backward Euler solver
@@ -32,6 +33,7 @@ type BDFEulerAuto struct {
 	maxIter    []*Quant     // maximum number of iterations per step
 	newDt      []float64    // 
 	diff       []gpu.Reductor
+	err_list   *list.List
 	iterations *Quant
 	badSteps   *Quant
 	minDt      *Quant
@@ -86,7 +88,7 @@ func (s *BDFEulerAuto) Step() {
 			iter = 0
 			err := 1.0e38
 			// Do predictor: BDF Euler
-			//Debug("Do backward Euler")
+			// Debug("Do backward Euler")
 			equation[i].input[0].Update()
 			for err > maxIterErr {
 				gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h)
@@ -121,6 +123,7 @@ func (s *BDFEulerAuto) Step() {
 				err_y := float64(iterationDiff)
 				s.err[i].SetScalar(err)
 				y.Array().CopyFromDevice(s.ybuffer[i])
+				s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later 
 				y.Invalidate()
 				equation[i].input[0].Update()
 				err_dy := float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
@@ -134,9 +137,13 @@ func (s *BDFEulerAuto) Step() {
 					break
 				}
 			}
-
+           
 			maxStepErr := s.maxErr[i].Scalar()
 			StepErr := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i]))
+			
+			s.err_list.PushFront(StepErr)
+			s.err_list.Remove(s.err_list.Back())
+			
 			if StepErr == 0.0 {
 				StepErr = headRoom * headRoom * maxStepErr
 			}
@@ -148,8 +155,25 @@ func (s *BDFEulerAuto) Step() {
 			}
 			// Let us compare BDF Euler and BDF Trapezoidal
 			// to guess next time step            
-			errRatio := math.Abs(headRoom * maxStepErr / StepErr)
-			step_corr := errRatio
+			errRatio := 0.0
+			
+			if e.step.Scalar() > 3 {
+			    //do softcore adjustment
+			    elem := s.err_list.Front()
+			    e := elem.Value.(float64)
+			    ep1 := elem.Next().Value.(float64)
+			    ep2 := elem.Next().Value.(float64)
+			    pre_f1 := math.Pow((ep1/e),0.075)
+			    pre_f2 := math.Pow((ep1*ep1/(e*ep2)), 0.01)
+			    pre := math.Pow((maxStepErr / e), 0.175)
+			    errRatio = pre_f1 * pre * pre_f2
+			    //Debug(e,ep1,ep2)
+			} else {
+			    //do hardcore adjustment
+			    errRatio = headRoom * maxStepErr / StepErr
+			}
+			
+			step_corr := math.Abs(errRatio)
 
 			if step_corr > 1.5 {
 				step_corr = 1.5
@@ -197,7 +221,12 @@ func init() {
 
 func LoadBDFEulerAuto(e *Engine) {
 	s := new(BDFEulerAuto)
-
+    s.err_list = list.New()
+    
+    s.err_list.PushFront(0.0)
+    s.err_list.PushFront(0.0)
+    s.err_list.PushFront(0.0)
+    
 	// Minimum/maximum time step
 	s.minDt = e.AddNewQuant("mindt", SCALAR, VALUE, Unit("s"), "Minimum time step")
 	s.minDt.SetScalar(1e-38)
