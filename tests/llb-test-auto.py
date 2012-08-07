@@ -3,8 +3,8 @@ from math import *
 # Test for LLB
 # see I. Radu et al., PRL 102, 117201 (2009)
   
-Nx = 128
-Ny = 128
+Nx = 32
+Ny = 32
 Nz = 4
 
 sX = 256e-9
@@ -17,7 +17,7 @@ csZ = sZ/Nz
 
 setgridsize(Nx, Ny, Nz)
 setcellsize(csX, csY, csZ)
-setperiodic(8,8,0)
+#setperiodic(8,8,0)
 
 #optical spot size
 osX = 0.05e-6
@@ -74,21 +74,7 @@ for kk in range(Nz):
 
 setmask('msat', msat) 
 setv('msat', Ms0)        
-
-msat0 = makearray(1,Nx,Ny,Nz)            
-for kk in range(Nz):
-    zz = float(kk) * csZ
-    for jj in range(Ny):
-        yy = float(jj)*csY-cY
-        y = yy**2
-        for ii in range(Nx):
-            xx = float(ii)*csX-cX
-            x = xx**2
-            arg = -(0.25*x*sigmaX + 0.25*y*sigmaY)
-            sd = -zz/sdepth
-            scale = 1.0 - 0.1 * exp(arg) * exp(sd) 
-            msat0[0][ii][jj][kk] = scale
-setmask('msat0', msat0)   
+  
 setv('msat0', Ms0)  
 
 Aex = 1.3e-11
@@ -114,29 +100,22 @@ setv('kappa', 2e-4)
 
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 1e-4 * lex
+lambda_e = 1e-3 * lex
 setv('lambda_e', lambda_e)
 
 Mf = getarray('Mf') 
 Mfd = makearray(3,Nx,Ny,Nz)
 for kk in range(Nz):
-    zz = float(kk) * csZ
     for jj in range(Ny):
-        yy = float(jj)*csY-cY
-        y = yy**2
         for ii in range(Nx):
-            xx = float(ii)*csX-cX
-            x = xx**2
-            arg = -(x*sigmaX + y*sigmaY)
-            sd = -zz / sdepth
-            scale = 1.0 - 0.9 * exp(arg) * exp(sd)
+            scale = 0.1
             Mfd[0][ii][jj][kk] = Mf[0][ii][jj][kk] * scale
             Mfd[1][ii][jj][kk] = Mf[1][ii][jj][kk] * scale
             Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
 setarray('Mf',Mfd)
      
 autosave("m", "gplot", [], 1e-12)
-autosavesinglefile("m", "dump", [], 1e-12)
+#autosavesinglefile("m", "dump", [], 1e-12)
 
 #autosave("msat", "gplot", [], 1e-12)
 #autosave("mf", "gplot", [], 1e-12)
@@ -147,7 +126,7 @@ autotabulate(["t", "<msat>"], "msat.txt", 1e-15)
 #autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
 #save("b", "gplot", [])
-run(3e-12)
+run(100e-12)
 printstats()
 
 sync()
