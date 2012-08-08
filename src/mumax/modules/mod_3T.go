@@ -22,22 +22,22 @@ func Load3T(e *Engine) {
     //Load Temperatures
     LoadT(e)
     
-    Te := e.GetQuant("Te")
-    Ts := e.GetQuant("Ts")
-    Tl := e.GetQuant("Tl")
+    Te := e.Quant("Te")
+    Ts := e.Quant("Ts")
+    Tl := e.Quant("Tl")
     
     Q := e.AddNewQuant("Q", SCALAR, MASK, Unit("J/s"), "The power of external heater")
     gamma_e := e.AddNewQuant("gamma_e", SCALAR, MASK, Unit("J/K^2"), "The heat capacity of electrons")
     Cs := e.AddNewQuant("Cs", SCALAR, MASK, Unit("J/K"), "The heat capacity of spins")
     Cl := e.AddNewQuant("Cl", SCALAR, MASK, Unit("J/K"), "The heat capacity of phonons")
     
-    Gel := := e.AddNewQuant("Gel", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for electron-phonon")
-    Ges := := e.AddNewQuant("Ges", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for electron-spin")
-    Gsl := := e.AddNewQuant("Gsl", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for spin-phonon")
+    Gel := e.AddNewQuant("Gel", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for electron-phonon")
+    Ges := e.AddNewQuant("Ges", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for electron-spin")
+    Gsl := e.AddNewQuant("Gsl", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for spin-phonon")
     
-    Qe := e.AddNewQuant("Qe", SCALAR, MASK, Unit("J/s"), "The heat accumulated in electron sub-system")
-    Qs := e.AddNewQuant("Qs", SCALAR, MASK, Unit("J/s"), "The heat accumulated in spin sub-system")
-    Ql := e.AddNewQuant("Ql", SCALAR, MASK, Unit("J/s"), "The heat accumulated in phonon sub-system")
+    Qe := e.AddNewQuant("Qe", SCALAR, FIELD, Unit("J/s"), "The heat accumulated in electron sub-system")
+    Qs := e.AddNewQuant("Qs", SCALAR, FIELD, Unit("J/s"), "The heat accumulated in spin sub-system")
+    Ql := e.AddNewQuant("Ql", SCALAR, FIELD, Unit("J/s"), "The heat accumulated in phonon sub-system")
     
     e.Depends("Qe", "Te", "Tl", "Ts", "gamma_e", "Ges", "Gel", "Q")
     e.Depends("Qs", "Te", "Tl", "Ts", "Cs",      "Gsl", "Ges")
@@ -66,7 +66,6 @@ type QlUpdater struct {
 }
 
 func (u *QeUpdater) Update() {
-    stream := u.Te.Stream()[0]
     gpu.Qe_async(
         u.Qe.Array(),
         u.Te.Array(),
@@ -79,8 +78,7 @@ func (u *QeUpdater) Update() {
         u.Q.Multiplier(),
         u.gamma_e.Multiplier(),
         u.Gel.Multiplier(),
-        u.Ges.Multiplier()
-    )
+        u.Ges.Multiplier())
     u.Qe.Array().Sync()
 }
 
@@ -95,8 +93,7 @@ func (u *QsUpdater) Update() {
         u.Ges.Array(),
         u.Cs.Multiplier(),
         u.Gsl.Multiplier(),
-        u.Ges.Multiplier()
-    )
+        u.Ges.Multiplier())
     u.Qs.Array().Sync()
 }
 
@@ -111,8 +108,7 @@ func (u *QlUpdater) Update() {
         u.Gsl.Array(),
         u.Cl.Multiplier(),
         u.Gel.Multiplier(),
-        u.Gsl.Multiplier()
-    )
+        u.Gsl.Multiplier())
     u.Ql.Array().Sync()
 }
 

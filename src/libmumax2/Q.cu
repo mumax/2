@@ -78,7 +78,7 @@ __export__ void Qe_async(float** Qe,
                          float QMul, 
                          float gamma_eMul, 
                          float GelMul, float GesMul, 
-                         CUstream stream, int Npart){
+                         CUstream* stream, int Npart){
     dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	
@@ -106,7 +106,7 @@ __export__ void Qs_async(float** Qs,
                          float** Cs, 
                          float** Gsl, float** Ges, 
                          float CsMul, 
-                         float GslMul, float GesMul, CUstream stream, int Npart) {
+                         float GslMul, float GesMul, CUstream* stream, int Npart) {
     dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	
@@ -132,7 +132,7 @@ __export__ void Ql_async(float** Ql,
                          float** Gel, float** Gsl,
                          float ClMul,
                          float GelMul, float GslMul, 
-                         CUstream stream, int Npart){
+                         CUstream* stream, int Npart){
     dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);
 	

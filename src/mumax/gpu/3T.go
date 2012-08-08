@@ -18,7 +18,7 @@ import (
 	"unsafe"
 )
 
-func Qe_async(Qe *Array, Te *Array, Tl *Array, Ts *Array, Q *Araray, gamma_e *Array, Gel *Array, Ges *Array, QMul []float64, gamma_eMul []float64, GelMul []float64, GesMul []float64) {
+func Qe_async(Qe *Array, Te *Array, Tl *Array, Ts *Array, Q *Array, gamma_e *Array, Gel *Array, Ges *Array, QMul []float64, gamma_eMul []float64, GelMul []float64, GesMul []float64) {
 
 	// Calling the CUDA functions
 	C.Qe_async(
@@ -40,7 +40,9 @@ func Qe_async(Qe *Array, Te *Array, Tl *Array, Ts *Array, Q *Araray, gamma_e *Ar
         (C.float)(float32(GelMul[0])),
         (C.float)(float32(GesMul[0])),
         
-	    (*C.CUstream)(unsafe.Pointer(&(Qe.Stream[0]))))
+	    (*C.CUstream)(unsafe.Pointer(&(Qe.Stream[0]))),
+	    
+	    (C.int)(Qe.partLen3D))
 }
 
 func Qs_async(Qs *Array, Ts *Array, Te *Array, Tl *Array, Cs *Array, Gsl *Array, Ges *Array, CsMul []float64, GslMul []float64, GesMul []float64) {
@@ -61,7 +63,8 @@ func Qs_async(Qs *Array, Ts *Array, Te *Array, Tl *Array, Cs *Array, Gsl *Array,
         (C.float)(float32(GslMul[0])),
         (C.float)(float32(GesMul[0])),
         
-	    (*C.CUstream)(unsafe.Pointer(&(Qs.Stream[0]))))
+	    (*C.CUstream)(unsafe.Pointer(&(Qs.Stream[0]))),
+	    (C.int)(Qs.partLen3D))
 }
 
 func Ql_async(Ql *Array, Tl *Array, Te *Array, Ts *Array, Cl *Array, Gel *Array, Gsl *Array, ClMul []float64, GelMul []float64, GslMul []float64) {
@@ -83,5 +86,6 @@ func Ql_async(Ql *Array, Tl *Array, Te *Array, Ts *Array, Cl *Array, Gel *Array,
         (C.float)(float32(GelMul[0])),
         (C.float)(float32(GslMul[0])),
         
-	    (*C.CUstream)(unsafe.Pointer(&(Ql.Stream[0]))))
+	    (*C.CUstream)(unsafe.Pointer(&(Ql.Stream[0]))),
+	    (C.int)(Ql.partLen3D))
 }
