@@ -88,7 +88,7 @@ setv('B_ext',[Bx,By,Bz])
               
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
-setv('lambda', 0.008)
+setv('lambda', [0.008, 0.004, 0.006, 0.0, 0.0, 0.0])
 
 k = makearray(1,Nx,Ny,Nz)            
 for kk in range(Nz):
@@ -101,7 +101,7 @@ setv('kappa', 2e-4)
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
 lambda_e = 1e-3 * lex
-setv('lambda_e', lambda_e)
+setv('lambda_e', [lambda_e, 0.1 * lambda_e, 0.5 * lambda_e, 0.0, 0.0, 0.0])
 
 Mf = getarray('Mf') 
 Mfd = makearray(3,Nx,Ny,Nz)
@@ -126,7 +126,7 @@ autotabulate(["t", "<msat>"], "msat.txt", 1e-15)
 #autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
 #save("b", "gplot", [])
-run(100e-12)
+run(1e-12)
 printstats()
 
 sync()

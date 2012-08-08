@@ -30,8 +30,8 @@ func LoadBaryakhtarTorques(e *Engine) {
 	LoadFullMagnetization(e)
 	// ============ New Quantities =============
 
-	e.AddNewQuant("lambda", SCALAR, MASK, Unit("A/m"), "Landau-Lifshits relaxation constant")
-	e.AddNewQuant("lambda_e", SCALAR, MASK, Unit("A/m"), "Baryakhtar's exchange relaxation constant")
+	e.AddNewQuant("lambda", SYMMTENS, MASK, Unit(""), "Landau-Lifshits relaxation constant")
+	e.AddNewQuant("lambda_e", SYMMTENS, MASK, Unit(""), "Baryakhtar's exchange relaxation constant")
 	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
 	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
@@ -51,23 +51,27 @@ type BaryakhtarUpdater struct {
 func (u *BaryakhtarUpdater) Update() {
 
 	e := GetEngine()
-	cellSize := e.CellSize()
 	btorque := u.btorque
-	m := e.Quant("mf")
-	lambda := e.Quant("lambda")
-	lambda_e := e.Quant("lambda_e")
-	heff := e.Quant("H_eff")
 	gammaLL := e.Quant("gamma_LL").Scalar()
+	cellSize := e.CellSize()
+	m := e.Quant("mf")
+	heff := e.Quant("H_eff")
 	pbc := e.Periodic()
 	msat0 := e.Quant("msat0")
 	//heff := e.Quant("debug_h")
-
+	
 	// put gamma in multiplier to avoid additional multiplications
 	multiplierBT := btorque.Multiplier()
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
 	}
-
+    
+    lambda := e.Quant("lambda")
+	lambda_e := e.Quant("lambda_e")
+	
+    //Debug(lambda.Multiplier()[XX], lambda.Multiplier()[YY], lambda.Multiplier()[ZZ], lambda.Multiplier()[XY], lambda.Multiplier()[XZ], lambda.Multiplier()[YZ])
+    //Debug(lambda_e.Multiplier()[XX], lambda_e.Multiplier()[YY], lambda_e.Multiplier()[ZZ], lambda_e.Multiplier()[XY], lambda_e.Multiplier()[XZ], lambda_e.Multiplier()[YZ])
+    
 	gpu.LLGBtAsync(btorque.Array(),
 		m.Array(),
 		heff.Array(),
@@ -75,8 +79,8 @@ func (u *BaryakhtarUpdater) Update() {
 		lambda.Array(),
 		lambda_e.Array(),
 		float32(msat0.Multiplier()[0]),
-		float32(lambda.Multiplier()[0]),
-		float32(lambda_e.Multiplier()[0]),
+		lambda.Multiplier(),
+		lambda_e.Multiplier(),
 		float32(cellSize[X]),
 		float32(cellSize[Y]),
 		float32(cellSize[Z]),
