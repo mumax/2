@@ -27,14 +27,14 @@ DLLEXPORT void Qe_async(float** Qe,
                          float QMul, 
                          float gamma_eMul, 
                          float GelMul, float GesMul, 
-                         CUstream stream, int Npart);
+                         CUstream* stream, int Npart);
                          
 DLLEXPORT void Qs_async(float** Qs,
                          float** Te, float** Tl, float** Ts,
                          float** Cs, 
                          float** Gsl, float** Ges, 
                          float CsMul, 
-                         float GslMul, float GesMul, CUstream stream, int Npart);
+                         float GslMul, float GesMul, CUstream* stream, int Npart);
                          
 DLLEXPORT void Ql_async(float** Ql,
                          float** Te, float** Tl, float** Ts,
@@ -42,7 +42,7 @@ DLLEXPORT void Ql_async(float** Ql,
                          float** Gel, float** Gsl,
                          float ClMul,
                          float GelMul, float GslMul, 
-                         CUstream stream, int Npart);
+                         CUstream* stream, int Npart);
 
 #ifdef __cplusplus
 }
