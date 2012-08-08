@@ -9,12 +9,17 @@ package engine
 
 // Implements binary dump output,
 // in the machine's endianess.
-// uses 32-bit words:
-//	0: magic "#d1\n"
-//  1: time of the snapshot
-//	2: rank: 4
-//	3:2+rank: sizes for each direction
-//	rest: ieee float data.
+// Header: all 64-bit words:
+//	magic: "#dump10\n"
+//  label for "time" coordinate (8 byte string like "t" or "f")
+//  time of the snapshot (double)
+// 	label for "space" coordinate (like "r" or "k")
+// 	cellsize
+//	data rank: always 4
+//	4 sizes for each direction, like: 3  128 256 1024
+// 	Precission of data: 4 for float32, 8 for float64
+// 	DATA
+// 	crc64 of DATA and header.
 // Author: Arne Vansteenkiste
 
 import (
