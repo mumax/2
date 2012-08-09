@@ -1,7 +1,7 @@
 package dump
 
 // Magic number
-const MAGIC = "#dump10\n"
+const MAGIC = "#dump100"
 
 // Precision identifier
 const (
