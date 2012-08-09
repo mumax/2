@@ -1,6 +1,6 @@
 export GOPATH=$(CURDIR)/../..
 
-DIRS=apigen common engine frontend gpu host modules ovf queue
+DIRS=apigen common engine frontend gpu host modules ovf queue dump
 
 all: $(DIRS)
 

@@ -25,7 +25,7 @@ package engine
 import (
 	"io"
 	. "mumax/common"
-	"unsafe"
+	"mumax/dump"
 )
 
 func init() {
@@ -46,12 +46,15 @@ func (f *FormatDump) Write(out io.Writer, q *Quant, options []string) {
 	data := q.Buffer().Array
 	list := q.Buffer().List
 
-	out.Write([]byte("#d1\n"))
-	writeInt(out, 4) // rank 4
-	writeDouble(out, GetEngine().Quant("t").Scalar())
-	writeInt(out, len(data))
-	writeInt(out, len(data[0]))
-	writeInt(out, len(data[0][0]))
-	writeInt(out, len(data[0][0][0]))
-	out.Write((*(*[1<<31 - 1]byte)(unsafe.Pointer(&list[0])))[0 : 4*len(list)])
+	w := dump.NewWriter(out, dump.CRC_ENABLED)
+	w.Rank = 4
+	w.Size = []int{len(data), len(data[0]), len(data[0][0]), len(data[0][0][0])}
+	w.TimeLabel="t(s)"
+	w.Time=  GetEngine().Quant("t").Scalar()
+	w.SpaceLabel="r(m)"
+	sz := GetEngine().CellSize()
+	w.CellSize=[3]float64{sz[X], sz[Y], sz[Z]} // ? do we swap or not?
+	w.WriteHeader()
+	w.WriteData(list)
+	w.WriteHash()
 }
