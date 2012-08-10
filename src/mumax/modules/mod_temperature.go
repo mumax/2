@@ -90,27 +90,26 @@ func (u *TempBrownUpdater) Update() {
 		return
 	}
 
+	// Update only if we went past the dt cutoff
+	t := e.Quant("t").Scalar()
+	dt := e.Quant("dt").Scalar()
+	cutoff_dt := e.Quant("cutoff_dt").Scalar()
+	if dt < cutoff_dt {
+		dt = cutoff_dt
+		if u.last_time != 0 && t < u.last_time+dt {
+			return
+		}
+	}
+
 	// Make standard normal noise
 	noise := u.htherm.Array()
 	devPointers := noise.Pointers()
 	N := int64(noise.PartLen4D())
-
 	// Fills H_therm with gaussian noise.
 	// CURAND does not provide an out-of-the-box way to do this in parallel over the GPUs
 	for dev := range u.rng {
 		gpu.SetDeviceForIndex(dev)
 		u.rng[dev].GenerateNormal(uintptr(devPointers[dev]), N, 0, 1)
-	}
-
-	// Update only if we went past the dt cutoff
-	cutoff_dt := e.Quant("cutoff_dt").Scalar()
-	t := e.Quant("t").Scalar()
-	dt := e.Quant("dt").Scalar()
-	if dt < cutoff_dt {
-		dt = cutoff_dt
-		if t < u.last_time+dt {
-			return
-		}
 	}
 
 	// Scale the noise according to local parameters
