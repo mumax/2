@@ -31,6 +31,7 @@ func LoadTempBrown(e *Engine) {
 	temp := e.AddNewQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
 	temp.SetVerifier(NonNegative)
 	Htherm := e.AddNewQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
+	e.AddNewQuant("cutoff_dt", SCALAR, VALUE, "s", "Update thermal field at most once per cutoff_dt. Works best with fixed time step equal to N*cutoff_dt.")
 
 	// By declaring that H_therm depends on Step,
 	// It will be automatically updated at each new time step
@@ -50,6 +51,7 @@ type TempBrownUpdater struct {
 	htherm           *Quant             // The quantity I will update
 	therm_seed       *Quant
 	therm_seed_cache int64
+	last_time        float64 // time of last htherm update
 }
 
 func NewTempBrownUpdater(htherm *Quant, therm_seed *Quant) Updater {
@@ -100,8 +102,18 @@ func (u *TempBrownUpdater) Update() {
 		u.rng[dev].GenerateNormal(uintptr(devPointers[dev]), N, 0, 1)
 	}
 
-	// Scale the noise according to local parameters
+	// Update only if we went past the dt cutoff
+	cutoff_dt := e.Quant("cutoff_dt").Scalar()
+	t := e.Quant("t").Scalar()
 	dt := e.Quant("dt").Scalar()
+	if dt < cutoff_dt {
+		dt = cutoff_dt
+		if t < u.last_time+dt {
+			return
+		}
+	}
+
+	// Scale the noise according to local parameters
 	cellSize := e.CellSize()
 	V := cellSize[X] * cellSize[Y] * cellSize[Z]
 	alpha := e.Quant("alpha")
@@ -118,4 +130,6 @@ func (u *TempBrownUpdater) Update() {
 	for c := 0; c < 3; c++ {
 		gpu.ScaleNoise(&(noise.Comp[c]), alphaMask, tempMask, alphaKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
 	}
+
+	u.last_time = t
 }
