@@ -28,6 +28,10 @@ __global__ void  QeKern(float* __restrict__ Qi,
 	    float T_j = Tj[i];
 	    float T_k = Tk[i];
 	    
+//	    if (i == 10) {
+//	        printf(">T_i: %g\tT_j: %g\tT_k: %g\n", T_i, T_j, T_k);
+//	    }
+	    
 	    float g = (gamma != NULL) ? gamma[i] * gammaMul : gammaMul;
 	    float Q_i = (Q != NULL) ? Q[i] * QMul : QMul;
 	    float G_ij = (Gij != NULL) ? Gij[i] * GijMul : GijMul;
@@ -56,6 +60,10 @@ __global__  void QKern(float* __restrict__ Qi,
 	    float T_i = Ti[i];
 	    float T_j = Tj[i];
 	    float T_k = Tk[i];
+	    
+//	    if (i == 10) {
+//	        printf(">>T_i: %g\tT_j: %g\tT_k: %g\n", T_i, T_j, T_k);
+//	    }
 	    
 	    float C_i = (Ci != NULL) ? Ci[i] * CMul : CMul;
 	    float G_ij = (Gij != NULL) ? Gij[i] * GijMul : GijMul;

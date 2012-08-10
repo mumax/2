@@ -45,7 +45,7 @@ func Qe_async(Qe *Array, Te *Array, Tl *Array, Ts *Array, Q *Array, gamma_e *Arr
 	    (C.int)(Qe.partLen3D))
 }
 
-func Qs_async(Qs *Array, Ts *Array, Te *Array, Tl *Array, Cs *Array, Gsl *Array, Ges *Array, CsMul []float64, GslMul []float64, GesMul []float64) {
+func Qs_async(Qs *Array, Te *Array, Tl *Array, Ts *Array, Cs *Array, Gsl *Array, Ges *Array, CsMul []float64, GslMul []float64, GesMul []float64) {
 	// Calling the CUDA functions
 	C.Qs_async(
 	    (**C.float)(unsafe.Pointer(&(Qs.Comp[X].Pointers()[0]))),
@@ -67,7 +67,7 @@ func Qs_async(Qs *Array, Ts *Array, Te *Array, Tl *Array, Cs *Array, Gsl *Array,
 	    (C.int)(Qs.partLen3D))
 }
 
-func Ql_async(Ql *Array, Tl *Array, Te *Array, Ts *Array, Cl *Array, Gel *Array, Gsl *Array, ClMul []float64, GelMul []float64, GslMul []float64) {
+func Ql_async(Ql *Array, Te *Array, Tl *Array, Ts *Array, Cl *Array, Gel *Array, Gsl *Array, ClMul []float64, GelMul []float64, GslMul []float64) {
 	// Calling the CUDA functions
 	C.Ql_async(
 	    
