@@ -177,6 +177,31 @@ func (a API) SetPointwise(quantity string, time float64, value []float64) {
 
 }
 
+func (a API) SetPointwiseOf(argument string, quantity string, arg float64, value []float64) {
+	e := a.Engine
+	
+	argum := e.Quant(argument)
+	q := e.Quant(quantity)
+	
+	checkKinds(argum, VALUE, SCALAR)
+	checkKinds(q, VALUE, MASK)
+
+	u := q.GetUpdater()
+	if u == nil {
+		u = newPointwiseOfUpdater(argum, q)
+		q.SetUpdater(u)
+	}
+
+	pointwise, ok := u.(*PointwiseOfUpdater)
+	if !ok {
+		panic(InputErrF("Can not set time-dependent", quantity, ", it is already determined in an other way:", reflect.TypeOf(u)))
+	}
+
+	SwapXYZ(value)
+	pointwise.Append(arg, value) // swap!
+
+}
+
 // Set scalar. Convenience method for SetValue() with only one number.
 // REDUNDANT?
 func (a API) SetS(quantity string, value float64) {
