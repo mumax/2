@@ -47,13 +47,15 @@ func (f *FormatDump) Write(out io.Writer, q *Quant, options []string) {
 	list := q.Buffer().List
 
 	w := dump.NewWriter(out, dump.CRC_ENABLED)
-	w.Rank = 4
-	w.Size = []int{len(data), len(data[0]), len(data[0][0]), len(data[0][0][0])}
-	w.TimeLabel = "t(s)"
+	w.Components = len(data) 
+	w.MeshSize = [3]int{len(data[0]), len(data[0][0]), len(data[0][0][0])}
+	w.TimeUnit = "s"
 	w.Time = GetEngine().Quant("t").Scalar()
-	w.SpaceLabel = "r(m)"
+	w.MeshUnit = "m"
+	w.DataLabel = q.Name()
+	w.DataUnit = string(q.Unit())
 	sz := GetEngine().CellSize()
-	w.CellSize = [3]float64{sz[X], sz[Y], sz[Z]} // ? do we swap or not?
+	w.MeshStep = [3]float64{sz[X], sz[Y], sz[Z]} // We dont swap
 	w.WriteHeader()
 	w.WriteData(list)
 	w.WriteHash()

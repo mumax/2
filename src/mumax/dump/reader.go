@@ -2,6 +2,7 @@ package dump
 
 import (
 	"fmt"
+	//"nimble-cube/core"
 	"hash"
 	"hash/crc64"
 	"io"
@@ -11,9 +12,7 @@ import (
 
 // Reads successive data frames in dump format.
 type Reader struct {
-	Frame       // Frame read by the last Read().
-	Bytes int64 // Total number of bytes read.
-	Err   error // Stores the latest I/O error, if any.
+	Frame // Frame read by the last Read().
 	in    io.Reader
 	crc   hash.Hash64
 }
@@ -30,24 +29,30 @@ func NewReader(in io.Reader, enableCRC bool) *Reader {
 // Reads one frame and stores it in r.Frame.
 func (r *Reader) Read() error {
 	r.Err = nil // clear previous error, if any
-	magic := r.readString()
-	if magic != MAGIC {
-		r.Err = fmt.Errorf("dump: bad magic number:%v", magic)
+	r.Magic = r.readString()
+	if r.Err != nil {
 		return r.Err
 	}
-	r.TimeLabel = r.readString()
+	if r.Magic != MAGIC {
+		r.Err = fmt.Errorf("dump: bad magic number:%v", r.Magic)
+		return r.Err
+	}
+	r.Components = r.readInt()
+	for i := range r.MeshSize {
+		r.MeshSize[i] = r.readInt()
+	}
+	for i := range r.MeshStep {
+		r.MeshStep[i] = r.readFloat64()
+	}
+	r.MeshUnit = r.readString()
 	r.Time = r.readFloat64()
-	r.SpaceLabel = r.readString()
-	for i := range r.CellSize {
-		r.CellSize[i] = r.readFloat64()
-	}
-	r.Rank = int(r.readUint64())
-	r.Size = make([]int, r.Rank)
-	for i := 0; i < r.Rank; i++ {
-		r.Size[i] = int(r.readUint64())
-	}
+	r.TimeUnit = r.readString()
+	r.DataLabel = r.readString()
+	r.DataUnit = r.readString()
 	r.Precission = r.readUint64()
-
+	if r.Err != nil {
+		return r.Err
+	}
 	r.readData()
 
 	// Check CRC
@@ -57,10 +62,20 @@ func (r *Reader) Read() error {
 		r.crc.Reset() // reset for next frame
 	}
 	r.CRC = r.readUint64() // checksum from data stream. 0 means not set
-	if r.CRC != 0 && mycrc != r.CRC && r.Err == nil {
-		r.Err = fmt.Errorf("dump CRC error: expected %x, got %x", r.CRC, mycrc)
+	if r.crc != nil && r.CRC != 0 &&
+		mycrc != r.CRC &&
+		r.Err == nil {
+		r.Err = fmt.Errorf("dump CRC error: expected %16x, got %16x", r.CRC, mycrc)
 	}
 	return r.Err
+}
+
+func (r *Reader) readInt() int {
+	x := r.readUint64()
+	if uint64(int(x)) != x {
+		r.Err = fmt.Errorf("value overflows int: %v", x)
+	}
+	return int(x)
 }
 
 // read until the buffer is full
@@ -103,7 +118,7 @@ func (r *Reader) readUint64() uint64 {
 // enlarging the previous one if needed.
 func (r *Reader) readData() {
 	N := 1
-	for _, s := range r.Size {
+	for _, s := range r.Size() {
 		N *= s
 	}
 	if cap(r.Data) < N {
@@ -114,15 +129,4 @@ func (r *Reader) readData() {
 	}
 	buf := (*(*[1<<31 - 1]byte)(unsafe.Pointer(&r.Data[0])))[0 : 4*len(r.Data)]
 	r.read(buf)
-}
-
-// Print the last frame in human readable form
-func (r *Reader) Fprint(out io.Writer) {
-	if r.Err != nil {
-		fmt.Fprintln(out, r.Err)
-		return
-	}
-	fmt.Fprintf(out, "%#v\n", r.Header)
-	fmt.Fprintf(out, "Data%v\n", r.Data)
-	fmt.Fprintf(out, "ISO CRC64:%x\n", r.CRC)
 }

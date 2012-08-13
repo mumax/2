@@ -28,7 +28,7 @@ setv('alpha', 0.02)
 setv('dt', 1e-15)
 setv('t', 0)
 
-autosave("m", "dump", [], 200e-12)
+autosave("m", "dump", [], 100e-12)
 autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 10e-12)
 
 Bx = -24.6E-3

@@ -45,17 +45,19 @@ func NewWriter(out io.Writer, enableCRC bool) *Writer {
 // Writes the current header.
 func (w *Writer) WriteHeader() {
 	w.writeString(MAGIC)
-	w.writeString(w.TimeLabel)
-	w.writeFloat64(w.Time)
-	w.writeString(w.SpaceLabel)
-	for _, c := range w.CellSize {
-		w.writeFloat64(c)
-	}
-	w.writeUInt64(uint64(w.Rank))
-	for _, s := range w.Size {
+	w.writeUInt64(uint64(w.Components))
+	for _, s := range w.MeshSize {
 		w.writeUInt64(uint64(s))
 	}
-	w.writeUInt64(FLOAT32)
+	for _, s := range w.MeshStep {
+		w.writeFloat64(s)
+	}
+	w.writeString(w.MeshUnit)
+	w.writeFloat64(w.Time)
+	w.writeString(w.TimeUnit)
+	w.writeString(w.DataLabel)
+	w.writeString(w.DataUnit)
+	w.writeUInt64(FLOAT32) // TODO: check.
 }
 
 // Writes the data.
