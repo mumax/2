@@ -309,7 +309,7 @@ __export__  void zhangli_async(float** sttx, float** stty, float** sttz,
     dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
 		
 	// FUCKING THREADS PER BLOCK LIMITATION
-	check3dconf(gridSize, blockSize);
+	//check3dconf(gridSize, blockSize);
 		
 	float i12csx = 1.0f / (12.0f * csx);
 	float i12csy = 1.0f / (12.0f * csy);

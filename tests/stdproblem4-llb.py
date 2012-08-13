@@ -25,11 +25,15 @@ load('demag')
 load('zeeman')
 load('llb')
 
-load('solver/bdf_euler_auto')
-setv('mf_maxiterations', 5)
-setv('mf_maxerror', 1e-6)
-setv('mf_maxitererror', 1e-8)
+#load('solver/bdf-euler-auto')
+#setv('mf_maxiterations', 5)
+#setv('mf_maxerror', 1e-6)
+#setv('mf_maxitererror', 1e-8)
 
+load('solver/rk12')
+setv('mf_maxerror', 1e-6)
+setv('mindt', 1e-16)
+setv('maxdt', 1e-12)
 # set parameters
 # Py
 # set magnetization

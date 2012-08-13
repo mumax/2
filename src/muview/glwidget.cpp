@@ -304,7 +304,7 @@ void GLWidget::paintGL()
 		mag = sqrt( (*dataPtr)[i][j][k][0] * (*dataPtr)[i][j][k][0] +
 			    (*dataPtr)[i][j][k][1] * (*dataPtr)[i][j][k][1] +
 			    (*dataPtr)[i][j][k][2] * (*dataPtr)[i][j][k][2]);
-		float mz = (*dataPtr)[i][j][k][2];
+		//float mz = (*dataPtr)[i][j][k][2];
 		if (mag > 0.001 &&
 		    i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
 		    i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&

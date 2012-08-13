@@ -7,31 +7,22 @@
 
 package modules
 
+// File provides various temperature quantities
+// Author: Mykola Dvornik
+
 import (
-	. "mumax/common"
 	. "mumax/engine"
-	"mumax/gpu"
 )
 
-type decomposeMUpdater struct {
-	mf, msat0 *Quant
-}
-
-func (u *decomposeMUpdater) Update() {
-	e := GetEngine()
-
-	m := e.Quant("m")
-	msat := e.Quant("Msat")
-
-	mf := u.mf
-	//msat0 := u.msat0
-
-	//gpu.Limit(mf.Array(), msat0.Array(), float32(msat.Multiplier()[0]), float32(msat0.Multiplier()[0]))
-
-	gpu.Decompose(mf.Array(),
-		m.Array(),
-		msat.Array(),
-		float32(msat.Multiplier()[0]))
-	m.Invalidate()
-	msat.Invalidate()
+// Load the temperatures
+func LoadT(e *Engine) {
+	if !e.HasQuant("Ts") {
+		e.AddNewQuant("Ts", SCALAR, FIELD, Unit("K"), "The spin's temperature")
+	}
+	if !e.HasQuant("Tl") {
+		e.AddNewQuant("Tl", SCALAR, FIELD, Unit("K"), "The lattice temperature")
+	}
+	if !e.HasQuant("Te") {
+		e.AddNewQuant("Te", SCALAR, FIELD, Unit("K"), "The electrons temperature")
+	}
 }

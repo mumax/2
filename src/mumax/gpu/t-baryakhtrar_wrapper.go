@@ -18,7 +18,7 @@ import (
 	"unsafe"
 )
 
-func LLGBtAsync(t *Array, M *Array, h *Array, msat0 *Array, lambda *Array, lambda_e *Array, msat0Mul float32, lambdaMul float32, lambda_eMul float32, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLGBtAsync(t *Array, M *Array, h *Array, msat0 *Array, lambda *Array, lambda_e *Array, msat0Mul float32, lambdaMul []float64, lambda_eMul []float64, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
 
 	// Bookkeeping 
 	CheckSize(h.Size3D(), M.Size3D())
@@ -26,10 +26,7 @@ func LLGBtAsync(t *Array, M *Array, h *Array, msat0 *Array, lambda *Array, lambd
 
 	//Assert(l.NComp() == 1)
 	Assert(h.NComp() == 3)
-
-	/*if t.PartSize()[X] < 4 || t.PartSize()[Y] < 4 || t.PartSize()[Z] < 4 {
-	    panic("For LLB dimensions should have >= 4 cells!")
-	}*/
+    
 	// Calling the CUDA functions
 	C.tbaryakhtar_async(
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),
@@ -46,13 +43,35 @@ func LLGBtAsync(t *Array, M *Array, h *Array, msat0 *Array, lambda *Array, lambd
 
 		(**C.float)(unsafe.Pointer(&(msat0.Comp[X].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(lambda.Comp[X].Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[XX].Pointers()[0]))), //XX
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[YY].Pointers()[0]))), //YY
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[ZZ].Pointers()[0]))), //ZZ
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[YZ].Pointers()[0]))), //YZ
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[XZ].Pointers()[0]))), //XZ
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[XY].Pointers()[0]))), //XY
+		
+		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[XX].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[YY].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[ZZ].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[YZ].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[XZ].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(lambda_e.Comp[XY].Pointers()[0]))),
 
 		(C.float)(msat0Mul),
-		(C.float)(lambdaMul),
-		(C.float)(lambda_eMul),
-
+		(C.float)(float32(lambdaMul[XX])),
+		(C.float)(float32(lambdaMul[YY])),
+		(C.float)(float32(lambdaMul[ZZ])),
+		(C.float)(float32(lambdaMul[YZ])),
+		(C.float)(float32(lambdaMul[XZ])),
+		(C.float)(float32(lambdaMul[XY])),
+		
+		(C.float)(float32(lambda_eMul[XX])),
+        (C.float)(float32(lambda_eMul[YY])),
+        (C.float)(float32(lambda_eMul[ZZ])),
+        (C.float)(float32(lambda_eMul[YZ])),
+        (C.float)(float32(lambda_eMul[XZ])),
+        (C.float)(float32(lambda_eMul[XY])),
+        
 		(C.int)(t.PartSize()[X]),
 		(C.int)(t.PartSize()[Y]),
 		(C.int)(t.PartSize()[Z]),
@@ -67,3 +86,4 @@ func LLGBtAsync(t *Array, M *Array, h *Array, msat0 *Array, lambda *Array, lambd
 
 		(*C.CUstream)(unsafe.Pointer(&(t.Stream[0]))))
 }
+

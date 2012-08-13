@@ -23,7 +23,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
   
   if (j < N1Part && k < N2){
 
-	real mSat_mask;
+	float mSat_mask;
 	if (mSat_map ==NULL){
 		mSat_mask = 1.0f;
 	}else{
@@ -33,7 +33,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 		}
 	}
 
-    real Aex2_Mu0Msat; // 2 * Aex / Mu0 * Msat
+    float Aex2_Mu0Msat; // 2 * Aex / Mu0 * Msat
     if (Aex_map==NULL){
       Aex2_Mu0Msat = Aex2_Mu0Msat_mul / mSat_mask;
 	}else{
@@ -42,8 +42,8 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 
 
 
-	real m0 = m[I]; // mag component of central cell 
-	real m1, m2 ;   // mag component of neighbors in 2 directions
+	float m0 = m[I]; // mag component of central cell 
+	float m1, m2 ;   // mag component of neighbors in 2 directions
 	
     // neighbors in X direction
 	int idx;
@@ -69,7 +69,7 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
     } 
 	m2 = m[idx]; 
 
-    real H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
+    float H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
 
     // neighbors in Z direction
     if (k-1 >= 0){

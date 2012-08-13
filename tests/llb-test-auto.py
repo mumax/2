@@ -3,8 +3,8 @@ from math import *
 # Test for LLB
 # see I. Radu et al., PRL 102, 117201 (2009)
   
-Nx = 128
-Ny = 128
+Nx = 32
+Ny = 32
 Nz = 4
 
 sX = 256e-9
@@ -17,7 +17,7 @@ csZ = sZ/Nz
 
 setgridsize(Nx, Ny, Nz)
 setcellsize(csX, csY, csZ)
-setperiodic(8,8,0)
+#setperiodic(8,8,0)
 
 #optical spot size
 osX = 0.05e-6
@@ -44,9 +44,9 @@ load('exchange6')
 load('demag')
 load('zeeman')
 load('llb')
-load('abc_gilbert')
+#load('abc-gilbert')
 
-load('solver/bdf_euler_auto')
+load('solver/bdf-euler-auto')
 setv('mf_maxiterations', 5)
 setv('mf_maxerror', 1e-6)
 setv('mf_maxitererror', 1e-8)
@@ -74,21 +74,7 @@ for kk in range(Nz):
 
 setmask('msat', msat) 
 setv('msat', Ms0)        
-
-msat0 = makearray(1,Nx,Ny,Nz)            
-for kk in range(Nz):
-    zz = float(kk) * csZ
-    for jj in range(Ny):
-        yy = float(jj)*csY-cY
-        y = yy**2
-        for ii in range(Nx):
-            xx = float(ii)*csX-cX
-            x = xx**2
-            arg = -(0.25*x*sigmaX + 0.25*y*sigmaY)
-            sd = -zz/sdepth
-            scale = 1.0 - 0.1 * exp(arg) * exp(sd) 
-            msat0[0][ii][jj][kk] = scale
-setmask('msat0', msat0)   
+  
 setv('msat0', Ms0)  
 
 Aex = 1.3e-11
@@ -102,33 +88,34 @@ setv('B_ext',[Bx,By,Bz])
               
 setv('dt', 1e-18)
 #setv('maxdt',1e-12)
-setv('lambda', 0.008)
+setv('lambda', [0.008, 0.004, 0.006, 0.0, 0.0, 0.0])
+
+k = makearray(1,Nx,Ny,Nz)            
+for kk in range(Nz):
+    for jj in range(Ny):
+        for ii in range(Nx):
+            k[0][ii][jj][kk] = 1.0
+setmask('kappa', k) 
 setv('kappa', 2e-4)
+
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 1e-4 * lex
-setv('lambda_e', lambda_e)
+lambda_e = 1e-3 * lex
+setv('lambda_e', [lambda_e, 0.1 * lambda_e, 0.5 * lambda_e, 0.0, 0.0, 0.0])
 
 Mf = getarray('Mf') 
 Mfd = makearray(3,Nx,Ny,Nz)
 for kk in range(Nz):
-    zz = float(kk) * csZ
     for jj in range(Ny):
-        yy = float(jj)*csY-cY
-        y = yy**2
         for ii in range(Nx):
-            xx = float(ii)*csX-cX
-            x = xx**2
-            arg = -(x*sigmaX + y*sigmaY)
-            sd = -zz / sdepth
-            scale = 1.0 - 0.9 * exp(arg) * exp(sd)
+            scale = 0.1
             Mfd[0][ii][jj][kk] = Mf[0][ii][jj][kk] * scale
             Mfd[1][ii][jj][kk] = Mf[1][ii][jj][kk] * scale
             Mfd[2][ii][jj][kk] = Mf[2][ii][jj][kk] * scale
 setarray('Mf',Mfd)
      
 autosave("m", "gplot", [], 1e-12)
-autosavesinglefile("m", "dump", [], 1e-12)
+#autosavesinglefile("m", "dump", [], 1e-12)
 
 #autosave("msat", "gplot", [], 1e-12)
 #autosave("mf", "gplot", [], 1e-12)
@@ -139,7 +126,7 @@ autotabulate(["t", "<msat>"], "msat.txt", 1e-15)
 #autotabulate(["t", "<mf>"], "mf.txt", 1e-16)
 #step()
 #save("b", "gplot", [])
-run(3e-12)
+run(1e-12)
 printstats()
 
 sync()

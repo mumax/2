@@ -20,24 +20,24 @@ __global__ void limiterKern(float* __restrict__ Mx, float* __restrict__ My, floa
 	
 	if (i < Npart) {
 
-		real3 M = make_real3(Mx[i], My[i], Mz[i]);
+		float3 M = make_float3(Mx[i], My[i], Mz[i]);
 
-		real nMn = len(M);
+		float nMn = len(M);
 
-		real limit = (limitMask != NULL) ? limitMask[i] * limitMul : limitMul;
+		float limit = (limitMask != NULL) ? limitMask[i] * limitMul : limitMul;
 
-		if (nMn == 0.0 || limit == 0.0) {
+		if (nMn == 0.0f || limit == 0.0f) {
 		    Mx[i] = 0.0f;
 		    My[i] = 0.0f;
 		    Mz[i] = 0.0f;
 		    return;
 		}
 	    		
-	    real Ms = msatMul * nMn;
+	    float Ms = msatMul * nMn;
 	       			
-		real ratio = limit / Ms;        
+		float ratio = limit / Ms;        
 
-		real norm = (ratio < 1.0) ? ratio : 1.0;
+		float norm = (ratio < 1.0f) ? ratio : 1.0f;
 		
 		Mx[i] = M.x * norm;
 		My[i] = M.y * norm;
