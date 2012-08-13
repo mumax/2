@@ -1,5 +1,6 @@
 from mumax2 import *
 from math import *
+
 # Standard Problem 4
 
 Nx = 32
@@ -20,6 +21,7 @@ setv('Tl_maxerror', 1./1000.)
 Te = [ [[[10.0]]] ]
 Tl = [ [[[10.0]]] ]
 Ts = [ [[[10.0]]] ]
+
 setarray('Te', Te)
 setarray('Tl', Tl)
 setarray('Ts', Ts)
@@ -58,6 +60,7 @@ autotabulate(["t", "<Te>", "<Tl>", "<Ts>",], "T.dat", tt)
 autotabulate(["t", "Q",], "Q.dat", tt)
 autotabulate(["t", "<Qe>", "<Ql>", "<Qs>"], "QQ.dat", tt)
 run(1e-12)
+
 
 printstats()
 
