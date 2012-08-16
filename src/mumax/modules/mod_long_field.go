@@ -24,18 +24,22 @@ func init() {
 func LoadLongField(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
+	if !e.HasQuant("Ts") {
+	    e.LoadModule("3T")
+	}
+	
 	kappa := e.AddNewQuant("kappa", SCALAR, MASK, Unit(""), "longitudinal magnetic susceptibility")
 	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
-	e.Depends("H_lf", "kappa", "msat0", "msat", "m")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, msat0: e.Quant("msat0"), msat: e.Quant("msat")})
+	e.Depends("H_lf", "kappa", "msat0", "msat", "m", "Tc", "Ts")
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), Ts: e.Quant("Ts") })
 
 }
 
 type LongFieldUpdater struct {
-	m, kappa, Hlf, msat0, msat *Quant
+	m, kappa, Hlf, msat0, msat0T0, msat, Tc, Ts *Quant
 }
 
 func (u *LongFieldUpdater) Update() {
@@ -44,10 +48,13 @@ func (u *LongFieldUpdater) Update() {
 	kappa := u.kappa
 	Hlf := u.Hlf
 	msat0 := u.msat0
+	msat0T0 := u.msat0T0
 	msat := u.msat
+	Tc := u.Tc
+	Ts := u.Ts
 	stream := u.Hlf.Array().Stream
 	kappaMul := 2.0 * kappa.Multiplier()[0]
 
-	gpu.LongFieldAsync(Hlf.Array(), m.Array(), msat.Array(), msat0.Array(), kappa.Array(), kappaMul, msat.Multiplier()[0], msat0.Multiplier()[0], stream)
+	gpu.LongFieldAsync(Hlf.Array(), m.Array(), msat.Array(), msat0.Array(), msat0T0.Array(), kappa.Array(), Tc.Array(), Ts.Array(), kappaMul, msat.Multiplier()[0], msat0.Multiplier()[0], msat0T0.Multiplier()[0], Tc.Multiplier()[0], Ts.Multiplier()[0], stream)
 	stream.Sync()
 }

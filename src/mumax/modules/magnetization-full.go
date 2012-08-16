@@ -21,7 +21,9 @@ func LoadFullMagnetization(e *Engine) {
 
 	if !e.HasQuant("mf") {
 		msat0 := e.AddNewQuant("msat0", SCALAR, MASK, Unit("A/m"), "the initial distribution of the saturation magnetization")
+		e.AddNewQuant("msat0T0", SCALAR, MASK, Unit("A/m"), "the value of the saturation magnetization at Ts = 0")
 		mf := e.AddNewQuant("mf", VECTOR, FIELD, Unit(""), "complete magnetization vector reduced by equilibrium value of saturation magnetization")
+		e.AddNewQuant("Tc", SCALAR, MASK, Unit("K"), "Curie temperature")
 		mf.SetUpdater(&decomposeMUpdater{mf: mf, msat0: msat0})
 		e.Depends("mf", "msat0")
 	}
