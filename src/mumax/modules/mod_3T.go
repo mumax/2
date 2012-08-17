@@ -21,23 +21,24 @@ func init() {
 func Load3T(e *Engine) {
     //Load Temperatures
     LoadT(e)
-    
+    LoadGes(e)
     Te := e.Quant("Te")
     Ts := e.Quant("Ts")
     Tl := e.Quant("Tl")
     
     Q := e.AddNewQuant("Q", SCALAR, MASK, Unit("J/s"), "The power of external heater")
-    gamma_e := e.AddNewQuant("gamma_e", SCALAR, MASK, Unit("J/K^2"), "The heat capacity of electrons")
-    Cs := e.AddNewQuant("Cs", SCALAR, MASK, Unit("J/K"), "The heat capacity of spins")
-    Cl := e.AddNewQuant("Cl", SCALAR, MASK, Unit("J/K"), "The heat capacity of phonons")
+    gamma_e := e.AddNewQuant("gamma_e", SCALAR, MASK, Unit("J/(K^2*m^3)"), "The heat capacity of electrons")
+    Cs := e.AddNewQuant("Cs", SCALAR, MASK, Unit("J/(K*m^3)"), "The heat capacity of spins")
+    Cl := e.AddNewQuant("Cl", SCALAR, MASK, Unit("J/(K*m^3)"), "The heat capacity of phonons")
     
-    Gel := e.AddNewQuant("Gel", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for electron-phonon")
-    Ges := e.AddNewQuant("Ges", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for electron-spin")
-    Gsl := e.AddNewQuant("Gsl", SCALAR, MASK, Unit("J/K"), "The coupling coefficient for spin-phonon")
+    Gel := e.AddNewQuant("Gel", SCALAR, MASK, Unit("W/(K*m^3)"), "The electron-phonon coupling coefficient")
+    //Ges := e.AddNewQuant("Ges", SCALAR, MASK, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
+    Ges := e.Quant("Ges")
+    Gsl := e.AddNewQuant("Gsl", SCALAR, MASK, Unit("W/(K*m^3)"), "The spin-phonon coupling coefficient")
     
-    Qe := e.AddNewQuant("Qe", SCALAR, FIELD, Unit("J/s"), "The heat accumulated in electron sub-system")
-    Qs := e.AddNewQuant("Qs", SCALAR, FIELD, Unit("J/s"), "The heat accumulated in spin sub-system")
-    Ql := e.AddNewQuant("Ql", SCALAR, FIELD, Unit("J/s"), "The heat accumulated in phonon sub-system")
+    Qe := e.AddNewQuant("Qe", SCALAR, FIELD, Unit("W/(m^3)"), "The heat flux density of electrons")
+    Qs := e.AddNewQuant("Qs", SCALAR, FIELD, Unit("W/(m^3)"), "The heat flux density of spins")
+    Ql := e.AddNewQuant("Ql", SCALAR, FIELD, Unit("W/(m^3)"), "The heat flux density of phonons")
     
     e.Depends("Qe", "Te", "Tl", "Ts", "gamma_e", "Ges", "Gel", "Q")
     e.Depends("Qs", "Te", "Tl", "Ts", "Cs",      "Gsl", "Ges")
