@@ -33,7 +33,7 @@ func Add(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
-
+// Multiply 2 multi-GPU arrays: dst = a * b
 func Mul(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
 	C.mulAsync(
@@ -42,6 +42,24 @@ func Mul(dst, a, b *Array) {
 		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
+func Dot(dst, a, b *Array) {
+	CheckSize(dst.size3D, a.size3D)
+	C.dotAsync(
+		(**C.float)(unsafe.Pointer(&(dst.Comp[X].Pointers()[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(a.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(a.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(a.Comp[Z].Pointers()[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(b.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(b.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(b.Comp[Z].Pointers()[0]))),
+		
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen3D))
 	dst.Stream.Sync()
 }
 
