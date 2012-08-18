@@ -15,6 +15,10 @@ setv('dt', 1e-15)
 setv('Te_maxerror', 1./1000.)
 setv('Ts_maxerror', 1./1000.)
 setv('Tl_maxerror', 1./1000.)
+setv('k_e', 400)
+setv('k_s', 100)
+setv('k_l', 100)
+
 #load('solver/euler')
 #setv('dt', 1e-15)
 
@@ -35,7 +39,7 @@ setv('Cs', 1.0e3)
 setv('Cl', 12.0e5)
 
 setv('Gel', 8.e17)
-setv('Ges', 12.0e15)
+setv('Ges', 1e18)
 setv('Gsl', 8.64e15)
 
 tt = 1e-15 # 1/2*tt = bandwidth ~50 GHz
