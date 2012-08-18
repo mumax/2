@@ -125,7 +125,12 @@ __global__ void QiDiffKern(float* __restrict__ Qi,
             float G_ik = (Gik != NULL) ? Gik[x0] * GikMul : GikMul;
 
             float C_i = (isCofT == 1) ? g * T_i : g;
-
+            /*if (x0 == 16) {
+                printf("Ti: %g\tTj %g\tTk %g\n", T_i, T_j, T_k);
+                printf("C_i: %g\tGij %g\tGik %g\n", C_i, G_ij, G_ik);
+                printf("k: %g\tddT %g\tQ_i %g\n", k, ddT, Q_i);
+            }*/
+            
             Qi[x0] = (C_i != 0.0f) ? (-G_ij * (T_i - T_j) - G_ik * (T_i - T_k) + Q_i + k * ddT) / (C_i) : 0.0f;
         }
 }

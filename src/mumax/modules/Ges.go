@@ -18,14 +18,18 @@ import (
 
 // Load the temperatures
 func LoadGes(e *Engine) {
-    LoadHField(e)
-	LoadFullMagnetization(e)
+    //LoadHField(e)
+	//LoadFullMagnetization(e)
 	
-	if !e.HasQuant("Ges") {
+	if e.HasQuant("h_eff") && e.HasQuant("m") && !e.HasQuant("Ges") {
+	    Debug("3TM is initalized with magnetization dynamics support.")
 		Ges := e.AddNewQuant("Ges", SCALAR, FIELD, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
 		g_es := e.AddNewQuant("g_es", SCALAR, MASK, Unit(""), "The dimensionless electron-spin coupling coefficient")
 		e.Depends("Ges", "g_es", "m", "msat", "h_eff", "mf")
 	    Ges.SetUpdater(&GesUpdater{g_es: g_es, Ges: Ges, m: e.Quant("m"), msat: e.Quant("msat"), h_eff: e.Quant("h_eff")})
+	} else {
+	    Debug("3TM is initalized without magnetization dynamics support")
+	    e.AddNewQuant("Ges", SCALAR, MASK, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
 	}
 	
 }

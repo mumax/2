@@ -15,9 +15,9 @@ setv('dt', 1e-15)
 setv('Te_maxerror', 1./1000.)
 setv('Ts_maxerror', 1./1000.)
 setv('Tl_maxerror', 1./1000.)
-setv('k_e', 400)
-setv('k_s', 100)
-setv('k_l', 100)
+setv('k_e', 4.0)
+setv('k_s', 1.0)
+setv('k_l', 1.0)
 
 #load('solver/euler')
 #setv('dt', 1e-15)
@@ -39,7 +39,7 @@ setv('Cs', 1.0e3)
 setv('Cl', 12.0e5)
 
 setv('Gel', 8.e17)
-setv('Ges', 1e18)
+setv('Ges', 1e16)
 setv('Gsl', 8.64e15)
 
 tt = 1e-15 # 1/2*tt = bandwidth ~50 GHz
@@ -49,12 +49,12 @@ T0 = 100e-15 # Time delay for the excitation
 dT = 10e-15 # FWHM of the excitation gaussian envelope
 dTT = 0.5 / (dT * dT) # FWHW squared
 Qamp = 1e22
-N = 1100 # 2100 timesteps, ~6 ns
+N = 2100 # 2100 timesteps, ~6 ns
 time = N * tt
 fine = 10
 N_fine = fine * N
 tt_fine = tt / float(fine)
-
+setmask_file('Q', 'Qmsk.png')
 for i in range(N_fine):
         t = tt_fine * float(i)
         Q = Qamp * exp(-1.0 * dTT * (t-T0)**2)
@@ -62,9 +62,12 @@ for i in range(N_fine):
             
 autotabulate(["t", "<Te>", "<Tl>", "<Ts>",], "T.dat", tt)
 autotabulate(["t", "Q",], "Q.dat", tt)
+autosave("Q", "gplot", [], 10.0*tt)
+autosave("Te", "gplot", [], 10.0*tt)
+autosave("Ts", "gplot", [], 10.0*tt)
+autosave("Tl", "gplot", [], 10.0*tt)
 autotabulate(["t", "<Qe>", "<Ql>", "<Qs>"], "QQ.dat", tt)
-run(1e-12)
-
+run(2e-12)
 
 printstats()
 

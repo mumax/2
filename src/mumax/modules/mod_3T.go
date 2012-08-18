@@ -21,7 +21,8 @@ func init() {
 func Load3T(e *Engine) {
     //Load Temperatures
     LoadT(e)
-    //LoadGes(e)
+    LoadGes(e)
+    
     Te := e.Quant("Te")
     Ts := e.Quant("Ts")
     Tl := e.Quant("Tl")
@@ -32,8 +33,8 @@ func Load3T(e *Engine) {
     Cl := e.AddNewQuant("Cl", SCALAR, MASK, Unit("J/(K*m^3)"), "The heat capacity of phonons")
     
     Gel := e.AddNewQuant("Gel", SCALAR, MASK, Unit("W/(K*m^3)"), "The electron-phonon coupling coefficient")
-    Ges := e.AddNewQuant("Ges", SCALAR, MASK, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
-    //Ges := e.Quant("Ges")
+    //Ges := e.AddNewQuant("Ges", SCALAR, MASK, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
+    Ges := e.Quant("Ges")
     Gsl := e.AddNewQuant("Gsl", SCALAR, MASK, Unit("W/(K*m^3)"), "The spin-phonon coupling coefficient")
     
     ke := e.AddNewQuant("k_e", SCALAR, MASK, Unit("W/(K*m)"), "Heat conductance of electrons")
@@ -121,6 +122,7 @@ func (u *QsUpdater) Update() {
         cellSize,
         pbc)
     u.Qs.Array().Sync()
+    Q.Free()
 }
 
 func (u *QlUpdater) Update() {
@@ -148,6 +150,7 @@ func (u *QlUpdater) Update() {
         cellSize,
         pbc)
     u.Ql.Array().Sync()
+    Q.Free()
 }
 
 
