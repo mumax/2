@@ -100,7 +100,7 @@ const (
 // Gets the address of the symbol on the device (variable in global or constant memory space)
 func GetSymbolAddress(symbol string) uintptr {
 	var devptr unsafe.Pointer
-	err := Error(C.cudaGetSymbolAddress((*unsafe.Pointer)(&devptr), C.CString(symbol)))
+	err := Error(C.cudaGetSymbolAddress((*unsafe.Pointer)(&devptr), unsafe.Pointer(C.CString(symbol))))
 	if err != Success {
 		panic(err)
 	}
@@ -110,7 +110,7 @@ func GetSymbolAddress(symbol string) uintptr {
 // Gets the size (bytes) of the symbol on the device (variable in global or constant memory space)
 func GetSymbolSize(symbol string) int {
 	var size C.size_t
-	err := Error(C.cudaGetSymbolSize(&size, C.CString(symbol)))
+	err := Error(C.cudaGetSymbolSize(&size, unsafe.Pointer(C.CString(symbol))))
 	if err != Success {
 		panic(err)
 	}

@@ -24,7 +24,7 @@ func LoadGes(e *Engine) {
 	if !e.HasQuant("Ges") {
 		Ges := e.AddNewQuant("Ges", SCALAR, FIELD, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
 		g_es := e.AddNewQuant("g_es", SCALAR, MASK, Unit(""), "The dimensionless electron-spin coupling coefficient")
-		e.Depends("Ges", "g_es", "m", "msat", "h_eff")
+		e.Depends("Ges", "g_es", "m", "msat", "h_eff", "mf")
 	    Ges.SetUpdater(&GesUpdater{g_es: g_es, Ges: Ges, m: e.Quant("m"), msat: e.Quant("msat"), h_eff: e.Quant("h_eff")})
 	}
 	

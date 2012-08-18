@@ -55,7 +55,7 @@ func SetupArgument(arg uintptr, size, offset uint) {
 // UNSAFE
 // Launches the function on the device. To be preceded by ConfigureCall()
 func Launch(entry string) {
-	err := Error(C.cudaLaunch(C.CString(entry)))
+	err := Error(C.cudaLaunch(unsafe.Pointer(C.CString(entry))))
 	if err != Success {
 		panic(err)
 	}
