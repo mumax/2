@@ -15,10 +15,10 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("3T", "Three-temperature model module", Load3T)
+	RegisterModule("3TM", "Three-temperature model module", Load3TM)
 }
 
-func Load3T(e *Engine) {
+func Load3TM(e *Engine) {
     //Load Temperatures
     LoadT(e)
     LoadGes(e)
@@ -49,9 +49,9 @@ func Load3T(e *Engine) {
     e.Depends("Qs", "Te", "Tl", "Ts", "Cs",      "Gsl", "Ges", "k_s")
     e.Depends("Ql", "Te", "Tl", "Ts", "Cl",      "Gsl", "Gel", "k_l")
     
-    Qe.SetUpdater(&QeUpdater{Qe: Qe, Te: Te, Tl: Tl, Ts: Ts, Q: Q, gamma_e: gamma_e, Gel: Gel, Ges: Ges, ke: ke })
-    Qs.SetUpdater(&QsUpdater{Qs: Qs, Te: Te, Tl: Tl, Ts: Ts, Cs: Cs, Gsl: Gsl, Ges: Ges, ks: ks })
-    Ql.SetUpdater(&QlUpdater{Ql: Ql, Te: Te, Tl: Tl, Ts: Ts, Cl: Cl, Gel: Gel, Gsl: Gsl, kl: kl })
+    Qe.SetUpdater(&Qe3TMUpdater{Qe: Qe, Te: Te, Tl: Tl, Ts: Ts, Q: Q, gamma_e: gamma_e, Gel: Gel, Ges: Ges, ke: ke })
+    Qs.SetUpdater(&Qs3TMUpdater{Qs: Qs, Te: Te, Tl: Tl, Ts: Ts, Cs: Cs, Gsl: Gsl, Ges: Ges, ks: ks })
+    Ql.SetUpdater(&Ql3TMUpdater{Ql: Ql, Te: Te, Tl: Tl, Ts: Ts, Cl: Cl, Gel: Gel, Gsl: Gsl, kl: kl })
     
     e.AddPDE1("Te", "Qe")
     e.AddPDE1("Ts", "Qs")
@@ -59,24 +59,24 @@ func Load3T(e *Engine) {
     
 }
 
-type QeUpdater struct {
+type Qe3TMUpdater struct {
 	Qe, Te, Tl, Ts, Q, gamma_e, Gel, Ges, ke *Quant
 }
 
-type QsUpdater struct {
+type Qs3TMUpdater struct {
 	Qs, Te, Tl, Ts, Cs, Gsl, Ges, ks *Quant
 }
 
-type QlUpdater struct {
+type Ql3TMUpdater struct {
 	Ql, Te, Tl, Ts, Cl, Gel, Gsl, kl *Quant
 }
 
-func (u *QeUpdater) Update() {
+func (u *Qe3TMUpdater) Update() {
     e := GetEngine()
     pbc := e.Periodic()
     cellSize := e.CellSize()
     
-    gpu.Q_async(
+    gpu.Q3TM_async(
         u.Qe.Array(),
         u.Te.Array(),
         u.Tl.Array(),
@@ -97,13 +97,13 @@ func (u *QeUpdater) Update() {
     u.Qe.Array().Sync()
 }
 
-func (u *QsUpdater) Update() {
+func (u *Qs3TMUpdater) Update() {
     e := GetEngine()
     pbc := e.Periodic()
     cellSize := e.CellSize()
     QMul := []float64{0.0, 0.0, 0.0}
     Q := gpu.NilArray(u.Qs.Array().NComp(), u.Qs.Array().Size3D())
-    gpu.Q_async(
+    gpu.Q3TM_async(
         u.Qs.Array(),
         u.Ts.Array(),
         u.Tl.Array(),
@@ -125,13 +125,13 @@ func (u *QsUpdater) Update() {
     Q.Free()
 }
 
-func (u *QlUpdater) Update() {
+func (u *Ql3TMUpdater) Update() {
     e := GetEngine()
     pbc := e.Periodic()
     cellSize := e.CellSize()
     QMul := []float64{0.0, 0.0, 0.0}
     Q := gpu.NilArray(u.Ql.Array().NComp(), u.Ql.Array().Size3D())
-    gpu.Q_async(
+    gpu.Q3TM_async(
         u.Ql.Array(),
         u.Tl.Array(),
         u.Te.Array(),

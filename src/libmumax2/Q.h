@@ -18,7 +18,7 @@ extern "C" {
 
 
 /// calculates heat densities for various subsystems
-DLLEXPORT void Q_async(float** Qi,
+DLLEXPORT void Q3TM_async(float** Qi,
                          float** Ti, float** Tj, float** Tk, 
                          float** Q, 
                          float** gamma_i, 
@@ -27,6 +27,21 @@ DLLEXPORT void Q_async(float** Qi,
                          float QMul, 
                          float gamma_iMul, 
                          float GijMul, float GikMul, float kMul,
+                         int isCofT,
+                         const int sx, const int sy, const int sz,
+                         const float csx, const float csy, const float csz,
+                         const int pbc_x, const int pbc_y, const int pbc_z,
+                         CUstream* stream);
+                         
+DLLEXPORT void Q2TM_async(float** Qi,
+                         float** Ti, float** Tj, 
+                         float** Q, 
+                         float** gamma_i, 
+                         float** Gij,
+                         float** k,
+                         float QMul, 
+                         float gamma_iMul, 
+                         float GijMul, float kMul,
                          int isCofT,
                          const int sx, const int sy, const int sz,
                          const float csx, const float csy, const float csz,

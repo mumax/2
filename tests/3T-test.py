@@ -8,16 +8,16 @@ Ny = 32
 Nz = 1
 setgridsize(Nx, Ny, Nz)
 setcellsize(64e-9/Nx, 64e-9/Ny, 2e-9/Nz)
-
-load('3T')
+#setperiodic(4,4,0)
+load('3TM')
 load('solver/rk12')
 setv('dt', 1e-15)
 setv('Te_maxerror', 1./1000.)
 setv('Ts_maxerror', 1./1000.)
 setv('Tl_maxerror', 1./1000.)
-setv('k_e', 4.0)
-setv('k_s', 1.0)
-setv('k_l', 1.0)
+setv('k_e', 100.0)
+setv('k_s', 10.0)
+setv('k_l', 10.0)
 
 #load('solver/euler')
 #setv('dt', 1e-15)
@@ -49,12 +49,12 @@ T0 = 100e-15 # Time delay for the excitation
 dT = 10e-15 # FWHM of the excitation gaussian envelope
 dTT = 0.5 / (dT * dT) # FWHW squared
 Qamp = 1e22
-N = 2100 # 2100 timesteps, ~6 ns
+N = 10100 # 2100 timesteps, ~6 ns
 time = N * tt
 fine = 10
 N_fine = fine * N
 tt_fine = tt / float(fine)
-setmask_file('Q', 'Qmsk.png')
+setmask_file('Q', 'Qmsk-dot.png')
 for i in range(N_fine):
         t = tt_fine * float(i)
         Q = Qamp * exp(-1.0 * dTT * (t-T0)**2)
@@ -67,7 +67,7 @@ autosave("Te", "gplot", [], 10.0*tt)
 autosave("Ts", "gplot", [], 10.0*tt)
 autosave("Tl", "gplot", [], 10.0*tt)
 autotabulate(["t", "<Qe>", "<Ql>", "<Qs>"], "QQ.dat", tt)
-run(2e-12)
+run(10e-12)
 
 printstats()
 

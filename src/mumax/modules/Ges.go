@@ -24,7 +24,7 @@ func LoadGes(e *Engine) {
 	if e.HasQuant("h_eff") && e.HasQuant("m") && !e.HasQuant("Ges") {
 	    Debug("3TM is initalized with magnetization dynamics support.")
 		Ges := e.AddNewQuant("Ges", SCALAR, FIELD, Unit("W/(K*m^3)"), "The electron-spin coupling coefficient")
-		g_es := e.AddNewQuant("g_es", SCALAR, MASK, Unit(""), "The dimensionless electron-spin coupling coefficient")
+		g_es := e.AddNewQuant("g_es", SCALAR, MASK, Unit(""), "The dimensionless electron-spin coupling coefficient (Giblert constant)")
 		e.Depends("Ges", "g_es", "m", "msat", "h_eff", "mf")
 	    Ges.SetUpdater(&GesUpdater{g_es: g_es, Ges: Ges, m: e.Quant("m"), msat: e.Quant("msat"), h_eff: e.Quant("h_eff")})
 	} else {
@@ -45,7 +45,7 @@ func (u *GesUpdater) Update() {
     h_eff := u.h_eff
     Ges := u.Ges
     
-    mult := -2.0 * Mu0 * Kb * g_es.Multiplier()[0] * msat.Multiplier()[0] / H_bar
+    mult := -2.0 * Mu0 * Kb * g_es.Multiplier()[0] * msat.Multiplier()[0] / H_bar // minus is due to different conventions for relaxation constant
     Ges.Multiplier()[0] = mult
     
     

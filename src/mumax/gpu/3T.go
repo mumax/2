@@ -18,10 +18,10 @@ import (
 	"unsafe"
 )
 
-func Q_async(Qi *Array, Ti*Array, Tj *Array, Tk *Array, Q *Array, gamma_i *Array, Gij *Array, Gik *Array, k *Array, QMul []float64, gamma_iMul []float64, GijMul []float64, GikMul []float64, kMul []float64, isCofT int, cs []float64, pbc []int) {
+func Q3TM_async(Qi *Array, Ti*Array, Tj *Array, Tk *Array, Q *Array, gamma_i *Array, Gij *Array, Gik *Array, k *Array, QMul []float64, gamma_iMul []float64, GijMul []float64, GikMul []float64, kMul []float64, isCofT int, cs []float64, pbc []int) {
 
 	// Calling the CUDA functions
-	C.Q_async(
+	C.Q3TM_async(
 	    (**C.float)(unsafe.Pointer(&(Qi.Comp[X].Pointers()[0]))),
 	    
         (**C.float)(unsafe.Pointer(&(Ti.Comp[X].Pointers()[0]))),
@@ -40,6 +40,45 @@ func Q_async(Qi *Array, Ti*Array, Tj *Array, Tk *Array, Q *Array, gamma_i *Array
         (C.float)(float32(gamma_iMul[0])),
         (C.float)(float32(GijMul[0])),
         (C.float)(float32(GikMul[0])),
+        (C.float)(float32(kMul[0])),
+        
+        (C.int)(isCofT),
+        
+        (C.int)(Qi.PartSize()[X]),
+		(C.int)(Qi.PartSize()[Y]),
+		(C.int)(Qi.PartSize()[Z]),
+        
+        (C.float)(float32(cs[X])),
+        (C.float)(float32(cs[Y])),
+        (C.float)(float32(cs[Z])),
+        
+        (C.int)(pbc[X]),
+        (C.int)(pbc[Y]),
+        (C.int)(pbc[Z]),
+	    (*C.CUstream)(unsafe.Pointer(&(Qi.Stream[0]))),
+	    
+	    )
+}
+
+func Q2TM_async(Qi *Array, Ti*Array, Tj *Array, Q *Array, gamma_i *Array, Gij *Array, k *Array, QMul []float64, gamma_iMul []float64, GijMul []float64, kMul []float64, isCofT int, cs []float64, pbc []int) {
+
+	// Calling the CUDA functions
+	C.Q2TM_async(
+	    (**C.float)(unsafe.Pointer(&(Qi.Comp[X].Pointers()[0]))),
+	    
+        (**C.float)(unsafe.Pointer(&(Ti.Comp[X].Pointers()[0]))),
+        (**C.float)(unsafe.Pointer(&(Tj.Comp[X].Pointers()[0]))),
+        
+        (**C.float)(unsafe.Pointer(&(Q.Comp[X].Pointers()[0]))),
+        
+        (**C.float)(unsafe.Pointer(&(gamma_i.Comp[X].Pointers()[0]))),
+        
+        (**C.float)(unsafe.Pointer(&(Gij.Comp[X].Pointers()[0]))),
+        (**C.float)(unsafe.Pointer(&(k.Comp[X].Pointers()[0]))),
+        
+        (C.float)(float32(QMul[0])),
+        (C.float)(float32(gamma_iMul[0])),
+        (C.float)(float32(GijMul[0])),
         (C.float)(float32(kMul[0])),
         
         (C.int)(isCofT),
