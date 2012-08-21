@@ -12,7 +12,11 @@ NVCC+=\
   --compiler-options -Werror\
   --compiler-options -fPIC\
   --use_fast_math\
-  -arch=sm_21\
+  -gencode arch=compute_10,code=sm_10\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_20,code=sm_30\
+  -gencode arch=compute_30,code=sm_30\
   -Xptxas\
   -v\
   
@@ -20,7 +24,11 @@ NVCCWERRORLESS=nvcc
 NVCCWERRORLESS+=\
   --compiler-options -fPIC\
   --use_fast_math\
-  -arch=sm_21\
+  -gencode arch=compute_10,code=sm_10\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_20,code=sm_30\
+  -gencode arch=compute_30,code=sm_30\
   -Xptxas\
   -v\
 

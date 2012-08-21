@@ -87,6 +87,7 @@ func (u *TempBrownUpdater) Update() {
 	temp := e.Quant("temp")
 	tempMul := temp.Multiplier()[0]
 	if tempMul == 0 {
+		u.htherm.Array().Zero()
 		return
 	}
 
