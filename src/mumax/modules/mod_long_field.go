@@ -25,7 +25,7 @@ func LoadLongField(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	if !e.HasQuant("Ts") {
-	    e.LoadModule("2TM")
+		LoadT(e)
 	}
 	
 	kappa := e.AddNewQuant("kappa", SCALAR, MASK, Unit(""), "longitudinal magnetic susceptibility")
