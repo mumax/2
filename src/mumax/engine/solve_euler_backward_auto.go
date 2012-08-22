@@ -33,7 +33,7 @@ type BDFEulerAuto struct {
 	maxIter    []*Quant     // maximum number of iterations per step
 	newDt      []float64    // 
 	diff       []gpu.Reductor
-	err_list   *list.List
+	err_list   []*list.List
 	iterations *Quant
 	badSteps   *Quant
 	minDt      *Quant
@@ -143,8 +143,8 @@ func (s *BDFEulerAuto) Step() {
 			maxStepErr := s.maxErr[i].Scalar()
 			StepErr := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dy0buffer[i]))
 			
-			s.err_list.PushFront(StepErr)
-			s.err_list.Remove(s.err_list.Back())
+			s.err_list[i].PushFront(StepErr)
+			s.err_list[i].Remove(s.err_list[i].Back())
 			
 			if StepErr == 0.0 {
 				StepErr = headRoom * headRoom * maxStepErr
@@ -161,7 +161,7 @@ func (s *BDFEulerAuto) Step() {
 			
 			if e.step.Scalar() > 3 {
 			    //do softcore adjustment
-			    elem := s.err_list.Front()
+			    elem := s.err_list[i].Front()
 			    e := elem.Value.(float64)
 			    ep1 := elem.Next().Value.(float64)
 			    ep2 := elem.Next().Value.(float64)
@@ -227,11 +227,6 @@ func init() {
 
 func LoadBDFEulerAuto(e *Engine) {
 	s := new(BDFEulerAuto)
-    s.err_list = list.New()
-    
-    s.err_list.PushFront(0.0)
-    s.err_list.PushFront(0.0)
-    s.err_list.PushFront(0.0)
     
 	// Minimum/maximum time step
 	s.minDt = e.AddNewQuant("mindt", SCALAR, VALUE, Unit("s"), "Minimum time step")
@@ -252,6 +247,15 @@ func LoadBDFEulerAuto(e *Engine) {
 	s.dybuffer = make([]*gpu.Array, len(equation))
 
 	s.err = make([]*Quant, len(equation))
+	s.err_list = make([]*list.List, len(equation))
+	
+	for i := range equation {
+	    s.err_list[i] = list.New()
+	    s.err_list[i].PushFront(0.0)
+	    s.err_list[i].PushFront(0.0)
+	    s.err_list[i].PushFront(0.0)
+	}
+	
 	s.maxErr = make([]*Quant, len(equation))
 	s.maxIterErr = make([]*Quant, len(equation))
 	s.maxIter = make([]*Quant, len(equation))
