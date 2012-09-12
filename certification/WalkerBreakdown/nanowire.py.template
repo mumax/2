@@ -1,0 +1,87 @@
+from mumax2 import *
+import random as r
+
+# Figure4 thiaville
+
+# define geometry
+
+# number of cells
+Nx = 2048
+Ny = 128
+Nz = 1
+setgridsize(Nx, Ny, Nz)
+
+# physical size in meters  exchange length:5.2e-9
+sizeX = 4800e-9
+sizeY = 300e-9
+sizeZ = 5e-9
+setcellsize(sizeX/Nx, sizeY/Ny, sizeZ/Nz)
+
+
+# load modules
+
+load('micromagnetism')
+load('solver/rk12')
+
+# set parameters
+setv('Msat', 800e3)
+setv('Aex', 1.3e-11)
+setv('alpha', 0.02)
+setv('dt', 1e-12) # initial time step, will adapt
+setv('m_maxerror', 1./1000)
+
+# set magnetization
+m = makearray(3, Nx, Ny, Nz)    # define a python array with the right dimensions
+W = 2
+X=0
+Y=1
+Z=2
+for j in range(Ny):
+  for i in range(Nx/W-10):                   
+    m[X][i][j][0] = 1
+    m[Y][i][j][0] = 0
+    m[Z][i][j][0] = 0
+  for i in range(Nx/W-10,Nx/W+10):                
+    m[X][i][j][0] = 0 
+    m[Y][i][j][0] = 1
+    m[Z][i][j][0] = 0
+  for i in range(Nx/W+10, Nx):         
+    m[X][i][j][0] = -1
+    m[Y][i][j][0] = 0
+    m[Z][i][j][0] = 0
+
+setarray('m', m)                # Give the initialized array to MuMax 
+
+
+#relax
+
+setv('alpha', 1)    # high damping for relax
+saveas("m", "png", [], "init.png")
+run_until_smaller('maxtorque', 3e-4 * gets('gamma') * gets('msat'))
+m_initial = getarray('m') #save initial m
+setv('alpha', 0.02) # restore normal damping (0.02)
+setv('t', 0)        # re-set time to 0 so output starts at 0
+setv('dt', 1e-15)   # restore time step, will adapt again
+
+#set magnetic field strenght
+mag={H}/10000.
+
+
+# schedule some output
+average =0.0
+setv('t', 0)      			# re-set time to 0 so output starts at 0
+setarray('m', m_initial)                # Give the initialized array to MuMax 
+# save magnetization snapshots in png format every 100ps
+autosave("m", "png", [], 100e-12)
+# save a table with time and the average magnetization every 10ps
+autotabulate(["t", "<m>"], "m_H"+str(mag)+"_"+".txt", 10e-12)
+
+
+# run with field and Temperature
+Bx = mag 
+By =   0 
+Bz =   0      
+setv('B_ext', [Bx, By, Bz])
+run(3e-9)
+
+sync()
