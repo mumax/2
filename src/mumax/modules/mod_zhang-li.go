@@ -26,15 +26,15 @@ func LoadZhangLiMADTorque(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
 
 	// ============ New Quantities =============
-	xi := e.AddNewQuant("xi", SCALAR, VALUE, Unit(""), "Degree of non-adiabadicity")
-	xi.SetScalar(0.05)
-	pol := e.AddNewQuant("polarisation", SCALAR, VALUE, Unit(""), "Polarization degree of the spin-current")
-	pol.SetScalar(1.0)
+	xi := e.AddNewQuant("xi", SCALAR, MASK, Unit(""), "Degree of non-adiabadicity")
+	xi.Multiplier()[0] = 0.05
+	pol := e.AddNewQuant("polarisation", SCALAR, MASK, Unit(""), "Polarization degree of the spin-current")
+	pol.Multiplier()[0] = 1.0
 	LoadUserDefinedCurrentDensity(e)
 	zzt := e.AddNewQuant("zzt", VECTOR, FIELD, Unit("/s"), "Zhang-Li Spin Transfer Torque")
 
 	// ============ Dependencies =============
-	e.Depends("zzt", "xi", "polarisation", "j", "m", "msat")
+	e.Depends("zzt", "xi", "polarisation", "j", "m", "msat", "alpha")
 
 	// ============ Updating the torque =============
 	zzt.SetUpdater(&ZhangLiUpdater{zzt: zzt})
@@ -53,17 +53,18 @@ func (u *ZhangLiUpdater) Update() {
 	cellSize := e.CellSize()
 	zzt := u.zzt
 	m := e.Quant("m")
-	ee := e.Quant("xi").Scalar()
+	ee := e.Quant("xi")
 	msat := e.Quant("msat") // it is pointwise
-	pol := e.Quant("polarisation").Scalar()
+	pol := e.Quant("polarisation")
 	curr := e.Quant("j") // could be pointwise
 	pbc := e.Periodic()
-
+    alpha := e.Quant("alpha")
 	//njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
 	nmsatn := msat.Multiplier()[0]
+	
+    nPoln := pol.Multiplier()[0]
+    
+	pred := nPoln * MuB / (E * nmsatn) //pred needs  (* polMsk) and 1/(1+ee**2)
 
-	pred := pol * MuB / (E * nmsatn * (1 + ee*ee))
-	pret := ee * pred
-
-	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), curr.Multiplier(), float32(pred), float32(pret), float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
+	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), pol.Array(), ee.Array(), alpha.Array(), curr.Multiplier(), float32(pred), ee.Multiplier()[0], alpha.Multiplier()[0], float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)
 }
