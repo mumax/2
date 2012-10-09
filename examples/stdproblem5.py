@@ -29,10 +29,11 @@ savegraph("graph.png")
 setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
 setv('alpha', 1.0)
+setv('gamma', 2.211e5)
 
 setv('dt', 1e-15)
 setv('maxdt', 1e-12)
-setv('m_maxerror', 1./500)
+setv('m_maxerror', 1./2000)
 
 
 # Set a initial magnetisation which will relax into a vortex
@@ -65,6 +66,7 @@ setv('xi',0.05)
 setv('polarisation',1.0)
 save("m","png",[])
 save("m","vtk",[])
+
 j = makearray(3, Nx, Ny, Nz)
 for m in range(Nx):
     for n in range(Ny):
@@ -80,6 +82,6 @@ setmask('j', j)
 autosave("m", "gplot", [], 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)
 
-run(10.0e-9)
+run(15.0e-9)
 
 printstats()
