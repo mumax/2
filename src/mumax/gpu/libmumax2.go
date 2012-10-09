@@ -44,6 +44,17 @@ func Mul(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+// Divide 2 multi-GPU arrays: dst = a / b; _if_ b = 0 _then_ dst = a
+func Div(dst, a, b *Array) {
+	CheckSize(dst.size4D, a.size4D)
+	C.divAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
 
 func Dot(dst, a, b *Array) {
 	CheckSize(dst.size3D, a.size3D)
