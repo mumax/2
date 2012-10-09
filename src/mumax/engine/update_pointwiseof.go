@@ -68,7 +68,7 @@ func (field *PointwiseOfUpdater) Update() {
 	field.lastIdx = i
 
 	if i >= len(field.points) {
-		panic(InputErrF("Out of range of pointwise-defined quantity", field.quant.Name(), ". Field is defined only up to " + name + "= ", field.points[len(field.points)-1][0], "s, but requested at"  + name + "= ", arg, "s. Please define the quantity up to larger " + name))
+		panic(InputErrF("Out of range of pointwise-defined quantity", field.quant.Name(), ". Field is defined only up to " + name + "= ", field.points[len(field.points)-1][0], field.quant.Unit(), ", but requested at"  + name + "= ", arg, field.quant.Unit(), ". Please define the quantity up to larger " + name))
 	}
 
 	value := field.quant.multiplier
