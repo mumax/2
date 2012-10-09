@@ -21,7 +21,6 @@ func LoadMagnetization(e *Engine) {
 		m := e.AddNewQuant("m", VECTOR, FIELD, Unit(""), "magnetization")
 		Msat := e.AddNewQuant("Msat", SCALAR, MASK, Unit("A/m"), "saturation magnetization")
 		e.Depends("m", "Msat")
-
 		m.SetUpdater(&normUpdater{m: m, Msat: Msat})
 	}
 }
