@@ -577,6 +577,15 @@ func (a API) OutputDirectory() string {
 // E.g.: Add_To("H", "H_1") adds a new external field
 // H_1 that will be added to H.
 func (a API) Add_To(sumQuantity, newQuantity string) {
+    a.Add_To_Weighted(sumQuantity, newQuantity, 1.0)
+}
+
+// Add a new quantity to the multi-physics engine, its
+// value is multiplied by the weight value and add to the (existing) sumQuantity.
+// E.g.: Add_To_Weight("H", "H_1") adds a new external field
+// H_1 that will be added to H.
+
+func (a API) Add_To_Weighted(sumQuantity, newQuantity string, weight float64) {
 
 	e := a.Engine
 	sumQuant := e.Quant(sumQuantity)
@@ -594,7 +603,7 @@ func (a API) Add_To(sumQuantity, newQuantity string) {
 	    term = e.AddNewQuant(newQuantity, sumQuant.NComp(), MASK, sumQuant.Unit())
 	}
 	
-	sumUpd.AddParent(term.Name())
+	sumUpd.MAddParent(term.Name(), weight)
 	Log("Added new quantity", term.FullName(), "to", sumQuant.Name())
 
 	//e := a.Engine
