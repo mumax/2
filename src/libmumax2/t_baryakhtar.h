@@ -21,7 +21,7 @@ extern "C" {
 DLLEXPORT  void tbaryakhtar_async(float** tx, float**  ty, float**  tz, 
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
-			 float**  msat0,
+			 
 			 float** lambda_xx,
 			 float** lambda_yy,
 			 float** lambda_zz,
@@ -36,7 +36,6 @@ DLLEXPORT  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float** lambda_e_xz,
 			 float** lambda_e_xy,
 			 
-			 const float msat0Mul,
 			 const float lambdaMul_xx,
 			 const float lambdaMul_yy,
 			 const float lambdaMul_zz,
