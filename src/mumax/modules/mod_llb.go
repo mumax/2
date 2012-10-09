@@ -18,20 +18,17 @@ func init() {
 	RegisterModule("llb", "Landau-Lifshitz-Baryakhtar equation", LoadLLB)
 }
 
-// The torque quant contains the Landau-Lifshitz torque τ acting on the reduced magnetization m = M/Msat.
-//	d m / d t =  τ  
+// The torque quant contains the Landau-Lifshitz-Baryakhtar torque τ acting on the reduced magnetization m = M/Msat0, where Msat0 is the equlibrium value of saturation magnetization
+//	d mf / d t =  τ  
 // with unit
 //	[τ] = 1/s
 // Thus:
-//	τ = gamma[ (m x h) - α m  x (m x h) ]
-// with:
-//	h = H / Msat
+//	τ = gammaLL[ ( \lambda\_ij H - \lambdae\_e laplacian(H) ]
 // To keep numbers from getting extremely large or small, 
 // the multiplier is set to gamma, so the array stores τ/gamma
 func LoadLLB(e *Engine) {
 
 	LoadHField(e)
-	LoadMagnetization(e)
 	LoadFullMagnetization(e)
 
 	e.LoadModule("baryakhtar")
