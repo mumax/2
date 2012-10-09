@@ -24,19 +24,18 @@ func init() {
 
 func LoadTempBrown(e *Engine) {
 	e.LoadModule("llg") // needed for alpha, hfield, ...
-
+    LoadTemp(e, LtempName) // load temperature
+    
 	Therm_seed := e.AddNewQuant("Therm_seed", SCALAR, VALUE, Unit(""), `Random seed for H\_therm`)
 	Therm_seed.SetVerifier(Int)
 
-	temp := e.AddNewQuant("Temp", SCALAR, MASK, Unit("K"), "Temperature")
-	temp.SetVerifier(NonNegative)
 	Htherm := e.AddNewQuant("H_therm", VECTOR, FIELD, Unit("A/m"), "Thermal fluctuating field")
-	e.AddNewQuant("cutoff_dt", SCALAR, VALUE, "s", "Update thermal field at most once per cutoff_dt. Works best with fixed time step equal to N*cutoff_dt.")
+	e.AddNewQuant("cutoff_dt", SCALAR, VALUE, "s", `Update thermal field at most once per cutoff\_dt. Works best with fixed time step equal to N*cutoff\_dt.`)
 
 	// By declaring that H_therm depends on Step,
 	// It will be automatically updated at each new time step
 	// and remain constant during the stages of the step.
-	e.Depends("H_therm", "Temp", "Step", "dt", "alpha", "gamma", "Msat", "Therm_seed")
+	e.Depends("H_therm", LtempName, "Step", "dt", "alpha", "gamma", "Msat", "Therm_seed")
 	Htherm.SetUpdater(NewTempBrownUpdater(Htherm, Therm_seed))
 
 	// Add thermal field to total field
