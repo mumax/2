@@ -26,7 +26,6 @@ func LoadBaryakhtarTorques(e *Engine) {
 
 	e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
 	LoadHField(e)
-	LoadMagnetization(e)
 	LoadFullMagnetization(e)
 	// ============ New Quantities =============
 
@@ -37,7 +36,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 
 	// ============ Dependencies =============
-	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0")//, "debug_h")
+	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e")//, "debug_h")
 
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{btorque: btorque}
@@ -57,7 +56,6 @@ func (u *BaryakhtarUpdater) Update() {
 	m := e.Quant("mf")
 	heff := e.Quant("H_eff")
 	pbc := e.Periodic()
-	msat0 := e.Quant("msat0")
 	//heff := e.Quant("debug_h")
 	
 	// put gamma in multiplier to avoid additional multiplications
@@ -75,10 +73,8 @@ func (u *BaryakhtarUpdater) Update() {
 	gpu.LLGBtAsync(btorque.Array(),
 		m.Array(),
 		heff.Array(),
-		msat0.Array(),
 		lambda.Array(),
 		lambda_e.Array(),
-		float32(msat0.Multiplier()[0]),
 		lambda.Multiplier(),
 		lambda_e.Multiplier(),
 		float32(cellSize[X]),
