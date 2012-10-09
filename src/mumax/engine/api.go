@@ -584,7 +584,16 @@ func (a API) Add_To(sumQuantity, newQuantity string) {
 	if !ok {
 		panic(InputErrF("Add_To: quantity ", sumQuant.Name(), " is not of type 'sum', nothing can be added to it."))
 	}
-	term := e.AddNewQuant(newQuantity, sumQuant.NComp(), MASK, sumQuant.Unit())
+	
+	
+    var term *Quant
+    
+	if e.HasQuant(newQuantity) {
+	    term = e.Quant(newQuantity) 
+	} else {
+	    term = e.AddNewQuant(newQuantity, sumQuant.NComp(), MASK, sumQuant.Unit())
+	}
+	
 	sumUpd.AddParent(term.Name())
 	Log("Added new quantity", term.FullName(), "to", sumQuant.Name())
 
