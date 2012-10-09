@@ -18,6 +18,14 @@
 #define printf(f, ...) ((void)(f, __VA_ARGS__),0)
 #endif
 
+
+const float kB = 1.380650424E-23;       // Boltzmann's constant in J/K
+const float muB = 9.2740091523E-24;     // Bohr magneton in Am^2
+
+const float eps = 1.0e-30f;
+
+typedef float (*func)(float x, float prefix, float mult);
+
 typedef double real;
 
 struct float5 {
@@ -194,9 +202,55 @@ inline __host__ __device__ float3 normalize(float3 a){
 	return make_float3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
 
+inline __device__ float coth(float x) {
+    return 1.0f / tanhf(x);
+}
+
 inline __host__ __device__ real3 normalize(real3 a){
     real veclen = (len(a) != 0.0) ? 1.0 / len(a) : 0.0;
 	return make_real3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
+
+inline __device__ float Bj(float J, float x) {
+        float lpre = 1.0f / (2.0f * J);
+        float gpre = (2.0f * J + 1) * lpre;
+        return gpre * coth(gpre * x) - lpre * coth(lpre * x);
+}
+
+inline __device__ float L(float x) {
+        return (x != 0.0f) ? coth(x) - (1.0f / x) : 0.0f;
+}
+
+// find the root of the function on (xa,xb) with linear convergance
+//inline __device__ float findroot(func* f, float mult, float xa, float xb) {
+
+//    float ya = f[0](xa, mult);
+//    if (ya < eps) return ya;
+//    float yb = f[0](xb, mult);
+//    if (yb < eps) return yb;
+//    
+//    float y1 = ya;
+//    float x1 = xa;
+//    float y2 = yb;
+//    float x2 = xb;
+//    
+//    float x = 1.0e10f;
+//    float y = 1.0e10f;
+//    
+//    while (y > eps) {
+//    
+//        float k = (x2-x1) / (y2-y1);
+//        x = x1 - y1 * k;
+//        y = f[0](x, mult);
+//        
+//        y1 = (signbit(y) == signbit(y1)) ? y : y1;
+//        x1 = (signbit(y) == signbit(y1)) ? x : x1;
+//        
+//        y2 = (signbit(y) == signbit(y2) && signbit(y) != signbit(y1)) ? y : y2;
+//        x2 = (signbit(y) == signbit(y2) && signbit(y) != signbit(y1)) ? x : x2;
+//         
+//    }
+//    return x;
+//}
 
 #endif
