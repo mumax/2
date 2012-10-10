@@ -19,7 +19,7 @@ const ELcoupName = "Gel"
 
 // Register this module
 func init() {
-	RegisterModule("temperature/E-L", "Electron temperature model", LoadEL)
+	RegisterModule("temperature/E-L", "Elecron-Lattice coupling", LoadEL)
 }
 
 func LoadEL(e *Engine) {

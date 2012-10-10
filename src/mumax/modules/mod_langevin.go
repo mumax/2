@@ -18,7 +18,7 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("langevin", "Temperature dependance of equilibrium value of saturation magnetization", LoadLangevin)
+	RegisterModule("langevin", "Temperature dependance of equilibrium value of saturation magnetization for J → ∞", LoadLangevin)
 }
 
 func LoadLangevin(e *Engine) {
