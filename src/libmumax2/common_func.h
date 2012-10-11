@@ -22,7 +22,8 @@
 const float kB = 1.380650424E-23;       // Boltzmann's constant in J/K
 const float muB = 9.2740091523E-24;     // Bohr magneton in Am^2
 
-const float eps = 1.0e-30f;
+const float eps = 1.0e-30f;              // The target error for iterative methods
+const float linRange = 1.0e-1f;          // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
 
@@ -218,7 +219,7 @@ inline __device__ float Bj(float J, float x) {
 }
 
 inline __device__ float L(float x) {
-        return (x != 0.0f) ? coth(x) - (1.0f / x) : 0.0f;
+        return (x < linRange && x > -linRange ) ? (x / 3.0f) - ((x * x * x) / 45.0f) : coth(x) - (1.0f / x) ;
 }
 
 // find the root of the function on (xa,xb) with linear convergance
