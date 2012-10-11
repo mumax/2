@@ -78,9 +78,9 @@ __global__ void langevinKern(float* __restrict__ msat0Msk,
 	            float J0 = (J0Msk == NULL) ? J0Mul : J0Mul * J0Msk[i];
 	            float pre = msat0Mul * J0 / (kB * Temp);
 	            float prefix = (msat0T0 / msat0Mul);
-	            float msat0 =  findroot(&pModel, prefix, pre, 0.1f, 1.0f);
-	            //printf("msat: %f\n", msat0);
-	            msat0Msk[i] = msat0;
+	            float msat0 =  findroot(&pModel, prefix, pre, 0.9f, 1.5f);
+	            //if (msat0 < 0.0f) { printf("msat: %f\n", msat0); }
+	            msat0Msk[i] = fabsf(msat0);
 	        }
 }
 
