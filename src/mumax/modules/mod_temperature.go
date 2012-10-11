@@ -83,7 +83,7 @@ func (u *TempBrownUpdater) Update() {
 	u.therm_seed_cache = therm_seed
 
 	// Nothing to do for zero temperature
-	temp := e.Quant("temp")
+	temp := e.Quant(LtempName)
 	tempMul := temp.Multiplier()[0]
 	if tempMul == 0 {
 		u.htherm.Array().Zero()
