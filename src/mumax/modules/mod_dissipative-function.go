@@ -65,7 +65,7 @@ func (u *DFUpdater) Update() {
 	// Account for torque multiplier, because we usually put gamma there 
 	u.Qmagn.Multiplier()[0] *= u.torque.Multiplier()[0]
 	// Account for -mu0 
-	u.Qmagn.Multiplier()[0] *= -Mu0
+	u.Qmagn.Multiplier()[0] *= -0.5 * Mu0
 	// Account for multiplier in H_eff
 	u.Qmagn.Multiplier()[0] *= u.Heff.Multiplier()[0]
 	// From now Qmag = dot(H_eff, torque)
