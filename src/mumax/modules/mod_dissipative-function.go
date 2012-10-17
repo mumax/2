@@ -32,10 +32,10 @@ func LoadDF(e *Engine) {
     // THE UGLY PART STARTS HERE
     
     if e.HasQuant("mf") {
-        e.Depends("Qmag", "torque", "H_eff", "msat0")
+        e.Depends("Qmag", "torque", "H_eff", "msat0T0")
         Qmagn.SetUpdater(&DFUpdater{
 		                  Qmagn: Qmagn,
-		                  msat: e.Quant("msat0"),
+		                  msat: e.Quant("msat0T0"),
 		                  torque: e.Quant("torque"),
 		                  Heff: e.Quant("H_eff")})
 		
