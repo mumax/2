@@ -13,6 +13,7 @@ package modules
 import (
 	. "mumax/common"
 	. "mumax/engine"
+	//"mumax/gpu"
 )
 
 // Register this module
@@ -23,33 +24,44 @@ func init() {
 func LoadEnergy(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
-
+    
+    M := "m"
+    if e.HasQuant("mf") {
+        M = "mf"
+    }
+    
 	total := e.AddNewQuant("E", SCALAR, VALUE, Unit("J"), "Sum of all calculated energy terms (this is the total energy only if all relevant energy terms are loaded")
 	sumUpd := NewSumUpdater(total).(*SumUpdater)
 	total.SetUpdater(sumUpd)
 
 	if e.HasQuant("B_ext") {
-		term := LoadEnergyTerm(e, "E_zeeman", "m", "B_ext", -e.CellVolume(), "Zeeman energy")
+		term := LoadEnergyTerm(e, "E_zeeman", M, "B_ext", -e.CellVolume(), "Zeeman energy")
 		Log("Loaded Zeeman energy E_zeeman")
 		sumUpd.AddParent(term.Name())
 	}
 
 	if e.HasQuant("H_ex") {
-		term := LoadEnergyTerm(e, "E_ex", "m", "H_ex", -0.5*e.CellVolume()*Mu0, "Exchange energy")
+		term := LoadEnergyTerm(e, "E_ex", M, "H_ex", -0.5*e.CellVolume()*Mu0, "Exchange energy")
 		Log("Loaded exchange energy E_ex")
 		sumUpd.AddParent(term.Name())
 	}
 
 	// WARNING: this assumes B is only B_demag.
 	if e.HasQuant("B") {
-		term := LoadEnergyTerm(e, "E_demag", "m", "B", -0.5*e.CellVolume(), "Demag energy")
+		term := LoadEnergyTerm(e, "E_demag", M, "B", -0.5*e.CellVolume(), "Demag energy")
 		Log("Loaded demag energy E_demag")
 		sumUpd.AddParent(term.Name())
 	}
 
 	if e.HasQuant("H_anis") {
-		term := LoadEnergyTerm(e, "E_anis", "m", "H_anis", -e.CellVolume()*Mu0, "Anisotropy energy")
+		term := LoadEnergyTerm(e, "E_anis", M, "H_anis", -e.CellVolume()*Mu0, "Anisotropy energy")
 		Log("Loaded anisotropy energy E_anis")
+		sumUpd.AddParent(term.Name())
+	}
+	
+	if e.HasQuant("H_lf") {
+		term := LoadEnergyTerm(e, "E_lf", M, "H_lf", -e.CellVolume()*Mu0, "Longitudinal field energy")
+		Log("Loaded anisotropy energy E_lf")
 		sumUpd.AddParent(term.Name())
 	}
 }
