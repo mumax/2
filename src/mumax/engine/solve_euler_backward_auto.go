@@ -50,7 +50,7 @@ func (s *BDFEulerAuto) Step() {
 
 	equation := e.equation
 	// save everything in the begining
-	topIdx := len(equation) - 1
+	//topIdx := len(equation) - 1
 	
 	//Debug("Update quantities")
 	for i := range equation {
@@ -71,7 +71,7 @@ func (s *BDFEulerAuto) Step() {
 		// Advance time and update all inputs  
 		e.time.SetScalar(t0 + dt)
 		iter := 0
-        badStep := false
+		badStep := false
 		for i := range equation {
 			//Debug("Do forward Euler")	         
 			// Do zero order approximation with Euler method
@@ -141,7 +141,7 @@ func (s *BDFEulerAuto) Step() {
 			}
            
 			maxStepErr := s.maxErr[i].Scalar()
-			StepErr := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dy0buffer[i]))
+			StepErr := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dy0buffer[i])) / float64(s.diff[i].MaxAbs(s.y0buffer[i]))
 			
 			s.err_list[i].PushFront(StepErr)
 			s.err_list[i].Remove(s.err_list[i].Back())
@@ -194,9 +194,10 @@ func (s *BDFEulerAuto) Step() {
 		}
 		//Debug("Get new timestep")
 		sort.Float64s(s.newDt)
-		nDt := s.newDt[topIdx]
+		//nDt := s.newDt[topIdx]
+		nDt := s.newDt[0]
 		engine.dt.SetScalar(nDt)
-		//Debug("Get new timestep:",nDt,"s")
+		//Debug("Got new timestep:",nDt,"s")
 		//Debug("Badsteps:",isBadStep)
 		if !badStep || nDt == s.minDt.Scalar() {
 		    //Debug("Giving up.")
