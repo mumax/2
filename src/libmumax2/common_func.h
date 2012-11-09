@@ -19,11 +19,12 @@
 #endif
 
 
-const float kB = 1.380650424E-23;       // Boltzmann's constant in J/K
-const float muB = 9.2740091523E-24;     // Bohr magneton in Am^2
-
-const float eps = 1.0e-30f;              // The target error for iterative methods
-const float linRange = 1.0e-1f;          // Defines the region of linearity
+const float kB = 1.380650424E-23f;      // Boltzmann's constant in J/K
+const float muB = 9.2740091523E-24f;    // Bohr magneton in Am^2
+const float mu0 = 4.0f * 1e-7f * 3.14159265358979f; // vacuum permeability
+const float zero = 1.0e-32f;             // the zero threshold
+const float eps  = 1.0e-8f;             // the target numerical accuracy of iterative methods 
+const float linRange = 2.0e-1f;         // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
 
@@ -177,15 +178,16 @@ inline __host__ __device__ float dot(real3 a, real3 b)
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-// cross product
+// cross product in LHR system 
+
 inline __host__ __device__ float3 crossf(float3 a, float3 b)
 { 
-	return make_float3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); 
+	return make_float3( - a.y*b.z + a.z*b.y,  - a.z*b.x + a.x*b.z, - a.x*b.y + a.y*b.x); 
 }
 
 inline __host__ __device__ real3 cross(real3 a, real3 b)
 { 
-	return make_real3(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); 
+	return make_real3( - a.y*b.z + a.z*b.y, - a.z*b.x + a.x*b.z,  - a.x*b.y + a.y*b.x); 
 }
 
 // lenght of the 3-components vector
@@ -203,8 +205,20 @@ inline __host__ __device__ float3 normalize(float3 a){
 	return make_float3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
 
-inline __device__ float coth(float x) {
+inline __device__ float cothf(float x) {
     return 1.0f / tanhf(x);
+    //~ return (x > -linRange && x < linRange) ? (1.0f / x) + (x / 3.0f) - (powf(x, 3.0f)/45.0f) + (0.5f * powf(x, 5.0f)/945.0f)  
+                                           //~ : 1.0f / tanhf(x);
+    //return coshf(x) / sinh(x);
+}
+
+inline __device__ double coth(double x) {
+    return (x > -linRange && x < linRange) ? (1.0 / x) + (x / 3.0) - (pow(x, 3.0)/45.0) + (0.5f * pow(x, 5.0)/945.0)  
+                                           : 1.0 / tanh(x);
+}
+
+inline __device__ float dcothf(float x) {
+    return 1.0f - cothf(x) * cothf(x);
 }
 
 inline __host__ __device__ real3 normalize(real3 a){
@@ -214,44 +228,44 @@ inline __host__ __device__ real3 normalize(real3 a){
 
 inline __device__ float Bj(float J, float x) {
         float lpre = 1.0f / (2.0f * J);
-        float gpre = (2.0f * J + 1) * lpre;
-        return gpre * coth(gpre * x) - lpre * coth(lpre * x);
+        float gpre = (2.0f * J + 1.0f) * lpre;
+        float lim = linRange / gpre;
+        return (fabsf(x) < lim) ? ((gpre*gpre - lpre*lpre) * x / 3.0f) + ((powf(lpre,4.0f) - powf(gpre,4.0f)) * x * x * x / 45.0f) + (0.5f * (powf(gpre,6.0f) - powf(lpre,6.0f)) * x * x * x * x * x / 945.0f) + ((powf(gpre,8.0f) - powf(lpre,8.0f)) * x * x * x * x * x  * x * x/ 4725.0f)
+                                : gpre * cothf(gpre * x) - lpre * cothf(lpre * x);
 }
+
+inline __device__ float dBjdxf(float J, float x) {
+        float lpre = 1.0f / (2.0f * J);
+        float gpre = (2.0f * J + 1.0f) * lpre;
+        float gpre2 = gpre * gpre;
+        float lpre2 = lpre * lpre;
+        float lim = linRange / gpre;
+        return (fabsf(x) < lim) ? (gpre2 - lpre2) / 3.0f + ((powf(lpre,4.0f) - powf(gpre,4.0f)) * x * x / 15.0f) + (0.5f * (powf(gpre,6.0f) - powf(lpre,6.0f)) * x * x * x * x / 189.0f) + ((powf(gpre,8.0f) - powf(lpre,8.0f)) * x * x * x * x  * x * x/ 675.0f)
+                                : (gpre2 - lpre2) + lpre2*cothf(lpre*x)*cothf(lpre*x) - gpre2*cothf(gpre*x)*cothf(gpre*x);
+}
+
+//~ inline __device__ double dBjdx(double J, double x) {
+        //~ double lpre = 1.0 / (2.0 * J);
+        //~ double gpre = (2.0 * J + 1.0) * lpre;
+        //~ 
+        //~ double gpre2 = gpre * gpre;
+        //~ double lpre2 = lpre * lpre;
+        //~ return (x > -(double)linRange && x < (double)linRange) ? (gpre2 - lpre2) / 3.0 + (pow(lpre,4.0) - pow(gpre,4.0)) * x * x / 15.0 
+                                                               //~ : (gpre2 - lpre2) + lpre2*coth(lpre*x)*coth(lpre*x) - gpre2*coth(gpre*x)*coth(gpre*x);
+//~ }
 
 inline __device__ float L(float x) {
-        return (x < linRange && x > -linRange ) ? (x / 3.0f) - ((x * x * x) / 45.0f) : coth(x) - (1.0f / x) ;
+        return (x > -linRange && x < linRange) ? (x / 3.0f) - ((x * x * x) / 45.0f) : cothf(x) - (1.0f / x) ;
 }
 
-// find the root of the function on (xa,xb) with linear convergance
-//inline __device__ float findroot(func* f, float mult, float xa, float xb) {
+inline __device__ float dLdx(float x) {
+        return (x > -linRange && x < linRange) ? (1 / 3.0f) - ((x * x) / 15.0f) : 1.0f - (cothf(x) * cothf(x)) + (1.0f / (x*x));
+}
 
-//    float ya = f[0](xa, mult);
-//    if (ya < eps) return ya;
-//    float yb = f[0](xb, mult);
-//    if (yb < eps) return yb;
-//    
-//    float y1 = ya;
-//    float x1 = xa;
-//    float y2 = yb;
-//    float x2 = xb;
-//    
-//    float x = 1.0e10f;
-//    float y = 1.0e10f;
-//    
-//    while (y > eps) {
-//    
-//        float k = (x2-x1) / (y2-y1);
-//        x = x1 - y1 * k;
-//        y = f[0](x, mult);
-//        
-//        y1 = (signbit(y) == signbit(y1)) ? y : y1;
-//        x1 = (signbit(y) == signbit(y1)) ? x : x1;
-//        
-//        y2 = (signbit(y) == signbit(y2) && signbit(y) != signbit(y1)) ? y : y2;
-//        x2 = (signbit(y) == signbit(y2) && signbit(y) != signbit(y1)) ? x : x2;
-//         
-//    }
-//    return x;
-//}
+// Classical function
+inline __device__ float signf(float x) {
+    float val = (signbit(x) == 0.0f) ? 1.0f : -1.0f;
+    return (x == 0.0f) ? 0.0f : val;
+}
 
 #endif
