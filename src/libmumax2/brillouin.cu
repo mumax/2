@@ -1,4 +1,4 @@
-#include "langevin.h"
+#include "brillouin.h"
 
 #include "multigpu.h"
 #include <cuda.h>
