@@ -27,11 +27,11 @@ func LoadBaryakhtarTorques(e *Engine) {
 	e.LoadModule("longfield") // needed for initial distribution of satruration magnetization
 	LoadHField(e)
 	LoadFullMagnetization(e)
+	LoadGammaLL(e)
 	// ============ New Quantities =============
 
 	e.AddNewQuant("lambda", SYMMTENS, MASK, Unit(""), "Landau-Lifshits relaxation constant")
 	e.AddNewQuant("lambda_e", SYMMTENS, MASK, Unit(""), "Baryakhtar's exchange relaxation constant")
-	e.AddNewQuant("gamma_LL", SCALAR, VALUE, Unit("m/As"), "Landau-Lifshits gyromagetic ratio")
 	//e.AddNewQuant("debug_h", VECTOR, FIELD, Unit("A/m"), "Debug effective field to check laplacian implementation")
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 
