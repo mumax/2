@@ -41,7 +41,6 @@ type BDFEulerAuto struct {
 }
 
 func (s *BDFEulerAuto) Step() {
-	//Debug("Enter solver")
 	e := GetEngine()
 	t0 := e.time.Scalar()
 
@@ -50,9 +49,7 @@ func (s *BDFEulerAuto) Step() {
 
 	equation := e.equation
 	// save everything in the begining
-	//topIdx := len(equation) - 1
 	
-	//Debug("Update quantities")
 	for i := range equation {
 		equation[i].input[0].Update()
 		y := equation[i].output[0]
@@ -61,9 +58,9 @@ func (s *BDFEulerAuto) Step() {
 		s.dy0buffer[i].CopyFromDevice(dy.Array()) // save for later
 	}
 	
-    //isBadStep = 1
-    const maxTry = 3 // undo at most this many bad steps
+	const maxTry = 3 // undo at most this many bad steps
 	const headRoom = 0.8
+	
 	for try := 0; try < maxTry; try++ {
 	
 		// get dt here to avoid updates later on.
@@ -73,7 +70,6 @@ func (s *BDFEulerAuto) Step() {
 		iter := 0
 		badStep := false
 		for i := range equation {
-			//Debug("Do forward Euler")	         
 			// Do zero order approximation with Euler method
 			y := equation[i].output[0]
 			dy := equation[i].input[0]
@@ -90,25 +86,27 @@ func (s *BDFEulerAuto) Step() {
 			iter = 0
 			err := 1.0e38
 			// Do predictor: BDF Euler
-			// Debug("Do backward Euler")
 			equation[i].input[0].Update()
 			for err > maxIterErr {
 				gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h)
 				iterationDiff := s.diff[i].MaxDiff(y.Array(), s.ybuffer[i])
 				err_y := float64(iterationDiff)
-				s.err[i].SetScalar(err)
+				abs_y := float64(s.diff[i].MaxSum(y.Array(), s.ybuffer[i]))
 				y.Array().CopyFromDevice(s.ybuffer[i])
 				s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later 
 				y.Invalidate()
 				equation[i].input[0].Update()
-				err_dy := float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
-				err = err_y / err_dy
+				//err_dy := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
+				if abs_y == 0.0 {
+					break
+				}
+				err = err_y / abs_y
+				s.err[i].SetScalar(err)
 				iter = iter + 1
 				s.iterations.SetScalar(s.iterations.Scalar() + 1)
 				if iter > maxIter {
 					s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 					badStep = true
-					//Debug("Badstep in Euler")
 					break
 				}
 			}
@@ -116,44 +114,59 @@ func (s *BDFEulerAuto) Step() {
 
 			iter = 0
 			err = 1e38
-			//Debug("Do trapezodila")
 			// Do corrector: BDF trapezoidal
 			for err > maxIterErr {
 				gpu.Add(s.ybuffer[i], dy.Array(), s.dy0buffer[i])
 				gpu.Madd(s.ybuffer[i], s.y0buffer[i], s.ybuffer[i], 0.5*h)
 				iterationDiff := s.diff[i].MaxDiff(y.Array(), s.ybuffer[i])
 				err_y := float64(iterationDiff)
-				s.err[i].SetScalar(err)
+				abs_y := float64(s.diff[i].MaxSum(y.Array(), s.ybuffer[i]))
 				y.Array().CopyFromDevice(s.ybuffer[i])
 				s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later 
 				y.Invalidate()
 				equation[i].input[0].Update()
-				err_dy := float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
-				err = err_y / err_dy
+				//err_dy := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i]))
+
+				if abs_y == 0.0 {
+					break
+				}
+				err = err_y / abs_y
+				s.err[i].SetScalar(err)
 				iter = iter + 1
 				s.iterations.SetScalar(s.iterations.Scalar() + 1)
 				if iter > 2 {
 					s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 					badStep = true
-					//Debug("Badstep in Trapezoidal")
 					break
 				}
 			}
            
 			maxStepErr := s.maxErr[i].Scalar()
-			StepErr := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dy0buffer[i])) / float64(s.diff[i].MaxAbs(s.y0buffer[i]))
+			
+			// Absolute error
+			
+			abs_y := float64(s.diff[i].MaxSum(y.Array(), s.y0buffer[i]))
+			rel_dy := 0.5 * t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dy0buffer[i]))
+			Debug("Abs y:", abs_y, "Rel dy:", rel_dy)
+			StepErr := 0.0
+			
+			if abs_y == 0.0 || rel_dy == 0.0 {
+				StepErr = headRoom * headRoom * maxStepErr
+			} else {
+				StepErr = rel_dy / abs_y
+			}
+			
+			if (StepErr < 0.01 * maxStepErr) {
+				StepErr = 0.01 * maxStepErr
+			}
 			
 			s.err_list[i].PushFront(StepErr)
 			s.err_list[i].Remove(s.err_list[i].Back())
 			
-			if StepErr == 0.0 {
-				StepErr = headRoom * headRoom * maxStepErr
-			}
 			// step is large then threshould then badstep is reported
 			if StepErr > maxStepErr {
 				s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 				badStep = true
-				//Debug("General Badstep")
 			}
 			// Let us compare BDF Euler and BDF Trapezoidal
 			// to guess next time step            
@@ -169,14 +182,13 @@ func (s *BDFEulerAuto) Step() {
 			    pre_f2 := math.Pow((ep1*ep1/(e*ep2)), 0.01)
 			    pre := math.Pow((maxStepErr / e), 0.175)
 			    errRatio = pre_f1 * pre * pre_f2
-			    //Debug(e,ep1,ep2)
 			} else {
 			    //do hardcore adjustment
 			    errRatio = headRoom * maxStepErr / StepErr
 			}
 			
 			step_corr := math.Abs(errRatio)
-
+			
 			if step_corr > 1.5 {
 				step_corr = 1.5
 			}
@@ -192,21 +204,14 @@ func (s *BDFEulerAuto) Step() {
 			}
 			s.newDt[i] = new_dt
 		}
-		//Debug("Get new timestep")
 		sort.Float64s(s.newDt)
-		//nDt := s.newDt[topIdx]
 		nDt := s.newDt[0]
 		engine.dt.SetScalar(nDt)
-		//Debug("Got new timestep:",nDt,"s")
-		//Debug("Badsteps:",isBadStep)
 		if !badStep || nDt == s.minDt.Scalar() {
-		    //Debug("Giving up.")
 			break //give up
 		}
 	}
-
 	// Advance step	
-	//Debug("Time step is completed.")
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }
 
