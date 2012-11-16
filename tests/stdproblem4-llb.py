@@ -25,13 +25,13 @@ load('demag')
 load('zeeman')
 load('llb')
 
-#load('solver/bdf-euler-auto')
-#setv('mf_maxiterations', 5)
-#setv('mf_maxerror', 1e-6)
-#setv('mf_maxitererror', 1e-8)
-
-load('solver/rk12')
+load('solver/bdf-euler-auto')
+setv('mf_maxiterations', 5)
 setv('mf_maxerror', 1e-6)
+setv('mf_maxitererror', 1e-8)
+
+#~ load('solver/rk12')
+#~ setv('mf_maxerror', 1e-6)
 setv('mindt', 1e-16)
 setv('maxdt', 1e-12)
 # set parameters
@@ -39,6 +39,10 @@ setv('maxdt', 1e-12)
 # set magnetization
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
+
+T=[[[[273]]]]
+setarray('Te',T)
+setv('Tc', 820)
 
 msat = makearray(1,Nx,Ny,Nz)            
 for kk in range(Nz):
@@ -66,32 +70,33 @@ for kk in range(Nz):
             msat0[0][ii][jj][kk] = 1.0
 
 setmask('msat0', msat0) 
-setv('msat0', 800e3)
-
+ 
 Ms0 = 800e3
+setv('msat0', Ms0)
+setv('msat0T0', Ms0)
 Aex = 1.3e-11
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
 lambda_e = 0.0 * lex
-setv('lambda_e', lambda_e)
+alpha=0.1
+setv('lambda', [alpha, alpha, alpha, 0.0, 0.0, 0.0])
+setv('lambda_e', [lambda_e, lambda_e, lambda_e, 0.0, 0.0, 0.0])
 setv('kappa', 1e-4)
 setv('Aex', 1.3e-11)
 gamma=2.211e5
-alpha=1.0
 gammall = gamma / (1.0+alpha**2)
 setv('gamma_ll',gammall)
 setv('dt', 1e-17) # initial time step, will adapt
 
 #relax
 
-setv('lambda', 0.1) # high damping for relax
 autotabulate(["t", "<m>"], "m.txt", 1e-12)
 run(1e-9)
 
 alpha=0.02
 gammall = gamma / (1.0+alpha**2)
 setv('gamma_ll',gammall)
-setv('lambda', 0.02) # restore normal damping
+setv('lambda', [alpha, alpha, alpha, 0.0, 0.0, 0.0])
 #setv('t', 0)        # re-set time to 0 so output starts at 0
 save("m","vtk",[])
 save("m","ovf",[])

@@ -2,14 +2,14 @@ from mumax2 import *
 from math import *
 
 # Test for LLB with 2TM
-# see I. Radu et al., PRL 102, 117201 (2009)
+# Ni, just like in PRB 81, 174401 (2010)
   
 Nx = 64
 Ny = 64
 Nz = 4
 
-sX = 320e-9
-sY = 320e-9
+sX = 640e-9
+sY = 640e-9
 sZ = 20e-9
 
 hsX = 0.5 * sX
@@ -22,6 +22,7 @@ csZ = sZ/Nz
 
 setgridsize(Nx, Ny, Nz)
 setcellsize(csX, csY, csZ)
+setperiodic(8,8,0)
 
 # LLB 
 load('exchange6')
@@ -34,7 +35,8 @@ load('temperature/ETM')
 load('temperature/LTM')
 load('temperature/E-L')
 
-load('langevin')
+load('mfa-brillouin/msat0')
+load('mfa-brillouin/kappa')
 
 add_to("Qe", "Qmag")
 add_to("Qe", "Qlaser")
@@ -57,15 +59,16 @@ setv('Te_maxitererror', 1e-8)
 
 savegraph("graph.png")
 
-Ms0 = 800e3
+Ms0 = 480e3
 
-T = [ [[[0.0]]] ]
+T = [ [[[200.0]]] ]
 setarray('Temp', T)
 setarray('Te', T)
 
-setv('Tc', 812)
-setv('J0', 4.2e-26)
-
+setv('Tc', 631)
+#~ setv('n', 8.3e28) #Py
+setv('n', 9.14e28) #Ni
+setv('J', 1.0/2.0)
 
 # Py
 
@@ -86,45 +89,47 @@ for kk in range(Nz):
 
 setmask('msat', msat) 
 setmask('msat0', msat)
+setmask('kappa', msat)
+
 setv('msat', Ms0)        
 setv('msat0', Ms0) 
 setv('msat0T0', Ms0) 
 
-Aex = 1.3e-11
+Aex = 0.86e-11
 setv('Aex', Aex)
 setv('gamma_LL', 2.211e5)
 
-Bx = 0.0270 # 270 Oe
-By = 0.0 
-Bz = 0.0
-setv('B_ext',[Bx,By,Bz])
+#~ Bx = 0.0 # 270 Oe
+#~ By = 0.0 
+#~ Bz = 0.0
+#~ setv('B_ext',[Bx,By,Bz])
                 
 setv('dt', 1e-18)
 setv('kappa', 1e-4)
 
 # Heat bath parameters
 
-setv('Cp_e', 2.0e5)
+setv('Cp_e', 3000.0)
 
-setv('Cp_l', 1.0e6)
+setv('Cp_l', 3.1e6)
 
-setv('Gel', 0.6e18)
+setv('Gel', 1.0e18)
 
 # Baryakhtar relaxation parameters
 
-lbd = 0.01
+lbd = 0.045
 lex = Aex / (mu0 * Ms0 * Ms0) 
 print("l_ex^2: "+str(lex)+"\n")
-lambda_e = 1e-4 * lex
+lambda_e = 0.0 * lex
 setv('lambda', [lbd, lbd, lbd, 0.0, 0.0, 0.0])
 setv('lambda_e', [lambda_e, lambda_e, lambda_e, 0.0, 0.0, 0.0])
 
 tt = 1e-15
-T0 = 100e-15 # Time delay for the excitation
-dT = 10e-15 # FWHM of the excitation gaussian envelope
+T0 = 500e-15 # Time delay for the excitation
+dT = 80e-15 # FWHM of the excitation gaussian envelope
 dTT = 0.5 / (dT * dT) # FWHW squared
-Qamp = 4.5e21
-N = 2100 # 
+Qamp = 3e21
+N = 3100 # 
 time = N * tt
 fine = 10
 N_fine = fine * N
@@ -148,7 +153,7 @@ setv('maxdt', 1e-14)
 setv('mindt', 1e-17)
 setv('dt', 1e-17)
 
-run(2e-12)
+run(3e-12)
 
 printstats()
 
