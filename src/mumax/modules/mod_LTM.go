@@ -18,6 +18,9 @@ const LtempName = "Temp"
 const LrateName = "dTempds"
 const LcapacName = "Cp_l"
 const LcondName = "k_l"
+const LpowName = "pow_l"
+
+const Lpow = 0.0
 
 // Register this module
 func init() {
@@ -25,7 +28,7 @@ func init() {
 }
 
 func LoadLTM(e *Engine) {
-    LoadTM(e, LtempName, LfluxName, LrateName, LcapacName)
+    LoadTM(e, LtempName, LfluxName, LrateName, LcapacName, LpowName, Lpow)
 }
 
 

@@ -18,6 +18,9 @@ const EtempName = "Te"
 const ErateName = "dTeds"
 const EcapacName = "Cp_e"
 const EcondName = "k_e"
+const EpowName = "pow_e"
+
+const Epow = 1.0
 
 // Register this module
 func init() {
@@ -25,7 +28,7 @@ func init() {
 }
 
 func LoadETM(e *Engine) {
-    LoadTM(e, EtempName, EfluxName, ErateName, EcapacName)
+    LoadTM(e, EtempName, EfluxName, ErateName, EcapacName, EpowName, Epow)
 }
 
 

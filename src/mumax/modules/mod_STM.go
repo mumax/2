@@ -18,6 +18,9 @@ const StempName = "Ts"
 const SrateName = "dTsds"
 const ScapacName = "Cp_s"
 const ScondName = "k_s"
+const SpowName = "pow_s"
+
+const Spow = 0.0
 
 // Register this module
 func init() {
@@ -25,7 +28,7 @@ func init() {
 }
 
 func LoadSTM(e *Engine) {
-    LoadTM(e, StempName, SfluxName, SrateName, ScapacName)
+    LoadTM(e, StempName, SfluxName, SrateName, ScapacName, SpowName, Spow)
 }
 
 
