@@ -174,7 +174,7 @@ __global__ void tbaryakhtar_HdeltaHKernMGPUfloat(float* __restrict__ tx, float* 
          
         ddhy   = mmstep.x * ddhy_x + mmstep.y * ddhy_y + mmstep.z * ddhy_z;
 			
-		h_b1   = hz[xn.x];
+	h_b1   = hz[xn.x];
         h      = hz[xn.y];
         h_f1   = hz[xn.z]; 
         sum    = __fadd_rn(h_b1, h_f1);

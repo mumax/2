@@ -8,7 +8,7 @@
 package modules
 
 // 6-neighbor exchange interaction
-// Author: Arne Vansteenkiste
+// Author: Mykola Dvornik
 
 import (
 	. "mumax/common"
@@ -26,14 +26,15 @@ func LoadLongField(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
 	LoadTemp(e, "Te")
+	LoadKappa(e)
+	LoadMFAParams(e)
 	
-	kappa := e.AddNewQuant("kappa", SCALAR, MASK, Unit(""), "longitudinal magnetic susceptibility")
 	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
 	e.Depends("H_lf", "kappa", "msat0", "msat", "m", "Tc", "Te", "msat0T0")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: kappa, Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te") })
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: e.Quant("kappa"), Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te") })
 
 }
 
