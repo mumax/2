@@ -20,18 +20,18 @@ __global__ void normalizeKern(float* mx, float* my, float* mz,
 		// reconstruct norm from map
 		float norm = (norm_map != NULL ) ? norm_map[i] : 1.0f;
 		
-    	float Mx = mx[i];
-    	float My = my[i];
-    	float Mz = mz[i];
+		float Mx = mx[i];
+		float My = my[i];
+		float Mz = mz[i];
     
 		float Mnorm = sqrtf(Mx * Mx + My * My + Mz * Mz);
 		float scale = (norm == 0.0f) ? 0.0f : 1.0f;
 		
 		scale = (Mnorm != 0.0f) ? scale/ Mnorm : 0.0;
 		
-        float m_x = Mx * scale;
-        float m_y = My * scale;
-        float m_z = Mz * scale;
+		float m_x = Mx * scale;
+		float m_y = My * scale;
+		float m_z = Mz * scale;
         
 		mx[i] = m_x;
 		my[i] = m_y;
