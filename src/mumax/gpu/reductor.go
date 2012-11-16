@@ -153,6 +153,22 @@ func (r *Reductor) MaxDiff(a, b *Array) float32 {
 	return max
 }
 
+// Takes the maximum absolute sum between the elements of a and b.
+func (r *Reductor) MaxSum(a, b *Array) float32 {
+	r.checkSize(a)
+	r.checkSize(b)
+	PartialMaxSum(a, b, &(r.devbuffer), r.blocks, r.threads, r.N)
+	// reduce further on CPU
+	(&r.devbuffer).CopyToHost(&r.hostbuffer)
+	max := r.hostbuffer.List[0] // all values are already positive
+	for _, num := range r.hostbuffer.List {
+		if num > max {
+			max = num
+		}
+	}
+	return max
+}
+
 // Takes the maximum norm of a 3-component (vector) array.
 func (r *Reductor) MaxNorm(a *Array) float32 {
 	r.checkSize(&a.Comp[0])

@@ -44,7 +44,7 @@ func Mul(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
-// Divide 2 multi-GPU arrays: dst = a / b; _if_ b = 0 _then_ dst = a
+// Divide 2 multi-GPU arrays: dst = a / b; _if_ b = 0 _then_ dst = 0
 func Div(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
 	C.divAsync(
@@ -55,6 +55,22 @@ func Div(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+
+// Divide and Multiply by the array raised to the Power : dst = pow(c, p) * a / b; _if_ b = 0 _then_ dst = a, _if_c = 0 _then_ dst = 0
+func DivMulPow(dst, a, b, c *Array, p float64) {
+	CheckSize(dst.size4D, a.size4D)
+	C.divMulPowAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		C.float(float32(p)),
+		
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
 
 func Dot(dst, a, b *Array) {
 	CheckSize(dst.size3D, a.size3D)
@@ -328,6 +344,19 @@ func PartialMaxAbs(in, out *Array, blocks, threadsPerBlock, N int) {
 // Partial maximum difference between arrays (see reduce.h)
 func PartialMaxDiff(a, b, out *Array, blocks, threadsPerBlock, N int) {
 	C.partialMaxDiffAsync(
+		(**C.float)(unsafe.Pointer(&a.pointer[0])),
+		(**C.float)(unsafe.Pointer(&b.pointer[0])),
+		(**C.float)(unsafe.Pointer(&out.pointer[0])),
+		C.int(blocks),
+		C.int(threadsPerBlock),
+		C.int(N),
+		(*C.CUstream)(unsafe.Pointer(&(out.Stream[0]))))
+	out.Stream.Sync()
+}
+
+// Partial maximum difference between arrays (see reduce.h)
+func PartialMaxSum(a, b, out *Array, blocks, threadsPerBlock, N int) {
+	C.partialMaxSumAsync(
 		(**C.float)(unsafe.Pointer(&a.pointer[0])),
 		(**C.float)(unsafe.Pointer(&b.pointer[0])),
 		(**C.float)(unsafe.Pointer(&out.pointer[0])),

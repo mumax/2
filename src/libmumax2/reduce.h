@@ -82,6 +82,15 @@ DLLEXPORT void partialMaxAbsAsync(float** input, float** output, int blocksPerGP
 /// @param streams array of cuda streams on each device for async execution                                         
 DLLEXPORT void partialMaxDiffAsync(float** a, float** b, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
 
+/// Multi-GPU partial maximum sum between arrays (max(abs(a[i]+b[i]))).
+/// @param input input data parts for each GPU. each array size is NPerGPU
+/// @param output partially summed data for each GPU, usually copied and reduced further on the CPU. size of each array = blocksPerGPU
+/// @param blocksPerGPU number of thread blocks per GPU. blocksPerGPU = divUp(NPerGPU, threadsPerBlockPerGPU*2)
+/// @param threadsPerBlockPerGPU use this many threads per GPU thread block. @warning must be < NPerGPU
+/// @param NPerGPU size of input data per GPU, must be > threadsPerBlockPerGPU
+/// @param streams array of cuda streams on each device for async execution                                         
+DLLEXPORT void partialMaxSumAsync(float** a, float** b, float** output, int blocksPerGPU, int threadsPerBlockPerGPU, int NPerGPU, CUstream* streams);
+
 
 /// Multi-GPU partial maximum Euclidian norm squared of 3-vector(max(x[i]**2+y[i]**2+z[i]**2)).
 /// @param x input vector x-component parts for each GPU. each array size is NPerGPU
