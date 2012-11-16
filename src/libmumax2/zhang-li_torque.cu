@@ -287,9 +287,9 @@ extern "C" {
 						        dotf(dmdy, nj0),
 						        dotf(dmdz, nj0));
 					          		  
-        float3 dmdjxm = crossf(m, dmdj); // I switched the terms
+        float3 dmdjxm = crossf(dmdj, m); // with minus in it
 
-        float3 mxdmxm = crossf(dmdjxm, m); // here as well
+        float3 mxdmxm = crossf(m, dmdjxm); // with minus from [dmdj x m]
           	  
         sttx[x0] = m_sat * ((pred * mxdmxm.x) + (pret * dmdjxm.x));
         stty[x0] = m_sat * ((pred * mxdmxm.y) + (pret * dmdjxm.y));
