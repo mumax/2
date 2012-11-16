@@ -16,8 +16,7 @@ __global__ void divKern(float* dst, float* a, float* b, int Npart) {
 	if (i < Npart) {
 
         float bb = (b == NULL) ? 1.0f : b[i];
-        bb = (bb == 0.0f) ? 1.0f : bb;
-		dst[i] = a[i] / bb;
+		dst[i] = (bb == 0.0f)? 0.0f : a[i] / bb;
 	}
 }
 
