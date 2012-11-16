@@ -1,17 +1,18 @@
 /**
   * @file
-  * This file implements common function typically required for calculus.
+  * This file implements common functions typically required for calculus.
   *
   *
   * @author Mykola Dvornik
   */
 
-#ifndef _COMMON_FUNC_H
-#define _COMMON_FUNC_H
+#ifndef _COMMON_FUNC_H_
+#define _COMMON_FUNC_H_
+
 
 #include <cuda.h>
-
 #include "stdio.h"
+
 // printf() is only supported
 // for devices of compute capability 2.0 and higher
 #if defined(__CUDA_ARCH__) && (__CUDA_ARCH__ < 200)
@@ -19,12 +20,12 @@
 #endif
 
 
-const float kB = 1.380650424E-23f;      // Boltzmann's constant in J/K
-const float muB = 9.2740091523E-24f;    // Bohr magneton in Am^2
-const float mu0 = 4.0f * 1e-7f * 3.14159265358979f; // vacuum permeability
-const float zero = 1.0e-32f;             // the zero threshold
-const float eps  = 1.0e-8f;             // the target numerical accuracy of iterative methods 
-const float linRange = 2.0e-1f;         // Defines the region of linearity
+#define kB          1.380650424E-23f                    // Boltzmann's constant in J/K
+#define muB         9.2740091523E-24f                   // Bohr magneton in Am^2
+#define mu0         4.0f * 1e-7f * 3.14159265358979f    // vacuum permeability
+#define zero        1.0e-32f                            // the zero threshold
+#define eps         1.0e-8f                             // the target numerical accuracy of iterative methods 
+#define linRange    2.0e-1f                             // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
 
