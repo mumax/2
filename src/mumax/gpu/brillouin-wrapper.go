@@ -18,21 +18,23 @@ import (
 	"unsafe"
 )
 
-func LangevinAsync(msat0 *Array, msat0T0 *Array, T *Array, J0 *Array, msat0Mul float64, msat0T0Mul float64, J0Mul float64, stream Stream) {
+func BrillouinAsync(msat0 *Array, msat0T0 *Array, T *Array, Tc *Array,  S *Array, msat0Mul float64, msat0T0Mul float64, TcMul float64, SMul float64, stream Stream) {
 
 	// Bookkeeping
 	CheckSize(msat0.Size3D(), T.Size3D())
 
 	// Calling the CUDA functions
-	C.langevinAsync(
+	C.brillouinAsync(
 		(**C.float)(unsafe.Pointer(&(msat0.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(msat0T0.Comp[X].Pointers()[0]))),
         (**C.float)(unsafe.Pointer(&(T.Comp[X].Pointers()[0]))),
-        (**C.float)(unsafe.Pointer(&(J0.Comp[X].Pointers()[0]))),
+        (**C.float)(unsafe.Pointer(&(Tc.Comp[X].Pointers()[0]))),
+        (**C.float)(unsafe.Pointer(&(S.Comp[X].Pointers()[0]))),
         
 		(C.float)(msat0Mul),
 		(C.float)(msat0T0Mul),
-		(C.float)(J0Mul),
+		(C.float)(TcMul),
+		(C.float)(SMul),
 
 		(C.int)(msat0.partLen3D),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))

@@ -18,29 +18,34 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("langevin", "Temperature dependance of equilibrium value of saturation magnetization for J → ∞", LoadLangevin)
+	RegisterModule("mfa-brillouin/msat0", "Temperature dependance of equilibrium value of saturation magnetization for any finite J", LoadBrillouin)
 }
 
-func LoadLangevin(e *Engine) {
+func LoadBrillouin(e *Engine) {
     LoadFullMagnetization(e)
 	LoadTemp(e, "Te")
-	J0 := e.AddNewQuant("J0", SCALAR, MASK, Unit(""), "zero Fourier component of exchange integral")
-	e.Depends("msat0", "msat0T0", "Te", "J0")
+	LoadMFAParams(e)
+	
+	S  := e.Quant("J")
+	Tc := e.Quant("Tc")
+	
+	e.Depends("msat0", "msat0T0", "Te", "J", "Tc")
 	msat0 := e.Quant("msat0")
-	msat0.SetUpdater(&LangevinUpdater{msat0: msat0, msat0T0: e.Quant("msat0T0"), T: e.Quant("Te"), J0: J0})
+	msat0.SetUpdater(&BrillouinUpdater{msat0: msat0, msat0T0: e.Quant("msat0T0"), T: e.Quant("Te"), Tc: Tc, S: S })
 
 }
 
-type LangevinUpdater struct {
-	msat0, msat0T0, T, J0 *Quant
+type BrillouinUpdater struct {
+	msat0, msat0T0, T, Tc, S *Quant
 }
 
-func (u *LangevinUpdater) Update() {
+func (u *BrillouinUpdater) Update() {
 	msat0 := u.msat0
 	msat0T0 := u.msat0T0
-	T := u.T
-	J0 := u.J0
+	T  := u.T
+	S  := u.S
+	Tc := u.Tc
 	stream := msat0.Array().Stream
-	gpu.LangevinAsync(msat0.Array(), msat0T0.Array(), T.Array(), J0.Array(), msat0.Multiplier()[0], msat0T0.Multiplier()[0], J0.Multiplier()[0], stream)
+	gpu.BrillouinAsync(msat0.Array(), msat0T0.Array(), T.Array(), Tc.Array(), S.Array(), msat0.Multiplier()[0], msat0T0.Multiplier()[0], Tc.Multiplier()[0], S.Multiplier()[0], stream)
 	stream.Sync()
 }
