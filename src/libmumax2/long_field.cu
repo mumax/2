@@ -37,34 +37,30 @@ extern "C" {
         float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
         float Tc = (TcMsk != NULL) ? TcMsk[I] * TcMul : TcMul;
         float Ts = (TsMsk != NULL) ? TsMsk[I] * TsMul : TsMul;
-        
+	
         if (Ms0T0 == 0.0f || kappa == 0.0f || Ts == Tc) {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
             hz[I] = 0.0f;
             return;
         }
-        
+	
         kappa = 1.0f / kappa;
-
-        float Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
-
+	
+	float Ms = (msatMsk != NULL ) ? msatMsk[I] * msatMul : msatMul;
+	
         float3 m = make_float3(mx[I], my[I], mz[I]);
 
         float ratio = (Ts < Tc) ? Ms / Ms0 : Ms / Ms0T0;
         
-        //float ratio_T0 = Ms;// / Ms0T0; 
+        float mult = (Ts < Tc) ?          (1.0f - ratio * ratio) 
+                               : - 2.0f * (1.0f + 0.6f * ratio * ratio * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
+                               
+        mult = (mult == 0.0f) ? 0.0f : kappa * Ms * mult;
         
-        float T_ratio = 0.6f * ratio * ratio * Tc / (Ts - Tc);
-        
-        // kappa is actually 0.5/kappa!
-        
-        float mult = (Ts < Tc) ?         (1.0f - ratio * ratio) 
-                               : -2.0f * (1.0f + T_ratio); // 2.0 is to account kappa = 0.5 / kappa
-                           
-        hx[I] = kappa * Ms * mult * m.x;
-        hy[I] = kappa * Ms * mult * m.y;
-        hz[I] = kappa * Ms * mult * m.z;      
+        hx[I] = mult * m.x;
+        hy[I] = mult * m.y;
+        hz[I] = mult * m.z;      
         } 
   }
 
