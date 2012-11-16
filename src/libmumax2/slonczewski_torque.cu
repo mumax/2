@@ -17,13 +17,17 @@ extern "C" {
 					 float* __restrict__ px, float* __restrict__ py, float* __restrict__ pz,
 					 float* __restrict__ jx, float* __restrict__ jy, float* __restrict__ jz,
 					 float* __restrict__ alphaMsk, 
-                     float* __restrict__ t_flMsk, 
+					 float* __restrict__ t_flMsk, 
+					 float* __restrict__ polMsk,
+					 float* __restrict__ lambdaMsk,
+					 float* __restrict__ epsilonPrimeMsk,
 					 float3 pMul,
 					 float3 jMul,
-					 float3 pre,
+					 float2 pre,
 					 float3 meshSize,
 					 float alphaMul,
-                     float t_flMul,
+					 float t_flMul,
+					 float lambdaMul,
 					 int NPart) 
   {
     
@@ -46,13 +50,13 @@ extern "C" {
       return;  
     }
 	  
-	if (I < NPart){ // Thread configurations are usually too large...
+    if (I < NPart){ // Thread configurations are usually too large...
       
       free_layer_thickness = 1.0f / free_layer_thickness;
       Ms = 1.0f / Ms;
           
+      pre.x *= Ms;
       pre.y *= Ms;
-      pre.z *= Ms;
        
       float3 m = make_float3(mx[I], my[I], mz[I]);
       
@@ -61,7 +65,7 @@ extern "C" {
       float p_z = (pz != NULL) ? pMul.z * pz[I] : pMul.z;  
         
       float3 p = make_float3(p_x, p_y, p_z);  
-                   
+	  
       p = normalize(p);
        
       float3 pxm = crossf(p, m); // plus
@@ -69,31 +73,37 @@ extern "C" {
       
       float  pdotm = dotf(p, m);
            
-	  J = normalize(J);
-	  float Jdir = dotf(make_float3(1.0f,1.0f,1.0f), J);
-	  float Jsign = Jdir / fabsf(Jdir); 
-	  nJn *= Jsign; 
-	  pre.y *= nJn;
-	  pre.z *= nJn;
-	  
-	  // get effective thinkness of free layer
-	  
-	  //float free_layer_thickness = fabsf(dotf(meshSize, J)); 
-	  //free_layer_thickness = (free_layer_thickness != 0.0f) ? 1.0f / free_layer_thickness : 0.0f;
-	  
-	  pre.y *= free_layer_thickness;
-	  pre.z *= free_layer_thickness; 
-	  
-      float epsilon = pre.x / ((pre.x + 1.0f) + (pre.x - 1.0f) * pdotm);
-      pre.y *= epsilon;
+      J = normalize(J);
+      float Jdir = dotf(make_float3(1.0f,1.0f,1.0f), J);
+      float Jsign = Jdir / fabsf(Jdir); 
+      nJn *= Jsign; 
+      pre.x *= nJn;
+      pre.y *= nJn;
+      
+      pre.x *= free_layer_thickness;
+      pre.y *= free_layer_thickness;
+      
+      // take into account spatial profile of scattering control parameter
+      float lambda = (lambdaMsk == NULL) ? lambdaMul : lambdaMul * lambdaMsk[I]; 
+      float lambda2 = lambda * lambda;
+      float epsilon = lambda2 / ((lambda2 + 1.0f) + (lambda2 - 1.0f) * pdotm);
+      pre.x *= epsilon;
       
       float alpha = (alphaMsk != NULL) ? 1.0f/(1.0f + alphaMsk[I] * alphaMul * alphaMsk[I] * alphaMul) : 1.0f/(1.0f + alphaMul * alphaMul); 
+      pre.x *= alpha;
       pre.y *= alpha;
-      pre.z *= alpha;
-     
-      sttx[I] = pre.y * mxpxm.x + pre.z * pxm.x;
-      stty[I] = pre.y * mxpxm.y + pre.z * pxm.y;
-      sttz[I] = pre.y * mxpxm.z + pre.z * pxm.z;
+      
+      // take into account spatial profile of polarization efficiency
+      float pol = (polMsk == NULL) ? 1.0f : polMsk[I];
+      pre.x *= pol;
+      
+      // take into account spatial profile of the secondary spin transfer term
+      float epsilonPrime = (epsilonPrimeMsk == NULL) ? 1.0f : epsilonPrimeMsk[I];
+      pre.y *= epsilonPrime;
+      
+      sttx[I] = pre.x * mxpxm.x + pre.y * pxm.x;
+      stty[I] = pre.x * mxpxm.y + pre.y * pxm.y;
+      sttz[I] = pre.x * mxpxm.z + pre.y * pxm.z;
       
     } 
   }
@@ -106,13 +116,17 @@ extern "C" {
 			 float** px, float** py, float** pz,
 			 float** jx, float** jy, float** jz,
 			 float** alphamsk,
-             float** t_flmsk,
+			 float** t_flmsk,
+			 float** polMsk,
+			 float** lambdaMsk,
+			 float** epsilon_primeMsk,
 			 float pxMul, float pyMul, float pzMul,
 			 float jxMul, float jyMul, float jzMul,
-			 float lambda2, float beta_prime, float pre_field,
+			 float beta_prime, float pre_field,
 			 float meshSizeX,float meshSizeY, float meshSizeZ, 
 			 float alphaMul,
-             float t_flMul,
+			 float t_flMul,
+			 float lambdaMul,
 			 int NPart, 
 			 CUstream* stream)
   {
@@ -121,7 +135,7 @@ extern "C" {
     dim3 gridSize, blockSize;
     make1dconf(NPart, &gridSize, &blockSize);
     float3 meshSize = make_float3(meshSizeX, meshSizeY, meshSizeZ);
-    float3 pre = make_float3(lambda2, beta_prime, pre_field);
+    float2 pre = make_float2(beta_prime, pre_field);
     float3 pMul = make_float3(pxMul, pyMul, pzMul);
     float3 jMul = make_float3(jxMul, jyMul, jzMul);
     
@@ -134,13 +148,17 @@ extern "C" {
 										       px[dev], py[dev], pz[dev],
 										       jx[dev], jy[dev], jz[dev],
 										       alphamsk[dev],
-                                               t_flmsk[dev],
-											   pMul,
-											   jMul,
-											   pre,
+										       t_flmsk[dev],
+										       polMsk[dev],
+										       lambdaMsk[dev],
+										       epsilon_primeMsk[dev],
+										       pMul,
+										       jMul,
+										       pre,
 										       meshSize,
 										       alphaMul, 
-                                               t_flMul,
+										       t_flMul,
+										       lambdaMul,
 										       NPart);
     } // end dev < nDev loop
 										  

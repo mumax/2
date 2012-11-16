@@ -28,14 +28,14 @@ func LoadSlonczewskiTorque(e *Engine) {
 	// ============ New Quantities =============
 	e.AddNewQuant("t_fl", SCALAR, MASK, Unit(""), "Free layer thickness")
 
-	labmda := e.AddNewQuant("lambda", SCALAR, VALUE, Unit(""), "In-Plane term")
-	labmda.SetScalar(1.0)
+	labmda := e.AddNewQuant("lambda", SCALAR, MASK, Unit(""), "Scattering control parameter")
+	labmda.SetValue([]float64{1.0})
 	e.AddNewQuant("p", VECTOR, MASK, Unit(""), "Polarization Vector")
 
-	pol := e.AddNewQuant("pol", SCALAR, VALUE, Unit(""), "Polarization efficiency")
-	pol.SetScalar(1.0)
-	epsilon_prime := e.AddNewQuant("epsilon_prime", SCALAR, VALUE, Unit(""), "Field-like term")
-	epsilon_prime.SetScalar(0.0)
+	pol := e.AddNewQuant("pol", SCALAR, MASK, Unit(""), "Polarization efficiency")
+	pol.SetValue([]float64{1.0})
+	epsilon_prime := e.AddNewQuant("epsilon_prime", SCALAR, MASK, Unit(""), "Field-like term")
+	epsilon_prime.SetValue([]float64{0.0})
 	LoadUserDefinedCurrentDensity(e)
 	stt := e.AddNewQuant("stt", VECTOR, FIELD, Unit("/s"), "Slonczewski Spin Transfer Torque")
 
@@ -61,9 +61,9 @@ func (u *slonczewskiUpdater) Update() {
 	stt := u.stt
 	m := e.Quant("m")
 	msat := e.Quant("msat")
-	pol := e.Quant("pol").Scalar()
-	lambda := e.Quant("lambda").Scalar()
-	epsilon_prime := e.Quant("epsilon_prime").Scalar()
+	pol := e.Quant("pol")
+	lambda := e.Quant("lambda")
+	epsilon_prime := e.Quant("epsilon_prime")
 	p := e.Quant("p")
 	curr := e.Quant("j")
 	alpha := e.Quant("alpha")
@@ -75,9 +75,9 @@ func (u *slonczewskiUpdater) Update() {
 	nmsatn := msat.Multiplier()[0]
 
 	beta := H_bar * gamma / (Mu0 * E * nmsatn) // njn is missing
-	beta_prime := pol * beta                   //beta_prime does not contain 
-	pre_fld := beta * epsilon_prime
-	lambda2 := lambda * lambda
+	beta_prime := pol.Multiplier()[0] * beta   // epsilon is missing, polMask is missing
+	pre_fld := beta * epsilon_prime.Multiplier()[0] // epsilon_primeMsk is missing
+		
 	gpu.LLSlon(stt.Array(),
 		m.Array(),
 		msat.Array(),
@@ -85,12 +85,15 @@ func (u *slonczewskiUpdater) Update() {
 		curr.Array(),
 		alpha.Array(),
 		t_fl.Array(),
+		pol.Array(),
+		lambda.Array(),
+		epsilon_prime.Array(),
 		p.Multiplier(),
 		curr.Multiplier(),
-		float32(lambda2),
 		float32(beta_prime),
 		float32(pre_fld),
 		worldSize,
 		alpha.Multiplier(),
-		t_fl.Multiplier())
+		t_fl.Multiplier(),
+		lambda.Multiplier())
 }

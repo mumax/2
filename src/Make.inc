@@ -12,7 +12,9 @@ NVCC+=\
   --compiler-options -Werror\
   --compiler-options -fPIC\
   --use_fast_math\
+  -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_30,code=sm_30\
   -Xptxas\
   -v\
   
@@ -20,7 +22,9 @@ NVCCWERRORLESS=nvcc
 NVCCWERRORLESS+=\
   --compiler-options -fPIC\
   --use_fast_math\
+  -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_30,code=sm_30\
   -Xptxas\
   -v\
 
@@ -58,10 +62,8 @@ NVCC=nvcc --use-local-env --cl-version 2010
 NVCC+=\
   -m64\
   -O3\
-  -gencode arch=compute_10,code=sm_10\
   -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
-  -gencode arch=compute_20,code=sm_30\
   -gencode arch=compute_30,code=sm_30\
   -Xptxas\
   -v\
@@ -74,7 +76,6 @@ NVCC+=\
   --compiler-options -EHs\
   --compiler-options -GS\
   --compiler-options -fp:fast\
-  --compiler-options -arch:AVX\
   --compiler-options -DWIN32\
   --compiler-options -DNDEBUG\
   --compiler-options -D_WINDOWS\
@@ -83,10 +84,8 @@ NVCCWERRORLESS=nvcc --use-local-env --cl-version 2010
 NVCCWERRORLESS+=\
   -m64\
   -O3\
-  -gencode arch=compute_10,code=sm_10\
   -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
-  -gencode arch=compute_20,code=sm_30\
   -gencode arch=compute_30,code=sm_30\
   -Xptxas\
   -v\
@@ -99,7 +98,6 @@ NVCCWERRORLESS+=\
   --compiler-options -EHs\
   --compiler-options -GS\
   --compiler-options -fp:fast\
-  --compiler-options -arch:AVX\
   --compiler-options -DWIN32\
   --compiler-options -DNDEBUG\
   --compiler-options -D_WINDOWS\
@@ -119,6 +117,5 @@ CC+=\
  /GS\
  /Zi\
  /fp:fast\
- /arch:AVX\
  
  endif

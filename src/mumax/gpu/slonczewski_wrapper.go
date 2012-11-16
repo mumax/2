@@ -8,7 +8,7 @@
 package gpu
 
 // CGO wrappers for slonczewski_torque.cu
-// Author: Graham Rowlands, Arne Vansteenkiste
+// Author: Mykola Dvornik, Graham Rowlands, Arne Vansteenkiste
 
 //#include "libmumax2.h"
 import "C"
@@ -18,16 +18,8 @@ import (
 	"unsafe"
 )
 
-//  void slonczewski_async(float** sttx, float** stty, float** sttz, 
-//			 float** mx, float** my, float** mz, 
-//			 float** px, float** py, float** pz,
-//			 float pxMul, float pyMul, float pzMul,
-//			 float aj, float bj, float Pol,
-//			 float** jx, float IeMul,
-//			 int NPart, 
-//			 CUstream* stream)
 
-func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array, t_fl *Array, pMul []float64, jMul []float64, lambda2 float32, beta_prime float32, pre_field float32, worldSize []float64, alphaMul []float64, t_flMul []float64) {
+func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array, t_fl *Array, pol *Array, lambda *Array, epsilon_prime *Array, pMul []float64, jMul []float64, beta_prime float32, pre_field float32, worldSize []float64, alphaMul []float64, t_flMul []float64, lambdaMul []float64) {
 
 	// Bookkeeping
 	CheckSize(p.Size3D(), m.Size3D())
@@ -59,6 +51,12 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
 
 		(**C.float)(unsafe.Pointer(&(t_fl.Comp[X].Pointers()[0]))),
 
+		(**C.float)(unsafe.Pointer(&(pol.Comp[X].Pointers()[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(lambda.Comp[X].Pointers()[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(epsilon_prime.Comp[X].Pointers()[0]))),
+		
 		(C.float)(pMul[X]),
 		(C.float)(pMul[Y]),
 		(C.float)(pMul[Z]),
@@ -67,7 +65,6 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
 		(C.float)(jMul[Y]),
 		(C.float)(jMul[Z]),
 
-		(C.float)(lambda2),
 		(C.float)(beta_prime),
 		(C.float)(pre_field),
 
@@ -77,6 +74,7 @@ func LLSlon(stt *Array, m *Array, msat *Array, p *Array, j *Array, alpha *Array,
 
 		(C.float)(alphaMul[X]),
 		(C.float)(t_flMul[X]),
+		(C.float)(lambdaMul[X]),
 
 		(C.int)(m.PartLen3D()),
 		(*C.CUstream)(unsafe.Pointer(&(stt.Stream[0]))))
