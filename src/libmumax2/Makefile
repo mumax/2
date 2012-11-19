@@ -53,10 +53,10 @@ else
 all: libmumax2.lib libmumax2.h
 
 $(CU_OFILES): %.obj: %.cu %.h
-	$(NVCC) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -c -I. $(@:.obj=.cu) -o $(@)
+	$(NVCC) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -dc -I. $(@:.obj=.cu) -o $(@)
 
 $(CU_OFILES_WERRORLESS): %.obj: %.cu %.h
-	$(NVCCWERRORLESS) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -c -I. $(@:.obj=.cu) -o $(@)
+	$(NVCCWERRORLESS) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -dc -I. $(@:.obj=.cu) -o $(@)
 
 $(CPP_OFILES): %.obj: %.cpp %.h
 	 $(CC) /D_USRDLL /DDLL_EXPORTS -c $(@:.obj=.cpp) -o $(@)

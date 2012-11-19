@@ -13,6 +13,9 @@ NVCC+=\
   --compiler-options -Werror\
   --compiler-options -fPIC\
   --compiler-options -g\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_30,code=sm_30\
   -G\
   
 NVCCWERRORLESS=nvcc
@@ -20,6 +23,9 @@ NVCCWERRORLESS+=\
   --compiler-options -Wall\
   --compiler-options -fPIC\
   --compiler-options -g\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_30,code=sm_30\
   -G\
 
 # flags for the gcc compiler
@@ -54,12 +60,14 @@ else
 
 NVCC=nvcc --use-local-env --cl-version 2010
 NVCC+=\
-  -m64\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_30,code=sm_30\
   --compiler-options -W4\
   --compiler-options -Zi\
   --compiler-options -Od\
   --compiler-options -Gd\
-  --compiler-options -EHs\
+  --compiler-options -EHsc\
   --compiler-options -MDd\
   --compiler-options -GS\
   --compiler-options -fp:precise\
@@ -69,12 +77,14 @@ NVCC+=\
   
 NVCCWERRORLESS=nvcc --use-local-env --cl-version 2010
 NVCCWERRORLESS+=\
-  -m64\
+  -gencode arch=compute_20,code=sm_20\
+  -gencode arch=compute_20,code=sm_21\
+  -gencode arch=compute_30,code=sm_30\
   --compiler-options -W4\
   --compiler-options -Zi\
   --compiler-options -Gd\
   --compiler-options -Od\
-  --compiler-options -EHs\
+  --compiler-options -EHsc\
   --compiler-options -MDd\
   --compiler-options -GS\
   --compiler-options -fp:precise\

@@ -60,8 +60,6 @@ else
 
 NVCC=nvcc --use-local-env --cl-version 2010
 NVCC+=\
-  -m64\
-  -O3\
   -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
   -gencode arch=compute_30,code=sm_30\
@@ -69,11 +67,9 @@ NVCC+=\
   -v\
   --use_fast_math\
   --compiler-options -W4\
-  --compiler-options -Zi\
   --compiler-options -Ox\
   --compiler-options -Oi\
-  --compiler-options -GL\
-  --compiler-options -EHs\
+  --compiler-options -EHsc\
   --compiler-options -GS\
   --compiler-options -fp:fast\
   --compiler-options -DWIN32\
@@ -82,8 +78,6 @@ NVCC+=\
   
 NVCCWERRORLESS=nvcc --use-local-env --cl-version 2010
 NVCCWERRORLESS+=\
-  -m64\
-  -O3\
   -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
   -gencode arch=compute_30,code=sm_30\
@@ -91,11 +85,9 @@ NVCCWERRORLESS+=\
   -v\
   --use_fast_math\
   --compiler-options -W4\
-  --compiler-options -Zi\
   --compiler-options -Ox\
   --compiler-options -Oi\
-  --compiler-options -GL\
-  --compiler-options -EHs\
+  --compiler-options -EHsc\
   --compiler-options -GS\
   --compiler-options -fp:fast\
   --compiler-options -DWIN32\
@@ -112,10 +104,8 @@ CC+=\
  /W4\
  /Ox\
  /Oi\
- /GL\
  /EHsc\
  /GS\
- /Zi\
  /fp:fast\
  
  endif
