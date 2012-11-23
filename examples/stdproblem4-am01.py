@@ -19,9 +19,19 @@ setcellsize(sizeX/Nx, sizeY/Ny, sizeZ/Nz)
 
 # load modules
 
-load('micromagnetism')
-load('solver/rk12')
+load('exchange6')
+load('demag')
+load('zeeman')
+load('llg')
+load('maxtorque')
 
+load('solver/am01')
+setv('m_maxiterations', 100000000)
+setv('m_maxabserror', 1e-3)
+setv('m_maxrelerror', 1e-3)
+setv('m_maxitererror', 1e-6)
+setv('maxdt', 1e-10)
+setv('mindt', 1e-17)
 
 # set parameters
 
@@ -29,7 +39,6 @@ setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
 setv('alpha', 0.02)
 setv('dt', 1e-12) # initial time step, will adapt
-setv('m_maxerror', 1e-3)
 
 
 # set magnetization

@@ -1,5 +1,6 @@
 from mumax2 import *
 from math import *
+from mumax2_geom import *
 
 # Test for LLB with 2TM
 # Ni, just like in PRB 81, 174401 (2010)
@@ -22,7 +23,7 @@ csZ = sZ/Nz
 
 setgridsize(Nx, Ny, Nz)
 setcellsize(csX, csY, csZ)
-setperiodic(8,8,0)
+# setperiodic(8,8,0)
 
 # LLB 
 load('exchange6')
@@ -44,18 +45,21 @@ add_to("Qe", "Qlaser")
 add_to_weighted("Qe", "Qel", 1.0)
 add_to_weighted("Ql", "Qel", -1.0)
 
-load('solver/bdf-euler-auto')
-setv('mf_maxiterations', 5)
-setv('mf_maxerror', 1e-6)
-setv('mf_maxitererror', 1e-8)
+load('solver/am01')
+setv('mf_maxiterations', 10000)
+setv('mf_maxabserror', 1e-5)
+setv('mf_maxrelerror', 1e-3)
+setv('mf_maxitererror', 1e-6)
 
 setv('Temp_maxiterations', 5)
-setv('Temp_maxerror', 1e-6)
-setv('Temp_maxitererror', 1e-8)
+setv('Temp_maxabserror', 1e-3)
+setv('Temp_maxrelerror', 1e-3)
+setv('Temp_maxitererror', 1e-4)
 
 setv('Te_maxiterations', 5)
-setv('Te_maxerror', 1e-6)
-setv('Te_maxitererror', 1e-8)
+setv('Te_maxabserror', 1e-3)
+setv('Te_maxrelerror', 1e-3)
+setv('Te_maxitererror', 1e-4)
 
 savegraph("graph.png")
 
@@ -72,24 +76,17 @@ setv('J', 1.0/2.0)
 
 # Py
 
-Mfd = makearray(3,Nx,Ny,Nz)
-for kk in range(Nz):
-    for jj in range(Ny):
-        for ii in range(Nx):
-            Mfd[0][ii][jj][kk] = 1.0
-            Mfd[1][ii][jj][kk] = 0.0
-            Mfd[2][ii][jj][kk] = 0.0
-setarray('Mf',Mfd)
 
-msat = makearray(1,Nx,Ny,Nz)            
-for kk in range(Nz):
-    for jj in range(Ny):
-        for ii in range(Nx):
-            msat[0][ii][jj][kk] = 1.0
 
+msat = ellipse()
 setmask('msat', msat) 
 setmask('msat0', msat)
+setmask('msat0T0', msat)
 setmask('kappa', msat)
+
+#~ mf =[ [[[1]]], [[[0]]], [[[0]]] ]
+#~ setarray('Mf', mf)
+setarray('Mf', ellipsevec(3, [1,0,0]))
 
 setv('msat', Ms0)        
 setv('msat0', Ms0) 
@@ -139,21 +136,32 @@ for i in range(N_fine):
         t = tt_fine * float(i)
         Q = Qamp * exp(-1.0 * dTT * (t-T0)**2)
         setpointwise('Qlaser', t, Q)  
-
+setpointwise('Qlaser', 9999.9, 0)
+ 
 autotabulate(["t", "<msat>"], "msat.txt", tt)
 autotabulate(["t", "<Temp>"], "Tl.txt", tt)
 autotabulate(["t", "<Te>"], "Te.txt", tt)
 autotabulate(["t", "<msat0>"], "msat0.txt", tt)
+autotabulate(["t", "<mf>"], "mf.txt", tt)
 
 autotabulate(["t", "<Qmag>"], "Qmag.txt", tt)
 autotabulate(["t", "<Qel>"], "Qel.txt", tt)
 autotabulate(["t", "<Qe>"], "Qe.txt", tt)
 
-setv('maxdt', 1e-14)
+setv('maxdt', 1e-12)
 setv('mindt', 1e-17)
 setv('dt', 1e-17)
 
-run(3e-12)
+step()
+
+save("H_ex", "gplot", [])
+save("B", "gplot", [])
+save("H_lf", "gplot", [])
+save("m", "gplot", [])
+save("msat", "gplot", [])
+save("msat0", "gplot", [])
+
+run(1e-9)
 
 printstats()
 

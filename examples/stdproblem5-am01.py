@@ -21,8 +21,21 @@ csZ = (sizeZ/Nz)
 
 setcellsize(csX, csY, csZ)
 
-load('micromagnetism')
-load('solver/rk12')
+# load modules
+
+load('exchange6')
+load('demag')
+load('zeeman')
+load('llg')
+load('maxtorque')
+
+load('solver/am01')
+setv('m_maxiterations', 100000000000)
+setv('m_maxabserror', 1e-5)
+setv('m_maxrelerror', 1e-2)
+setv('m_maxitererror', 1e-5)
+setv('maxdt', 1e-10)
+setv('mindt', 1e-17)
 
 savegraph("graph.png")
 
@@ -33,7 +46,6 @@ setv('gamma', 2.211e5)
 
 setv('dt', 1e-15)
 setv('maxdt', 1e-12)
-setv('m_maxerror', 1e-3)
 
 
 # Set a initial magnetisation which will relax into a vortex
@@ -83,4 +95,5 @@ autosave("m", "gplot", [], 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)
 
 run(15.0e-9)
+
 printstats()
