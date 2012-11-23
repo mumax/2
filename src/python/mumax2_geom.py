@@ -43,6 +43,25 @@ def ellipse():
 					else:
 							mask[i][j][k] = 0
 	return [mask]
+	
+## Returns a 3-component mask for a (2D) ellipse that fits exactly in the simulation box.
+def ellipsevec(comp, vec):
+	Nx,Ny,Nz = getgridsize()
+	mask= [[[[0 for z in range(Nz)] for y in range(Ny)] for x in range(Nx)] for c in range(comp)]
+	rx = Nx/2.
+	ry = Ny/2.
+	zval = [0 for c in range(comp)]
+	for i in range(0,Nx):
+			x = (-Nx/2. + i + 0.5)
+			for j in range(0,Ny):
+				y = (-Ny/2. + j + 0.5)
+				for k in range(0,Nz):
+					temp = zval
+					if (x/rx)**2 + (y/ry)**2 < 1:
+						temp = vec
+					for c in range(comp):
+						mask[c][i][j][k] = temp[c]
+	return mask
 
 ## Returns a mask for a (2D) regulqr Ngone given a number of sides, a radius, a rotation angle and a center.
 # @param sides (int) the number of sides (e.g. 3 for triangle, 4 for square ...) (unitless)
