@@ -53,10 +53,11 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 		if(wrap0){                                // ... PBC?
 			idx = (N0-1)*N1Part*N2 + j*N2 + k;    // yes: wrap around!
 		}else{                                    
-      		idx = I;                              // no: use central m (Neumann BC) 
+		  //idx = I;                              // no: use central m (Neumann BC)
+		  idx = -1;				  // no: use zero-value outside, because it is important for LLBr 
 		}
     }
-	m1 = m[idx];
+	m1 = (idx < 0) ? 0.0f : m[idx];
 
  	if (i+1 < N0){
       idx = (i+1)*N1Part*N2 + j*N2 + k;
@@ -64,10 +65,11 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 		if(wrap0){
 			idx = (0)*N1Part*N2 + j*N2 + k;
 		}else{
-      		idx = I;
+      		//idx = I;
+		idx = -1;				  // no: use zero-value outside, because it is important for LLBr 
 		}
     } 
-	m2 = m[idx]; 
+	m2 = (idx < 0) ? 0.0f : m[idx]; 
 
     float H = Aex2_Mu0Msat * cellx_2 * ((m1-m0) + (m2-m0));
 
@@ -78,10 +80,11 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 		if(wrap2){
 			idx = i*N1Part*N2 + j*N2 + (N2-1);
 		}else{
-      		idx = I;
+      		//idx = I;
+		idx = -1;				  // no: use zero-value outside, because it is important for LLBr 
 		}
     }
-	m1 = m[idx];
+	m1 = (idx < 0) ? 0.0f : m[idx];
 
  	if (k+1 < N2){
       idx =  i*N1Part*N2 + j*N2 + (k+1);
@@ -89,10 +92,11 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 		if(wrap2){
 			idx = i*N1Part*N2 + j*N2 + (0);
 		}else{
-      		idx = I;
+      		//idx = I;
+		idx = -1;				  // no: use zero-value outside, because it is important for LLBr
 		}
     } 
-	m2 = m[idx];
+	m2 = (idx < 0) ? 0.0f : m[idx];
    
     H += Aex2_Mu0Msat * cellz_2 * ((m1-m0) + (m2-m0));
 
@@ -106,7 +110,8 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 			idx = i*N1Part*N2 + (N1Part-1)*N2 + k; // take value from other part (either PBC or multi-GPU)
 			m1 = mPart0[idx];
 		}else{                                     // no adjacent part: use central m (Neumann BC)
-	  		m1 = m[I];
+	  		//m1 = m[I];
+			m1 = 0.0f;
 		}
     }
 
@@ -118,7 +123,8 @@ __global__ void exchange6Kern(float* h, float* m, float* mSat_map, float* Aex_ma
 			idx = i*N1Part*N2 + (0)*N2 + k;
             m2 = mPart2[idx];
 		}else{
-			m2 = m[I];
+			//m2 = m[I];
+			m2 = 0.0f;
 		}
     } 
     H += Aex2_Mu0Msat * celly_2 * ((m1-m0) + (m2-m0));
