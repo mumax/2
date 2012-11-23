@@ -14,7 +14,9 @@ __global__ void tbaryakhtar_HdeltaHKernMGPUfloat(float* __restrict__ tx, float* 
 					 float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
 					 float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
 					 float* __restrict__ rhx, float* __restrict__ rhy, float* __restrict__ rhz,
-					 					 
+					
+					 float* __restrict__ msat0T0Msk,
+					 
 					 float* __restrict__ lambda_xx,
 					 float* __restrict__ lambda_yy,
 					 float* __restrict__ lambda_zz,
@@ -55,8 +57,17 @@ __global__ void tbaryakhtar_HdeltaHKernMGPUfloat(float* __restrict__ tx, float* 
     if (j < size.y && k < size.z){ // 3D now:)
         
         int x0 = i * size.w + j * size.z + k;
-	    
-	    float3 mmstep = make_float3(mstep.x, mstep.y, mstep.z);
+	
+	float msat0T0 = (msat0T0Msk == NULL) ? 1.0 : msat0T0Msk[x0];
+	// make sure there is no torque in vacuum!
+	if (msat0T0 == 0.0f) {
+		tx[x0] = 0.0f;
+		ty[x0] = 0.0f;
+		tz[x0] = 0.0f;
+		return;
+	}
+	 
+	float3 mmstep = make_float3(mstep.x, mstep.y, mstep.z);
 	    	    
         // Second-order derivative 3-points stencil
         int xb1, xf1, x;    
@@ -277,6 +288,8 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 
+			 float** msat0T0,
+			 
 			 float** lambda_xx,
 			 float** lambda_yy,
 			 float** lambda_zz,
@@ -367,7 +380,9 @@ __export__  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 												   hx[dev], hy[dev], hz[dev],
 												   lhx, lhy, lhz,
 												   rhx, rhy, rhz,
-
+												   
+												   msat0T0[dev],
+												   
 												   lambda_xx[dev],
 												   lambda_yy[dev],
 												   lambda_zz[dev],

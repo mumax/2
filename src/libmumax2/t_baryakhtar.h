@@ -22,6 +22,8 @@ DLLEXPORT  void tbaryakhtar_async(float** tx, float**  ty, float**  tz,
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 
+			 float** msat0T0,
+			 
 			 float** lambda_xx,
 			 float** lambda_yy,
 			 float** lambda_zz,

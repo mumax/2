@@ -141,6 +141,11 @@ __global__ void brillouinKern(float* __restrict__ msat0Msk,
 	            
 	            float msat0T0 = (msat0T0Msk == NULL) ? msat0T0Mul : msat0T0Mul * msat0T0Msk[i];
 	            
+		    if (msat0T0 == 0.0f) {
+			msat0Msk[i] = 0.0f;
+			return;
+		    }
+		    
 	            if (Temp == 0.0f) {
 	                   msat0Msk[i] = msat0T0 / msat0Mul;
 	                   return;

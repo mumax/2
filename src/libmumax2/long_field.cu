@@ -37,7 +37,9 @@ extern "C" {
         float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
         float Tc = (TcMsk != NULL) ? TcMsk[I] * TcMul : TcMul;
         float Ts = (TsMsk != NULL) ? TsMsk[I] * TsMul : TsMul;
-	
+	// ~ if (I == 0) {
+	    // ~ printf("Ms0T0: %f\tMs0: %f\tkappa: %f\n", Ms0T0, Ms0, kappa);
+	// ~ }
         if (Ms0T0 == 0.0f || kappa == 0.0f || Ts == Tc) {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
@@ -57,10 +59,11 @@ extern "C" {
                                : - 2.0f * (1.0f + 0.6f * ratio * ratio * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
                                
         mult = (mult == 0.0f) ? 0.0f : kappa * Ms * mult;
-        
+	
         hx[I] = mult * m.x;
         hy[I] = mult * m.y;
-        hz[I] = mult * m.z;      
+        hz[I] = mult * m.z;  
+	    
         } 
   }
 
