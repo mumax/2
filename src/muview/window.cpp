@@ -217,15 +217,11 @@ void Window::adjustAnimSlider(bool back)
     animSlider->setTickInterval(2);
     animSlider->setTickPosition(QSlider::TicksRight);
     animSlider->setEnabled(TRUE);
-<<<<<<< HEAD
     if (back) {
         animSlider->setSliderPosition(numFiles-1);
     } else {
         animSlider->setSliderPosition(0);
     }
-=======
-    animSlider->setSliderPosition(0);
->>>>>>> Fixed caching. Now reads ahead in discrete chunks set by a fixed int.
   } else {
     animSlider->setEnabled(FALSE);
   }
