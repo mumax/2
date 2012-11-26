@@ -23,8 +23,19 @@ setcellsize(sX/Nx, sY/Ny, sZ/Nz)
 
 # load basic modules for micromagnetic simulations
 
-load('micromagnetism')
-load('solver/rk12')
+load('exchange6')
+load('demag')
+load('zeeman')
+load('llg')
+load('maxtorque')
+
+load('solver/am01')
+setv('m_maxiterations', 3)
+setv('m_maxabserror', 1e-4)
+setv('m_maxrelerror', 1e-4)
+setv('m_maxitererror', 1e-4)
+setv('maxdt', 1e-10)
+setv('mindt', 1e-17)
 
 savegraph("graph.png")
 
@@ -39,8 +50,6 @@ setv('alpha', 1.0)
 setv('dt', 1e-15)
 # Define the maximum time step solver can take, s
 setv('maxdt', 1e-12)
-# Define maximum magnetization error between steps 
-setv('m_maxerror', 1e-4)
 
 # Define static applied field, T
 Bx = 0.0 # 100 Oe 

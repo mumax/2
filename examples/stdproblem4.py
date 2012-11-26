@@ -29,7 +29,7 @@ setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
 setv('alpha', 0.02)
 setv('dt', 1e-12) # initial time step, will adapt
-setv('m_maxerror', 1e-3)
+setv('m_maxerror', 1e-4)
 
 
 # set magnetization

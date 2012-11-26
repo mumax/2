@@ -33,7 +33,7 @@ setv('gamma', 2.211e5)
 
 setv('dt', 1e-15)
 setv('maxdt', 1e-12)
-setv('m_maxerror', 1e-3)
+setv('m_maxerror', 1e-4)
 
 
 # Set a initial magnetisation which will relax into a vortex
@@ -81,6 +81,6 @@ setmask('j', j)
 #autosave("m", "png", [], 10e-12)
 autosave("m", "gplot", [], 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)
-
+autotabulate(["t", "m_error"], "error.dat", 1e-13)
 run(15.0e-9)
 printstats()

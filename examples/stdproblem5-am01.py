@@ -30,10 +30,10 @@ load('llg')
 load('maxtorque')
 
 load('solver/am01')
-setv('m_maxiterations', 100000000000)
-setv('m_maxabserror', 1e-5)
-setv('m_maxrelerror', 1e-2)
-setv('m_maxitererror', 1e-5)
+setv('m_maxiterations', 3)
+setv('m_maxabserror', 1e-4)
+setv('m_maxrelerror', 1e-4)
+setv('m_maxitererror', 1e-4)
 setv('maxdt', 1e-10)
 setv('mindt', 1e-17)
 
@@ -93,6 +93,7 @@ setmask('j', j)
 #autosave("m", "png", [], 10e-12)
 autosave("m", "gplot", [], 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)
+autotabulate(["t", "m_error"], "error.dat", 1e-13)
 
 run(15.0e-9)
 
