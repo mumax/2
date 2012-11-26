@@ -1,11 +1,9 @@
 #include <vector>
-#include <vector>
-#include <vector>
 #include <iostream>
 
 #include <QtGui>
 #include <QDir>
-#include <QxtSpanSlider>
+//#include <QxtSpanSlider>
 #include <QKeySequence>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -20,6 +18,7 @@
 #include "OMFImport.h"
 #include "OMFHeader.h"
 #include "OMFContainer.h"
+#include "qxtspanslider.h"
 
 struct OMFImport;
 

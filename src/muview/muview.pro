@@ -3,19 +3,15 @@
 # but is quite finnicky in, e.g., ubuntu package manager
 
 QT      += opengl
-CONFIG  += qxt
-QXT     += core gui
+LIBS    += -lglut -L../libomf -lomf -lGLU
 
-LIBS    += -lglut -L../libomf -lomf -lQxtCore -lQxtGui -lGLU
-
-INCLUDEPATH += ../libomf /usr/include/qxt/QxtCore /usr/include/qxt/QxtGui
+INCLUDEPATH += ../libomf
 
 # Files and Targets
 HEADERS = glwidget.h window.h \
-    preferences.h
+    preferences.h qxtspanslider.h qxtspanslider_p.h
 SOURCES = glwidget.cpp main.cpp window.cpp \ 
-    preferences.cpp
-TARGET  = muview
+    preferences.cpp qxtspanslider.cpp
 
 FORMS += \
     preferences.ui
