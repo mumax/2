@@ -420,11 +420,14 @@ void OMFImport::parseDataBinary4()
   delete [] buffer;
 
   if (header.version==1) {
-    acceptLine(); // read trailing newline character
+    //acceptLine(); // read trailing newline character
   }
   acceptLine(); // read next line...
 
-  // Parse "End: Data Binary 4"
+  // Seems that we must remove the first erroneous char
+  line = line.substr(1,line.size()-1);
+  
+// Parse "End: Data Binary 4"
   if (header.version==1) {
     ok = parseCommentLine(line, key, value);
     if (!ok || key != "end" || value != "data binary 4") {
@@ -500,8 +503,11 @@ void OMFImport::parseDataBinary8()
 
   delete [] buffer;
 
-  acceptLine(); // read trailing newline character
+  //acceptLine(); // read trailing newline character
   acceptLine(); // read next line...
+
+  // Seems that we must remove the first erroneous char
+  line = line.substr(1,line.size()-1);
 
   // Parse "End: Data Binary 8"
   ok = parseCommentLine(line, key, value);

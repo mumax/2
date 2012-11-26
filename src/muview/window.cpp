@@ -174,7 +174,7 @@ Window::Window(int argc, char *argv[])
         // Update the top overlay
         glWidget->updateTopOverlay(filenames.front());
         // Refresh the animation bar
-        adjustAnimSlider();
+        adjustAnimSlider(false);
     }
   }
 }
@@ -204,7 +204,7 @@ QSlider *Window::createSlider()
   return slider;
 }
 
-void Window::adjustAnimSlider()
+void Window::adjustAnimSlider(bool back)
 {
   //int cacheSize = (int)omfCache.size();
   //std::cout << "Cache size is:\t" << cacheSize << std::endl;
@@ -217,7 +217,11 @@ void Window::adjustAnimSlider()
     animSlider->setTickInterval(2);
     animSlider->setTickPosition(QSlider::TicksRight);
     animSlider->setEnabled(TRUE);
-    animSlider->setSliderPosition(0);
+    if (back) {
+        animSlider->setSliderPosition(numFiles-1);
+    } else {
+        animSlider->setSliderPosition(0);
+    }
   } else {
     animSlider->setEnabled(FALSE);
   }
@@ -298,7 +302,7 @@ void Window::openFiles()
       glWidget->updateData(omfCache.back());
       
       // Refresh the animation bar
-      adjustAnimSlider();
+      adjustAnimSlider(false);
 
       // Refresh the overlay
       glWidget->updateTopOverlay("");
@@ -322,6 +326,7 @@ void Window::updateWatchedFiles(const QString& str) {
     filters << "*.omf" << "*.ovf";
     chosenDir.setNameFilters(filters);
     QStringList dirFiles = chosenDir.entryList();
+
     OMFHeader tempHeader = OMFHeader();
 
     // compare to existing list of files
@@ -329,7 +334,7 @@ void Window::updateWatchedFiles(const QString& str) {
     foreach(QString dirFile, dirFiles)
     {
             //qDebug() << QString("Changed File!") << dirFile;
-            if (!filenames.contains(dirFile)) {
+            if (!filenames.contains(dirString + dirFile)) {
                 // Haven't been loaded
                 QString fullPath = dirString + dirFile;
                 QFileInfo info(fullPath);
@@ -337,37 +342,45 @@ void Window::updateWatchedFiles(const QString& str) {
 
                 if (!watchedFiles.contains(fullPath)) {
                     // Not on the watch list yet
-                    watchedFiles.insert(fullPath,info.lastModified());
+                    watchedFiles.insert(fullPath, info.lastModified());
                     //qDebug() << QString("Inserted: ") << (dirFile);
                 } else {
                     // on the watch list
                     if (info.lastModified() == watchedFiles[fullPath]) {
                         // File size has stabalized
                         //qDebug() << QString("Stable, pushed") << dirFile;
-                        filenames.append(dirFile);
-                        omfCache.push_back(readOMF(fullPath.toStdString(), tempHeader));
+                        filenames.append(fullPath);
+                        displayNames.append(dirFile);
+                        //omfCache.push_back(readOMF(fullPath.toStdString(), tempHeader));
                         changed = true;
                     } else {
                         // File still changing
-                        //qDebug() << QString("Unstable") << dirFile;
+                        //qDebug() << QSt        //qDebug() << QString("Pushing Back") << filenames[loadPos];ring("Unstable") << dirFile;
                         watchedFiles[fullPath] = info.lastModified();
                     }
                 }
             }
     }
 
+
     if (changed) {
+        // Fill the cache with the last file only
+        while (!omfCache.empty()) {
+            omfCache.pop_back();
+        }
+        cachePos = filenames.size()-1;
+        omfCache.push_back(readOMF(filenames.last().toStdString(), tempHeader));
 
         //qDebug() << QString("Updated Data");
         noFollowUpdate = false;
         if (!noFollowUpdate) {
-            // Update the Display with the first element
+            // Update the Display with the last element
             glWidget->updateData(omfCache.back());
             // Update the top overlay
             glWidget->updateTopOverlay(displayNames.back());
         }
         // Refresh the animation bar
-        adjustAnimSlider();
+        adjustAnimSlider(true);
     }
 
 }
@@ -475,7 +488,7 @@ void Window::openDir()
 
       // Refresh the animation bar
       //qDebug() << QString("Updating Animation Slider");
-      adjustAnimSlider();
+      adjustAnimSlider(false);
     }
 }
 
@@ -491,6 +504,14 @@ void Window::watchDir(const QString& str)
     } else {
         dir = str;
     }
+
+  filenames.clear();
+  displayNames.clear();
+  // Clear the cache of pre-existing elements
+  while (!omfCache.empty()) {
+      omfCache.pop_back();
+  }
+  cachePos = 0; // reset position to beginning
 
   if (dir != "")
     {
@@ -508,33 +529,30 @@ void Window::watchDir(const QString& str)
       QStringList dirFiles = chosenDir.entryList();
 
       // persistent storage of filenames for top overlay
-      filenames = dirFiles;
+      displayNames = dirFiles;
+
+      foreach (QString file, dirFiles) {
+         filenames.push_back(dirString + file);
+      }
 
       if (filenames.length()>0) {
-          // Clear the cache of pre-existing elements
-          while (!omfCache.empty()) {
-              omfCache.pop_back();
-          }
 
-          // Qt macro for looping over files
+          // Only cache the last file
           OMFHeader tempHeader = OMFHeader();
-          foreach (QString file, dirFiles)
-          {
-              //std::cout << (dirString+file).toStdString() << std::endl;
-              // Push our new content...
-              omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
-          }
+          cachePos = filenames.size()-1;
+          omfCache.push_back(readOMF(filenames.last().toStdString(), tempHeader));
 
           // Update the Display with the first element
-          glWidget->updateData(omfCache.front());
+          glWidget->updateData(omfCache.back());
 
           // Update the top overlay
-          glWidget->updateTopOverlay(filenames.front());
+          glWidget->updateTopOverlay(displayNames.back());
 
           // Refresh the animation bar
-          adjustAnimSlider();
+          adjustAnimSlider(true);
       }
       // Now the callbacks
+      //qDebug() << QString("Calling it back...");
       QObject::connect(watcher, SIGNAL(directoryChanged(QString)),
               this, SLOT(updateWatchedFiles(QString)));
     }

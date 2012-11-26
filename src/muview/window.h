@@ -56,7 +56,7 @@ private:
   // Main Window Stuff
   void createActions();
   void createMenus();
-  void adjustAnimSlider();
+  void adjustAnimSlider(bool back);
 
   QMenu *fileMenu;
   QMenu *settingsMenu;
