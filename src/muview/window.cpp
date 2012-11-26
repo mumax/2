@@ -1,4 +1,4 @@
-#include <vector>
+#include <deque>
 #include <iostream>
 
 #include <QtGui>
@@ -26,6 +26,10 @@ Window::Window(int argc, char *argv[])
 {
   QWidget *widget = new QWidget;
   setCentralWidget(widget);
+
+  // Cache size
+  cacheSize = 50;
+  cachePos  = 0;
 
   glWidget = new GLWidget;
   prefs = new Preferences(this);
@@ -113,6 +117,7 @@ Window::Window(int argc, char *argv[])
   
   // Load files from command line if supplied
   if (argc > 1) {
+    OMFHeader tempHeader = OMFHeader();
     QStringList rawList;
     for (int i=1; i<argc; i++) {
       rawList << argv[i];
@@ -133,29 +138,36 @@ Window::Window(int argc, char *argv[])
                 // Push our new content...
                 if (info.isDir()) {
                     QDir chosenDir(item);
-                    QString dirString = chosenDir.path()+"/";
+                    dirString = chosenDir.path()+"/";
                     QStringList filters;
                     filters << "*.omf" << "*.ovf";
                     chosenDir.setNameFilters(filters);
-                    QStringList dirFiles = chosenDir.entryList();
+                    QStringList files = chosenDir.entryList();
 
-                    OMFHeader tempHeader = OMFHeader();
-                    foreach (QString file, dirFiles)
+                    foreach (QString file, files)
                     {
-                        allLoadedFiles << file;
-                        omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+                        filenames << (dirString+file);
+                        displayNames << (dirString+item);
+                        //omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
                     }
 
                 } else {
                     // just a normal file
-                    OMFHeader tempHeader = OMFHeader();
-                    allLoadedFiles << item;
-                    omfCache.push_back(readOMF(item.toStdString(), tempHeader));
+                    filenames << (dirString+item);
+                    displayNames << (dirString+item);
+                    //omfCache.push_back(readOMF(item.toStdString(), tempHeader));
                 }
             }
         }
         // persistent storage of filenames for top overlay
-        filenames = allLoadedFiles;
+        //filenames = allLoadedFiles;
+
+        // Looping over files
+        OMFHeader tempHeader = OMFHeader();
+        for (int loadPos=0; loadPos<cacheSize && loadPos<filenames.size(); loadPos++) {
+            omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), tempHeader));
+            //qDebug() << QString("Pushing Back") << filenames[loadPos];
+        }
 
         // Update the Display with the first element
         glWidget->updateData(omfCache.front());
@@ -194,21 +206,22 @@ QSlider *Window::createSlider()
 
 void Window::adjustAnimSlider()
 {
-  int cacheSize = (int)omfCache.size();
+  //int cacheSize = (int)omfCache.size();
   //std::cout << "Cache size is:\t" << cacheSize << std::endl;
-
-  if (cacheSize > 1) {
-    animSlider->setRange(0, cacheSize-1);
+  int numFiles = filenames.size();
+  //qDebug() << QString("Updating Animation Slider to size") << numFiles;
+  if (numFiles > 1) {
+    animSlider->setRange(0, numFiles-1);
     animSlider->setSingleStep(1);
     animSlider->setPageStep(10);
     animSlider->setTickInterval(2);
     animSlider->setTickPosition(QSlider::TicksRight);
     animSlider->setEnabled(TRUE);
-    animSlider->setSliderPosition(cacheSize-1);
+    animSlider->setSliderPosition(0);
   } else {
     animSlider->setEnabled(FALSE);
   }
-
+  //qDebug() << QString("Updated Animation Slider to size") << numFiles;
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -276,7 +289,7 @@ void Window::openFiles()
 
       // Remove the last element if not empty
       while (!omfCache.empty()) {
-	omfCache.pop_back();
+        omfCache.pop_back();
       }
 
       // Push our file data
@@ -350,9 +363,8 @@ void Window::updateWatchedFiles(const QString& str) {
         if (!noFollowUpdate) {
             // Update the Display with the first element
             glWidget->updateData(omfCache.back());
-
             // Update the top overlay
-            glWidget->updateTopOverlay(filenames.back());
+            glWidget->updateTopOverlay(displayNames.back());
         }
         // Refresh the animation bar
         adjustAnimSlider();
@@ -362,14 +374,50 @@ void Window::updateWatchedFiles(const QString& str) {
 
 void Window::updateDisplayData(int index)
 {
-  if (!omfCache.empty()) {
-    int cacheSize = (int)omfCache.size();
-    if (index < cacheSize) {
-      // Update the top overlay
-      glWidget->updateTopOverlay(filenames[index]);
-      // Update the Display
-      glWidget->updateData(omfCache.at(index));
-    }
+  // Check to see if we've cached this data already.
+  // Add and remove elements from the front and back
+  // of the deque until we've caught up... if we're
+  // too far out of range just scratch everything and
+  // reload.
+
+  OMFHeader tempHeader = OMFHeader();
+  if ( abs(index-cachePos) >= cacheSize ) {
+      // Out of the realm of caching
+      // Clear the cache of pre-existing elements
+      //qDebug() << QString("Clearing the cache, too far out of range") << index << cachePos;
+      while (!omfCache.empty()) {
+        omfCache.pop_back();
+      }
+      cachePos = index;
+      for (int loadPos=index; loadPos<(index+cacheSize) && loadPos<filenames.size(); loadPos++) {
+          omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), tempHeader));
+      }
+      cachePos = index;
+  } else if ( index < cachePos ) {
+      // Moving backwards, regroup for fast scrubbing!
+      //qDebug() << QString("Moving backwards") << index << cachePos;
+      for (int loadPos=cachePos-1; loadPos >= index && loadPos<filenames.size(); loadPos--) {
+          if (omfCache.size()==uint(cacheSize)) {
+             omfCache.pop_back();
+          } else {
+             //qDebug() << QString("Refilling");
+          }
+          omfCache.push_front(readOMF((filenames[loadPos]).toStdString(), tempHeader));
+      }
+      cachePos = index;
+  }
+
+  // We should be within the current cache
+  if (index < filenames.size()) {
+    //qDebug() << QString("In Cache Range") << index << cachePos;
+    // Update the top overlay
+    glWidget->updateTopOverlay(displayNames[index]);
+    // Update the Display
+    //qDebug() << QString("Current cache size") << omfCache.size();
+    glWidget->updateData(omfCache.at(index-cachePos));
+  } else {
+      //qDebug() << QString("Out of Cache Range!!!!") << index << cachePos;
+      glWidget->updateTopOverlay(QString("Don't scroll so erratically..."));
   }
 }
 
@@ -383,36 +431,50 @@ void Window::openDir()
   if (dir != "") 
     {
       QDir chosenDir(dir);
-      QString dirString = chosenDir.path()+"/";
+      dirString = chosenDir.path()+"/";
       QStringList filters;
       filters << "*.omf" << "*.ovf";
       chosenDir.setNameFilters(filters);
       QStringList dirFiles = chosenDir.entryList();
+      filenames.clear();
+      foreach (QString file, dirFiles) {
+         filenames.push_back(dirString + file);
+      }
 
       // persistent storage of filenames for top overlay
-      filenames = dirFiles;
+      displayNames = dirFiles;
+
+      cachePos  = 0; // reset position to beginning
 
       // Clear the cache of pre-existing elements
       while (!omfCache.empty()) {
-	omfCache.pop_back();
+        omfCache.pop_back();
       }
 
-      // Qt macro for looping over files
+      // Looping over files
       OMFHeader tempHeader = OMFHeader();
-      foreach (QString file, dirFiles)
-	{
-          //std::cout << (dirString+file).toStdString() << std::endl;
-	  // Push our new content...
-	  omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
-	}
+      for (int loadPos=0; loadPos<cacheSize && loadPos<filenames.size(); loadPos++) {
+          omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), tempHeader));
+          //qDebug() << QString("Pushing Back") << filenames[loadPos];
+      }
+//      foreach (QString file, filenames)
+//      {
+//            //std::cout << (dirString+file).toStdString() << std::endl;
+//            // Push our new content...
+//            if (loadPos < cacheSize) {
+//                omfCache.push_back(readOMF((dirString+file).toStdString(), tempHeader));
+//            }
+//            loadPos++;
+//      }
 
       // Update the Display with the first element
       glWidget->updateData(omfCache.front());
   
       // Update the top overlay
-      glWidget->updateTopOverlay(filenames.front());
+      glWidget->updateTopOverlay(displayNames.front());
 
       // Refresh the animation bar
+      //qDebug() << QString("Updating Animation Slider");
       adjustAnimSlider();
     }
 }

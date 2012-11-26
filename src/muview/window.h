@@ -12,7 +12,7 @@
 
 // For reading OMF files
 #include "OMFContainer.h"
-#include <vector>
+#include <deque>
 
 // General widget stuff 
 class QSlider;
@@ -100,8 +100,15 @@ private:
   QxtSpanSlider *zSpanSlider;
   
   // Storage and caching
-  std::vector<array_ptr> omfCache;
+  // A finite number of files, as governed by cacheSize, will
+  // reside in memory at a given time, otherwise we will choke
+  // the system on large output directories.
+  int cacheSize; // Maxmimum cache size
+  int cachePos;  // Current location w.r.t list of all filenames
+  std::deque<array_ptr> omfCache;
   QStringList filenames;
+  QStringList displayNames;
+  QString dirString;
 
   // Watch dirs
   QFileSystemWatcher *watcher;
