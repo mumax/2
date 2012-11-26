@@ -18,7 +18,7 @@ import (
 	"container/list"
 )
 
-// Naive Backward Euler solver
+// The adaptive implicit method, predictor: Implicit Euler, corrector: Trapezoidal
 type BDFEulerAuto struct {
 	ybuffer []*gpu.Array // current value of the quantity
 
@@ -62,71 +62,61 @@ func (s *BDFEulerAuto) Step() {
 		dy := equation[i].input[0]
 		s.y0buffer[i].CopyFromDevice(y.Array())   // save for later
 		s.dy0buffer[i].CopyFromDevice(dy.Array()) // save for later
+		// store the step
+		dt := engine.dt.Scalar()
+		s.newDt[i] = dt
 	}
 	
-	const maxTry = 3 // undo at most this many bad steps
+	const maxTry = 6 // undo at most this many bad steps
 	const headRoom = 0.8
-	
+
+
 	for i := range equation {
-		
+		 
 		// try to integrate maxTry times at most
 		for try := 0; try < maxTry; try++ {
-			// get dt here to avoid updates later on.
-			dt := engine.dt.Scalar()
-			iter := 0
+			
+			// get dt here to avoid updates later on.			
+			dt := s.newDt[i] // the newDt stores either initial dt or corrected one (in case of badstep)
+			e.time.SetScalar(t0 + dt)		
+				
 			badStep := false
 			badIterator := false
-			
+
 			y := equation[i].output[0]
 			dy := equation[i].input[0]
+			
 			dyMul := dy.multiplier
 			t_step := dt * dyMul[0]
+			
 			h := float32(t_step)
 			
 			// Do zero order approximation with forward Euler method
 			// The zero-order approximation is used as a starting point for fixed-point iteration
+			
 			gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], h)
 			y.Invalidate()
-			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
 			
-			// Advance time and update all inputs 
 			// Since implicit methods use derivative at right side
-			e.time.SetScalar(t0 + dt)
-			equation[i].input[0].Update()
 			
-			s.dybuffer[i].CopyFromDevice(dy.Array())
+			equation[i].input[0].Update()
+			s.y1buffer[i].CopyFromDevice(dy.Array())
 			
 			// Do higher order approximation until converges    
 			maxIterErr := s.maxIterErr[i].Scalar()
 			maxIter := int(s.maxIter[i].Scalar())
 			
-			iter = 0
-			err := 1e10
-			m := 1e-38
-			// Do predictor: BDF Euler
-			// Store previous errors in the list to measure the convergence
-			
-			err_list := list.New()
-			err_list.PushFront(err)
-			err_list.PushFront(err)
-			
+			// Do predictor: BDF Euler (aka Adams-Moulton 0)
+			iter := 0
+			err := 1e10			
 			for err > maxIterErr {
 				gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h) 
 				err = float64(s.diff[i].MaxDiff(y.Array(), s.ybuffer[i]))
-				//Estimate convergence
-				elem := err_list.Front()
-				e := elem.Value.(float64)
-				m = err / e
-				//~ Debug("AM0 m:",m)
-				if m > 0.99 {
-					// If it is converged then badstep is not reported
-					// If there is indeed a badstep then it will be reflected in global error
-					//if err > maxIterErr {Debug("BDF AM0, TOL failed at:", err)}
-					break
+				sum := float64(s.diff[i].MaxSum(y.Array(), s.ybuffer[i]))
+				if sum > 0.0 {
+					err = err / sum
 				}
-				err_list.PushFront(err)
-				err_list.Remove(err_list.Back())				
 				iter = iter + 1
 				s.iterations.SetScalar(s.iterations.Scalar() + 1)
 				y.Array().CopyFromDevice(s.ybuffer[i])
@@ -137,42 +127,32 @@ func (s *BDFEulerAuto) Step() {
 					break
 				}
 			}
+			// Save the derivative for the comparator
+			s.dybuffer[i].CopyFromDevice(dy.Array())
+			
 			// If fixed-point iterator cannot converge, then panic
-			if badIterator {
+			if badIterator && try == (maxTry - 1) {
 				panic(Bug(fmt.Sprintf("The BDF iterator cannot converge for %s! Please increase the maximum number of iterations and re-run!",y.Name())))
+			} else if badIterator {
+				s.newDt[i] = 0.5 * dt
+				continue
 			}
 			
-			// Update and save the result for step predictor
-			// equation[i].input[0].Update()
-			
-			s.y1buffer[i].CopyFromDevice(y.Array())
-			
-			// Do corrector: BDF trapezoidal
+			// Do corrector: BDF trapezoidal (aka Adams-Moulton 1)
 			iter = 0
 			err = 1e10
-			m = 1e-38
-			err_list.Init()
-			err_list.PushFront(err)
-			err_list.PushFront(err)
-			
-			dy.Array().CopyFromDevice(s.dybuffer[i])
+			// There is no such method in the literature
+			// So lets do it like RK does, start from the initial guess, but not from the predicted one
+			// restore dy as estimated by Forward Euler
+			dy.Array().CopyFromDevice(s.y1buffer[i])
 			for err > maxIterErr {
 				gpu.Add(s.ybuffer[i], dy.Array(), s.dy0buffer[i])
 				gpu.Madd(s.ybuffer[i], s.y0buffer[i], s.ybuffer[i], 0.5*h) 
 				err = float64(s.diff[i].MaxDiff(y.Array(), s.ybuffer[i]))
-				//Estimate convergence
-				elem := err_list.Front()
-				e := elem.Value.(float64)
-				m = err / e
-				//~ Debug("AM1 m:",m)
-				if m > 0.99 {
-					// If it is converged then badstep is not reported
-					// If there is indeed a badstep then it will be reflected in global error
-					//~ if err > maxIterErr {Debug("BDF AM1, TOL failed at:", err)}
-					break
+				sum := float64(s.diff[i].MaxSum(y.Array(), s.ybuffer[i]))
+				if sum > 0.0 {
+					err = err / sum
 				}
-				err_list.PushFront(err)
-				err_list.Remove(err_list.Back())				
 				iter = iter + 1
 				s.iterations.SetScalar(s.iterations.Scalar() + 1)
 				y.Array().CopyFromDevice(s.ybuffer[i])
@@ -184,13 +164,17 @@ func (s *BDFEulerAuto) Step() {
 				}
 			}
 			 
-			if badIterator {
+			if badIterator && try == (maxTry - 1) {
 				// If fixed-point iterator cannot converge, then panic
 				panic(Bug(fmt.Sprintf("The BDF iterator cannot converge for %s! Please increase the maximum number of iterations and re-run!",y.Name())))
+			} else if badIterator {
+				s.newDt[i] = 0.5 * dt
+				continue
 			}
 			
-			abs_dy := 1.5 * float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i])) // / 3.0
-			max_y := float64(s.diff[i].MaxAbs(s.y1buffer[i]))
+			// The error is estimated mainly by BDF Euler
+			abs_dy := t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i])) / 3.0
+			max_y := float64(s.diff[i].MaxSum(dy.Array(), s.dybuffer[i]))
 		
 			s.err[i].SetScalar(abs_dy)
 			
@@ -213,9 +197,9 @@ func (s *BDFEulerAuto) Step() {
 				maxStepErr = math.Min(maxAbsStepErr, maxRelStepErr)
 			}
 			
-			// Let us compare the current error to the error from previous steps
+			// Let us compare the current error to the error from the previous steps
 			errRatio := 0.0	
-			if  s.err_list[i].Len() == 3  && !badStep {
+			if  s.err_list[i].Len() == 3 && !badStep{
 			    //do softcore adjustment
 			    elem := s.err_list[i].Front()
 			    e   := abs_dy
