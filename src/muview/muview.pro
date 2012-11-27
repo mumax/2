@@ -12,6 +12,5 @@ HEADERS = glwidget.h window.h \
     preferences.h qxtspanslider.h qxtspanslider_p.h
 SOURCES = glwidget.cpp main.cpp window.cpp \ 
     preferences.cpp qxtspanslider.cpp
-
 FORMS += \
     preferences.ui

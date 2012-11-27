@@ -233,11 +233,13 @@ void GLWidget::initializeGL()
   glEnable(GL_LIGHT0);
   glEnable(GL_MULTISAMPLE);
 
+  static GLfloat global_ambient[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
   // Lights
   static GLfloat lightPosition1[4] = { 4.0,  1.0, 10.0, 0.0 };
   static GLfloat lightPosition2[4] = { -4.0, -1.0, 10.0, 0.0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
-  glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
+  //glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
+  //glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
 
   // Display List for cone
   cone = glGenLists(1);
@@ -277,12 +279,14 @@ void GLWidget::paintGL()
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
 
   qglClearColor(qtPurple.dark());
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-  glTranslatef(xLoc, yLoc, -10.0 + zoom);
+  //gluLookAt(eyex, eyey, eyez, atx, aty, atz, upx, upy, upz);
+  glTranslatef(xLoc, yLoc, -15.0 + zoom);
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
@@ -355,7 +359,8 @@ void GLWidget::paintGL()
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
-    
+    glDisable(GL_LIGHT0);
+
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     
@@ -370,7 +375,7 @@ void GLWidget::resizeGL(int width, int height)
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(60.0, (float)width / (float)height, 0.1, 200.0);
+  gluPerspective(60.0, (float)width / (float)height, 0.1, 500.0);
   glMatrixMode(GL_MODELVIEW);
   glViewport(0, 0, width, height);
 }
