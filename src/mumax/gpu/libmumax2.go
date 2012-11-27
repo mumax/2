@@ -179,6 +179,24 @@ func LinearCombination3Async(dst *Array, a *Array, mulA float32, b *Array, mulB 
 		C.int(dst.partLen4D))
 }
 
+// dst[i] = a[i]*mulA + b[i]*mulB + c[i]*mulC
+func LinearCombination3(dst *Array, a *Array, mulA float32, b *Array, mulB float32, c *Array, mulC float32) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len() && dstlen == c.Len())
+	C.linearCombination3Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
+
 // Calculates:
 //	τ = (m x h) - α m  x (m x h)
 // If h = H/Msat, then τ = 1/gamma*dm/dt

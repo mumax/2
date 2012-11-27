@@ -77,8 +77,7 @@ func (s *BDFEulerAuto) Step() {
 		for try := 0; try < maxTry; try++ {
 			
 			// get dt here to avoid updates later on.			
-			dt := s.newDt[i] // the newDt stores either initial dt or corrected one (in case of badstep)
-			e.time.SetScalar(t0 + dt)		
+			dt := s.newDt[i] // the newDt stores either initial dt or corrected one (in case of badstep)		
 				
 			badStep := false
 			badIterator := false
@@ -93,15 +92,14 @@ func (s *BDFEulerAuto) Step() {
 			
 			// Do zero order approximation with forward Euler method
 			// The zero-order approximation is used as a starting point for fixed-point iteration
-			
 			gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], h)
 			y.Invalidate()
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
 			
 			// Since implicit methods use derivative at right side
-			
+			e.time.SetScalar(t0 + dt)
 			equation[i].input[0].Update()
-			s.y1buffer[i].CopyFromDevice(dy.Array())
+			s.dybuffer[i].CopyFromDevice(dy.Array())
 			
 			// Do higher order approximation until converges    
 			maxIterErr := s.maxIterErr[i].Scalar()
@@ -128,7 +126,7 @@ func (s *BDFEulerAuto) Step() {
 				}
 			}
 			// Save the derivative for the comparator
-			s.dybuffer[i].CopyFromDevice(dy.Array())
+			s.y1buffer[i].CopyFromDevice(y.Array())
 			
 			// If fixed-point iterator cannot converge, then panic
 			if badIterator && try == (maxTry - 1) {
@@ -144,10 +142,11 @@ func (s *BDFEulerAuto) Step() {
 			// There is no such method in the literature
 			// So lets do it like RK does, start from the initial guess, but not from the predicted one
 			// restore dy as estimated by Forward Euler
-			dy.Array().CopyFromDevice(s.y1buffer[i])
+			dy.Array().CopyFromDevice(s.dybuffer[i])
 			for err > maxIterErr {
-				gpu.Add(s.ybuffer[i], dy.Array(), s.dy0buffer[i])
-				gpu.Madd(s.ybuffer[i], s.y0buffer[i], s.ybuffer[i], 0.5*h) 
+				//gpu.Add(s.ybuffer[i], dy.Array(), s.dy0buffer[i])
+				//gpu.Madd(s.ybuffer[i], s.y0buffer[i], s.ybuffer[i], 0.5*h) 
+				gpu.LinearCombination3(s.ybuffer[i], s.y0buffer[i], float32(1.0), dy.Array(), 0.5 * h, s.dy0buffer[i], 0.5 * h)
 				err = float64(s.diff[i].MaxDiff(y.Array(), s.ybuffer[i]))
 				sum := float64(s.diff[i].MaxSum(y.Array(), s.ybuffer[i]))
 				if sum > 0.0 {
@@ -173,8 +172,8 @@ func (s *BDFEulerAuto) Step() {
 			}
 			
 			// The error is estimated mainly by BDF Euler
-			abs_dy := t_step * float64(s.diff[i].MaxDiff(dy.Array(), s.dybuffer[i])) / 3.0
-			max_y := float64(s.diff[i].MaxSum(dy.Array(), s.dybuffer[i]))
+			abs_dy := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i])) / 3.0
+			max_y := float64(s.diff[i].MaxSum(y.Array(), s.y1buffer[i]))
 		
 			s.err[i].SetScalar(abs_dy)
 			
@@ -314,13 +313,13 @@ func LoadBDFEulerAuto(e *Engine) {
 		unit := out.Unit()
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.maxAbsErr[i] = e.AddNewQuant(out.Name()+"_maxAbsError", SCALAR, VALUE, unit, "Maximum absolute error per step for "+out.Name())
-		s.maxAbsErr[i].SetScalar(1e-5)
+		s.maxAbsErr[i].SetScalar(1e-4)
 		s.maxRelErr[i] = e.AddNewQuant(out.Name()+"_maxRelError", SCALAR, VALUE, unit, "Maximum relative error per step for "+out.Name())
-		s.maxRelErr[i].SetScalar(1e-5)
+		s.maxRelErr[i].SetScalar(1e-3)
 		s.maxIterErr[i] = e.AddNewQuant(out.Name()+"_maxIterError", SCALAR, VALUE, unit, "The maximum error of iterator"+out.Name())
-		s.maxIterErr[i].SetScalar(1e-8)
+		s.maxIterErr[i].SetScalar(1e-6)
 		s.maxIter[i] = e.AddNewQuant(out.Name()+"_maxIterations", SCALAR, VALUE, unit, "Maximum number of evaluations per step"+out.Name())
-		s.maxIterErr[i].SetScalar(1000)
+		s.maxIter[i].SetScalar(3)
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 
 		s.maxAbsErr[i].SetVerifier(Positive)
