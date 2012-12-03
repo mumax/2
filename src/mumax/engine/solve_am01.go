@@ -65,7 +65,7 @@ func (s *BDFEulerAuto) Step() {
 	}
 	
 	const maxTry = 6 // undo at most this many bad steps
-	headRoom := 0.8
+	const headRoom = 0.85
 
 	// try to integrate maxTry times at most
 	for try := 0; try < maxTry; try++ {
@@ -216,25 +216,6 @@ func (s *BDFEulerAuto) Step() {
 			maxRelStepErr := s.maxRelErr[i].Scalar() * max_y
 			maxStepErr := maxAbsStepErr
 			
-			// Calculate the error rate
-			de := 1e10
-			relError := StepErr
-			if s.err_list[i].Len() > 1 {
-			    elem := s.err_list[i].Front()
-			    ep1 := elem.Value.(float64)
-			    de = math.Abs((ep1 - relError))
-			}
-			
-			if (de > 1e-7) {
-				de = 1e-7
-			}
-			
-			s.err_list[i].PushFront(relError)
-			// Store 10 successive stepErrors
-			if s.err_list[i].Len() == 10 {
-				s.err_list[i].Remove(s.err_list[i].Back())
-			}
-			
 			// if step is large then threshold then badstep is reported
 			if StepErr > maxAbsStepErr || StepErr > maxRelStepErr {
 				s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
@@ -243,27 +224,55 @@ func (s *BDFEulerAuto) Step() {
 				maxStepErr = math.Min(maxAbsStepErr, maxRelStepErr)
 			}
 			
-			// Let us compare the current error to the error from the previous steps
-			errRatio := 0.0	
-			if  de > 1e-7 && s.err_list[i].Len() > 2 {
-			    //do softcore adjustment
+			//~ // Calculate the error rate
+			de_dt := 1e38
+			de := 1e38
+			if s.err_list[i].Len() > 1 {
 			    elem := s.err_list[i].Front()
-			    e   := abs_dy
 			    ep1 := elem.Value.(float64)
-			    ep2 := elem.Next().Value.(float64)
-			    pre_f1 := math.Pow((ep1/e),0.075)
-			    pre_f2 := math.Pow((ep1*ep1/(e*ep2)), 0.01)
-			    pre := math.Pow((maxStepErr / e), 0.175)
-			    errRatio = 0.96 * pre_f1 * pre * pre_f2
-			} else if !badStep {
+			    de_dt = (StepErr - ep1) / dt	    
+			    if de_dt > 1.0e6 {
+					de_dt = 1.0e6
+				}
+				
+				if de_dt < -1.0e6 {
+					de_dt = -1.0e6
+				}
+				de = ep1 + de_dt * dt
+			}
+			
+			// Let us compare the current error to the error from the previous steps
+			errRatio := 1.0e10
+			errRateRatio := 1.0e10
+			// Get error from error_rate and error and pick the smallest one
+			
+			if !badStep {
 			    //do hardcore adjustment if there is not enough history and err < err0
-			    errRatio = headRoom * math.Sqrt(maxStepErr / StepErr)
+			    errRatio = math.Sqrt(maxStepErr / StepErr)
 			} else {
 			    //do hardcore adjustment if there is not enough history and (or) err > err0
-			    errRatio = headRoom * math.Pow((maxStepErr / StepErr), 1./3.)
+			    errRatio = math.Pow(maxStepErr / StepErr, 1./3.)
 			}
-		
+			
+			//~ if StepErr > de && s.err_list[i].Len() > 1 {
+				//~ badStep = true
+			//~ } 
+			
+			if s.err_list[i].Len() > 1 {
+				errRateRatio = math.Sqrt(de / StepErr)
+				Debug(errRatio, errRateRatio)
+				//errRatio = math.Min(errRatio, errRateRatio)
+			}
+			errRatio *= headRoom
 			step_corr := math.Abs(errRatio)
+			
+			// Keep the history of 'good' errors
+			if !badStep || try == (maxTry - 1) {
+				s.err_list[i].PushFront(StepErr)
+				if s.err_list[i].Len() == 10 {
+					s.err_list[i].Remove(s.err_list[i].Back())
+				}
+			}
 			
 			if step_corr > 1.5 {
 				step_corr = 1.5
