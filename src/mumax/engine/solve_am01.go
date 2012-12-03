@@ -65,7 +65,7 @@ func (s *BDFEulerAuto) Step() {
 	}
 	
 	const maxTry = 6 // undo at most this many bad steps
-	const headRoom = 0.8
+	headRoom := 0.8
 
 	// try to integrate maxTry times at most
 	for try := 0; try < maxTry; try++ {
@@ -196,12 +196,12 @@ func (s *BDFEulerAuto) Step() {
 			engine.dt.SetScalar(0.5 * dt)
 			continue
 		}
-		
+
 		for i := range equation {
 			y := equation[i].output[0]
 			// The error is estimated mainly by BDF Euler
-			abs_dy := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i])) / 3.0
-			max_y := float64(s.diff[i].MaxSum(y.Array(), s.y1buffer[i]))
+			abs_dy := float64(s.diff[i].MaxDiff(y.Array(), s.y1buffer[i])) 
+			max_y := 0.5 * float64(s.diff[i].MaxSum(y.Array(), s.y1buffer[i]))
 		
 			s.err[i].SetScalar(abs_dy)
 			
@@ -216,17 +216,36 @@ func (s *BDFEulerAuto) Step() {
 			maxRelStepErr := s.maxRelErr[i].Scalar() * max_y
 			maxStepErr := maxAbsStepErr
 			
+			// Calculate the error rate
+			de := 1e10
+			relError := StepErr
+			if s.err_list[i].Len() > 1 {
+			    elem := s.err_list[i].Front()
+			    ep1 := elem.Value.(float64)
+			    de = math.Abs((ep1 - relError))
+			}
+			
+			if (de > 1e-7) {
+				de = 1e-7
+			}
+			
+			s.err_list[i].PushFront(relError)
+			// Store 10 successive stepErrors
+			if s.err_list[i].Len() == 10 {
+				s.err_list[i].Remove(s.err_list[i].Back())
+			}
+			
 			// if step is large then threshold then badstep is reported
 			if StepErr > maxAbsStepErr || StepErr > maxRelStepErr {
 				s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 				badStep = true
-				// We don't now which particular condition has triggered the badstep, so let us pick the smallest error threshold
+				// We don't know which particular condition has triggered the badstep, so let us pick the smallest error threshold
 				maxStepErr = math.Min(maxAbsStepErr, maxRelStepErr)
 			}
 			
 			// Let us compare the current error to the error from the previous steps
 			errRatio := 0.0	
-			if  s.err_list[i].Len() == 3 && !badStep{
+			if  de > 1e-7 && s.err_list[i].Len() > 2 {
 			    //do softcore adjustment
 			    elem := s.err_list[i].Front()
 			    e   := abs_dy
@@ -241,9 +260,9 @@ func (s *BDFEulerAuto) Step() {
 			    errRatio = headRoom * math.Sqrt(maxStepErr / StepErr)
 			} else {
 			    //do hardcore adjustment if there is not enough history and (or) err > err0
-			    errRatio = headRoom * math.Pow((maxStepErr / StepErr), 0.33333333333)
+			    errRatio = headRoom * math.Pow((maxStepErr / StepErr), 1./3.)
 			}
-			
+		
 			step_corr := math.Abs(errRatio)
 			
 			if step_corr > 1.5 {
@@ -258,13 +277,6 @@ func (s *BDFEulerAuto) Step() {
 			}
 			if new_dt > s.maxDt.Scalar() {
 				new_dt = s.maxDt.Scalar()
-			}
-			if !badStep || try == (maxTry - 1) {
-				// Memorize only successful steps!
-				s.err_list[i].PushFront(StepErr)
-				if s.err_list[i].Len() == 4 {
-					s.err_list[i].Remove(s.err_list[i].Back())
-				}
 			}
 			s.newDt[i] = new_dt
 		}
