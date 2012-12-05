@@ -27,6 +27,10 @@ DLLEXPORT void linearCombination2Async(float** dst, float** a, float mulA, float
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 DLLEXPORT void linearCombination3Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, CUstream* stream, int NPart);
 
+/// dst[i] = a[i] + Mul * (b[i] + c[i])
+/// @param Npart number of floats per GPU, so total number of floats / nDevice()
+DLLEXPORT void addMaddAsync(float** dst, float** a, float** b, float** c, float mul, CUstream* stream, int NPart);
+
 /// Multiply-add: a[i] += mulB * b[i]
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 DLLEXPORT void madd1Async(float** a, float** b, float mulB, CUstream* stream, int Npart);

@@ -28,7 +28,13 @@ __export__ void addAsync(float** dst, float** a, float** b, CUstream* stream, in
 	}
 }
 
-
+///@internal
+__global__ void addmaddKern(float* dst, float* a, float* b, float* c, float mul, int Npart) {
+	int i = threadindex;
+	if (i < Npart) {
+		dst[i] = a[i] + mul * (b[i] + c[i]);
+	}
+}
 
 ///@internal
 __global__ void maddKern(float* dst, float* a, float* b, float mulB, int Npart) {
@@ -45,6 +51,16 @@ __global__ void maddKern(float* dst, float* a, float* b, float mulB, int Npart) 
 }
 
 
+__export__ void addMaddAsync(float** dst, float** a, float** b, float** c, float mul, CUstream* stream, int NPart)
+{
+	dim3 gridSize, blockSize;
+	make1dconf(NPart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		addmaddKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], c[dev], mul, NPart);
+	}
+	
+}
 __export__ void maddAsync(float** dst, float** a, float** b, float mulB, CUstream* stream, int Npart) {
 	dim3 gridSize, blockSize;
 	make1dconf(Npart, &gridSize, &blockSize);

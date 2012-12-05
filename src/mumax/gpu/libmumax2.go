@@ -127,6 +127,20 @@ func Madd(dst, a, b *Array, mulB float32) {
 	dst.Stream.Sync()
 }
 
+// Multiply-add: dst = a + mul* (b + c)
+// b may NOT contain NULL pointers!
+func AddMadd(dst, a, b, c *Array, mul float32) {
+	C.addMaddAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mul),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
 // Complex multiply add. 
 // dst and src contain complex numbers (interleaved format)
 // kern contains real numbers
