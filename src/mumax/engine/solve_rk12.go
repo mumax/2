@@ -13,6 +13,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/gpu"
+	"math"
 )
 
 type RK12Solver struct {
@@ -91,7 +92,7 @@ func (s *RK12Solver) Step() {
 	equation := e.equation
 
 	// First update all inputs
-	dt := engine.dt.Scalar()
+	
 	for i := range equation {
 		Assert(equation[i].kind == EQN_PDE1)
 		equation[i].input[0].Update()
@@ -117,7 +118,8 @@ func (s *RK12Solver) Step() {
 	const maxTry = 3 // undo at most this many bad steps
 	const headRoom = 0.8
 	for try := 0; try < maxTry; try++ {
-
+		// We need to update timestep if the step has failed
+		dt := engine.dt.Scalar()
 		// initial euler step
 		for i := range equation {
 			y := equation[i].output[0]
@@ -164,8 +166,13 @@ func (s *RK12Solver) Step() {
 				// peak error should be that of good step, unless last trial which will not be undone
 				s.peakErr[i].SetScalar(err)
 			}
-			factor := (maxErr * headRoom) / err
-
+			factor := 0.0
+			if !badStep {
+				factor = math.Sqrt(maxErr / err) //maxErr / err
+			} else {
+				factor = math.Pow(maxErr / err, 1./3.)
+			}
+			factor *= headRoom
 			// do not increase/cut too much
 			// TODO: give user the control:
 			if factor > 1.5 {
