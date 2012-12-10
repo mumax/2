@@ -89,9 +89,8 @@ extern "C" {
       float epsilon = lambda2 / ((lambda2 + 1.0f) + (lambda2 - 1.0f) * pdotm);
       pre.x *= epsilon;
       
-      float alpha = (alphaMsk != NULL) ? 1.0f/(1.0f + alphaMsk[I] * alphaMul * alphaMsk[I] * alphaMul) : 1.0f/(1.0f + alphaMul * alphaMul); 
-      pre.x *= alpha;
-      pre.y *= alpha;
+      float alpha = (alphaMsk != NULL) ? (alphaMsk[I] * alphaMul) : alphaMul; 
+      float alphaFac = 1.0f / (1.0f + alpha * alpha);
       
       // take into account spatial profile of polarization efficiency
       float pol = (polMsk == NULL) ? 1.0f : polMsk[I];
@@ -100,10 +99,16 @@ extern "C" {
       // take into account spatial profile of the secondary spin transfer term
       float epsilonPrime = (epsilonPrimeMsk == NULL) ? 1.0f : epsilonPrimeMsk[I];
       pre.y *= epsilonPrime;
+
+      float mxpxmFac = pre.x - alpha * pre.y;
+      float pxmFac = pre.y - alpha * pre.x;
+
+      mxpxmFac *= alphaFac;
+      pxmFac *= alphaFac;
       
-      sttx[I] = pre.x * mxpxm.x + pre.y * pxm.x;
-      stty[I] = pre.x * mxpxm.y + pre.y * pxm.y;
-      sttz[I] = pre.x * mxpxm.z + pre.y * pxm.z;
+      sttx[I] = mxpxmFac * mxpxm.x + pxmFac * pxm.x;
+      stty[I] = mxpxmFac * mxpxm.y + pxmFac * pxm.y;
+      sttz[I] = mxpxmFac * mxpxm.z + pxmFac * pxm.z;
       
     } 
   }
