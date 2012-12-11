@@ -46,17 +46,26 @@ func NewAverageUpdater(in, out *Quant) Updater {
 
 func (this *AverageUpdater) Update() {
 	var sum float32 = 666
-
-	if this.in.nComp == 1 {
-		sum = this.reduce.Sum(this.in.Array())
-		this.out.SetScalar(float64(sum) * this.in.multiplier[0] / float64(GetEngine().NCell()))
+	if this.in.IsSpaceDependent() {
+		if this.in.nComp == 1 {
+			sum = this.reduce.Sum(this.in.Array())
+			this.out.SetScalar(float64(sum) * this.in.multiplier[0] / float64(GetEngine().NCell()))
+		} else {
+			for c := 0; c < this.in.nComp; c++ {
+				sum := this.reduce.Sum(&(this.in.Array().Comp[c]))
+				this.out.SetComponent(c, float64(sum)*this.in.multiplier[c]/float64(GetEngine().NCell()))
+			}
+		}
 	} else {
-		for c := 0; c < this.in.nComp; c++ {
-			sum := this.reduce.Sum(&(this.in.Array().Comp[c]))
-			this.out.SetComponent(c, float64(sum)*this.in.multiplier[c]/float64(GetEngine().NCell()))
+		// The mask is not space dependant, so just copy the multiplier from the 'in' into the 'out'
+		if this.in.nComp == 1 {
+			this.out.SetScalar(this.in.multiplier[0])
+		} else {
+			for c := 0; c < this.in.nComp; c++ {
+				this.out.SetComponent(c, this.in.multiplier[c])
+			}
 		}
 	}
-
 }
 
 // ________________________________________________________________________________ maxabs
