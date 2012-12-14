@@ -16,6 +16,8 @@ import (
 	"mumax/host"
 )
 
+// Calculates the magnetostatic kernel by brute-force integration
+// of magnetic charges over the faces and averages over cell volumes.
 func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, kern *host.Array) {
 
 	Debug("Calculating demag kernel:", "size", size, "accuracy:", accuracy_)
