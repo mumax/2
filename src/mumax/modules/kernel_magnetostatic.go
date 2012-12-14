@@ -18,6 +18,14 @@ import (
 
 // Calculates the magnetostatic kernel by brute-force integration
 // of magnetic charges over the faces and averages over cell volumes.
+// 
+// size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
+// accuracy: use 2^accuracy integration points
+//
+// return value: A symmetric rank 5 tensor K[sourcedir][destdir][x][y][z]
+// (e.g. K[X][Y][1][2][3] gives H_y at position (1, 2, 3) due to a unit dipole m_x at the origin.
+// You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
+// K[KernIdx[X][X]] returns K[XX]
 func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, kern *host.Array) {
 
 	Debug("Calculating demag kernel:", "size", size, "accuracy:", accuracy_)
