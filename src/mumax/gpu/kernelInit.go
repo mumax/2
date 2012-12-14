@@ -18,43 +18,43 @@ import (
 	//   "fmt"
 )
 
-func InitDipoleKernel6(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array) {
-	Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
-	Start("kern_d")
-
-	Assert(len(kern.Array) == 9) // TODO: should be able to change to 6
-	CheckSize(kern.Size3D, size)
-
-	// initialization Gauss quadrature points for integrations + copy to gpu ________________________
-	dev_qd_W_10 := make([]cu.DevicePtr, NDevice())
-	dev_qd_P_10 := make([]cu.DevicePtr, NDevice())
-	Initialize_Gauss_quadrature(dev_qd_W_10, dev_qd_P_10, cellsize)
-	// ______________________________________________________________________________________________
-
-	// allocate array to store one component on the devices _________________________________________
-	gpuBuffer := NewArray(1, size)
-	defer gpuBuffer.Free()
-	// ______________________________________________________________________________________________
-
-	// initialize kernel elements and copy to host __________________________________________________
-	for comp := 0; comp < 9; comp++ {
-		gpuBuffer.Zero()
-		InitDipoleKernel6Element(gpuBuffer, comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
-		gpuBuffer.CopyToHost(kern.Component(comp))
-	}
-	// ______________________________________________________________________________________________
-
-	// free everything ______________________________________________________________________________
-	devices := getDevices()
-	for i := range devices {
-		setDevice(devices[i])
-		dev_qd_W_10[i].Free()
-		dev_qd_P_10[i].Free()
-	}
-	// ______________________________________________________________________________________________
-
-	Stop("kern_d")
-}
+//func InitDipoleKernel6(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array) {
+//	Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
+//	Start("kern_d")
+//
+//	Assert(len(kern.Array) == 9) // TODO: should be able to change to 6
+//	CheckSize(kern.Size3D, size)
+//
+//	// initialization Gauss quadrature points for integrations + copy to gpu ________________________
+//	dev_qd_W_10 := make([]cu.DevicePtr, NDevice())
+//	dev_qd_P_10 := make([]cu.DevicePtr, NDevice())
+//	Initialize_Gauss_quadrature(dev_qd_W_10, dev_qd_P_10, cellsize)
+//	// ______________________________________________________________________________________________
+//
+//	// allocate array to store one component on the devices _________________________________________
+//	gpuBuffer := NewArray(1, size)
+//	defer gpuBuffer.Free()
+//	// ______________________________________________________________________________________________
+//
+//	// initialize kernel elements and copy to host __________________________________________________
+//	for comp := 0; comp < 9; comp++ {
+//		gpuBuffer.Zero()
+//		InitDipoleKernel6Element(gpuBuffer, comp, periodic, cellsize, dev_qd_P_10, dev_qd_W_10)
+//		gpuBuffer.CopyToHost(kern.Component(comp))
+//	}
+//	// ______________________________________________________________________________________________
+//
+//	// free everything ______________________________________________________________________________
+//	devices := getDevices()
+//	for i := range devices {
+//		setDevice(devices[i])
+//		dev_qd_W_10[i].Free()
+//		dev_qd_P_10[i].Free()
+//	}
+//	// ______________________________________________________________________________________________
+//
+//	Stop("kern_d")
+//}
 
 func InitRotorKernel(size []int, cellsize []float64, periodic []int, accuracy int, kern *host.Array) {
 	Debug("Calculating demag kernel", "size:", size, "cellsize:", cellsize, "accuracy:", accuracy, "periodic:", periodic)
