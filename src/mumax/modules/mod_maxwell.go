@@ -26,10 +26,7 @@ func LoadEField(e *Engine) {
 		return
 	}
 	EField := e.AddNewQuant("E", VECTOR, FIELD, Unit("V/m"), "electrical field")
-	//EExt := e.AddNewQuant("E_ext", VECTOR, MASK, Unit("V/m"), "externally applied electrical field")
-	//e.Depends("E", "E_ext")
 	EField.SetUpdater(newEFieldUpdater())
-	//maxwell.EExt = EExt
 	maxwell.E = EField
 }
 
@@ -39,10 +36,7 @@ func LoadBField(e *Engine) {
 		return
 	}
 	BField := e.AddNewQuant("B", VECTOR, FIELD, Unit("T"), "magnetic induction")
-	//BExt := e.AddNewQuant("B_ext", VECTOR, MASK, Unit("T"), "externally applied magnetic induction")
-	//e.Depends("B", "B_ext")
 	BField.SetUpdater(newBFieldUpdater())
-	//maxwell.BExt = BExt
 	maxwell.B = BField
 	// Add B/mu0 to H_eff
 	if e.HasQuant("H_eff") {
