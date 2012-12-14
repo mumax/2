@@ -163,7 +163,7 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 							}
 						}
 					}
-					for d := s; d < 3; d++ { // destination index Ksdxyz
+					for d := 0; d < 3; d++ { // destination index Ksdxyz
 						I := FullTensorIdx[s][d]
 						array[I][xw][yw][zw] += float32(B[d]) // We have to ADD because there are multiple contributions in case of periodicity
 					}
