@@ -14,7 +14,7 @@ setv('Msat', 800e3)
 setv('Aex', 1.3e-11)
 setv('alpha', 1)
 setv('dt', 1e-15)
-setv('m_maxerror', 1./100)
+setv('m_maxerror', 1e-5)
 
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
@@ -23,13 +23,14 @@ setarray('m', m)
 savegraph("graph.png")
 
 #run(2e-9) #relax
-run_until_smaller('maxtorque', 1e-2 * gets('gamma') * 800e3)
+#run(1e-9)
+run_until_smaller('maxtorque', 1e-6 * gets('gamma') * 800e3)
 setv('alpha', 0.02)
 setv('dt', 1e-15)
 setv('t', 0)
 
 autosave("m", "omf", ["Text"], 200e-12)
-autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 10e-12)
+autotabulate(["t", "<m>", "m_error", "m_peakerror", "badsteps", "dt", "maxtorque"], "m.txt", 1e-12)
 
 Bx = -24.6E-3
 By =   4.3E-3
