@@ -18,13 +18,13 @@ import (
 // Loads the "Q" quantity if it is not already present.
 func LoadMFAParams(e *Engine) {
 	if !e.HasQuant("Tc") {
-	    e.AddNewQuant("Tc", SCALAR, MASK, Unit("K"), "Curie temperature")
+		e.AddNewQuant("Tc", SCALAR, MASK, Unit("K"), "Curie temperature")
 	}
 	if !e.HasQuant("J") {
-	    e.AddNewQuant("J", SCALAR, MASK, Unit("K"), "Full atomic angular momentum")
+		e.AddNewQuant("J", SCALAR, MASK, Unit("K"), "Full atomic angular momentum")
 	}
-	
+
 	if !e.HasQuant("n") {
-	    e.AddNewQuant("n", SCALAR, MASK, Unit("1/m3"), "Number of spins in the unit volume")
+		e.AddNewQuant("n", SCALAR, MASK, Unit("1/m3"), "Number of spins in the unit volume")
 	}
 }

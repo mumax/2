@@ -58,12 +58,12 @@ func (u *ZhangLiUpdater) Update() {
 	pol := e.Quant("polarisation")
 	curr := e.Quant("j") // could be pointwise
 	pbc := e.Periodic()
-    alpha := e.Quant("alpha")
+	alpha := e.Quant("alpha")
 	//njn := math.Sqrt(float64(curr.Multiplier()[0] * curr.Multiplier()[0]) + float64(curr.Multiplier()[1] * curr.Multiplier()[1]) + float64(curr.Multiplier()[2] * curr.Multiplier()[2]))
 	nmsatn := msat.Multiplier()[0]
-	
-    nPoln := pol.Multiplier()[0]
-    
+
+	nPoln := pol.Multiplier()[0]
+
 	pred := nPoln * MuB / (E * nmsatn) //pred needs  (* polMsk) and 1/(1+ee**2)
 
 	gpu.LLZhangLi(zzt.Array(), m.Array(), curr.Array(), msat.Array(), pol.Array(), ee.Array(), alpha.Array(), curr.Multiplier(), float32(pred), ee.Multiplier()[0], alpha.Multiplier()[0], float32(cellSize[X]), float32(cellSize[Y]), float32(cellSize[Z]), pbc)

@@ -24,8 +24,8 @@ func init() {
 
 func LoadAnizBrown(e *Engine) {
 	//e.LoadModule("llb")
-    LoadTemp(e, LtempName) // load temperature
-    
+	LoadTemp(e, LtempName) // load temperature
+
 	Therm_seed := e.AddNewQuant("Therm_seed", SCALAR, VALUE, Unit(""), `Random seed for H\_therm`)
 	Therm_seed.SetVerifier(Int)
 
@@ -35,7 +35,7 @@ func LoadAnizBrown(e *Engine) {
 	// By declaring that H_therm depends on Step,
 	// It will be automatically updated at each new time step
 	// and remain constant during the stages of the step.
-	
+
 	e.AddNewQuant("lambda_lattice", VECTOR, MASK, Unit(""), "Anizotropic lattice coupling constant")
 	e.Depends("H_therm", LtempName, "Step", "dt", "lambda_lattice", "gamma_LL", "Msat", "Therm_seed")
 	Htherm.SetUpdater(NewAnizBrownUpdater(Htherm, Therm_seed))
@@ -118,7 +118,7 @@ func (u *AnizBrownUpdater) Update() {
 	cellSize := e.CellSize()
 	V := cellSize[X] * cellSize[Y] * cellSize[Z]
 	ll := e.Quant("lambda_lattice")
-	
+
 	gamma := e.Quant("gamma_LL").Scalar()
 	mSat := e.Quant("Msat")
 	mSatMask := mSat.Array()
@@ -129,7 +129,7 @@ func (u *AnizBrownUpdater) Update() {
 
 	for c := 0; c < 3; c++ {
 		llMask := ll.Array().Component(X)
-		llKB2tempMul :=  float32(ll.Multiplier()[c] * KB2tempMul)
+		llKB2tempMul := float32(ll.Multiplier()[c] * KB2tempMul)
 		gpu.ScaleNoise(&(noise.Comp[c]), llMask, tempMask, llKB2tempMul, mSatMask, mu0VgammaDtMsatMul)
 	}
 

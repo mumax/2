@@ -18,6 +18,6 @@ import (
 // Loads the "Q" quantity if it is not already present.
 func LoadKappa(e *Engine) {
 	if !e.HasQuant("kappa") {
-	    e.AddNewQuant("kappa", SCALAR, MASK, Unit(""), "longitudinal magnetic susceptibility")
+		e.AddNewQuant("kappa", SCALAR, MASK, Unit(""), "longitudinal magnetic susceptibility")
 	}
 }

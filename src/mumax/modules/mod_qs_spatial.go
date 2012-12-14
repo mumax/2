@@ -18,7 +18,6 @@ func init() {
 }
 
 func LoadQSspat(e *Engine) {
-    LoadQspat(e, StempName, SspatFluxName, ScondName)
-    //AddTermToQuant(e.Quant("Q"), Qspat)
+	LoadQspat(e, StempName, SspatFluxName, ScondName)
+	//AddTermToQuant(e.Quant("Q"), Qspat)
 }
-

@@ -74,10 +74,10 @@ func (u *slonczewskiUpdater) Update() {
 
 	nmsatn := msat.Multiplier()[0]
 
-	beta := H_bar * gamma / (Mu0 * E * nmsatn) // njn is missing
-	beta_prime := pol.Multiplier()[0] * beta   // epsilon is missing, polMask is missing
+	beta := H_bar * gamma / (Mu0 * E * nmsatn)      // njn is missing
+	beta_prime := pol.Multiplier()[0] * beta        // epsilon is missing, polMask is missing
 	pre_fld := beta * epsilon_prime.Multiplier()[0] // epsilon_primeMsk is missing
-		
+
 	gpu.LLSlon(stt.Array(),
 		m.Array(),
 		msat.Array(),

@@ -23,9 +23,9 @@ func init() {
 }
 
 func LoadTempBrown(e *Engine) {
-	e.LoadModule("llg") // needed for alpha, hfield, ...
-    LoadTemp(e, LtempName) // load temperature
-    
+	e.LoadModule("llg")    // needed for alpha, hfield, ...
+	LoadTemp(e, LtempName) // load temperature
+
 	Therm_seed := e.AddNewQuant("Therm_seed", SCALAR, VALUE, Unit(""), `Random seed for H\_therm`)
 	Therm_seed.SetVerifier(Int)
 

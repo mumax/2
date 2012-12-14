@@ -15,34 +15,33 @@ import (
 
 func LoadQspat(e *Engine, tName string, fName string, cName string) {
 
-    //LoadQ(e, fName)
-    LoadTemp(e, tName)
-    
-    k := e.AddNewQuant(cName, SCALAR, MASK, Unit("J/(s*K*m)"), "Heat conductivity")
-    Qspat := e.AddNewQuant(fName, SCALAR, FIELD, Unit("J/(s*m3)"), "Heat flux density caused by spatial temperature gradient")
-    T := e.Quant(tName)
-    e.Depends(fName, cName, tName) 
-    Qspat.SetUpdater(&QspatUpdater{Qspat: Qspat, T: T, k: k })
-    //AddTermToQuant(e.Quant("Q"), Qspat)
+	//LoadQ(e, fName)
+	LoadTemp(e, tName)
+
+	k := e.AddNewQuant(cName, SCALAR, MASK, Unit("J/(s*K*m)"), "Heat conductivity")
+	Qspat := e.AddNewQuant(fName, SCALAR, FIELD, Unit("J/(s*m3)"), "Heat flux density caused by spatial temperature gradient")
+	T := e.Quant(tName)
+	e.Depends(fName, cName, tName)
+	Qspat.SetUpdater(&QspatUpdater{Qspat: Qspat, T: T, k: k})
+	//AddTermToQuant(e.Quant("Q"), Qspat)
 }
 
 type QspatUpdater struct {
 	Qspat, T, k *Quant
 }
 
-
 func (u *QspatUpdater) Update() {
-    e := GetEngine()
-    pbc := e.Periodic()
-    cellSize := e.CellSize()
-    
-    gpu.Qspat_async(
-        u.Qspat.Array(),
-        u.T.Array(),
-        u.k.Array(),
-        u.k.Multiplier(),
-        cellSize,
-        pbc)
+	e := GetEngine()
+	pbc := e.Periodic()
+	cellSize := e.CellSize()
 
-    u.Qspat.Array().Sync()
+	gpu.Qspat_async(
+		u.Qspat.Array(),
+		u.T.Array(),
+		u.k.Array(),
+		u.k.Multiplier(),
+		cellSize,
+		pbc)
+
+	u.Qspat.Array().Sync()
 }

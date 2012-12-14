@@ -19,5 +19,5 @@ func LoadTemp(e *Engine, name string) {
 	if !e.HasQuant(name) {
 		temp := e.AddNewQuant(name, SCALAR, FIELD, Unit("K"), "The temperature of the thermal bath")
 		temp.SetVerifier(NonNegative)
-    }
+	}
 }

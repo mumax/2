@@ -28,7 +28,5 @@ func init() {
 }
 
 func LoadETM(e *Engine) {
-    LoadTM(e, EtempName, EfluxName, ErateName, EcapacName, EpowName, Epow)
+	LoadTM(e, EtempName, EfluxName, ErateName, EcapacName, EpowName, Epow)
 }
-
-

@@ -24,7 +24,7 @@ func (u *decomposeMUpdater) Update() {
 	msat := e.Quant("Msat")
 
 	mf := u.mf
-	
+
 	gpu.Decompose(mf.Array(),
 		m.Array(),
 		msat.Array(),

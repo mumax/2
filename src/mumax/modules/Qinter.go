@@ -15,31 +15,30 @@ import (
 
 func LoadQinter(e *Engine, fName string, TiName string, TjName string, GijName string) {
 
-    LoadTemp(e, TiName)
-    LoadTemp(e, TjName)
-    
-    Gij := e.AddNewQuant(GijName, SCALAR, MASK, Unit("J/(s*K*m3)"), "Coupling constant")
-    Qinter := e.AddNewQuant(fName, SCALAR, FIELD, Unit("J/(s*m3)"), "Heat flux density caused by spatial temperature gradient")
-    Ti := e.Quant(TiName)
-    Tj := e.Quant(TjName)
-    e.Depends(fName, TiName, TjName, GijName) 
-    Qinter.SetUpdater(&QinterUpdater{Qinter: Qinter, Ti: Ti, Tj: Tj, Gij: Gij })
+	LoadTemp(e, TiName)
+	LoadTemp(e, TjName)
+
+	Gij := e.AddNewQuant(GijName, SCALAR, MASK, Unit("J/(s*K*m3)"), "Coupling constant")
+	Qinter := e.AddNewQuant(fName, SCALAR, FIELD, Unit("J/(s*m3)"), "Heat flux density caused by spatial temperature gradient")
+	Ti := e.Quant(TiName)
+	Tj := e.Quant(TjName)
+	e.Depends(fName, TiName, TjName, GijName)
+	Qinter.SetUpdater(&QinterUpdater{Qinter: Qinter, Ti: Ti, Tj: Tj, Gij: Gij})
 }
 
 type QinterUpdater struct {
 	Qinter, Ti, Tj, Gij *Quant
 }
 
-
 func (u *QinterUpdater) Update() {
-    
-    stream := u.Qinter.Array().Stream
-    gpu.Qinter_async(
-        u.Qinter.Array(),
-        u.Ti.Array(),
-        u.Tj.Array(),
-        u.Gij.Array(),
-        u.Gij.Multiplier(),
-        stream)
-    stream.Sync()
+
+	stream := u.Qinter.Array().Stream
+	gpu.Qinter_async(
+		u.Qinter.Array(),
+		u.Ti.Array(),
+		u.Tj.Array(),
+		u.Gij.Array(),
+		u.Gij.Multiplier(),
+		stream)
+	stream.Sync()
 }

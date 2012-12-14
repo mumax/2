@@ -24,12 +24,12 @@ func init() {
 func LoadEnergy(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
-    
-    M := "m"
-    if e.HasQuant("mf") {
-        M = "mf"
-    }
-    
+
+	M := "m"
+	if e.HasQuant("mf") {
+		M = "mf"
+	}
+
 	total := e.AddNewQuant("E", SCALAR, VALUE, Unit("J"), "Sum of all calculated energy terms (this is the total energy only if all relevant energy terms are loaded")
 	sumUpd := NewSumUpdater(total).(*SumUpdater)
 	total.SetUpdater(sumUpd)
@@ -58,7 +58,7 @@ func LoadEnergy(e *Engine) {
 		Log("Loaded anisotropy energy E_anis")
 		sumUpd.AddParent(term.Name())
 	}
-	
+
 	if e.HasQuant("H_lf") {
 		term := LoadEnergyTerm(e, "E_lf", M, "H_lf", -e.CellVolume()*Mu0, "Longitudinal field energy")
 		Log("Loaded anisotropy energy E_lf")

@@ -28,7 +28,5 @@ func init() {
 }
 
 func LoadSTM(e *Engine) {
-    LoadTM(e, StempName, SfluxName, SrateName, ScapacName, SpowName, Spow)
+	LoadTM(e, StempName, SfluxName, SrateName, ScapacName, SpowName, Spow)
 }
-
-

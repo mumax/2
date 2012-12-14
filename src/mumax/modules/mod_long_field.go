@@ -28,13 +28,13 @@ func LoadLongField(e *Engine) {
 	LoadTemp(e, "Te")
 	LoadKappa(e)
 	LoadMFAParams(e)
-	
+
 	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
 	e.Depends("H_lf", "kappa", "msat0", "msat", "m", "Tc", "Te", "msat0T0")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: e.Quant("kappa"), Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te") })
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: e.Quant("kappa"), Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te")})
 
 }
 

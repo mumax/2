@@ -23,11 +23,11 @@ func init() {
 
 func LoadBrillouinKappa(e *Engine) {
 
-    LoadFullMagnetization(e)
+	LoadFullMagnetization(e)
 	LoadTemp(e, "Te")
 	LoadKappa(e)
 	LoadMFAParams(e)
-	
+
 	e.Depends("kappa", "Te", "Tc", "msat0", "J", "msat0T0", "n")
 	msat0 := e.Quant("msat0")
 	msat0T0 := e.Quant("msat0T0")
@@ -42,7 +42,7 @@ type kappaUpdater struct {
 }
 
 func (u *kappaUpdater) Update() {
-    kappa := u.kappa
+	kappa := u.kappa
 	msat0 := u.msat0
 	msat0T0 := u.msat0T0
 	T := u.T
@@ -51,7 +51,7 @@ func (u *kappaUpdater) Update() {
 	n := u.n
 	stream := kappa.Array().Stream
 	kappa.Multiplier()[0] = Mu0 / (n.Multiplier()[0] * Kb)
-	
+
 	gpu.KappaAsync(kappa.Array(), msat0.Array(), msat0T0.Array(), T.Array(), Tc.Array(), S.Array(), n.Array(), msat0.Multiplier()[0], msat0T0.Multiplier()[0], Tc.Multiplier()[0], S.Multiplier()[0], stream)
 	stream.Sync()
 }

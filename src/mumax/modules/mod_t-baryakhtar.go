@@ -36,7 +36,7 @@ func LoadBaryakhtarTorques(e *Engine) {
 	btorque := e.AddNewQuant("torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits torque plus Baryakhtar relaxation")
 
 	// ============ Dependencies =============
-	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0T0")//, "debug_h")
+	e.Depends("torque", "mf", "H_eff", "gamma_LL", "lambda", "lambda_e", "msat0T0") //, "debug_h")
 
 	// ============ Updating the torque =============
 	upd := &BaryakhtarUpdater{btorque: btorque}
@@ -57,20 +57,20 @@ func (u *BaryakhtarUpdater) Update() {
 	heff := e.Quant("H_eff")
 	pbc := e.Periodic()
 	//heff := e.Quant("debug_h")
-	
+
 	// put gamma in multiplier to avoid additional multiplications
 	multiplierBT := btorque.Multiplier()
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
 	}
-    
-    lambda := e.Quant("lambda")
+
+	lambda := e.Quant("lambda")
 	lambda_e := e.Quant("lambda_e")
 	msat0T0 := e.Quant("msat0T0")
-	
-    //Debug(lambda.Multiplier()[XX], lambda.Multiplier()[YY], lambda.Multiplier()[ZZ], lambda.Multiplier()[XY], lambda.Multiplier()[XZ], lambda.Multiplier()[YZ])
-    //Debug(lambda_e.Multiplier()[XX], lambda_e.Multiplier()[YY], lambda_e.Multiplier()[ZZ], lambda_e.Multiplier()[XY], lambda_e.Multiplier()[XZ], lambda_e.Multiplier()[YZ])
-    
+
+	//Debug(lambda.Multiplier()[XX], lambda.Multiplier()[YY], lambda.Multiplier()[ZZ], lambda.Multiplier()[XY], lambda.Multiplier()[XZ], lambda.Multiplier()[YZ])
+	//Debug(lambda_e.Multiplier()[XX], lambda_e.Multiplier()[YY], lambda_e.Multiplier()[ZZ], lambda_e.Multiplier()[XY], lambda_e.Multiplier()[XZ], lambda_e.Multiplier()[YZ])
+
 	gpu.LLGBtAsync(btorque.Array(),
 		m.Array(),
 		heff.Array(),
