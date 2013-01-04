@@ -69,7 +69,7 @@ func (u *DFUpdater) Update() {
 	u.Qmagn.Multiplier()[0] *= u.Heff.Multiplier()[0]
 	// From now Qmag = dot(H_eff, torque)
 
-	gpu.Dot(u.Qmagn.Array(),
+	gpu.DotSign(u.Qmagn.Array(),
 		u.Heff.Array(),
 		u.torque.Array())
 	// Finally. do Qmag = Qmag * msat(r) to account spatial properties of msat
