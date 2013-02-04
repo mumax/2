@@ -204,11 +204,31 @@ func zeros(n int) []float64 {
 // Set the multiplier of a MASK or the value of a VALUE
 func (q *Quant) SetValue(val []float64) {
 	//Debug("SetValue", q.name, val)
-	checkKinds(q, MASK, VALUE)
+	//~ checkKinds(q, MASK, VALUE)
 	checkComp(q, len(val))
-	for i, v := range val {
-		q.multiplier[i] = v
+	if q.kind == MASK {
+		for i, v := range val {
+			q.multiplier[i] = v
+		}
+	} else if q.kind == FIELD {
+		q.multiplier = ones(q.nComp)
+		// use q.Buffer instead?
+		tempField := host.NewArray(q.nComp, q.array.Size3D())
+		for c := 0; c < q.nComp; c++ {
+			for i := 0; i < q.array.Size3D()[X]; i++ {
+				for j := 0; j < q.array.Size3D()[Y]; j++ {
+					for k := 0; k < q.array.Size3D()[Z]; k++ {
+						tempField.Array[c][i][j][k] = float32(val[c])
+					}
+				}
+			}
+		}
+		q.SetField(tempField)
+		// not sure whenever tempBuffer will be destroyed by the GC?
+	} else {
+		panic(InputErr(q.name + " is not " + MASK.String() + " or " + FIELD.String() + " but " + q.kind.String()))
 	}
+	
 	q.Verify()
 	q.Invalidate() //!
 }
