@@ -26,16 +26,16 @@ func LoadAnisCubic(e *Engine) {
 	LoadMagnetization(e)
 
 	Hcanis := e.AddNewQuant("H_CubAnis", VECTOR, FIELD, Unit("A/m"), "Cubic anisotropy field")
-	k1 := e.AddNewQuant("K1", SCALAR, MASK, Unit("J/m3"), "cubic anisotropy constant K1")
-	anisC1 := e.AddNewQuant("anisC1", VECTOR, MASK, Unit(""), "Cubic anisotropy direction 1 (unit vector)")
-	anisC2 := e.AddNewQuant("anisC2", VECTOR, MASK, Unit(""), "Cubic anisotropy direction 2 (unit vector)")
+	k1 := e.AddNewQuant("cubicAnisK1", SCALAR, MASK, Unit("J/m3"), "Cubic anisotropy constant K1")
+	anisC1 := e.AddNewQuant("anisCubic1", VECTOR, MASK, Unit(""), "Cubic anisotropy direction 1 (unit vector)")
+	anisC2 := e.AddNewQuant("anisCubic2", VECTOR, MASK, Unit(""), "Cubic anisotropy direction 2 (unit vector)")
 
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_CubAnis")
 	e.Depends("H_CubAnis", "K1", "K2", "anisC1", "anisC2", "MSat", "m")
 
-	Hcanis.SetUpdater(&CubicAnisUpdater{e.Quant("m"), Hcanis, k1, k2, e.Quant("msat"), anisC1, anisC2})
+	Hcanis.SetUpdater(&CubicAnisUpdater{e.Quant("m"), Hcanis, k1, e.Quant("msat"), anisC1, anisC2})
 }
 
 type CubicAnisUpdater struct {
