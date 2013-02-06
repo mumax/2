@@ -820,7 +820,7 @@ func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat f
 }
 
 // Computes the cubic anisotropy field, stores in h.
-func CubicAnisotropyAsync(h, m *Array, K1Mask, MsatMask *Array, K1_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
+func CubicAnisotropyAsync(h, m *Array, K1Mask, K2Mask, MsatMask *Array, K1_Mu0MSat float64, K2_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
 	C.cubicAnisotropyAsync(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
@@ -829,8 +829,10 @@ func CubicAnisotropyAsync(h, m *Array, K1Mask, MsatMask *Array, K1_Mu0MSat float
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(K1Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K2Mask.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(MsatMask.pointer[0]))),
 		(C.float)(K1_Mu0MSat),
+		(C.float)(K2_Mu0MSat),
 		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[X].pointer[0]))),
 		(C.float)(anisC1Mul[X]),
 		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Y].pointer[0]))),

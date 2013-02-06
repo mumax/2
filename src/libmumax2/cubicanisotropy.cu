@@ -11,7 +11,7 @@ extern "C" {
 
 __global__ void cubicAnisotropyKern (float *hx, float *hy, float *hz, 
                                      float *mx, float *my, float *mz,
-                                     float *K1_map, float* mSat_map, float K1_Mu0Msat_mul, 
+                                     float *K1_map, float *K2_map, float* mSat_map, float K1_Mu0Msat_mul, float K2_Mu0Msat_mul, 
                                      float *anisC1_mapx, float anisC1_mulx,
                                      float *anisC1_mapy, float anisC1_muly,
                                      float *anisC1_mapz, float anisC1_mulz,
@@ -39,6 +39,13 @@ __global__ void cubicAnisotropyKern (float *hx, float *hy, float *hz,
       K1_Mu0Msat = K1_Mu0Msat_mul / mSat_mask;
 	}else{
       K1_Mu0Msat = (K1_Mu0Msat_mul / mSat_mask) * K1_map[i];
+	}
+
+    float K2_Mu0Msat; // 2 * K2 / Mu0 * Msat
+    if (K2_map==NULL){
+      K2_Mu0Msat = K2_Mu0Msat_mul / mSat_mask;
+	}else{
+      K2_Mu0Msat = (K2_Mu0Msat_mul / mSat_mask) * K2_map[i];
 	}
 
     float u1x;
@@ -94,13 +101,26 @@ __global__ void cubicAnisotropyKern (float *hx, float *hy, float *hz,
     float a3 = u3x*mx[i] + u3y*my[i] + u3z*mz[i];
     float a3sq = a3*a3;
 
-    hx[i] = (a1*(a2sq+a3sq))*u1x + (a2*(a1sq+a3sq))*u2x + (a3*(a1sq+a2sq))*u3x;
-    hy[i] = (a1*(a2sq+a3sq))*u1y + (a2*(a1sq+a3sq))*u2y + (a3*(a1sq+a2sq))*u3y;
-    hz[i] = (a1*(a2sq+a3sq))*u1z + (a2*(a1sq+a3sq))*u2z + (a3*(a1sq+a2sq))*u3z;
+    hx1[i] = (a1*(a2sq+a3sq))*u1x + (a2*(a1sq+a3sq))*u2x + (a3*(a1sq+a2sq))*u3x;
+    hy1[i] = (a1*(a2sq+a3sq))*u1y + (a2*(a1sq+a3sq))*u2y + (a3*(a1sq+a2sq))*u3y;
+    hz1[i] = (a1*(a2sq+a3sq))*u1z + (a2*(a1sq+a3sq))*u2z + (a3*(a1sq+a2sq))*u3z;
 
-    hx[i] *= K1_Mu0Msat;
-    hy[i] *= K1_Mu0Msat;
-    hz[i] *= K1_Mu0Msat;
+    hx1[i] *= K1_Mu0Msat;
+    hy1[i] *= K1_Mu0Msat;
+    hz1[i] *= K1_Mu0Msat;
+
+    hx2[i] = a1*a2sq*a3sq*u1x + a2*a1sq*a3sq*u2x + a3*a1sq*a2sq*u2x;
+    hy2[i] = a1*a2sq*a3sq*u1y + a2*a1sq*a3sq*u2y + a3*a1sq*a2sq*u2y;
+    hz2[i] = a1*a2sq*a3sq*u1z + a2*a1sq*a3sq*u2z + a3*a1sq*a2sq*u2z;
+
+    hx2[i] *= K2_Mu0Msat;
+    hy2[i] *= K2_Mu0Msat;
+    hz2[i] *= K2_Mu0Msat;
+    
+    hx[i] = hx1[i] + hx2[i];
+    hy[i] = hy1[i] + hy2[i];
+    hz[i] = hz1[i] + hz2[i];
+
   }
 
 }
@@ -109,7 +129,7 @@ __global__ void cubicAnisotropyKern (float *hx, float *hy, float *hz,
 
 __export__ void cubicAnisotropyAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
-                          float **K1_map, float **MSat_map, float K1_Mu0Msat_mul, 
+                          float **K1_map, float **K2_map, float **MSat_map, float K1_Mu0Msat_mul, float K2_Mu0Msat_mul, 
                           float **anisC1_mapx, float anisC1_mulx,
                           float **anisC1_mapy, float anisC1_muly,
                           float **anisC1_mapz, float anisC1_mulz,
@@ -133,7 +153,7 @@ __export__ void cubicAnisotropyAsync(float **hx, float **hy, float **hz,
     cubicAnisotropyKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (
 					hx[dev],hy[dev],hz[dev],  
                     mx[dev],my[dev],mz[dev], 
-                    K1_map[dev], MSat_map[dev], K1_Mu0Msat_mul,
+                    K1_map[dev], K2_map[dev], MSat_map[dev], K1_Mu0Msat_mul, K2_Mu0Msat_mul,
                     anisC1_mapx[dev], anisC1_mulx,
                     anisC1_mapy[dev], anisC1_muly,
                     anisC1_mapz[dev], anisC1_mulz,

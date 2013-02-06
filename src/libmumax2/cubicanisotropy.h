@@ -19,7 +19,7 @@ extern "C" {
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 DLLEXPORT void cubicAnisotropyAsync(float **hx, float **hy, float **hz, 
                           float **mx, float **my, float **mz,
-                          float **K1_map, float **MSat_map, float K1_Mu0Msat_mul, 
+                          float **K1_map, float **K2_map, float **MSat_map, float K1_Mu0Msat_mul, float K2_Mu0Msat_mul, 
                           float **anisC1_mapx, float anisC1_mulx,
                           float **anisC1_mapy, float anisC1_muly,
                           float **anisC1_mapz, float anisC1_mulz,
