@@ -101,25 +101,25 @@ __global__ void cubicAnisotropyKern (float *hx, float *hy, float *hz,
     float a3 = u3x*mx[i] + u3y*my[i] + u3z*mz[i];
     float a3sq = a3*a3;
 
-    hx1[i] = (a1*(a2sq+a3sq))*u1x + (a2*(a1sq+a3sq))*u2x + (a3*(a1sq+a2sq))*u3x;
-    hy1[i] = (a1*(a2sq+a3sq))*u1y + (a2*(a1sq+a3sq))*u2y + (a3*(a1sq+a2sq))*u3y;
-    hz1[i] = (a1*(a2sq+a3sq))*u1z + (a2*(a1sq+a3sq))*u2z + (a3*(a1sq+a2sq))*u3z;
+    float hx1 = (a1*(a2sq+a3sq))*u1x + (a2*(a1sq+a3sq))*u2x + (a3*(a1sq+a2sq))*u3x;
+    float hy1 = (a1*(a2sq+a3sq))*u1y + (a2*(a1sq+a3sq))*u2y + (a3*(a1sq+a2sq))*u3y;
+    float hz1 = (a1*(a2sq+a3sq))*u1z + (a2*(a1sq+a3sq))*u2z + (a3*(a1sq+a2sq))*u3z;
 
-    hx1[i] *= K1_Mu0Msat;
-    hy1[i] *= K1_Mu0Msat;
-    hz1[i] *= K1_Mu0Msat;
+    hx1 *= K1_Mu0Msat;
+    hy1 *= K1_Mu0Msat;
+    hz1 *= K1_Mu0Msat;
 
-    hx2[i] = a1*a2sq*a3sq*u1x + a2*a1sq*a3sq*u2x + a3*a1sq*a2sq*u2x;
-    hy2[i] = a1*a2sq*a3sq*u1y + a2*a1sq*a3sq*u2y + a3*a1sq*a2sq*u2y;
-    hz2[i] = a1*a2sq*a3sq*u1z + a2*a1sq*a3sq*u2z + a3*a1sq*a2sq*u2z;
+    float hx2 = a1*a2sq*a3sq*u1x + a2*a1sq*a3sq*u2x + a3*a1sq*a2sq*u2x;
+    float hy2 = a1*a2sq*a3sq*u1y + a2*a1sq*a3sq*u2y + a3*a1sq*a2sq*u2y;
+    float hz2 = a1*a2sq*a3sq*u1z + a2*a1sq*a3sq*u2z + a3*a1sq*a2sq*u2z;
 
-    hx2[i] *= K2_Mu0Msat;
-    hy2[i] *= K2_Mu0Msat;
-    hz2[i] *= K2_Mu0Msat;
+    hx2 *= K2_Mu0Msat;
+    hy2 *= K2_Mu0Msat;
+    hz2 *= K2_Mu0Msat;
     
-    hx[i] = hx1[i] + hx2[i];
-    hy[i] = hy1[i] + hy2[i];
-    hz[i] = hz1[i] + hz2[i];
+    hx[i] = hx1 + hx2;
+    hy[i] = hy1 + hy2;
+    hz[i] = hz1 + hz2;
 
   }
 

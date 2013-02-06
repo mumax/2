@@ -798,7 +798,7 @@ func InitPointKernelElement(gpuBuffer *Array, comp int, periodic []int, cellSize
 }
 
 // Computes the uniaxial anisotropy field, stores in h.
-func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
+func UniaxialAnisotropyAsync(h, m *Array, KuMask *Array, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
 	C.uniaxialAnisotropyAsync(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
@@ -820,7 +820,7 @@ func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat f
 }
 
 // Computes the cubic anisotropy field, stores in h.
-func CubicAnisotropyAsync(h, m *Array, K1Mask, K2Mask, MsatMask *Array, K1_Mu0MSat float64, K2_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
+func CubicAnisotropyAsync(h, m *Array, K1Mask *Array, K2Mask *Array, MsatMask *Array, K1_Mu0MSat float64, K2_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
 	C.cubicAnisotropyAsync(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
