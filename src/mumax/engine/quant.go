@@ -206,7 +206,7 @@ func (q *Quant) SetValue(val []float64) {
 	//Debug("SetValue", q.name, val)
 	//~ checkKinds(q, MASK, VALUE)
 	checkComp(q, len(val))
-	if q.kind == MASK {
+	if q.kind == MASK || q.kind == VALUE {
 		for i, v := range val {
 			q.multiplier[i] = v
 		}
@@ -226,7 +226,7 @@ func (q *Quant) SetValue(val []float64) {
 		q.SetField(tempField)
 		// not sure whenever tempBuffer will be destroyed by the GC?
 	} else {
-		panic(InputErr(q.name + " is not " + MASK.String() + " or " + FIELD.String() + " but " + q.kind.String()))
+		panic(InputErr(q.name + " is not " + MASK.String() + " or " + FIELD.String() + " or " + VALUE.String() + " but " + q.kind.String()))
 	}
 	
 	q.Verify()
