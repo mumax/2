@@ -101,7 +101,7 @@ func (u *Cubic4AnisUpdater) Update() {
 	stream := u.hcanis.Array().Stream
 	msat := u.msat
 
-	gpu.Cubic6AnisotropyAsync(hcanis, m, k1, msat.Array(), 2*k1mul/(Mu0*msat.Multiplier()[0]), anisC1, anisC1Mul, anisC2, anisC2Mul, stream)
+	gpu.Cubic4AnisotropyAsync(hcanis, m, k1, msat.Array(), 2*k1mul/(Mu0*msat.Multiplier()[0]), anisC1, anisC1Mul, anisC2, anisC2Mul, stream)
 
 	stream.Sync()
 }
