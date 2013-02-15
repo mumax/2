@@ -21,7 +21,7 @@ func LoadMFAParams(e *Engine) {
 		e.AddNewQuant("Tc", SCALAR, MASK, Unit("K"), "Curie temperature")
 	}
 	if !e.HasQuant("J") {
-		e.AddNewQuant("J", SCALAR, MASK, Unit("K"), "Full atomic angular momentum")
+		e.AddNewQuant("J", SCALAR, MASK, Unit(""), "Full atomic angular momentum")
 	}
 
 	if !e.HasQuant("n") {
