@@ -16,23 +16,34 @@ sizeY = 125e-9
 sizeZ = 3e-9
 setcellsize(sizeX/Nx, sizeY/Ny, sizeZ/Nz)
 
-
 # load modules
 
 # LLB 
 load('exchange6')
 load('demag')
 load('zeeman')
-load('llb')
+
+load('llbr')
+load('llbr/torque')
+load('llbr/longitudinal')
+load('llbr/transverse')
+load('llbr/nonlocal')
+
+add_to('llbr_RHS', 'llbr_torque')
+#~ add_to('llbr_RHS', 'llbr_transverse')
+add_to('llbr_RHS', 'llbr_long')
+#~ add_to('llbr_RHS', 'llbr_nonlocal')
 
 load('solver/rk12')
 setv('mf_maxerror', 1e-4)
 
 setv('mindt', 1e-16)
 setv('maxdt', 1e-12)
+
 # set parameters
 # Py
 # set magnetization
+
 m=[ [[[1]]], [[[1]]], [[[0]]] ]
 setarray('m', m)
 
@@ -75,9 +86,12 @@ lex = Aex / (mu0 * Ms0 * Ms0)
 print("l_ex^2: "+str(lex)+"\n")
 lambda_e = 0.0 * lex
 alpha=0.1
+
 setv('lambda', [alpha, alpha, alpha, 0.0, 0.0, 0.0])
 setv('lambda_e', [lambda_e, lambda_e, lambda_e, 0.0, 0.0, 0.0])
-setv('kappa', 1e-4)
+setv('mu', [alpha, alpha, alpha, 0.0, 0.0, 0.0])
+
+setv('kappa', 1e-3)
 setv('Aex', 1.3e-11)
 gamma=2.211e5
 gammall = gamma / (1.0+alpha**2)
@@ -93,11 +107,10 @@ alpha=0.02
 gammall = gamma / (1.0+alpha**2)
 setv('gamma_ll',gammall)
 setv('lambda', [alpha, alpha, alpha, 0.0, 0.0, 0.0])
+setv('mu', [alpha, alpha, alpha, 0.0, 0.0, 0.0])
 #setv('t', 0)        # re-set time to 0 so output starts at 0
 save("m","vtk",[])
 save("m","ovf",[])
-
-# schedule some output
 
 # save magnetization snapshots in OMF text format every 20ps
 autosave("m", "gplot", [], 1e-12)
@@ -109,7 +122,7 @@ autotabulate(["t", "<m>"], "m.txt", 1e-12)
 
 Bx = -24.6E-3 
 By =   4.3E-3 
-Bz =   0      
+Bz =   0.0      
 setv('B_ext', [Bx, By, Bz])
 setv('dt', 1e-15) # initial time step, will adapt
 run(1e-9)
@@ -118,5 +131,7 @@ run(1e-9)
 # some debug output
 
 printstats()
-savegraph("graph.png") # see stdprobl4.py.out/graph.dot.png
+
+savegraph("graph.png")
+
 sync()

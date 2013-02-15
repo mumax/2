@@ -1,0 +1,49 @@
+/**
+  * @file
+  * This file implements perpendicular Baryakhtar's relaxation
+  * See: unpublished W Wang, ..., MD, VVK, MF, HFG (2012)
+  *
+  * @author Mykola Dvornik
+  */
+
+#ifndef _BARYAKHTAR_NONLOCAL_H_
+#define _BARYAKHTAR_NONLOCAL_H_
+
+#include <cuda.h>
+#include "cross_platform.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+DLLEXPORT  void baryakhtar_nonlocal_async(float** tx, float**  ty, float**  tz, 
+
+			 float**  hx, float**  hy, float**  hz,			 
+			 
+			 float** msat0T0,
+			 
+			 float** lambda_e_xx,
+			 float** lambda_e_yy,
+			 float** lambda_e_zz,
+			 float** lambda_e_yz,
+			 float** lambda_e_xz,
+			 float** lambda_e_xy,
+			 
+			 const float lambda_eMul_xx,
+			 const float lambda_eMul_yy,
+			 const float lambda_eMul_zz,
+			 const float lambda_eMul_yz,
+			 const float lambda_eMul_xz,
+			 const float lambda_eMul_xy,
+			 
+			 const int sx, const int sy, const int sz,
+			 const float csx, const float csy, const float csz,
+			 const int pbc_x, const int pbc_y, const int pbc_z, 
+			 CUstream* stream);
+			 
+#ifdef __cplusplus
+}
+#endif
+#endif
+
