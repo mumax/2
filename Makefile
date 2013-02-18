@@ -4,6 +4,7 @@ export GOPATH=$(CURDIR)
 
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
+	go run src/cuda/setup-cuda-paths.go -dir=src/cuda/
 	go install -v --gccgoflags '-Ofast -march=native' mumax2-bin
 	go install -v apigen
 	go install -v texgen
