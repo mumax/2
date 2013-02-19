@@ -6,6 +6,10 @@ package driver
 
 import "C"
 
-//#cgo LDFLAGS: -L{{.Lib}} -lcuda -lcudart
-//#cgo CFLAGS: -I{{.Include}} -Wno-error
+//#cgo LDFLAGS: \
+                {{range .Lib}}-L{{.}} \{{end}} 
+                -lcuda -lcudart
+//#cgo CFLAGS: \
+                {{range .Include}}-I{{.}} \{{end}}
+                -Wno-error
 import "C"

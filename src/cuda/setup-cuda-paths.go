@@ -7,15 +7,19 @@ import (
 	"flag"
 	"text/template"
 	"path/filepath"
+	"strings"
 )
 
 type Config struct{
-	Include	string
-	Lib string
+	Include	[]string
+	Lib []string
 }
 
-var dir = flag.String("dir", ".", "root of the cuda wrappers")
 
+var dir = flag.String("dir", ".", "root of the cuda wrappers")
+var config Config
+
+const VARDELIM = ":"
 const CUDA_INC_PATH="CUDA_INC_PATH"
 const CUDA_LIB_PATH="CUDA_LIB_PATH"
 
@@ -27,9 +31,9 @@ func main(){
 	
 	CUDAINC := filepath.ToSlash(os.Getenv(CUDA_INC_PATH))
 	CUDALIB := filepath.ToSlash(os.Getenv(CUDA_LIB_PATH))
-	var config Config
-	config.Include = CUDAINC
-	config.Lib = CUDALIB
+	
+	config.Include = strings.Split(CUDAINC, VARDELIM)
+	config.Lib = strings.Split(CUDALIB, VARDELIM)
 	
 	fmt.Println(*dir)
 	dirs, _ := ioutil.ReadDir(*dir)

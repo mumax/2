@@ -6,6 +6,10 @@ package curand
 
 import "C"
 
-//#cgo LDFLAGS: -L{{.Lib}} -lcuda -lcudart -lcurand
-//#cgo CFLAGS: -I{{.Include}} -Wno-error
+//#cgo LDFLAGS: \
+                {{range .Lib}}-L{{.}} \{{end}}
+                -lcuda -lcudart -lcurand
+//#cgo CFLAGS: \
+                {{range .Include}}-I{{.}} \{{end}}
+                -Wno-error
 import "C"

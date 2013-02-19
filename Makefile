@@ -2,6 +2,13 @@ include src/Make.inc
 
 export GOPATH=$(CURDIR)
 
+ifndef SystemRoot
+export CUDAROOT=/usr/local/cuda
+export NVROOT=/usr/lib64/nvidia
+export CUDA_INC_PATH=$(CUDAROOT)/include
+export CUDA_LIB_PATH=$(NVROOT)/lib64:$(CUDAROOT)/lib64
+endif
+
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
 	go run src/cuda/setup-cuda-paths.go -dir=src/cuda/

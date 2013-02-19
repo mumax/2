@@ -6,6 +6,11 @@ package cufft
 
 import "C"
 
-//#cgo LDFLAGS: -L{{.Lib}} -lcuda -lcudart -lcufft
-//#cgo CFLAGS: -I{{.Include}} -Wno-error
+
+//#cgo LDFLAGS: \
+                {{range .Lib}}-L{{.}} \{{end}}
+                -lcuda -lcudart -lcufft
+//#cgo CFLAGS: \
+                {{range .Include}}-I{{.}} \{{end}}
+                -Wno-error
 import "C"
