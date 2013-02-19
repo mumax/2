@@ -11,7 +11,7 @@ package modules
 // Authors: Mykola Dvornik, Arne Vansteenkiste
 
 import (
-	. "mumax/common"
+	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 	//"math"

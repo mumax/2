@@ -9,7 +9,7 @@ package modules
 
 import (
 	"math"
-	. "mumax/common"
+	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
