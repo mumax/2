@@ -6,5 +6,6 @@ all: $(DIRS)
 
 .PHONY: $(DIRS)
 $(DIRS): 
+		go run setup-cuda-paths.go
 		go install -v cuda/$@
 
