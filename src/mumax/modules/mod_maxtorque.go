@@ -16,16 +16,40 @@ import (
 	. "mumax/engine"
 )
 
-// Register this module
-func init() {
-	RegisterModule("maxtorque", "Calculates maximum torque for the given time", LoadMaxTorque)
+var inMaxTorque = map[string]string{
+	"": "",
 }
 
-func LoadMaxTorque(e *Engine) {
-	if e.HasQuant("torque") {
-		torque := e.Quant("torque")
-		maxtorque := e.AddNewQuant("maxtorque", SCALAR, VALUE, torque.Unit(), "Maximum |torque|")
-		e.Depends("maxtorque", "torque")
+var depsMaxTorque = map[string]string{
+	"torque":      "torque",
+}
+
+var outMaxTorque = map[string]string{
+	"maxtorque": "maxtorque",
+}
+
+// Register this module
+func init() {
+	args := Arguments{inMaxTorque, depsMaxTorque, outMaxTorque}
+	RegisterModuleArgs("maxtorque", "Calculates maximum torque for the given time", args, LoadMaxTorqueArgs)
+}
+
+func LoadMaxTorqueArgs(e *Engine, args ...Arguments) {
+	
+	// make it automatic !!!
+	var arg Arguments
+	
+	if len(args) == 0 {
+		arg = Arguments{inMaxTorque, depsMaxTorque, outMaxTorque}
+	} else {
+		arg = args[0]
+	}
+	//
+	
+	if e.HasQuant(arg.Deps("torque")) {
+		torque := e.Quant(arg.Deps("torque"))
+		maxtorque := e.AddNewQuant(arg.Outs("maxtorque"), SCALAR, VALUE, torque.Unit(), "Maximum |torque|")
+		e.Depends(arg.Outs("maxtorque"), arg.Deps("torque"))
 		maxtorque.SetUpdater(NewMaxNormUpdater(torque, maxtorque))
 	} else {
 		panic(InputErr(fmt.Sprint("maxtorque module should be loaded after micromagnetic equation module")))
