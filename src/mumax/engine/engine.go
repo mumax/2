@@ -349,6 +349,24 @@ func (e *Engine) LoadModule(name string) {
 	e.modules = append(e.modules, module)
 }
 
+// Low-level module load, not aware of dependencies
+func (e *Engine) LoadModuleArgs(name string, ins, deps, outs []string) {
+	if e.size3D == nil {
+		panic(InputErr("Grid size should be set before loading modules"))
+	}
+	if e.cellSize == nil {
+		panic(InputErr("Cell size should be set before loading modules"))
+	}
+	module := GetModule(name)
+	Log("Loaded module", module.Name, ":", module.Description)
+	Log("In: ", module.Args.InsMap, " Deps: ", module.Args.DepsMap, " Out: ", module.Args.OutsMap)
+	
+	args := module.Args
+	module.LoadFunc(e, args)
+	e.modules = append(e.modules, module)
+}
+
+
 // Constructs and adds an arbitrary quantity.
 // (Also returns it, but it's not necessarily used further)
 // Name tag is case-independent.

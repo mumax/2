@@ -14,37 +14,65 @@ import (
 	"mumax/gpu"
 )
 
+var inDF = map[string]string{
+	"": "",
+}
+
+var depsDF = map[string]string{
+	"mf":      "mf",
+	"torque":  "torque",
+	"H_eff":   "H_eff",
+	"msat0T0": "msat0T0",
+	"msat":    "msat",
+	"m":       "m",
+}
+
+var outDF = map[string]string{
+	"Qmag": "Qmag",
+}
+
 // Register this module
 func init() {
-	RegisterModule("dissipative-function", "Dissipative function", LoadDF)
+	args := Arguments{inDF, depsDF, outDF}
+	RegisterModuleArgs("dissipative-function", "Dissipative function", args, LoadDFArgs)
 }
 
 // There is a problem, since LLB torque is normalized by msat0T0 (zero-temperature value), while LLG torque is normalized by msat
 
-func LoadDF(e *Engine) {
-
+func LoadDFArgs(e *Engine, args ...Arguments) {
+		
+	// make it automatic !!!
+	var arg Arguments
+	
+	if len(args) == 0 {
+		arg = Arguments{inDF, depsDF, outDF}
+	} else {
+		arg = args[0]
+	}
+	//
+	
 	// make sure the effective field is in place
 	LoadHField(e)
 
-	Qmagn := e.AddNewQuant("Qmag", SCALAR, FIELD, Unit("J/(s*m3)"), "The heat flux density from magnetic subsystem to thermal bath")
+	Qmagn := e.AddNewQuant(arg.Outs("Qmag"), SCALAR, FIELD, Unit("J/(s*m3)"), "The heat flux density from magnetic subsystem to thermal bath")
 
 	// THE UGLY PART STARTS HERE
 
-	if e.HasQuant("mf") {
-		e.Depends("Qmag", "torque", "H_eff", "msat0T0")
+	if e.HasQuant(arg.Deps("mf")) {
+		e.Depends(arg.Outs("Qmag"), arg.Deps("torque"), arg.Deps("H_eff"), arg.Deps("msat0T0"))
 		Qmagn.SetUpdater(&DFUpdater{
 			Qmagn:  Qmagn,
-			msat:   e.Quant("msat0T0"),
-			torque: e.Quant("torque"),
-			Heff:   e.Quant("H_eff")})
+			msat:   e.Quant(arg.Deps("msat0T0")),
+			torque: e.Quant(arg.Deps("torque")),
+			Heff:   e.Quant(arg.Deps("H_eff"))})
 
-	} else if e.HasQuant("m") {
-		e.Depends("Qmag", "torque", "H_eff", "msat")
+	} else if e.HasQuant(arg.Deps("m")) {
+		e.Depends(arg.Outs("Qmag"), arg.Deps("torque"), arg.Deps("H_eff"), arg.Deps("msat"))
 		Qmagn.SetUpdater(&DFUpdater{
 			Qmagn:  Qmagn,
-			msat:   e.Quant("msat"),
-			torque: e.Quant("torque"),
-			Heff:   e.Quant("H_eff")})
+			msat:   e.Quant(arg.Deps("msat")),
+			torque: e.Quant(arg.Deps("torque")),
+			Heff:   e.Quant(arg.Deps("H_eff"))})
 	} else {
 		panic(InputErr(fmt.Sprint("There is no magnetic subsystem! Aborting.")))
 	}

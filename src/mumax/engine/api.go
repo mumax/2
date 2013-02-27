@@ -87,6 +87,11 @@ func (a API) Load(name string) {
 	a.Engine.LoadModule(name)
 }
 
+// Load a physics module with user-defined variables.
+func (a API) LoadArgs(name string, ins, deps, outs []string) {
+	a.Engine.LoadModuleArgs(name, ins, deps, outs)
+}
+
 //________________________________________________________________________________ run
 
 // Take one solver step
