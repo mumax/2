@@ -12,8 +12,10 @@ package engine
 import (
 	"fmt"
 	. "mumax/common"
+	"strings"
 )
 
+const ArgDelim = ":"
 // A physics module. Loading it adds various quantity nodes to the engine.
 type Arguments struct {
 	InsMap   map[string]string // the string-to-string map of the input quantities
@@ -83,4 +85,35 @@ func GetModule(name string) Module {
 		panic(InputErr(fmt.Sprint("Unknown module:", name, " Options: ", opts)))
 	}
 	return module
+}
+
+func ParseArgument(m map[string]string, v string) {
+	pair := strings.Split(v, ArgDelim)
+	if len(pair) > 2 {
+		panic(InputErr("Cannot parse user-defined variable: " + v ))
+	}
+	
+	_, ok := m[pair[0]]
+	if !ok {
+		panic(InputErr("Cannot assign non-existing variable: " + v ))
+	}
+	
+	m[pair[0]] = pair[1]
+}
+
+
+func GetParsedArgumentsMap(module Module, in,deps,out []string) Arguments {
+	arg := module.Args
+	
+	for _,val := range in {
+		ParseArgument(arg.InsMap, val)
+	}
+	for _,val := range deps {
+		ParseArgument(arg.DepsMap, val)
+	}
+	for _,val := range out {
+		ParseArgument(arg.OutsMap, val)
+	}
+	
+	return arg
 }

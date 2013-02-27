@@ -361,7 +361,7 @@ func (e *Engine) LoadModuleArgs(name string, ins, deps, outs []string) {
 	Log("Loaded module", module.Name, ":", module.Description)
 	Log("In: ", module.Args.InsMap, " Deps: ", module.Args.DepsMap, " Out: ", module.Args.OutsMap)
 	
-	args := module.Args
+	args := GetParsedArgumentsMap(module, ins, deps, outs)
 	module.LoadFunc(e, args)
 	e.modules = append(e.modules, module)
 }
