@@ -11,7 +11,7 @@ package modules
 // Author: Mykola Dvornik
 
 import (
-	. "mumax/common"
+	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )

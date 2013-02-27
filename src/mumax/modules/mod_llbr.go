@@ -8,7 +8,7 @@
 package modules
 
 import (
-	. "mumax/common"
+	//~ . "mumax/common"
 	. "mumax/engine"
 	//"mumax/gpu"
 )
