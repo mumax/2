@@ -31,6 +31,33 @@ func LoadUserDefinedCurrentDensity(e *Engine) {
 	e.AddNewQuant("j", VECTOR, MASK, Unit("A/m2"), "electrical current density")
 }
 
+func LoadUserDefinedCurrentDensity0(e *Engine) {
+	if e.HasQuant("j0") {
+		Debug("Another electrical current module is already loaded! If it is desired behaviour please ignore this message. Otherwise, please remove all other modules!")
+		Debug("Please make sure you add your custom electrical current distibution to the the 'j0' quantity")
+		return
+	}
+	e.AddNewQuant("j0", VECTOR, MASK, Unit("A/m2"), "electrical current density")
+}
+
+func LoadUserDefinedCurrentDensity1(e *Engine) {
+	if e.HasQuant("j1") {
+		Debug("Another electrical current module is already loaded! If it is desired behaviour please ignore this message. Otherwise, please remove all other modules!")
+		Debug("Please make sure you add your custom electrical current distibution to the the 'j' quantity")
+		return
+	}
+	e.AddNewQuant("j1", VECTOR, MASK, Unit("A/m2"), "electrical current density")
+}
+
+func LoadUserDefinedCurrentDensity2(e *Engine) {
+	if e.HasQuant("j2") {
+		Debug("Another electrical current module is already loaded! If it is desired behaviour please ignore this message. Otherwise, please remove all other modules!")
+		Debug("Please make sure you add your custom electrical current distibution to the the 'j' quantity")
+		return
+	}
+	e.AddNewQuant("j2", VECTOR, MASK, Unit("A/m2"), "electrical current density")
+}
+
 // calculate current density
 func LoadCalculatedCurrentDensity(e *Engine) {
 	if e.HasQuant("diff_rho") {
