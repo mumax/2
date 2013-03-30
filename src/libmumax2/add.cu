@@ -128,6 +128,277 @@ __export__ void madd2Async(float** a, float** b, float mulB, float** c, float mu
 }
 
 
+///@internal
+__global__ void madd3Kern(float* a, float* b, float mulB, float* c, float mulC, float* d, float mulD, int Npart) {
+	int i = threadindex;
+
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+
+	float cMask;
+	if (c == NULL){
+		cMask = 1.0f;
+	}else{
+		cMask = c[i];
+	}
+
+	float dMask;
+	if (d == NULL){
+		dMask = 1.0f;
+	}else{
+		dMask = d[i];
+	}
+
+	if (i < Npart) {
+		a[i] += mulB * bMask + mulC * cMask + mulD * dMask;
+	}
+}
+
+
+__export__ void madd3Async(float** a, float** b, float mulB, float** c, float mulC, float** d, float mulD, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd3Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, c[dev], mulC, d[dev], mulD, Npart);
+	}
+}
+
+
+__global__ void madd4Kern(float* a, float* b, float mulB, float* c, float mulC, float* d, float mulD, float* e, float mulE, int Npart) {
+	int i = threadindex;
+
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+
+	float cMask;
+	if (c == NULL){
+		cMask = 1.0f;
+	}else{
+		cMask = c[i];
+	}
+
+	float dMask;
+	if (d == NULL){
+		dMask = 1.0f;
+	}else{
+		dMask = d[i];
+	}
+
+	float eMask;
+	if (e == NULL){
+		eMask = 1.0f;
+	}else{
+		eMask = e[i];
+	}
+
+	if (i < Npart) {
+		a[i] += mulB * bMask + mulC * cMask + mulD * dMask + mulE * eMask;
+	}
+}
+
+
+__export__ void madd4Async(float** a, float** b, float mulB, float** c, float mulC, float** d, float mulD, float** e, float mulE, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd4Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, c[dev], mulC, d[dev], mulD, e[dev], mulE, Npart);
+	}
+}
+
+
+__global__ void madd5Kern(float* a, float* b, float mulB, float* c, float mulC, float* d, float mulD, float* e, float mulE, float* f, float mulF, int Npart) {
+	int i = threadindex;
+
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+
+	float cMask;
+	if (c == NULL){
+		cMask = 1.0f;
+	}else{
+		cMask = c[i];
+	}
+
+	float dMask;
+	if (d == NULL){
+		dMask = 1.0f;
+	}else{
+		dMask = d[i];
+	}
+
+	float eMask;
+	if (e == NULL){
+		eMask = 1.0f;
+	}else{
+		eMask = e[i];
+	}
+
+	float fMask;
+	if (f == NULL){
+		fMask = 1.0f;
+	}else{
+		fMask = f[i];
+	}
+
+	if (i < Npart) {
+		a[i] += mulB * bMask + mulC * cMask + mulD * dMask + mulE * eMask + mulF * fMask;
+	}
+}
+
+
+__export__ void madd5Async(float** a, float** b, float mulB, float** c, float mulC, float** d, float mulD, float** e, float mulE, float** f, float mulF, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd5Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, c[dev], mulC, d[dev], mulD, e[dev], mulE, f[dev], mulF, Npart);
+	}
+}
+
+
+__global__ void madd6Kern(float* a, float* b, float mulB, float* c, float mulC, float* d, float mulD, float* e, float mulE, float* f, float mulF, float* g, float mulG, int Npart) {
+	int i = threadindex;
+
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+
+	float cMask;
+	if (c == NULL){
+		cMask = 1.0f;
+	}else{
+		cMask = c[i];
+	}
+
+	float dMask;
+	if (d == NULL){
+		dMask = 1.0f;
+	}else{
+		dMask = d[i];
+	}
+
+	float eMask;
+	if (e == NULL){
+		eMask = 1.0f;
+	}else{
+		eMask = e[i];
+	}
+
+	float fMask;
+	if (f == NULL){
+		fMask = 1.0f;
+	}else{
+		fMask = f[i];
+	}
+
+	float gMask;
+	if (g == NULL){
+		gMask = 1.0f;
+	}else{
+		gMask = g[i];
+	}
+
+	if (i < Npart) {
+		a[i] += mulB * bMask + mulC * cMask + mulD * dMask + mulE * eMask + mulF * fMask + mulG * gMask;
+	}
+}
+
+
+__export__ void madd6Async(float** a, float** b, float mulB, float** c, float mulC, float** d, float mulD, float** e, float mulE, float** f, float mulF, float** g, float mulG, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd6Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, c[dev], mulC, d[dev], mulD, e[dev], mulE, f[dev], mulF, g[dev], mulG, Npart);
+	}
+}
+
+
+__global__ void madd7Kern(float* a, float* b, float mulB, float* c, float mulC, float* d, float mulD, float* e, float mulE, float* f, float mulF, float* g, float mulG, float* h, float mulH, int Npart) {
+	int i = threadindex;
+
+	float bMask;
+	if (b == NULL){
+		bMask = 1.0f;
+	}else{
+		bMask = b[i];
+	}
+
+	float cMask;
+	if (c == NULL){
+		cMask = 1.0f;
+	}else{
+		cMask = c[i];
+	}
+
+	float dMask;
+	if (d == NULL){
+		dMask = 1.0f;
+	}else{
+		dMask = d[i];
+	}
+
+	float eMask;
+	if (e == NULL){
+		eMask = 1.0f;
+	}else{
+		eMask = e[i];
+	}
+
+	float fMask;
+	if (f == NULL){
+		fMask = 1.0f;
+	}else{
+		fMask = f[i];
+	}
+
+	float gMask;
+	if (g == NULL){
+		gMask = 1.0f;
+	}else{
+		gMask = g[i];
+	}
+
+	float hMask;
+	if (h == NULL){
+		hMask = 1.0f;
+	}else{
+		hMask = h[i];
+	}
+
+	if (i < Npart) {
+		a[i] += mulB * bMask + mulC * cMask + mulD * dMask + mulE * eMask + mulF * fMask + mulG * gMask + mulH * hMask;
+	}
+}
+
+
+__export__ void madd7Async(float** a, float** b, float mulB, float** c, float mulC, float** d, float mulD, float** e, float mulE, float** f, float mulF, float** g, float mulG, float** h, float mulH, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		madd7Kern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (a[dev], b[dev], mulB, c[dev], mulC, d[dev], mulD, e[dev], mulE, f[dev], mulF, g[dev], mulG, h[dev], mulH, Npart);
+	}
+}
+
+
 __global__ void cmaddKern(float* dst, float a, float b, float* kern, float* src, int NComplexPart){
 
   int i = threadindex; // complex index

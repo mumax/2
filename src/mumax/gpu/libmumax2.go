@@ -33,6 +33,7 @@ func Add(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+
 // Multiply 2 multi-GPU arrays: dst = a * b
 func Mul(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
@@ -44,6 +45,7 @@ func Mul(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+
 // Divide 2 multi-GPU arrays: dst = a / b; _if_ b = 0 _then_ dst = 0
 func Div(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
@@ -121,6 +123,14 @@ func MAdd1Async(a, b *Array, mulB float32, stream Stream) {
 		C.int(a.partLen4D))
 }
 
+// Synchronous multiply-add: a += mulB*b
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd1(a, b *Array, mulB float32) {
+		stream := a.Stream
+		MAdd1Async(a, b, mulB, stream)
+		stream.Sync()
+}
+
 // Asynchronous multiply-add: a += mulB*b + mulC*c
 // b,c may contain NULL pointers, implemented as all 1's.
 func MAdd2Async(a, b *Array, mulB float32, c *Array, mulC float32, stream Stream) {
@@ -132,6 +142,149 @@ func MAdd2Async(a, b *Array, mulB float32, c *Array, mulC float32, stream Stream
 		(C.float)(mulC),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		C.int(a.partLen4D))
+}
+
+// Synchronous multiply-add: a += mulB*b + mulC*c
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd2(a, b *Array, mulB float32, c *Array, mulC float32) {
+		stream := a.Stream
+		MAdd2Async(a, b, mulB, c, mulC, stream)
+		stream.Sync()
+}
+
+// Asynchronous multiply-add: a += mulB*b + mulC*c + mulD*d
+// b,c,d may contain NULL pointers, implemented as all 1's.
+func MAdd3Async(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, stream Stream) {
+	C.madd3Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
+}
+
+// Synchronous multiply-add: a += mulB*b + mulC*c + mulD*d
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd3(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32) {
+		stream := a.Stream
+		MAdd3Async(a, b, mulB, c, mulC, d, mulD, stream)
+		stream.Sync()
+}
+
+// Asynchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e
+// b,c,d,e may contain NULL pointers, implemented as all 1's.
+func MAdd4Async(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, stream Stream) {
+	C.madd4Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(**C.float)(unsafe.Pointer(&(e.pointer[0]))),
+		(C.float)(mulE),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
+}
+
+// Synchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd4(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32) {
+		stream := a.Stream
+		MAdd4Async(a, b, mulB, c, mulC, d, mulD, e, mulE, stream)
+		stream.Sync()
+}
+
+// Asynchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e + mulF*f
+// b,c,d,e,f may contain NULL pointers, implemented as all 1's.
+func MAdd5Async(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32, stream Stream) {
+	C.madd5Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(**C.float)(unsafe.Pointer(&(e.pointer[0]))),
+		(C.float)(mulE),
+		(**C.float)(unsafe.Pointer(&(f.pointer[0]))),
+		(C.float)(mulF),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
+}
+
+// Synchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e + mulF*f
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd5(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32) {
+		stream := a.Stream
+		MAdd5Async(a, b, mulB, c, mulC, d, mulD, e, mulE, f, mulF, stream)
+		stream.Sync()
+}
+
+// Asynchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e + mulF*f + mulG*g
+// b,c,d,e,f,g may contain NULL pointers, implemented as all 1's.
+func MAdd6Async(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32, g *Array, mulG float32, stream Stream) {
+	C.madd6Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(**C.float)(unsafe.Pointer(&(e.pointer[0]))),
+		(C.float)(mulE),
+		(**C.float)(unsafe.Pointer(&(f.pointer[0]))),
+		(C.float)(mulF),
+		(**C.float)(unsafe.Pointer(&(g.pointer[0]))),
+		(C.float)(mulG),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
+}
+
+// Synchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e + mulF*f + mulG*g
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd6(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32, g *Array, mulG float32) {
+		stream := a.Stream
+		MAdd6Async(a, b, mulB, c, mulC, d, mulD, e, mulE, f, mulF, g, mulG, stream)
+		stream.Sync()
+}
+
+// Asynchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e + mulF*f + mulG*g + mulH*h
+// b,c,d,e,f,g,h may contain NULL pointers, implemented as all 1's.
+func MAdd7Async(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32, g *Array, mulG float32, h *Array, mulH float32, stream Stream) {
+	C.madd7Async(
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(**C.float)(unsafe.Pointer(&(e.pointer[0]))),
+		(C.float)(mulE),
+		(**C.float)(unsafe.Pointer(&(f.pointer[0]))),
+		(C.float)(mulF),
+		(**C.float)(unsafe.Pointer(&(g.pointer[0]))),
+		(C.float)(mulG),
+		(**C.float)(unsafe.Pointer(&(h.pointer[0]))),
+		(C.float)(mulH),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		C.int(a.partLen4D))
+}
+
+// Synchronous multiply-add: a += mulB*b + mulC*c + mulD*d + mulE*e + mulF*f + mulG*g + mulH*h
+// b may contain NULL pointers, implemented as all 1's.
+func MAdd7(a, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32, g *Array, mulG float32, h *Array, mulH float32) {
+		stream := a.Stream
+		MAdd7Async(a, b, mulB, c, mulC, d, mulD, e, mulE, f, mulF, g, mulG, h, mulH, stream)
+		stream.Sync()
 }
 
 // Multiply-add: dst = a + mulB*b
