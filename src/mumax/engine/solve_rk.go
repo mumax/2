@@ -752,9 +752,9 @@ func (s *RK32Solver) Step() {
 					gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], h * s.tableauA[0][0])
 				} else {
 					if i0 == 1 {
-						gpu.MAdd2(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy1buffer[i], s.tableauA[1][1])
+						gpu.SMul(s.dybuffer[i], s.dy1buffer[i], s.tableauA[1][1])
 					} else if i0 == 2 {
-						gpu.MAdd4(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[2][0], s.dy1buffer[i], s.tableauA[2][1], s.dy2buffer[i], s.tableauA[2][2])
+						gpu.LinearCombination3(s.dybuffer[i], s.dy0buffer[i], s.tableauA[2][0], s.dy1buffer[i], s.tableauA[2][1], s.dy2buffer[i], s.tableauA[2][2])
 
 						// In Bogacki-Shampine scheme, higher order corrector is used to get
 						// an intermediate point used for computing lower order predictor
@@ -803,18 +803,8 @@ func (s *RK32Solver) Step() {
 
 			// The higher order dy/dt was already computed to obtain s.dy3buffer[i]
 			// Compute the error estimate
-			gpu.MAdd5(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.errTab[0], s.dy1buffer[i], s.errTab[1], s.dy2buffer[i], s.errTab[2], s.dy3buffer[i], s.errTab[3])
+			gpu.LinearCombination4(s.dybuffer[i], s.dy0buffer[i], s.errTab[0], s.dy1buffer[i], s.errTab[1], s.dy2buffer[i], s.errTab[2], s.dy3buffer[i], s.errTab[3])
 
-			// Compute the lower order dy/dt
-			// gpu.MAdd5(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauB[0], s.dy1buffer[i], s.tableauB[1], s.dy2buffer[i], s.tableauB[2], s.dy3buffer[i], s.tableauB[3])
-
-			// Compute the higher order end points
-			//gpu.Madd(y.Array(), s.y0buffer[i], s.dyhbuffer[i], h)
-
-			// error estimate using difference of high and low order dy
-			// High order dy = s.dyhbuffer[i] * h
-			// Low order dy = s.dybuffer[i] * h
-			// stepDiff := s.diff[i].MaxDiff(s.dyhbuffer[i], s.dybuffer[i]) * h
 			stepDiff := s.diff[i].MaxAbs(s.dybuffer[i]) * h
 			err := float64(stepDiff)
 			s.err[i].SetScalar(err)
@@ -960,13 +950,13 @@ func (s *RK45Solver) Step() {
 					gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], h * s.tableauA[0][0])
 				} else {
 					if i0 == 1 {
-						gpu.MAdd3(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[1][0], s.dy1buffer[i], s.tableauA[1][1])
+						gpu.LinearCombination2(s.dybuffer[i], s.dy0buffer[i], s.tableauA[1][0], s.dy1buffer[i], s.tableauA[1][1])
 					} else if i0 == 2 {
-						gpu.MAdd4(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[2][0], s.dy1buffer[i], s.tableauA[2][1], s.dy2buffer[i], s.tableauA[2][2])
+						gpu.LinearCombination3(s.dybuffer[i], s.dy0buffer[i], s.tableauA[2][0], s.dy1buffer[i], s.tableauA[2][1], s.dy2buffer[i], s.tableauA[2][2])
 					} else if i0 == 3 {
-						gpu.MAdd5(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[3][0], s.dy1buffer[i], s.tableauA[3][1], s.dy2buffer[i], s.tableauA[3][2], s.dy3buffer[i], s.tableauA[3][3])
+						gpu.LinearCombination4(s.dybuffer[i], s.dy0buffer[i], s.tableauA[3][0], s.dy1buffer[i], s.tableauA[3][1], s.dy2buffer[i], s.tableauA[3][2], s.dy3buffer[i], s.tableauA[3][3])
 					} else if i0 == 4 {
-						gpu.MAdd6(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[4][0], s.dy1buffer[i], s.tableauA[4][1], s.dy2buffer[i], s.tableauA[4][2], s.dy3buffer[i], s.tableauA[4][3], s.dy4buffer[i], s.tableauA[4][4])
+						gpu.LinearCombination5(s.dybuffer[i], s.dy0buffer[i], s.tableauA[4][0], s.dy1buffer[i], s.tableauA[4][1], s.dy2buffer[i], s.tableauA[4][2], s.dy3buffer[i], s.tableauA[4][3], s.dy4buffer[i], s.tableauA[4][4])
 					}
 					gpu.Madd(y.Array(), s.y0buffer[i], s.dybuffer[i], h)
 				}
@@ -1015,21 +1005,12 @@ func (s *RK45Solver) Step() {
 			// y := equation[i].output[0]
 			h := float32(s.dy0Mul[i] * dt)
 
-			// Calculate dy for predictor
-			// gpu.MAdd6(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauB[0][0], s.dy2buffer[i], s.tableauB[0][2], s.dy3buffer[i], s.tableauB[0][3], s.dy4buffer[i], s.tableauB[0][4], s.dy5buffer[i], s.tableauB[0][5])
-
 			// Calculate dy for corrector
-			gpu.MAdd6(s.dyhbuffer[i], s.dyhbuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauB[0], s.dy2buffer[i], s.tableauB[2], s.dy3buffer[i], s.tableauB[3], s.dy4buffer[i], s.tableauB[4], s.dy5buffer[i], s.tableauB[5])
-			// gpu.MAdd6(s.dyhbuffer[i], s.dyhbuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauB[1][0], s.dy2buffer[i], s.tableauB[1][2], s.dy3buffer[i], s.tableauB[1][3], s.dy4buffer[i], s.tableauB[1][4], s.dy5buffer[i], s.tableauB[1][5])
-
-			// Calculate y from high order dy
-			// gpu.Madd(y.Array(), s.y0buffer[i], s.dyhbuffer[i], h)
+			gpu.LinearCombination5(s.dyhbuffer[i], s.dy0buffer[i], s.tableauB[0], s.dy2buffer[i], s.tableauB[2], s.dy3buffer[i], s.tableauB[3], s.dy4buffer[i], s.tableauB[4], s.dy5buffer[i], s.tableauB[5])
 
 			// Compute the error estimate
-			gpu.MAdd6(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.errTab[0], s.dy2buffer[i], s.errTab[2], s.dy3buffer[i], s.errTab[3], s.dy4buffer[i], s.errTab[4], s.dy5buffer[i], s.errTab[5])
+			gpu.LinearCombination5(s.dybuffer[i], s.dy0buffer[i], s.errTab[0], s.dy2buffer[i], s.errTab[2], s.dy3buffer[i], s.errTab[3], s.dy4buffer[i], s.errTab[4], s.dy5buffer[i], s.errTab[5])
 
-			// error estimate using difference of high and low order dy
-			// stepDiff := s.diff[i].MaxDiff(s.dyhbuffer[i], s.dybuffer[i]) * h
 			stepDiff := s.diff[i].MaxAbs(s.dybuffer[i]) * h
 			err := float64(stepDiff)
 			s.err[i].SetScalar(err)
@@ -1178,15 +1159,15 @@ func (s *RKF54Solver) Step() {
 					gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], h * s.tableauA[0][0])
 				} else {
 					if i0 == 1 {
-						gpu.MAdd3(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[1][0], s.dy1buffer[i], s.tableauA[1][1])
+						gpu.LinearCombination2(s.dybuffer[i], s.dy0buffer[i], s.tableauA[1][0], s.dy1buffer[i], s.tableauA[1][1])
 					} else if i0 == 2 {
-						gpu.MAdd4(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[2][0], s.dy1buffer[i], s.tableauA[2][1], s.dy2buffer[i], s.tableauA[2][2])
+						gpu.LinearCombination3(s.dybuffer[i], s.dy0buffer[i], s.tableauA[2][0], s.dy1buffer[i], s.tableauA[2][1], s.dy2buffer[i], s.tableauA[2][2])
 					} else if i0 == 3 {
-						gpu.MAdd5(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[3][0], s.dy1buffer[i], s.tableauA[3][1], s.dy2buffer[i], s.tableauA[3][2], s.dy3buffer[i], s.tableauA[3][3])
+						gpu.LinearCombination4(s.dybuffer[i], s.dy0buffer[i], s.tableauA[3][0], s.dy1buffer[i], s.tableauA[3][1], s.dy2buffer[i], s.tableauA[3][2], s.dy3buffer[i], s.tableauA[3][3])
 					} else if i0 == 4 {
-						gpu.MAdd6(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[4][0], s.dy1buffer[i], s.tableauA[4][1], s.dy2buffer[i], s.tableauA[4][2], s.dy3buffer[i], s.tableauA[4][3], s.dy4buffer[i], s.tableauA[4][4])
+						gpu.LinearCombination5(s.dybuffer[i], s.dy0buffer[i], s.tableauA[4][0], s.dy1buffer[i], s.tableauA[4][1], s.dy2buffer[i], s.tableauA[4][2], s.dy3buffer[i], s.tableauA[4][3], s.dy4buffer[i], s.tableauA[4][4])
 					} else if i0 == 5 {
-						gpu.MAdd6(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauA[5][0], s.dy2buffer[i], s.tableauA[5][2], s.dy3buffer[i], s.tableauA[5][3], s.dy4buffer[i], s.tableauA[5][4], s.dy5buffer[i], s.tableauA[5][5])
+						gpu.LinearCombination5(s.dybuffer[i], s.dy0buffer[i], s.tableauA[5][0], s.dy2buffer[i], s.tableauA[5][2], s.dy3buffer[i], s.tableauA[5][3], s.dy4buffer[i], s.tableauA[5][4], s.dy5buffer[i], s.tableauA[5][5])
 
 						// Since this is also the high order corrector, we will remember this in s.dyhbuffer[i]
 						s.dyhbuffer[i].CopyFromDevice(s.dybuffer[i])
@@ -1240,14 +1221,8 @@ func (s *RKF54Solver) Step() {
 			// y := equation[i].output[0]
 			h := float32(s.dy0Mul[i] * dt)
 
-			// Calculate dy for predictor
-			// gpu.MAdd7(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.tableauB[0], s.dy2buffer[i], s.tableauB[2], s.dy3buffer[i], s.tableauB[3], s.dy4buffer[i], s.tableauB[4], s.dy5buffer[i], s.tableauB[5], s.dy6buffer[i], s.tableauB[6])
-
-			// Calculate y from high order dy
-			// gpu.Madd(y.Array(), s.y0buffer[i], s.dyhbuffer[i], h)
-
 			// Calculate error estimate
-			gpu.MAdd7(s.dybuffer[i], s.dybuffer[i], float32(-1.0), s.dy0buffer[i], s.errTab[0], s.dy2buffer[i], s.errTab[2], s.dy3buffer[i], s.errTab[3], s.dy4buffer[i], s.errTab[4], s.dy5buffer[i], s.errTab[5], s.dy6buffer[i], s.errTab[6])
+			gpu.LinearCombination6(s.dybuffer[i], s.dy0buffer[i], s.errTab[0], s.dy2buffer[i], s.errTab[2], s.dy3buffer[i], s.errTab[3], s.dy4buffer[i], s.errTab[4], s.dy5buffer[i], s.errTab[5], s.dy6buffer[i], s.errTab[6])
 
 			// error estimate using difference of high and low order dy
 			// stepDiff := s.diff[i].MaxDiff(s.dyhbuffer[i], s.dybuffer[i]) * h

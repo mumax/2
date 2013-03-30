@@ -28,6 +28,24 @@ __export__ void mulAsync(float** dst, float** a, float** b, CUstream* stream, in
 	}
 }
 
+///@internal
+__global__ void smulKern(float* dst, float* a, float mulA, int Npart) {
+	int i = threadindex;
+	if (i < Npart) {
+		dst[i] = a[i] * mulA;
+	}
+}
+
+
+__export__ void smulAsync(float** dst, float** a, float mulA, CUstream* stream, int Npart) {
+	dim3 gridSize, blockSize;
+	make1dconf(Npart, &gridSize, &blockSize);
+	for (int dev = 0; dev < nDevice(); dev++) {
+		gpu_safe(cudaSetDevice(deviceId(dev)));
+		smulKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], mulA, Npart);
+	}
+}
+
 #ifdef __cplusplus
 }
 #endif
