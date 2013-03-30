@@ -33,6 +33,18 @@ func Add(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+// Asynchronous scalar multiply: dsy = mulA*a
+// b may contain NULL pointers, implemented as all 1's.
+func SMul(dst, a *Array, mulA float32) {
+	C.smulAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(a.partLen4D))
+	dst.Stream.Sync()
+}
+
 // Multiply 2 multi-GPU arrays: dst = a * b
 func Mul(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
@@ -197,6 +209,21 @@ func LinearCombination2Async(dst *Array, a *Array, mulA float32, b *Array, mulB 
 		C.int(dst.partLen4D))
 }
 
+// dst[i] = a[i]*mulA + b[i]*mulB
+func LinearCombination2(dst *Array, a *Array, mulA float32, b *Array, mulB float32) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len())
+	C.linearCombination2Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
 // dst[i] = a[i]*mulA + b[i]*mulB + c[i]*mulC
 func LinearCombination3Async(dst *Array, a *Array, mulA float32, b *Array, mulB float32, c *Array, mulC float32, stream Stream) {
 	dstlen := dst.Len()
@@ -225,6 +252,69 @@ func LinearCombination3(dst *Array, a *Array, mulA float32, b *Array, mulB float
 		(C.float)(mulB),
 		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
 		(C.float)(mulC),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
+// dst[i] = a[i]*mulA + b[i]*mulB + c[i]*mulC + d[i]*mulD
+func LinearCombination4(dst *Array, a *Array, mulA float32, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len() && dstlen == c.Len() && dstlen == d.Len())
+	C.linearCombination4Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
+// dst[i] = a[i]*mulA + b[i]*mulB + c[i]*mulC + d[i]*mulD + e[i]*mulE
+func LinearCombination5(dst *Array, a *Array, mulA float32, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len() && dstlen == c.Len() && dstlen == d.Len() && dstlen == e.Len())
+	C.linearCombination5Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(**C.float)(unsafe.Pointer(&(e.pointer[0]))),
+		(C.float)(mulE),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
+// dst[i] = a[i]*mulA + b[i]*mulB + c[i]*mulC + d[i]*mulD + e[i]*mulE + f[i]*mulF
+func LinearCombination6(dst *Array, a *Array, mulA float32, b *Array, mulB float32, c *Array, mulC float32, d *Array, mulD float32, e *Array, mulE float32, f *Array, mulF float32) {
+	dstlen := dst.Len()
+	Assert(dstlen == a.Len() && dstlen == b.Len() && dstlen == c.Len() && dstlen == d.Len() && dstlen == e.Len() && dstlen == f.Len())
+	C.linearCombination6Async(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
+		(C.float)(mulA),
+		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
+		(C.float)(mulB),
+		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
+		(C.float)(mulC),
+		(**C.float)(unsafe.Pointer(&(d.pointer[0]))),
+		(C.float)(mulD),
+		(**C.float)(unsafe.Pointer(&(e.pointer[0]))),
+		(C.float)(mulE),
+		(**C.float)(unsafe.Pointer(&(f.pointer[0]))),
+		(C.float)(mulF),
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()

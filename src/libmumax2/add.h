@@ -27,6 +27,18 @@ DLLEXPORT void linearCombination2Async(float** dst, float** a, float mulA, float
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 DLLEXPORT void linearCombination3Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, CUstream* stream, int NPart);
 
+/// dst[i] = MulA*a[i] + MulB*b[i] + MulC*c[i] + MulD*d[i]
+/// @param Npart number of floats per GPU, so total number of floats / nDevice()
+DLLEXPORT void linearCombination4Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, float** d, float mulD, CUstream* stream, int NPart);
+
+/// dst[i] = MulA*a[i] + MulB*b[i] + MulC*c[i] + MulD*d[i] + MulE*e[i]
+/// @param Npart number of floats per GPU, so total number of floats / nDevice()
+DLLEXPORT void linearCombination5Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, float** d, float mulD, float** e, float mulE, CUstream* stream, int NPart);
+
+/// dst[i] = MulA*a[i] + MulB*b[i] + MulC*c[i] + MulD*d[i] + MulE*e[i] + MulF*f[i]
+/// @param Npart number of floats per GPU, so total number of floats / nDevice()
+DLLEXPORT void linearCombination6Async(float** dst, float** a, float mulA, float** b, float mulB, float** c, float mulC, float** d, float mulD, float** e, float mulE, float** f, float mulF, CUstream* stream, int NPart);
+
 /// dst[i] = a[i] + Mul * (b[i] + c[i])
 /// @param Npart number of floats per GPU, so total number of floats / nDevice()
 DLLEXPORT void addMaddAsync(float** dst, float** a, float** b, float** c, float mul, CUstream* stream, int NPart);
