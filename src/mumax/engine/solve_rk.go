@@ -708,11 +708,11 @@ func (s *RK32Solver) Step() {
 		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
 		s.dy0buffer[i].CopyFromDevice(dy.Array()) // save for later
 		s.dy0Mul[i] = dyMul[0]
-		s.dybuffer[i].Zero()
-		s.dyhbuffer[i].Zero()
-		s.dy1buffer[i].Zero()
-		s.dy2buffer[i].Zero()
-		s.dy3buffer[i].Zero()
+//		s.dybuffer[i].Zero()
+//		s.dyhbuffer[i].Zero()
+//		s.dy1buffer[i].Zero()
+//		s.dy2buffer[i].Zero()
+//		s.dy3buffer[i].Zero()
 	}
 
 	maxTry := s.maxTry // undo at most this many bad steps
@@ -737,13 +737,13 @@ func (s *RK32Solver) Step() {
 			      	// This is intermediate point computed from the previous i0
 				y := equation[i].output[0]
 				h := float32(s.dy0Mul[i] * dt)
-			      	if ((i0 == 0) && (try > 0)) { // Reset buffers whenever we have a bad step
-					s.dybuffer[i].Zero()
-					s.dyhbuffer[i].Zero()
-					s.dy1buffer[i].Zero()
-					s.dy2buffer[i].Zero()
-					s.dy3buffer[i].Zero()
-				}
+//			      	if ((i0 == 0) && (try > 0)) { // Reset buffers whenever we have a bad step
+//					s.dybuffer[i].Zero()
+//					s.dyhbuffer[i].Zero()
+//					s.dy1buffer[i].Zero()
+//					s.dy2buffer[i].Zero()
+//					s.dy3buffer[i].Zero()
+//				}
 
 			       	//  Update intermediate point
 				if i0 == 0 {
@@ -905,12 +905,12 @@ func (s *RK45Solver) Step() {
 		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
 		s.dy0buffer[i].CopyFromDevice(dy.Array()) // save for later
 		s.dy0Mul[i] = dyMul[0]
-		s.dybuffer[i].Zero()
-		s.dy1buffer[i].Zero()
-		s.dy2buffer[i].Zero()
-		s.dy3buffer[i].Zero()
-		s.dy4buffer[i].Zero()
-		s.dy5buffer[i].Zero()
+//		s.dybuffer[i].Zero()
+//		s.dy1buffer[i].Zero()
+//		s.dy2buffer[i].Zero()
+//		s.dy3buffer[i].Zero()
+//		s.dy4buffer[i].Zero()
+//		s.dy5buffer[i].Zero()
 	}
 
 
@@ -934,14 +934,14 @@ func (s *RK45Solver) Step() {
 			      	// This is intermediate point computed from the previous iteration
 				y := equation[i].output[0]
 				h := float32(s.dy0Mul[i] * dt)
-			      	if ((i0 == 0) && (try > 0)) { // Reset buffers whenever we have a bad step
-					s.dybuffer[i].Zero()
-					s.dy1buffer[i].Zero()
-					s.dy2buffer[i].Zero()
-					s.dy3buffer[i].Zero()
-					s.dy4buffer[i].Zero()
-					s.dy5buffer[i].Zero()
-				}
+//			      	if ((i0 == 0) && (try > 0)) { // Reset buffers whenever we have a bad step
+//					s.dybuffer[i].Zero()
+//					s.dy1buffer[i].Zero()
+//					s.dy2buffer[i].Zero()
+//					s.dy3buffer[i].Zero()
+//					s.dy4buffer[i].Zero()
+//					s.dy5buffer[i].Zero()
+//				}
 
 			       	//  Update intermediate point
 				if i0 == 0 {
@@ -1112,13 +1112,13 @@ func (s *RKF54Solver) Step() {
 		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
 		s.dy0buffer[i].CopyFromDevice(dy.Array()) // save for later
 		s.dy0Mul[i] = dyMul[0]
-		s.dybuffer[i].Zero()
-		s.dy1buffer[i].Zero()
-		s.dy2buffer[i].Zero()
-		s.dy3buffer[i].Zero()
-		s.dy4buffer[i].Zero()
-		s.dy5buffer[i].Zero()
-		s.dy6buffer[i].Zero()
+//		s.dybuffer[i].Zero()
+//		s.dy1buffer[i].Zero()
+//		s.dy2buffer[i].Zero()
+//		s.dy3buffer[i].Zero()
+//		s.dy4buffer[i].Zero()
+//		s.dy5buffer[i].Zero()
+//		s.dy6buffer[i].Zero()
 	}
 
 
@@ -1142,15 +1142,15 @@ func (s *RKF54Solver) Step() {
 			      	// This is intermediate point computed from the previous iteration
 				y := equation[i].output[0]
 				h := float32(s.dy0Mul[i] * dt)
-			      	if ((i0 == 0) && (try > 0)) { // Reset buffers whenever we have a bad step
-					s.dybuffer[i].Zero()
-					s.dy1buffer[i].Zero()
-					s.dy2buffer[i].Zero()
-					s.dy3buffer[i].Zero()
-					s.dy4buffer[i].Zero()
-					s.dy5buffer[i].Zero()
-					s.dy6buffer[i].Zero()
-				}
+//			      	if ((i0 == 0) && (try > 0)) { // Reset buffers whenever we have a bad step
+//					s.dybuffer[i].Zero()
+//					s.dy1buffer[i].Zero()
+//					s.dy2buffer[i].Zero()
+//					s.dy3buffer[i].Zero()
+//					s.dy4buffer[i].Zero()
+//					s.dy5buffer[i].Zero()
+//					s.dy6buffer[i].Zero()
+//				}
 
 			       	//  Update intermediate point
 				if i0 == 0 {
