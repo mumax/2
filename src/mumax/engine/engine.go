@@ -452,13 +452,6 @@ func (e *Engine) SetSolver(s Solver) {
 	e.solver = s
 }
 
-func (e *Engine) HasSolver() bool {
-        if e.solver != nil {
-	        return true
-	}
-        return false
-}
-
 // Takes one time step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
