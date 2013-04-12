@@ -437,15 +437,12 @@ func (e *Engine) SetSolver(s Solver) {
 // Takes one time step.
 // It is the solver's responsibility to Update/Invalidate its dependencies as needed.
 func (e *Engine) Step() {
-	if len(e.equation) == 0 || e.solver == nil {
-		// if no solvers are defined, just advance time.
-		// yes, this can be the desired behavior.
-		e.time.SetScalar(e.time.Scalar() + e.dt.Scalar())
-		// Always update step last, signals completion of step
-		e.step.SetScalar(e.step.Scalar() + 1)
-	} else {
-		e.solver.Step()
+	// This is the last chance to load a default solver
+	if e.solver == nil {
+		Log("setting default solver")	
+		e.LoadModule("rk12")
 	}
+		e.solver.Step()
 	// notify that a step has been taken
 	// check if output needs to be saved
 	e.notifyAll()

@@ -41,6 +41,13 @@ func LoadRK12(e *Engine) {
 	s.maxDt.SetScalar(1e38)
 	s.badSteps = e.AddNewQuant("badsteps", SCALAR, VALUE, Unit(""), "Number of time steps that had to be re-done")
 
+	// sensible defaults for micromagnetism.
+	// Feel free to change in input script.
+	e.Quant("dt").SetScalar(0.1e-15)
+	e.Quant("mindt").SetScalar(0.1e-15)
+	e.Quant("m_maxerror").SetScalar(1e-4)
+
+
 	equation := e.equation
 	s.dybuffer = make([]*gpu.Array, len(equation))
 	s.y0buffer = make([]*gpu.Array, len(equation))

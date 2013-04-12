@@ -26,11 +26,7 @@ func LoadMicromag(e *Engine) {
 	e.LoadModule("exchange6")
 	e.LoadModule("llg")
 	e.LoadModule("zeeman")
-	e.LoadModule("solver/rk12")
 	e.LoadModule("maxtorque")
-	e.Quant("dt").SetScalar(1e-15)
-	e.Quant("mindt").SetScalar(1e-15)
-	e.Quant("m_maxerror").SetScalar(1. / 2000.)
 
 	/*torque := e.Quant("torque")
 
