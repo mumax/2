@@ -17,6 +17,7 @@ import (
 // Register this module
 func init() {
 	RegisterModule("micromagnetism", "Basic micromagnetism module", LoadMicromag)
+	RegisterModule("micromagnetism/basic", "Solverless basic micromagnetism module", LoadMicromagBasic)
 }
 
 func LoadMicromag(e *Engine) {
@@ -26,11 +27,27 @@ func LoadMicromag(e *Engine) {
 	e.LoadModule("exchange6")
 	e.LoadModule("llg")
 	e.LoadModule("zeeman")
-//	e.LoadModule("solver/rk12")
+	e.LoadModule("solver/rk12")
 	e.LoadModule("maxtorque")
-//	e.Quant("dt").SetScalar(1e-15)
-//	e.Quant("mindt").SetScalar(1e-15)
-//	e.Quant("m_maxerror").SetScalar(1. / 2000.)
+	e.Quant("dt").SetScalar(1e-15)
+	e.Quant("mindt").SetScalar(1e-15)
+	e.Quant("m_maxerror").SetScalar(1. / 2000.)
+
+	/*torque := e.Quant("torque")
+
+	maxtorque := e.AddNewQuant("maxtorque", SCALAR, VALUE, torque.Unit(), "Maximum |torque|")
+	e.Depends("maxtorque", "torque")
+	maxtorque.SetUpdater(NewMaxNormUpdater(torque, maxtorque))*/
+}
+
+func LoadMicromagBasic(e *Engine) {
+	LoadHField(e)
+	LoadMagnetization(e)
+	e.LoadModule("demag")
+	e.LoadModule("exchange6")
+	e.LoadModule("llg")
+	e.LoadModule("zeeman")
+	e.LoadModule("maxtorque")
 
 	/*torque := e.Quant("torque")
 
