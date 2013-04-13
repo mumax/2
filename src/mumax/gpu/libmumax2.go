@@ -922,7 +922,7 @@ func InitPointKernelElement(gpuBuffer *Array, comp int, periodic []int, cellSize
 }
 
 // Computes the uniaxial anisotropy field, stores in h.
-func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
+func UniaxialAnisotropyAsync(h, m *Array, KuMask *Array, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
 	C.uniaxialAnisotropyAsync(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
@@ -939,6 +939,96 @@ func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat f
 		(C.float)(anisUMul[Y]),
 		(**C.float)(unsafe.Pointer(&(anisUMask.Comp[Z].pointer[0]))),
 		(C.float)(anisUMul[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(C.int)(h.partLen3D))
+}
+
+// Computes the fourth cubic anisotropy field, stores in h.
+func Cubic4AnisotropyAsync(h, m *Array, K1Mask *Array, MsatMask *Array, K1_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
+	C.cubic4AnisotropyAsync(
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K1Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(MsatMask.pointer[0]))),
+		(C.float)(K1_Mu0MSat),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[X].pointer[0]))),
+		(C.float)(anisC1Mul[X]),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Y].pointer[0]))),
+		(C.float)(anisC1Mul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Z].pointer[0]))),
+		(C.float)(anisC1Mul[Z]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[X].pointer[0]))),
+		(C.float)(anisC2Mul[X]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[Y].pointer[0]))),
+		(C.float)(anisC2Mul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[Z].pointer[0]))),
+		(C.float)(anisC2Mul[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(C.int)(h.partLen3D))
+}
+
+// Computes the sixth cubic anisotropy field, stores in h.
+func Cubic6AnisotropyAsync(h, m *Array, K1Mask *Array, K2Mask *Array, MsatMask *Array, K1_Mu0MSat float64, K2_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
+	C.cubic6AnisotropyAsync(
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K1Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K2Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(MsatMask.pointer[0]))),
+		(C.float)(K1_Mu0MSat),
+		(C.float)(K2_Mu0MSat),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[X].pointer[0]))),
+		(C.float)(anisC1Mul[X]),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Y].pointer[0]))),
+		(C.float)(anisC1Mul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Z].pointer[0]))),
+		(C.float)(anisC1Mul[Z]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[X].pointer[0]))),
+		(C.float)(anisC2Mul[X]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[Y].pointer[0]))),
+		(C.float)(anisC2Mul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[Z].pointer[0]))),
+		(C.float)(anisC2Mul[Z]),
+		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
+		(C.int)(h.partLen3D))
+}
+
+// Computes the eighth cubic anisotropy field, stores in h.
+func Cubic8AnisotropyAsync(h, m *Array, K1Mask *Array, K2Mask *Array, K3Mask *Array, MsatMask *Array, K1_Mu0MSat float64, K2_Mu0MSat float64, K3_Mu0MSat float64, anisC1Mask *Array, anisC1Mul []float64, anisC2Mask *Array, anisC2Mul []float64, stream Stream) {
+	C.cubic8AnisotropyAsync(
+		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(h.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K1Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K2Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(K3Mask.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(MsatMask.pointer[0]))),
+		(C.float)(K1_Mu0MSat),
+		(C.float)(K2_Mu0MSat),
+		(C.float)(K3_Mu0MSat),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[X].pointer[0]))),
+		(C.float)(anisC1Mul[X]),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Y].pointer[0]))),
+		(C.float)(anisC1Mul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisC1Mask.Comp[Z].pointer[0]))),
+		(C.float)(anisC1Mul[Z]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[X].pointer[0]))),
+		(C.float)(anisC2Mul[X]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[Y].pointer[0]))),
+		(C.float)(anisC2Mul[Y]),
+		(**C.float)(unsafe.Pointer(&(anisC2Mask.Comp[Z].pointer[0]))),
+		(C.float)(anisC2Mul[Z]),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
 		(C.int)(h.partLen3D))
 }

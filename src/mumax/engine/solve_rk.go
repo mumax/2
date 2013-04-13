@@ -198,7 +198,9 @@ func LoadRK32(e *Engine) {
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.peakErr[i] = e.AddNewQuant(out.Name()+"_peakerror", SCALAR, VALUE, unit, "All-time maximum error/step for "+out.Name())
 		s.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s.maxErr[i].SetScalar(1e-4)
 		s.relErr[i] = e.AddNewQuant(out.Name()+"_relError", SCALAR, VALUE, unit, "Relative error/step for "+out.Name())
+		s.relErr[i].SetScalar(1e-2)
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s.maxErr[i].SetVerifier(Positive)
 
@@ -281,7 +283,9 @@ func LoadRK45CK(e *Engine) {
 		s0.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s0.peakErr[i] = e.AddNewQuant(out.Name()+"_peakerror", SCALAR, VALUE, unit, "All-time maximum error/step for "+out.Name())
 		s0.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s0.maxErr[i].SetScalar(1e-4)
 		s0.relErr[i] = e.AddNewQuant(out.Name()+"_relError", SCALAR, VALUE, unit, "Relative error/step for "+out.Name())
+		s0.relErr[i].SetScalar(1e-2)
 		s0.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s0.maxErr[i].SetVerifier(Positive)
 
@@ -366,7 +370,9 @@ func LoadRK45F(e *Engine) {
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.peakErr[i] = e.AddNewQuant(out.Name()+"_peakerror", SCALAR, VALUE, unit, "All-time maximum error/step for "+out.Name())
 		s.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s.maxErr[i].SetScalar(1e-4)
 		s.relErr[i] = e.AddNewQuant(out.Name()+"_relError", SCALAR, VALUE, unit, "Relative error/step for "+out.Name())
+		s.relErr[i].SetScalar(1e-2)
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s.maxErr[i].SetVerifier(Positive)
 
@@ -452,7 +458,9 @@ func LoadRKF54(e *Engine) {
 		s0.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s0.peakErr[i] = e.AddNewQuant(out.Name()+"_peakerror", SCALAR, VALUE, unit, "All-time maximum error/step for "+out.Name())
 		s0.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s0.maxErr[i].SetScalar(1e-4)
 		s0.relErr[i] = e.AddNewQuant(out.Name()+"_relError", SCALAR, VALUE, unit, "Relative error/step for "+out.Name())
+		s0.relErr[i].SetScalar(1e-2)
 		s0.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s0.maxErr[i].SetVerifier(Positive)
 
@@ -539,7 +547,9 @@ func LoadRKF54M(e *Engine) {
 		s1.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s1.peakErr[i] = e.AddNewQuant(out.Name()+"_peakerror", SCALAR, VALUE, unit, "All-time maximum error/step for "+out.Name())
 		s1.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s1.maxErr[i].SetScalar(1e-4)
 		s1.relErr[i] = e.AddNewQuant(out.Name()+"_relError", SCALAR, VALUE, unit, "Relative error/step for "+out.Name())
+		s1.relErr[i].SetScalar(1e-2)
 		s1.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s1.maxErr[i].SetVerifier(Positive)
 
@@ -626,7 +636,9 @@ func LoadRKF54S(e *Engine) {
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.peakErr[i] = e.AddNewQuant(out.Name()+"_peakerror", SCALAR, VALUE, unit, "All-time maximum error/step for "+out.Name())
 		s.maxErr[i] = e.AddNewQuant(out.Name()+"_maxError", SCALAR, VALUE, unit, "Maximum error/step for "+out.Name())
+		s.maxErr[i].SetScalar(1e-4)
 		s.relErr[i] = e.AddNewQuant(out.Name()+"_relError", SCALAR, VALUE, unit, "Relative error/step for "+out.Name())
+		s.relErr[i].SetScalar(1e-2)
 		s.diff[i].Init(out.Array().NComp(), out.Array().Size3D())
 		s.maxErr[i].SetVerifier(Positive)
 
