@@ -18,11 +18,16 @@ import (
 	"mumax/gpu"
 	"mumax/host"
 	"os"
+	"math"
 	"path"
 	"reflect"
 	"runtime"
 )
 
+const ( 
+	FINE_T = 100 // subdivision of time interval in dispersion calculation 
+	BEXT = 1e-4  // the amplitude of excitation used in dispersion calculation 
+)
 // The API methods are accessible to the end-user through scripting languages.
 type API struct {
 	Engine *Engine
@@ -762,3 +767,119 @@ func (a API) ReadFile(filename string) *host.Array {
 func (a API) OutputID() int {
 	return a.Engine.OutputID()
 }
+
+
+//~ @ This file implements dispersion calculation API for mumax2 core
+//~ @ It is intendant to replace semargl functionality
+//~ @ Author: Mykola 'godsic' Dvornik
+
+func (a API) GetDispersion(fmin, fmax float64, steps int) {
+    if fmax < fmin {
+        panic(InputErr("The bandwidth is negative."))
+    }
+    
+    //~ calculate frequency increment
+    df := (fmax - fmin) / float64(steps)
+    
+    meshSize := a.Engine.GridSize()
+    cellSize := a.Engine.CellSize()
+    worldSize := a.Engine.WorldSize()
+    
+    //~ calculate BZ boundaries 
+    bw := make([]float64, len(cellSize))
+    for i := range cellSize {
+        bw[i] = math.Pi / cellSize[i]
+    }
+    
+    qM := a.Engine.Quant("m")
+    m := qM.Array()
+    COMP := qM.NComp()
+    //~ Save initial state
+    m0 := gpu.NewArray(COMP, meshSize)
+    m0.CopyFromDevice(m)
+    B0 := a.GetValue("B_ext")
+    
+    //~ create spatial mask for excitation field
+    //~ to precisely control spatial bandwidth of the excitation the sinc function is used 
+    //~ with the cutoff tuned to the boundary of the Brillouin zone of the discreet mesh
+
+	Debug("Preparing excitation mask...")
+    bMask := host.NewArray(COMP, meshSize)
+    
+    for c := 0; c < COMP; c++ {
+        for k := 0; k < meshSize[0]; k++ {
+            z := float64(k) * cellSize[0] - 0.5 * worldSize[0]
+            sincZ := sinc(bw[0] * z)
+            for j := 0; j < meshSize[1]; j++ {
+                y := float64(j) * cellSize[1] - 0.5 * worldSize[1]
+                sincY := sinc(bw[1] * y)
+                for i := 0; i < meshSize[2]; i++ {
+                    x := float64(i) * cellSize[2] - 0.5 * worldSize[2]
+                    sincX := sinc(bw[2] * x)
+                    bMask.Array[c][k][j][i] = float32(sincX * sincY * sincZ)
+                }
+            }
+        }
+    }
+  
+    a.SetMask("B_ext", bMask)
+	Debug("Done.")
+	
+    //~ create FFT plan
+    fftBuffer := new(gpu.Array)
+    fftOutputSize := gpu.FFTOutputSize(meshSize)
+	fftBuffer.Init(1, fftOutputSize, gpu.DO_ALLOC)
+    plan := gpu.NewDefaultFFT(meshSize, meshSize)
+    //~ create quantity for host
+    mFFTHost := NewQuant("fft_m", COMP, fftOutputSize, FIELD, Unit("A/m"), true, "FFT of M")
+    mFFTHostArray := mFFTHost.Buffer()
+    
+    //~ Looping over the range of frequencies 
+    for i := 0; i < steps; i++ {
+        //~ Get frequency of excitation 
+        f := fmin + float64(i) * df
+        Debug(fmt.Sprintf("Calculate response for %g Hz", f))
+        
+        //~ Get time constant as 6T 
+        tc := 3.0 / f
+        dt := tc / float64(FINE_T)
+        //~ Generate CW excitation 
+        for ii := 0; ii < FINE_T; ii++ {
+            t := float64(ii) * dt
+            val := math.Sin(2.0 * math.Pi * f * t)
+            a.SetPointwise("B_ext", t, []float64{B0[0] + val, B0[1] + val, B0[2] + val})
+        }
+        a.SetPointwise("B_ext", 9999.9, []float64{B0[0], B0[1], B0[2]})
+        
+        //~ run simulations 
+        a.Run(tc)
+        
+        Debug("Do FFT...")
+        //~ Do FFT of m to buffer
+        for ii := 0; ii < COMP; ii++{
+            plan.Forward(m.Component(ii), fftBuffer)
+            fftBuffer.CopyToHost(mFFTHostArray.Component(ii))
+        }
+        
+        Debug("Done.")
+        
+        //~ Save result to file
+        filename := a.Engine.AutoFilename(mFFTHost.Name(), "dump")
+		a.Engine.SaveAs(mFFTHost, "dump", []string{}, filename)
+     
+        //~ recover state 
+        a.SetS("t", 0.0)
+        a.SetS("dt", 1e-15)
+        a.SetV("B_ext", B0)
+        a.Engine.Quant("m").Array().CopyFromDevice(m0)
+    }
+}
+
+func sinc(arg float64) float64{
+    res := 1.0
+    if arg != 0.0 {
+        res = math.Sin(arg) / arg
+    }
+    return res
+}
+
