@@ -3,14 +3,19 @@ include src/Make.inc
 export GOPATH=$(CURDIR)
 
 ifndef SystemRoot
+LIBNAME=libmumax2.so
 export CUDAROOT=/usr/local/cuda-5.0
 export NVROOT=/usr/lib64/nvidia
 export CUDA_INC_PATH=$(CUDAROOT)/include/
-export CUDA_LIB_PATH=$(NVROOT)/lib64/:$(CUDAROOT)/lib64/
+export CUDA_LIB_PATH=$(NVROOT)/opengl/lib64/:$(CUDAROOT)/lib64/
+else
+LIBNAME=libmumax2.dll
 endif
 
 all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
+	cp src/libmumax2/$(LIBNAME) src/mumax/gpu/
+	cp src/libmumax2/$(LIBNAME) .
 	go run src/cuda/setup-cuda-paths.go -dir=src/cuda/
 	go install -v --gccgoflags '-Ofast -march=native' mumax2-bin
 	go install -v apigen
@@ -25,6 +30,8 @@ endif
 .PHONY: clean
 clean:	
 	rm -rf pkg/*
+	rm -rf src/mumax/gpu/$(LIBNAME)
+	rm $(LIBNAME)
 ifndef SystemRoot	
 	rm -rf bin/mumax2-bin
 	rm -rf bin/apigen
