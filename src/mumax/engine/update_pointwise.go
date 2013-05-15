@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -37,7 +37,7 @@ func (field *PointwiseUpdater) Update() {
 
 	//find closest times
 
-	// first search backwards in time, 
+	// first search backwards in time,
 	// multi-stage solvers may have gone back in time.
 	i := field.lastIdx
 	if i >= len(field.points) {
@@ -95,7 +95,8 @@ func (p *PointwiseUpdater) Append(time float64, value []float64) {
 	checkComp(p.quant, len(value))
 	if len(p.points) > 0 {
 		if p.points[len(p.points)-1][0] > time {
-			panic(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time))
+			Debug(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time, ". Please skip this warning if it is desired behaviour. The list of points will be flushed."))
+			p.points = make([][]float64, 0, 1000)
 		}
 	}
 
