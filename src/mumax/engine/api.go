@@ -25,8 +25,9 @@ import (
 )
 
 const (
-	FINE_T = 100  // subdivision of time interval in dispersion calculation
-	BEXT   = 1e-3 // the amplitude of excitation used in dispersion calculation
+	FINE_T     = 100  // subdivision of time interval in dispersion calculation
+	B_EXT      = 1e-3 // the amplitude of excitation used in dispersion calculation
+	OUT_FORMAT = "dump"
 )
 
 // The API methods are accessible to the end-user through scripting languages.
@@ -787,6 +788,7 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	meshSize := a.Engine.GridSize()
 	cellSize := a.Engine.CellSize()
 	worldSize := a.Engine.WorldSize()
+	logicSize := a.Engine.PaddedSize()
 
 	//~ calculate half BZ boundaries
 	bw := make([]float64, len(cellSize))
@@ -830,9 +832,9 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 
 	//~ create FFT plan
 	fftBuffer := new(gpu.Array)
-	fftOutputSize := gpu.FFTOutputSize(meshSize)
+	fftOutputSize := gpu.FFTOutputSize(logicSize)
 	fftBuffer.Init(1, fftOutputSize, gpu.DO_ALLOC)
-	plan := gpu.NewDefaultFFT(meshSize, meshSize)
+	plan := gpu.NewDefaultFFT(meshSize, logicSize)
 
 	//~ get dimensions for per component quantities, lame
 	OutputSize := make([]int, 3)
@@ -851,15 +853,22 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	for i := 0; i < steps; i++ {
 		//~ Get frequency of excitation
 		f := fmin + float64(i)*df
-		Debug(fmt.Sprintf("Calculating response for %g Hz...", f))
+		Debug(fmt.Sprintf("Calculating response for %g GHz...", f*1e-9))
 
 		//~ Get time constant as 6T
-		tc := 3.0 / f
+
+		tp := 1.0 / f // period of RF
+
+		tc := 6.0 * tp // length of excitation
+
+		rt := 2.0 * tp // rise time of the excitation
+		ft := 2.0 * tp // fall time of the excitation
+
 		dt := tc / float64(FINE_T)
 		//~ Generate CW excitation
 		for ii := 0; ii < FINE_T; ii++ {
 			t := float64(ii) * dt
-			val := BEXT * math.Sin(2.0*math.Pi*f*t)
+			val := B_EXT * math.Sin(2.0*math.Pi*f*t) * (1.0 - math.Exp(-t/rt)) * (1.0 - math.Exp((t-tc)/ft))
 			a.SetPointwise("B_ext", t, []float64{B0[0], B0[1], B0[2] + val})
 		}
 		a.SetPointwise("B_ext", float64(FINE_T)*dt, []float64{B0[0], B0[1], B0[2]})
@@ -883,10 +892,10 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 		Debug("Done.")
 
 		//~ Save result to files
-		filename := a.Engine.AutoFilename(mFFTHostX.Name(), "dump")
-		a.Engine.SaveAs(mFFTHostX, "dump", []string{}, filename)
-		filename = a.Engine.AutoFilename(mFFTHostY.Name(), "dump")
-		a.Engine.SaveAs(mFFTHostY, "dump", []string{}, filename)
+		filename := a.Engine.AutoFilename(mFFTHostX.Name(), OUT_FORMAT)
+		a.Engine.SaveAs(mFFTHostX, OUT_FORMAT, []string{}, filename)
+		filename = a.Engine.AutoFilename(mFFTHostY.Name(), OUT_FORMAT)
+		a.Engine.SaveAs(mFFTHostY, OUT_FORMAT, []string{}, filename)
 
 		//~ recover state
 		a.SetS("t", 0.0)
@@ -906,9 +915,20 @@ func sinc(arg float64) float64 {
 }
 
 func extractCmplxComponents(src, comp1, comp2 *host.Array, format int) {
-	//~ Debug(src.Size4D)
-	//~ Debug(comp1.Size4D)
-
+	//~ for i := range comp1.List {
+	//~ R := float64(src.List[2*i+0])
+	//~ I := float64(src.List[2*i+1])
+	//~ switch format {
+	//~ case 0:
+	//~ tR := R
+	//~ R = math.Sqrt(R*R + I*I)
+	//~ I = math.Atan2(I, tR)
+	//~ case 1:
+	//~ // pass through
+	//~ }
+	//~ comp1.List[i] = float32(R)
+	//~ comp2.List[i] = float32(I)
+	//~ }
 	for k := 0; k < comp1.Size4D[1]; k++ {
 		for j := 0; j < comp1.Size4D[2]; j++ {
 			for i := 0; i < comp1.Size4D[3]; i++ {
@@ -920,7 +940,7 @@ func extractCmplxComponents(src, comp1, comp2 *host.Array, format int) {
 					R = math.Sqrt(R*R + I*I)
 					I = math.Atan2(I, tR)
 				case 1:
-					//~ pass through
+					// pass through
 				}
 				comp1.Array[0][k][j][i] = float32(R)
 				comp2.Array[0][k][j][i] = float32(I)
