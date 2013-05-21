@@ -96,7 +96,7 @@ func (p *PointwiseUpdater) Append(time float64, value []float64) {
 	if len(p.points) > 0 {
 		if p.points[len(p.points)-1][0] > time {
 			Debug(InputErrF("Pointwise definition should be in chronological order, but", p.points[len(p.points)-1][0], ">", time, ". Please skip this warning if it is desired behaviour. The list of points will be flushed."))
-			p.points = make([][]float64, 0, 1000)
+			p.points = p.points[len(p.points):]
 		}
 	}
 
