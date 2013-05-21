@@ -39,4 +39,4 @@ setv('B_ext', [Bx, By, Bz])
 run_until_smaller('maxtorque', 1e-4 * gets('gamma') * 800e3)
 
 setv('alpha', 0.0008)
-getdispersion(10e9, 100e9, 10, 0)
+getdispersion(50e9, 100e9, 5, 0)
