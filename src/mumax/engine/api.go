@@ -26,8 +26,9 @@ import (
 
 const (
 	FINE_T     = 100  // subdivision of time interval in dispersion calculation
-	B_EXT      = 1e-3 // the amplitude of excitation used in dispersion calculation
+	B_EXT      = 1e-4 // the amplitude of excitation used in dispersion calculation
 	OUT_FORMAT = "dump"
+	N_TC       = 24
 )
 
 // The API methods are accessible to the end-user through scripting languages.
@@ -810,7 +811,7 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	//~ to precisely control spatial bandwidth of the excitation the sinc function is used
 	//~ with the cutoff tuned to the boundary of the Brillouin zone of the discreet mesh
 
-	Debug("Preparing excitation mask...")
+	//~ Debug("Preparing excitation mask...")
 	bMask := host.NewArray(COMP, meshSize)
 
 	for k := 0; k < meshSize[0]; k++ {
@@ -822,8 +823,8 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 			for i := 0; i < meshSize[2]; i++ {
 				x := float64(i)*cellSize[2] - 0.5*worldSize[2]
 				sincX := sinc(bw[2] * x)
-				bMask.Array[Z][k][j][i] = float32(1.0);
-				bMask.Array[Y][k][j][i] = float32(1.0);
+				bMask.Array[Z][k][j][i] = float32(1.0)
+				bMask.Array[Y][k][j][i] = float32(1.0)
 				bMask.Array[X][k][j][i] = float32(sincX * sincY * sincZ)
 			}
 		}
@@ -832,19 +833,19 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	a.SetMask("B_ext", bMask)
 	//~ a.SetV("B_ext", []float64{1.0, 1.0, 1.0})
 	//~ a.Save("B_ext", "gplot", []string{})
-	Debug("Done.")
+	//~ Debug("Done.")
 
 	//~ create FFT plan
 	fftBuffer := new(gpu.Array)
 	fftOutputSize := gpu.FFTOutputSize(logicSize)
 	fftBuffer.Init(1, fftOutputSize, gpu.DO_ALLOC)
 	plan := gpu.NewDefaultFFT(meshSize, logicSize)
-	
+
 	//~ create window
-	
+
 	window := gpu.NewArray(1, meshSize)
-	window.CopyFromHost(gaussianWindow(meshSize))
-	 
+	window.CopyFromHost(genWindow(meshSize))
+
 	//~ get dimensions for per component quantities, lame
 	OutputSize := make([]int, 3)
 	OutputSize[0] = fftOutputSize[0]
@@ -863,56 +864,55 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 		//~ Get frequency of excitation
 		f := fmin + float64(i)*df
 		Debug(fmt.Sprintf("Calculating response for %g GHz...", f*1e-9))
-		Debug(B0)
 		//~ Get time constant as 6T
 
 		tp := 1.0 / f // period of RF
 
-		tc := 6.0 * tp // length of the excitation
+		tc := float64(N_TC) * tp // length of the excitation
 
-		rt := tc / 3.0 // rise time of the excitation
+		rt := tc // rise time of the excitation
 		//~ ft := tc * 1.0 // fall time of the excitation
 
-		dt := tc / float64(FINE_T)
+		dt := tp / float64(FINE_T)
+
+		N := (N_TC + 2) * FINE_T
+
 		//~ Generate CW excitation
-		for ii := 0; ii < FINE_T; ii++ {
+		for ii := 0; ii < N; ii++ {
 			t := float64(ii) * dt
 			val := B_EXT * math.Sin(2.0*math.Pi*f*t) * (1.0 - math.Exp(-t/rt)) // * (1.0 - math.Exp((t-tc)/ft))
 			a.SetPointwise("B_ext", t, []float64{B0[X], B0[Y], B0[Z] + val})
 		}
-		Debug(B0)
-		a.SetPointwise("B_ext", float64(FINE_T)*dt, []float64{B0[X], B0[Y], B0[Z]})
-		Debug(B0)
 		a.SetPointwise("B_ext", 9999.9, []float64{B0[X], B0[Y], B0[Z]})
 
 		//~ run simulations
-		a.AutoTabulate([]string{"t","<B_ext>","<m>"}, "debug_"+fmt.Sprintf("%g-GHZ", f * 1e-9)+".dat", dt)
-		
+		a.AutoTabulate([]string{"t", "<B_ext>", "<m>"}, "debug_"+fmt.Sprintf("%g-GHZ", f*1e-9)+".dat", dt)
+
 		qM.Update()
 		a.Run(tc)
 		qM.Update()
 
 		//~ substrate ground state
 		gpu.Madd(m, m, m0, float32(-1.0))
-		
+
 		//~ apply windowing
-		for ii := 0; ii < COMP; ii++ { 
-			gpu.Mul(m.Component(ii), m.Component(ii), window) 
+		for ii := 0; ii < COMP; ii++ {
+			gpu.Mul(m.Component(ii), m.Component(ii), window)
 		}
-		
+
 		//~ Do FFT of m to buffer
 		//~ split cmplx buffer to two per-component buffers
 		//~ Do representation conversion if required
-		Debug("Do FFT...")
+		//~ Debug("Do FFT...")
 		for ii := 0; ii < COMP; ii++ {
 			plan.Forward(m.Component(ii), fftBuffer)
 			extractCmplxComponents(fftBuffer.LocalCopy(), mFFTHostXArray.Component(ii), mFFTHostYArray.Component(ii), format)
 		}
-		Debug("Done.")
-		
+		//~ Debug("Done.")
+
 		transposeYZ(mFFTHostXArray)
 		transposeYZ(mFFTHostYArray)
-		
+
 		//~ Save result to files
 		filename := a.Engine.AutoFilename(mFFTHostX.Name(), OUT_FORMAT)
 		a.Engine.SaveAs(mFFTHostX, OUT_FORMAT, []string{}, filename)
@@ -920,7 +920,6 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 		a.Engine.SaveAs(mFFTHostY, OUT_FORMAT, []string{}, filename)
 
 		//~ recover state
-		Debug(B0)
 		a.SetS("t", 0.0)
 		a.SetS("dt", 1e-15)
 		a.SetV("B_ext", []float64{B0[X], B0[Y], B0[Z]})
@@ -965,18 +964,17 @@ func transposeYZ(src *host.Array) {
 	sZ := src.Size4D[3]
 	hsX := sX / 2
 	hsY := sY / 2
-	//~ hsZ := sZ / 2
 	for c := 0; c < src.Size4D[0]; c++ {
 		for k := 0; k < hsX; k++ {
 			for j := 0; j < hsY; j++ {
-				for i := 0; i < sZ; i++ { 
+				for i := 0; i < sZ; i++ {
 					val := src.Array[c][k][j][i]
-					src.Array[c][k][j][i] = src.Array[c][k + hsX][j + hsY][i]
-					src.Array[c][k + hsX][j + hsY][i] = val
-					val = src.Array[c][k][j + hsY][i]
-					src.Array[c][k][j + hsY][i] = src.Array[c][k + hsX][j][i]
-					src.Array[c][k + hsX][j][i] = val
-					
+					src.Array[c][k][j][i] = src.Array[c][k+hsX][j+hsY][i]
+					src.Array[c][k+hsX][j+hsY][i] = val
+					val = src.Array[c][k][j+hsY][i]
+					src.Array[c][k][j+hsY][i] = src.Array[c][k+hsX][j][i]
+					src.Array[c][k+hsX][j][i] = val
+
 				}
 			}
 		}
@@ -988,28 +986,34 @@ func gaussTrunc(arg, w float64) float64 {
 	ok := (arg == 0.0) || (arg == 1.0)
 	val := 0.0
 	if !ok {
-		val = math.Exp(-0.5 * iw * iw * (2.0 * arg - 1.0) * (2.0 * arg - 1.0))
+		val = math.Exp(-0.5 * iw * iw * (2.0*arg - 1.0) * (2.0*arg - 1.0))
 	}
 	return val
-} 
+}
 
 func blackmanNuttall(arg float64) float64 {
-	return 0.3635819 - 0.4891775 * math.Cos(2.0 * math.Pi * arg) + 0.1365995 * math.Cos(4.0 * math.Pi * arg) - 0.0106411 * math.Cos(6.0 * math.Pi * arg)
+	return 0.3635819 - 0.4891775*math.Cos(2.0*math.Pi*arg) + 0.1365995*math.Cos(4.0*math.Pi*arg) - 0.0106411*math.Cos(6.0*math.Pi*arg)
 }
-func gaussianWindow(size []int) *host.Array {
+
+func hamming(arg float64) float64 {
+	return 0.53836 - 0.46164*math.Cos(2.0*math.Pi*arg)
+}
+
+func genWindow(size []int) *host.Array {
 	window := host.NewArray(1, size)
 	for i := 0; i < size[0]; i++ {
+		arg0 := float64(i) / float64(size[0]-1)
+		val0 := gaussTrunc(arg0, 0.4)
 		for j := 0; j < size[1]; j++ {
+			arg1 := float64(j) / float64(size[1]-1)
+			val1 := gaussTrunc(arg1, 0.4)
 			for k := 0; k < size[2]; k++ {
-					arg0 := float64(i) / float64(size[0] - 1)
-					arg1 := float64(j) / float64(size[1] - 1)
-					arg2 := float64(k) / float64(size[2] - 1)
-					//~ val := gaussTrunc(arg0, 0.4) * gaussTrunc(arg1, 0.4) * gaussTrunc(arg2, 0.4)
-					val := blackmanNuttall(arg0) * blackmanNuttall(arg1) * blackmanNuttall(arg2)
-					window.Array[0][i][j][k] = float32(val)
-				}
+				arg2 := float64(k) / float64(size[2]-1)
+				val2 := gaussTrunc(arg2, 0.4)
+				window.Array[0][i][j][k] = float32(val0 * val1 * val2)
+			}
 		}
-		
-	}	
+
+	}
 	return window
 }
