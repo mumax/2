@@ -815,14 +815,23 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	bMask := host.NewArray(COMP, meshSize)
 
 	for k := 0; k < meshSize[0]; k++ {
-		z := float64(k)*cellSize[0] - 0.5*worldSize[0]
-		sincZ := sinc(bw[0] * z)
+		sincZ := 1.0
+		if meshSize[0] > 16 {
+			z := float64(k)*cellSize[0] - 0.5*worldSize[0]
+			sincZ = sinc(bw[0] * z)
+		}
 		for j := 0; j < meshSize[1]; j++ {
-			y := float64(j)*cellSize[1] - 0.5*worldSize[1]
-			sincY := sinc(bw[1] * y)
+			sincY := 1.0
+			if meshSize[1] > 16 {
+				y := float64(j)*cellSize[1] - 0.5*worldSize[1]
+				sincY = sinc(bw[1] * y)
+			}
 			for i := 0; i < meshSize[2]; i++ {
-				x := float64(i)*cellSize[2] - 0.5*worldSize[2]
-				sincX := sinc(bw[2] * x)
+				sincX := 1.0
+				if meshSize[2] > 16 {
+					x := float64(i)*cellSize[2] - 0.5*worldSize[2]
+					sincX = sinc(bw[2] * x)
+				}
 				bMask.Array[Z][k][j][i] = float32(1.0)
 				bMask.Array[Y][k][j][i] = float32(1.0)
 				bMask.Array[X][k][j][i] = float32(sincX * sincY * sincZ)
@@ -1002,14 +1011,23 @@ func hamming(arg float64) float64 {
 func genWindow(size []int) *host.Array {
 	window := host.NewArray(1, size)
 	for i := 0; i < size[0]; i++ {
-		arg0 := float64(i) / float64(size[0]-1)
-		val0 := gauss(arg0, 0.4)
+		val0 := 1.0
+		if size[0] > 16 {
+			arg0 := float64(i) / float64(size[0]-1)
+			val0 = gauss(arg0, 0.4)
+		}
 		for j := 0; j < size[1]; j++ {
-			arg1 := float64(j) / float64(size[1]-1)
-			val1 := gauss(arg1, 0.4)
+			val1 := 1.0
+			if size[1] > 16 {
+				arg1 := float64(j) / float64(size[1]-1)
+				val1 = gauss(arg1, 0.4)
+			}
 			for k := 0; k < size[2]; k++ {
-				arg2 := float64(k) / float64(size[2]-1)
-				val2 := gauss(arg2, 0.4)
+				val2 := 1.0
+				if size[2] > 16 {
+					arg2 := float64(k) / float64(size[2]-1)
+					val2 = gauss(arg2, 0.4)
+				}
 				window.Array[0][i][j][k] = float32(val0 * val1 * val2)
 			}
 		}
