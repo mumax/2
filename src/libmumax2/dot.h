@@ -22,7 +22,7 @@ DLLEXPORT void dotAsync(float** dst, float** ax, float** ay, float** az, float**
 
 
 /// calculates the dot product and takes the sign according to that of arguments, e.g. -1*-1= -1, 1*1=1
-DLLEXPORT void dotSignAsync(float** dst, float** ax, float** ay, float** az, float** bx, float** by, float** bz, CUstream* stream, int Npart);
+DLLEXPORT void dotSignAsync(float** dst, float** ax, float** ay, float** az, float** bx, float** by, float** bz, float** cx, float** cy, float** cz, CUstream* stream, int Npart);
 
 #ifdef __cplusplus
 }

@@ -90,8 +90,8 @@ func Dot(dst, a, b *Array) {
 	dst.Stream.Sync()
 }
 
-// Synchronous Singed Dot product: C = sign(B) * (AiBi)
-func DotSign(dst, a, b *Array) { 
+// Synchronous Singed Dot product: C = sign(BC) * (AB)
+func DotSign(dst, a, b, c *Array) { 
 	CheckSize(dst.size3D, a.size3D)
 	C.dotSignAsync(
 		(**C.float)(unsafe.Pointer(&(dst.Comp[X].Pointers()[0]))),
@@ -103,6 +103,10 @@ func DotSign(dst, a, b *Array) {
 		(**C.float)(unsafe.Pointer(&(b.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(b.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(b.Comp[Z].Pointers()[0]))),
+		
+		(**C.float)(unsafe.Pointer(&(c.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(c.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(c.Comp[Z].Pointers()[0]))),
 		
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen3D))
