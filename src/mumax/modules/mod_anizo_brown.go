@@ -45,13 +45,14 @@ func LoadAnizBrown(e *Engine, args ...Arguments) {
 	var arg Arguments
 
 	if len(args) == 0 {
-		arg = Arguments{inDF, depsDF, outDF}
+		arg = Arguments{inBA, depsBA, outBA}
 	} else {
 		arg = args[0]
 	}
 	//
+	Debug(arg)
 
-	LoadTemp(e, LtempName) // load temperature
+	LoadTemp(e, arg.Deps("T")) // load temperature
 
 	Therm_seed := e.AddNewQuant(arg.Ins("Therm_seed"), SCALAR, VALUE, Unit(""), `Random seed for H\_therm`)
 	Therm_seed.SetVerifier(Int)
@@ -167,15 +168,17 @@ func (u *AnizBrownUpdater) Update() {
 	tempMask := temp.Array()
 	KB2tempMul := Kb * 2.0 * tempMul
 	mu0VgammaDtMsatMul := Mu0 * V * gamma * dt * mSatMul
+	KB2tempMul_mu0VgammaDtMsatMul := KB2tempMul / mu0VgammaDtMsatMul
 
+	Debug(KB2tempMul_mu0VgammaDtMsatMul)
 	gpu.ScaleNoiseAniz(noise,
 		mu.Array(),
 		tempMask,
 		msatMask,
 		msat0T0.Array(),
 		mu.Multiplier(),
-		KB2tempMul,
-		mu0VgammaDtMsatMul)
+		KB2tempMul_mu0VgammaDtMsatMul)
+	noise.Stream.Sync()
 
 	u.last_time = t
 }

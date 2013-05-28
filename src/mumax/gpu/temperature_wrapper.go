@@ -34,7 +34,7 @@ func ScaleNoise(noise, alphaMask *Array,
 
 func ScaleNoiseAniz(h, mu, T, msat, msat0T0 *Array,
 	muMul []float64,
-	KB2tempMul float64, mu0VgammaDtMsatMul float64) {
+	KB2tempMul_mu0VgammaDtMsatMul float64) {
 	CheckSize(h.Size3D(), mu.Size3D())
 	C.temperature_scaleAnizNoise(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].Pointers()[0]))),
@@ -59,8 +59,7 @@ func ScaleNoiseAniz(h, mu, T, msat, msat0T0 *Array,
 		(C.float)(float32(muMul[XZ])),
 		(C.float)(float32(muMul[XY])),
 
-		(C.float)(float32(KB2tempMul)),
-		(C.float)(float32(mu0VgammaDtMsatMul)),
+		(C.float)(float32(KB2tempMul_mu0VgammaDtMsatMul)),
 		(*C.CUstream)(unsafe.Pointer(&(h.Stream[0]))),
 		(C.int)(h.PartLen3D()))
 }

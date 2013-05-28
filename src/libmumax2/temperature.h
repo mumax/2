@@ -47,8 +47,7 @@ DLLEXPORT void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
 				float muMul_xz,
 				float muMul_xy,
 				
-				float KB2tempMul, 
-			   	float mu0VgammaDtMSatMul,
+				float KB2tempMul_mu0VgammaDtMSatMul, 
 			   	CUstream* stream, 
 			   	int Npart);
 #ifdef __cplusplus

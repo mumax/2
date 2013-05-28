@@ -90,8 +90,7 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
 				const float muMul_xz,
 				const float muMul_xy,
 				
-				const float KB2tempMul,
-				const float mu0VgammaDtMSatMul,
+				const float KB2tempMul_mu0VgammaDtMSatMul,
 				
 			   	int Npart){
 
@@ -135,7 +134,12 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
 
 		float msat = (msatMask != NULL) ? msatMask[i] : 1.0;
 		float T = (tempMask != NULL) ? tempMask[i] : 1.0;
-		float pre = sqrtf((T * KB2tempMul)/(mu0VgammaDtMSatMul * msat));
+		float pre = sqrtf((T * KB2tempMul_mu0VgammaDtMSatMul) / msat);
+		if (i==100) {
+			printf("pre, T, KB2tempMul_mu0VgammaDtMSatMul, msat: %f %f %f %f\n", pre, T, KB2tempMul_mu0VgammaDtMSatMul, msat);
+			printf("mu_H: %f %f %f\n", mu_H.x, mu_H.y, mu_H.z);
+		}
+		
 		hx[i] = pre * mu_H.x;
 		hy[i] = pre * mu_H.y;
 		hz[i] = pre * mu_H.z;
@@ -162,8 +166,7 @@ __export__ void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
 				float muMul_xz,
 				float muMul_xy,
 				
-			    float KB2tempMul, 
-			   	float mu0VgammaDtMSatMul,
+				float KB2tempMul_mu0VgammaDtMSatMul, 
 			   	CUstream* stream, 
 			   	int Npart){
 
@@ -188,8 +191,8 @@ __export__ void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
 						muMul_yz,
 						muMul_xz,
 						muMul_xy,
-						KB2tempMul, 
-						mu0VgammaDtMSatMul, Npart);
+						KB2tempMul_mu0VgammaDtMSatMul, 
+						Npart);
 	}
 }
 
