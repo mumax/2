@@ -33,22 +33,20 @@ load('zeeman')
 load('llbr')
 load('llbr/torque')
 load('llbr/transverse')
-#~ load('temperature/LTM')
+load('temperature/LTM')
 
-#~ loadargs('dissipative-function',[], ["m:mf","R:llbr_transverse"],["Qmag:Qc"])
+loadargs('dissipative-function',[], ["m:mf","R:llbr_transverse"],["Qmag:Qc"])
 load('temperature/brown-anisotropic')
 
 add_to('llbr_RHS', 'llbr_torque')
 add_to('llbr_RHS', 'llbr_transverse')
 
-#~ add_to_weighted("Ql", "Qc", -1.0)
+add_to_weighted("Ql", "Qc", -1.0)
 
-load('solver/am01')
-setv('mf_maxabserror', 1e-4)
-setv('mf_maxrelerror', 1e-3)
+load('solver/rk12')
+setv('mf_maxerror', 1e-4)
 
-#~ setv('Temp_maxabserror', 1e-4)
-#~ setv('Temp_maxrelerror', 1e-3)
+setv('Temp_maxerror', 1e-3)
 
 savegraph("graph.png")
 
@@ -71,16 +69,16 @@ setv('msat0T0', Ms0)
 Aex = 0.86e-11
 setv('Aex', Aex)
 setv('gamma_LL', 2.211e5)
-setv('kappa', 1e-4)
+#~ setv('kappa', 1e-4)
 
-Bx = 0.1 # 1000 Oe
-By = 0.0 
-Bz = 0.0
-setv('B_ext',[Bx,By,Bz])
+#~ Bx = 0.1 # 1000 Oe
+#~ By = 0.0 
+#~ Bz = 0.0
+#~ setv('B_ext',[Bx,By,Bz])
                 
 # Heat bath parameters
 
-#~ setv('Cp_l', 3.0e6)
+setv('Cp_l', 3.0e6)
 
 # Baryakhtar relaxation parameters
 
@@ -89,13 +87,15 @@ setv('mu', [mu, mu, mu, 0.0, 0.0, 0.0])
 
 tt = 1e-15
  
-#~ autotabulate(["t", "<Temp>"], "Temp.txt", tt)
+autotabulate(["t", "<Temp>"], "Temp.txt", tt)
 autotabulate(["t", "<mf>"], "mf.txt", tt)
-#~ autotabulate(["t", "<Qc>"], "Qc.txt", tt)
+autotabulate(["t", "<Qc>"], "Qc.txt", tt)
+autotabulate(["t", "<Ql>"], "Ql.txt", tt)
+autotabulate(["t", "<H_therm>"], "H_therm.txt", tt)
 
-setv('maxdt', 1e-12)
-setv('mindt', 1e-17)
-setv('dt', 1e-17)
+setv('maxdt', 1e-15)
+setv('mindt', 1e-15)
+setv('dt', 1e-15)
 
 
 T = [ [[[273.0]]] ]
@@ -103,8 +103,8 @@ setarray('Temp', T)
 
 run(1e-9)
 
-T = [ [[[600.0]]] ]
-setarray('Temp', T)
+#~ T = [ [[[600.0]]] ]
+#~ setarray('Temp', T)
 
 run(1e-9)
 
