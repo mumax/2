@@ -24,15 +24,14 @@ func init() {
 
 func LoadBaryakhtarTransverse(e *Engine) {
 
-	e.LoadModule("longfield")
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
 	
 	// =========== New Quantities =============
 
-	e.AddNewQuant("mu", SYMMTENS, MASK, Unit(""), "LLBr transverse relaxation constant")
-	llbr_transverse := e.AddNewQuant("llbr_transverse", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar transverse relaxation term")
+	e.AddNewQuant("mu", SYMMTENS, MASK, Unit(""), "LLBr ferromagnetic relaxation constant")
+	llbr_transverse := e.AddNewQuant("llbr_transverse", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar ferromagnetic relaxation term")
 	
 	// ============ Dependencies =============
 	e.Depends("llbr_transverse", "mf", "H_eff", "gamma_LL", "mu", "msat0T0")
@@ -40,8 +39,6 @@ func LoadBaryakhtarTransverse(e *Engine) {
 	// ============ Updating the torque =============
 	upd := &BaryakhtarTransverseUpdater{llbr_transverse: llbr_transverse}
 	llbr_transverse.SetUpdater(upd)
-	//~ AddTermToQuant(e.Quant("llbr_RHS"), llbr_transverse)
-	
 }
 
 type BaryakhtarTransverseUpdater struct {
