@@ -28,11 +28,13 @@ func LoadBaryakhtarLongitudinal(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
+	e.LoadModule("longfield")
+	
 	// ============ New Quantities =============
 
-	e.AddNewQuant("lambda", SYMMTENS, MASK, Unit(""), "LLBr longitudinal relaxation constant")
+	e.AddNewQuant("lambda", SYMMTENS, MASK, Unit(""), "LLBr paramagnetic relaxations constant")
 
-	llbr_long := e.AddNewQuant("llbr_long", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar longitudinal relaxation term")
+	llbr_long := e.AddNewQuant("llbr_long", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar paramagnetic relaxation term")
 
 	// =============== Dependencies =============
 	e.Depends("llbr_long", "H_eff", "gamma_LL", "lambda", "msat0T0")
@@ -40,7 +42,6 @@ func LoadBaryakhtarLongitudinal(e *Engine) {
 	// ============ Updating the torque =============
 	upd := &BaryakhtarLongitudinalUpdater{llbr_long: llbr_long}
 	llbr_long.SetUpdater(upd)
-	//~ AddTermToQuant(e.Quant("llbr_RHS"), llbr_long)
 }
 
 type BaryakhtarLongitudinalUpdater struct {
