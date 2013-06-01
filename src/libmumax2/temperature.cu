@@ -135,10 +135,6 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
 		float msat = (msatMask != NULL) ? msatMask[i] : 1.0;
 		float T = (tempMask != NULL) ? tempMask[i] : 1.0;
 		float pre = sqrtf((T * KB2tempMul_mu0VgammaDtMSatMul) / msat);
-		if (i==100) {
-			printf("pre, T, KB2tempMul_mu0VgammaDtMSatMul, msat: %f %f %f %f\n", pre, T, KB2tempMul_mu0VgammaDtMSatMul, msat);
-			printf("mu_H: %f %f %f\n", mu_H.x, mu_H.y, mu_H.z);
-		}
 		
 		hx[i] = pre * mu_H.x;
 		hy[i] = pre * mu_H.y;

@@ -170,7 +170,6 @@ func (u *AnizBrownUpdater) Update() {
 	mu0VgammaDtMsatMul := Mu0 * V * gamma * dt * mSatMul
 	KB2tempMul_mu0VgammaDtMsatMul := KB2tempMul / mu0VgammaDtMsatMul
 
-	Debug(KB2tempMul_mu0VgammaDtMsatMul)
 	gpu.ScaleNoiseAniz(noise,
 		mu.Array(),
 		tempMask,
