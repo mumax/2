@@ -24,7 +24,7 @@ func init() {
 // with unit
 //	[τ] = 1/s
 // Thus:
-//	τ = gammaLL[ ( \lambda\_ij H - \lambdae\_e laplacian(H) ]
+//	τ = gammaLL[ ( \lambda\_ij H + M x M x \mu\_ij H - \lambdae\_e laplacian(H) ]
 // To keep numbers from getting extremely large or small, 
 // the multiplier is set to gamma, so the array stores τ/gamma
 
@@ -32,7 +32,6 @@ func LoadLLBR(e *Engine) {
 	
 	LoadFullMagnetization(e)
 	
-	e.LoadModule("longfield")
 	llbr_RHS := e.AddNewQuant("llbr_RHS", VECTOR, FIELD, Unit("/s"), "The Right Hand Side of Landau-Lifshits-Baryakhtar equation")
 	llbr_RHS.SetUpdater(NewSumUpdater(llbr_RHS))
 	
