@@ -393,8 +393,101 @@ func FindRatApprox(x float64, y float64, relerr float64, maxq float64, p *float6
      return flag
 }
 
-// Calculates the magnetostatic kernel by brute-force integration
-// of magnetic charges over the faces and averages over cell volumes.
+func GetNextPowerOfTwo(n int) int {
+     m := 1
+     logsize := 0
+     for (m < n) {
+     	 m *= 2
+	logsize += 1
+	 Assert(m>0)
+     }
+     return m
+}
+
+func RecommendSize(sz int) int {
+     return GetNextPowerOfTwo(sz)
+}
+
+type Newell1DFFT struct {
+	fftsize int // 
+}
+
+type Newell1DFFTS struct {
+	fftsize int // 
+}
+
+type Newell3DFFT struct {
+	fftx Newell1DFFT // 
+	ffty Newell1DFFTS // 
+	fftz Newell1DFFTS // 
+}
+
+func (s *Newell1DFFT) SetDimensions(import_csize int) {
+	s.fftsize = import_csize/2
+}
+
+func (s *Newell1DFFTS) SetDimensions(import_csize int) {
+	s.fftsize = import_csize
+}
+
+func (s *Newell1DFFT) GetScaling() float64 {
+	if (s.fftsize > 0) {
+		return float64(1.0)/float64(s.fftsize)
+	}
+	return 1.0
+}
+
+func (s *Newell1DFFTS) GetScaling() float64 {
+	if (s.fftsize > 0) {
+		return float64(1.0)/float64(s.fftsize)
+	}
+	return 1.0
+}
+
+func (s *Newell1DFFT) GetLogicalDimension() int {
+	if (s.fftsize > 0) {
+		return 2*s.fftsize
+	}
+	return 1
+}
+
+func (s *Newell1DFFTS) GetLogicalDimension() int {
+	if (s.fftsize > 0) {
+		return s.fftsize
+	}
+	return 1
+}
+
+func (s *Newell3DFFT) RecommendDimensions(rdim1, rdim2, rdim3 int, cdim1, cdim2, cdim3 *int) {
+	csize1 := RecommendSize(rdim1)
+	csize2 := RecommendSize(rdim2)
+	csize3 := RecommendSize(rdim3)
+	*cdim1 = (csize1/2)+1
+	*cdim2 = csize2
+	*cdim3 = csize3
+}
+
+func (s *Newell3DFFT) SetDimensions(in_cdim1, in_cdim2, in_cdim3 int) {
+	cdim1 := in_cdim1
+	cdim2 := in_cdim2
+	cdim3 := in_cdim3
+
+	if (cdim1 == 1) {
+		s.fftx.SetDimensions(1)
+	} else {
+		s.fftx.SetDimensions(2*(cdim1-1))
+	}
+	s.ffty.SetDimensions(cdim2)
+	s.fftz.SetDimensions(cdim3)
+}
+
+func (s *Newell3DFFT) GetLogicalDimension(ldim1, ldim2, ldim3 *int) {
+	*ldim1 = s.fftx.GetLogicalDimension()
+	*ldim2 = s.ffty.GetLogicalDimension()
+	*ldim3 = s.fftz.GetLogicalDimension()
+}
+
+// Calculates the magnetostatic kernel by Newell's formulation
 // 
 // size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
 // accuracy: use 2^accuracy integration points
@@ -429,13 +522,49 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		}
 	}
 
-	array := kern.Array
+//	array := kern.Array
+	ffts := new(Newell3DFFT)
 
 	var (
 	    scratchPt *host.Array // Create some scratch space for doing computations
 	    p1, p2, q1, q2	float64
 	    R	[3]float64
+	    rdimx, rdimy, rdimz, cdimx, cdimy, cdimz int
 	)
+
+	if (size[X] == 1) {
+		rdimx = 1
+	} else {
+		rdimx = 2*size[X]
+	}
+	if (size[Y] == 1) {
+		rdimy = 1
+	} else {
+		rdimy = 2*size[Y]
+	}
+	if (size[Z] == 1) {
+		rdimz = 1
+	} else {
+		rdimz = 2*size[Z]
+	}
+	
+	ffts.RecommendDimensions(rdimx, rdimy, rdimz, &cdimx, &cdimy, &cdimz)
+
+	if (cdimx == 1) {
+		ffts.fftx.SetDimensions(1)
+	} else {
+		ffts.fftx.SetDimensions(2*(cdimx-1))
+	}
+	ffts.ffty.SetDimensions(cdimy)
+	ffts.fftz.SetDimensions(cdimz)
+
+//	ldimx := ffts.fftx.GetLogicalDimension()
+//	ldimy := ffts.ffty.GetLogicalDimension()
+//	ldimz := ffts.fftz.GetLogicalDimension()
+
+//	adimx := (ldimx/2) + 1
+//	adimy := (ldimy/2) + 1
+//	adimz := (ldimz/2) + 1
 
 	scratch := scratchPt.Array
 	dx, dy, dz := cellsize[X], cellsize[Y], cellsize[Z]
@@ -459,9 +588,9 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 
 	// Field (destination) loop ranges
 	// offset by -dx, -dy, and -dz so we can do d^2/dx^2, d^2/dy^2 and d^2/dz^2 in place
-	x1, x2 := -1, size[X]
-	y1, y2 := -1, size[Y]
-	z1, z2 := -1, size[Z]
+	xstop := 1
+	ystop := 1
+	zstop := 1
 	// Handle PBC separately
 	// Need to error check for only 1D PBC
 
@@ -475,22 +604,38 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	}
 
 	scale := 1 / (4 * math.Pi * dx * dy * dz)
-	scale *= fftxScale * fftyScale * fftzScale
+	scale *= ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling()
+
+	scaled_arad := float64(asymptotic_radius) * math.Pow(dx*dy*dz, float64(1.0/3.0))
+
+	if (rdimz > 1) { zstop = rdimz+2 }
+	if (rdimy > 1) { ystop = rdimy+2 }
+	if (rdimx > 1) { xstop = rdimx+2 }
+
+	if (scaled_arad > 0.0) {
+		ztest := int(math.Ceil(scaled_arad/dz)) + 2
+		if (ztest < zstop) { zstop = ztest }
+		ytest := int(math.Ceil(scaled_arad/dy)) + 2
+		if (ytest < ystop) { ystop = ytest }
+		xtest := int(math.Ceil(scaled_arad/dx)) + 2
+		if (xtest < xstop) { xstop = xtest }
+	}
+
 //	for s := 0; s < 3; s++ { // source index Ksdxyz
 //		u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
 // 	}
 	if (periodic[0]+periodic[1]+periodic[2] == 0) {
-   	   	for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped.
-		      xw := Wrap(x, size[X])
-		      R[X] = float64(x) * cellsize[X]
+   	   	for x := 0; x < xstop; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped.
+		      xw := x
+		      R[X] = float64(x-1) * cellsize[X]
 
-		      for y := y1; y <= y2; y++ {
-			    yw := Wrap(y, size[Y])
-			    R[Y] = float64(y) * cellsize[Y]
+		      for y := 0; y < ystop; y++ {
+			    yw := y
+			    R[Y] = float64(y-1) * cellsize[Y]
 
-			    for z := z1; z <= z2; z++ {
-			    	  zw := Wrap(z, size[Z])
-			    	  R[Z] = float64(z) * cellsize[Z]
+			    for z := 0; z < zstop; z++ {
+			    	  zw := z
+			    	  R[Z] = float64(z-1) * cellsize[Z]
 
 				  // For Nxx
 				  I := FullTensorIdx[0][0]
@@ -504,6 +649,52 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 
 			    }
 		      }
+		}
+
+		// Do d^2/dz^2
+		if (zstop == 1) {
+			zw := 0
+			for y := 0; y < ystop; y++ {
+				yw := y
+				R[Y] = float64(y-1) * cellsize[Y]
+
+				for x := 0; x < xstop; x++ {
+					xw := x
+					R[X] = float64(x-1) * cellsize[X]
+
+					I := FullTensorIdx[0][0]
+					scratch[I][xw][yw][zw] -= float32(scale*Newell_f(R[X],R[Y],0.0))
+					scratch[I][xw][yw][zw] *= float32(2.0)
+
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][zw] -=float32(scale*Newell_g(R[X],R[Y],0.0))
+					scratch[I][xw][yw][zw] *= float32(2.0)
+
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][zw] = float32(0.0)
+
+				}
+			}
+		} else {
+			for z := 0; z < rdimz; z++ {
+				zw := z
+				R[Z] = float64(z-1) * cellsize[Z]
+				for y := 0; y < ystop; y++ {
+					yw := y
+					R[Y] = float64(y-1) * cellsize[Y]
+					for x := 0; x < xstop; x++ {
+						xw := x
+						R[X] = float64(x-1) * cellsize[X]
+
+						I := FullTensorIdx[0][0]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
+						I := FullTensorIdx[0][1]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
+						I := FullTensorIdx[0][2]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
+					}
+				}
+			}
 		}
 	}
 }
