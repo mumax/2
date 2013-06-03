@@ -101,11 +101,11 @@ func SelfDemagNx(x, y, z float64) float64 {
 	return Nxx
 }
 
-func SelfDemayNy(xsize, ysize, zsize float64) float64 {
+func SelfDemagNy(xsize, ysize, zsize float64) float64 {
      return SelfDemagNx(ysize,zsize,xsize)
 }
 
-func SelfDemayNz(xsize, ysize, zsize float64) float64 {
+func SelfDemagNz(xsize, ysize, zsize float64) float64 {
      return SelfDemagNx(zsize,xsize,ysize)
 }
 
@@ -205,6 +205,14 @@ func CalculateSDA00(x, y, z, dx, dy, dz float64) float64 {
 	   result = 8.0*accSum(27,arrPt)
 	}
 	return result
+}
+
+func CalculateSDA11(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA00(y,x,z,dy,dx,dz)
+}
+
+func CalculateSDA22(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA00(z,y,x,dz,dy,dx)
 }
 
 func Newell_g(x, y, z float64) float64 {
@@ -307,6 +315,13 @@ func CalculateSDA01(x, y, z, l, h, e float64) float64 {
 
 }
 
+func CalculateSDA02(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA01(x,z,y,dx,dz,dy)
+}
+
+func CalculateSDA12(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA01(y,z,x,dy,dz,dx)
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Greatest common divisor via Euclid's algorithm
@@ -496,7 +511,7 @@ func (s *Newell3DFFT) GetLogicalDimension(ldim1, ldim2, ldim3 *int) {
 // (e.g. K[X][Y][1][2][3] gives H_y at position (1, 2, 3) due to a unit dipole m_x at the origin.
 // You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
 // K[KernIdx[X][X]] returns K[XX]
-func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_radius int, kern *host.Array) {
+func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_radius, zero_self_demag int, kern *host.Array) {
 
 	Debug("Calculating demag kernel:", "size", size)
 
@@ -612,6 +627,8 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	if (rdimy > 1) { ystop = rdimy+2 }
 	if (rdimx > 1) { xstop = rdimx+2 }
 
+	I := FullTensorIdx[0][0]
+
 	if (scaled_arad > 0.0) {
 		ztest := int(math.Ceil(scaled_arad/dz)) + 2
 		if (ztest < zstop) { zstop = ztest }
@@ -638,7 +655,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 			    	  R[Z] = float64(z-1) * cellsize[Z]
 
 				  // For Nxx
-				  I := FullTensorIdx[0][0]
+				  I = FullTensorIdx[0][0]
 				  scratch[I][xw][yw][zw]=float32(scale*Newell_f(R[X],R[Y],R[Z]))
 				  // For Nxy
 				  I = FullTensorIdx[0][1]
@@ -662,7 +679,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 					xw := x
 					R[X] = float64(x-1) * cellsize[X]
 
-					I := FullTensorIdx[0][0]
+					I = FullTensorIdx[0][0]
 					scratch[I][xw][yw][zw] -= float32(scale*Newell_f(R[X],R[Y],0.0))
 					scratch[I][xw][yw][zw] *= float32(2.0)
 
@@ -678,23 +695,127 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		} else {
 			for z := 0; z < rdimz; z++ {
 				zw := z
-				R[Z] = float64(z-1) * cellsize[Z]
 				for y := 0; y < ystop; y++ {
 					yw := y
-					R[Y] = float64(y-1) * cellsize[Y]
 					for x := 0; x < xstop; x++ {
 						xw := x
-						R[X] = float64(x-1) * cellsize[X]
 
-						I := FullTensorIdx[0][0]
+						I = FullTensorIdx[0][0]
 						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-						I := FullTensorIdx[0][1]
+						I = FullTensorIdx[0][1]
 						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-						I := FullTensorIdx[0][2]
+						I = FullTensorIdx[0][2]
 						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
 					}
 				}
 			}
 		}
+
+		// Do d^2/dy^2
+		if (ystop == 1) {
+			yw := 0
+			for z := 0; z < zstop; z++ {
+				zw := z
+				R[Z] = float64(z) * cellsize[Z]
+
+				for x := 0; x < xstop; x++ {
+					xw := x
+					R[X] = float64(x-1) * cellsize[X]
+
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][yw][zw] -= float32(scale*(Newell_f(R[X],0.0,R[Z]-cellsize[Z])+Newell_f(R[X],0.0,R[Z]+cellsize[Z])-2.0*Newell_f(R[X],0.0,R[Z])))
+					scratch[I][xw][yw][zw] *= float32(2.0)
+
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][zw] =float32(0.0)
+
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][zw] -= float32(scale*(Newell_g(R[X],R[Z]-cellsize[Z],0.0)+Newell_g(R[X],R[Z]+cellsize[Z],0.0)-2.0*Newell_g(R[X],R[Z],0.0)))
+					scratch[I][xw][yw][zw] *= float32(2.0)
+
+				}
+			}
+		} else {
+			for z := 0; z < rdimz; z++ {
+				zw := z
+				for y := 0; y < ystop; y++ {
+					yw := y
+					for x := 0; x < xstop; x++ {
+						xw := x
+
+						I = FullTensorIdx[0][0]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
+						I = FullTensorIdx[0][1]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
+						I = FullTensorIdx[0][2]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
+					}
+				}
+			}
+		}
+
+		// Do d^2/dx^2
+		if (xstop == 1) {
+			xw := 0
+			for z := 0; z < zstop; z++ {
+				zw := z
+				R[Z] = float64(z) * cellsize[Z]
+
+				for y := 0; y < ystop; y++ {
+					yw := y
+					R[Y] = float64(y) * cellsize[Y]
+
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][yw][zw] -= float32(scale*((4.0*Newell_f(0.0,R[Y],R[Z])+Newell_f(0.0,R[Y]+cellsize[Y],R[Z]+cellsize[Z])+Newell_f(0.0,R[Y]-cellsize[Y],R[Z]+cellsize[Z])+Newell_f(0.0,R[Y]+cellsize[Y],R[Z]-cellsize[Z])+Newell_f(0.0,R[Y]-cellsize[Y],R[Z]-cellsize[Z]))-2.0*(Newell_f(0,R[Y]+cellsize[Y],R[Z])+Newell_f(0,R[Y]-cellsize[Y],R[Z])+Newell_f(0,R[Y],R[Z]+cellsize[Z])+Newell_f(0,R[Y],R[Z]-cellsize[Z]))))
+					scratch[I][xw][yw][zw] *= float32(2.0)
+
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][zw] =float32(0.0)
+
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][zw] = float32(0.0)
+
+				}
+			}
+		} else {
+			for z := 0; z < rdimz; z++ {
+				zw := z
+				for y := 0; y < ystop; y++ {
+					yw := y
+					for x := 0; x < xstop; x++ {
+						xw := x
+
+						I = FullTensorIdx[0][0]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw]
+						I = FullTensorIdx[0][1]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw]
+						I = FullTensorIdx[0][2]
+						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw]
+					}
+				}
+			}
+		}
+
+		// Correct for self-demag
+		selfscale := float32(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
+		I = FullTensorIdx[0][0]
+		scratch[I][0][0][0] = float32(SelfDemagNx(cellsize[X],cellsize[Y],cellsize[Z]))
+		if (zero_self_demag > 0) { scratch[I][0][0][0] -= float32(1.0/3.0) }
+		scratch[I][0][0][0] *= selfscale
+		I = FullTensorIdx[0][1]
+		scratch[I][0][0][0] = float32(0.0)
+		I = FullTensorIdx[0][2]
+		scratch[I][0][0][0] = float32(0.0)
+
+		// Use asymptotic approximation for far field
+		if (scaled_arad >= 0.0) {
+			scaled_arad_sq := scaled_arad*scaled_arad
+			fft_scaling := float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
+			Assert(scaled_arad_sq > 0.0 && fft_scaling > 0.0)
+		}
+
+		xtest := float64(rdimx)*float64(cellsize[X])
+		xtest *= xtest
+		
 	}
 }
