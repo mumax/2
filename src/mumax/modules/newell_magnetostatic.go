@@ -46,7 +46,7 @@ type DemagAsymptoticRefineData struct {
 }
 
 type DemagNxxAsymptoticBase struct {
-	cubic_cell int
+	cubic_cell bool
 	self_demag, lead_weight float64
 	a1, a2, a3, a4, a5, a6 float64
 	b1, b2, b3, b4, b5, b6, b7, b8, b9, b10 float64
@@ -593,15 +593,96 @@ func (s *DemagAsymptoticRefineData) DemagAsymptoticRefineData(dx, dy, dz, maxrat
 func NxxAsymptotic(x, y, z float64) float64 {
 	ptdata := new(DemagNabData)
 	ptdata.Set(x,y,z)
-	return DemagNxxAsymptotic_NxxAsymptotic(ptdata)
+	return DemagNxxAsymptoticF(ptdata)
 }
 
-func DemagNxxAsymptotic_NxxAsymptotic(ptdata *DemagNabData) float64{
+func DemagNxxAsymptoticF(ptdata *DemagNabData) float64{
 	return float64(0.0)
 }
 
-func DemagNxxAsymptoticBase_DemagNxxAsymptoticBase(refine_data *DemagAsymptoticRefineData) {
-//	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
+func (s *DemagNxxAsymptoticBase) DemagNxxAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) {
+	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
+	s.self_demag = SelfDemagNx(dx,dy,dz)
+	dx2, dy2, dz2 := dx*dx, dy*dy, dz*dz
+	dx4, dy4, dz4 := dx2*dx2, dy2*dy2, dz2*dz2
+	dx6, dy6, dz6 := dx4*dx2, dy4*dy2, dz4*dz2
+	s.lead_weight = (-dx*dy*dz)/(4*math.Pi)
+	// Initialize coefficients for 1/R^5 term
+	if ( (dx2 != dy2) || (dx2 != dz2) || (dy2 != dz2) ) { // Non-cube case
+		s.cubic_cell = false
+		s.a1 = s.lead_weight / float64(4.0)
+		s.a2, s.a3, s.a4, s.a5, s.a6 = s.a1, s.a1, s.a1, s.a1, s.a1
+		s.a1 *=   8.0*dx2 -  4.0*dy2 -  4.0*dz2
+		s.a2 *= -24.0*dx2 + 27.0*dy2 -  3.0*dz2
+		s.a3 *= -24.0*dx2 -  3.0*dy2 + 27.0*dz2
+		s.a4 *=   3.0*dx2 -  4.0*dy2 +      dz2
+		s.a5 *=   6.0*dx2 -  3.0*dy2 -  3.0*dz2
+		s.a6 *=   3.0*dx2 +      dy2 -  4.0*dz2
+	} else { // Cube
+		s.cubic_cell = true
+		s.a1, s.a2, s.a3, s.a4, s.a5, s.a6 = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+	}
+
+	// Initialize coefficients for 1/R^7 term
+	s.b1, s.b2, s.b3, s.b4, s.b5, s.b6, s.b7, s.b8, s.b9, s.b10 = s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0)
+	if (s.cubic_cell) {
+		s.b1  *=  -14.0*dx4
+		s.b2  *=  105.0*dx4
+		s.b3  *=  105.0*dx4
+		s.b4  *= -105.0*dx4
+		s.b6  *= -105.0*dx4
+		s.b7  *=    7.0*dx4
+		s.b10 *=    7.0*dx4
+		s.b5, s.b8, s.b9 = 0.0, 0.0, 0.0
+	} else {
+		s.b1  *=   32.0*dx4 -  40.0*dx2*dy2 -  40.0*dx2*dz2 +  12.0*dy4 +  10.0*dy2*dz2 +  12.0*dz4
+		s.b2  *= -240.0*dx4 + 580.0*dx2*dy2 +  20.0*dx2*dz2 - 202.0*dy4 -  75.0*dy2*dz2 +  22.0*dz4
+		s.b3  *= -240.0*dx4 +  20.0*dx2*dy2 + 580.0*dx2*dz2 +  22.0*dy4 -  75.0*dy2*dz2 - 202.0*dz4
+		s.b4  *=  180.0*dx4 - 505.0*dx2*dy2 +  55.0*dx2*dz2 + 232.0*dy4 -  75.0*dy2*dz2 +   8.0*dz4
+		s.b5  *=  360.0*dx4 - 450.0*dx2*dy2 - 450.0*dx2*dz2 - 180.0*dy4 + 900.0*dy2*dz2 - 180.0*dz4
+		s.b6  *=  180.0*dx4 +  55.0*dx2*dy2 - 505.0*dx2*dz2 +   8.0*dy4 -  75.0*dy2*dz2 + 232.0*dz4
+		s.b7  *=  -10.0*dx4 +  30.0*dx2*dy2 -   5.0*dx2*dz2 -  16.0*dy4 +  10.0*dy2*dz2 -   2.0*dz4
+		s.b8  *=  -30.0*dx4 +  55.0*dx2*dy2 +  20.0*dx2*dz2 +   8.0*dy4 -  75.0*dy2*dz2 +  22.0*dz4
+		s.b9  *=  -30.0*dx4 +  20.0*dx2*dy2 +  55.0*dx2*dz2 +  22.0*dy4 -  75.0*dy2*dz2 +   8.0*dz4
+		s.b10 *=  -10.0*dx4 -   5.0*dx2*dy2 +  30.0*dx2*dz2 -   2.0*dy4 +  10.0*dy2*dz2 -  16.0*dz4
+	}
+
+	// Initialize coefficients for 1/R^9 term
+	s.c1, s.c2, s.c3, s.c4, s.c5, s.c6, s.c7, s.c8 = s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0)
+	s.c9, s.c10, s.c11, s.c12, s.c13, s.c14, s.c15 = s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0)
+	if(s.cubic_cell) {
+		s.c1  *=    32.0 * dx6
+		s.c2  *=  -448.0 * dx6
+		s.c3  *=  -448.0 * dx6
+		s.c4  *=  -150.0 * dx6
+		s.c5  *=  7620.0 * dx6
+		s.c6  *=  -150.0 * dx6
+		s.c7  *=   314.0 * dx6
+		s.c8  *= -3810.0 * dx6
+		s.c9  *= -3810.0 * dx6
+		s.c10 *=   314.0 * dx6
+		s.c11 *=   -16.0 * dx6
+		s.c12 *=   134.0 * dx6
+		s.c13 *=   300.0 * dx6
+		s.c14 *=   134.0 * dx6
+		s.c15 *=   -16.0 * dx6
+	} else {
+		s.c1  *=    384.0 *dx6 +   -896.0 *dx4*dy2 +   -896.0 *dx4*dz2 +    672.0 *dx2*dy4 +    560.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   -120.0 *dy6 +   -112.0 *dy4*dz2 +   -112.0 *dy2*dz4 +   -120.0 *dz6
+		s.c2  *=  -5376.0 *dx6 +  22624.0 *dx4*dy2 +   2464.0 *dx4*dz2 + -19488.0 *dx2*dy4 +  -7840.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   3705.0 *dy6 +   2198.0 *dy4*dz2 +    938.0 *dy2*dz4 +   -345.0 *dz6
+		s.c3  *=  -5376.0 *dx6 +   2464.0 *dx4*dy2 +  22624.0 *dx4*dz2 +    672.0 *dx2*dy4 +  -7840.0 *dx2*dy2*dz2 + -19488.0 *dx2*dz4 +   -345.0 *dy6 +    938.0 *dy4*dz2 +   2198.0 *dy2*dz4 +   3705.0 *dz6
+		s.c4  *=  10080.0 *dx6 + -48720.0 *dx4*dy2 +   1680.0 *dx4*dz2 +  49770.0 *dx2*dy4 +  -2625.0 *dx2*dy2*dz2 +   -630.0 *dx2*dz4 + -10440.0 *dy6 +  -1050.0 *dy4*dz2 +   2100.0 *dy2*dz4 +   -315.0 *dz6
+		s.c5  *=  20160.0 *dx6 + -47040.0 *dx4*dy2 + -47040.0 *dx4*dz2 +  -6300.0 *dx2*dy4 + 133350.0 *dx2*dy2*dz2 +  -6300.0 *dx2*dz4 +   7065.0 *dy6 + -26670.0 *dy4*dz2 + -26670.0 *dy2*dz4 +   7065.0 *dz6
+		s.c6  *=  10080.0 *dx6 +   1680.0 *dx4*dy2 + -48720.0 *dx4*dz2 +   -630.0 *dx2*dy4 +  -2625.0 *dx2*dy2*dz2 +  49770.0 *dx2*dz4 +   -315.0 *dy6 +   2100.0 *dy4*dz2 +  -1050.0 *dy2*dz4 + -10440.0 *dz6
+		s.c7  *=  -3360.0 *dx6 +  17290.0 *dx4*dy2 +  -1610.0 *dx4*dz2 + -19488.0 *dx2*dy4 +   5495.0 *dx2*dy2*dz2 +   -588.0 *dx2*dz4 +   4848.0 *dy6 +  -3136.0 *dy4*dz2 +    938.0 *dy2*dz4 +    -75.0 *dz6
+		s.c8  *= -10080.0 *dx6 +  32970.0 *dx4*dy2 +  14070.0 *dx4*dz2 +  -6300.0 *dx2*dy4 + -66675.0 *dx2*dy2*dz2 +  12600.0 *dx2*dz4 + -10080.0 *dy6 +  53340.0 *dy4*dz2 + -26670.0 *dy2*dz4 +   3015.0 *dz6
+		s.c9  *= -10080.0 *dx6 +  14070.0 *dx4*dy2 +  32970.0 *dx4*dz2 +  12600.0 *dx2*dy4 + -66675.0 *dx2*dy2*dz2 +  -6300.0 *dx2*dz4 +   3015.0 *dy6 + -26670.0 *dy4*dz2 +  53340.0 *dy2*dz4 + -10080.0 *dz6
+		s.c10 *=  -3360.0 *dx6 +  -1610.0 *dx4*dy2 +  17290.0 *dx4*dz2 +   -588.0 *dx2*dy4 +   5495.0 *dx2*dy2*dz2 + -19488.0 *dx2*dz4 +    -75.0 *dy6 +    938.0 *dy4*dz2 +  -3136.0 *dy2*dz4 +   4848.0 *dz6
+		s.c11 *=    105.0 *dx6 +   -560.0 *dx4*dy2 +     70.0 *dx4*dz2 +    672.0 *dx2*dy4 +   -280.0 *dx2*dy2*dz2 +     42.0 *dx2*dz4 +   -192.0 *dy6 +    224.0 *dy4*dz2 +   -112.0 *dy2*dz4 +     15.0 *dz6
+		s.c12 *=    420.0 *dx6 +  -1610.0 *dx4*dy2 +   -350.0 *dx4*dz2 +    672.0 *dx2*dy4 +   2345.0 *dx2*dy2*dz2 +   -588.0 *dx2*dz4 +    528.0 *dy6 +  -3136.0 *dy4*dz2 +   2198.0 *dy2*dz4 +   -345.0 *dz6
+		s.c13 *=    630.0 *dx6 +  -1470.0 *dx4*dy2 +  -1470.0 *dx4*dz2 +   -630.0 *dx2*dy4 +   5250.0 *dx2*dy2*dz2 +   -630.0 *dx2*dz4 +    360.0 *dy6 +  -1050.0 *dy4*dz2 +  -1050.0 *dy2*dz4 +    360.0 *dz6
+		s.c14 *=    420.0 *dx6 +   -350.0 *dx4*dy2 +  -1610.0 *dx4*dz2 +   -588.0 *dx2*dy4 +   2345.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   -345.0 *dy6 +   2198.0 *dy4*dz2 +  -3136.0 *dy2*dz4 +    528.0 *dz6
+		s.c15 *=    105.0 *dx6 +     70.0 *dx4*dy2 +   -560.0 *dx4*dz2 +     42.0 *dx2*dy4 +   -280.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +     15.0 *dy6 +   -112.0 *dy4*dz2 +    224.0 *dy2*dz4 +   -192.0 *dz6
+	}
 }
 
 // Calculates the magnetostatic kernel by Newell's formulation
