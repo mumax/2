@@ -17,6 +17,47 @@ import (
 	"mumax/host"
 )
 
+// Define some required data types
+type Newell1DFFT struct {
+	fftsize int // 
+}
+
+type Newell1DFFTS struct {
+	fftsize int // 
+}
+
+type Newell3DFFT struct {
+	fftx Newell1DFFT // 
+	ffty Newell1DFFTS // 
+	fftz Newell1DFFTS // 
+}
+
+type DemagNabData struct {
+	x, y, z float64
+	tx2, ty2, tz2 float64
+	R, iR float64
+	R2, iR2 float64
+}
+
+type DemagAsymptoticRefineData struct {
+	rdx, rdy, rdz float64
+	result_scale float64
+	xcount, ycount, zcount int
+}
+
+type DemagNxxAsymptoticBase struct {
+	cubic_cell int
+	self_demag, lead_weight float64
+	a1, a2, a3, a4, a5, a6 float64
+	b1, b2, b3, b4, b5, b6, b7, b8, b9, b10 float64
+	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15 float64
+}
+
+type DemagNxxAsymptotic struct {
+	refine_data DemagAsymptoticRefineData
+	Nxx DemagNxxAsymptoticBase
+}
+
 // Some subroutines required for other subroutines
 func asCompare(px *float64, py *float64) int {
      x := *px
@@ -423,20 +464,6 @@ func RecommendSize(sz int) int {
      return GetNextPowerOfTwo(sz)
 }
 
-type Newell1DFFT struct {
-	fftsize int // 
-}
-
-type Newell1DFFTS struct {
-	fftsize int // 
-}
-
-type Newell3DFFT struct {
-	fftx Newell1DFFT // 
-	ffty Newell1DFFTS // 
-	fftz Newell1DFFTS // 
-}
-
 func (s *Newell1DFFT) SetDimensions(import_csize int) {
 	s.fftsize = import_csize/2
 }
@@ -500,6 +527,81 @@ func (s *Newell3DFFT) GetLogicalDimension(ldim1, ldim2, ldim3 *int) {
 	*ldim1 = s.fftx.GetLogicalDimension()
 	*ldim2 = s.ffty.GetLogicalDimension()
 	*ldim3 = s.fftz.GetLogicalDimension()
+}
+
+func (s *DemagNabData) Set(import_x, import_y, import_z float64) {
+	s.x, s.y, s.z = import_x, import_y, import_z
+	x2 := s.x*s.x
+	y2 := s.y*s.y
+	s.R2 = x2 + y2
+	z2 := s.z*s.z
+	s.R2 += z2
+	R4 := s.R2*s.R2
+	s.R = math.Sqrt(s.R2)
+	if (s.R2 != 0.0) {
+		s.tx2 = x2 / R4
+		s.ty2 = y2 / R4
+		s.tz2 = z2 / R4
+		s.iR2 = float64(1.0 / s.R2)
+		s.iR = float64(1.0 / s.R)
+	} else {
+		s.tx2, s.ty2, s.tz2 = 0.0, 0.0, 0.0
+		s.iR2, s.R, s.iR = 0.0, 0.0, 0.0
+	}
+}
+
+func DemagNabData_SetPair(ixa, iya, iza, ixb, iyb, izb float64, pta, ptb *DemagNabData) {
+	pta.Set(ixa,iya,iza)
+	ptb.Set(ixb,iyb,izb)
+}
+
+func (s *DemagAsymptoticRefineData) DemagAsymptoticRefineData(dx, dy, dz, maxratio float64) {
+	s.rdx, s.rdy, s.rdz = 0.0, 0.0, 0.0
+	s.result_scale = 0.0
+	s.xcount, s.ycount, s.zcount = 0, 0, 0
+	if (dz <= dx && dz <= dy) {
+		xratio := math.Ceil(dx/(maxratio*dz))
+		s.xcount = int(xratio)
+		s.rdx = float64(dx/xratio)
+		yratio := math.Ceil(dy/(maxratio*dz))
+		s.ycount = int(yratio)
+		s.rdy = float64(dy/yratio)
+		s.zcount = 1
+		s.rdz = dz
+	} else if (dy <= dx && dy <= dz) {
+		xratio := math.Ceil(dx/(maxratio*dy))
+		s.xcount = int(xratio)
+		s.rdx = float64(dx/xratio)
+		zratio := math.Ceil(dz/(maxratio*dy))
+		s.zcount = int(zratio)
+		s.rdz = float64(dz/zratio)
+		s.ycount = 1
+		s.rdy = dy
+	} else {
+		yratio := math.Ceil(dy/(maxratio*dx))
+		s.ycount = int(yratio)
+		s.rdy = float64(dy/yratio)
+		zratio := math.Ceil(dz/(maxratio*dx))
+		s.zcount = int(zratio)
+		s.rdz = float64(dz/zratio)
+		s.ycount = 1
+		s.rdx = dx
+	}
+	s.result_scale = float64(1.0) / ( float64(s.xcount) * float64(s.ycount) * float64(s.zcount) )
+}
+
+func NxxAsymptotic(x, y, z float64) float64 {
+	ptdata := new(DemagNabData)
+	ptdata.Set(x,y,z)
+	return DemagNxxAsymptotic_NxxAsymptotic(ptdata)
+}
+
+func DemagNxxAsymptotic_NxxAsymptotic(ptdata *DemagNabData) float64{
+	return float64(0.0)
+}
+
+func DemagNxxAsymptoticBase_DemagNxxAsymptoticBase(refine_data *DemagAsymptoticRefineData) {
+//	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
 }
 
 // Calculates the magnetostatic kernel by Newell's formulation
