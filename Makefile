@@ -4,7 +4,7 @@ export GOPATH=$(CURDIR)
 
 ifndef SystemRoot
 LIBNAME=libmumax2.so
-export CUDAROOT=/usr/local/cuda-5.0
+export CUDAROOT=/usr/local/cuda
 export NVROOT=/usr/lib64/nvidia
 export CUDA_INC_PATH=$(CUDAROOT)/include/
 export CUDA_LIB_PATH=$(NVROOT)/opengl/lib64/:$(CUDAROOT)/lib64/
