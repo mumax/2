@@ -54,7 +54,7 @@ func LoadEnergy(e *Engine) {
 	}
 
 	if e.HasQuant("H_anis") {
-		term := LoadEnergyTerm(e, "E_anis", M, "H_anis", -e.CellVolume()*Mu0, "Anisotropy energy")
+		term := LoadEnergyTerm(e, "E_anis", M, "H_anis", -e.CellVolume()*Mu0*0.5, "Uniaxial Anisotropy energy")
 		Log("Loaded anisotropy energy E_anis")
 		sumUpd.AddParent(term.Name())
 	}
@@ -62,6 +62,24 @@ func LoadEnergy(e *Engine) {
 	if e.HasQuant("H_lf") {
 		term := LoadEnergyTerm(e, "E_lf", M, "H_lf", -e.CellVolume()*Mu0, "Longitudinal field energy")
 		Log("Loaded anisotropy energy E_lf")
+		sumUpd.AddParent(term.Name())
+	}
+
+	if e.HasQuant("H_Cub4Anis") {
+		term := LoadEnergyTerm(e, "E_Cub4Anis", M, "H_Cub4Anis", -e.CellVolume()*Mu0*0.25, "Cubic Anisotropy energy")
+		Log("Loaded anisotropy energy E_Cub4Anis")
+		sumUpd.AddParent(term.Name())
+	}
+
+	if e.HasQuant("H_Cub6Anis") {
+		term := LoadEnergyTerm(e, "E_Cub6Anis", M, "H_Cub6Anis", -e.CellVolume()*Mu0*0.25, "Cubic Anisotropy energy")
+		Log("Loaded anisotropy energy E_Cub6Anis")
+		sumUpd.AddParent(term.Name())
+	}
+
+	if e.HasQuant("H_Cub8Anis") {
+		term := LoadEnergyTerm(e, "E_Cub8Anis", M, "H_Cub8Anis", -e.CellVolume()*Mu0*0.25, "Cubic Anisotropy energy")
+		Log("Loaded anisotropy energy E_Cub8Anis")
 		sumUpd.AddParent(term.Name())
 	}
 }
