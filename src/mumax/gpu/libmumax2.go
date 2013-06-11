@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 // This file wraps the core functions of libmultigpu.so.
@@ -33,6 +33,7 @@ func Add(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+
 // Multiply 2 multi-GPU arrays: dst = a * b
 func Mul(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
@@ -44,6 +45,7 @@ func Mul(dst, a, b *Array) {
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
+
 // Divide 2 multi-GPU arrays: dst = a / b; _if_ b = 0 _then_ dst = 0
 func Div(dst, a, b *Array) {
 	CheckSize(dst.size4D, a.size4D)
@@ -65,7 +67,7 @@ func DivMulPow(dst, a, b, c *Array, p float64) {
 		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(c.pointer[0]))),
 		C.float(float32(p)),
-		
+
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
@@ -76,43 +78,42 @@ func Dot(dst, a, b *Array) {
 	CheckSize(dst.size3D, a.size3D)
 	C.dotAsync(
 		(**C.float)(unsafe.Pointer(&(dst.Comp[X].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(a.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(a.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(a.Comp[Z].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(b.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(b.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(b.Comp[Z].Pointers()[0]))),
-		
+
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen3D))
 	dst.Stream.Sync()
 }
 
 // Synchronous Singed Dot product: C = sign(BC) * (AB)
-func DotSign(dst, a, b, c *Array) { 
+func DotSign(dst, a, b, c *Array) {
 	CheckSize(dst.size3D, a.size3D)
 	C.dotSignAsync(
 		(**C.float)(unsafe.Pointer(&(dst.Comp[X].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(a.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(a.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(a.Comp[Z].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(b.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(b.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(b.Comp[Z].Pointers()[0]))),
-		
+
 		(**C.float)(unsafe.Pointer(&(c.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(c.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(c.Comp[Z].Pointers()[0]))),
-		
+
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen3D))
 	dst.Stream.Sync()
 }
-
 
 // Asynchronous multiply-add: a += mulB*b
 // b may contain NULL pointers, implemented as all 1's.
@@ -138,14 +139,37 @@ func MAdd2Async(a, b *Array, mulB float32, c *Array, mulC float32, stream Stream
 		C.int(a.partLen4D))
 }
 
-// Multiply-add: dst = a + mulB*b
+// 3-vector multiply-add: dst_i = a_i + mulB_i*b_i
 // b may contain NULL pointers, implemented as all 1's.
-func Madd(dst, a, b *Array, mulB float32) {
+func VecMadd(dst, a, b *Array, mulB []float64) {
+	C.vecMaddAsync(
+		(**C.float)(unsafe.Pointer(&(dst.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(dst.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(dst.Comp[Z].Pointers()[0]))),
+
+		(**C.float)(unsafe.Pointer(&(a.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(a.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(a.Comp[Z].Pointers()[0]))),
+
+		(**C.float)(unsafe.Pointer(&(b.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(b.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(b.Comp[Z].Pointers()[0]))),
+
+		(C.float)(float32(mulB[X])),
+		(C.float)(float32(mulB[Y])),
+		(C.float)(float32(mulB[Z])),
+
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen3D))
+	dst.Stream.Sync()
+}
+
+func Madd(dst, a, b *Array, mulB float64) {
 	C.maddAsync(
 		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(a.pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(b.pointer[0]))),
-		(C.float)(mulB),
+		(C.float)(float32(mulB)),
 		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
@@ -165,7 +189,7 @@ func AddMadd(dst, a, b, c *Array, mul float32) {
 	dst.Stream.Sync()
 }
 
-// Complex multiply add. 
+// Complex multiply add.
 // dst and src contain complex numbers (interleaved format)
 // kern contains real numbers
 // 	dst[i] += scale * kern[i] * src[i]
@@ -233,7 +257,6 @@ func LinearCombination3(dst *Array, a *Array, mulA float32, b *Array, mulB float
 		C.int(dst.partLen4D))
 	dst.Stream.Sync()
 }
-
 
 // Calculates:
 //	τ = (m x h) - α m  x (m x h)

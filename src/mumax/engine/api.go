@@ -908,7 +908,7 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 		a.Remove(handle)
 
 		//~ substrate ground state
-		gpu.Madd(m, m, m0, float32(-1.0))
+		gpu.Madd(m, m, m0, -1.0)
 
 		//~ apply windowing
 		for ii := 0; ii < COMP; ii++ {

@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -46,8 +46,8 @@ type MaxwellPlan struct {
 	dBdt, dEdt *Quant // time derivative of field
 	E, B       *Quant // E/B fields
 	// TODO: time derivatives could be taken in FFT space, but this complicates external fields
-	//fftE1, fftE2 *gpu.Array       // previous FFT E fields for time derivative 
-	//fftB1, fftB2 *gpu.Array       // previous FFT B fields for time derivative 
+	//fftE1, fftE2 *gpu.Array       // previous FFT E fields for time derivative
+	//fftB1, fftB2 *gpu.Array       // previous FFT B fields for time derivative
 	//time1, time2 float64          // time of previous fields for derivative
 }
 
@@ -72,7 +72,7 @@ const (
 	JZ  = 6
 )
 
-// 
+//
 func (plan *MaxwellPlan) init() {
 	if plan.initialized {
 		return
@@ -300,7 +300,7 @@ func (plan *MaxwellPlan) update(in *[7]*gpu.Array, inMul *[7]float64, out *gpu.A
 	// add external field
 	if ext != nil {
 		for c := 0; c < 3; c++ {
-			mul := float32(ext.Multiplier()[c])
+			mul := ext.Multiplier()[c]
 			if mul != 0 {
 				gpu.Madd(out.Component(c), out.Component(c), ext.Array().Component(c), mul)
 			}
@@ -325,7 +325,7 @@ func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, re
 	}
 	Assert(matsymm == SYMMETRIC || matsymm == ANTISYMMETRIC || matsymm == NOSYMMETRY || matsymm == DIAGONAL)
 
-	//if FFT'd kernel is pure real or imag, 
+	//if FFT'd kernel is pure real or imag,
 	//store only relevant part and multiply by scaling later
 	scaling := [3]complex128{complex(1, 0), complex(0, 1), complex(0, 0)}[realness]
 	Debug("scaling=", scaling)
@@ -411,7 +411,7 @@ func (plan *MaxwellPlan) LoadKernel(kernel *host.Array, pos int, matsymm int, re
 
 const zero_tolerance = 1e-5
 
-// list is considered zero if all elements are 
+// list is considered zero if all elements are
 // at least a factorzero_tolerance smaller than max.
 func IsZero(array []float32, max float32) bool {
 	return (maxAbs(array) / max) < zero_tolerance
@@ -444,7 +444,7 @@ const (
 )
 
 // Detects matrix symmetry.
-// returns NOSYMMETRY, SYMMETRIC, ANTISYMMETRIC 
+// returns NOSYMMETRY, SYMMETRIC, ANTISYMMETRIC
 func MatrixSymmetry(matrix *host.Array) int {
 	AssertMsg(matrix.NComp() == 9, "MatrixSymmetry NComp")
 	symm := true

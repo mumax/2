@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -47,7 +47,7 @@ func (s *HeunSolver) Step() {
 		s.buffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.buffer[i].CopyFromDevice(dy.Array()) // save for later
 
-		gpu.Madd(y.Array(), y.Array(), dy.Array(), float32(dt*dyMul[0])) // initial euler step
+		gpu.Madd(y.Array(), y.Array(), dy.Array(), dt*dyMul[0]) // initial euler step
 
 		y.Invalidate()
 	}

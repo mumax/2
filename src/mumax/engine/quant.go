@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -29,9 +29,9 @@ import (
 // Typically a mask represents A(r) * f(t), a pointwise multiplication
 // of an N-vector function of space A(r) by an N-vector function of time f(t).
 // A(r) is an array, f(t) is the multiplier which will be updated every time step.
-// When a mask's array contains NULL pointers for each gpu, the mask is independent of space. 
+// When a mask's array contains NULL pointers for each gpu, the mask is independent of space.
 // The array is then interpreted as 1(r), the unit field. In this way, masks that happen to be
-// constant values in space (homogeneous) can be efficiently represented. 
+// constant values in space (homogeneous) can be efficiently represented.
 // TODO: deduplicate identical mask arrays by setting identical pointers?
 //
 // Quantities are the nodes of an acyclic graph representing the differential
@@ -160,7 +160,7 @@ func (q *Quant) initChildrenParents() {
 }
 
 // Quantity representing a single component of the original,
-// with shared underlying storage. 
+// with shared underlying storage.
 // The returned Quant's name and dependencies still have to be set.
 func (orig *Quant) Component(comp int) *Quant {
 	q := new(Quant)
@@ -228,7 +228,7 @@ func (q *Quant) SetValue(val []float64) {
 	} else {
 		panic(InputErr(q.name + " is not " + MASK.String() + " or " + FIELD.String() + " or " + VALUE.String() + " but " + q.kind.String()))
 	}
-	
+
 	q.Verify()
 	q.Invalidate() //!
 }
@@ -274,8 +274,8 @@ func (sum *Quant) Add(parent *Quant) {
 			continue
 		}
 		sumMul := sum.multiplier[c]
-		sumComp := sum.array.Component(c)                           // does not alloc
-		gpu.Madd(sumComp, sumComp, parComp, float32(parMul/sumMul)) // divide by sum's multiplier!
+		sumComp := sum.array.Component(c)                  // does not alloc
+		gpu.Madd(sumComp, sumComp, parComp, parMul/sumMul) // divide by sum's multiplier!
 		invalidated = true
 	}
 	if invalidated {
@@ -474,7 +474,7 @@ func (q *Quant) GetUpdater() Updater {
 	return q.updater
 }
 
-//___________________________________________________________ 
+//___________________________________________________________
 
 // INTERNAL: in case of a MASK, make sure the underlying array is allocted.
 // Used, e.g., when a space-independent mask gets replaced by a space-dependent one.
