@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package gpu
@@ -40,6 +40,7 @@ func InitMultiGPU(devices []int, flags uint) {
 	printMultiGPUInfo()
 	initMultiGPUProperties()
 	initMultiGPUPeerAccess()
+	initMultiGPUL1Config()
 
 	stream0 := make([]cu.Stream, NDevice())
 	STREAM0 = Stream(stream0)
@@ -133,6 +134,24 @@ func initMultiGPUPeerAccess() {
 	cuda.SetDevice(_useDevice[0])
 }
 
+// init inter-device access
+func initMultiGPUL1Config() {
+	// first init contexts
+	for i := range _useDevice {
+		setDevice(_useDevice[i])
+		dummy := cuda.Malloc(1) // initializes a cuda context for the device
+		cuda.Free(dummy)
+	}
+
+	for i := range _useDevice { //_deviceCtxs {
+		cuda.SetDevice(_useDevice[i])
+		cuda.DeviceSetCacheConfig(cuda.FuncCachePreferL1)
+	}
+
+	// set the current context
+	cuda.SetDevice(_useDevice[0])
+}
+
 // Error message
 const ERR_UNIFIED_ADDR = "A GPU does not support unified addressing and can not be used in a multi-GPU setup."
 
@@ -197,7 +216,7 @@ func SetDeviceForIndex(index int) {
 	setDevice(_useDevice[index])
 }
 
-// Returns the list of usable devices. 
+// Returns the list of usable devices.
 func getDevices() []int {
 	if _useDevice == nil {
 		panic(Bug(MSG_DEVICEUNINITIATED))

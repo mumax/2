@@ -14,7 +14,7 @@ import (
 	"unsafe"
 )
 
-// Returns the device number on which the host thread executes device code. 
+// Returns the device number on which the host thread executes device code.
 func GetDevice() int {
 	var device int
 	err := Error(C.cudaGetDevice((*C.int)(unsafe.Pointer(&device))))
@@ -34,7 +34,7 @@ func GetDeviceCount() int {
 	return count
 }
 
-// Sets the device on which the host thread executes device code. 
+// Sets the device on which the host thread executes device code.
 func SetDevice(device int) {
 	err := Error(C.cudaSetDevice(C.int(device)))
 	if err != Success {
@@ -157,4 +157,22 @@ func (prop *DeviceProp) String() string {
 		fmt.Sprintln("PciBusID:                ", prop.PciBusID) +
 		fmt.Sprintln("PciDeviceID:             ", prop.PciDeviceID) +
 		fmt.Sprint("TccDriver:                ", prop.TccDriver)
+}
+
+type CacheConfig uint32
+
+// L1/shared memory configuration flags
+const (
+	FuncCachePreferNone   CacheConfig = C.cudaFuncCachePreferNone
+	FuncCachePreferShared CacheConfig = C.cudaFuncCachePreferShared
+	FuncCachePreferL1     CacheConfig = C.cudaFuncCachePreferL1
+	FuncCachePreferEqual  CacheConfig = C.cudaFuncCachePreferEqual
+)
+
+func DeviceSetCacheConfig(cconfig CacheConfig) {
+	err := Error(C.cudaDeviceSetCacheConfig(uint32(cconfig)))
+	if err != Success {
+		panic(err)
+	}
+	return
 }
