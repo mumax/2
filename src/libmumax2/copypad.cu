@@ -116,13 +116,9 @@ __global__ void copyPad3DKern(float* dst, int D0, int D1, int D2, float* src, in
   // due to memory bandwidth limitations
   for (int i=0; i<D0; i++){
     if (j<D1 && k<D2){ // if we are in the destination array we should write something
-      if(i<S0 && j<S1 && k<S2){ // we are in the source array: copy the source
-        dst[i*D1*D2 + j*D2 + k] = src[i*S1*S2 + j*S2 + k];
-      }else{ // we are out of the source array: write zero
-        dst[i*D1*D2 + j*D2 + k] = 0.0f; 
+      dst[i*D1*D2 + j*D2 + k] = (i<S0 && j<S1 && k<S2) ? src[i*S1*S2 + j*S2 + k] : 0.0f;
       }
     }
-  }
 }
 
 __export__ void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams){
