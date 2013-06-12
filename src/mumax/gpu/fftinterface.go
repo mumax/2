@@ -20,7 +20,7 @@ func init() {
 // The default FFT constructor.
 // The function pointer may be changed 
 // to use a different FFT implementation globally.
-var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlan5 // this default is for tests, not sims.
+var NewDefaultFFT func(dataSize, logicSize []int) FFTInterface = NewFFTPlanX // this default is for tests, not sims.
 
 // Global map with all registered FFT plans
 var fftPlans map[string]func(dataSize, logicSize []int) FFTInterface
@@ -47,22 +47,13 @@ func FFTNormLogic(logicSize []int) int {
 	return (logicSize[0] * logicSize[1] * logicSize[2])
 }
 
-// Returns the (NDevice-dependent) output size of an FFT with given logic size.
+// Returns the output size of an FFT with given logic size.
 func FFTOutputSize(logicSize []int) []int {
 
 	outputSize := make([]int, 3)
 	outputSize[0] = logicSize[0]
-	outputSize[1] = logicSize[2]/2 + NDevice() // One extra row of complex numbers PER GPU
-	outputSize[2] = logicSize[1] * 2
-	// 	if NDevice() == 1 {
-	// 		outputSize[1] = logicSize[1]
-	// 		outputSize[2] = logicSize[2] + 2 // One extra row of complex numbers
-	// 	} else { //multi-gpu: YZ-transposed output!!
-	// 		/*		outputSize[1] = logicSize[2] + 2*NDevice() // One extra row of complex numbers PER GPU
-	// 				outputSize[2] = logicSize[1]*/
-	// 		outputSize[1] = logicSize[2]/2 + NDevice() // One extra row of complex numbers PER GPU
-	// 		outputSize[2] = logicSize[1] * 2
-	// 	}
+	outputSize[1] = logicSize[1]
+	outputSize[2] = logicSize[2] + 2
 
 	return outputSize
 }
