@@ -25,10 +25,11 @@ type FFTPlanX struct {
 	dataSize   [3]int // Size of the (non-zero) input data block
 	logicSize  [3]int // Transform size including zero-padding. >= dataSize
 	outputSize [3]int // Size of the output data (one extra row PER GPU)
-
+	buffer 	    Array // An array for zero-padding the data
+	
 	// fft plans
-	plan3D_FWD cufft.Handle
-	plan3D_BWD cufft.Handle
+	plan3dR2C cufft.Handle
+	plan3dC2R cufft.Handle
 	Stream                   
 }
 
@@ -37,9 +38,12 @@ func (fft *FFTPlanX) init(dataSize, logicSize []int) {
 		panic(InputErrF("FFT Plan X has no multi-gpu support."))
 	}
 	
+	
 	Assert(len(dataSize) == 3)
 	Assert(len(logicSize) == 3)
 	const nComp = 1
+	
+	fft.buffer.Init(nComp, logicSize, DONT_ALLOC)
 	
 	Debug(dataSize, logicSize)
 
@@ -52,12 +56,12 @@ func (fft *FFTPlanX) init(dataSize, logicSize []int) {
 
 	fft.Stream = NewStream()
 
-	fft.plan3D_FWD = cufft.Plan3d(fft.logicSize[0], fft.logicSize[1], fft.logicSize[2], cufft.R2C)
-	fft.plan3D_FWD.SetStream(uintptr(fft.Stream[0]))
-	fft.plan3D_FWD.SetCompatibilityMode(cufft.COMPATIBILITY_NATIVE)
-	fft.plan3D_BWD = cufft.Plan3d(fft.logicSize[0], fft.logicSize[1], fft.logicSize[2], cufft.C2R)
-	fft.plan3D_BWD.SetStream(uintptr(fft.Stream[0]))
-	fft.plan3D_BWD.SetCompatibilityMode(cufft.COMPATIBILITY_NATIVE)
+	fft.plan3dR2C = cufft.Plan3d(fft.logicSize[0], fft.logicSize[1], fft.logicSize[2], cufft.R2C)
+	fft.plan3dR2C.SetStream(uintptr(fft.Stream[0]))
+	fft.plan3dR2C.SetCompatibilityMode(cufft.COMPATIBILITY_NATIVE)
+	fft.plan3dC2R = cufft.Plan3d(fft.logicSize[0], fft.logicSize[1], fft.logicSize[2], cufft.C2R)
+	fft.plan3dC2R.SetStream(uintptr(fft.Stream[0]))
+	fft.plan3dC2R.SetCompatibilityMode(cufft.COMPATIBILITY_NATIVE)
 }
 
 func NewFFTPlanX(dataSize, logicSize []int) FFTInterface {
@@ -78,31 +82,26 @@ func (fft *FFTPlanX) Forward(in, out *Array) {
 	AssertMsg(out.size4D[0] == 1, "2")
 	CheckSize(in.size3D, fft.dataSize[:])
 	CheckSize(out.size3D, fft.outputSize[:])
+
+	buf := &fft.buffer
+	buf.PointTo(out, 0)
+
+	CopyPad3D(buf, in)
 	
-	CopyPad3D(out, in)
-	lin := in.LocalCopy()
-	lout := out.LocalCopy()
-	Debug("in: ", lin.Array)
-	Debug("out: ", lout.Array)
 	ptr := uintptr(out.pointer[0]) 
-	fft.plan3D_FWD.ExecR2C(ptr, ptr)
-	fft.Sync() //  Is this required?
 	
-	llout := out.LocalCopy()
-	Debug("out: ", llout.Array)
+	fft.plan3dR2C.ExecR2C(ptr, ptr)
+	fft.Sync()
 }
 
 func (fft *FFTPlanX) Inverse(in, out *Array) {
 	
 	ptr := uintptr(in.pointer[0]) 
-	fft.plan3D_BWD.ExecC2R(ptr, ptr)
+	fft.plan3dC2R.ExecC2R(ptr, ptr)
+	fft.Sync()
 	
-	fft.Sync() //  Is this required?
-	// extracting data
-	CopyPad3D(out, in)
+	buf := &fft.buffer
+	buf.PointTo(in, 0)
 	
-	lin := in.LocalCopy()
-	lout := out.LocalCopy()
-	Debug("in: ", lin.Array)
-	Debug("out: ", lout.Array)
+	CopyPad3D(out, buf)
 }
