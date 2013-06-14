@@ -104,6 +104,19 @@ void make2dconf(int N1, int N2, dim3* gridSize, dim3* blockSize){
   	check3dconf(*gridSize, *blockSize);
 }
 
+void make3dconf(int N0, int N1, int N2, dim3* gridSize, dim3* blockSize) {
+
+	(*gridSize).x = divUp(N0, BLOCKSIZEX);
+	(*gridSize).y = divUp(N1, BLOCKSIZEY);
+	(*gridSize).z = divUp(N2, BLOCKSIZEZ);
+
+	(*blockSize).x = BLOCKSIZEX;
+	(*blockSize).y = BLOCKSIZEY;
+	(*blockSize).z = BLOCKSIZEZ;
+  
+  	check3dconf(*gridSize, *blockSize);
+}
+
 #ifdef __cplusplus
 }
 #endif

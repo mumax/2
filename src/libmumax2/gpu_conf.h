@@ -25,6 +25,10 @@
 extern "C" {
 #endif
 
+#define BLOCKSIZEX 2
+#define BLOCKSIZEY 2
+#define BLOCKSIZEZ 64
+
 /// Returns the maximum number of threads per block for this GPU
 int gpu_maxthreads();
 
@@ -107,6 +111,7 @@ void make1dconf(int N,           ///< size of array to span (number of floats)
 
 void make2dconf(int N1, int N2, dim3* gridSize, dim3* blockSize);
 
+void make3dconf(int N0, int N1, int N2, dim3* gridSize, dim3* blockSize);
 
 #ifdef __cplusplus
 }

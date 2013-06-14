@@ -105,25 +105,18 @@ extern "C" {
     }
 
 
-#define BLOCKSIZEX 4
-#define BLOCKSIZEY 4
-#define BLOCKSIZEZ 32
-
     __export__ void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float** msat, float** aex, float Aex2_mu0MsatMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams)
     {
 
-        dim3 gridsize(divUp(N0, BLOCKSIZEX), divUp(N1Part, BLOCKSIZEY), divUp(N2, BLOCKSIZEZ));
-        dim3 blocksize(BLOCKSIZEX, BLOCKSIZEY, BLOCKSIZEZ);
-
-        //int NPart = N0 * N1Part * N2;
-
-        float cellx_2 = 1.0f / (cellSizeX * cellSizeX);
-        float celly_2 = 1.0f / (cellSizeY * cellSizeY);
-        float cellz_2 = 1.0f / (cellSizeZ * cellSizeZ);
-        //printf("exchange factors %g %g %g\n", fac0, fac1, fac2); // OK
+        dim3 gridsize, blocksize;
+        
+        make3dconf(N0, N1Part, N2, &gridsize, &blocksize);
+        
+        float cellx_2 = (float)(1.0 / ((double)cellSizeX * (double)cellSizeX));
+        float celly_2 = (float)(1.0 / ((double)cellSizeY * (double)cellSizeY));
+        float cellz_2 = (float)(1.0 / ((double)cellSizeZ * (double)cellSizeZ));
 
         int nDev = nDevice();
-
 
         for (int dev = 0; dev < nDev; dev++)
         {
