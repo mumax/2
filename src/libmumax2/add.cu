@@ -48,12 +48,21 @@ extern "C" {
         int i = threadindex;
         if (i < Npart)
         {
-            float B = (b == NULL) ? 1.0f : b[i];
-            dst[i] = a[i] + mulB * B;
+            dst[i] = a[i] + mulB * b[i];
+        }
+    }
+
+    __global__ void maddScalarKern(float* dst, float* a, float mulB, int Npart)
+    {
+        int i = threadindex;
+        if (i < Npart)
+        {
+            dst[i] = a[i] + mulB;
         }
     }
 
 ///@internal
+
     __global__ void vecMaddKern(float*  dstx, float*  dsty, float*  dstz,
                                 float*  ax, float*  ay, float*  az,
                                 float*  bx, float*  by, float*  bz,
@@ -64,14 +73,24 @@ extern "C" {
 
         if (i < Npart)
         {
-            float Bx = (bx == NULL) ? 1.0f : bx[i];
-            dstx[i] = ax[i] + mulBx * Bx;
+            dstx[i] = ax[i] + mulBx * bx[i];
+            dsty[i] = ay[i] + mulBy * by[i];
+            dstz[i] = az[i] + mulBz * bz[i];
+        }
+    }
 
-            float By = (by == NULL) ? 1.0f : by[i];
-            dsty[i] = ay[i] + mulBy * By;
+    __global__ void vecMaddScalarKern(float*  dstx, float*  dsty, float*  dstz,
+                                      float*  ax, float*  ay, float*  az,
+                                      float mulBx, float mulBy, float mulBz,
+                                      int Npart)
+    {
+        int i = threadindex;
 
-            float Bz = (bz == NULL) ? 1.0f : bz[i];
-            dstz[i] = az[i] + mulBz * Bz;
+        if (i < Npart)
+        {
+            dstx[i] = ax[i] + mulBx;
+            dsty[i] = ay[i] + mulBy;
+            dstz[i] = az[i] + mulBz;
         }
     }
 
@@ -93,7 +112,14 @@ extern "C" {
         for (int dev = 0; dev < nDevice(); dev++)
         {
             gpu_safe(cudaSetDevice(deviceId(dev)));
-            maddKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], mulB, Npart);
+            if (b[dev] == NULL)
+            {
+                maddScalarKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], mulB, Npart);
+            }
+            else
+            {
+                maddKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], mulB, Npart);
+            }
         }
     }
     __export__ void vecMaddAsync(float** dstx, float** dsty, float** dstz,
@@ -107,11 +133,21 @@ extern "C" {
         for (int dev = 0; dev < nDevice(); dev++)
         {
             gpu_safe(cudaSetDevice(deviceId(dev)));
-            vecMaddKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dstx[dev], dsty[dev], dstz[dev],
-                    ax[dev], ay[dev], az[dev],
-                    bx[dev], by[dev], bz[dev],
-                    mulBx,   mulBy,   mulBz,
-                    Npart);
+            if (bx[dev] == NULL)
+            {
+                vecMaddScalarKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dstx[dev], dsty[dev], dstz[dev],
+                        ax[dev], ay[dev], az[dev],
+                        mulBx,   mulBy,   mulBz,
+                        Npart);
+            }
+            else
+            {
+                vecMaddKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dstx[dev], dsty[dev], dstz[dev],
+                        ax[dev], ay[dev], az[dev],
+                        bx[dev], by[dev], bz[dev],
+                        mulBx,   mulBy,   mulBz,
+                        Npart);
+            }
         }
     }
 
