@@ -85,7 +85,9 @@ func (fft *FFTPlanX) Forward(in, out *Array) {
 
 	buf := &fft.buffer
 	buf.PointTo(out, 0)
-
+	
+	buf.Zero()
+	
 	CopyPad3D(buf, in)
 	
 	ptr := uintptr(out.pointer[0]) 
@@ -103,5 +105,5 @@ func (fft *FFTPlanX) Inverse(in, out *Array) {
 	buf := &fft.buffer
 	buf.PointTo(in, 0)
 	
-	CopyPad3D(out, buf)
+	CopyUnPad3D(out, buf)
 }

@@ -120,7 +120,45 @@ extern "C" {
 
 /// @internal Does padding and unpadding of a 3D matrix.  Padding in the y-direction is only correct when 1 GPU is used!!
 /// Fills padding space with zeros.
-    __global__ void copyPad3DKern(float* dst, int D0, int D1, int D2, float* src, int S0, int S1, int S2)
+    __global__ void copyPad3DKern(float* dst, int D0, int D1, int D2, int D1D2, float* src, int S0, int S1, int S2, int S1S2)
+    {
+
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        int j = blockIdx.y * blockDim.y + threadIdx.y;
+        int k = blockIdx.z * blockDim.z + threadIdx.z;
+
+        // this check makes it work for padding as well as for unpadding.
+        // 2 separate functions are probably not more efficient
+        // due to memory bandwidth limitations
+        if (i < S0 && j < S1 && k < S2) // if we are in the destination array we should write something
+        {
+            dst[i * D1D2 + j * D2 + k] = src[i * S1S2 + j * S2 + k];
+        }
+    }
+
+    __export__ void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams)
+    {
+
+        dim3 gridSize, blockSize;
+        make3dconf(S0, S1, S2, &gridSize, &blockSize);
+
+        int D1D2 = D1*D2;
+        int S1S2 = S1*S2;
+        
+        for (int dev = 0; dev < nDevice(); dev++)
+        {
+            gpu_safe(cudaSetDevice(deviceId(dev)));
+            for (int i = 0; i < Ncomp; i++)
+            {
+                float* src3D = &(src[dev][i * S0 * S1S2]);
+                float* dst3D = &(dst[dev][i * D0 * D1D2]); //D1==S1
+                copyPad3DKern <<< gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst3D, D0, D1, D2, D1D2, src3D, S0, S1, S2, S1S2);
+            }
+        }
+    }
+    
+    
+    __global__ void copyUnPad3DKern(float* dst, int D0, int D1, int D2, int D1D2, float* src, int S0, int S1, int S2, int S1S2)
     {
 
         int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -132,27 +170,31 @@ extern "C" {
         // due to memory bandwidth limitations
         if (i < D0 && j < D1 && k < D2) // if we are in the destination array we should write something
         {
-            dst[i * D1 * D2 + j * D2 + k] = (i < S0 && j < S1 && k < S2) ? src[i * S1 * S2 + j * S2 + k] : 0.0f;
+            dst[i * D1D2 + j * D2 + k] = src[i * S1S2 + j * S2 + k];
         }
     }
 
-    __export__ void copyPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams)
+    __export__ void copyUnPad3DAsync(float** dst, int D0, int D1, int D2, float** src, int S0, int S1, int S2, int Ncomp, CUstream* streams)
     {
 
         dim3 gridSize, blockSize;
         make3dconf(D0, D1, D2, &gridSize, &blockSize);
 
+        int D1D2 = D1*D2;
+        int S1S2 = S1*S2;
+        
         for (int dev = 0; dev < nDevice(); dev++)
         {
             gpu_safe(cudaSetDevice(deviceId(dev)));
             for (int i = 0; i < Ncomp; i++)
             {
-                float* src3D = &(src[dev][i * S0 * S1 * S2]);
-                float* dst3D = &(dst[dev][i * D0 * D1 * D2]); //D1==S1
-                copyPad3DKern <<< gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst3D, D0, D1, D2, src3D, S0, S1, S2);
+                float* src3D = &(src[dev][i * S0 * S1S2]);
+                float* dst3D = &(dst[dev][i * D0 * D1D2]); //D1==S1
+                copyUnPad3DKern <<< gridSize, blockSize, 0, cudaStream_t(streams[dev])>>> (dst3D, D0, D1, D2, D1D2, src3D, S0, S1, S2, S1S2);
             }
         }
     }
+
 
 
 
