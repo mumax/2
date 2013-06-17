@@ -25,9 +25,17 @@
 extern "C" {
 #endif
 
-#define BLOCKSIZEX 2
-#define BLOCKSIZEY 2
-#define BLOCKSIZEZ 64
+#define BLOCKSIZE3DX 2
+#define BLOCKSIZE3DY 2
+#define BLOCKSIZE3DZ 64
+
+#define BLOCKSIZE2DX 1
+#define BLOCKSIZE2DY 8
+#define BLOCKSIZE2DZ 64
+
+#define BLOCKSIZE1DX 1
+#define BLOCKSIZE1DY 16
+#define BLOCKSIZE1DZ 64
 
 /// Returns the maximum number of threads per block for this GPU
 int gpu_maxthreads();

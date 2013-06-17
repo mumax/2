@@ -67,7 +67,7 @@ void gpu_setmaxthreads(int max){
 void make1dconf(int N, dim3* gridSize, dim3* blockSize){
 
   cudaDeviceProp* prop = (cudaDeviceProp*)gpu_getproperties();
-  int maxBlockSize = gpu_maxthreads();
+  int maxBlockSize = gpu_maxthreads() / 2; // mad: initially we assumed it to be equal to gpu_maxthreads(), but using half of it improves gpu occupancy due to the resources pressure 
   int maxGridSize = prop->maxGridSize[X];
 
   (*blockSize).x = maxBlockSize;
@@ -106,13 +106,13 @@ void make2dconf(int N1, int N2, dim3* gridSize, dim3* blockSize){
 
 void make3dconf(int N0, int N1, int N2, dim3* gridSize, dim3* blockSize) {
 
-	(*gridSize).x = divUp(N0, BLOCKSIZEX);
-	(*gridSize).y = divUp(N1, BLOCKSIZEY);
-	(*gridSize).z = divUp(N2, BLOCKSIZEZ);
+	(*gridSize).x = divUp(N0, BLOCKSIZE3DX);
+	(*gridSize).y = divUp(N1, BLOCKSIZE3DY);
+	(*gridSize).z = divUp(N2, BLOCKSIZE3DZ);
 
-	(*blockSize).x = BLOCKSIZEX;
-	(*blockSize).y = BLOCKSIZEY;
-	(*blockSize).z = BLOCKSIZEZ;
+	(*blockSize).x = BLOCKSIZE3DX;
+	(*blockSize).y = BLOCKSIZE3DY;
+	(*blockSize).z = BLOCKSIZE3DZ;
   
   	check3dconf(*gridSize, *blockSize);
 }
