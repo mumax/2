@@ -14,6 +14,7 @@ import (
 	"math"
 	. "mumax/common"
 	"mumax/gpu"
+	"fmt"
 )
 
 type RK12Solver struct {
@@ -108,16 +109,16 @@ func (s *RK12Solver) Step() {
 		dy := equation[i].input[0]
 		dyMul := dy.multiplier
 		checkUniform(dyMul)
-		//s.dybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.dybuffer[i].CopyFromDevice(dy.Array()) // save for later
-		//s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.y0buffer[i].CopyFromDevice(y.Array()) // save for later
 
 	}
 
-	const maxTry = 3 // undo at most this many bad steps
+	const maxTry = 10 // undo at most this many bad steps
 	const headRoom = 0.8
-	for try := 0; try < maxTry; try++ {
+	try := 0 
+	
+	for {
 		// We need to update timestep if the step has failed
 		dt := engine.dt.Scalar()
 		// initial euler step
@@ -201,12 +202,12 @@ func (s *RK12Solver) Step() {
 		if !badStep || newDt == s.minDt.Scalar() {
 			break
 		}
+		if try > maxTry {
+			panic(Bug(fmt.Sprint("The solver cannot converge after ",maxTry," badsteps")))
+		}
+		
+		try++
 	} // end try
-
-	//	for i := range equation {
-	//		Pool.Recycle(&s.dybuffer[i])
-	//		Pool.Recycle(&s.y0buffer[i])
-	//	}
 
 	// advance time step
 	e.step.SetScalar(e.step.Scalar() + 1)
