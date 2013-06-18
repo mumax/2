@@ -67,8 +67,9 @@ func (s *BDFEulerAuto) Step() {
 	const maxTry = 6 // undo at most this many bad steps
 	const headRoom = 0.8
 
+	try := 0
 	// try to integrate maxTry times at most
-	for try := 0; try < maxTry; try++ {
+	for {
 		dt := engine.dt.Scalar()
 		badStep := false
 		badIterator := false
@@ -265,6 +266,11 @@ func (s *BDFEulerAuto) Step() {
 		if !badStep || nDt == s.minDt.Scalar() {
 			break
 		}
+		if try > maxTry {
+			panic(Bug(fmt.Sprint("The solver cannot converge after ",maxTry," badsteps")))
+		}
+		
+		try++
 	}
 	// Advance step
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
