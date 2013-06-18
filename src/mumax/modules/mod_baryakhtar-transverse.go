@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -27,12 +27,12 @@ func LoadBaryakhtarTransverse(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
-	
+
 	// =========== New Quantities =============
 
-	e.AddNewQuant("mu", SYMMTENS, MASK, Unit(""), "LLBr ferromagnetic relaxation constant")
+	e.AddNewQuant("mu", VECTOR, MASK, Unit(""), "LLBr ferromagnetic relaxation constant")
 	llbr_transverse := e.AddNewQuant("llbr_transverse", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar ferromagnetic relaxation term")
-	
+
 	// ============ Dependencies =============
 	e.Depends("llbr_transverse", "mf", "H_eff", "gamma_LL", "mu", "msat0T0")
 
@@ -48,7 +48,7 @@ type BaryakhtarTransverseUpdater struct {
 func (u *BaryakhtarTransverseUpdater) Update() {
 
 	e := GetEngine()
-	
+
 	llbr_transverse := u.llbr_transverse
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	m := e.Quant("mf")
@@ -69,6 +69,6 @@ func (u *BaryakhtarTransverseUpdater) Update() {
 		msat0T0.Array(),
 		mu.Array(),
 		mu.Multiplier())
-		
+
 	llbr_transverse.Array().Sync()
 }

@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -29,10 +29,10 @@ func LoadBaryakhtarLongitudinal(e *Engine) {
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
 	e.LoadModule("longfield")
-	
+
 	// ============ New Quantities =============
 
-	e.AddNewQuant("lambda", SYMMTENS, MASK, Unit(""), "LLBr paramagnetic relaxations constant")
+	e.AddNewQuant("lambda", VECTOR, MASK, Unit(""), "LLBr paramagnetic relaxations constant")
 
 	llbr_long := e.AddNewQuant("llbr_long", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar paramagnetic relaxation term")
 
@@ -69,6 +69,6 @@ func (u *BaryakhtarLongitudinalUpdater) Update() {
 		msat0T0.Array(),
 		lambda.Array(),
 		lambda.Multiplier())
-		
+
 	llbr_long.Array().Sync()
 }

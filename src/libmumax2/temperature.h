@@ -22,34 +22,28 @@ extern "C" {
 /// @param temp mask for the temperature
 /// @param alphaKB2tempMul multiplier for alpha * temperature * 2 * Boltzmann constant.
 /// @param m0VgammaDtMSatMul Mu_zero * cell volume * gyromagnetic ratio * time step * MSat multiplier.
-DLLEXPORT void temperature_scaleNoise(float** noise,
-			   	float** alpha,
-			   	float** temp, float alphaKB2tempMul,
-			   	float** mSat, float mu0VgammaDtMSatMul,
-			   	CUstream* stream, int Npart);
+    DLLEXPORT void temperature_scaleNoise(float** noise,
+                                          float** alpha,
+                                          float** temp, float alphaKB2tempMul,
+                                          float** mSat, float mu0VgammaDtMSatMul,
+                                          CUstream* stream, int Npart);
 
 
-DLLEXPORT void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
-			   	float** mu_xx, 
-			   	float** mu_yy, 
-			   	float** mu_zz, 
-			   	float** mu_yz, 
-			   	float** mu_xz, 
-			   	float** mu_xy, 
-			   	float** tempMask, 
-			   	float** msatMask,
-			   	float** msat0T0Mask,
-			   	
-			   	float muMul_xx,
-				float muMul_yy,
-				float muMul_zz,
-				float muMul_yz,
-				float muMul_xz,
-				float muMul_xy,
-				
-				float KB2tempMul_mu0VgammaDtMSatMul, 
-			   	CUstream* stream, 
-			   	int Npart);
+    DLLEXPORT void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
+            float** mu_xx,
+            float** mu_yy,
+            float** mu_zz,
+            float** tempMask,
+            float** msatMask,
+            float** msat0T0Mask,
+
+            float muMul_xx,
+            float muMul_yy,
+            float muMul_zz,
+
+            float KB2tempMul_mu0VgammaDtMSatMul,
+            CUstream* stream,
+            int Npart);
 #ifdef __cplusplus
 }
 #endif

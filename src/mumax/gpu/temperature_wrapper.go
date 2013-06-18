@@ -41,23 +41,17 @@ func ScaleNoiseAniz(h, mu, T, msat, msat0T0 *Array,
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Z].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(mu.Comp[XX].Pointers()[0]))), //XX
-		(**C.float)(unsafe.Pointer(&(mu.Comp[YY].Pointers()[0]))), //YY
-		(**C.float)(unsafe.Pointer(&(mu.Comp[ZZ].Pointers()[0]))), //ZZ
-		(**C.float)(unsafe.Pointer(&(mu.Comp[YZ].Pointers()[0]))), //YZ
-		(**C.float)(unsafe.Pointer(&(mu.Comp[XZ].Pointers()[0]))), //XZ
-		(**C.float)(unsafe.Pointer(&(mu.Comp[XY].Pointers()[0]))), //XY
+		(**C.float)(unsafe.Pointer(&(mu.Comp[X].Pointers()[0]))), //XX
+		(**C.float)(unsafe.Pointer(&(mu.Comp[Y].Pointers()[0]))), //YY
+		(**C.float)(unsafe.Pointer(&(mu.Comp[Z].Pointers()[0]))), //ZZ
 
 		(**C.float)(unsafe.Pointer(&(T.Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(msat.Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(msat0T0.Pointers()[0]))),
 
-		(C.float)(float32(muMul[XX])),
-		(C.float)(float32(muMul[YY])),
-		(C.float)(float32(muMul[ZZ])),
-		(C.float)(float32(muMul[YZ])),
-		(C.float)(float32(muMul[XZ])),
-		(C.float)(float32(muMul[XY])),
+		(C.float)(float32(muMul[X])),
+		(C.float)(float32(muMul[Y])),
+		(C.float)(float32(muMul[Z])),
 
 		(C.float)(float32(KB2tempMul_mu0VgammaDtMsatMul)),
 		(*C.CUstream)(unsafe.Pointer(&(h.Stream[0]))),

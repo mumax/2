@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -27,9 +27,9 @@ func LoadBaryakhtarNonLocal(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
-	
+
 	// ============ New Quantities =============
-	e.AddNewQuant("lambda_e", SYMMTENS, MASK, Unit(""), "LLBr nonlocal relaxation constant")
+	e.AddNewQuant("lambda_e", VECTOR, MASK, Unit(""), "LLBr nonlocal relaxation constant")
 	llbr_nonlocal := e.AddNewQuant("llbr_nonlocal", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonlocal relaxation term")
 
 	// ============ Dependencies =============
@@ -38,7 +38,6 @@ func LoadBaryakhtarNonLocal(e *Engine) {
 	// ============ Updating the torque =============
 	upd := &BaryakhtarNonlocalUpdater{llbr_nonlocal: llbr_nonlocal}
 	llbr_nonlocal.SetUpdater(upd)
-	//~ AddTermToQuant(e.Quant("llbr_RHS"), llbr_nonlocal)
 }
 
 type BaryakhtarNonlocalUpdater struct {
