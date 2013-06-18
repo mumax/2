@@ -5,17 +5,13 @@ from mumax2_geom import *
 # Test for LLB with 2TM
 # Ni, just like in PRB 81, 174401 (2010)
   
-Nx = 64
-Ny = 64
-Nz = 4
+Nx = 32
+Ny = 32
+Nz = 32
 
-sX = 320e-9
-sY = 320e-9
-sZ = 20e-9
-
-hsX = 0.5 * sX
-hsY = 0.5 * sY
-hsZ = 0.5 * sZ
+sX = 160e-9
+sY = 160e-9
+sZ = 160e-9
 
 csX = sX/Nx
 csY = sY/Ny
@@ -40,7 +36,7 @@ load('temperature/brown-anisotropic')
 add_to('llbr_RHS', 'llbr_torque')
 add_to('llbr_RHS', 'llbr_transverse')
 
-add_to_weighted("Ql", "Qc", -1.0)
+add_to("Ql", "Qc")
 
 load('solver/rk12')
 
@@ -82,7 +78,7 @@ setv('Cp_l', 3.0e6)
 # Baryakhtar relaxation parameters
 
 mu = 0.005
-setv('mu', [mu, mu, mu, 0.0, 0.0, 0.0])
+setv('mu', [mu, mu, mu])
 
 tt = 1e-14
  
@@ -96,6 +92,10 @@ setv('maxdt', 1e-14)
 setv('mindt', 1e-14)
 setv('dt', 1e-14)
 
+
+T = [ [[[0.0]]] ]
+setarray('Temp', T)
+run(1e-9)
 
 T = [ [[[10.0]]] ]
 setarray('Temp', T)

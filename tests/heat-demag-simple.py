@@ -45,7 +45,7 @@ load('mfa-brillouin/kappa')
 add_to('llbr_RHS', 'llbr_torque')
 add_to('llbr_RHS', 'llbr_long')
 
-add_to_weighted("Qe", "Qnc", -1.0)
+add_to("Qe", "Qnc")
 add_to("Qe", "Qlaser")
 add_to("Qe", "Qe_spat")
 
@@ -70,15 +70,14 @@ setv('J', 1.0/2.0)
 
 # Py
 
-msat = ellipse()
+msat = [ [[[1.0]]]]
 setmask('msat', msat) 
 setmask('msat0', msat)
 setmask('msat0T0', msat)
 setmask('kappa', msat)
 
-#~ mf =[ [[[1]]], [[[0]]], [[[0]]] ]
-#~ setarray('Mf', mf)
-setarray('Mf', ellipsevec(3, [1,0,0]))
+mf =[ [[[1.0]]], [[[0.0]]], [[[0.0]]] ]
+setarray('Mf', mf)
 
 setv('msat', Ms0)        
 setv('msat0', Ms0) 
@@ -103,24 +102,18 @@ setv('Cp_e', 3000.0)
 
 cpe = makearray(1, Nx, Ny, Nz)
 for kk in range(Nz):
-    val0 = 1.0
-    if kk == 0 or kk == Nz - 1:
-            val0 = 0.0
     for jj in range(Ny):
-        val1 = 1.0
-        if jj == 0 or jj == Ny - 1:
-                val1 = 0.0
         for ii in range(Nx):
             val2 = 1.0
             if ii == 0 or ii == Nx - 1:
                     val2 = 0.0
-            cpe[0][ii][jj][kk] = val0 * val1 * val2
+            cpe[0][ii][jj][kk] = val2
 setmask('Cp_e', cpe)
 
 # Baryakhtar relaxation parameters
 
 lbd = 0.045
-setv('lambda', [lbd, lbd, lbd, 0.0, 0.0, 0.0])
+setv('lambda', [lbd, lbd, lbd])
 
 tt = 1e-15
 T0 = 500e-15 # Time delay for the excitation
