@@ -120,7 +120,7 @@ extern "C" {
 
 /// @internal Does padding and unpadding of a 3D matrix.  Padding in the y-direction is only correct when 1 GPU is used!!
 /// Fills padding space with zeros.
-    __global__ void copyPad3DKern(float* dst, int D0, int D1, int D2, int D1D2, float* src, int S0, int S1, int S2, int S1S2)
+    __global__ void copyPad3DKern(float* __restrict__ dst, int D0, int D1, int D2, int D1D2, float* __restrict__ src, int S0, int S1, int S2, int S1S2)
     {
 
         int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -142,9 +142,9 @@ extern "C" {
         dim3 gridSize, blockSize;
         make3dconf(S0, S1, S2, &gridSize, &blockSize);
 
-        int D1D2 = D1*D2;
-        int S1S2 = S1*S2;
-        
+        int D1D2 = D1 * D2;
+        int S1S2 = S1 * S2;
+
         for (int dev = 0; dev < nDevice(); dev++)
         {
             gpu_safe(cudaSetDevice(deviceId(dev)));
@@ -156,9 +156,9 @@ extern "C" {
             }
         }
     }
-    
-    
-    __global__ void copyUnPad3DKern(float* dst, int D0, int D1, int D2, int D1D2, float* src, int S0, int S1, int S2, int S1S2)
+
+
+    __global__ void copyUnPad3DKern(float* __restrict__ dst, int D0, int D1, int D2, int D1D2, float* __restrict__ src, int S0, int S1, int S2, int S1S2)
     {
 
         int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -180,9 +180,9 @@ extern "C" {
         dim3 gridSize, blockSize;
         make3dconf(D0, D1, D2, &gridSize, &blockSize);
 
-        int D1D2 = D1*D2;
-        int S1S2 = S1*S2;
-        
+        int D1D2 = D1 * D2;
+        int S1S2 = S1 * S2;
+
         for (int dev = 0; dev < nDevice(); dev++)
         {
             gpu_safe(cudaSetDevice(deviceId(dev)));
