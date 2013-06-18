@@ -54,7 +54,7 @@ func LoadEnergy(e *Engine) {
 	}
 
 	if e.HasQuant("H_anis") {
-		term := LoadEnergyTerm(e, "E_anis", M, "H_anis", -e.CellVolume()*Mu0, "Anisotropy energy")
+		term := LoadEnergyTerm(e, "E_anis", M, "H_anis", -0.5*e.CellVolume()*Mu0, "Anisotropy energy")
 		Log("Loaded anisotropy energy E_anis")
 		sumUpd.AddParent(term.Name())
 	}
