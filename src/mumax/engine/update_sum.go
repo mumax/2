@@ -13,7 +13,7 @@ package engine
 import (
 	. "mumax/common"
 	"mumax/gpu"
-	//~ "fmt"
+	"fmt"
 )
 
 type SumUpdater struct {
@@ -55,14 +55,14 @@ func (u *SumUpdater) addTerms() {
 				parMul[c] = weight * parent.Multiplier()[c] / sum.Multiplier()[c]
 			}
 
-			//~ switch sum.NComp(){
-			//~ case 1:
-			//~ gpu.Madd(sum.array.Component(0), sum.array.Component(0), parent.array.Component(0), parMul[0])
-			//~ case 3:
-			gpu.VecMadd(sum.Array(), sum.Array(), parent.Array(), parMul)
-			//~ default:
-			//~ panic(InputErr("sum is not implemented for NComp: " + fmt.Sprint(sum.NComp())))
-			//~ }
+			switch sum.NComp() {
+			case 1:
+				gpu.Madd(sum.array.Component(0), sum.array.Component(0), parent.array.Component(0), parMul[0])
+			case 3:
+				gpu.VecMadd(sum.Array(), sum.Array(), parent.Array(), parMul)
+			default:
+				panic(InputErr("sum is not implemented for NComp: " + fmt.Sprint(sum.NComp())))
+			}
 
 		}
 	} else {
