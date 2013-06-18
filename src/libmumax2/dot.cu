@@ -1,5 +1,3 @@
-#include "gilbert.h"
-
 #include "multigpu.h"
 #include <cuda.h>
 #include "gpu_conf.h"
