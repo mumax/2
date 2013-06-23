@@ -72,14 +72,14 @@ func (s *BDFEulerAuto) Step() {
 	const maxIterErr = 0.1
 	const maxIter = 3
 	try := 0
-
-	// try to integrate maxTry times at most
+	restricted := false
+	
 	for {
+		
 		dt := engine.dt.Scalar()
 		badStep := false
 		badIterator := false
-		restricted := false
-
+		
 		for i := range equation {
 			// get dt here to avoid updates later on.
 			y := equation[i].output[0]
@@ -110,17 +110,16 @@ func (s *BDFEulerAuto) Step() {
 
 		// Protection
 		for i := range equation {
-			er[i] = 1e10
+			er[i] = maxIterErr
 		}
 
 		// Do predictor: BDF Euler (aka Adams-Moulton 0)
 		iter := 0
-		err := 1e10
+		err := 1.0
 		alpha := 0.0
 		alpha_ref := 0.6
-		h_alpha := 0.0
 
-		for err > maxIterErr {
+		for (err >= maxIterErr || iter > maxIter) {
 			for i := range equation {
 				y := equation[i].output[0]
 				dy := equation[i].input[0]
@@ -152,7 +151,7 @@ func (s *BDFEulerAuto) Step() {
 			alpha = alp[len(equation)-1]
 			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
-			if alpha > alpha_ref || iter > maxIter {
+			if alpha >= 1.0 {
 				badIterator = true
 				break
 			}
@@ -162,7 +161,13 @@ func (s *BDFEulerAuto) Step() {
 		if badIterator && try == (maxTry-1) {
 			panic(Bug(fmt.Sprintf("The BDF Euler iterator cannot converge! Please increase the maximum number of iterations and re-run!")))
 		} else if badIterator {
+			h_alpha := dt * 0.5
+			if alpha > alpha_ref {
+				h_alpha = dt * alpha_ref / alpha
+			}
+			engine.dt.SetScalar(h_alpha)
 			restricted = true
+			continue
 		}
 
 		// Save the derivative for the comparator
@@ -174,16 +179,16 @@ func (s *BDFEulerAuto) Step() {
 
 		// Protection
 		for i := range equation {
-			er[i] = 1e10
+			er[i] = maxIterErr
 		}
 
 		// Do corrector: BDF trapezoidal (aka Adams-Moulton 1)
 		iter = 0
-		err = 1e10
+		err = 1.0e10
 
 		// There is no such method in the literature
 		// So lets do it like RK does, start from the initial guess, but not from the predicted one
-		for err > maxIterErr {
+		for (err >= maxIterErr || iter > maxIter) {
 			for i := range equation {
 				y := equation[i].output[0]
 				dy := equation[i].input[0]
@@ -216,23 +221,26 @@ func (s *BDFEulerAuto) Step() {
 			alpha = alp[len(equation)-1]
 			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
-			if alpha > alpha_ref || iter > maxIter {
+			if alpha >= 1.0 {
 				badIterator = true
 				break
 			}
 		}
 
-		h_alpha = dt * math.Sqrt(alpha_ref/alpha)
-
 		if badIterator && try == (maxTry-1) {
 			// If fixed-point iterator cannot converge, then panic
 			panic(Bug(fmt.Sprintf("The BDF Trapezoidal iterator cannot converge! Please decrease the error the maximum number of iterations and re-run!")))
 		} else if badIterator {
-			if alpha < alpha_ref {
-				h_alpha = dt * 0.5
+			// if there is a bad step in iterator then do hard/soft for step correction for fast/slow convergence
+			h_alpha := dt * 0.5
+			if alpha > alpha_ref {
+				h_alpha = dt * alpha_ref / alpha
 			}
+			engine.dt.SetScalar(h_alpha)
 			restricted = true
+			continue
 		}
+
 
 		for i := range equation {
 			y := equation[i].output[0]
@@ -242,14 +250,15 @@ func (s *BDFEulerAuto) Step() {
 			tErr := 0.0
 			for p := 0; p < COMP; p++ {
 				diffy := float64(s.diff[i].MaxDiff(y.Array().Component(p), s.y1buffer[i].Component(p)))
-				maxy := float64(s.diff[i].MaxAbs(s.ybuffer[i].Component(p)))
+				maxy := float64(s.diff[i].MaxAbs(y.Array().Component(p)))
 				tErr += math.Pow(diffy/(s.maxAbsErr[i].Scalar()+maxy*s.maxRelErr[i].Scalar()), 2.0)
 			}
 			tErr = srCOMP * math.Sqrt(tErr)
 
 			s.err[i].SetScalar(tErr)
 
-			step_corr := math.Sqrt(headRoom / tErr)
+			step_corr := math.Pow(headRoom / tErr, 0.5)
+			//~ Debug("hr0:", step_corr)
 			// if step is large then threshold then badstep is reported
 			if tErr >= 1.0 {
 				s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
@@ -257,19 +266,21 @@ func (s *BDFEulerAuto) Step() {
 			} else {
 				pStep := s.steps_list[i].Front()
 				if pStep != nil {
-					step_corr *= math.Sqrt(dt / pStep.Value.(float64))
+					step_corr *= math.Pow(dt / pStep.Value.(float64), 0.5)
 				}
 				if !restricted {
 					pErr := s.err_list[i].Front()
 					if pErr != nil {
-						step_corr *= math.Sqrt(pErr.Value.(float64) / tErr)
+						step_corr *= math.Pow(pErr.Value.(float64) / tErr, 0.5)
 					}
 				}
 			}
-
-			// Let us compare the current error to the error from the previous steps
-
+			
+			restricted = false
+			
 			h_r := dt * step_corr
+			h_alpha := dt * alpha_ref / alpha
+			
 			new_dt := math.Min(h_r, h_alpha)
 
 			if new_dt < s.minDt.Scalar() {
@@ -283,7 +294,7 @@ func (s *BDFEulerAuto) Step() {
 			// Keep the history of 'good' errors
 			if !badStep {
 				s.err_list[i].PushFront(tErr)
-				s.steps_list[i].PushFront(new_dt)
+				s.steps_list[i].PushFront(dt)
 
 				if s.err_list[i].Len() == 10 {
 					s.err_list[i].Remove(s.err_list[i].Back())
@@ -305,6 +316,7 @@ func (s *BDFEulerAuto) Step() {
 		try++
 	}
 	// Advance step
+	//~ Debug("Successful step.")
 	e.step.SetScalar(e.step.Scalar() + 1) // advance time step
 }
 

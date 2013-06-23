@@ -28,7 +28,7 @@ load('maxtorque')
 load('solver/am01')
 setv('maxiterations', 3)
 setv('m_maxabserror', 1e-4)
-setv('m_maxrelerror', 1e-4)
+setv('m_maxrelerror', 1e-2)
 setv('maxitererror', 1e-4)
 setv('maxdt', 1e-10)
 setv('mindt', 1e-17)
@@ -71,6 +71,9 @@ By =   4.3E-3
 Bz =   0      
 setv('B_ext', [Bx, By, Bz])
 autotabulate(["t", "m_error"], "error.dat", 1e-13)
+autotabulate(["t", "badsteps"], "bs.dat", 1e-13)
+autotabulate(["t", "bdf_iterations"], "iter.dat", 1e-13)
+autotabulate(["t", "dt"], "dt.dat", 1e-13)
 run(1e-9)
 
 # some debug output
