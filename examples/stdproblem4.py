@@ -62,6 +62,7 @@ By =   4.3E-3
 Bz =   0      
 setv('B_ext', [Bx, By, Bz])
 autotabulate(["t", "m_error"], "error.dat", 1e-13)
+autotabulate(["t", "dt"], "dt.dat", 1e-13)
 run(1e-9)
 
 
