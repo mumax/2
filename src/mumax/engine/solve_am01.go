@@ -70,13 +70,14 @@ func (s *BDFEulerAuto) Step() {
 	const maxTry = 60 // undo at most this many bad steps
 	const headRoom = 0.8
 	const maxIterErr = 0.1
-	const maxIter = 3
+	const maxIter = 5
 	try := 0
 	restricted := false
 	
 	for {
 		
 		dt := engine.dt.Scalar()
+		Debug("dt",dt)
 		badStep := false
 		badIterator := false
 		
@@ -118,8 +119,8 @@ func (s *BDFEulerAuto) Step() {
 		err := 1.0
 		alpha := 0.0
 		alpha_ref := 0.6
-
-		for (err >= maxIterErr || iter > maxIter) {
+		// Iterator should take at least two steps to estimate convergence of the solution
+		for (iter < maxIter) {
 			for i := range equation {
 				y := equation[i].output[0]
 				dy := equation[i].input[0]
@@ -138,6 +139,7 @@ func (s *BDFEulerAuto) Step() {
 				tErr = srCOMP * math.Sqrt(tErr)
 				alp[i] = tErr / er[i]
 				er[i] = tErr
+				Debug("E:", tErr)
 				y.Array().CopyFromDevice(s.ybuffer[i])
 				y.Invalidate()
 			}
@@ -151,19 +153,24 @@ func (s *BDFEulerAuto) Step() {
 			alpha = alp[len(equation)-1]
 			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
+			// Check first if the target error is reached
+			if err <= maxIterErr {
+				break
+			}
+			// If not, then check for convergence
 			if alpha >= 1.0 {
 				badIterator = true
 				break
 			}
 		}
-
+		Debug("E", iter, alpha)
 		// If fixed-point iterator cannot converge, then panic
 		if badIterator && try == (maxTry-1) {
 			panic(Bug(fmt.Sprintf("The BDF Euler iterator cannot converge! Please increase the maximum number of iterations and re-run!")))
 		} else if badIterator {
 			h_alpha := dt * 0.5
 			if alpha > alpha_ref {
-				h_alpha = dt * alpha_ref / alpha
+				h_alpha = dt * math.Pow(alpha_ref / alpha, 0.5)
 			}
 			engine.dt.SetScalar(h_alpha)
 			restricted = true
@@ -188,7 +195,8 @@ func (s *BDFEulerAuto) Step() {
 
 		// There is no such method in the literature
 		// So lets do it like RK does, start from the initial guess, but not from the predicted one
-		for (err >= maxIterErr || iter > maxIter) {
+		// Iterator should take at least two steps to estimate convergence of the solution
+		for (iter < maxIter) {
 			for i := range equation {
 				y := equation[i].output[0]
 				dy := equation[i].input[0]
@@ -221,12 +229,17 @@ func (s *BDFEulerAuto) Step() {
 			alpha = alp[len(equation)-1]
 			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
+			// Check first if the target error is reached
+			if err <= maxIterErr {
+				break
+			}
+			// If not, then check for convergence
 			if alpha >= 1.0 {
 				badIterator = true
 				break
 			}
 		}
-
+		Debug("T", iter, alpha)
 		if badIterator && try == (maxTry-1) {
 			// If fixed-point iterator cannot converge, then panic
 			panic(Bug(fmt.Sprintf("The BDF Trapezoidal iterator cannot converge! Please decrease the error the maximum number of iterations and re-run!")))
@@ -234,7 +247,7 @@ func (s *BDFEulerAuto) Step() {
 			// if there is a bad step in iterator then do hard/soft for step correction for fast/slow convergence
 			h_alpha := dt * 0.5
 			if alpha > alpha_ref {
-				h_alpha = dt * alpha_ref / alpha
+				h_alpha = dt * math.Pow(alpha_ref / alpha, 0.5)
 			}
 			engine.dt.SetScalar(h_alpha)
 			restricted = true
@@ -254,35 +267,32 @@ func (s *BDFEulerAuto) Step() {
 				tErr += math.Pow(diffy/(s.maxAbsErr[i].Scalar()+maxy*s.maxRelErr[i].Scalar()), 2.0)
 			}
 			tErr = srCOMP * math.Sqrt(tErr)
-
-			s.err[i].SetScalar(tErr)
-
-			step_corr := math.Pow(headRoom / tErr, 0.5)
-			//~ Debug("hr0:", step_corr)
-			// if step is large then threshold then badstep is reported
 			if tErr >= 1.0 {
 				s.badSteps.SetScalar(s.badSteps.Scalar() + 1)
 				badStep = true
-			} else {
-				pStep := s.steps_list[i].Front()
-				if pStep != nil {
-					step_corr *= math.Pow(dt / pStep.Value.(float64), 0.5)
-				}
-				if !restricted {
-					pErr := s.err_list[i].Front()
-					if pErr != nil {
-						step_corr *= math.Pow(pErr.Value.(float64) / tErr, 0.5)
-					}
-				}
+			}
+			s.err[i].SetScalar(tErr)
+
+			step_corr := math.Pow(headRoom / tErr, 0.5)
+			pStep := s.steps_list[i].Front()
+			if pStep != nil {
+				step_corr *= math.Pow(dt / pStep.Value.(float64), 0.5)
+			}
+			pErr := s.err_list[i].Front()
+			if pErr != nil {
+				step_corr *= math.Pow(pErr.Value.(float64) / tErr, 0.5)
 			}
 			
-			restricted = false
+			
 			
 			h_r := dt * step_corr
-			h_alpha := dt * alpha_ref / alpha
+			new_dt := h_r
 			
-			new_dt := math.Min(h_r, h_alpha)
-
+			if restricted {
+				h_alpha := dt * alpha_ref / alpha
+				new_dt = math.Min(h_r, h_alpha)
+			}
+			
 			if new_dt < s.minDt.Scalar() {
 				new_dt = s.minDt.Scalar()
 			}
