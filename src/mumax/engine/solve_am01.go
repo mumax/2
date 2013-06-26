@@ -70,7 +70,7 @@ func (s *BDFEulerAuto) Step() {
 	const maxTry = 60 // undo at most this many bad steps
 	const headRoom = 0.8
 	const maxIterErr = 0.1
-	const maxIter = 3
+	const maxIter = 2
 	try := 0
 	restrict_step := false
 	alpha_ref := 0.85
@@ -140,6 +140,7 @@ func (s *BDFEulerAuto) Step() {
 					tErr += math.Pow(diffy/(s.maxAbsErr[i].Scalar()+maxy*s.maxRelErr[i].Scalar()), 2.0)
 				}
 				tErr = srCOMP * math.Sqrt(tErr)
+				Debug("E e:", tErr)
 				alp[i] = tErr / er[i]
 				er[i] = tErr
 				y.Array().CopyFromDevice(s.ybuffer[i])
@@ -157,7 +158,11 @@ func (s *BDFEulerAuto) Step() {
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
 			// Check first if the target error is reached
 			if err <= maxIterErr {
-				break
+				if !restrict_step {
+					break
+				} else if iter > 1 {
+					break
+				}
 			}
 			// If not, then check for convergence
 			if alpha >= 1.0 || iter > maxIter {
@@ -174,7 +179,7 @@ func (s *BDFEulerAuto) Step() {
 			// if there is a bad step in iterator then do hard/soft for step correction for fast/slow convergence
 			h_alpha := 0.5 * dt
 			if alpha > alpha_ref {
-				h_alpha = dt * alpha_ref / alpha
+				h_alpha = dt * math.Pow(alpha_ref / alpha, 0.5)
 			}
 			engine.dt.SetScalar(h_alpha)
 			alpha_0 = alpha
@@ -281,16 +286,23 @@ func (s *BDFEulerAuto) Step() {
 
 			step_corr := math.Pow(headRoom / tErr, 0.5)
 			pStep := s.steps_list[i].Front()
+			bounds := 1.0e10
 			if pStep != nil {
 				Debug("dt/",  dt / pStep.Value.(float64))
 				step_corr *= (dt / pStep.Value.(float64))
+				bounds = math.Max(dt, pStep.Value.(float64)) / math.Min(dt, pStep.Value.(float64)) 
 			}
+			
 			pErr := s.err_list[i].Front()
 			if pErr != nil {
 				//~ Debug(pErr.Value.(float64), " / ", tErr)
 				step_corr *= math.Pow(pErr.Value.(float64) / tErr, 0.5)
 			}
-						
+			
+			if step_corr > 1.0 && step_corr > bounds {
+				step_corr = bounds
+			}
+			
 			h_r := dt * step_corr
 			new_dt := h_r
 			
