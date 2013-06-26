@@ -145,6 +145,7 @@ save("p","ovf",[])
 autosave("m", "gplot", [], 1e-12)
 # Tabulate net magnetization every 1 ps, similar to OOMMF's mmGraph
 autotabulate(["t", "<m>"], "m.txt", 1e-12)
+autotabulate(["t", "dt"], "dt.dat", 1e-13)
 
 # Run simulation for 5 ns
 run(5e-9)

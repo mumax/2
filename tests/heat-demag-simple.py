@@ -49,12 +49,15 @@ add_to("Qe", "Qnc")
 add_to("Qe", "Qlaser")
 add_to("Qe", "Qe_spat")
 
-load('solver/am01')
+load('solver/am12')
 setv('mf_maxabserror', 1e-4)
 setv('mf_maxrelerror', 1e-3)
 
 setv('Te_maxabserror', 1e-4)
 setv('Te_maxrelerror', 1e-3)
+#~ load('solver/rk12')
+#~ setv('mf_maxerror', 1e-4)
+#~ setv('Te_maxerror', 1e-2)
 
 savegraph("graph.png")
 
@@ -92,7 +95,7 @@ setv('gamma_LL', 2.211e5)
 #~ Bz = 0.0
 #~ setv('B_ext',[Bx,By,Bz])
                 
-setv('dt', 1e-18)
+setv('dt', 1e-15)
 setv('kappa', 1e-4)
 
 # Heat bath parameters
@@ -119,7 +122,7 @@ tt = 1e-15
 T0 = 500e-15 # Time delay for the excitation
 dT = 80e-15 # FWHM of the excitation gaussian envelope
 dTT = 0.5 / (dT * dT) # FWHW squared
-Qamp = 3e21
+Qamp = 1e21
 N = 3100 # 
 time = N * tt
 fine = 10
@@ -141,7 +144,7 @@ autotabulate(["t", "<Qlaser>"], "Qlaser.txt", tt)
 
 setv('maxdt', 1e-12)
 setv('mindt', 1e-17)
-setv('dt', 1e-17)
+setv('dt', 1e-15)
 
 run(10e-12)
 

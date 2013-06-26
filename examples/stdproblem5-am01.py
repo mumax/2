@@ -29,11 +29,9 @@ load('zeeman')
 load('llg')
 load('maxtorque')
 
-load('solver/am01')
-setv('maxiterations', 3)
+load('solver/am12')
 setv('m_maxabserror', 1e-4)
-setv('m_maxrelerror', 1e-4)
-setv('maxitererror', 1e-4)
+setv('m_maxrelerror', 1e-3)
 setv('maxdt', 1e-10)
 setv('mindt', 1e-17)
 
@@ -94,6 +92,7 @@ setmask('j', j)
 autosave("m", "gplot", [], 10e-12)
 autotabulate(["t", "<m>"], "m.txt", 50e-12)
 autotabulate(["t", "m_error"], "error.dat", 1e-13)
+autotabulate(["t", "dt"], "dt.dat", 1e-13)
 
 run(15.0e-9)
 
