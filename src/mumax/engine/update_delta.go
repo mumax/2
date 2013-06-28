@@ -19,17 +19,12 @@ type ΔUpdater struct {
 	q0  *Quant
 }
 
-func newΔUpdater(in, out *Quant) *ΔUpdater {
+func NewΔUpdater(in, ref, out *Quant) *ΔUpdater {
 	// look for ground state quantity
-	qname := in.Name()
-	q0name := qname + "_0"
-	if !engine.HasQuant(q0name) {
-		panic(InputErrF("Cannot find ", q0name))
-	}
 	u := new(ΔUpdater)
 	u.in = in
 	u.out = out
-	u.q0 = engine.Quant(q0name)
+	u.q0 = ref
 	engine.Depends(out.Name(), in.Name(), u.q0.Name())
 	return u
 }

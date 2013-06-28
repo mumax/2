@@ -859,8 +859,8 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	//~ get dimensions for per component quantities, lame
 	OutputSize := make([]int, 3)
 	OutputSize[0] = fftOutputSize[0]
-	OutputSize[1] = fftOutputSize[2] / 2
-	OutputSize[2] = fftOutputSize[1]
+	OutputSize[1] = fftOutputSize[1]
+	OutputSize[2] = fftOutputSize[2] / 2
 
 	//~ create two output quantities for real/img (amp/phase) parts
 
@@ -975,4 +975,8 @@ func (a API) SaveState(dst, src string) {
 
 func (a API) RecoverState(dst, src string) {
 	a.Engine.RecoverState(dst, src)
+}
+
+func (a API) AddDeltaQuant(src, ref string) {
+	a.Engine.AddDeltaQuant(src, ref)
 }

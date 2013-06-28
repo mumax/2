@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -12,6 +12,7 @@ package engine
 import (
 	"fmt"
 	. "mumax/common"
+	"mumax/gpu"
 	"path"
 	"strings"
 )
@@ -43,7 +44,7 @@ type Engine struct {
 	dt             *Quant            // time step quantity is always present
 	step           *Quant            // number of time steps been taken
 	timer          Timer             // For benchmarking
-	modules        []Module          // loaded modules 
+	modules        []Module          // loaded modules
 	crontabs       map[int]Notifier  // periodical jobs, indexed by handle
 	outputTables   map[string]*Table // open output table files, indexed by file name
 	_outputID      int               // index for output numbering
@@ -93,7 +94,7 @@ func (e *Engine) Close() {
 
 //__________________________________________________________________ I/O
 
-// Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time. 
+// Gets an ID number to identify the current time. Used to number output files. E.g. the 7 in "m000007.omf". Files with the same OutputID correspond to the same simulation time.
 func (e *Engine) OutputID() int {
 	t := e.time.Scalar()
 	if t != e._lastOutputT {
@@ -245,14 +246,45 @@ func (e *Engine) HasQuant(name string) bool {
 	return ok
 }
 
+func (e *Engine) AddDeltaQuant(in, ref string) {
+	if !e.HasQuant(in) {
+		panic(InputErrF(in, "does not exist."))
+	}
+	if !e.HasQuant(ref) {
+		panic(InputErrF(ref, "does not exist."))
+	}
+	qin := e.Quant(in)
+	qref := e.Quant(ref)
+
+	out := "Δ" + in
+
+	qout := e.AddNewQuant(out, qin.nComp, qin.kind, qin.unit)
+	qout.updater = NewΔUpdater(qin, qref, qout)
+}
+
 // Derived quantities are averages, components, etc. of existing quantities.
 // They are added to the engine on-demand.
 // Syntax:
-//	"<q>"  : average of q
-//	"q.x"  : x-component of q, must be vector
-//	"q.xx" : xx-component of q, must be tensor
-//	"<q.x>": average of x-component of q.
+//	"<q>"  		: average of q
+//	"q.x"  		: x-component of q, must be vector
+//	"q.xx" 		: xx-component of q, must be tensor
+//	"<q.x>"		: average of x-component of q.
+//  "fft(q)" 	: fft of q
 func (e *Engine) addDerivedQuant(name string) {
+	// fft
+	if strings.HasPrefix(name, "fft(") && strings.HasSuffix(name, ")") {
+		in := name[len("fft(") : len(name)-1]
+		Debug(in)
+		qin := e.Quant(in)
+	    if qin.kind == VALUE {
+	        panic(InputErrF(qin.Name(), "is not space-dependent, fft is meaningless."))
+	    }
+	    e.AddQuant(NewQuant(name, qin.nComp, gpu.FFTOutputSize(e.GridSize()), qin.kind, qin.unit, false, "fft of " + qin.desc))
+	    Debug(name)
+	    qout := e.Quant(name)
+		qout.updater = NewFFTUpdater(qin, qout)
+		return
+	}
 	// average
 	if strings.HasPrefix(name, "<") && strings.HasSuffix(name, ">") {
 		origname := name[1 : len(name)-1]
@@ -360,7 +392,7 @@ func (e *Engine) LoadModuleArgs(name string, ins, deps, outs []string) {
 	module := GetModule(name)
 	Log("Loaded module", module.Name, ":", module.Description)
 	Log("In: ", module.Args.InsMap, " Deps: ", module.Args.DepsMap, " Out: ", module.Args.OutsMap)
-	
+
 	args := GetParsedArgumentsMap(module, ins, deps, outs)
 	module.LoadFunc(e, args)
 	e.modules = append(e.modules, module)
@@ -561,7 +593,7 @@ func (e *Engine) AutoSaveSingleFile(quant string, format string, options []strin
 	return handle
 }
 
-// See api.go 
+// See api.go
 func (e *Engine) Tabulate(quants []string, filename string) {
 	if _, ok := e.outputTables[filename]; !ok { // table not yet open
 		e.outputTables[filename] = NewTable(e.Relative(filename))
@@ -674,13 +706,14 @@ func (e *Engine) SaveState(out, in string) {
 	if !e.HasQuant(in) {
 		panic(InputErrF(in, "does not exist."))
 	}
-	
+
 	qin := e.Quant(in)
+	qin.Update()//!!!!!
 
 	if !e.HasQuant(out) {
 		e.AddNewQuant(out, qin.NComp(), qin.Kind(), qin.Unit(), qin.desc)
 	}
-		
+
 	qout :=  e.Quant(out)
 	qout.CopyFromQuant(qin)
 }
