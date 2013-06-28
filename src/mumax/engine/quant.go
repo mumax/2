@@ -519,6 +519,21 @@ func (q *Quant) SetUpToDate(status bool) {
 	q.upToDate = status
 }
 
+func (q *Quant) CopyFromQuant(qin *Quant) {
+	checkKind(q, qin.Kind())
+	checkComp(q, qin.NComp())
+	if q.unit != qin.unit {
+		panic(InputErrF("Units mismatch:", q.FullName(), "!=", qin.FullName))
+	}
+
+	for i := 0; i < q.nComp; i++ {
+		q.multiplier[i] = qin.multiplier[i]
+	}
+
+	q.array.CopyFromDevice(&(qin.array))
+	q.Invalidate()
+}
+
 //// If the quantity represents a space-dependent field, return a host copy of its value.
 //// Call FreeBuffer() to recycle it.
 //func (q *Quant) FieldValue() *host.Array {
