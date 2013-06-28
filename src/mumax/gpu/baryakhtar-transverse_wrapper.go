@@ -18,10 +18,10 @@ import (
 	"unsafe"
 )
 
-func BaryakhtarTransverseAsync(t *Array, M *Array, h *Array, msat0T0 *Array, mu *Array, muMul []float64) {
+func BaryakhtarTransverseAsync(t *Array, S *Array, h *Array, msat0T0 *Array, mu *Array, muMul []float64) {
 
 	// Bookkeeping
-	CheckSize(h.Size3D(), M.Size3D())
+	CheckSize(h.Size3D(), S.Size3D())
 	CheckSize(h.Size3D(), t.Size3D())
 	Assert(h.NComp() == 3)
 
@@ -31,9 +31,9 @@ func BaryakhtarTransverseAsync(t *Array, M *Array, h *Array, msat0T0 *Array, mu 
 		(**C.float)(unsafe.Pointer(&(t.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Z].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(M.Comp[X].Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(M.Comp[Y].Pointers()[0]))),
-		(**C.float)(unsafe.Pointer(&(M.Comp[Z].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(S.Comp[Z].Pointers()[0]))),
 
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].Pointers()[0]))),

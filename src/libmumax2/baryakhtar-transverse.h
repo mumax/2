@@ -1,7 +1,6 @@
 /**
   * @file
-  * This file implements perpendicular Baryakhtar's relaxation
-  * See: unpublished W Wang, ..., MD, VVK, MF, HFG (2012)
+  * This file implements transverse Baryakhtar's relaxation
   *
   * @author Mykola Dvornik
   */
@@ -18,7 +17,7 @@ extern "C" {
 #endif
 
     DLLEXPORT  void baryakhtar_transverse_async(float** tx, float**  ty, float**  tz,
-            float**  Mx, float**  My, float**  Mz,
+            float**  Sx, float**  Sy, float**  Sz,
             float**  hx, float**  hy, float**  hz,
 
             float** msat0T0,

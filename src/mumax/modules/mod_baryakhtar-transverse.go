@@ -34,7 +34,7 @@ func LoadBaryakhtarTransverse(e *Engine) {
 	llbr_transverse := e.AddNewQuant("llbr_transverse", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar ferromagnetic relaxation term")
 
 	// ============ Dependencies =============
-	e.Depends("llbr_transverse", "mf", "H_eff", "gamma_LL", "mu", "msat0T0")
+	e.Depends("llbr_transverse", "m", "H_eff", "gamma_LL", "mu", "msat0T0")
 
 	// ============ Updating the torque =============
 	upd := &BaryakhtarTransverseUpdater{llbr_transverse: llbr_transverse}
@@ -51,7 +51,7 @@ func (u *BaryakhtarTransverseUpdater) Update() {
 
 	llbr_transverse := u.llbr_transverse
 	gammaLL := e.Quant("gamma_LL").Scalar()
-	m := e.Quant("mf")
+	m := e.Quant("m") // m is spin |m| = 1
 	heff := e.Quant("H_eff")
 
 	// put gamma in multiplier to avoid additional multiplications
