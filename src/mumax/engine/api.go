@@ -923,9 +923,6 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 			extractCmplxComponents(fftBuffer.LocalCopy(), mFFTHostXArray.Component(ii), mFFTHostYArray.Component(ii), norm, format)
 		}
 
-		transposeYZ(mFFTHostXArray)
-		transposeYZ(mFFTHostYArray)
-
 		//~ Save result to files
 		filename := a.Engine.AutoFilename(mFFTHostX.Name(), OUT_FORMAT)
 		a.Engine.SaveAs(mFFTHostX, OUT_FORMAT, []string{}, filename)
@@ -972,25 +969,10 @@ func extractCmplxComponents(src, comp1, comp2 *host.Array, norm float64, format 
 	}
 }
 
-func transposeYZ(src *host.Array) {
-	sX := src.Size4D[1]
-	sY := src.Size4D[2]
-	sZ := src.Size4D[3]
-	hsX := sX / 2
-	hsY := sY / 2
-	for c := 0; c < src.Size4D[0]; c++ {
-		for k := 0; k < hsX; k++ {
-			for j := 0; j < hsY; j++ {
-				for i := 0; i < sZ; i++ {
-					val := src.Array[c][k][j][i]
-					src.Array[c][k][j][i] = src.Array[c][k+hsX][j+hsY][i]
-					src.Array[c][k+hsX][j+hsY][i] = val
-					val = src.Array[c][k][j+hsY][i]
-					src.Array[c][k][j+hsY][i] = src.Array[c][k+hsX][j][i]
-					src.Array[c][k+hsX][j][i] = val
+func (a API) SaveState(dst, src string) {
+	a.Engine.SaveState(dst, src)
+}
 
-				}
-			}
-		}
-	}
+func (a API) RecoverState(dst, src string) {
+	a.Engine.RecoverState(dst, src)
 }

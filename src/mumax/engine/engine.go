@@ -669,6 +669,35 @@ func (e *Engine) Stats() string {
 	return str
 }
 
+
+func (e *Engine) SaveState(out, in string) {
+	if !e.HasQuant(in) {
+		panic(InputErrF(in, "does not exist."))
+	}
+	
+	qin := e.Quant(in)
+
+	if !e.HasQuant(out) {
+		e.AddNewQuant(out, qin.NComp(), qin.Kind(), qin.Unit(), qin.desc)
+	}
+		
+	qout :=  e.Quant(out)
+	qout.CopyFromQuant(qin)
+}
+
+func (e *Engine) RecoverState(out, in string) {
+	if !e.HasQuant(out) {
+		panic(InputErrF(out, "does not exist."))
+	}
+	qout := e.Quant(out)
+	if !e.HasQuant(in) {
+		panic(InputErrF(in, "does not exist."))
+	}
+	qin := e.Quant(in)
+	qout.CopyFromQuant(qin)
+}
+
+
 func valid(b bool) string {
 	if b {
 		return "OK"
