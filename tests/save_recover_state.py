@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from mumax2 import *
 from math import *
-# Standard Problem 4
-
-# define geometry
+eps = 1e-7
 
 # number of cells
 Nx = 32
@@ -45,8 +43,9 @@ valz = sqrt(1./3.)
 for kk in range(Nz):
     for jj in range(Ny):
         for ii in range(Nx):
-            diff = (m0[0][ii][jj][kk] - valx) + (m0[1][ii][jj][kk] - valy) + (m0[2][ii][jj][kk] - valz)
-            if diff > 1e-15:
+            diff = abs((m0[0][ii][jj][kk] - valx) + (m0[1][ii][jj][kk] - valy) + (m0[2][ii][jj][kk] - valz))
+            if diff > eps:
+                print ii, jj, kk, diff
                 ok = None
 
 recoverstate('m', 'm_1')
@@ -60,8 +59,9 @@ valz = 0.0
 for kk in range(Nz):
     for jj in range(Ny):
         for ii in range(Nx):
-            diff = (m0[0][ii][jj][kk] - valx) + (m0[1][ii][jj][kk] - valy) + (m0[2][ii][jj][kk] - valz)
-            if diff > 1e-15:
+            diff = abs((m0[0][ii][jj][kk] - valx) + (m0[1][ii][jj][kk] - valy) + (m0[2][ii][jj][kk] - valz))
+            if diff > eps:
+                print ii, jj, kk, diff
                 ok = None
 
 if ok :
