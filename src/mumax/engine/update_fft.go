@@ -25,23 +25,24 @@ type FFTUpdater struct {
 	norm float64
 }
 
-func newFFTUpdater(in, out *Quant) *FFTUpdater {
+func NewFFTUpdater(qin, qout *Quant) *FFTUpdater {
+
 	u := new(FFTUpdater)
-	u.in = in
-	u.out = out
+	u.in = qin
+	u.out = qout
 
 	meshSize := engine.GridSize()
 
 	u.win = gpu.NewArray(1, meshSize)
 	u.win.CopyFromHost(genWindow(meshSize))
 
-	u.q = gpu.NewArray(in.NComp(), meshSize)
+	u.q = gpu.NewArray(qin.NComp(), meshSize)
 
 	u.norm = 1.0 / float64(gpu.FFTNormLogic(meshSize))
 
 	u.plan = gpu.NewDefaultFFT(meshSize, meshSize)
 
-	engine.Depends(out.Name(), in.Name())
+	engine.Depends(qout.Name(), qin.Name())
 
 	return u
 }
@@ -59,12 +60,11 @@ func (u *FFTUpdater) Update() {
 	for ii := 0; ii < COMP; ii++ {
 		gpu.Mul(q.Component(ii), qin.Component(ii), window)
 	}
-
+    //~ dot fft
 	for ii := 0; ii < COMP; ii++ {
+        u.out.Multiplier()[ii] *= u.norm
 		u.plan.Forward(q.Component(ii), qout.Component(ii))
-		//~ extractCmplxComponents(fftBuffer.LocalCopy(), mFFTHostXArray.Component(ii), mFFTHostYArray.Component(ii), norm, format)
 	}
-
 }
 
 func gauss(arg, w float64) float64 {
