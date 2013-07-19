@@ -24,7 +24,7 @@
 #define muB         9.2740091523E-24f                   // Bohr magneton in Am^2
 #define mu0         4.0f * 1e-7f * 3.14159265358979f    // vacuum permeability
 #define zero        1.0e-32f                            // the zero threshold
-#define eps         1.0e-8f                             // the target numerical accuracy of iterative methods 
+#define eps         1.0e-8f                             // the target numerical accuracy of iterative methods
 #define linRange    2.0e-1f                             // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
@@ -34,7 +34,7 @@ typedef double real;
 struct float5 {
     float x;
     float y;
-    float z;    
+    float z;
     float w;
     float v;
 };
@@ -44,7 +44,7 @@ typedef struct float5 float5;
 struct int6 {
     int x;
     int y;
-    int z;    
+    int z;
     int w;
     int v;
     int t;
@@ -111,7 +111,7 @@ inline __host__ __device__ int6 make_int6(int x, int y, int z, int w, int v, int
     a.v = v;
     a.t = t;
     return a;
-} 
+}
 
 inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float v){
     float5 a;
@@ -121,7 +121,7 @@ inline __host__ __device__ float5 make_float5(float x, float y, float z, float w
     a.w = w;
     a.v = v;
     return a;
-} 
+}
 
 inline __host__ __device__ real7 make_real7(real x, real y, real z, real w, real t, real q){
     real7 a;
@@ -170,25 +170,25 @@ inline __host__ __device__ int Mod(int a, int b){
 
 // dot product
 inline __host__ __device__ float dotf(float3 a, float3 b)
-{ 
+{
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 inline __host__ __device__ float dot(real3 a, real3 b)
-{ 
+{
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-// cross product in LHR system 
+// cross product in LHR system
 
 inline __host__ __device__ float3 crossf(float3 a, float3 b)
-{ 
-	return make_float3( - a.y*b.z + a.z*b.y,  - a.z*b.x + a.x*b.z, - a.x*b.y + a.y*b.x); 
+{
+	return make_float3( - a.y*b.z + a.z*b.y,  - a.z*b.x + a.x*b.z, - a.x*b.y + a.y*b.x);
 }
 
 inline __host__ __device__ real3 cross(real3 a, real3 b)
-{ 
-	return make_real3( - a.y*b.z + a.z*b.y, - a.z*b.x + a.x*b.z,  - a.x*b.y + a.y*b.x); 
+{
+	return make_real3( - a.y*b.z + a.z*b.y, - a.z*b.x + a.x*b.z,  - a.x*b.y + a.y*b.x);
 }
 
 // lenght of the 3-components vector
@@ -208,13 +208,13 @@ inline __host__ __device__ float3 normalize(float3 a){
 
 inline __device__ float cothf(float x) {
     return 1.0f / tanhf(x);
-    //~ return (x > -linRange && x < linRange) ? (1.0f / x) + (x / 3.0f) - (powf(x, 3.0f)/45.0f) + (0.5f * powf(x, 5.0f)/945.0f)  
+    //~ return (x > -linRange && x < linRange) ? (1.0f / x) + (x / 3.0f) - (powf(x, 3.0f)/45.0f) + (0.5f * powf(x, 5.0f)/945.0f)
                                            //~ : 1.0f / tanhf(x);
     //return coshf(x) / sinh(x);
 }
 
 inline __device__ double coth(double x) {
-    return (x > -linRange && x < linRange) ? (1.0 / x) + (x / 3.0) - (pow(x, 3.0)/45.0) + (0.5f * pow(x, 5.0)/945.0)  
+    return (x > -linRange && x < linRange) ? (1.0 / x) + (x / 3.0) - (pow(x, 3.0)/45.0) + (0.5f * pow(x, 5.0)/945.0)
                                            : 1.0 / tanh(x);
 }
 
@@ -248,10 +248,10 @@ inline __device__ float dBjdxf(float J, float x) {
 //~ inline __device__ double dBjdx(double J, double x) {
         //~ double lpre = 1.0 / (2.0 * J);
         //~ double gpre = (2.0 * J + 1.0) * lpre;
-        //~ 
+        //~
         //~ double gpre2 = gpre * gpre;
         //~ double lpre2 = lpre * lpre;
-        //~ return (x > -(double)linRange && x < (double)linRange) ? (gpre2 - lpre2) / 3.0 + (pow(lpre,4.0) - pow(gpre,4.0)) * x * x / 15.0 
+        //~ return (x > -(double)linRange && x < (double)linRange) ? (gpre2 - lpre2) / 3.0 + (pow(lpre,4.0) - pow(gpre,4.0)) * x * x / 15.0
                                                                //~ : (gpre2 - lpre2) + lpre2*coth(lpre*x)*coth(lpre*x) - gpre2*coth(gpre*x)*coth(gpre*x);
 //~ }
 
@@ -267,6 +267,18 @@ inline __device__ float dLdx(float x) {
 inline __device__ float signf(float x) {
     float val = (signbit(x) == 0.0f) ? 1.0f : -1.0f;
     return (x == 0.0f) ? 0.0f : val;
+}
+
+inline __device__ float getMaskUnity(float *msk, int idx) {
+    return (msk == NULL) ? 1.0f : msk[idx];
+}
+
+inline __device__ float getMaskZero(float *msk, int idx) {
+    return (msk == NULL) ? 0.0f : msk[idx];
+}
+
+inline __device__ float fdivZero(float a, float b) {
+    return (b == 0.0f) ? 0.0f : a / b ;
 }
 
 #endif
