@@ -872,6 +872,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 
 	I := FullTensorIdx[0][0]
 
+	// Use far field approximation past the asymptotic radius
 	if (scaled_arad > 0.0) {
 		ztest := int(math.Ceil(scaled_arad/dz)) + 2
 		if (ztest < zstop) { zstop = ztest }
@@ -885,7 +886,10 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 //		u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
 // 	}
 	if (periodic[0]+periodic[1]+periodic[2] == 0) {
-   	   	for x := 0; x < xstop; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped.
+		// Calculate Nxx, Nxy and Nxz in the first octant, non-periodic case.
+		// Step 1: Evaluate f & g at each cell site. Offset by (-dx, -dy, -dz)
+		// so that we can do 2nd derivative operations "in-place".
+   	   	for x := 0; x < xstop; x++ { // in each dimension, we stay in the region up to the asymptotic radius
 		      xw := x
 		      R[X] = float64(x-1) * cellsize[X]
 
@@ -911,8 +915,9 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		      }
 		}
 
-		// Do d^2/dz^2
+		// Step: 2a: Do d^2/dz^2
 		if (zstop == 1) {
+			// Only 1 layer in z-direction of f/g stored in scratch array.
 			zw := 0
 			for y := 0; y < ystop; y++ {
 				yw := y
@@ -921,6 +926,15 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 				for x := 0; x < xstop; x++ {
 					xw := x
 					R[X] = float64(x-1) * cellsize[X]
+
+					// Function f is even in each variable, so for example
+					//	f(x, y, -dz) - 2f(x, y, 0) + f(x, y, dz)
+					//		= 2( f(x, y, -dz) - f(f, y, 0) )
+					// Function g is even in z, and odd in x and y, so for example
+					//	g(x, -dz, y) - 2g(x, 0, y) + g(x, dz, y)
+					//		= 2g(x, 0, y) = 0
+					// Nyy(x, y, z) = Nxx(y, x, z); Nzz(x, y, z) = Nxx(z, y, x);
+					// Nxz(x, y, z) = Nxy(x, z, y); Nyz(x, y, z) = Nxy(y, z, x);
 
 					I = FullTensorIdx[0][0]
 					scratch[I][xw][yw][zw] -= float32(scale*Newell_f(R[X],R[Y],0.0))
@@ -954,7 +968,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 			}
 		}
 
-		// Do d^2/dy^2
+		// Step 2b: Do d^2/dy^2
 		if (ystop == 1) {
 			yw := 0
 			for z := 0; z < zstop; z++ {
@@ -964,6 +978,15 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 				for x := 0; x < xstop; x++ {
 					xw := x
 					R[X] = float64(x-1) * cellsize[X]
+
+					// Function f is even in each variable, so for example
+					//	f(x, y, -dz) - 2f(x, y, 0) + f(x, y, dz)
+					//		= 2( f(x, y, -dz) - f(f, y, 0) )
+					// Function g is even in z, and odd in x and y, so for example
+					//	g(x, -dz, y) - 2g(x, 0, y) + g(x, dz, y)
+					//		= 2g(x, 0, y) = 0
+					// Nyy(x, y, z) = Nxx(y, x, z); Nzz(x, y, z) = Nxx(z, y, x);
+					// Nxz(x, y, z) = Nxy(x, z, y); Nyz(x, y, z) = Nxy(y, z, x);
 
 					I = FullTensorIdx[0][0]
 					scratch[I][xw][yw][zw] -= float32(scale*(Newell_f(R[X],0.0,R[Z]-cellsize[Z])+Newell_f(R[X],0.0,R[Z]+cellsize[Z])-2.0*Newell_f(R[X],0.0,R[Z])))
@@ -997,7 +1020,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 			}
 		}
 
-		// Do d^2/dx^2
+		// Step 2c: Do d^2/dx^2
 		if (xstop == 1) {
 			xw := 0
 			for z := 0; z < zstop; z++ {
@@ -1008,15 +1031,24 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 					yw := y
 					R[Y] = float64(y) * cellsize[Y]
 
+					// Function f is even in each variable, so for example
+					//	f(x, y, -dz) - 2f(x, y, 0) + f(x, y, dz)
+					//		= 2( f(x, y, -dz) - f(f, y, 0) )
+					// Function g is even in z, and odd in x and y, so for example
+					//	g(x, -dz, y) - 2g(x, 0, y) + g(x, dz, y)
+					//		= 2g(x, 0, y) = 0
+					// Nyy(x, y, z) = Nxx(y, x, z); Nzz(x, y, z) = Nxx(z, y, x);
+					// Nxz(x, y, z) = Nxy(x, z, y); Nyz(x, y, z) = Nxy(y, z, x);
+
 					I = FullTensorIdx[0][0]
 					scratch[I][xw][yw][zw] -= float32(scale*((4.0*Newell_f(0.0,R[Y],R[Z])+Newell_f(0.0,R[Y]+cellsize[Y],R[Z]+cellsize[Z])+Newell_f(0.0,R[Y]-cellsize[Y],R[Z]+cellsize[Z])+Newell_f(0.0,R[Y]+cellsize[Y],R[Z]-cellsize[Z])+Newell_f(0.0,R[Y]-cellsize[Y],R[Z]-cellsize[Z]))-2.0*(Newell_f(0,R[Y]+cellsize[Y],R[Z])+Newell_f(0,R[Y]-cellsize[Y],R[Z])+Newell_f(0,R[Y],R[Z]+cellsize[Z])+Newell_f(0,R[Y],R[Z]-cellsize[Z]))))
-					scratch[I][xw][yw][zw] *= float32(2.0)
+					scratch[I][xw][yw][zw] *= float32(2.0) // For Nxx
 
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] =float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0) // For Nxy
 
 					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw] = float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0) // For Nxz
 
 				}
 			}
@@ -1039,23 +1071,38 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 			}
 		}
 
-		// Correct for self-demag
+		// Special "SelfDemag" code may be more accurate at index 0,0,0.
 		selfscale := float32(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
 		I = FullTensorIdx[0][0]
 		scratch[I][0][0][0] = float32(SelfDemagNx(cellsize[X],cellsize[Y],cellsize[Z]))
 		if (zero_self_demag > 0) { scratch[I][0][0][0] -= float32(1.0/3.0) }
 		scratch[I][0][0][0] *= selfscale
-		I = FullTensorIdx[0][1]
-		scratch[I][0][0][0] = float32(0.0)
-		I = FullTensorIdx[0][2]
-		scratch[I][0][0][0] = float32(0.0)
 
-		// Use asymptotic approximation for far field
+		I = FullTensorIdx[0][1]
+		scratch[I][0][0][0] = float32(0.0)  // Nxy[0] = 0
+
+		I = FullTensorIdx[0][2]
+		scratch[I][0][0][0] = float32(0.0) // Nxz[0] = 0
+
+		// Step 2.5: Use asymptotic (dipolar + higher) approximation for far field
+		// Dipole approximation:
+		//
+		//			 / 3x^2-R^2   3xy       3xz    \
+		//            dx.dy.dz   |			       |
+		// H_demag = ----------- |   3xy   3y^2-R^2     3yz    |
+		//            4.pi.R^5   |			       |
+		//			 \   3xz      3yz     3z^2-R^2 /
+		//
+
 		if (scaled_arad >= 0.0) {
 			scaled_arad_sq := scaled_arad*scaled_arad
 			fft_scaling := float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
 			Assert(scaled_arad_sq > 0.0 && fft_scaling > 0.0)
 		}
+
+		// Since H = -N.M, and by convention with the rest of this code,
+		// we store "-N" instead of "N" so we don't have to multiply the
+		// output from the FFT + iFFT by -1 when calculating the energy
 
 		xtest := float64(rdimx)*float64(cellsize[X])
 		xtest *= xtest
