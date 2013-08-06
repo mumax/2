@@ -41,8 +41,8 @@ type DemagNabData struct {
 
 type DemagNabPairData struct {
 	ubase, uoff float64
-	ptp DemagNabData // ubase + uoff
-	ptm DemagNabData // ubase - uoff
+	ptp *DemagNabData // ubase + uoff
+	ptm *DemagNabData // ubase - uoff
 }
 
 type DemagAsymptoticRefineData struct {
@@ -800,7 +800,7 @@ func (s *DemagNxyAsymptoticBase) NxyAsymptoticF(ptdata *DemagNabData) float64{
 	return Nxy
 }
 
-func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) float64{
+func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) {
 	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
 
 	dx2 := dx*dx
@@ -831,7 +831,7 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymp
 
 	// Initialize coefficients for 1/R^7 term
 	s.b1, s.b2, s.b3, s.b4, s.b5, s.b6 = (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0
-	if (cubic_cell) {
+	if (s.cubic_cell) {
 		s.b1  *=  -7*dx4
 		s.b2  *=  19*dx4
 		s.b3  *=  13*dx4
@@ -849,7 +849,7 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymp
 
 	// Initialize coefficients for 1/R^9 term
 	s.c1, s.c2, s.c3, s.c4, s.c5, s.c6, s.c7, s.c8, s.c9, s.c10 = s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0
-	if (cubic_cell) {
+	if (s.cubic_cell) {
 		s.c1  *=   48 *dx6
 		s.c2  *= -142 *dx6
 		s.c3  *= -582 *dx6
@@ -896,7 +896,7 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticPairX(ptdata *DemagNabPairDat
 
 	// Cancellation primarily in 1/R^3 term.
 	xbase := ptdata.ubase
-	term3x := 3*lead_weight*xbase // Main non-canceling part
+	term3x := 3*s.lead_weight*xbase // Main non-canceling part
 	term3cancel := float64(0.0) // Main canceling part
 	{
 		xoff  := ptdata.uoff
@@ -907,7 +907,7 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticPairX(ptdata *DemagNabPairDat
 		A2 := A*A
 		B2 := B*B
 		Rdiff := -2*B*(B2*B2 + 5*A2*(A2+2*B2)) / (R5p*R5m*(R5p+R5m))
-		term3cancel = 3*lead_weight*xoff*Rdiff
+		term3cancel = 3*s.lead_weight*xoff*Rdiff
 	}
 
 	// 1/R^5 terms; Note these are zero if cells are cubes
@@ -919,7 +919,7 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticPairX(ptdata *DemagNabPairDat
 	tz2m := ptdata.ptm.tz2
 	term5p := 0.0
 	term5m := 0.0
-	if (!cubic_cell) {
+	if (!s.cubic_cell) {
 		term5p = s.a1*tx2p + s.a2*ty2p + s.a3*tz2p
 		term5m = s.a1*tx2m + s.a2*ty2m + s.a3*tz2m
 	}
@@ -975,10 +975,10 @@ func (s *DemagNxyAsymptotic) DemagNxyAsymptoticF(ptdata *DemagNabData) float64{
 			// Compute interactions for x-strip
 			yoff := ptdata.y+float64(j)*rdy
 			rptdata.Set(ptdata.x,yoff,zoff)
-			xsum := xcount * s.Nxy.NxyAsymptoticF(rptdata)
+			xsum := float64(xcount) * s.Nxy.NxyAsymptoticF(rptdata)
 			for i:=1; i<xcount; i++ {
-				rptdata.Set(ptdata.x+i*rdx,yoff,zoff)
-				mrptdata.Set(ptdata.x-i*rdx,yoff,zoff)
+				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff)
+				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff)
 				xsum += float64(xcount-i) * s.Nxy.NxyAsymptoticPair(rptdata,mrptdata)
 			}
 			// Weight x-strip interactions into xy-plate
@@ -990,7 +990,7 @@ func (s *DemagNxyAsymptotic) DemagNxyAsymptoticF(ptdata *DemagNabData) float64{
 	return zsum*result_scale;
 }
 
-func (s *DemagNxyAsyptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64 {
+func (s *DemagNxyAsymptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64 {
 	// Evaluates asymptotic approximation to
 	//    Nxy(x+xoff,y,z) + Nxy(x-xoff,y,z)
 	// on the assumption that |xoff| >> |x|.
@@ -1021,14 +1021,14 @@ func (s *DemagNxyAsyptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64
 			yoff := ptdata.ptp.y+float64(j)*rdy // .ptm.y == .ptp.y
 			work.uoff = ptdata.uoff
 			DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-			xsum := float64(xcount) * s.Nxy.NxyAsymptoticPairX(work)
+			xsum := float64(xcount) * s.Nxy.DemagNxyAsymptoticPairX(work)
 			for i:=1; i<xcount; i++ {
 				work.uoff = ptdata.uoff + float64(i)*rdx
 				DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-				tmpsum := s.Nxy.NxyAsymptoticPairX(work)
+				tmpsum := s.Nxy.DemagNxyAsymptoticPairX(work)
 				work.uoff = ptdata.uoff - float64(i)*rdx
 				DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-				tmpsum += s.Nxy.NxyAsymptoticPairX(work)
+				tmpsum += s.Nxy.DemagNxyAsymptoticPairX(work)
 				xsum += float64(xcount-i) * tmpsum
 			}
 			// Weight x-strip interactions into xy-plate
@@ -1040,8 +1040,8 @@ func (s *DemagNxyAsyptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64
 	return zsum*result_scale;
 }
 
-func (s *DemagNxyAsyptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float64 {
-	return s.NxyAsymptoticF(ptdata.ptp) + s.NxyAsymptoticF(ptdata.ptm)
+func (s *DemagNxyAsymptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float64 {
+	return s.DemagNxyAsymptoticF(ptdata.ptp) + s.DemagNxyAsymptoticF(ptdata.ptm)
 }
 
 // Calculates the magnetostatic kernel by Newell's formulation
