@@ -548,7 +548,7 @@ func (s *Newell3DFFT) GetLogicalDimension(ldim1, ldim2, ldim3 *int) {
 	*ldim3 = s.fftz.GetLogicalDimension()
 }
 
-func (s *DemagNabData) Set(import_x, import_y, import_z float64) {
+func (s *DemagNabData) Set(import_x, import_y, import_z float64) { // OxsDemagNabData::Set
 	s.x, s.y, s.z = import_x, import_y, import_z
 	x2 := s.x*s.x
 	y2 := s.y*s.y
@@ -569,12 +569,12 @@ func (s *DemagNabData) Set(import_x, import_y, import_z float64) {
 	}
 }
 
-func DemagNabData_SetPair(ixa, iya, iza, ixb, iyb, izb float64, pta, ptb *DemagNabData) {
+func DemagNabData_SetPair(ixa, iya, iza, ixb, iyb, izb float64, pta, ptb *DemagNabData) { // OxsDemagNabData::SetPair
 	pta.Set(ixa,iya,iza)
 	ptb.Set(ixb,iyb,izb)
 }
 
-func (s *DemagAsymptoticRefineData) DemagAsymptoticRefineData(dx, dy, dz, maxratio float64) {
+func (s *DemagAsymptoticRefineData) DemagAsymptoticRefineData(dx, dy, dz, maxratio float64) { // OxsDemagAsymptoticRefineData::OxsDemagAsymptoticRefineData
 	s.rdx, s.rdy, s.rdz = 0.0, 0.0, 0.0
 	s.result_scale = 0.0
 	s.xcount, s.ycount, s.zcount = 0, 0, 0
@@ -609,11 +609,11 @@ func (s *DemagAsymptoticRefineData) DemagAsymptoticRefineData(dx, dy, dz, maxrat
 	s.result_scale = float64(1.0) / ( float64(s.xcount) * float64(s.ycount) * float64(s.zcount) )
 }
 
-func (s *DemagNxxAsymptoticBase) NxxAsymptoticPair(ptA, ptB *DemagNabData) float64 {
-	return s.NxxAsymptoticF(ptA) + s.NxxAsymptoticF(ptB)
+func (s *DemagNxxAsymptoticBase) NxxAsymptoticPairBase(ptA, ptB *DemagNabData) float64 {  // Oxs_DemagNxxAsymptoticBase::NxxAsymptoticPair
+	return s.NxxAsymptoticBaseF(ptA) + s.NxxAsymptoticBaseF(ptB)
 }
 
-func (s *DemagNxxAsymptoticBase) NxxAsymptoticF(ptdata *DemagNabData) float64{
+func (s *DemagNxxAsymptoticBase) NxxAsymptoticBaseF(ptdata *DemagNabData) float64{ // Oxs_DemagNxxAsymptoticBase::NxxAsymptotic
 	if (ptdata.iR2 <= 0.0) { return s.self_demag }
 
 	tx2, ty2, tz2 := ptdata.tx2, ptdata.ty2, ptdata.tz2
@@ -638,7 +638,7 @@ func (s *DemagNxxAsymptoticBase) NxxAsymptoticF(ptdata *DemagNabData) float64{
 	return Nxx
 }
 
-func (s *DemagNxxAsymptoticBase) DemagNxxAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) {
+func (s *DemagNxxAsymptoticBase) DemagNxxAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) { // Oxs_DemagNxxAsymptoticBase::Oxs_DemagNxxAsymptoticBase
 	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
 	s.self_demag = SelfDemagNx(dx,dy,dz)
 	dx2, dy2, dz2 := dx*dx, dy*dy, dz*dz
@@ -723,13 +723,13 @@ func (s *DemagNxxAsymptoticBase) DemagNxxAsymptoticBaseF(refine_data *DemagAsymp
 	}
 }
 
-func (s *DemagNxxAsymptotic) NxxAsymptotic(x, y, z float64) float64 {
+func (s *DemagNxxAsymptotic) NxxAsymptotic(x, y, z float64) float64 { // Oxs_DemagNxxAsymptotic::Oxs_DemagNxxAsymptotic
 	ptdata := new(DemagNabData)
 	ptdata.Set(x,y,z)
-	return s.DemagNxxAsymptoticF(ptdata)
+	return s.NxxAsymptoticF(ptdata)
 }
 
-func (s *DemagNxxAsymptotic) DemagNxxAsymptoticF(ptdata *DemagNabData) float64 {
+func (s *DemagNxxAsymptotic) NxxAsymptoticF(ptdata *DemagNabData) float64 { // Oxs_DemagNxxAsymptotic::NxxAsymptotic
 	xcount := s.refine_data.xcount
 	ycount := s.refine_data.ycount
 	zcount := s.refine_data.zcount
@@ -749,11 +749,11 @@ func (s *DemagNxxAsymptotic) DemagNxxAsymptoticF(ptdata *DemagNabData) float64 {
 			// Compute interactions for x-strip
 			yoff := ptdata.y + float64(j)*rdy
 			rptdata.Set(ptdata.x,yoff,zoff)
-			xsum := float64(xcount) * s.Nxx.NxxAsymptoticF(&rptdata);
+			xsum := float64(xcount) * s.Nxx.NxxAsymptoticBaseF(&rptdata);
 			for i := 1; i < xcount; i++ {
 				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff);
 				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff);
-				xsum += float64(xcount-i) * s.Nxx.NxxAsymptoticPair(&rptdata,&mrptdata);
+				xsum += float64(xcount-i) * s.Nxx.NxxAsymptoticPairBase(&rptdata,&mrptdata);
 			}
 			// Weight x-strip interactions into xy-plate
 			ysum += (float64(ycount) - math.Abs(float64(j)))*xsum;
@@ -765,11 +765,11 @@ func (s *DemagNxxAsymptotic) DemagNxxAsymptoticF(ptdata *DemagNabData) float64 {
 }
 
 // To repeat for Nxy and Nxz
-func (s *DemagNxyAsymptoticBase) NxyAsymptoticPair(ptA, ptB *DemagNabData) float64 {
-	return s.NxyAsymptoticF(ptA) + s.NxyAsymptoticF(ptB)
+func (s *DemagNxyAsymptoticBase) NxyAsymptoticPairBase(ptA, ptB *DemagNabData) float64 { // Oxs_DemagNxyAsymptoticBase::NxyAsymptoticPair
+	return s.NxyAsymptoticBaseF(ptA) + s.NxyAsymptoticBaseF(ptB)
 }
 
-func (s *DemagNxyAsymptoticBase) NxyAsymptoticF(ptdata *DemagNabData) float64{
+func (s *DemagNxyAsymptoticBase) NxyAsymptoticBaseF(ptdata *DemagNabData) float64{ // Oxs_DemagNxyAsymptoticBase::NxyAsymptotic
 	if (ptdata.iR2 <= 0.0) { return float64(0.0) }
 
 	tx2, ty2, tz2 := ptdata.tx2, ptdata.ty2, ptdata.tz2
@@ -800,7 +800,7 @@ func (s *DemagNxyAsymptoticBase) NxyAsymptoticF(ptdata *DemagNabData) float64{
 	return Nxy
 }
 
-func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) {
+func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) { // Oxs_DemagNxyAsymptoticBase::Oxs_DemagNxyAsymptoticBase
 	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
 
 	dx2 := dx*dx
@@ -874,7 +874,7 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymp
 	}
 }
 
-func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticPairX(ptdata *DemagNabPairData) float64{
+func (s *DemagNxyAsymptoticBase) NxyAsymptoticPairXBase(ptdata *DemagNabPairData) float64{ // Oxs_DemagNxyAsymptoticBase::NxyAsymptoticPairX
 	// Evaluates asymptotic approximation to
 	//    Nxy(x+xoff,y,z) + Nxy(x-xoff,y,z)
 	// on the assumption that |xoff| >> |x|.
@@ -891,8 +891,8 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticPairX(ptdata *DemagNabPairDat
 
 	// Both R2p and R2m must be positive, since asymptotics
 	// don't apply for R==0.
-		if (R2p<=0.0) { return s.NxyAsymptoticF(ptdata.ptm) }
-		if (R2m<=0.0) { return s.NxyAsymptoticF(ptdata.ptp) }
+		if (R2p<=0.0) { return s.NxyAsymptoticBaseF(ptdata.ptm) }
+		if (R2m<=0.0) { return s.NxyAsymptoticBaseF(ptdata.ptp) }
 
 	// Cancellation primarily in 1/R^3 term.
 	xbase := ptdata.ubase
@@ -949,13 +949,13 @@ func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticPairX(ptdata *DemagNabPairDat
 	return Nxy
 }
 
-func (s *DemagNxyAsymptotic) NxyAsymptotic(x, y, z float64) float64 {
+func (s *DemagNxyAsymptotic) NxyAsymptotic(x, y, z float64) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptotic
 	ptdata := new(DemagNabData)
 	ptdata.Set(x,y,z)
-	return s.DemagNxyAsymptoticF(ptdata)
+	return s.NxyAsymptoticF(ptdata)
 }
 
-func (s *DemagNxyAsymptotic) DemagNxyAsymptoticF(ptdata *DemagNabData) float64{
+func (s *DemagNxyAsymptotic) NxyAsymptoticF(ptdata *DemagNabData) float64{ // Oxs_DemagNxyAsymptotic::NxyAsymptotic
 	xcount := s.refine_data.xcount
 	ycount := s.refine_data.ycount
 	zcount := s.refine_data.zcount;
@@ -964,8 +964,10 @@ func (s *DemagNxyAsymptotic) DemagNxyAsymptoticF(ptdata *DemagNabData) float64{
 	rdz := s.refine_data.rdz;
 	result_scale := s.refine_data.result_scale;
 
-	rptdata := new(DemagNabData)
-	mrptdata := new(DemagNabData)
+	var (
+		rptdata, mrptdata DemagNabData
+	)
+
 	zsum := float64(0.0)
 
 	for k:=1-zcount; k<zcount; k++ {
@@ -975,11 +977,11 @@ func (s *DemagNxyAsymptotic) DemagNxyAsymptoticF(ptdata *DemagNabData) float64{
 			// Compute interactions for x-strip
 			yoff := ptdata.y+float64(j)*rdy
 			rptdata.Set(ptdata.x,yoff,zoff)
-			xsum := float64(xcount) * s.Nxy.NxyAsymptoticF(rptdata)
+			xsum := float64(xcount) * s.Nxy.NxyAsymptoticBaseF(&rptdata)
 			for i:=1; i<xcount; i++ {
 				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff)
 				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff)
-				xsum += float64(xcount-i) * s.Nxy.NxyAsymptoticPair(rptdata,mrptdata)
+				xsum += float64(xcount-i) * s.Nxy.NxyAsymptoticPairBase(&rptdata,&mrptdata)
 			}
 			// Weight x-strip interactions into xy-plate
 			ysum += (float64(ycount) - math.Abs(float64(j)))*xsum;
@@ -990,7 +992,7 @@ func (s *DemagNxyAsymptotic) DemagNxyAsymptoticF(ptdata *DemagNabData) float64{
 	return zsum*result_scale;
 }
 
-func (s *DemagNxyAsymptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64 {
+func (s *DemagNxyAsymptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptoticPairX
 	// Evaluates asymptotic approximation to
 	//    Nxy(x+xoff,y,z) + Nxy(x-xoff,y,z)
 	// on the assumption that |xoff| >> |x|.
@@ -1021,14 +1023,14 @@ func (s *DemagNxyAsymptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float6
 			yoff := ptdata.ptp.y+float64(j)*rdy // .ptm.y == .ptp.y
 			work.uoff = ptdata.uoff
 			DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-			xsum := float64(xcount) * s.Nxy.DemagNxyAsymptoticPairX(work)
+			xsum := float64(xcount) * s.Nxy.NxyAsymptoticPairXBase(work)
 			for i:=1; i<xcount; i++ {
 				work.uoff = ptdata.uoff + float64(i)*rdx
 				DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-				tmpsum := s.Nxy.DemagNxyAsymptoticPairX(work)
+				tmpsum := s.Nxy.NxyAsymptoticPairXBase(work)
 				work.uoff = ptdata.uoff - float64(i)*rdx
 				DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-				tmpsum += s.Nxy.DemagNxyAsymptoticPairX(work)
+				tmpsum += s.Nxy.NxyAsymptoticPairXBase(work)
 				xsum += float64(xcount-i) * tmpsum
 			}
 			// Weight x-strip interactions into xy-plate
@@ -1040,8 +1042,8 @@ func (s *DemagNxyAsymptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float6
 	return zsum*result_scale;
 }
 
-func (s *DemagNxyAsymptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float64 {
-	return s.DemagNxyAsymptoticF(ptdata.ptp) + s.DemagNxyAsymptoticF(ptdata.ptm)
+func (s *DemagNxyAsymptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptoticPairZ
+	return s.NxyAsymptoticF(ptdata.ptp) + s.NxyAsymptoticF(ptdata.ptm)
 }
 
 // Calculates the magnetostatic kernel by Newell's formulation
