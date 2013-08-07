@@ -7,7 +7,7 @@
 
 package modules
 
-// Magnetostatic kernel
+// Magnetostatic kernel using Newell's formulation as implemented in OOMMF
 // Author: Kelvin Fong
 
 import (
@@ -59,17 +59,17 @@ type DemagNxxAsymptoticBase struct {
 	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15 float64
 }
 
-type DemagNxxAsymptotic struct {
-	refine_data DemagAsymptoticRefineData
-	Nxx DemagNxxAsymptoticBase
-}
-
 type DemagNxyAsymptoticBase struct {
 	cubic_cell bool
 	lead_weight float64
 	a1, a2, a3 float64
 	b1, b2, b3, b4, b5, b6 float64
 	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 float64
+}
+
+type DemagNxxAsymptotic struct {
+	refine_data DemagAsymptoticRefineData
+	Nxx DemagNxxAsymptoticBase
 }
 
 type DemagNxyAsymptotic struct {
@@ -764,7 +764,6 @@ func (s *DemagNxxAsymptotic) NxxAsymptoticF(ptdata *DemagNabData) float64 { // O
 	return zsum*result_scale
 }
 
-// To repeat for Nxy and Nxz
 func (s *DemagNxyAsymptoticBase) NxyAsymptoticPairBase(ptA, ptB *DemagNabData) float64 { // Oxs_DemagNxyAsymptoticBase::NxyAsymptoticPair
 	return s.NxyAsymptoticBaseF(ptA) + s.NxyAsymptoticBaseF(ptB)
 }
@@ -1046,6 +1045,13 @@ func (s *DemagNxyAsymptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float6
 	return s.NxyAsymptoticF(ptdata.ptp) + s.NxyAsymptoticF(ptdata.ptm)
 }
 
+// To instantiate Nyy, do a call to instantiate Nxx but with x and y swapped
+// To instantiate Nxx, do a call to instantiate Nxx but with x and z swapped
+
+// To instantiate Nxz, do a call to instantiate Nxy but with y and z swapped
+// To instantiate Nyz, do a call to instantiate Nxy but with (x, y, z) = (y, z, x)
+
+
 // Calculates the magnetostatic kernel by Newell's formulation
 // 
 // size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
@@ -1087,7 +1093,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	var (
 	    scratchPt *host.Array // Create some scratch space for doing computations
 	    p1, p2, q1, q2	float64
-	    R	[3]float64
+	    R, R2	[3]float64
 	    rdimx, rdimy, rdimz, cdimx, cdimy, cdimz int
 	)
 
@@ -1395,9 +1401,11 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		//			 \   3xz      3yz     3z^2-R^2 /
 		//
 
+		scaled_arad_sq, fft_scaling := float64(0.0), float64(0.0)
+
 		if (scaled_arad >= 0.0) {
-			scaled_arad_sq := scaled_arad*scaled_arad
-			fft_scaling := float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
+			scaled_arad_sq = scaled_arad*scaled_arad
+			fft_scaling = float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
 			Assert(scaled_arad_sq > 0.0 && fft_scaling > 0.0)
 		}
 
@@ -1413,7 +1421,45 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		ANxx.refine_data.DemagAsymptoticRefineData(dx,dy,dz,Default_Refine_Data)
 		ANxx.Nxx.DemagNxxAsymptoticBaseF(&ANxx.refine_data)
 
-		//ANxy := new(DemagNxyAsymptotic)
-		//ANxz := new(DemagNxzAsymptotic)
+		ANxy := new(DemagNxyAsymptotic)
+		ANxy.refine_data.DemagAsymptoticRefineData(dx,dy,dz,Default_Refine_Data)
+		ANxy.Nxy.DemagNxyAsymptoticBaseF(&ANxy.refine_data)
+
+		ANxz := new(DemagNxyAsymptotic)
+		ANxz.refine_data.DemagAsymptoticRefineData(dx,dz,dy,Default_Refine_Data)
+		ANxz.Nxy.DemagNxyAsymptoticBaseF(&ANxy.refine_data)
+
+		for z := 0; z < rdimz; z++ {
+			zw := z
+			R[Z] = float64(zw) * cellsize[Z]
+			R2[Z] = R[Z] * R[Z]
+			for y := 0; y < rdimy; y++ {
+				yw := y
+				R[Y] = float64(yw) * cellsize[Y]
+				R2[Y] = R[Y]*R[Y]
+
+				xstart := 0
+				test := scaled_arad_sq - R2[Y] - R2[Z]
+				if (test>0.0) {
+					if (test>xtest) {
+						xstart = rdimx+1
+					} else {
+						xstart = int(math.Ceil(math.Sqrt(test)/cellsize[X]))
+					}
+				}
+				for x := xstart; x < rdimx; x++ {
+					xw := x
+					R[X] = float64(x) * cellsize[X]
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][yw][zw] = float32(fft_scaling*ANxx.NxxAsymptotic(R[X],R[Y],R[Z]))
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][zw] = float32(fft_scaling*ANxy.NxyAsymptotic(R[X],R[Y],R[Z]))
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][zw] = float32(fft_scaling*ANxz.NxyAsymptotic(R[X],R[Z],R[Y]))
+				}
+			}
+		}
+
+		// Step 2.6: If periodic boundary conditions selected, compute periodic tensors
 	}
 }
