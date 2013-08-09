@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
     DLLEXPORT  void baryakhtar_transverse_async(float** tx, float**  ty, float**  tz,
-            float**  Sx, float**  Sy, float**  Sz,
+            float**  mx, float**  my, float**  mz,
             float**  hx, float**  hy, float**  hz,
 
             float** msat0T0,

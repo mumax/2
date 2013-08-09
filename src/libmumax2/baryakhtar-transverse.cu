@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
     __global__ void baryakhtarTransverseKernFloat(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
-            float* __restrict__ Sx, float* __restrict__ Sy, float* __restrict__ Sz,
+            float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
             float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
 
             float* __restrict__ msat0T0Msk,
@@ -32,7 +32,7 @@ extern "C" {
         {
 
             float msat0T0 = (msat0T0Msk == NULL) ? 1.0 : msat0T0Msk[x0];
-            float3 S = make_float3(Sx[x0], Sy[x0], Sz[x0]);
+            float3 m = make_float3(mx[x0], my[x0], mz[x0]);
 
             // make sure there is no torque for non-magnetic points
             if (msat0T0 == 0.0f)
@@ -45,32 +45,32 @@ extern "C" {
 
             float3 H = make_float3(hx[x0], hy[x0], hz[x0]);
 
-            float3 SxH = crossf(S, H);
+            float3 mxH = crossf(m, H);
 
-            float3 mu_SxH;
+            float3 mu_mxH;
 
             float m_xx = (mu_xx != NULL) ? mu_xx[x0] * muMul_xx : muMul_xx;
 
-            mu_SxH.x = m_xx * SxH.x;
+            mu_mxH.x = m_xx * mxH.x;
 
             float m_yy = (mu_yy != NULL) ? mu_yy[x0] * muMul_yy : muMul_yy;
 
-            mu_SxH.y = m_yy * SxH.y;
+            mu_mxH.y = m_yy * mxH.y;
 
             float m_zz = (mu_zz != NULL) ? mu_zz[x0] * muMul_zz : muMul_zz;
 
-            mu_SxH.z = m_zz * SxH.z;
+            mu_mxH.z = m_zz * mxH.z;
 
-            float3 _Sxmu_SxH = crossf(mu_SxH, S);
+            float3 _mxmu_mxH = crossf(mu_mxH, m);
 
-            tx[x0] = _Sxmu_SxH.x;
-            ty[x0] = _Sxmu_SxH.y;
-            tz[x0] = _Sxmu_SxH.z;
+            tx[x0] = _mxmu_mxH.x;
+            ty[x0] = _mxmu_mxH.y;
+            tz[x0] = _mxmu_mxH.z;
         }
     }
 
     __export__  void baryakhtar_transverse_async(float** tx, float**  ty, float**  tz,
-            float**  Sx, float**  Sy, float**  Sz,
+            float**  mx, float**  my, float**  mz,
             float**  hx, float**  hy, float**  hz,
 
             float** msat0T0,
@@ -97,7 +97,7 @@ extern "C" {
             // calculate dev neighbours
 
             baryakhtarTransverseKernFloat <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
-                    Sx[dev], Sy[dev], Sz[dev],
+                    mx[dev], my[dev], mz[dev],
                     hx[dev], hy[dev], hz[dev],
 
                     msat0T0[dev],
