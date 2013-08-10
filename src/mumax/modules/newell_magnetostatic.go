@@ -1123,9 +1123,9 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	ffts.ffty.SetDimensions(cdimy)
 	ffts.fftz.SetDimensions(cdimz)
 
-//	ldimx := ffts.fftx.GetLogicalDimension()
-//	ldimy := ffts.ffty.GetLogicalDimension()
-//	ldimz := ffts.fftz.GetLogicalDimension()
+	ldimx := ffts.fftx.GetLogicalDimension()
+	ldimy := ffts.ffty.GetLogicalDimension()
+	ldimz := ffts.fftz.GetLogicalDimension()
 
 //	adimx := (ldimx/2) + 1
 //	adimy := (ldimy/2) + 1
@@ -1459,7 +1459,140 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 				}
 			}
 		}
+	}
 
-		// Step 2.6: If periodic boundary conditions selected, compute periodic tensors
+	// Step 2.6: If periodic boundary conditions selected, compute periodic tensors
+
+	// Step 3: Use symmetries to reflect into other octants.
+	//     Also, at each coordinate plane, set to 0.0 any term
+	//     which is odd across that boundary.  It should already
+	//     be close to 0, but will likely be slightly off due to
+	//     rounding errors.
+	// Symmetries: A00, A11, A22 are even in each coordinate
+	//             A01 is odd in x and y, even in z.
+	//             A02 is odd in x and z, even in y.
+	//             A12 is odd in y and z, even in x.
+	for z:=0; z<rdimz; z++ {
+		zw := z
+		for y:=0; y<rdimy; y++ {
+			yw := y
+			for x:=0; x<rdimx; x++ {
+				xw := x
+				if ((x==0) || (y==0)) {
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][zw]=float32(0.0)
+				}
+				if ((x==0) || (z==0)) {
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][zw]=float32(0.0)
+				}
+				I = FullTensorIdx[0][0]
+				tmpA00 := scratch[I][xw][yw][zw]
+				I = FullTensorIdx[0][1]
+				tmpA01 := scratch[I][xw][yw][zw]
+				I = FullTensorIdx[0][2]
+				tmpA02 := scratch[I][xw][yw][zw]
+
+				if (x>0) {
+					I = FullTensorIdx[0][0]
+					scratch[I][ldimx-xw][yw][zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][ldimx-xw][yw][zw]=-1.0*tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][ldimx-xw][yw][zw]=-1.0*tmpA02
+				}
+				if (y>0) {
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][ldimy-yw][zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][ldimy-yw][zw]=-1.0*tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][ldimy-yw][zw]=tmpA02
+				}
+				if (z>0) {
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][yw][ldimz-zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][ldimz-zw]=tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][ldimz-zw]=-1.0*tmpA02
+				}
+				if ((x>0) && (y>0)) {
+					I = FullTensorIdx[0][0]
+					scratch[I][ldimx-xw][ldimy-yw][zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][ldimx-xw][ldimy-yw][zw]=tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][ldimx-xw][ldimy-yw][zw]=-1.0*tmpA02
+				}
+				if ((x>0) && (z>0)) {
+					I = FullTensorIdx[0][0]
+					scratch[I][ldimx-xw][yw][ldimz-zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][ldimx-xw][yw][ldimz-zw]=-1.0*tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][ldimx-xw][yw][ldimz-zw]=tmpA02
+				}
+				if ((y>0) && (z>0)) {
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][ldimy-yw][ldimz-zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][ldimy-yw][ldimz-zw]=-1.0*tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][ldimy-yw][ldimz-zw]=-1.0*tmpA02
+				}
+				if ((x>0) && (y>0) && (z>0)) {
+					I = FullTensorIdx[0][0]
+					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw]=tmpA00
+					I = FullTensorIdx[0][1]
+					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw]=tmpA01
+					I = FullTensorIdx[0][2]
+					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw]=tmpA02
+				}
+			}
+		}
+	}
+	// Step 3.5: Fill in zero-padded overhang
+	for z:=0; z<ldimz; z++ {
+		zw := z
+		if ((z<rdimz) || (z>ldimz-rdimz)) { // Outer z
+			for y:=0; y<ldimy; y++ {
+				yw := y
+				if ((y<rdimy) || (y>ldimy-rdimy)) { // Outer y
+					for x:=rdimx; x<=ldimx-rdimx; x++ {
+						xw := x
+						I = FullTensorIdx[0][0]
+						scratch[I][xw][yw][zw]=float32(0.0)
+						I = FullTensorIdx[0][1]
+						scratch[I][xw][yw][zw]=float32(0.0)
+						I = FullTensorIdx[0][2]
+						scratch[I][xw][yw][zw]=float32(0.0)
+					}
+				} else { // Inner y
+					for x:=0; x<ldimx; x++ {
+						xw := x
+						I = FullTensorIdx[0][0]
+						scratch[I][xw][yw][zw]=float32(0.0)
+						I = FullTensorIdx[0][1]
+						scratch[I][xw][yw][zw]=float32(0.0)
+						I = FullTensorIdx[0][2]
+						scratch[I][xw][yw][zw]=float32(0.0)
+					}
+				}
+			}
+		} else { // Middle z
+			for y:=0; y<ldimy; y++ {
+				yw := y
+				for x:=0; x<ldimx; x++ {
+					xw := x
+					I = FullTensorIdx[0][0]
+					scratch[I][xw][yw][zw]=float32(0.0)
+					I = FullTensorIdx[0][1]
+					scratch[I][xw][yw][zw]=float32(0.0)
+					I = FullTensorIdx[0][2]
+					scratch[I][xw][yw][zw]=float32(0.0)
+				}
+			}
+		}
 	}
 }
