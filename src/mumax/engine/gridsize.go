@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -36,19 +36,26 @@ func IsGoodCUFFTSize(n int) bool {
 // Should be a good CUFFT size and meet alignment
 // requirements.
 func IsGoodGridSize1(direction, n int) bool {
+	rem := 0
+
 	if !IsGoodCUFFTSize(n) {
 		return false
 	}
+
 	switch direction {
 	default:
 		panic(Bug("Illegal argument"))
 	case Z:
-		return n%16 == 0
+		rem = n%16
+		return rem == 0
 	case Y:
-		return n%16 == 0
+		rem = n%16
+		return rem == 0
 	case X:
-		return n%1 == 0
+		rem = n%1
+		return rem == 0
 	}
+
 	panic(Bug("Unreachable"))
 	return false
 }
