@@ -12,10 +12,10 @@ extern "C" {
 __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, float* __restrict__  hz,
                               float* __restrict__  mx, float* __restrict__  my, float* __restrict__  mz,
                               float* __restrict__  mSat_map, float* __restrict__  Aex_map,
-                              float Aex2_Mu0Msat_mul,
-                              int N0, int N1, int N2,
-                              int wrap0, int wrap1, int wrap2,
-                              float cellx_2, float celly_2, float cellz_2)
+                              const float Aex2_Mu0Msat_mul,
+                              const int N0, const int N1, const int N2,
+                              const int wrap0, const int wrap1, const int wrap2,
+                              const float cellx_2, const float celly_2, const float cellz_2)
 {
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -30,8 +30,12 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         float mSat0 = getMaskUnity(mSat_map, I);
         float Aex0 = getMaskUnity(Aex_map, I);
         float lex0Mul = fdivZero(Aex0, mSat0);
-        float lexMul;
-
+        float lexMul, lex1Mul, lex2Mul;
+        
+        float pre_x = cellx_2 * Aex2_Mu0Msat_mul;
+        float pre_y = celly_2 * Aex2_Mu0Msat_mul;
+        float pre_z = cellz_2 * Aex2_Mu0Msat_mul;
+        
         float mx0 = mx[I]; // mag component of central cell
         float mx1, mx2 ;   // mag component of neighbors in 2 directions
 
@@ -42,7 +46,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         float mz1, mz2 ;   // mag component of neighbors in 2 directions
 
         float Hx, Hy, Hz;
-        float lex1Mul, lex2Mul;
+        float tHx, tHy, tHz;
 
         // neighbors in X direction
         int idx = i - 1;
@@ -52,9 +56,9 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         my1 = (idx < 0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
         mz1 = (idx < 0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
         lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        Hx = cellx_2 * lexMul * (mx1 - mx0);
-        Hy = cellx_2 * lexMul * (my1 - my0);
-        Hz = cellx_2 * lexMul * (mz1 - mz0);
+        tHx = lexMul * (mx1 - mx0);
+        tHy = lexMul * (my1 - my0);
+        tHz = lexMul * (mz1 - mz0);
 
         idx = i + 1;
         idx = (idx == N0 && wrap0) ? idx - N0 : idx;
@@ -63,10 +67,14 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         my2 = (idx == N0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
         mz2 = (idx == N0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
         lexMul = 2.0f * fdivZero((lex0Mul * lex2Mul), (lex0Mul + lex2Mul));
-        Hx += cellx_2 * lexMul * (mx2 - mx0);
-        Hy += cellx_2 * lexMul * (my2 - my0);
-        Hz += cellx_2 * lexMul * (mz2 - mz0);
+        tHx += lexMul * (mx2 - mx0);
+        tHy += lexMul * (my2 - my0);
+        tHz += lexMul * (mz2 - mz0);
 
+        Hx = pre_x * tHx;
+        Hy = pre_x * tHy;
+        Hz = pre_x * tHz;
+        
         // neighbors in Z direction
         idx = k - 1;
         idx = (idx < 0 && wrap2) ? N2 + idx : idx;
@@ -75,9 +83,9 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         my1 = (idx < 0) ? my0 : my[i * N1 * N2 + j * N2 + idx];
         mz1 = (idx < 0) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
         lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        Hx += cellz_2 * lexMul * (mx1 - mx0);
-        Hy += cellz_2 * lexMul * (my1 - my0);
-        Hz += cellz_2 * lexMul * (mz1 - mz0);
+        tHx = lexMul * (mx1 - mx0);
+        tHy = lexMul * (my1 - my0);
+        tHz = lexMul * (mz1 - mz0);
 
         idx = k + 1;
         idx = (idx == N2 && wrap2) ? idx - N2 : idx;
@@ -86,10 +94,14 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         my2 = (idx == N2) ? my0 : my[i * N1 * N2 + j * N2 + idx];
         mz2 = (idx == N2) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
         lexMul = 2.0f * fdivZero((lex0Mul * lex2Mul), (lex0Mul + lex2Mul));
-        Hx += cellz_2 * lexMul * (mx2 - mx0);
-        Hy += cellz_2 * lexMul * (my2 - my0);
-        Hz += cellz_2 * lexMul * (mz2 - mz0);
+        tHx += lexMul * (mx2 - mx0);
+        tHy += lexMul * (my2 - my0);
+        tHz += lexMul * (mz2 - mz0);
 
+        Hx += pre_z * tHx;
+        Hy += pre_z * tHy;
+        Hz += pre_z * tHz;
+        
         // neighbors in Y direction
         idx = j - 1;
         idx = (idx < 0 && wrap1) ? N1 + idx : idx;
@@ -98,9 +110,9 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         my1 = (idx < 0) ? my0 : my[i * N1 * N2 + idx * N2 + k];
         mz1 = (idx < 0) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
         lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        Hx += celly_2 * lexMul * (mx1 - mx0);
-        Hy += celly_2 * lexMul * (my1 - my0);
-        Hz += celly_2 * lexMul * (mz1 - mz0);
+        tHx = lexMul * (mx1 - mx0);
+        tHy = lexMul * (my1 - my0);
+        tHz = lexMul * (mz1 - mz0);
 
         idx = j + 1;
         idx = (idx == N1 && wrap1) ? idx - N1 : idx;
@@ -109,14 +121,18 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         my2 = (idx == N1) ? my0 : my[i * N1 * N2 + idx * N2 + k];
         mz2 = (idx == N1) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
         lexMul = 2.0f * fdivZero((lex0Mul * lex2Mul), (lex0Mul + lex2Mul));
-        Hx += celly_2 * lexMul * (mx2 - mx0);
-        Hy += celly_2 * lexMul * (my2 - my0);
-        Hz += celly_2 * lexMul * (mz2 - mz0);
+        tHx += lexMul * (mx2 - mx0);
+        tHy += lexMul * (my2 - my0);
+        tHz += lexMul * (mz2 - mz0);
+        
+        Hx += pre_y * tHx;
+        Hy += pre_y * tHy;
+        Hz += pre_y * tHz;
 
         // Write back to global memory
-        hx[I] = Aex2_Mu0Msat_mul * Hx;
-        hy[I] = Aex2_Mu0Msat_mul * Hy;
-        hz[I] = Aex2_Mu0Msat_mul * Hz;
+        hx[I] = Hx;
+        hy[I] = Hy;
+        hz[I] = Hz;
 
     }
 
