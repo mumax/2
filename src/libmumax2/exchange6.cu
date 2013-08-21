@@ -9,9 +9,10 @@
 extern "C" {
 #endif
 // full 3D blocks
-__global__ void exchange6Kern(float* hx, float* hy, float* hz,
-                              float* mx, float* my, float* mz,
-                              float* mSat_map, float* Aex_map, float Aex2_Mu0Msat_mul,
+__global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, float* __restrict__  hz,
+                              float* __restrict__  mx, float* __restrict__  my, float* __restrict__  mz,
+                              float* __restrict__  mSat_map, float* __restrict__  Aex_map,
+                              float Aex2_Mu0Msat_mul,
                               int N0, int N1, int N2,
                               int wrap0, int wrap1, int wrap2,
                               float cellx_2, float celly_2, float cellz_2)
@@ -21,10 +22,10 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int k = blockIdx.z * blockDim.z + threadIdx.z;
 
-    int I = i * N1 * N2 + j * N2 + k;
-
     if (i < N0 && j < N1 && k < N2)
     {
+
+        int I = i * N1 * N2 + j * N2 + k;
 
         float mSat0 = getMaskUnity(mSat_map, I);
         float Aex0 = getMaskUnity(Aex_map, I);
@@ -45,7 +46,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         // neighbors in X direction
         int idx = i - 1;
-        idx = (idx < 0 && wrap0) ? N0 - 1 : idx;
+        idx = (idx < 0 && wrap0) ? N0 + idx : idx;
         lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx1 = (idx < 0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
         my1 = (idx < 0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
@@ -56,7 +57,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
         Hz = cellx_2 * lexMul * (mz1 - mz0);
 
         idx = i + 1;
-        idx = (idx == N0 && wrap0) ? 0 : idx;
+        idx = (idx == N0 && wrap0) ? idx - N0 : idx;
         lex2Mul = (idx == N0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx2 = (idx == N0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
         my2 = (idx == N0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
@@ -68,7 +69,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         // neighbors in Z direction
         idx = k - 1;
-        idx = (idx < 0 && wrap2) ? N2 - 1 : idx;
+        idx = (idx < 0 && wrap2) ? N2 + idx : idx;
         lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx1 = (idx < 0) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
         my1 = (idx < 0) ? my0 : my[i * N1 * N2 + j * N2 + idx];
@@ -79,7 +80,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
         Hz += cellz_2 * lexMul * (mz1 - mz0);
 
         idx = k + 1;
-        idx = (idx == N2 && wrap2) ? 0 : idx;
+        idx = (idx == N2 && wrap2) ? idx - N2 : idx;
         lex2Mul = (idx == N2) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx2 = (idx == N2) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
         my2 = (idx == N2) ? my0 : my[i * N1 * N2 + j * N2 + idx];
@@ -91,7 +92,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         // neighbors in Y direction
         idx = j - 1;
-        idx = (idx < 0 && wrap1) ? N1 - 1 : idx;
+        idx = (idx < 0 && wrap1) ? N1 + idx : idx;
         lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx1 = (idx < 0) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
         my1 = (idx < 0) ? my0 : my[i * N1 * N2 + idx * N2 + k];
@@ -102,7 +103,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
         Hz += celly_2 * lexMul * (mz1 - mz0);
 
         idx = j + 1;
-        idx = (idx == N1 && wrap1) ? 0 : idx;
+        idx = (idx == N1 && wrap1) ? idx - N1 : idx;
         lex2Mul = (idx == N1) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx2 = (idx == N1) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
         my2 = (idx == N1) ? my0 : my[i * N1 * N2 + idx * N2 + k];
