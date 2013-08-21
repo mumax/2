@@ -28,7 +28,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         float mSat0 = getMaskUnity(mSat_map, I);
         float Aex0 = getMaskUnity(Aex_map, I);
-        float lex0Mul = (mSat0 == 0.0) ? 0.0 : Aex0 / mSat0;
+        float lex0Mul = fdivZero(Aex0, mSat0);
         float lexMul;
 
         float mx0 = mx[I]; // mag component of central cell
@@ -46,7 +46,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
         // neighbors in X direction
         int idx = i - 1;
         idx = (idx < 0 && wrap0) ? N0 - 1 : idx;
-        lex1Mul = (idx < 0) ? 0.0 : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx1 = (idx < 0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
         my1 = (idx < 0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
         mz1 = (idx < 0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
@@ -57,7 +57,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         idx = i + 1;
         idx = (idx == N0 && wrap0) ? 0 : idx;
-        lex2Mul = (idx == N0) ? 0.0 : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex2Mul = (idx == N0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx2 = (idx == N0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
         my2 = (idx == N0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
         mz2 = (idx == N0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
@@ -69,7 +69,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
         // neighbors in Z direction
         idx = k - 1;
         idx = (idx < 0 && wrap2) ? N2 - 1 : idx;
-        lex1Mul = (idx < 0) ? 0.0 : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx1 = (idx < 0) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
         my1 = (idx < 0) ? my0 : my[i * N1 * N2 + j * N2 + idx];
         mz1 = (idx < 0) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
@@ -80,7 +80,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         idx = k + 1;
         idx = (idx == N2 && wrap2) ? 0 : idx;
-        lex2Mul = (idx == N2) ? 0.0 : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex2Mul = (idx == N2) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx2 = (idx == N2) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
         my2 = (idx == N2) ? my0 : my[i * N1 * N2 + j * N2 + idx];
         mz2 = (idx == N2) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
@@ -92,7 +92,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
         // neighbors in Y direction
         idx = j - 1;
         idx = (idx < 0 && wrap1) ? N1 - 1 : idx;
-        lex1Mul = (idx < 0) ? 0.0 : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx1 = (idx < 0) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
         my1 = (idx < 0) ? my0 : my[i * N1 * N2 + idx * N2 + k];
         mz1 = (idx < 0) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
@@ -103,7 +103,7 @@ __global__ void exchange6Kern(float* hx, float* hy, float* hz,
 
         idx = j + 1;
         idx = (idx == N1 && wrap1) ? 0 : idx;
-        lex2Mul = (idx == N1) ? 0.0 : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex2Mul = (idx == N1) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
         mx2 = (idx == N1) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
         my2 = (idx == N1) ? my0 : my[i * N1 * N2 + idx * N2 + k];
         mz2 = (idx == N1) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
