@@ -29,6 +29,7 @@ type BDFAM12 struct {
 	dy0buffer  []*gpu.Array // the value of quantity derivative at the begining of the step
 	dybuffer   []*gpu.Array // the buffer for quantity derivative
 	err        []*Quant     // error estimates for each equation
+	alpha      []float64     // convergence estimates for each equation
 	maxAbsErr  []*Quant     // maximum absolute error per step for each equation
 	maxRelErr  []*Quant     // maximum absolute error per step for each equation
 	newDt      []float64    //
@@ -49,7 +50,7 @@ func (s *BDFAM12) Step() {
 	s.iterations.SetScalar(0)
 
 	equation := e.equation
-	//~ make sure that errors history is wiped for t0 = 0s!
+	//~ make sure that errors history is wiped for t0 = 0 s!
 	if t0 == 0.0 {
 		for i := range equation {
 			s.err_list[i].Init()
@@ -57,23 +58,21 @@ func (s *BDFAM12) Step() {
 		}
 	}
 	//~ save everything in the begining
+	e.UpdateEqRHS()
 	for i := range equation {
-		equation[i].input[0].Update()
-		y := equation[i].output[0]
-		dy := equation[i].input[0]
+		y := equation[i].LHS()
+		dy := equation[i].RHS()
 		s.y0buffer[i].CopyFromDevice(y.Array())   //~ save for later
 		s.dy0buffer[i].CopyFromDevice(dy.Array()) //~ save for later
 	}
 
-	const maxTry = 60 //~ undo at most this many bad steps
+	const maxTry = 10 //~ undo at most this many bad steps
 	const headRoom = 0.8
 	const maxIterErr = 0.1
 	const maxIter = 5
-	const alpha_ref = 0.85
+	const alpha_ref = 0.6
+
 	try := 0
-	alpha_1 := 0.0
-	alpha_0 := 0.0
-	dt_0 := 0.0
 	restrict_step := false
 
 	for {
@@ -81,75 +80,72 @@ func (s *BDFAM12) Step() {
 		dt := engine.dt.Scalar()
 		badStep := false
 		badIterator := false
+
+		er := make([]float64, len(equation))
+		alp := make([]float64, len(equation))
+
+		//~ Do zero-order approximation with explicit Euler
 		for i := range equation {
-			//~ get dt here to avoid updates later on.
-			y := equation[i].output[0]
-			dy := equation[i].input[0]
+			y := equation[i].LHS()
+			dy := equation[i].RHS()
 			dyMul := dy.multiplier
 			t_step := dt * dyMul[0]
-			//~ Do zero order approximation with forward Euler method
-			//~ The zero-order approximation is used as a starting point for fixed-point iteration
 			gpu.Madd(y.Array(), s.y0buffer[i], s.dy0buffer[i], t_step)
 			y.Invalidate()
 		}
 
 		s.iterations.SetScalar(s.iterations.Scalar() + 1)
 
-		//~ Since implicit methods use derivative at right side
+		//~ Do predictor using implicit Euler
 
 		e.time.SetScalar(t0 + dt)
+		e.UpdateEqRHS()
 
 		for i := range equation {
-			equation[i].input[0].Update()
-			s.dybuffer[i].CopyFromDevice(equation[i].input[0].Array())
+			s.dybuffer[i].CopyFromDevice(equation[i].RHS().Array())
 		}
 
-		//~ Do higher order approximation until converges
-
-		er := make([]float64, len(equation))
-		alp := make([]float64, len(equation)) //~ Convergence
-
-		//~ Protection
 		for i := range equation {
 			er[i] = maxIterErr
 		}
 
-		//~ Do predictor: BDF Euler (aka Adams-Moulton 0)
 		iter := 0
 		err := 1.0
-		alpha := 0.0
-
-		//~ Iterator should take at least two steps to estimate convergence of the solution
+		α := 0.0
 		for {
 			for i := range equation {
-				y := equation[i].output[0]
-				dy := equation[i].input[0]
+
+				y := equation[i].LHS()
+				dy := equation[i].RHS()
 				COMP := dy.NComp()
 				srCOMP := 1.0 / math.Sqrt(float64(COMP))
 
-				dyMul := dy.multiplier
-				t_step := dt * dyMul[0]
-				gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), t_step)
+				h := dt * dy.multiplier[0]
+				gpu.Madd(s.ybuffer[i], s.y0buffer[i], dy.Array(), h)
+
 				tErr := 0.0
 				for p := 0; p < COMP; p++ {
 					diffy := float64(s.diff[i].MaxDiff(y.Array().Component(p), s.ybuffer[i].Component(p)))
 					maxy := float64(s.diff[i].MaxAbs(s.ybuffer[i].Component(p)))
-					tErr += math.Pow(diffy/(s.maxAbsErr[i].Scalar()+maxy*s.maxRelErr[i].Scalar()), 2.0)
+					tErr += math.Pow(diffy / (s.maxAbsErr[i].Scalar()+maxy * s.maxRelErr[i].Scalar()), 2.0)
 				}
 				tErr = srCOMP * math.Sqrt(tErr)
-				alp[i] = tErr / er[i]
+
+				α = tErr / er[i]
+				alp[i] = α
+				s.alpha[i] = α
 				er[i] = tErr
+
 				y.Array().CopyFromDevice(s.ybuffer[i])
 				y.Invalidate()
 			}
-			for i := range equation {
-				equation[i].input[0].Update()
-			}
+
 			//~ Get the largest error
 			sort.Float64s(er)
 			sort.Float64s(alp)
 			err = er[len(equation)-1]
-			alpha = alp[len(equation)-1]
+			α = alp[len(equation)-1]
+
 			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
 			//~ Check first if the target error is reached
@@ -157,57 +153,54 @@ func (s *BDFAM12) Step() {
 				break
 			}
 			//~ If not, then check for convergence
-			if alpha >= 1.0 || iter > maxIter {
+			if α >= 1.0 || iter > maxIter {
 				badIterator = true
 				break
 			}
+			e.UpdateEqRHS()
 		}
-		alpha_1 = alpha
 		//~ If fixed-point iterator cannot converge, then panic
 		if badIterator && try == (maxTry-1) {
 			panic(Bug(fmt.Sprintf("The BDF Euler iterator cannot converge! Please increase the maximum number of iterations and re-run!")))
 		} else if badIterator {
 			//~ if there is a bad step in iterator then do hard/soft for step correction for fast/slow convergence
 			h_alpha := 0.5 * dt
-			if alpha > alpha_ref {
-				h_alpha = dt * math.Pow(alpha_ref/alpha, 0.5)
+			if α > alpha_ref {
+				h_alpha = dt * math.Pow(alpha_ref / α, 0.5)
 			}
 			engine.dt.SetScalar(h_alpha)
-			alpha_0 = alpha
-			dt_0 = dt
 			restrict_step = true
 			continue
 		}
-		//~ Save the derivative for the comparator
-		//~ and restore dy as estimated by Forward Euler
+
+		//~ Save function value of the comparator
+		//~ and restore dy as estimated by explicit Euler
 		for i := range equation {
-			s.y1buffer[i].CopyFromDevice(equation[i].output[0].Array())
-			equation[i].input[0].Array().CopyFromDevice(s.dybuffer[i])
+			s.y1buffer[i].CopyFromDevice(equation[i].LHS().Array())
+			equation[i].RHS().Array().CopyFromDevice(s.dybuffer[i])
 		}
 
-		//~ Protection
+		//~ Apply embedded 2nd order implicit method (trapezoidal)
+
 		for i := range equation {
 			er[i] = maxIterErr
 		}
 
-		//~ Do corrector: BDF trapezoidal (aka Adams-Moulton 1)
 		iter = 0
 		err = 1.0
 		badIterator = false
-		//~ There is no such method in the literature
-		//~ So lets do it like RK does, start from the initial guess, but not from the predicted one
-		//~ Iterator should take at least two steps to estimate convergence of the solution
+
 		for {
 			for i := range equation {
-				y := equation[i].output[0]
-				dy := equation[i].input[0]
+
+				y := equation[i].LHS()
+				dy := equation[i].RHS()
 				COMP := dy.NComp()
 				srCOMP := 1.0 / math.Sqrt(float64(COMP))
-				dyMul := dy.multiplier
 
-				t_step := dt * dyMul[0]
-				h := float32(t_step)
+				h := float32(dt * dy.multiplier[0])
 				gpu.AddMadd(s.ybuffer[i], s.y0buffer[i], dy.Array(), s.dy0buffer[i], 0.5*h)
+
 				tErr := 0.0
 				for p := 0; p < COMP; p++ {
 					diffy := float64(s.diff[i].MaxDiff(y.Array().Component(p), s.ybuffer[i].Component(p)))
@@ -215,19 +208,19 @@ func (s *BDFAM12) Step() {
 					tErr += math.Pow(diffy/(s.maxAbsErr[i].Scalar()+maxy*s.maxRelErr[i].Scalar()), 2.0)
 				}
 				tErr = srCOMP * math.Sqrt(tErr)
+
 				alp[i] = tErr / er[i]
 				er[i] = tErr
+
 				y.Array().CopyFromDevice(s.ybuffer[i])
 				y.Invalidate()
-			}
-			for i := range equation {
-				equation[i].input[0].Update()
 			}
 			//~ Get the largest error
 			sort.Float64s(er)
 			sort.Float64s(alp)
 			err = er[len(equation)-1]
-			alpha = alp[len(equation)-1]
+			α = alp[len(equation)-1]
+
 			iter = iter + 1
 			s.iterations.SetScalar(s.iterations.Scalar() + 1)
 			//~ Check first if the target error is reached
@@ -235,10 +228,11 @@ func (s *BDFAM12) Step() {
 				break
 			}
 			//~ If not, then check for convergence
-			if alpha >= 1.0 || iter > maxIter {
+			if α >= 1.0 || iter > maxIter {
 				badIterator = true
 				break
 			}
+			e.UpdateEqRHS()
 		}
 
 		if badIterator && try == (maxTry-1) {
@@ -247,22 +241,23 @@ func (s *BDFAM12) Step() {
 		} else if badIterator {
 			//~ if there is a bad step in iterator then do hard/soft for step correction for fast/slow convergence
 			h_alpha := 0.5 * dt
-			if alpha > alpha_ref {
-				h_alpha = dt * math.Pow(alpha_ref/alpha, 0.5)
+			if α > alpha_ref {
+				h_alpha = dt * math.Pow(alpha_ref / α, 0.5)
 			}
 			engine.dt.SetScalar(h_alpha)
 			continue
 		}
 
 		for i := range equation {
-			y := equation[i].output[0]
+
+			y := equation[i].LHS()
 			COMP := y.NComp()
 			srCOMP := 1.0 / math.Sqrt(float64(COMP))
-			//~ The error is mainly given by BDF Euler
+
 			tErr := 0.0
 			for p := 0; p < COMP; p++ {
 				diffy := float64(s.diff[i].MaxDiff(y.Array().Component(p), s.y1buffer[i].Component(p)))
-				maxy := float64(s.diff[i].MaxAbs(y.Array().Component(p)))
+				maxy := float64(s.diff[i].MaxAbs(s.y1buffer[i].Component(p)))
 				tErr += math.Pow(diffy/(s.maxAbsErr[i].Scalar()+maxy*s.maxRelErr[i].Scalar()), 2.0)
 			}
 			tErr = srCOMP * math.Sqrt(tErr)
@@ -274,26 +269,16 @@ func (s *BDFAM12) Step() {
 			s.err[i].SetScalar(tErr)
 			//~ Estimate step correction
 			step_corr := math.Pow(headRoom/tErr, 0.5)
-			pStep := s.steps_list[i].Front()
-			bounds := 1.0e10
-			//~ Get the bound of step variation for two previous steps. The more previous steps we use, the more inert our corrector become. This should be avoided.
-			if pStep != nil {
-				bounds = math.Max(dt, pStep.Value.(float64)) / math.Min(dt, pStep.Value.(float64))
-			}
-
-			if step_corr > bounds {
-				step_corr = bounds
-			}
 
 			h_r := dt * step_corr
 			new_dt := h_r
 			//~ if iterator reported convergence problems, then the step correction should be restricted according to the linear prediction of the sweet convergence spot.
 			if restrict_step {
-				//~ estimate the time of the sweet convergence spot
-				h_alpha := dt_0 + (alpha_ref-alpha_0)*(dt-dt_0)/(alpha_1-alpha_0)
+				h_alpha := dt * math.Pow(alpha_ref / s.alpha[i], 0.5)
 				new_dt = math.Min(h_r, h_alpha)
 				restrict_step = false
 			}
+
 			//~ User-defined limiter for the new step. Just for stability experiments.
 			if new_dt < s.minDt.Scalar() {
 				new_dt = s.minDt.Scalar()
@@ -369,6 +354,7 @@ func LoadBDFAM12(e *Engine) {
 	s.dybuffer = make([]*gpu.Array, len(equation))
 
 	s.err = make([]*Quant, len(equation))
+	s.alpha = make([]float64, len(equation))
 	s.err_list = make([]*list.List, len(equation))
 	s.steps_list = make([]*list.List, len(equation))
 
@@ -386,7 +372,7 @@ func LoadBDFAM12(e *Engine) {
 
 		eqn := &(equation[i])
 		Assert(eqn.kind == EQN_PDE1)
-		out := eqn.output[0]
+		out := eqn.LHS()
 		unit := out.Unit()
 		s.err[i] = e.AddNewQuant(out.Name()+"_error", SCALAR, VALUE, unit, "Error/step estimate for "+out.Name())
 		s.maxAbsErr[i] = e.AddNewQuant(out.Name()+"_maxAbsError", SCALAR, VALUE, unit, "Maximum absolute error per step for "+out.Name())
@@ -400,7 +386,7 @@ func LoadBDFAM12(e *Engine) {
 
 		// TODO: recycle?
 
-		y := equation[i].output[0]
+		y := equation[i].LHS()
 		s.ybuffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.y0buffer[i] = Pool.Get(y.NComp(), y.Size3D())
 		s.y1buffer[i] = Pool.Get(y.NComp(), y.Size3D())
