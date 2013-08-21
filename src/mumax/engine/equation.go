@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -28,7 +28,19 @@ func (e *Equation) String() string {
 	return "<invalid equation>"
 }
 
+func (e *Equation) UpdateRHS(){
+	e.input[0].Update()
+}
+
+func (e *Equation) LHS() *Quant {
+	return e.output[0]
+}
+
+func (e *Equation) RHS() *Quant {
+	return e.input[0]
+}
+
 const (
 	EQN_INVALID = iota // not used
-	EQN_PDE1           // dy/dt=f(y,t) 
+	EQN_PDE1           // dy/dt=f(y,t)
 )

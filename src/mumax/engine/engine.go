@@ -730,6 +730,11 @@ func (e *Engine) RecoverState(out, in string) {
 	qout.CopyFromQuant(qin)
 }
 
+func (e *Engine) UpdateEqRHS() {
+	for _, eq := range e.equation {
+		eq.UpdateRHS()
+	}
+}
 
 func valid(b bool) string {
 	if b {
