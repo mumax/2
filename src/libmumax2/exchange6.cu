@@ -12,7 +12,7 @@ extern "C" {
 __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, float* __restrict__  hz,
                               float* __restrict__  mx, float* __restrict__  my, float* __restrict__  mz,
                               float* __restrict__  mSat_map, float* __restrict__  Aex_map,
-                              const float Aex2_Mu0Msat_mul,
+                              const float pre,
                               const int N0, const int N1, const int N2,
                               const int wrap0, const int wrap1, const int wrap2,
                               const float cellx_2, const float celly_2, const float cellz_2)
@@ -30,101 +30,87 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         float mSat0 = getMaskUnity(mSat_map, I);
         float Aex0 = getMaskUnity(Aex_map, I);
         float lex0Mul = fdivZero(Aex0, mSat0);
-        float lexMul, lex1Mul;
-
-        float pre_x = cellx_2 * Aex2_Mu0Msat_mul;
-        float pre_y = celly_2 * Aex2_Mu0Msat_mul;
-        float pre_z = cellz_2 * Aex2_Mu0Msat_mul;
+        float lexMul, lex1Mul, lex2Mul;
 
         float mx0 = mx[I]; // mag component of central cell
+        float mx1, mx2;
 
         float my0 = my[I]; // mag component of central cell
+        float my1, my2;
 
         float mz0 = mz[I]; // mag component of central cell
+        float mz1, mz2;
 
-        float m;
         float Hx, Hy, Hz;
-        float tHx, tHy, tHz;
 
         // neighbors in X direction
         int idx = i - 1;
         idx = (idx < 0 && wrap0) ? N0 + idx : idx;
-        lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
-        lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
+        lexMul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex1Mul = 2.0f * fdivZero((lex0Mul * lexMul), (lex0Mul + lexMul));
 
-        m = (idx < 0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
-        tHx = lexMul * (m - mx0);
-        m = (idx < 0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
-        tHy = lexMul * (m - my0);
-        m = (idx < 0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
-        tHz = lexMul * (m - mz0);
+        mx1 = (idx < 0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
+        my1 = (idx < 0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
+        mz1 = (idx < 0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
 
         idx = i + 1;
         idx = (idx == N0 && wrap0) ? idx - N0 : idx;
-        lex1Mul = (idx == N0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
-        lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
+        lexMul = (idx == N0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex2Mul = 2.0f * fdivZero((lex0Mul * lexMul), (lex0Mul + lexMul));
 
-        m = (idx == N0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
-        tHx += lexMul * (m - mx0);
-        m = (idx == N0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
-        tHy += lexMul * (m - my0);
-        m = (idx == N0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
-        tHz += lexMul * (m - mz0);
+        mx2 = (idx == N0) ? mx0 : mx[idx * N1 * N2 + j * N2 + k];
+        my2 = (idx == N0) ? my0 : my[idx * N1 * N2 + j * N2 + k];
+        mz2 = (idx == N0) ? mz0 : mz[idx * N1 * N2 + j * N2 + k];
 
-        Hx = pre_x * tHx;
-        Hy = pre_x * tHy;
-        Hz = pre_x * tHz;
+        Hx = pre * cellx_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 - mx0));
+        Hy = pre * cellx_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 - my0));
+        Hz = pre * cellx_2 * (lex1Mul * (mz1 - mz0) + lex2Mul * (mz2 - mz0));
 
         // neighbors in Z direction
         idx = k - 1;
         idx = (idx < 0 && wrap2) ? N2 + idx : idx;
-        lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
-        lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        m = (idx < 0) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
-        tHx = lexMul * (m - mx0);
-        m = (idx < 0) ? my0 : my[i * N1 * N2 + j * N2 + idx];
-        tHy = lexMul * (m - my0);
-        m = (idx < 0) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
-        tHz = lexMul * (m - mz0);
+        lexMul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex1Mul = 2.0f * fdivZero((lex0Mul * lexMul), (lex0Mul + lexMul));
+
+        mx1 = (idx < 0) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
+        my1 = (idx < 0) ? my0 : my[i * N1 * N2 + j * N2 + idx];
+        mz1 = (idx < 0) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
 
         idx = k + 1;
         idx = (idx == N2 && wrap2) ? idx - N2 : idx;
-        lex1Mul = (idx == N2) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
-        lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        m = (idx == N2) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
-        tHx += lexMul * (m - mx0);
-        m = (idx == N2) ? my0 : my[i * N1 * N2 + j * N2 + idx];
-        tHy += lexMul * (m - my0);
-        m = (idx == N2) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
-        tHz += lexMul * (m - mz0);
-        Hz += pre_z * tHz;
+        lexMul = (idx == N2) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex2Mul = 2.0f * fdivZero((lex0Mul * lexMul), (lex0Mul + lexMul));
+
+        mx2 = (idx == N2) ? mx0 : mx[i * N1 * N2 + j * N2 + idx];
+        my2 = (idx == N2) ? my0 : my[i * N1 * N2 + j * N2 + idx];
+        mz2 = (idx == N2) ? mz0 : mz[i * N1 * N2 + j * N2 + idx];
+
+        Hx += pre * cellz_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 - mx0));
+        Hy += pre * cellz_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 - my0));
+        Hz += pre * cellz_2 * (lex1Mul * (mz1 - mz0) + lex2Mul * (mz2 - mz0));
 
         // neighbors in Y direction
         idx = j - 1;
         idx = (idx < 0 && wrap1) ? N1 + idx : idx;
-        lex1Mul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
-        lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        m = (idx < 0) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
-        tHx = lexMul * (m - mx0);
-        m = (idx < 0) ? my0 : my[i * N1 * N2 + idx * N2 + k];
-        tHy = lexMul * (m - my0);
-        m = (idx < 0) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
-        tHz = lexMul * (m - mz0);
+        lexMul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex1Mul = 2.0f * fdivZero((lex0Mul * lexMul), (lex0Mul + lexMul));
+
+        mx1 = (idx < 0) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
+        my1 = (idx < 0) ? my0 : my[i * N1 * N2 + idx * N2 + k];
+        mz1 = (idx < 0) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
 
         idx = j + 1;
         idx = (idx == N1 && wrap1) ? idx - N1 : idx;
-        lex1Mul = (idx == N1) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
-        lexMul = 2.0f * fdivZero((lex0Mul * lex1Mul), (lex0Mul + lex1Mul));
-        m = (idx == N1) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
-        tHx += lexMul * (m - mx0);
-        m = (idx == N1) ? my0 : my[i * N1 * N2 + idx * N2 + k];
-        tHy += lexMul * (m - my0);
-        m = (idx == N1) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
-        tHz += lexMul * (m - mz0);
+        lexMul = (idx == N1) ? 0.0f : fdivZero(getMaskUnity(Aex_map, idx), getMaskUnity(mSat_map, idx));
+        lex2Mul = 2.0f * fdivZero((lex0Mul * lexMul), (lex0Mul + lexMul));
 
-        Hx += pre_y * tHx;
-        Hy += pre_y * tHy;
-        Hz += pre_y * tHz;
+        mx2 = (idx == N1) ? mx0 : mx[i * N1 * N2 + idx * N2 + k];
+        my2 = (idx == N1) ? my0 : my[i * N1 * N2 + idx * N2 + k];
+        mz2 = (idx == N1) ? mz0 : mz[i * N1 * N2 + idx * N2 + k];
+
+        Hx += pre * celly_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 - mx0));
+        Hy += pre * celly_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 - my0));
+        Hz += pre * celly_2 * (lex1Mul * (mz1 - mz0) + lex2Mul * (mz2 - mz0));
 
         // Write back to global memory
         hx[I] = Hx;
