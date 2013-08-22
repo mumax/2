@@ -281,4 +281,8 @@ inline __device__ float fdivZero(float a, float b) {
     return (b == 0.0f) ? 0.0f : a / b ;
 }
 
+inline __device__ float avgGeomZero(float a, float b) {
+    float a_b = a + b;
+    return (a_b == 0.0f) ? 0.0f : 2.0 * a * b / a_b;
+}
 #endif
