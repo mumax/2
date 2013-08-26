@@ -7,7 +7,7 @@
 
 package modules
 
-// Module implementing transverse and longitudinal Baryakhtar's' torques.
+// Module implements nonconservative zero-order nonlocal relaxation damping
 // Authors: Mykola Dvornik, Arne Vansteenkiste
 
 import (
@@ -19,42 +19,42 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("llbr/nonlocal", "LLBr nonlocal relaxation term", LoadBaryakhtarNonLocal)
+	RegisterModule("llbar/damping/nonconservative/nonlocal_00", "LLBar nonconservative zero-order nonlocal relaxation term", LoadLLBarNonlocal02NC)
 }
 
-func LoadBaryakhtarNonLocal(e *Engine) {
+func LoadLLBarNonlocal02NC(e *Engine) {
 
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
 
 	// ============ New Quantities =============
-	e.AddNewQuant("lambda_e", VECTOR, MASK, Unit(""), "LLBr nonlocal relaxation constant")
-	llbr_nonlocal := e.AddNewQuant("llbr_nonlocal", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonlocal relaxation term")
+	e.AddNewQuant("λₑ⁰", VECTOR, MASK, Unit(""), "LLBar zero-order non-local relaxation diagonal tensor")
+	llbar_nonlocal00nc := e.AddNewQuant("llbar_nonlocal00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonconservative zero-order nonlocal relaxation term")
 
 	// ============ Dependencies =============
-	e.Depends("llbr_nonlocal", "H_eff", "gamma_LL", "lambda_e", "msat0T0")
+	e.Depends("llbar_nonlocal00nc", "H_eff", "gamma_LL", "λₑ⁰", "msat0T0")
 
 	// ============ Updating the torque =============
-	upd := &BaryakhtarNonlocalUpdater{llbr_nonlocal: llbr_nonlocal}
-	llbr_nonlocal.SetUpdater(upd)
+	upd := &LLBarNonlocal02NCUpdater{llbar_nonlocal00nc: llbar_nonlocal00nc}
+	llbar_nonlocal00nc.SetUpdater(upd)
 }
 
-type BaryakhtarNonlocalUpdater struct {
-	llbr_nonlocal *Quant
+type LLBarNonlocal02NCUpdater struct {
+	llbar_nonlocal00nc *Quant
 }
 
-func (u *BaryakhtarNonlocalUpdater) Update() {
+func (u *LLBarNonlocal02NCUpdater) Update() {
 
 	e := GetEngine()
-	llbr_nonlocal := u.llbr_nonlocal
+	llbar_nonlocal00nc := u.llbar_nonlocal00nc
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	cellSize := e.CellSize()
 	heff := e.Quant("H_eff")
 	pbc := e.Periodic()
 
 	// put gamma in multiplier to avoid additional multiplications
-	multiplierBT := llbr_nonlocal.Multiplier()
+	multiplierBT := llbar_nonlocal00nc.Multiplier()
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
 	}
@@ -62,7 +62,7 @@ func (u *BaryakhtarNonlocalUpdater) Update() {
 	lambda_e := e.Quant("lambda_e")
 	msat0T0 := e.Quant("msat0T0")
 
-	gpu.BaryakhtarNonlocalAsync(llbr_nonlocal.Array(),
+	gpu.LLBarNonlocal02NC(llbar_nonlocal00nc.Array(),
 		heff.Array(),
 		msat0T0.Array(),
 		lambda_e.Array(),
@@ -72,5 +72,5 @@ func (u *BaryakhtarNonlocalUpdater) Update() {
 		float32(cellSize[Z]),
 		pbc)
 
-	llbr_nonlocal.Array().Sync()
+	llbar_nonlocal00nc.Array().Sync()
 }

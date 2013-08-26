@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-    __global__ void baryakhtarNonLocalKernFloat(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
+    __global__ void llbarNonlocal02ncKern(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
 
             float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
             float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
@@ -192,7 +192,7 @@ extern "C" {
 
 #define BLOCKSIZE 16
 
-    __export__  void baryakhtar_nonlocal_async(float** tx, float**  ty, float**  tz,
+    __export__  void llbar_nonlocal02nc_async(float** tx, float**  ty, float**  tz,
             float**  hx, float**  hy, float**  hz,
 
             float** msat0T0,
@@ -265,7 +265,7 @@ extern "C" {
             for (int i = 0; i < sx; i++)
             {
 
-                baryakhtarNonLocalKernFloat <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
+                llbarNonlocal02ncKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
                         hx[dev], hy[dev], hz[dev],
                         lhx, lhy, lhz,
                         rhx, rhy, rhz,
