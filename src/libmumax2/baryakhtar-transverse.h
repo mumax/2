@@ -16,22 +16,22 @@
 extern "C" {
 #endif
 
-    DLLEXPORT  void baryakhtar_transverse_async(float** tx, float**  ty, float**  tz,
-            float**  mx, float**  my, float**  mz,
-            float**  hx, float**  hy, float**  hz,
+DLLEXPORT  void llbar_local02c_async(float** tx, float**  ty, float**  tz,
+                                     float**  mx, float**  my, float**  mz,
+                                     float**  hx, float**  hy, float**  hz,
 
-            float** msat0T0,
+                                     float** msat0T0,
 
-            float** mu_xx,
-            float** mu_yy,
-            float** mu_zz,
+                                     float** mu_xx,
+                                     float** mu_yy,
+                                     float** mu_zz,
 
-            const float muMul_xx,
-            const float muMul_yy,
-            const float muMul_zz,
+                                     const float muMul_xx,
+                                     const float muMul_yy,
+                                     const float muMul_zz,
 
-            CUstream* stream,
-            int Npart);
+                                     CUstream* stream,
+                                     int Npart);
 
 #ifdef __cplusplus
 }

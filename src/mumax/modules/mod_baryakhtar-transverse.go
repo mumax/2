@@ -7,22 +7,20 @@
 
 package modules
 
-// Module implementing transverse and longitudinal Baryakhtar's' torques.
+// Module implements conservative second-order local damping
 // Authors: Mykola Dvornik
 
 import (
-	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	//"math"
 )
 
 // Register this module
 func init() {
-	RegisterModule("llbr/transverse", "LLBr transverse relaxation term", LoadBaryakhtarTransverse)
+	RegisterModule("llbar/conservative/local_02", "LLBar conservative second-order local relaxation term", LoadLLBarLocal02C)
 }
 
-func LoadBaryakhtarTransverse(e *Engine) {
+func LoadLLBarLocal02C(e *Engine) {
 
 	LoadHField(e)
 	LoadFullMagnetization(e)
@@ -30,32 +28,32 @@ func LoadBaryakhtarTransverse(e *Engine) {
 
 	// =========== New Quantities =============
 
-	e.AddNewQuant("mu", VECTOR, MASK, Unit(""), "LLBr ferromagnetic relaxation constant")
-	llbr_transverse := e.AddNewQuant("llbr_transverse", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar second-order transverse relaxation term")
+	e.AddNewQuant("μ02c", VECTOR, MASK, Unit(""), "LLBr ferromagnetic relaxation constant")
+	llbr_local02c := e.AddNewQuant("llbr_local02c", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar conservative second-order local relaxation term")
 
 	// ============ Dependencies =============
-	e.Depends("llbr_transverse", "mf", "H_eff", "gamma_LL", "mu", "msat0T0")
+	e.Depends("llbr_local02c", "mf", "H_eff", "gamma_LL", "μ02c", "msat0T0")
 
 	// ============ Updating the torque =============
-	upd := &BaryakhtarTransverseUpdater{llbr_transverse: llbr_transverse}
-	llbr_transverse.SetUpdater(upd)
+	upd := &LLBarLocal02CUpdater{llbr_local02c: llbr_local02c}
+	llbr_local02c.SetUpdater(upd)
 }
 
-type BaryakhtarTransverseUpdater struct {
-	llbr_transverse *Quant
+type LLBarLocal02CUpdater struct {
+	llbr_local02c *Quant
 }
 
-func (u *BaryakhtarTransverseUpdater) Update() {
+func (u *LLBarLocal02CUpdater) Update() {
 
 	e := GetEngine()
 
-	llbr_transverse := u.llbr_transverse
+	llbr_local02c := u.llbr_local02c
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	m := e.Quant("mf") // mf is M/Ms(T=0)
 	heff := e.Quant("H_eff")
 
 	// put gamma in multiplier to avoid additional multiplications
-	multiplierBT := llbr_transverse.Multiplier()
+	multiplierBT := llbr_local02c.Multiplier()
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
 	}
@@ -63,12 +61,12 @@ func (u *BaryakhtarTransverseUpdater) Update() {
 	mu := e.Quant("mu")
 	msat0T0 := e.Quant("msat0T0")
 
-	gpu.BaryakhtarTransverseAsync(llbr_transverse.Array(),
+	gpu.BaryakhtarLocal02CAsync(llbr_local02c.Array(),
 		m.Array(),
 		heff.Array(),
 		msat0T0.Array(),
 		mu.Array(),
 		mu.Multiplier())
 
-	llbr_transverse.Array().Sync()
+	llbr_local02c.Array().Sync()
 }
