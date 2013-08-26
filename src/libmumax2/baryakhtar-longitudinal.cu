@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-    __global__ void baryakhtarLongitudinalKernFloat(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
+    __global__ void llbarLocal00ncKern(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
             float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
 
             float* __restrict__ msat0T0Msk,
@@ -63,7 +63,7 @@ extern "C" {
         }
     }
 
-    __export__  void baryakhtar_longitudinal_async(float** tx, float**  ty, float**  tz,
+    __export__  void llbar_local00nc_async(float** tx, float**  ty, float**  tz,
             float**  hx, float**  hy, float**  hz,
 
             float** msat0T0,
@@ -89,7 +89,7 @@ extern "C" {
             gpu_safe(cudaSetDevice(deviceId(dev)));
             // calculate dev neighbours
 
-            baryakhtarLongitudinalKernFloat <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
+            llbarLocal00ncKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
                     hx[dev], hy[dev], hz[dev],
 
                     msat0T0[dev],

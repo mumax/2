@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-    DLLEXPORT  void baryakhtar_longitudinal_async(float** tx, float**  ty, float**  tz,
+    DLLEXPORT  void llbar_local00nc_async(float** tx, float**  ty, float**  tz,
             float**  hx, float**  hy, float**  hz,
 
             float** msat0T0,

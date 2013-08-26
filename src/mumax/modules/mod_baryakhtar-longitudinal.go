@@ -7,23 +7,21 @@
 
 package modules
 
-// Module implementing transverse and longitudinal Baryakhtar's' torques.
+// Module implements nonconservative zero-order local damping
 // Authors: Mykola Dvornik, Arne Vansteenkiste
 
 import (
-	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	//"math"
 )
 
 // Register this module
 
 func init() {
-	RegisterModule("llbr/longitudinal", "LLBr longitudinal relaxation term", LoadBaryakhtarLongitudinal)
+	RegisterModule("llbar/damping/nonconservative/local_00", "LLBar nonconservative zero-order local relaxation term", LoadLLBarLocal00NC)
 }
 
-func LoadBaryakhtarLongitudinal(e *Engine) {
+func LoadLLBarLocal00NC(e *Engine) {
 
 	LoadHField(e)
 	LoadFullMagnetization(e)
@@ -32,43 +30,43 @@ func LoadBaryakhtarLongitudinal(e *Engine) {
 
 	// ============ New Quantities =============
 
-	e.AddNewQuant("lambda", VECTOR, MASK, Unit(""), "LLBr paramagnetic relaxations constant")
+	e.AddNewQuant("λ⁰", VECTOR, MASK, Unit(""), "LLBar zero-order local relaxation diagonal tensor")
 
-	llbr_long := e.AddNewQuant("llbr_long", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar paramagnetic relaxation term")
+	llbar_local00nc := e.AddNewQuant("llbar_local00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonconservative zero-order local relaxation term")
 
 	// =============== Dependencies =============
-	e.Depends("llbr_long", "H_eff", "gamma_LL", "lambda", "msat0T0")
+	e.Depends("llbar_local00nc", "H_eff", "gamma_LL", "λ⁰", "msat0T0")
 
 	// ============ Updating the torque =============
-	upd := &BaryakhtarLongitudinalUpdater{llbr_long: llbr_long}
-	llbr_long.SetUpdater(upd)
+	upd := &LLBarLocal00NCUpdater{llbar_local00nc: llbar_local00nc}
+	llbar_local00nc.SetUpdater(upd)
 }
 
-type BaryakhtarLongitudinalUpdater struct {
-	llbr_long *Quant
+type LLBarLocal00NCUpdater struct {
+	llbar_local00nc *Quant
 }
 
-func (u *BaryakhtarLongitudinalUpdater) Update() {
+func (u *LLBarLocal00NCUpdater) Update() {
 
 	e := GetEngine()
-	llbr_long := u.llbr_long
+	llbar_local00nc := u.llbar_local00nc
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	heff := e.Quant("H_eff")
 
 	// put gamma in multiplier to avoid additional multiplications
-	multiplierBT := llbr_long.Multiplier()
+	multiplierBT := llbar_local00nc.Multiplier()
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
 	}
 
-	lambda := e.Quant("lambda")
+	lambda := e.Quant("λ⁰")
 	msat0T0 := e.Quant("msat0T0")
 
-	gpu.BaryakhtarLongitudinalAsync(llbr_long.Array(),
+	gpu.LLBarLocal00NC(llbar_local00nc.Array(),
 		heff.Array(),
 		msat0T0.Array(),
 		lambda.Array(),
 		lambda.Multiplier())
 
-	llbr_long.Array().Sync()
+	llbar_local00nc.Array().Sync()
 }

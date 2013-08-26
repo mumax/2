@@ -18,14 +18,14 @@ import (
 	"unsafe"
 )
 
-func BaryakhtarLongitudinalAsync(t *Array, h *Array, msat0T0 *Array, lambda *Array, lambdaMul []float64) {
+func LLBarLocal00NC(t *Array, h *Array, msat0T0 *Array, lambda *Array, lambdaMul []float64) {
 
 	// Bookkeeping
 	CheckSize(h.Size3D(), t.Size3D())
 	Assert(h.NComp() == 3)
 
 	// Calling the CUDA functions
-	C.baryakhtar_longitudinal_async(
+	C.llbar_local00nc_async(
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Z].Pointers()[0]))),
