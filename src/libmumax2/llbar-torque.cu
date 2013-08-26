@@ -1,4 +1,4 @@
-#include "baryakhtar-torque.h"
+#include "llbar-torque.h"
 #include "multigpu.h"
 #include "gpu_conf.h"
 #include "gpu_safe.h"
