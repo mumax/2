@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-DLLEXPORT  void baryakhtar_torque_async(float** tx, float**  ty, float**  tz, 
+DLLEXPORT  void llbar_torque_async(float** tx, float**  ty, float**  tz, 
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 

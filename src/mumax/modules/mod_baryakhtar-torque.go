@@ -7,22 +7,20 @@
 
 package modules
 
-// Module implementing transverse and longitudinal Baryakhtar's' torques.
+// Module implementes LLBar torque (indestiguishible from LL)
 // Authors: Mykola Dvornik, Arne Vansteenkiste
 
 import (
-	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	//"math"
 )
 
 // Register this module
 func init() {
-	RegisterModule("llbr/torque", "LLBr torque term", LoadBaryakhtarTorque)
+	RegisterModule("llbar/torque", "LLBar torque term", LoadLLBarTorque)
 }
 
-func LoadBaryakhtarTorque(e *Engine) {
+func LoadLLBarTorque(e *Engine) {
 
 	LoadHField(e)
 	LoadFullMagnetization(e)
@@ -30,32 +28,30 @@ func LoadBaryakhtarTorque(e *Engine) {
 
 	// ============ New Quantities =============
 
-	llbr_torque := e.AddNewQuant("llbr_torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar torque")
+	llbar_torque := e.AddNewQuant("llbar_torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar torque")
 
 	// ============ Dependencies =============
-	e.Depends("llbr_torque", "mf", "H_eff", "gamma_LL")
+	e.Depends("llbar_torque", "mf", "H_eff", "gamma_LL")
 
 	// ============ Updating the torque =============
-	upd := &BaryakhtarTorqueAsyncUpdater{llbr_torque: llbr_torque}
-	llbr_torque.SetUpdater(upd)
-
-	//~ AddTermToQuant(e.Quant("llbr_RHS"), llbr_torque)
+	upd := &LLBarTorqueUpdater{llbar_torque: llbar_torque}
+	llbar_torque.SetUpdater(upd)
 }
 
-type BaryakhtarTorqueAsyncUpdater struct {
-	llbr_torque *Quant
+type LLBarTorqueUpdater struct {
+	llbar_torque *Quant
 }
 
-func (u *BaryakhtarTorqueAsyncUpdater) Update() {
+func (u *LLBarTorqueUpdater) Update() {
 
 	e := GetEngine()
-	llbr_torque := u.llbr_torque
+	llbar_torque := u.llbar_torque
 	gammaLL := e.Quant("gamma_LL").Scalar()
 	m := e.Quant("mf")
 	heff := e.Quant("H_eff")
 
 	// put gamma in multiplier to avoid additional multiplications
-	multiplierBT := llbr_torque.Multiplier()
+	multiplierBT := llbar_torque.Multiplier()
 
 	for i := range multiplierBT {
 		multiplierBT[i] = gammaLL
@@ -63,10 +59,10 @@ func (u *BaryakhtarTorqueAsyncUpdater) Update() {
 
 	msat0T0 := e.Quant("msat0T0")
 
-	gpu.BaryakhtarTorqueAsync(llbr_torque.Array(),
+	gpu.LLBarTorqueAsync(llbar_torque.Array(),
 		m.Array(),
 		heff.Array(),
 		msat0T0.Array())
 
-	llbr_torque.Array().Sync()
+	llbar_torque.Array().Sync()
 }

@@ -18,14 +18,14 @@ import (
 	"unsafe"
 )
 
-func BaryakhtarTorqueAsync(t *Array, M *Array, h *Array, msat0T0 *Array) {
+func LLBarTorqueAsync(t *Array, M *Array, h *Array, msat0T0 *Array) {
 
 	// Bookkeeping
 	CheckSize(h.Size3D(), M.Size3D())
 
 	Assert(h.NComp() == 3)
 
-	C.baryakhtar_torque_async(
+	C.llbar_torque_async(
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Z].Pointers()[0]))),

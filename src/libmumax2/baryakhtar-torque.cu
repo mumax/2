@@ -9,7 +9,7 @@
 extern "C" {
 #endif  
 
-__global__ void baryakhtarTorqueKernFloat(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
+__global__ void llbarTorqueKern(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
 					 float* __restrict__ Mx, float* __restrict__ My, float* __restrict__ Mz,
 					 float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
 					
@@ -45,7 +45,7 @@ __global__ void baryakhtarTorqueKernFloat(float* __restrict__ tx, float* __restr
 
 #define BLOCKSIZE 16
 
-__export__  void baryakhtar_torque_async(float** tx, float**  ty, float**  tz, 
+__export__  void llbar_torque_async(float** tx, float**  ty, float**  tz, 
 			 float**  Mx, float**  My, float**  Mz, 
 			 float**  hx, float**  hy, float**  hz,
 			 
@@ -64,7 +64,7 @@ __export__  void baryakhtar_torque_async(float** tx, float**  ty, float**  tz,
 		
 		// calculate dev neighbours
 		
-		baryakhtarTorqueKernFloat<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],  
+		llbarTorqueKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],  
 												   Mx[dev], My[dev], Mz[dev],
 												   hx[dev], hy[dev], hz[dev],
 												   
