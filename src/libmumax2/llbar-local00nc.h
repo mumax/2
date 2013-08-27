@@ -6,8 +6,8 @@
   * @author Mykola Dvornik
   */
 
-#ifndef _BARYAKHTAR_LONGITUDINAL_H_
-#define _BARYAKHTAR_LONGITUDINAL_H_
+#ifndef _LLBAR_LOCAL00NC_H_
+#define _LLBAR_LOCAL00NC_H_
 
 #include <cuda.h>
 #include "cross_platform.h"

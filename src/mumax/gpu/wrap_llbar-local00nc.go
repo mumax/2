@@ -7,7 +7,7 @@
 
 package gpu
 
-// CGO wrappers for baryakhtar-longitudinal.cu
+// CGO wrappers for llbar-local00nc.h
 // Author: Mykola Dvornik
 
 //#include "libmumax2.h"

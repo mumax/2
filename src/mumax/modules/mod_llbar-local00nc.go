@@ -30,12 +30,12 @@ func LoadLLBarLocal00NC(e *Engine) {
 
 	// ============ New Quantities =============
 
-	e.AddNewQuant("λ⁰", VECTOR, MASK, Unit(""), "LLBar zero-order local relaxation diagonal tensor")
+	e.AddNewQuant("λ∥", VECTOR, MASK, Unit(""), "LLBar zero-order local relaxation diagonal tensor")
 
 	llbar_local00nc := e.AddNewQuant("llbar_local00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonconservative zero-order local relaxation term")
 
 	// =============== Dependencies =============
-	e.Depends("llbar_local00nc", "H_eff", "gamma_LL", "λ⁰", "msat0T0")
+	e.Depends("llbar_local00nc", "H_eff", "gamma_LL", "λ∥", "msat0T0")
 
 	// ============ Updating the torque =============
 	upd := &LLBarLocal00NCUpdater{llbar_local00nc: llbar_local00nc}
@@ -59,7 +59,7 @@ func (u *LLBarLocal00NCUpdater) Update() {
 		multiplierBT[i] = gammaLL
 	}
 
-	lambda := e.Quant("λ⁰")
+	lambda := e.Quant("λ∥")
 	msat0T0 := e.Quant("msat0T0")
 
 	gpu.LLBarLocal00NC(llbar_local00nc.Array(),
