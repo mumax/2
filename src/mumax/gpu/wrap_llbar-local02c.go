@@ -6,8 +6,8 @@
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package gpu
- 
-// CGO wrappers for llbar_Local02C.cu
+
+// CGO wrappers for llbar_local02c.cu
 // Author: Mykola Dvornik
 
 //#include "libmumax2.h"
@@ -18,7 +18,7 @@ import (
 	"unsafe"
 )
 
-func BaryakhtarLocal02CAsync(t *Array, m *Array, h *Array, msat0T0 *Array, mu *Array, muMul []float64) {
+func LLBarLocal02C(t *Array, m *Array, h *Array, msat0T0 *Array, mu *Array, muMul []float64) {
 
 	// Bookkeeping
 	CheckSize(h.Size3D(), m.Size3D())

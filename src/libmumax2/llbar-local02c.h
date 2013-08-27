@@ -5,8 +5,8 @@
   * @author Mykola Dvornik
   */
 
-#ifndef _BARYAKHTAR_TRANSVERSE_H_
-#define _BARYAKHTAR_TRANSVERSE_H_
+#ifndef _LLBAR_LOCAL02C_H_
+#define _LLBAR_LOCAL02C_H_
 
 #include <cuda.h>
 #include "cross_platform.h"
