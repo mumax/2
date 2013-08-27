@@ -7,7 +7,7 @@
 
 package gpu
 
-// CGO wrappers for baryakhtar-nonlocal.cu
+// CGO wrappers for llbar-nonlocal00nc.h
 // Author: Mykola Dvornik
 
 //#include "libmumax2.h"
@@ -18,14 +18,14 @@ import (
 	"unsafe"
 )
 
-func LLBarNonlocal02NC(t *Array, h *Array, msat0T0 *Array, lambda_e *Array, lambda_eMul []float64, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
+func LLBarNonlocal00NC(t *Array, h *Array, msat0T0 *Array, lambda_e *Array, lambda_eMul []float64, cellsizeX float32, cellsizeY float32, cellsizeZ float32, pbc []int) {
 
 	// Bookkeeping
 	CheckSize(t.Size3D(), h.Size3D())
 	Assert(h.NComp() == 3)
 
 	// Calling the CUDA functions
-	C.llbar_nonlocal02nc_async(
+	C.llbar_nonlocal00nc_async(
 		(**C.float)(unsafe.Pointer(&(t.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(t.Comp[Z].Pointers()[0]))),

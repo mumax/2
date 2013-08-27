@@ -6,8 +6,8 @@
   * @author Mykola Dvornik
   */
 
-#ifndef _BARYAKHTAR_NONLOCAL_H_
-#define _BARYAKHTAR_NONLOCAL_H_
+#ifndef _LLBAR_NONLOCAL00NC_H_
+#define _LLBAR_NONLOCAL00NC_H_
 
 #include <cuda.h>
 #include "cross_platform.h"
@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-    DLLEXPORT  void llbar_nonlocal02nc_async(float** tx, float**  ty, float**  tz,
+    DLLEXPORT  void llbar_nonlocal00nc_async(float** tx, float**  ty, float**  tz,
 
             float**  hx, float**  hy, float**  hz,
 

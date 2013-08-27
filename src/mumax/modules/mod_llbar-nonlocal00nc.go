@@ -14,37 +14,36 @@ import (
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
-	//"math"
 )
 
 // Register this module
 func init() {
-	RegisterModule("llbar/damping/nonconservative/nonlocal_00", "LLBar nonconservative zero-order nonlocal relaxation term", LoadLLBarNonlocal02NC)
+	RegisterModule("llbar/damping/nonconservative/nonlocal_00", "LLBar nonconservative zero-order nonlocal relaxation term", LoadLLBarNonlocal00NC)
 }
 
-func LoadLLBarNonlocal02NC(e *Engine) {
+func LoadLLBarNonlocal00NC(e *Engine) {
 
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
 
 	// ============ New Quantities =============
-	e.AddNewQuant("λₑ⁰", VECTOR, MASK, Unit(""), "LLBar zero-order non-local relaxation diagonal tensor")
+	e.AddNewQuant("λₑ∥", VECTOR, MASK, Unit(""), "LLBar zero-order non-local relaxation diagonal tensor")
 	llbar_nonlocal00nc := e.AddNewQuant("llbar_nonlocal00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonconservative zero-order nonlocal relaxation term")
 
 	// ============ Dependencies =============
-	e.Depends("llbar_nonlocal00nc", "H_eff", "gamma_LL", "λₑ⁰", "msat0T0")
+	e.Depends("llbar_nonlocal00nc", "H_eff", "gamma_LL", "λₑ∥", "msat0T0")
 
 	// ============ Updating the torque =============
-	upd := &LLBarNonlocal02NCUpdater{llbar_nonlocal00nc: llbar_nonlocal00nc}
+	upd := &LLBarNonlocal00NCUpdater{llbar_nonlocal00nc: llbar_nonlocal00nc}
 	llbar_nonlocal00nc.SetUpdater(upd)
 }
 
-type LLBarNonlocal02NCUpdater struct {
+type LLBarNonlocal00NCUpdater struct {
 	llbar_nonlocal00nc *Quant
 }
 
-func (u *LLBarNonlocal02NCUpdater) Update() {
+func (u *LLBarNonlocal00NCUpdater) Update() {
 
 	e := GetEngine()
 	llbar_nonlocal00nc := u.llbar_nonlocal00nc
@@ -59,10 +58,10 @@ func (u *LLBarNonlocal02NCUpdater) Update() {
 		multiplierBT[i] = gammaLL
 	}
 
-	lambda_e := e.Quant("lambda_e")
+	lambda_e := e.Quant("λₑ∥")
 	msat0T0 := e.Quant("msat0T0")
 
-	gpu.LLBarNonlocal02NC(llbar_nonlocal00nc.Array(),
+	gpu.LLBarNonlocal00NC(llbar_nonlocal00nc.Array(),
 		heff.Array(),
 		msat0T0.Array(),
 		lambda_e.Array(),
