@@ -17,7 +17,7 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("llbar/damping/conservative/local_02", "LLBar conservative second-order local relaxation term", LoadLLBarLocal02C)
+	RegisterModule("llbar/damping/conservative/02/local", "LLBar conservative second-order local relaxation term", LoadLLBarLocal02C)
 }
 
 func LoadLLBarLocal02C(e *Engine) {

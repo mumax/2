@@ -18,7 +18,7 @@ import (
 // Register this module
 
 func init() {
-	RegisterModule("llbar/damping/nonconservative/local_00", "LLBar nonconservative zero-order local relaxation term", LoadLLBarLocal00NC)
+	RegisterModule("llbar/damping/nonconservative/00/local", "LLBar nonconservative zero-order local relaxation term", LoadLLBarLocal00NC)
 }
 
 func LoadLLBarLocal00NC(e *Engine) {
