@@ -69,7 +69,7 @@ func LoadAnizBrown(e *Engine, args ...Arguments) {
 	msat := e.Quant(arg.Deps("msat"))
 	msat0T0 := e.Quant(arg.Deps("msat0T0"))
 
-	e.Depends(arg.Outs("H_therm"), arg.Deps("T"), arg.Deps("mu"), arg.Deps("msat"), arg.Deps("msat0T0"), arg.Ins("Therm_seed"), arg.Ins("cutoff_dt"), "Step", "dt", "gamma_LL")
+	e.Depends(arg.Outs("H_therm"), arg.Deps("T"), arg.Deps("mu"), arg.Deps("msat"), arg.Deps("msat0T0"), arg.Ins("Therm_seed"), arg.Ins("cutoff_dt"), "Step", "dt", "γ_LL")
 	Htherm.SetUpdater(NewAnizBrownUpdater(Htherm, Therm_seed, cutoff_dt, T, mu, msat, msat0T0))
 
 	// Add thermal field to total field
@@ -160,7 +160,7 @@ func (u *AnizBrownUpdater) Update() {
 	V := cellSize[X] * cellSize[Y] * cellSize[Z]
 	mu := u.mu
 
-	gamma := e.Quant("gamma_LL").Scalar()
+	gamma := e.Quant("γ_LL").Scalar()
 	mSat := u.msat
 	msat0T0 := u.msat0T0
 	msatMask := mSat.Array()

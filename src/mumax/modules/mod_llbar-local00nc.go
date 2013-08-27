@@ -35,7 +35,7 @@ func LoadLLBarLocal00NC(e *Engine) {
 	llbar_local00nc := e.AddNewQuant("llbar_local00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshitz-Baryakhtar nonconservative zero-order local relaxation term")
 
 	// =============== Dependencies =============
-	e.Depends("llbar_local00nc", "H_eff", "gamma_LL", "λ∥", "msat0T0")
+	e.Depends("llbar_local00nc", "H_eff", "γ_LL", "λ∥", "msat0T0")
 
 	// ============ Updating the torque =============
 	upd := &LLBarLocal00NCUpdater{llbar_local00nc: llbar_local00nc}
@@ -50,7 +50,7 @@ func (u *LLBarLocal00NCUpdater) Update() {
 
 	e := GetEngine()
 	llbar_local00nc := u.llbar_local00nc
-	gammaLL := e.Quant("gamma_LL").Scalar()
+	gammaLL := e.Quant("γ_LL").Scalar()
 	heff := e.Quant("H_eff")
 
 	// put gamma in multiplier to avoid additional multiplications

@@ -17,7 +17,7 @@ import (
 // Load the gyromagnetic ratio.
 
 func LoadGammaLL(e *Engine) {
-	if !e.HasQuant("gamma_LL") {
-		e.AddNewQuant("gamma_LL", SCALAR, MASK, Unit("m/As"), "Landau-Lifshitz gyromagetic ratio")
+	if !e.HasQuant("γ_LL") {
+		e.AddNewQuant("γ_LL", SCALAR, MASK, Unit("m/As"), "Landau-Lifshitz gyromagetic ratio")
 	}
 }
