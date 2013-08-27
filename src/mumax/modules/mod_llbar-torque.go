@@ -28,7 +28,7 @@ func LoadLLBarTorque(e *Engine) {
 
 	// ============ New Quantities =============
 
-	llbar_torque := e.AddNewQuant("llbar_torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar torque")
+	llbar_torque := e.AddNewQuant("llbar_torque", VECTOR, FIELD, Unit("/s"), "Landau-Lifshitz-Baryakhtar torque")
 
 	// ============ Dependencies =============
 	e.Depends("llbar_torque", "mf", "H_eff", "gamma_LL")

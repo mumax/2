@@ -29,7 +29,7 @@ func LoadLLBarLocal02C(e *Engine) {
 	// =========== New Quantities =============
 
 	e.AddNewQuant("μ⊥", VECTOR, MASK, Unit(""), "LLBar second-order local relaxation diagonal tensor")
-	llbar_local02c := e.AddNewQuant("llbar_local02c", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar conservative second-order local relaxation term")
+	llbar_local02c := e.AddNewQuant("llbar_local02c", VECTOR, FIELD, Unit("/s"), "Landau-Lifshitz-Baryakhtar conservative second-order local relaxation term")
 
 	// ============ Dependencies =============
 	e.Depends("llbar_local02c", "mf", "H_eff", "gamma_LL", "μ⊥", "msat0T0")

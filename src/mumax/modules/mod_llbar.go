@@ -30,7 +30,7 @@ func LoadLLBar(e *Engine) {
 
 	LoadFullMagnetization(e)
 
-	llbar_RHS := e.AddNewQuant("llbar_RHS", VECTOR, FIELD, Unit("/s"), "The Right Hand Side of Landau-Lifshits-Baryakhtar equation")
+	llbar_RHS := e.AddNewQuant("llbar_RHS", VECTOR, FIELD, Unit("/s"), "The Right Hand Side of Landau-Lifshitz-Baryakhtar equation")
 	llbar_RHS.SetUpdater(NewSumUpdater(llbar_RHS))
 
 	e.AddPDE1("mf", "llbar_RHS")

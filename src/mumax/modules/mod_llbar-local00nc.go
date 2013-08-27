@@ -32,7 +32,7 @@ func LoadLLBarLocal00NC(e *Engine) {
 
 	e.AddNewQuant("λ∥", VECTOR, MASK, Unit(""), "LLBar zero-order local relaxation diagonal tensor")
 
-	llbar_local00nc := e.AddNewQuant("llbar_local00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshits-Baryakhtar nonconservative zero-order local relaxation term")
+	llbar_local00nc := e.AddNewQuant("llbar_local00nc", VECTOR, FIELD, Unit("/s"), "Landau-Lifshitz-Baryakhtar nonconservative zero-order local relaxation term")
 
 	// =============== Dependencies =============
 	e.Depends("llbar_local00nc", "H_eff", "gamma_LL", "λ∥", "msat0T0")
