@@ -17,21 +17,21 @@
 extern "C" {
 #endif
 
-    DLLEXPORT  void llbar_local00nc_async(float** tx, float**  ty, float**  tz,
-            float**  hx, float**  hy, float**  hz,
+DLLEXPORT  void llbar_local00nc_async(float** tx, float**  ty, float**  tz,
+                                      float**  hx, float**  hy, float**  hz,
 
-            float** msat0T0,
+                                      float** msat0T0,
 
-            float** lambda_xx,
-            float** lambda_yy,
-            float** lambda_zz,
+                                      float** lambda_xx,
+                                      float** lambda_yy,
+                                      float** lambda_zz,
 
-            const float lambdaMul_xx,
-            const float lambdaMul_yy,
-            const float lambdaMul_zz,
+                                      const float lambdaMul_xx,
+                                      const float lambdaMul_yy,
+                                      const float lambdaMul_zz,
 
-            CUstream* stream,
-            int Npart);
+                                      CUstream* stream,
+                                      int Npart);
 
 #ifdef __cplusplus
 }

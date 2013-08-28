@@ -25,18 +25,18 @@ extern "C" {
 // @param periodic0,periodic1,periodic2 periodic boundary conditions
 // @param streams cuda stream PER GPU
 DLLEXPORT void currentDensityAsync(float** jx, float** jy, float** jz,
-                         float** Ex, float** Ey, float** Ez, 
-                         float** rMap, float rMul, 
-                         int N0, int N1Part, int N2,
-                         int periodic0, int periodic1, int periodic2, 
-                         CUstream* streams);
+                                   float** Ex, float** Ey, float** Ez,
+                                   float** rMap, float rMul,
+                                   int N0, int N1Part, int N2,
+                                   int periodic0, int periodic1, int periodic2,
+                                   CUstream* streams);
 
 DLLEXPORT void diffRhoAsync(float** drho,
-				  float** jx, float** jy, float** jz,
-				  float cellx, float celly, float cellz,
-                  int N0, int N1Part, int N2,
-                  int periodic0, int periodic1, int periodic2, 
-                  CUstream* streams);
+                            float** jx, float** jy, float** jz,
+                            float cellx, float celly, float cellz,
+                            int N0, int N1Part, int N2,
+                            int periodic0, int periodic1, int periodic2,
+                            CUstream* streams);
 
 #ifdef __cplusplus
 }

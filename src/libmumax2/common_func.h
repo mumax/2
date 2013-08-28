@@ -31,7 +31,8 @@ typedef float (*func)(float x, float prefix, float mult);
 
 typedef double real;
 
-struct float5 {
+struct float5
+{
     float x;
     float y;
     float z;
@@ -41,7 +42,8 @@ struct float5 {
 
 typedef struct float5 float5;
 
-struct int6 {
+struct int6
+{
     int x;
     int y;
     int z;
@@ -52,7 +54,8 @@ struct int6 {
 
 typedef struct int6 int6;
 
-struct real5 {
+struct real5
+{
     real x;
     real y;
     real z;
@@ -62,7 +65,8 @@ struct real5 {
 
 typedef struct real5 real5;
 
-struct real6 {
+struct real6
+{
     real x;
     real y;
     real z;
@@ -73,7 +77,8 @@ struct real6 {
 
 typedef struct real6 real6;
 
-struct real7 {
+struct real7
+{
     real x;
     real y;
     real z;
@@ -85,7 +90,8 @@ struct real7 {
 
 typedef struct real7 real7;
 
-struct real4 {
+struct real4
+{
     real x;
     real y;
     real z;
@@ -94,7 +100,8 @@ struct real4 {
 
 typedef struct real4 real4;
 
-struct real3 {
+struct real3
+{
     real x;
     real y;
     real z;
@@ -102,7 +109,8 @@ struct real3 {
 
 typedef struct real3 real3;
 
-inline __host__ __device__ int6 make_int6(int x, int y, int z, int w, int v, int t){
+inline __host__ __device__ int6 make_int6(int x, int y, int z, int w, int v, int t)
+{
     int6 a;
     a.x = x;
     a.y = y;
@@ -113,7 +121,8 @@ inline __host__ __device__ int6 make_int6(int x, int y, int z, int w, int v, int
     return a;
 }
 
-inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float v){
+inline __host__ __device__ float5 make_float5(float x, float y, float z, float w, float v)
+{
     float5 a;
     a.x = x;
     a.y = y;
@@ -123,7 +132,8 @@ inline __host__ __device__ float5 make_float5(float x, float y, float z, float w
     return a;
 }
 
-inline __host__ __device__ real7 make_real7(real x, real y, real z, real w, real t, real q){
+inline __host__ __device__ real7 make_real7(real x, real y, real z, real w, real t, real q)
+{
     real7 a;
     a.x = x;
     a.y = y;
@@ -134,7 +144,8 @@ inline __host__ __device__ real7 make_real7(real x, real y, real z, real w, real
     return a;
 }
 
-inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real v){
+inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real v)
+{
     real5 a;
     a.x = x;
     a.y = y;
@@ -144,7 +155,8 @@ inline __host__ __device__ real5 make_real5(real x, real y, real z, real w, real
     return a;
 }
 
-inline __host__ __device__ real6 make_real6(real x, real y, real z, real w, real v, real t){
+inline __host__ __device__ real6 make_real6(real x, real y, real z, real w, real v, real t)
+{
     real6 a;
     a.x = x;
     a.y = y;
@@ -155,7 +167,8 @@ inline __host__ __device__ real6 make_real6(real x, real y, real z, real w, real
     return a;
 }
 
-inline __host__ __device__ real3 make_real3(real x, real y, real z){
+inline __host__ __device__ real3 make_real3(real x, real y, real z)
+{
     real3 a;
     a.x = x;
     a.y = y;
@@ -164,124 +177,141 @@ inline __host__ __device__ real3 make_real3(real x, real y, real z){
 }
 
 // Python-like modulus
-inline __host__ __device__ int Mod(int a, int b){
-	return (a%b+b)%b;
+inline __host__ __device__ int Mod(int a, int b)
+{
+    return (a % b + b) % b;
 }
 
 // dot product
 inline __host__ __device__ float dotf(float3 a, float3 b)
 {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+    return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 inline __host__ __device__ float dot(real3 a, real3 b)
 {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+    return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 // cross product in LHR system
 
 inline __host__ __device__ float3 crossf(float3 a, float3 b)
 {
-	return make_float3( - a.y*b.z + a.z*b.y,  - a.z*b.x + a.x*b.z, - a.x*b.y + a.y*b.x);
+    return make_float3( - a.y * b.z + a.z * b.y,  - a.z * b.x + a.x * b.z, - a.x * b.y + a.y * b.x);
 }
 
 inline __host__ __device__ real3 cross(real3 a, real3 b)
 {
-	return make_real3( - a.y*b.z + a.z*b.y, - a.z*b.x + a.x*b.z,  - a.x*b.y + a.y*b.x);
+    return make_real3( - a.y * b.z + a.z * b.y, - a.z * b.x + a.x * b.z,  - a.x * b.y + a.y * b.x);
 }
 
 // lenght of the 3-components vector
-inline __host__ __device__ float len(float3 a){
-	return sqrtf(dotf(a,a));
+inline __host__ __device__ float len(float3 a)
+{
+    return sqrtf(dotf(a, a));
 }
 
-inline __host__ __device__ real len(real3 a){
-	return sqrt(dot(a,a));
+inline __host__ __device__ real len(real3 a)
+{
+    return sqrt(dot(a, a));
 }
 
 // normalize the 3-components vector
-inline __host__ __device__ float3 normalize(float3 a){
+inline __host__ __device__ float3 normalize(float3 a)
+{
     float veclen = (len(a) != 0.0f) ? 1.0f / len(a) : 0.0f;
-	return make_float3(a.x * veclen, a.y * veclen, a.z * veclen);
+    return make_float3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
 
-inline __device__ float cothf(float x) {
+inline __device__ float cothf(float x)
+{
     return 1.0f / tanhf(x);
     //~ return (x > -linRange && x < linRange) ? (1.0f / x) + (x / 3.0f) - (powf(x, 3.0f)/45.0f) + (0.5f * powf(x, 5.0f)/945.0f)
-                                           //~ : 1.0f / tanhf(x);
+    //~ : 1.0f / tanhf(x);
     //return coshf(x) / sinh(x);
 }
 
-inline __device__ double coth(double x) {
-    return (x > -linRange && x < linRange) ? (1.0 / x) + (x / 3.0) - (pow(x, 3.0)/45.0) + (0.5f * pow(x, 5.0)/945.0)
-                                           : 1.0 / tanh(x);
+inline __device__ double coth(double x)
+{
+    return (x > -linRange && x < linRange) ? (1.0 / x) + (x / 3.0) - (pow(x, 3.0) / 45.0) + (0.5f * pow(x, 5.0) / 945.0)
+           : 1.0 / tanh(x);
 }
 
-inline __device__ float dcothf(float x) {
+inline __device__ float dcothf(float x)
+{
     return 1.0f - cothf(x) * cothf(x);
 }
 
-inline __host__ __device__ real3 normalize(real3 a){
+inline __host__ __device__ real3 normalize(real3 a)
+{
     real veclen = (len(a) != 0.0) ? 1.0 / len(a) : 0.0;
-	return make_real3(a.x * veclen, a.y * veclen, a.z * veclen);
+    return make_real3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
 
-inline __device__ float Bj(float J, float x) {
-        float lpre = 1.0f / (2.0f * J);
-        float gpre = (2.0f * J + 1.0f) * lpre;
-        float lim = linRange / gpre;
-        return (fabsf(x) < lim) ? ((gpre*gpre - lpre*lpre) * x / 3.0f) + ((powf(lpre,4.0f) - powf(gpre,4.0f)) * x * x * x / 45.0f) + (0.5f * (powf(gpre,6.0f) - powf(lpre,6.0f)) * x * x * x * x * x / 945.0f) + ((powf(gpre,8.0f) - powf(lpre,8.0f)) * x * x * x * x * x  * x * x/ 4725.0f)
-                                : gpre * cothf(gpre * x) - lpre * cothf(lpre * x);
+inline __device__ float Bj(float J, float x)
+{
+    float lpre = 1.0f / (2.0f * J);
+    float gpre = (2.0f * J + 1.0f) * lpre;
+    float lim = linRange / gpre;
+    return (fabsf(x) < lim) ? ((gpre * gpre - lpre * lpre) * x / 3.0f) + ((powf(lpre, 4.0f) - powf(gpre, 4.0f)) * x * x * x / 45.0f) + (0.5f * (powf(gpre, 6.0f) - powf(lpre, 6.0f)) * x * x * x * x * x / 945.0f) + ((powf(gpre, 8.0f) - powf(lpre, 8.0f)) * x * x * x * x * x  * x * x / 4725.0f)
+           : gpre * cothf(gpre * x) - lpre * cothf(lpre * x);
 }
 
-inline __device__ float dBjdxf(float J, float x) {
-        float lpre = 1.0f / (2.0f * J);
-        float gpre = (2.0f * J + 1.0f) * lpre;
-        float gpre2 = gpre * gpre;
-        float lpre2 = lpre * lpre;
-        float lim = linRange / gpre;
-        return (fabsf(x) < lim) ? (gpre2 - lpre2) / 3.0f + ((powf(lpre,4.0f) - powf(gpre,4.0f)) * x * x / 15.0f) + (0.5f * (powf(gpre,6.0f) - powf(lpre,6.0f)) * x * x * x * x / 189.0f) + ((powf(gpre,8.0f) - powf(lpre,8.0f)) * x * x * x * x  * x * x/ 675.0f)
-                                : (gpre2 - lpre2) + lpre2*cothf(lpre*x)*cothf(lpre*x) - gpre2*cothf(gpre*x)*cothf(gpre*x);
+inline __device__ float dBjdxf(float J, float x)
+{
+    float lpre = 1.0f / (2.0f * J);
+    float gpre = (2.0f * J + 1.0f) * lpre;
+    float gpre2 = gpre * gpre;
+    float lpre2 = lpre * lpre;
+    float lim = linRange / gpre;
+    return (fabsf(x) < lim) ? (gpre2 - lpre2) / 3.0f + ((powf(lpre, 4.0f) - powf(gpre, 4.0f)) * x * x / 15.0f) + (0.5f * (powf(gpre, 6.0f) - powf(lpre, 6.0f)) * x * x * x * x / 189.0f) + ((powf(gpre, 8.0f) - powf(lpre, 8.0f)) * x * x * x * x  * x * x / 675.0f)
+           : (gpre2 - lpre2) + lpre2 * cothf(lpre * x) * cothf(lpre * x) - gpre2 * cothf(gpre * x) * cothf(gpre * x);
 }
 
 //~ inline __device__ double dBjdx(double J, double x) {
-        //~ double lpre = 1.0 / (2.0 * J);
-        //~ double gpre = (2.0 * J + 1.0) * lpre;
-        //~
-        //~ double gpre2 = gpre * gpre;
-        //~ double lpre2 = lpre * lpre;
-        //~ return (x > -(double)linRange && x < (double)linRange) ? (gpre2 - lpre2) / 3.0 + (pow(lpre,4.0) - pow(gpre,4.0)) * x * x / 15.0
-                                                               //~ : (gpre2 - lpre2) + lpre2*coth(lpre*x)*coth(lpre*x) - gpre2*coth(gpre*x)*coth(gpre*x);
+//~ double lpre = 1.0 / (2.0 * J);
+//~ double gpre = (2.0 * J + 1.0) * lpre;
+//~
+//~ double gpre2 = gpre * gpre;
+//~ double lpre2 = lpre * lpre;
+//~ return (x > -(double)linRange && x < (double)linRange) ? (gpre2 - lpre2) / 3.0 + (pow(lpre,4.0) - pow(gpre,4.0)) * x * x / 15.0
+//~ : (gpre2 - lpre2) + lpre2*coth(lpre*x)*coth(lpre*x) - gpre2*coth(gpre*x)*coth(gpre*x);
 //~ }
 
-inline __device__ float L(float x) {
-        return (x > -linRange && x < linRange) ? (x / 3.0f) - ((x * x * x) / 45.0f) : cothf(x) - (1.0f / x) ;
+inline __device__ float L(float x)
+{
+    return (x > -linRange && x < linRange) ? (x / 3.0f) - ((x * x * x) / 45.0f) : cothf(x) - (1.0f / x) ;
 }
 
-inline __device__ float dLdx(float x) {
-        return (x > -linRange && x < linRange) ? (1 / 3.0f) - ((x * x) / 15.0f) : 1.0f - (cothf(x) * cothf(x)) + (1.0f / (x*x));
+inline __device__ float dLdx(float x)
+{
+    return (x > -linRange && x < linRange) ? (1 / 3.0f) - ((x * x) / 15.0f) : 1.0f - (cothf(x) * cothf(x)) + (1.0f / (x * x));
 }
 
 // Classical function
-inline __device__ float signf(float x) {
+inline __device__ float signf(float x)
+{
     float val = (signbit(x) == 0.0f) ? 1.0f : -1.0f;
     return (x == 0.0f) ? 0.0f : val;
 }
 
-inline __device__ float getMaskUnity(float *msk, int idx) {
+inline __device__ float getMaskUnity(float *msk, int idx)
+{
     return (msk == NULL) ? 1.0f : msk[idx];
 }
 
-inline __device__ float getMaskZero(float *msk, int idx) {
+inline __device__ float getMaskZero(float *msk, int idx)
+{
     return (msk == NULL) ? 0.0f : msk[idx];
 }
 
-inline __device__ float fdivZero(float a, float b) {
+inline __device__ float fdivZero(float a, float b)
+{
     return (b == 0.0f) ? 0.0f : a / b ;
 }
 
-inline __device__ float avgGeomZero(float a, float b) {
+inline __device__ float avgGeomZero(float a, float b)
+{
     float a_b = a + b;
     return (a_b == 0.0f) ? 0.0f : 2.0 * a * b / a_b;
 }

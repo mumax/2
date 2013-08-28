@@ -4,7 +4,7 @@
  *  Use of this source code is governed by the GNU General Public License version 3
  *  (as published by the Free Software Foundation) that can be found in the license.txt file.
  *
- *  Note that you are welcome to modify this code under condition that you do not remove any 
+ *  Note that you are welcome to modify this code under condition that you do not remove any
  *  copyright notices and prominently state that you modified it, giving a relevant date.
  */
 
@@ -61,7 +61,7 @@ extern "C" {
     int concurrentKernels;
  * @endcode
  *
- * @note I currently return the cudaDeviceProp* as a void*. 
+ * @note I currently return the cudaDeviceProp* as a void*.
  * In this way, none of the core functions expose cuda stuff
  * directly. This makes it easier to link them with external
  * code (Go, in my case).
@@ -71,7 +71,7 @@ void* gpu_getproperties(void);
 
 /// Prints the properties of the used GPU
 void gpu_print_properties(FILE* out  ///< stream to print to
-);
+                         );
 
 
 /// Prints to stdout

@@ -24,10 +24,10 @@ extern "C" {
 /// |outy| = |Kxy Kyy Kyz| * |My|
 /// |outz|   |Kxz Kyz Kzz|   |Mz|
 DLLEXPORT void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float** fftMz,
-                              float** fftKxx, float** fftKyy, float** fftKzz,
-                              float** fftKyz, float** fftKxz, float** fftKxy,
-                              float** outx, float** outy, float** outz,
-                              CUstream* stream, int* partSize);
+        float** fftKxx, float** fftKyy, float** fftKzz,
+        float** fftKyz, float** fftKxz, float** fftKxy,
+        float** outx, float** outy, float** outz,
+        CUstream* stream, int* partSize);
 
 
 
@@ -39,9 +39,9 @@ DLLEXPORT void kernelMulMicromag3D2Async(float** fftMx,  float** fftMy,  float**
 /// |outy| = |Kxy Kyy Kyz| * |My|
 /// |outz|   |Kxz Kyz Kzz|   |Mz|
 DLLEXPORT void kernelMulMicromag2D2Async(float** fftMx,  float** fftMy,  float** fftMz,
-                              float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
-                              float** outx, float** outy, float** outz,
-                              CUstream* stream, int* partSize);
+        float** fftKxx, float** fftKyy, float** fftKzz, float** fftKyz,
+        float** outx, float** outy, float** outz,
+        CUstream* stream, int* partSize);
 
 #ifdef __cplusplus
 }

@@ -20,11 +20,11 @@ extern "C" {
 /// calculates heat flux densities for various subsystems
 
 DLLEXPORT void QinterAsync(float** Qi,
-                         float** Ti, float** Tj,
-                         float** Gij,
-                         float GijMul,
-                         int Npart,
-                         CUstream* stream);
+                           float** Ti, float** Tj,
+                           float** Gij,
+                           float GijMul,
+                           int Npart,
+                           CUstream* stream);
 
 #ifdef __cplusplus
 }

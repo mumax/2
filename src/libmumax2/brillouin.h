@@ -15,9 +15,9 @@
 extern "C" {
 #endif
 
-DLLEXPORT void brillouinAsync(float** msat0, 
+DLLEXPORT void brillouinAsync(float** msat0,
                               float** msat0T0,
-                              float** T, 
+                              float** T,
                               float** Tc,
                               float** S,
                               const float msat0Mul,

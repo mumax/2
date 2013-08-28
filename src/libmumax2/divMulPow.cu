@@ -11,32 +11,36 @@ extern "C" {
 #endif
 
 ///@internal
-__global__ void divMulPowKern(float* __restrict__ dst, 
-						float* __restrict__ a, 
-						float* __restrict__ b, 
-						float* __restrict__ c, 
-						float p, int Npart) {
-	int i = threadindex;
-	if (i < Npart) {
+__global__ void divMulPowKern(float* __restrict__ dst,
+                              float* __restrict__ a,
+                              float* __restrict__ b,
+                              float* __restrict__ c,
+                              float p, int Npart)
+{
+    int i = threadindex;
+    if (i < Npart)
+    {
 
         float bb = (b == NULL) ? 1.0f : b[i];
-        float val = (bb == 0.0f)? 0.0f : a[i] / bb;
-        
+        float val = (bb == 0.0f) ? 0.0f : a[i] / bb;
+
         float cc = (c == NULL) ? 1.0f : c[i];
         cc = (cc == 0.0) ? 0.0 : powf(cc, p);
-        
+
         dst[i] = val * cc;
-	}
+    }
 }
 
 
-__export__ void divMulPowAsync(float** dst, float** a, float** b, float** c, float p, CUstream* stream, int Npart) {
-	dim3 gridSize, blockSize;
-	make1dconf(Npart, &gridSize, &blockSize);
-	for (int dev = 0; dev < nDevice(); dev++) {
-		gpu_safe(cudaSetDevice(deviceId(dev)));
-		divMulPowKern <<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], c[dev], p, Npart);
-	}
+__export__ void divMulPowAsync(float** dst, float** a, float** b, float** c, float p, CUstream* stream, int Npart)
+{
+    dim3 gridSize, blockSize;
+    make1dconf(Npart, &gridSize, &blockSize);
+    for (int dev = 0; dev < nDevice(); dev++)
+    {
+        gpu_safe(cudaSetDevice(deviceId(dev)));
+        divMulPowKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], a[dev], b[dev], c[dev], p, Npart);
+    }
 }
 
 #ifdef __cplusplus

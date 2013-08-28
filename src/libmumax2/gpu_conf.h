@@ -4,7 +4,7 @@
  *  Use of this source code is governed by the GNU General Public License version 3
  *  (as published by the Free Software Foundation) that can be found in the license.txt file.
  *
- *  Note that you are welcome to modify this code under condition that you do not remove any 
+ *  Note that you are welcome to modify this code under condition that you do not remove any
  *  copyright notices and prominently state that you modified it, giving a relevant date.
  */
 
@@ -57,7 +57,8 @@ void gpu_setmaxthreads(int max);
  */
 //#define divUp(x, y) ( (((x)-1)/(y)) +1 )
 // It's almost like LISP ;-)
-inline int divUp(int x,int y) {
+inline int divUp(int x, int y)
+{
     long long xx = (long long)x;
     long long yy = (long long)y;
     long long res = ((xx - 1) / yy) + 1;
@@ -69,9 +70,9 @@ inline int divUp(int x,int y) {
 #define Y 1
 #define Z 2
 #endif
-               
+
 /**
- * Checks if the CUDA 3D kernel launch configuration is valid. 
+ * Checks if the CUDA 3D kernel launch configuration is valid.
  * CUDA tends to ignore invalid configurations silently, which is painfull for debugging.
  * Uses device properties
  */
@@ -80,15 +81,15 @@ inline int divUp(int x,int y) {
 void check3dconf(dim3 gridsize, dim3 blocksize );
 
 /**
- * Checks if the CUDA 1D kernel launch configuration is valid. 
+ * Checks if the CUDA 1D kernel launch configuration is valid.
  * CUDA tends to ignore invalid configurations silently, which is painfull for debugging.
  * Uses device properties
- */    
+ */
 void check1dconf(int gridsize, ///< 1D size of the thread grid
-               int blocksize ///< 1D size of the trhead blocks on the grid
-               );
+                 int blocksize ///< 1D size of the trhead blocks on the grid
+                );
 
-        
+
 /**
  * Makes a 1D thread configuration suited for a float array of size N
  * The returned configuration will span at least the entire array but
@@ -114,7 +115,7 @@ void check1dconf(int gridsize, ///< 1D size of the thread grid
 void make1dconf(int N,           ///< size of array to span (number of floats)
                 dim3* gridSize,  ///< grid size is returned here
                 dim3* blockSize  ///< block size is returned here
-                );
+               );
 
 
 void make2dconf(int N1, int N2, dim3* gridSize, dim3* blockSize);

@@ -1,7 +1,7 @@
 /**
   * @file
   * This file implements Slonczewski spin torque
-  * See Slonczewski JMMM 159 (1996) L1-L7 and 
+  * See Slonczewski JMMM 159 (1996) L1-L7 and
   *
   * @author Mykola Dvorni, Graham Rowlands, Arne Vansteenkiste
   */
@@ -17,25 +17,25 @@
 extern "C" {
 #endif
 
-  DLLEXPORT void slonczewski_async(float** sttx, float** stty, float** sttz, 
-			 float** mx, float** my, float** mz, 
-			 float** msat,
-			 float** px, float** py, float** pz,
-			 float** jx, float** jy, float** jz,
-			 float** alphamsk,
-			 float** t_flmsk,
-			 float** polMsk,
-			 float** lambdaMsk,
-			 float** epsilon_primeMsk,
-			 float pxMul, float pyMul, float pzMul,
-			 float jxMul, float jyMul, float jzMul,
-			 float beta_prime, float pre_field,
-			 float meshSizeX,float meshSizeY, float meshSizeZ, 
-			 float alphaMul,
-			 float t_flMul,
-			 float lambdaMul,
-			 int NPart, 
-			 CUstream* stream);
+DLLEXPORT void slonczewski_async(float** sttx, float** stty, float** sttz,
+                                 float** mx, float** my, float** mz,
+                                 float** msat,
+                                 float** px, float** py, float** pz,
+                                 float** jx, float** jy, float** jz,
+                                 float** alphamsk,
+                                 float** t_flmsk,
+                                 float** polMsk,
+                                 float** lambdaMsk,
+                                 float** epsilon_primeMsk,
+                                 float pxMul, float pyMul, float pzMul,
+                                 float jxMul, float jyMul, float jzMul,
+                                 float beta_prime, float pre_field,
+                                 float meshSizeX, float meshSizeY, float meshSizeZ,
+                                 float alphaMul,
+                                 float t_flMul,
+                                 float lambdaMul,
+                                 int NPart,
+                                 CUstream* stream);
 
 #ifdef __cplusplus
 }

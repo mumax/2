@@ -18,7 +18,7 @@ extern "C" {
 DLLEXPORT void kappaAsync(float** kappa,
                           float** msat0,
                           float** msat0T0,
-                          float** T, 
+                          float** T,
                           float** Tc,
                           float** S,
                           float** n,

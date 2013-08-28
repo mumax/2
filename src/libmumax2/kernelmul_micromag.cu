@@ -4,7 +4,7 @@
  *  Use of this source code is governed by the GNU General Public License version 3
  *  (as published by the Free Software Foundation) that can be found in the license.txt file.
  *
- *  Note that you are welcome to modify this code under condition that you do not remove any 
+ *  Note that you are welcome to modify this code under condition that you do not remove any
  *  copyright notices and prominently state that you modified it, giving a relevant date.
  */
 
@@ -24,66 +24,70 @@ extern "C" {
 /// |Hz|   |Kxz Kyz Kzz|   |Mz|
 __global__ void kernelMulMicromag3DKern(float* fftMx,  float* fftMy,  float* fftMz,
                                         float* fftKxx, float* fftKyy, float* fftKzz,
-                                        float* fftKyz, float* fftKxz, float* fftKxy, int N){
-  int i = threadindex;
-  int e = 2 * i;
+                                        float* fftKyz, float* fftKxz, float* fftKxy, int N)
+{
+    int i = threadindex;
+    int e = 2 * i;
 
-  // we use some shared memory here, which saves an "8N" buffer in the global memory
-  ///@todo coalescale read/writes, cleanup indices
-  if(i < N){
-    float reMx = fftMx[e  ];
-    float imMx = fftMx[e+1];
+    // we use some shared memory here, which saves an "8N" buffer in the global memory
+    ///@todo coalescale read/writes, cleanup indices
+    if(i < N)
+    {
+        float reMx = fftMx[e  ];
+        float imMx = fftMx[e + 1];
 
-    float reMy = fftMy[e  ];
-    float imMy = fftMy[e+1];
+        float reMy = fftMy[e  ];
+        float imMy = fftMy[e + 1];
 
-    float reMz = fftMz[e  ];
-    float imMz = fftMz[e+1];
+        float reMz = fftMz[e  ];
+        float imMz = fftMz[e + 1];
 
-    float Kxx = fftKxx[i];
-    float Kyy = fftKyy[i];
-    float Kzz = fftKzz[i];
+        float Kxx = fftKxx[i];
+        float Kyy = fftKyy[i];
+        float Kzz = fftKzz[i];
 
-    float Kyz = fftKyz[i];
-    float Kxz = fftKxz[i];
-    float Kxy = fftKxy[i];
+        float Kyz = fftKyz[i];
+        float Kxz = fftKxz[i];
+        float Kxy = fftKxy[i];
 
-    fftMx[e  ] = reMx * Kxx + reMy * Kxy + reMz * Kxz;
-    fftMx[e+1] = imMx * Kxx + imMy * Kxy + imMz * Kxz;
+        fftMx[e  ] = reMx * Kxx + reMy * Kxy + reMz * Kxz;
+        fftMx[e + 1] = imMx * Kxx + imMy * Kxy + imMz * Kxz;
 //     fftMx[e  ] = (int)Kyy;
 //     fftMx[e+1] = (int)Kyy;
 
-    fftMy[e  ] = reMx * Kxy + reMy * Kyy + reMz * Kyz;
-    fftMy[e+1] = imMx * Kxy + imMy * Kyy + imMz * Kyz;
+        fftMy[e  ] = reMx * Kxy + reMy * Kyy + reMz * Kyz;
+        fftMy[e + 1] = imMx * Kxy + imMy * Kyy + imMz * Kyz;
 //     fftMy[e  ] = (int) Kyz;
 //     fftMy[e+1] = (int) Kyz;
 
-    fftMz[e  ] = reMx * Kxz + reMy * Kyz + reMz * Kzz;
-    fftMz[e+1] = imMx * Kxz + imMy * Kyz + imMz * Kzz;
-/*    fftMz[e  ] = (int) Kzz;
-    fftMz[e+1] = (int) Kzz;*/
-  }
-  
-  return;
+        fftMz[e  ] = reMx * Kxz + reMy * Kyz + reMz * Kzz;
+        fftMz[e + 1] = imMx * Kxz + imMy * Kyz + imMz * Kzz;
+        /*    fftMz[e  ] = (int) Kzz;
+            fftMz[e+1] = (int) Kzz;*/
+    }
+
+    return;
 }
 
 __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
-                              float** fftKxx, float** fftKyy, float** fftKzz,
-                              float** fftKyz, float** fftKxz, float** fftKxy,
-                              CUstream* stream, int partLen3D){
+        float** fftKxx, float** fftKyy, float** fftKzz,
+        float** fftKyz, float** fftKxz, float** fftKxy,
+        CUstream* stream, int partLen3D)
+{
 
-  assert(partLen3D > 0);
-  assert(partLen3D % 2 == 0);
+    assert(partLen3D > 0);
+    assert(partLen3D % 2 == 0);
 
-  dim3 gridSize, blockSize;
-  make1dconf(partLen3D/2, &gridSize, &blockSize);
+    dim3 gridSize, blockSize;
+    make1dconf(partLen3D / 2, &gridSize, &blockSize);
 
-  for (int dev = 0; dev < nDevice(); dev++) {
-	gpu_safe(cudaSetDevice(deviceId(dev)));
-    kernelMulMicromag3DKern<<<gridSize, blockSize, 0, cudaStream_t(stream[dev])>>>( fftMx[dev],  fftMy[dev],  fftMz[dev],
-                                                                                   fftKxx[dev], fftKyy[dev], fftKzz[dev],
-                                                                                   fftKyz[dev], fftKxz[dev], fftKxy[dev], partLen3D/2);
-	}
+    for (int dev = 0; dev < nDevice(); dev++)
+    {
+        gpu_safe(cudaSetDevice(deviceId(dev)));
+        kernelMulMicromag3DKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>>( fftMx[dev],  fftMy[dev],  fftMz[dev],
+                fftKxx[dev], fftKyy[dev], fftKzz[dev],
+                fftKyz[dev], fftKxz[dev], fftKxy[dev], partLen3D / 2);
+    }
 }
 
 
@@ -114,7 +118,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  float Kyy = fftKyy[i];
 //  float Kyz = fftKyz[i];
 //  float Kzz = fftKzz[i];
-//  
+//
 //  fftMx[e  ] = reMx * Kxx;
 //  fftMx[e+1] = imMx * Kxx;
 //  fftMy[e  ] = reMy * Kyy + reMz * Kyz;
@@ -122,12 +126,12 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  fftMz[e  ] = reMy * Kyz + reMz * Kzz;
 //  fftMz[e+1] = imMy * Kyz + imMz * Kzz;
 //  }
-//  
+//
 //  return;
 //}
 //
-//void gpu_kernelmul4(float *fftMx, float *fftMy, float *fftMz, 
-//                    float *fftKxx, float *fftKyy, float *fftKzz, float *fftKyz, 
+//void gpu_kernelmul4(float *fftMx, float *fftMy, float *fftMz,
+//                    float *fftKxx, float *fftKyy, float *fftKzz, float *fftKyz,
 //                    int nRealNumbers){
 //
 //  //timer_start("kernel_mul");
@@ -140,7 +144,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  _gpu_kernelmul4<<<gridSize, blockSize>>>(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, nRealNumbers/2);
 //  gpu_sync();
 //  //timer_stop("kernel_mul");
-// 
+//
 //  return;
 //}
 //
@@ -168,18 +172,18 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  float Kyy = fftKyy[i];
 //  float Kyz = fftKyz[i];
 //  float Kzz = fftKzz[i];
-//  
+//
 //  fftMy[e  ] = reMy * Kyy + reMz * Kyz;
 //  fftMy[e+1] = imMy * Kyy + imMz * Kyz;
 //  fftMz[e  ] = reMy * Kyz + reMz * Kzz;
 //  fftMz[e+1] = imMy * Kyz + imMz * Kzz;
 //  }
-//  
+//
 //  return;
 //}
 //
-//void gpu_kernelmul3(float *fftMy, float *fftMz, 
-//                    float *fftKyy, float *fftKzz, float *fftKyz, 
+//void gpu_kernelmul3(float *fftMy, float *fftMz,
+//                    float *fftKyy, float *fftKzz, float *fftKyz,
 //                    int nRealNumbers){
 //
 //  //timer_start("kernel_mul");
@@ -192,7 +196,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  _gpu_kernelmul3<<<gridSize, blockSize>>>(fftMy, fftMz, fftKyy, fftKzz, fftKyz, nRealNumbers/2);
 //  gpu_sync();
 //  //timer_stop("kernel_mul");
-// 
+//
 //  return;
 //}
 //
@@ -222,7 +226,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //    float Kx = fftKx[i];
 //    float Ky = fftKy[i];
 //    float Kz = fftKz[i];
-//    
+//
 //    fftJx[e  ] =  reJy * Kz - reJz * Ky;
 //    fftJx[e+1] =  imJy * Kz - imJz * Ky;
 //
@@ -232,7 +236,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //    fftJz[e  ] =  reJx * Ky - reJy * Kx;
 //    fftJz[e+1] =  imJx * Ky - imJy * Kx;
 //  }
-//  
+//
 //  return;
 //}
 //
@@ -252,7 +256,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //                                           nRealNumbers/2);
 //  gpu_sync();
 //  //timer_stop("kernel_mul");
-//  
+//
 //  return;
 //}
 //
@@ -281,7 +285,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //
 //    float Ky = fftKy[i];
 //    float Kz = fftKz[i];
-//    
+//
 //    fftJx[e  ] =  reJy * Kz - reJz * Ky;
 //    fftJx[e+1] =  imJy * Kz - imJz * Ky;
 //
@@ -291,7 +295,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //    fftJz[e  ] =  reJx * Ky;
 //    fftJz[e+1] =  imJx * Ky;
 //  }
-//  
+//
 //  return;
 //}
 //
@@ -309,7 +313,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  _gpu_kernelmul_biot_savart3D_Nx1<<<gridSize, blockSize>>>(fftJx, fftJy, fftJz, fftKy, fftKz, nRealNumbers/2);
 //  gpu_sync();
 //  //timer_stop("kernel_mul");
-//  
+//
 //  return;
 //}
 //
@@ -332,14 +336,14 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //
 //    float Ky = fftKy[i];
 //    float Kz = fftKz[i];
-//    
+//
 //    fftJy[e  ] = -reJx * Kz;
 //    fftJy[e+1] = -imJx * Kz;
 //
 //    fftJz[e  ] =  reJx * Ky;
 //    fftJz[e+1] =  imJx * Ky;
 //  }
-//  
+//
 //  return;
 //}
 //
@@ -357,7 +361,7 @@ __export__ void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float**
 //  _gpu_kernelmul_biot_savart2D<<<gridSize, blockSize>>>(fftJx, fftJy, fftJz, fftKy, fftKz, nRealNumbers/2);
 //  gpu_sync();
 //  //timer_stop("kernel_mul");
-//  
+//
 //  return;
 //}
 

@@ -33,13 +33,13 @@ extern "C" {
 /// @param max (float) maximum value of the randomly generated numbers
 /// @param min (float) minimum value of the randomly generated numbers
 DLLEXPORT void initScalarQuantRandomUniformRegionAsync(float** S,
-											 float** regions,
-											 bool* host_regionsToProceed,
-											 int regionNum,
-											 CUstream* stream,
-											 int Npart,
-											 float max,
-											 float min);
+        float** regions,
+        bool* host_regionsToProceed,
+        int regionNum,
+        CUstream* stream,
+        int Npart,
+        float max,
+        float min);
 
 /// Initialise the vector quantity S = (Sx,Sy,Sz) using region system (value is random in each region)
 ///
@@ -52,11 +52,11 @@ DLLEXPORT void initScalarQuantRandomUniformRegionAsync(float** S,
 /// @param stream multi-GPU streams for asynchronous execution
 /// @param Npart number of elements per in each array (i.e. len(mx[0])
 DLLEXPORT void initVectorQuantRandomUniformRegionAsync(float** Sx, float** Sy, float** Sz,
-											 float** regions,
-											 bool* host_regionsToProceed,
-											 int regionNum,
-											 CUstream* stream,
-											 int Npart);
+        float** regions,
+        bool* host_regionsToProceed,
+        int regionNum,
+        CUstream* stream,
+        int Npart);
 
 
 #ifdef __cplusplus

@@ -23,9 +23,9 @@ extern "C" {
 /// |Hy| = |Kxy Kyy Kyz| * |My|
 /// |Hz|   |Kxz Kyz Kzz|   |Mz|
 DLLEXPORT void kernelMulMicromag3DAsync(float** fftMx,  float** fftMy,  float** fftMz,
-                              float** fftKxx, float** fftKyy, float** fftKzz,
-                              float** fftKyz, float** fftKxz, float** fftKxy,
-                              CUstream* stream, int partLen3D);
+                                        float** fftKxx, float** fftKyy, float** fftKzz,
+                                        float** fftKyz, float** fftKxz, float** fftKxy,
+                                        CUstream* stream, int partLen3D);
 
 #ifdef __cplusplus
 }
