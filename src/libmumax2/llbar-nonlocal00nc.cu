@@ -11,9 +11,7 @@ extern "C" {
 
 __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict__ ty, float* __restrict__ tz,
 
-                                      float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
-                                      float* __restrict__ lhx, float* __restrict__ lhy, float* __restrict__ lhz,
-                                      float* __restrict__ rhx, float* __restrict__ rhy, float* __restrict__ rhz,
+                                      float* __restrict__ Hx, float* __restrict__ Hy, float* __restrict__ Hz,
 
                                       float* __restrict__ msat0T0Msk,
 
@@ -25,168 +23,169 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
                                       const float lambda_eMul_yy,
                                       const float lambda_eMul_zz,
 
-                                      const int4 size,
-                                      const float3 mstep,
-                                      const int3 pbc,
-                                      const int i)
+                                      const int3 N,
+                                      const float3 cell_2,
+                                      const int3 wrap)
 {
 
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
-    int k = blockIdx.y * blockDim.y + threadIdx.y;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int k = blockIdx.z * blockDim.z + threadIdx.z;
 
-    if (j < size.y && k < size.z)
+    if (i < N.x && j < N.y && k < N.z)
     {
 
-        int x0 = i * size.w + j * size.z + k;
+        int I = i * N.y * N.z + j * N.z + k;
 
-        float msat0T0 = (msat0T0Msk == NULL) ? 1.0 : msat0T0Msk[x0];
-        // make sure there is no torque in vacuum!
+        float msat0T0 = getMaskUnity(msat0T0Msk, I);
+        // make sure there is no damping in vacuum!
         if (msat0T0 == 0.0f)
         {
-            tx[x0] = 0.0f;
-            ty[x0] = 0.0f;
-            tz[x0] = 0.0f;
+            tx[I] = 0.0f;
+            ty[I] = 0.0f;
+            tz[I] = 0.0f;
             return;
         }
-
-        float3 mmstep = make_float3(mstep.x, mstep.y, mstep.z);
 
         // Second-order derivative 3-points stencil
 //==================================================================================================
 
-        int xb1, xf1, x;
-        xb1 = (i == 0 && pbc.x == 0) ? i     : i - 1;
-        x   = (i == 0 && pbc.x == 0) ? i + 1 : i;
-        xf1 = (i == 0 && pbc.x == 0) ? i + 2 : i + 1;
-        xb1 = (i == size.x - 1 && pbc.x == 0) ? i - 2 : xb1;
-        x   = (i == size.x - 1 && pbc.x == 0) ? i - 1 : x;
-        xf1 = (i == size.x - 1 && pbc.x == 0) ? i     : xf1;
+        float lexx0 = lambda_eMul_xx * getMaskUnity(lambda_e_xx, I);
+        float leyy0 = lambda_eMul_yy * getMaskUnity(lambda_e_yy, I);
+        float lezz0 = lambda_eMul_zz * getMaskUnity(lambda_e_zz, I);
 
-        int yb1, yf1, y;
-        yb1 = (j == 0 && lhx == NULL) ? j     : j - 1;
-        y   = (j == 0 && lhx == NULL) ? j + 1 : j;
-        yf1 = (j == 0 && lhx == NULL) ? j + 2 : j + 1;
-        yb1 = (j == size.y - 1 && rhx == NULL) ? j - 2 : yb1;
-        y   = (j == size.y - 1 && rhx == NULL) ? j - 1 : y;
-        yf1 = (j == size.y - 1 && rhx == NULL) ? j     : yf1;
+        float lexx, leyy, lezz;
+        float lexx1, leyy1, lezz1;
+        float lexx2, leyy2, lezz2;
 
-        int zb1, zf1, z;
-        zb1 = (k == 0 && pbc.z == 0) ? k     : k - 1;
-        z   = (k == 0 && pbc.z == 0) ? k + 1 : k;
-        zf1 = (k == 0 && pbc.z == 0) ? k + 2 : k + 1;
-        zb1 = (k == size.z - 1 && pbc.z == 0) ? k - 2 : zb1;
-        z   = (k == size.z - 1 && pbc.z == 0) ? k - 1 : z;
-        zf1 = (k == size.z - 1 && pbc.z == 0) ? k     : zf1;
+        float Hx0 = Hx[I]; // mag component of central cell
+        float Hx1, Hx2;
 
-        xb1 = (xb1 < 0) ?          size.x + xb1 : xb1;
-        xf1 = (xf1 > size.x - 1) ? xf1 - size.x : xf1;
+        float Hy0 = Hy[I]; // mag component of central cell
+        float Hy1, Hy2;
 
-        yb1 = (yb1 < 0) ?          size.y + yb1 : yb1;
-        yf1 = (yf1 > size.y - 1) ? yf1 - size.y : yf1;
+        float Hz0 = Hz[I]; // mag component of central cell
+        float Hz1, Hz2;
 
-        zb1 = (zb1 < 0) ?          size.z + zb1 : zb1;
-        zf1 = (zf1 > size.z - 1) ? zf1 - size.z : zf1;
+        float Rx, Ry, Rz;
 
-        int comm = j * size.z + k;
-        int3 xn = make_int3(xb1 * size.w + comm,
-                            x   * size.w + comm,
-                            xf1 * size.w + comm);
+        int linAddr;
 
+        // neighbors in X direction
+        int idx = i - 1;
+        idx = (idx < 0 && wrap.x) ? N.x + idx : idx;
+        linAddr = idx * N.y * N.z + j * N.z + k;
 
-        comm = i * size.w + k;
-        int3 yn = make_int3(yb1 * size.z + comm,
-                            y   * size.z + comm,
-                            yf1 * size.z + comm);
+        lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
+        leyy = lambda_eMul_yy * getMaskUnity(lambda_e_yy, linAddr);
+        lezz = lambda_eMul_zz * getMaskUnity(lambda_e_zz, linAddr);
 
+        lexx1 = avgGeomZero(lexx0, lexx);
+        leyy1 = avgGeomZero(leyy0, leyy);
+        lezz1 = avgGeomZero(lezz0, lezz);
 
-        comm = i * size.w + j * size.z;
-        int3 zn = make_int3(zb1 + comm,
-                            z   + comm,
-                            zf1 + comm);
+        Hx1 = (idx < 0) ? Hx0 : Hx[linAddr];
+        Hy1 = (idx < 0) ? Hy0 : Hy[linAddr];
+        Hz1 = (idx < 0) ? Hz0 : Hz[linAddr];
 
+        idx = i + 1;
+        idx = (idx == N.x && wrap.x) ? idx - N.x : idx;
+        linAddr = idx * N.y * N.z + j * N.z + k;
 
-        float h_b1, h, h_f1;
-        float ddhx_x, ddhx_y, ddhx_z;
-        float ddhy_x, ddhy_y, ddhy_z;
-        float ddhz_x, ddhz_y, ddhz_z;
+        lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
+        leyy = lambda_eMul_yy * getMaskUnity(lambda_e_yy, linAddr);
+        lezz = lambda_eMul_zz * getMaskUnity(lambda_e_zz, linAddr);
 
-        float ddhx, ddhy, ddhz;
-        float sum;
+        lexx2 = avgGeomZero(lexx0, lexx);
+        leyy2 = avgGeomZero(leyy0, leyy);
+        lezz2 = avgGeomZero(lezz0, lezz);
 
-        h_b1   = hx[xn.x];
-        h      = hx[xn.y];
-        h_f1   = hx[xn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhx_x = (size.x > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        Hx2 = (idx == N.x) ? Hx0 : Hx[linAddr];
+        Hy2 = (idx == N.x) ? Hy0 : Hy[linAddr];
+        Hz2 = (idx == N.x) ? Hz0 : Hz[linAddr];
 
-        h_b1 = (j > 0 || lhx == NULL) ? hx[yn.x] : lhx[yn.x];
-        h    = hx[yn.y];
-        h_f1 = (j < size.y - 1 || rhx == NULL) ? hx[yn.z] : rhx[yn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhx_y = (size.y > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        Rx = cell_2.x * (lexx1 * (Hx1 - Hx0) + lexx2 * (Hx2 -  Hx0));
+        Ry = cell_2.y * (leyy1 * (Hy1 - Hy0) + leyy2 * (Hy2 -  Hy0));
+        Rz = cell_2.z * (lezz1 * (Hz1 - Hz0) + lezz2 * (Hz2 -  Hz0));
 
-        h_b1 = hx[zn.x];
-        h    = hx[zn.y];
-        h_f1 = hx[zn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhx_z = (size.z > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        // neighbors in Z direction
+        idx = k - 1;
+        idx = (idx < 0 && wrap.z) ? N.z + idx : idx;
+        linAddr = i * N.y * N.z + j * N.z + idx;
 
-        ddhx   = mmstep.x * ddhx_x + mmstep.y * ddhx_y + mmstep.z * ddhx_z;
+        lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
+        leyy = lambda_eMul_yy * getMaskUnity(lambda_e_yy, linAddr);
+        lezz = lambda_eMul_zz * getMaskUnity(lambda_e_zz, linAddr);
 
-        h_b1   = hy[xn.x];
-        h      = hy[xn.y];
-        h_f1   = hy[xn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhy_x = (size.x > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        lexx1 = avgGeomZero(lexx0, lexx);
+        leyy1 = avgGeomZero(leyy0, leyy);
+        lezz1 = avgGeomZero(lezz0, lezz);
 
-        h_b1 = (j > 0 || lhx == NULL) ? hy[yn.x] : lhy[yn.x];
-        h    = hy[yn.y];
-        h_f1 = (j < size.y - 1 || rhx == NULL) ? hy[yn.z] : rhy[yn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhy_y = (size.y > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        Hx1 = (idx < 0) ? Hx0 : Hx[linAddr];
+        Hy1 = (idx < 0) ? Hy0 : Hy[linAddr];
+        Hz1 = (idx < 0) ? Hz0 : Hz[linAddr];
 
-        h_b1 = hy[zn.x];
-        h    = hy[zn.y];
-        h_f1 = hy[zn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhy_z = (size.z > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        idx = k + 1;
+        idx = (idx == N.z && wrap.z) ? idx - N.z : idx;
+        linAddr = i * N.y * N.z + j * N.z + idx;
 
-        ddhy   = mmstep.x * ddhy_x + mmstep.y * ddhy_y + mmstep.z * ddhy_z;
+        lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
+        leyy = lambda_eMul_yy * getMaskUnity(lambda_e_yy, linAddr);
+        lezz = lambda_eMul_zz * getMaskUnity(lambda_e_zz, linAddr);
 
-        h_b1   = hz[xn.x];
-        h      = hz[xn.y];
-        h_f1   = hz[xn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhz_x = (size.x > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        lexx2 = avgGeomZero(lexx0, lexx);
+        leyy2 = avgGeomZero(leyy0, leyy);
+        lezz2 = avgGeomZero(lezz0, lezz);
 
-        h_b1 = (j > 0 || lhx == NULL) ? hz[yn.x] : lhz[yn.x];
-        h    = hz[yn.y];
-        h_f1 = (j < size.y - 1 || rhx == NULL) ? hz[yn.z] : rhz[yn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhz_y = (size.y > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        Hx2 = (idx == N.z) ? Hx0 : Hx[linAddr];
+        Hy2 = (idx == N.z) ? Hy0 : Hy[linAddr];
+        Hz2 = (idx == N.z) ? Hz0 : Hz[linAddr];
 
-        h_b1 = hz[zn.x];
-        h    = hz[zn.y];
-        h_f1 = hz[zn.z];
-        sum    = __fadd_rn(h_b1, h_f1);
-        ddhz_z = (size.z > 2) ? __fmaf_rn(-2.0f, h, sum) : 0.0;
+        Rx += cell_2.x * (lexx1 * (Hx1 - Hx0) + lexx2 * (Hx2 -  Hx0));
+        Ry += cell_2.y * (leyy1 * (Hy1 - Hy0) + leyy2 * (Hy2 -  Hy0));
+        Rz += cell_2.z * (lezz1 * (Hz1 - Hz0) + lezz2 * (Hz2 -  Hz0));
 
-        ddhz   = mmstep.x * ddhz_x + mmstep.y * ddhz_y + mmstep.z * ddhz_z;
-//==================================================================================================
+        // neighbors in Y direction
+        idx = j - 1;
+        idx = (idx < 0 && wrap.y) ? N.y + idx : idx;
+        linAddr = i * N.y * N.z + idx * N.z + k;
 
-        float le_xx = (lambda_e_xx != NULL) ? lambda_e_xx[x0] * lambda_eMul_xx : lambda_eMul_xx;
-        float ledHx = le_xx * ddhx;
+        lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
+        leyy = lambda_eMul_yy * getMaskUnity(lambda_e_yy, linAddr);
+        lezz = lambda_eMul_zz * getMaskUnity(lambda_e_zz, linAddr);
 
-        float le_yy = (lambda_e_yy != NULL) ? lambda_e_yy[x0] * lambda_eMul_yy : lambda_eMul_yy;
+        lexx1 = avgGeomZero(lexx0, lexx);
+        leyy1 = avgGeomZero(leyy0, leyy);
+        lezz1 = avgGeomZero(lezz0, lezz);
 
-        float ledHy = le_yy * ddhy;
+        Hx1 = (idx < 0) ? Hx0 : Hx[linAddr];
+        Hy1 = (idx < 0) ? Hy0 : Hy[linAddr];
+        Hz1 = (idx < 0) ? Hz0 : Hz[linAddr];
 
-        float le_zz = (lambda_e_zz != NULL) ? lambda_e_zz[x0] * lambda_eMul_zz : lambda_eMul_zz;
-        float ledHz = le_zz * ddhz;
+        idx = j + 1;
+        idx = (idx == N.y && wrap.y) ? idx - N.y : idx;
+        linAddr = i * N.y * N.y + idx * N.y + k;
 
-        tx[x0] = -ledHx;
-        ty[x0] = -ledHy;
-        tz[x0] = -ledHz;
+        lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
+        leyy = lambda_eMul_yy * getMaskUnity(lambda_e_yy, linAddr);
+        lezz = lambda_eMul_zz * getMaskUnity(lambda_e_zz, linAddr);
+
+        lexx2 = avgGeomZero(lexx0, lexx);
+        leyy2 = avgGeomZero(leyy0, leyy);
+        lezz2 = avgGeomZero(lezz0, lezz);
+
+        Hx2 = (idx == N.y) ? Hx0 : Hx[linAddr];
+        Hy2 = (idx == N.y) ? Hy0 : Hy[linAddr];
+        Hz2 = (idx == N.y) ? Hz0 : Hz[linAddr];
+
+        Rx += cell_2.x * (lexx1 * (Hx1 - Hx0) + lexx2 * (Hx2 -  Hx0));
+        Ry += cell_2.y * (leyy1 * (Hy1 - Hy0) + leyy2 * (Hy2 -  Hy0));
+        Rz += cell_2.z * (lezz1 * (Hz1 - Hz0) + lezz2 * (Hz2 -  Hz0));
+
+        // Write back to global memory
+        tx[I] = -Rx;
+        ty[I] = -Ry;
+        tz[I] = -Rz;
     }
 }
 
@@ -214,79 +213,34 @@ __export__  void llbar_nonlocal00nc_async(float** tx, float**  ty, float**  tz,
     dim3 gridSize(divUp(sy, BLOCKSIZE), divUp(sz, BLOCKSIZE));
     dim3 blockSize(BLOCKSIZE, BLOCKSIZE, 1);
 
-    float icsx2 = 1.0f / (csx * csx);
-    float icsy2 = 1.0f / (csy * csy);
-    float icsz2 = 1.0f / (csz * csz);
-
-    int syz = sy * sz;
+    float cellx_2 = (float)(1.0 / ((double)csx * (double)csx));
+    float celly_2 = (float)(1.0 / ((double)csy * (double)csy));
+    float cellz_2 = (float)(1.0 / ((double)csz * (double)csz));
 
 
-    float3 mstep = make_float3(icsx2, icsy2, icsz2);
-    int4 size = make_int4(sx, sy, sz, syz);
-    int3 pbc = make_int3(pbc_x, pbc_y, pbc_z);
+    float3 cell_2 = make_float3(cellx_2, celly_2, cellz_2);
+    int3 N = make_int3(sx, sy, sz);
+    int3 wrap = make_int3(pbc_x, pbc_y, pbc_z);
 
-    int nDev = nDevice();
+    int dev = 0;
 
+    llbarNonlocal00ncKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
+            hx[dev], hy[dev], hz[dev],
 
-    for (int dev = 0; dev < nDev; dev++)
-    {
-        gpu_safe(cudaSetDevice(deviceId(dev)));
+            msat0T0[dev],
 
-        // calculate dev neighbours
+            lambda_e_xx[dev],
+            lambda_e_yy[dev],
+            lambda_e_zz[dev],
 
-        int ld = Mod(dev - 1, nDev);
-        int rd = Mod(dev + 1, nDev);
+            lambda_eMul_xx,
+            lambda_eMul_yy,
+            lambda_eMul_zz,
 
-        float* lhx = hx[ld];
-        float* lhy = hy[ld];
-        float* lhz = hz[ld];
+            N,
+            cell_2,
+            wrap);
 
-        float* rhx = hx[rd];
-        float* rhy = hy[rd];
-        float* rhz = hz[rd];
-
-        if(pbc_y == 0)
-        {
-            if(dev == 0)
-            {
-                lhx = NULL;
-                lhy = NULL;
-                lhz = NULL;
-            }
-            if(dev == nDev - 1)
-            {
-                rhx = NULL;
-                rhy = NULL;
-                rhz = NULL;
-            }
-        }
-
-
-        for (int i = 0; i < sx; i++)
-        {
-
-            llbarNonlocal00ncKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (tx[dev], ty[dev], tz[dev],
-                    hx[dev], hy[dev], hz[dev],
-                    lhx, lhy, lhz,
-                    rhx, rhy, rhz,
-
-                    msat0T0[dev],
-
-                    lambda_e_xx[dev],
-                    lambda_e_yy[dev],
-                    lambda_e_zz[dev],
-
-                    lambda_eMul_xx,
-                    lambda_eMul_yy,
-                    lambda_eMul_zz,
-
-                    size,
-                    mstep,
-                    pbc,
-                    i);
-        }
-
-    } // end dev < nDev loop
 
 }
 
