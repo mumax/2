@@ -74,6 +74,7 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         // neighbors in X direction
         int idx = i - 1;
         idx = (idx < 0 && wrap.x) ? N.x + idx : idx;
+        idx = max(idx, 0);
         linAddr = idx * N.y * N.z + j * N.z + k;
 
         lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
@@ -84,12 +85,13 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         leyy1 = avgGeomZero(leyy0, leyy);
         lezz1 = avgGeomZero(lezz0, lezz);
 
-        Hx1 = (idx < 0) ? Hx0 : Hx[linAddr];
-        Hy1 = (idx < 0) ? Hy0 : Hy[linAddr];
-        Hz1 = (idx < 0) ? Hz0 : Hz[linAddr];
+        Hx1 = Hx[linAddr];
+        Hy1 = Hy[linAddr];
+        Hz1 = Hz[linAddr];
 
         idx = i + 1;
         idx = (idx == N.x && wrap.x) ? idx - N.x : idx;
+        idx = min(idx, N.x - 1);
         linAddr = idx * N.y * N.z + j * N.z + k;
 
         lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
@@ -100,9 +102,9 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         leyy2 = avgGeomZero(leyy0, leyy);
         lezz2 = avgGeomZero(lezz0, lezz);
 
-        Hx2 = (idx == N.x) ? Hx0 : Hx[linAddr];
-        Hy2 = (idx == N.x) ? Hy0 : Hy[linAddr];
-        Hz2 = (idx == N.x) ? Hz0 : Hz[linAddr];
+        Hx2 = Hx[linAddr];
+        Hy2 = Hy[linAddr];
+        Hz2 = Hz[linAddr];
 
         Rx = cell_2.x * (lexx1 * (Hx1 - Hx0) + lexx2 * (Hx2 -  Hx0));
         Ry = cell_2.y * (leyy1 * (Hy1 - Hy0) + leyy2 * (Hy2 -  Hy0));
@@ -111,6 +113,7 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         // neighbors in Z direction
         idx = k - 1;
         idx = (idx < 0 && wrap.z) ? N.z + idx : idx;
+        idx = max(idx, 0);
         linAddr = i * N.y * N.z + j * N.z + idx;
 
         lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
@@ -121,12 +124,13 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         leyy1 = avgGeomZero(leyy0, leyy);
         lezz1 = avgGeomZero(lezz0, lezz);
 
-        Hx1 = (idx < 0) ? Hx0 : Hx[linAddr];
-        Hy1 = (idx < 0) ? Hy0 : Hy[linAddr];
-        Hz1 = (idx < 0) ? Hz0 : Hz[linAddr];
+        Hx1 = Hx[linAddr];
+        Hy1 = Hy[linAddr];
+        Hz1 = Hz[linAddr];
 
         idx = k + 1;
         idx = (idx == N.z && wrap.z) ? idx - N.z : idx;
+        idx = min(idx, N.z - 1);
         linAddr = i * N.y * N.z + j * N.z + idx;
 
         lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
@@ -137,9 +141,9 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         leyy2 = avgGeomZero(leyy0, leyy);
         lezz2 = avgGeomZero(lezz0, lezz);
 
-        Hx2 = (idx == N.z) ? Hx0 : Hx[linAddr];
-        Hy2 = (idx == N.z) ? Hy0 : Hy[linAddr];
-        Hz2 = (idx == N.z) ? Hz0 : Hz[linAddr];
+        Hx2 = Hx[linAddr];
+        Hy2 = Hy[linAddr];
+        Hz2 = Hz[linAddr];
 
         Rx += cell_2.x * (lexx1 * (Hx1 - Hx0) + lexx2 * (Hx2 -  Hx0));
         Ry += cell_2.y * (leyy1 * (Hy1 - Hy0) + leyy2 * (Hy2 -  Hy0));
@@ -148,6 +152,7 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         // neighbors in Y direction
         idx = j - 1;
         idx = (idx < 0 && wrap.y) ? N.y + idx : idx;
+        idx = max(idx, 0);
         linAddr = i * N.y * N.z + idx * N.z + k;
 
         lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
@@ -158,12 +163,13 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         leyy1 = avgGeomZero(leyy0, leyy);
         lezz1 = avgGeomZero(lezz0, lezz);
 
-        Hx1 = (idx < 0) ? Hx0 : Hx[linAddr];
-        Hy1 = (idx < 0) ? Hy0 : Hy[linAddr];
-        Hz1 = (idx < 0) ? Hz0 : Hz[linAddr];
+        Hx1 = Hx[linAddr];
+        Hy1 = Hy[linAddr];
+        Hz1 = Hz[linAddr];
 
         idx = j + 1;
         idx = (idx == N.y && wrap.y) ? idx - N.y : idx;
+        idx = min(idx, N.y - 1);
         linAddr = i * N.y * N.y + idx * N.y + k;
 
         lexx = lambda_eMul_xx * getMaskUnity(lambda_e_xx, linAddr);
@@ -174,9 +180,9 @@ __global__ void llbarNonlocal00ncKern(float* __restrict__ tx, float* __restrict_
         leyy2 = avgGeomZero(leyy0, leyy);
         lezz2 = avgGeomZero(lezz0, lezz);
 
-        Hx2 = (idx == N.y) ? Hx0 : Hx[linAddr];
-        Hy2 = (idx == N.y) ? Hy0 : Hy[linAddr];
-        Hz2 = (idx == N.y) ? Hz0 : Hz[linAddr];
+        Hx2 = Hx[linAddr];
+        Hy2 = Hy[linAddr];
+        Hz2 = Hz[linAddr];
 
         Rx += cell_2.x * (lexx1 * (Hx1 - Hx0) + lexx2 * (Hx2 -  Hx0));
         Ry += cell_2.y * (leyy1 * (Hy1 - Hy0) + leyy2 * (Hy2 -  Hy0));
