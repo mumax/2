@@ -1595,4 +1595,118 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 			}
 		}
 	}
+
+	// Repeat for Nyy, Nyz and Nzz.
+	if (periodic[0]+periodic[1]+periodic[2] == 0) {
+		// Step 1: Evaluate f & g at eac site. Offset by (-dx, -dy, -dz)
+		// so we can do 2nd derivative operations "in-place"
+		for (z:=0;z<zstop;z++) {
+			zw := z
+			R[Z] = float64(z-1)*cellsize[Z]
+			for (y:=0;y<ystop;y++) {
+				yw := y
+				R[Y] = float64(y-1)*cellsize[Y]
+				for (x:=0;x<xstop;x++) {
+					xw := x
+					R[X] = float64(x-1)*cellsize[X]
+					I = FullTensorIdx[1][1]
+					scratch[I][xw][yw][zw]=float32(scale*Newell_f(R[Y],R[X],R[Z])) // For Nyy
+					I = FullTensorIdx[1][2]
+					scratch[I][xw][yw][zw]=float32(scale*Newell_g(R[Y],R[Z],R[X])) // For Nyz
+					I = FullTensorIdx[2][2]
+					scratch[I][xw][yw][zw]=float32(scale*Newell_f(R[Z],R[Y],R[X])) // For Nzz
+				}
+			}
+		}
+		// Step 2a: Do d^2/dz^2
+		if (zstop==1) {
+			// Only 1 layer in z-direction of f/g stored in scratch array.
+			for (y:=0;y<ystop;y++) {
+				yw := y
+				R[Y] = float64(y-1)*cellsize[Y]
+				for (x:=0;x<xstop;x++) {
+					xw := x
+					R[X] = float64(x-1)*cellsize[X]
+					// Function f is even in each variable, so for example
+					// f(x,y,-dz) - 2f(x,y,0) + f(x,y,dz)
+					// = 2( f(x,y,-dz) - f(x,y,0) )
+					// Function g(x,y,z) is even in z and odd in x and y,
+					// so for example
+					// g(x,-dz,y) - 2g(x,0,y) + g(x,dz,y)
+					// = 2g(x,0,y) = 0.
+					// Nyy(x,y,z) = Nxx(y,x,z); Nzz(x,y,z) = Nxx(z,y,x);
+					// Nxz(x,y,z) = Nxy(x,z,y); Nyz(x,y,z) = Nxy(y,z,x);
+					I = FullTensorIdx[1][1]
+					scratch[I][xw][yw][0] -= float32(scale*Newell_f(R[Y],R[X],0)) // For Nyy
+					scratch[I][xw][yw][0] *= float32(2.0)
+					I = FullTensorIdx[1][2]
+					scratch[I][xw][yw][0] = 0.0 // For Nyz
+					I = FullTensorIdx[2][2]
+					scratch[I][xw][yw][0] -= float32(scale*Newell_f(0,R[Y],R[X])) // For Nzz
+					scratch[I][xw][yw][0] *= float32(2.0)
+				}
+			}
+		} else {
+			for (z:=0;z<rdimz;k++) {
+				zw := z
+				for(y:=0;y<ystop;y++) {
+					for(x:=0;x<xstop;x++) {
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
+						I = FullTensorIdx[2][2]
+						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
+					}
+				}
+			}
+		}
+		// Step 2b: Do d^2/dy^2
+		if(ystop==1) {
+			// Only 1 layer in y-direction of f/g stored in scratch array.
+			for(z:=0;z<rdimz;z++) {
+				zw := z
+				R[Z]=float64(zw)*cellsize[Z]
+				for(x:=0;x<xstop;x++) {
+					xw := x
+					R[X] = float64(xw-1)*cellsize[X]
+					// Function f is even in each variable, so for example
+					// f(x,y,-dz) - 2f(x,y,0) + f(x,y,dz)
+					// = 2( f(x,y,-dz) - f(x,y,0) )
+					// Function g(x,y,z) is even in z and odd in x and y,
+					// so for example
+					// g(x,-dz,y) - 2g(x,0,y) + g(x,dz,y)
+					// = 2g(x,0,y) = 0.
+					// Nyy(x,y,z) = Nxx(y,x,z); Nzz(x,y,z) = Nxx(z,y,x);
+					// Nxz(x,y,z) = Nxy(x,z,y); Nyz(x,y,z) = Nxy(y,z,x);
+					I = FullTensorIdx[1][1]
+					scratch[I][xw][0][zw] -= float32(scale*((Newell_f(0,R[X],R[Z]-cellsize[Z]) + Newell_f(0,R[X],R[Z]+cellsize[Z])) - 2*Newell_f(0,R[X],R[Z])))
+					scratch[I][xw][0][zw] *= float32(2.0) // For Nyy
+					I = FullTensorIdx[1][2]
+					scratch[I][xw][0][zw] = 0.0; // For Nyz
+					I = FullTensorIdx[2][2]
+					scratch[I][xw][0][zw] -= float32(scale*((Newell_f(R[Z]-cellsize[Z]0,R[X]) + Newell_f(R[Z]+cellsize[Z],0,R[X])) - 2*Newell_f(R[Z],0,R[X])))
+					scratch[I][xw][0][zw] *= float32(2.0) // For Nzz
+				}
+			}
+		} else {
+			for(z:=0;z<rdimz;z++) {
+				zw := z
+				for(y:=0;y<rdimy;y++) {
+					yw := y
+					for(x:=0;x<xstop;x++) {
+						xw := x
+						OC_INDEX index = ODTV_VECSIZE*i+jkindex;
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
+						I = FullTensorIdx[1][2]
+						scratch[index+1] += float32(-2.0)*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
+						I = FullTensorIdx[2][2]
+						scratch[index+2] += float32(-2.0)*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
+					}
+				}
+			}
+		}
+	}
+
 }
