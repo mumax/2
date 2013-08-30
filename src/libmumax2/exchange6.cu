@@ -48,25 +48,27 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         // neighbors in X direction
         int idx = i - 1;
         idx = (idx < 0 && wrap0) ? N0 + idx : idx;
+        idx = max(idx, 0);
         linAddr = idx * N1 * N2 + j * N2 + k;
 
-        lexMul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
+        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
         lex1Mul = avgGeomZero(lex0Mul, lexMul);
 
-        mx1 = (idx < 0) ? mx0 : mx[linAddr];
-        my1 = (idx < 0) ? my0 : my[linAddr];
-        mz1 = (idx < 0) ? mz0 : mz[linAddr];
+        mx1 = mx[linAddr];
+        my1 = my[linAddr];
+        mz1 = mz[linAddr];
 
         idx = i + 1;
         idx = (idx == N0 && wrap0) ? idx - N0 : idx;
+        idx = min(idx, N0 - 1);
         linAddr = idx * N1 * N2 + j * N2 + k;
 
-        lexMul = (idx == N0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
+        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
         lex2Mul = avgGeomZero(lex0Mul, lexMul);
 
-        mx2 = (idx == N0) ? mx0 : mx[linAddr];
-        my2 = (idx == N0) ? my0 : my[linAddr];
-        mz2 = (idx == N0) ? mz0 : mz[linAddr];
+        mx2 = mx[linAddr];
+        my2 = my[linAddr];
+        mz2 = mz[linAddr];
 
         Hx = pre * cellx_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 -  mx0));
         Hy = pre * cellx_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 -  my0));
@@ -75,25 +77,27 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         // neighbors in Z direction
         idx = k - 1;
         idx = (idx < 0 && wrap2) ? N2 + idx : idx;
+        idx = max(idx, 0);
         linAddr = i * N1 * N2 + j * N2 + idx;
 
-        lexMul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
+        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
         lex1Mul = avgGeomZero(lex0Mul, lexMul);
 
-        mx1 = (idx < 0) ? mx0 : mx[linAddr];
-        my1 = (idx < 0) ? my0 : my[linAddr];
-        mz1 = (idx < 0) ? mz0 : mz[linAddr];
+        mx1 = mx[linAddr];
+        my1 = my[linAddr];
+        mz1 = mz[linAddr];
 
         idx = k + 1;
         idx = (idx == N2 && wrap2) ? idx - N2 : idx;
+        idx = min(idx, N2 - 1);
         linAddr = i * N1 * N2 + j * N2 + idx;
 
-        lexMul = (idx == N2) ? 0.0f : fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
+        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
         lex2Mul = avgGeomZero(lex0Mul, lexMul);
 
-        mx2 = (idx == N2) ? mx0 : mx[linAddr];
-        my2 = (idx == N2) ? my0 : my[linAddr];
-        mz2 = (idx == N2) ? mz0 : mz[linAddr];
+        mx2 = mx[linAddr];
+        my2 = my[linAddr];
+        mz2 = mz[linAddr];
 
         Hx += pre * cellz_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 -  mx0));
         Hy += pre * cellz_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 -  my0));
@@ -102,25 +106,27 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         // neighbors in Y direction
         idx = j - 1;
         idx = (idx < 0 && wrap1) ? N1 + idx : idx;
+        idx = max(idx, 0);
         linAddr = i * N1 * N2 + idx * N2 + k;
 
-        lexMul = (idx < 0) ? 0.0f : fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
+        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
         lex1Mul = avgGeomZero(lex0Mul, lexMul);
 
-        mx1 = (idx < 0) ? mx0 : mx[linAddr];
-        my1 = (idx < 0) ? my0 : my[linAddr];
-        mz1 = (idx < 0) ? mz0 : mz[linAddr];
+        mx1 = mx[linAddr];
+        my1 = my[linAddr];
+        mz1 = mz[linAddr];
 
         idx = j + 1;
         idx = (idx == N1 && wrap1) ? idx - N1 : idx;
+        idx = min(idx, N1 - 1);
         linAddr = i * N1 * N2 + idx * N2 + k;
 
-        lexMul = (idx == N1) ? 0.0f : fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
+        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
         lex2Mul = avgGeomZero(lex0Mul, lexMul);
 
-        mx2 = (idx == N1) ? mx0 : mx[linAddr];
-        my2 = (idx == N1) ? my0 : my[linAddr];
-        mz2 = (idx == N1) ? mz0 : mz[linAddr];
+        mx2 = mx[linAddr];
+        my2 = my[linAddr];
+        mz2 = mz[linAddr];
 
         Hx += pre * celly_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 -  mx0));
         Hy += pre * celly_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 -  my0));
