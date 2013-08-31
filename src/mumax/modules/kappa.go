@@ -7,17 +7,16 @@
 
 package modules
 
-// File provides the "kappa" quantity.
+// File provides the longitudinal magnetic susceptibility quantity.
 // Author: Mykola Dvornik
 
 import (
-	//~ . "mumax/common"
 	. "mumax/engine"
 )
 
 // Loads the "Q" quantity if it is not already present.
 func LoadKappa(e *Engine) {
-	if !e.HasQuant("kappa") {
-		e.AddNewQuant("kappa", SCALAR, MASK, Unit(""), "longitudinal magnetic susceptibility")
+	if !e.HasQuant("ϰ") {
+		e.AddNewQuant("ϰ", SCALAR, MASK, Unit(""), "Longitudinal magnetic susceptibility")
 	}
 }

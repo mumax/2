@@ -18,7 +18,7 @@ import (
 
 // Register this module
 func init() {
-	RegisterModule("mfa-brillouin/kappa", "Temperature dependence of longitudinal susceptibility for finite J", LoadBrillouinKappa)
+	RegisterModule("mfa/ϰ", "Temperature dependence of longitudinal susceptibility for finite J", LoadBrillouinKappa)
 }
 
 func LoadBrillouinKappa(e *Engine) {
@@ -28,10 +28,10 @@ func LoadBrillouinKappa(e *Engine) {
 	LoadKappa(e)
 	LoadMFAParams(e)
 
-	e.Depends("kappa", "Te", "Tc", "msat0", "J", "msat0T0", "n")
+	e.Depends("ϰ", "Te", "Tc", "msat0", "J", "msat0T0", "n")
 	msat0 := e.Quant("msat0")
 	msat0T0 := e.Quant("msat0T0")
-	kappa := e.Quant("kappa")
+	kappa := e.Quant("ϰ")
 	n := e.Quant("n")
 	kappa.SetUpdater(&kappaUpdater{kappa: kappa, msat0: msat0, msat0T0: msat0T0, T: e.Quant("Te"), Tc: e.Quant("Tc"), S: e.Quant("J"), n: n})
 

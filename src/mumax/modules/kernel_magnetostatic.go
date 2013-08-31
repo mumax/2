@@ -103,11 +103,11 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 						d = L
 					}
 					maxSize := d / accuracy // maximum acceptable integration size
-					nv := int(math.Max(cellsize[v]/maxSize, 1) + 0.5)
-					nw := int(math.Max(cellsize[w]/maxSize, 1) + 0.5)
-					nx := int(math.Max(cellsize[X]/maxSize, 1) + 0.5)
-					ny := int(math.Max(cellsize[Y]/maxSize, 1) + 0.5)
-					nz := int(math.Max(cellsize[Z]/maxSize, 1) + 0.5)
+					nv := int(math.Max(cellsize[v]/maxSize, 1.) + 0.5)
+					nw := int(math.Max(cellsize[w]/maxSize, 1.) + 0.5)
+					nx := int(math.Max(cellsize[X]/maxSize, 1.) + 0.5)
+					ny := int(math.Max(cellsize[Y]/maxSize, 1.) + 0.5)
+					nz := int(math.Max(cellsize[Z]/maxSize, 1.) + 0.5)
 					// Stagger source and destination grids.
 					// Massively improves accuracy. Could play with variations.
 					// See note.
@@ -133,19 +133,19 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 
 							// Do volume integral over destination cell
 							for α := 0; α < nx; α++ {
-								rx := R[X] - cellsize[X]/2 + cellsize[X]/float64(2*nx) + (cellsize[X]/float64(nx))*float64(α)
+								rx := R[X] - cellsize[X]/2. + cellsize[X]/float64(2*nx) + (cellsize[X]/float64(nx))*float64(α)
 
 								for β := 0; β < ny; β++ {
-									ry := R[Y] - cellsize[Y]/2 + cellsize[Y]/float64(2*ny) + (cellsize[Y]/float64(ny))*float64(β)
+									ry := R[Y] - cellsize[Y]/2. + cellsize[Y]/float64(2*ny) + (cellsize[Y]/float64(ny))*float64(β)
 
 									for γ := 0; γ < nz; γ++ {
-										rz := R[Z] - cellsize[Z]/2 + cellsize[Z]/float64(2*nz) + (cellsize[Z]/float64(nz))*float64(γ)
+										rz := R[Z] - cellsize[Z]/2. + cellsize[Z]/float64(2*nz) + (cellsize[Z]/float64(nz))*float64(γ)
 										points++
 
 										pole[u] = pu1
 										R2[X], R2[Y], R2[Z] = rx-pole[X], ry-pole[Y], rz-pole[Z]
 										r := math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
-										qr := charge / (4 * math.Pi * r * r * r)
+										qr := charge / (4. * math.Pi * r * r * r)
 										bx := R2[X] * qr
 										by := R2[Y] * qr
 										bz := R2[Z] * qr
@@ -153,7 +153,7 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 										pole[u] = pu2
 										R2[X], R2[Y], R2[Z] = rx-pole[X], ry-pole[Y], rz-pole[Z]
 										r = math.Sqrt(R2[X]*R2[X] + R2[Y]*R2[Y] + R2[Z]*R2[Z])
-										qr = -charge / (4 * math.Pi * r * r * r)
+										qr = -charge / (4. * math.Pi * r * r * r)
 										B[X] += (bx + R2[X]*qr) // addition ordered for accuracy
 										B[Y] += (by + R2[Y]*qr)
 										B[Z] += (bz + R2[Z]*qr)

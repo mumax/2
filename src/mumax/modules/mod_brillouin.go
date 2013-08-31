@@ -7,18 +7,17 @@
 
 package modules
 
-// 6-neighbor exchange interaction
+// Temperature dependance of equilibrium value of saturation magnetization for any finite J
 // Author: Arne Vansteenkiste
 
 import (
-	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
 
 // Register this module
 func init() {
-	RegisterModule("mfa-brillouin/msat0", "Temperature dependance of equilibrium value of saturation magnetization for any finite J", LoadBrillouin)
+	RegisterModule("mfa/msat0", "Temperature dependance of equilibrium value of saturation magnetization for any finite J", LoadBrillouin)
 }
 
 func LoadBrillouin(e *Engine) {

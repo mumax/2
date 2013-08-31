@@ -38,8 +38,8 @@ loadargs('dissipative-function',[], ["m:mf","R:llbar_local00nc"],["Qmag:Qnc"])
 load('temperature/ETM')
 load('temperature/ETM/Qspatial')
 
-load('mfa-brillouin/msat0')
-load('mfa-brillouin/kappa')
+load('mfa/msat0')
+load('mfa/ϰ')
 
 add_to('llbar_RHS', 'llbar_torque')
 add_to('llbar_RHS', 'llbar_local00nc')
@@ -72,7 +72,7 @@ msat = [ [[[1.0]]]]
 setmask('msat', msat)
 setmask('msat0', msat)
 setmask('msat0T0', msat)
-setmask('kappa', msat)
+setmask('ϰ', msat)
 
 mf =[ [[[1.0]]], [[[0.0]]], [[[0.0]]] ]
 setarray('Mf', mf)
@@ -91,7 +91,7 @@ setv('γ_LL', 2.211e5)
 #~ setv('B_ext',[Bx,By,Bz])
 
 setv('dt', 1e-15)
-setv('kappa', 1e-4)
+setv('ϰ', 1e-4)
 
 # Heat bath parameters
 setv('k_e', 91.0)
