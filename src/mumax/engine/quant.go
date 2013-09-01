@@ -523,7 +523,7 @@ func (q *Quant) CopyFromQuant(qin *Quant) {
 	checkKind(q, qin.Kind())
 	checkComp(q, qin.NComp())
 	if q.unit != qin.unit {
-		panic(InputErrF("Units mismatch:", q.FullName(), "!=", qin.FullName))
+		panic(InputErrF("Units mismatch:", q.FullName(), "!=", qin.FullName()))
 	}
 
 	for i := 0; i < q.nComp; i++ {
