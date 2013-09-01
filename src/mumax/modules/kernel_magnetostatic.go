@@ -14,6 +14,7 @@ import (
 	"math"
 	. "mumax/common"
 	"mumax/host"
+	"time"
 )
 
 // Calculates the magnetostatic kernel by brute-force integration
@@ -81,6 +82,9 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 		pole   [3]float64 // position of point charge on the surface
 		points int        // counts used integration points
 	)
+	
+	t0 := time.Now()
+	
 	for s := 0; s < 3; s++ { // source index Ksdxyz
 		u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
 
@@ -121,7 +125,7 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 					charge := surface * scale
 					pu1 := cellsize[u] / 2. // positive pole center
 					pu2 := -pu1             // negative pole center
-
+					
 					// Do surface integral over source cell, accumulate  in B
 					var B [3]float64
 					for i := 0; i < nv; i++ {
@@ -171,7 +175,9 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 			}
 		}
 	}
+	t1 := time.Now()
 	Debug("kernel used", points, "integration points")
+	Debug("kernel calculation took", t1.Sub(t0))
 }
 
 // closest distance between cells, given center distance d.
