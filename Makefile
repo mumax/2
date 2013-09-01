@@ -1,6 +1,6 @@
 include src/Make.inc
 
-export GOPATH=$(CURDIR)
+export GOPATH=$(CURDIR)/
 
 ifndef SystemRoot
 LIBNAME=libmumax2.so
@@ -13,11 +13,13 @@ LIBNAME=libmumax2.dll
 endif
 
 all:
+	@echo $(GOPATH)
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
 	cp src/libmumax2/$(LIBNAME) src/mumax/gpu/
 	cp src/libmumax2/$(LIBNAME) .
 	go run src/cuda/setup-cuda-paths.go -dir=src/cuda/
-	go install -v mumax2-bin
+	go install -race -compiler=gccgo -gccgoflags='-static-libgcc -L /home/mykola/mumax2/pkg/gccgo -L /usr/local/cuda/lib64/ -Ofast -march=native' -v mumax2-bin
+	#go install -v mumax2-bin
 	go install -v apigen
 	go install -v texgen
 	go install -v template
