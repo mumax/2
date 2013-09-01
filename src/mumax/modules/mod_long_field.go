@@ -7,11 +7,10 @@
 
 package modules
 
-// 6-neighbor exchange interaction
+// The effective field responsible for exchange longitudinal relaxation
 // Author: Mykola Dvornik
 
 import (
-	//~ . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
@@ -33,8 +32,8 @@ func LoadLongField(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_lf")
-	e.Depends("H_lf", "kappa", "msat0", "msat", "m", "Tc", "Te", "msat0T0")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: e.Quant("kappa"), Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te")})
+	e.Depends("H_lf", "ϰ", "msat0", "msat", "m", "Tc", "Te", "msat0T0")
+	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: e.Quant("ϰ"), Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te")})
 
 }
 
@@ -43,7 +42,6 @@ type LongFieldUpdater struct {
 }
 
 func (u *LongFieldUpdater) Update() {
-	//e := GetEngine()
 	m := u.m
 	kappa := u.kappa
 	Hlf := u.Hlf
