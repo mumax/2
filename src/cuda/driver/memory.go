@@ -62,7 +62,7 @@ func Memcpy(dst, src DevicePtr, bytes int64) {
 
 // Asynchronously copies a number of bytes on the current device.
 func MemcpyAsync(dst, src DevicePtr, bytes int64, stream Stream) {
-	err := Result(C.cuMemcpyAsync(C.CUdeviceptr(dst), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuMemcpyAsync(C.CUdeviceptr(dst), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -78,7 +78,7 @@ func MemcpyDtoD(dst, src DevicePtr, bytes int64) {
 
 // Asynchronously copies a number of bytes from host to device.
 func MemcpyDtoDAsync(dst, src DevicePtr, bytes int64, stream Stream) {
-	err := Result(C.cuMemcpyDtoDAsync(C.CUdeviceptr(dst), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuMemcpyDtoDAsync(C.CUdeviceptr(dst), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -95,7 +95,7 @@ func MemcpyHtoD(dst DevicePtr, src HostPtr, bytes int64) {
 // Asynchronously copies a number of bytes from host to device.
 // The host memory must be page-locked (see MemRegister)
 func MemcpyHtoDAsync(dst DevicePtr, src HostPtr, bytes int64, stream Stream) {
-	err := Result(C.cuMemcpyHtoDAsync(C.CUdeviceptr(dst), unsafe.Pointer(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuMemcpyHtoDAsync(C.CUdeviceptr(dst), unsafe.Pointer(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -112,7 +112,7 @@ func MemcpyDtoH(dst HostPtr, src DevicePtr, bytes int64) {
 // Asynchronously copies a number of bytes device host to host.
 // The host memory must be page-locked (see MemRegister)
 func MemcpyDtoHAsync(dst HostPtr, src DevicePtr, bytes int64, stream Stream) {
-	err := Result(C.cuMemcpyDtoHAsync(unsafe.Pointer(dst), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuMemcpyDtoHAsync(unsafe.Pointer(uintptr(dst)), C.CUdeviceptr(src), C.size_t(bytes), C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -120,7 +120,7 @@ func MemcpyDtoHAsync(dst HostPtr, src DevicePtr, bytes int64, stream Stream) {
 
 // Copies from device memory in one context (device) to another.
 func MemcpyPeer(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Context, bytes int64) {
-	err := Result(C.cuMemcpyPeer(C.CUdeviceptr(dst), C.CUcontext(unsafe.Pointer(dstCtx)), C.CUdeviceptr(src), C.CUcontext(unsafe.Pointer(srcCtx)), C.size_t(bytes)))
+	err := Result(C.cuMemcpyPeer(C.CUdeviceptr(dst), C.CUcontext(unsafe.Pointer(uintptr(dstCtx))), C.CUdeviceptr(src), C.CUcontext(unsafe.Pointer(uintptr(srcCtx))), C.size_t(bytes)))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -128,7 +128,7 @@ func MemcpyPeer(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Context, by
 
 // Asynchronously copies from device memory in one context (device) to another.
 func MemcpyPeerAsync(dst DevicePtr, dstCtx Context, src DevicePtr, srcCtx Context, bytes int64, stream Stream) {
-	err := Result(C.cuMemcpyPeerAsync(C.CUdeviceptr(dst), C.CUcontext(unsafe.Pointer(dstCtx)), C.CUdeviceptr(src), C.CUcontext(unsafe.Pointer(srcCtx)), C.size_t(bytes), C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuMemcpyPeerAsync(C.CUdeviceptr(dst), C.CUcontext(unsafe.Pointer(uintptr(dstCtx))), C.CUdeviceptr(src), C.CUcontext(unsafe.Pointer(uintptr(srcCtx))), C.size_t(bytes), C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -182,7 +182,7 @@ func MemHostRegister(ptr HostPtr, bytes int64, flags MemHostRegisterFlag) {
 
 // Unmaps memory locked by MemHostRegister().
 func MemHostUnregister(ptr HostPtr) {
-	err := Result(C.cuMemHostUnregister(unsafe.Pointer(ptr)))
+	err := Result(C.cuMemHostUnregister(unsafe.Pointer(uintptr(ptr))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -199,5 +199,5 @@ const (
 )
 
 func (p DevicePtr) String() string {
-	return fmt.Sprint(unsafe.Pointer(p))
+	return fmt.Sprint(unsafe.Pointer(uintptr(p)))
 }

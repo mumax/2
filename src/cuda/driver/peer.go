@@ -15,7 +15,7 @@ import (
 
 // Make allocations from the peer Context available to the current context.
 func CtxEnablePeerAccess(peer Context) {
-	err := Result(C.cuCtxEnablePeerAccess(C.CUcontext(unsafe.Pointer(peer)), C.uint(0)))
+	err := Result(C.cuCtxEnablePeerAccess(C.CUcontext(unsafe.Pointer(uintptr(peer))), C.uint(0)))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -28,7 +28,7 @@ func (peer Context) EnablePeerAccess() {
 
 // Reverses CtxEnablePeerAccess().
 func CtxDisablePeerAccess(peer Context) {
-	err := Result(C.cuCtxDisablePeerAccess(C.CUcontext(unsafe.Pointer(peer))))
+	err := Result(C.cuCtxDisablePeerAccess(C.CUcontext(unsafe.Pointer(uintptr(peer)))))
 	if err != SUCCESS {
 		panic(err)
 	}

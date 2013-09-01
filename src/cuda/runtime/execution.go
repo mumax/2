@@ -37,7 +37,7 @@ func ConfigureCall(gridDim, blockDim dim3, sharedMem uint, stream Stream) {
 	block.x = C.uint(blockDim.X)
 	block.y = C.uint(blockDim.Y)
 	block.z = C.uint(blockDim.Z)
-	err := Error(C.cudaConfigureCall((grid), (block), C.size_t(sharedMem), C.cudaStream_t(unsafe.Pointer(stream))))
+	err := Error(C.cudaConfigureCall((grid), (block), C.size_t(sharedMem), C.cudaStream_t(unsafe.Pointer(uintptr(stream)))))
 	if err != Success {
 		panic(err)
 	}

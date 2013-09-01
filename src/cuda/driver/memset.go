@@ -23,7 +23,7 @@ func MemsetD32(dst DevicePtr, value uint32, N int64) {
 
 // Asynchronously sets the first N 32-bit values of dst array to value.
 func MemsetD32Async(dst DevicePtr, value uint32, N int64, stream Stream) {
-	err := Result(C.cuMemsetD32Async(C.CUdeviceptr(dst), C.uint(value), C.size_t(N), C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuMemsetD32Async(C.CUdeviceptr(dst), C.uint(value), C.size_t(N), C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}

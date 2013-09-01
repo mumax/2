@@ -81,7 +81,7 @@ func Memcpy(dest, source uintptr, bytes int, direction MemcpyKind) {
 // Low-level asynchronous unsafe memory copy
 // Works on device memory or page-locked host memory.
 func MemcpyAsync(dest, source uintptr, bytes int, direction MemcpyKind, stream Stream) {
-	err := Error(C.cudaMemcpyAsync(unsafe.Pointer(dest), unsafe.Pointer(source), C.size_t(bytes), uint32(direction), C.cudaStream_t(unsafe.Pointer(stream))))
+	err := Error(C.cudaMemcpyAsync(unsafe.Pointer(dest), unsafe.Pointer(source), C.size_t(bytes), uint32(direction), C.cudaStream_t(unsafe.Pointer(uintptr(stream)))))
 	if err != Success {
 		panic(err)
 	}

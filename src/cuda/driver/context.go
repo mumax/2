@@ -21,12 +21,12 @@ func CtxCreate(flags uint, dev Device) Context {
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Context(unsafe.Pointer(ctx))
+	return Context(uintptr(unsafe.Pointer(ctx)))
 }
 
 //Destroys the CUDA context specified by ctx. If the context usage count is not equal to 1, or the context is current to any CPU thread other than the current one, this function fails. Floating contexts (detached from a CPU thread via cuCtxPopCurrent()) may be destroyed by this function.
 func CtxDestroy(ctx Context) {
-	err := Result(C.cuCtxDestroy(C.CUcontext(unsafe.Pointer(ctx))))
+	err := Result(C.cuCtxDestroy(C.CUcontext(unsafe.Pointer(uintptr(ctx)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -41,7 +41,7 @@ func (ctx *Context) Destroy() {
 // Returns the API version to create the context.
 func CtxGetApiVersion(ctx Context) (version int) {
 	var cversion C.uint
-	err := Result(C.cuCtxGetApiVersion(C.CUcontext(unsafe.Pointer(ctx)), &cversion))
+	err := Result(C.cuCtxGetApiVersion(C.CUcontext(unsafe.Pointer(uintptr(ctx))), &cversion))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -61,7 +61,7 @@ func CtxGetCurrent() Context {
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Context(unsafe.Pointer(ctx))
+	return Context(uintptr(unsafe.Pointer(ctx)))
 }
 
 // Returns the ordinal of the current context's device.
@@ -76,7 +76,7 @@ func CtxGetDevice() Device {
 
 // Sets the current active context.
 func CtxSetCurrent(ctx Context) {
-	err := Result(C.cuCtxSetCurrent(C.CUcontext(unsafe.Pointer(ctx))))
+	err := Result(C.cuCtxSetCurrent(C.CUcontext(unsafe.Pointer(uintptr(ctx)))))
 	if err != SUCCESS {
 		panic(err)
 	}

@@ -33,13 +33,13 @@ func CreateGenerator(rngType RngType) Generator {
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Generator(unsafe.Pointer(rng))
+	return Generator(uintptr(unsafe.Pointer(rng)))
 }
 
 func (g Generator) GenerateNormal(output uintptr, n int64, mean, stddev float32) {
 	err := Status(C.curandGenerateNormal(
-		C.curandGenerator_t(unsafe.Pointer(g)),
-		(*C.float)(unsafe.Pointer(output)),
+		C.curandGenerator_t(unsafe.Pointer(uintptr(g))),
+		(*C.float)(unsafe.Pointer(uintptr(output))),
 		C.size_t(n),
 		C.float(mean),
 		C.float(stddev)))
@@ -49,7 +49,7 @@ func (g Generator) GenerateNormal(output uintptr, n int64, mean, stddev float32)
 }
 
 func (g Generator) SetSeed(seed int64) {
-	err := Status(C.curandSetPseudoRandomGeneratorSeed(C.curandGenerator_t(unsafe.Pointer(g)), _Ctype_ulonglong(seed)))
+	err := Status(C.curandSetPseudoRandomGeneratorSeed(C.curandGenerator_t(unsafe.Pointer(uintptr(g))), _Ctype_ulonglong(seed)))
 	if err != SUCCESS {
 		panic(err)
 	}

@@ -18,7 +18,7 @@ type Function uintptr
 
 func FuncGetAttribute(attrib FunctionAttribute, function Function) int {
 	var attr C.int
-	err := Result(C.cuFuncGetAttribute(&attr, C.CUfunction_attribute(attrib), C.CUfunction(unsafe.Pointer(function))))
+	err := Result(C.cuFuncGetAttribute(&attr, C.CUfunction_attribute(attrib), C.CUfunction(unsafe.Pointer(uintptr(function)))))
 	if err != SUCCESS {
 		panic(err)
 	}

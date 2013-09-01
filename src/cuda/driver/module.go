@@ -24,7 +24,7 @@ func ModuleLoad(fname string) Module {
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Module(unsafe.Pointer(mod))
+	return Module(uintptr(unsafe.Pointer(mod)))
 }
 
 // Loads a compute module from string
@@ -34,17 +34,17 @@ func ModuleLoadData(image string) Module {
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Module(unsafe.Pointer(mod))
+	return Module(uintptr(unsafe.Pointer(mod)))
 }
 
 // Returns a Function handle
 func ModuleGetFunction(module Module, name string) Function {
 	var function C.CUfunction
-	err := Result(C.cuModuleGetFunction(&function, C.CUmodule(unsafe.Pointer(module)), C.CString(name)))
+	err := Result(C.cuModuleGetFunction(&function, C.CUmodule(unsafe.Pointer(uintptr(module))), C.CString(name)))
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Function(unsafe.Pointer(function))
+	return Function(uintptr(unsafe.Pointer(function)))
 }
 
 func (m Module) GetFunction(name string) Function {

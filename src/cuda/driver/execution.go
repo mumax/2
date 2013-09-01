@@ -46,7 +46,7 @@ func LaunchKernel(f Function, gridDimX, gridDimY, gridDimZ int, blockDimX, block
 	}
 	//fmt.Println("LaunchKernel: ", "func: ", f, "gridDim: ", gridDimX, gridDimY, gridDimZ, "blockDim: ", blockDimX, blockDimY, blockDimZ, "shmem: ", sharedMemBytes, "stream: ", stream, "argptrs: ", kernelParams, "argvals:", argvals)
 
-	err := Result(C.cuLaunchKernel(C.CUfunction(unsafe.Pointer(f)), C.uint(gridDimX), C.uint(gridDimY), C.uint(gridDimZ), C.uint(blockDimX), C.uint(blockDimY), C.uint(blockDimZ), C.uint(sharedMemBytes), C.CUstream(unsafe.Pointer(stream)), (*unsafe.Pointer)(unsafe.Pointer(&kernelParams[0])), (*unsafe.Pointer)(unsafe.Pointer(uintptr(0)))))
+	err := Result(C.cuLaunchKernel(C.CUfunction(unsafe.Pointer(uintptr(f))), C.uint(gridDimX), C.uint(gridDimY), C.uint(gridDimZ), C.uint(blockDimX), C.uint(blockDimY), C.uint(blockDimZ), C.uint(sharedMemBytes), C.CUstream(unsafe.Pointer(uintptr(stream))), (*unsafe.Pointer)(unsafe.Pointer(&kernelParams[0])), (*unsafe.Pointer)(unsafe.Pointer(uintptr(0)))))
 	if err != SUCCESS {
 		panic(err)
 	}

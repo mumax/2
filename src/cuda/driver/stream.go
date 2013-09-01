@@ -24,14 +24,14 @@ func StreamCreate() Stream {
 	if err != SUCCESS {
 		panic(err)
 	}
-	return Stream(unsafe.Pointer(stream))
+	return Stream(uintptr(unsafe.Pointer(stream)))
 }
 
 // Destroys the asynchronous stream
 func (stream *Stream) Destroy() {
 	str := *stream
 	*stream = Stream(uintptr(0))
-	err := Result(C.cuStreamDestroy(C.CUstream(unsafe.Pointer(str))))
+	err := Result(C.cuStreamDestroy(C.CUstream(unsafe.Pointer(uintptr(str)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -44,7 +44,7 @@ func StreamDestroy(stream *Stream) {
 
 // Blocks until the stream has completed.
 func (stream Stream) Synchronize() {
-	err := Result(C.cuStreamSynchronize(C.CUstream(unsafe.Pointer(stream))))
+	err := Result(C.cuStreamSynchronize(C.CUstream(unsafe.Pointer(uintptr(stream)))))
 	if err != SUCCESS {
 		panic(err)
 	}
@@ -52,7 +52,7 @@ func (stream Stream) Synchronize() {
 
 // Returns Success if all operations have completed, ErrorNotReady otherwise
 func (stream Stream) Query() Result {
-	return Result(C.cuStreamQuery(C.CUstream(unsafe.Pointer(stream))))
+	return Result(C.cuStreamQuery(C.CUstream(unsafe.Pointer(uintptr(stream)))))
 }
 
 // Returns Success if all operations have completed, ErrorNotReady otherwise
