@@ -35,7 +35,7 @@ func LoadAnisCubic4(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_Cub4Anis")
-	e.Depends("H_Cub4Anis", "cubic4AnisK1", "anisC1", "anisC2", "MSat", "m")
+	e.Depends("H_Cub4Anis", "cubic4AnisK1", "anisCubic4_1", "anisCubic4_2", "MSat", "m")
 
 	Hcanis.SetUpdater(&Cubic4AnisUpdater{e.Quant("m"), Hcanis, k1, e.Quant("msat"), anisC1, anisC2})
 }
@@ -53,7 +53,7 @@ func LoadAnisCubic6(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_Cub6Anis")
-	e.Depends("H_Cub6Anis", "cubic6AnisK1", "cubic6AnisK2", "anisC1", "anisC2", "MSat", "m")
+	e.Depends("H_Cub6Anis", "cubic6AnisK1", "cubic6AnisK2", "anisCubic6_1", "anisCubic6_2", "MSat", "m")
 
 	Hcanis.SetUpdater(&Cubic6AnisUpdater{e.Quant("m"), Hcanis, k1, k2, e.Quant("msat"), anisC1, anisC2})
 }
@@ -72,7 +72,7 @@ func LoadAnisCubic8(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_Cub8Anis")
-	e.Depends("H_Cub8Anis", "cubic8AnisK1", "cubic8AnisK2", "cubic8AnisK3", "anisC1", "anisC2", "MSat", "m")
+	e.Depends("H_Cub8Anis", "cubic8AnisK1", "cubic8AnisK2", "cubic8AnisK3", "anisCubic8_1", "anisCubic8_2", "MSat", "m")
 
 	Hcanis.SetUpdater(&Cubic8AnisUpdater{e.Quant("m"), Hcanis, k1, k2, k3, e.Quant("msat"), anisC1, anisC2})
 }
