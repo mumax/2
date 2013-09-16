@@ -1228,13 +1228,13 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 
 				  // For Nxx
 				  I = FullTensorIdx[0][0]
-				  scratch[I][xw][yw][zw]=float32(scale*Newell_f(R[X],R[Y],R[Z]))
+				  scratch[I][xw][yw][zw] = float32(scale*Newell_f(R[X],R[Y],R[Z]))
 				  // For Nxy
 				  I = FullTensorIdx[0][1]
-				  scratch[I][xw][yw][zw]=float32(scale*Newell_g(R[X],R[Y],R[Z]))
+				  scratch[I][xw][yw][zw] = float32(scale*Newell_g(R[X],R[Y],R[Z]))
 				  // For Nxz
 				  I = FullTensorIdx[0][2]
-				  scratch[I][xw][yw][zw]=float32(scale*Newell_g(R[X],R[Z],R[Y]))
+				  scratch[I][xw][yw][zw] = float32(scale*Newell_g(R[X],R[Z],R[Y]))
 
 			    }
 		      }
@@ -1266,7 +1266,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 					scratch[I][xw][yw][zw] *= float32(2.0)
 
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] -=float32(scale*Newell_g(R[X],R[Y],0.0))
+					scratch[I][xw][yw][zw] -= float32(scale*Newell_g(R[X],R[Y],0.0))
 					scratch[I][xw][yw][zw] *= float32(2.0)
 
 					I = FullTensorIdx[0][2]
@@ -1318,7 +1318,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 					scratch[I][xw][yw][zw] *= float32(2.0)
 
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] =float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0)
 
 					I = FullTensorIdx[0][2]
 					scratch[I][xw][yw][zw] -= float32(scale*(Newell_g(R[X],R[Z]-cellsize[Z],0.0)+Newell_g(R[X],R[Z]+cellsize[Z],0.0)-2.0*Newell_g(R[X],R[Z],0.0)))
@@ -1498,11 +1498,11 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 				xw := x
 				if ((x==0) || (y==0)) {
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw]=float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0)
 				}
 				if ((x==0) || (z==0)) {
 					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw]=float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0)
 				}
 				I = FullTensorIdx[0][0]
 				tmpA00 := scratch[I][xw][yw][zw]
@@ -1513,59 +1513,59 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 
 				if (x>0) {
 					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][yw][zw]=tmpA00
+					scratch[I][ldimx-xw][yw][zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][yw][zw]=-1.0*tmpA01
+					scratch[I][ldimx-xw][yw][zw] = -1.0*tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][yw][zw]=-1.0*tmpA02
+					scratch[I][ldimx-xw][yw][zw] = -1.0*tmpA02
 				}
 				if (y>0) {
 					I = FullTensorIdx[0][0]
-					scratch[I][xw][ldimy-yw][zw]=tmpA00
+					scratch[I][xw][ldimy-yw][zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][ldimy-yw][zw]=-1.0*tmpA01
+					scratch[I][xw][ldimy-yw][zw] = -1.0*tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][xw][ldimy-yw][zw]=tmpA02
+					scratch[I][xw][ldimy-yw][zw] = tmpA02
 				}
 				if (z>0) {
 					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][ldimz-zw]=tmpA00
+					scratch[I][xw][yw][ldimz-zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][ldimz-zw]=tmpA01
+					scratch[I][xw][yw][ldimz-zw] = tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][ldimz-zw]=-1.0*tmpA02
+					scratch[I][xw][yw][ldimz-zw] = -1.0*tmpA02
 				}
 				if ((x>0) && (y>0)) {
 					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][ldimy-yw][zw]=tmpA00
+					scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][ldimy-yw][zw]=tmpA01
+					scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][ldimy-yw][zw]=-1.0*tmpA02
+					scratch[I][ldimx-xw][ldimy-yw][zw] = -1.0*tmpA02
 				}
 				if ((x>0) && (z>0)) {
 					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][yw][ldimz-zw]=tmpA00
+					scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][yw][ldimz-zw]=-1.0*tmpA01
+					scratch[I][ldimx-xw][yw][ldimz-zw] = -1.0*tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][yw][ldimz-zw]=tmpA02
+					scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA02
 				}
 				if ((y>0) && (z>0)) {
 					I = FullTensorIdx[0][0]
-					scratch[I][xw][ldimy-yw][ldimz-zw]=tmpA00
+					scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][ldimy-yw][ldimz-zw]=-1.0*tmpA01
+					scratch[I][xw][ldimy-yw][ldimz-zw] = -1.0*tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][xw][ldimy-yw][ldimz-zw]=-1.0*tmpA02
+					scratch[I][xw][ldimy-yw][ldimz-zw] = -1.0*tmpA02
 				}
 				if ((x>0) && (y>0) && (z>0)) {
 					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw]=tmpA00
+					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA00
 					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw]=tmpA01
+					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA01
 					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw]=tmpA02
+					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA02
 				}
 			}
 		}
@@ -1580,21 +1580,21 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 					for x:=rdimx; x<=ldimx-rdimx; x++ {
 						xw := x
 						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw]=float32(0.0)
+						scratch[I][xw][yw][zw] = float32(0.0)
 						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw]=float32(0.0)
+						scratch[I][xw][yw][zw] = float32(0.0)
 						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw]=float32(0.0)
+						scratch[I][xw][yw][zw] = float32(0.0)
 					}
 				} else { // Inner y
 					for x:=0; x<ldimx; x++ {
 						xw := x
 						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw]=float32(0.0)
+						scratch[I][xw][yw][zw] = float32(0.0)
 						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw]=float32(0.0)
+						scratch[I][xw][yw][zw] = float32(0.0)
 						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw]=float32(0.0)
+						scratch[I][xw][yw][zw] = float32(0.0)
 					}
 				}
 			}
@@ -1604,11 +1604,11 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 				for x:=0; x<ldimx; x++ {
 					xw := x
 					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][zw]=float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0)
 					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw]=float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0)
 					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw]=float32(0.0)
+					scratch[I][xw][yw][zw] = float32(0.0)
 				}
 			}
 		}
@@ -1628,11 +1628,11 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 					xw := x
 					R[X] = float64(x-1)*cellsize[X]
 					I = FullTensorIdx[1][1]
-					scratch[I][xw][yw][zw]=float32(scale*Newell_f(R[Y],R[X],R[Z])) // For Nyy
+					scratch[I][xw][yw][zw] = float32(scale*Newell_f(R[Y],R[X],R[Z])) // For Nyy
 					I = FullTensorIdx[1][2]
-					scratch[I][xw][yw][zw]=float32(scale*Newell_g(R[Y],R[Z],R[X])) // For Nyz
+					scratch[I][xw][yw][zw] = float32(scale*Newell_g(R[Y],R[Z],R[X])) // For Nyz
 					I = FullTensorIdx[2][2]
-					scratch[I][xw][yw][zw]=float32(scale*Newell_f(R[Z],R[Y],R[X])) // For Nzz
+					scratch[I][xw][yw][zw] = float32(scale*Newell_f(R[Z],R[Y],R[X])) // For Nzz
 				}
 			}
 		}
@@ -1801,6 +1801,10 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		// See Notes IV, 26-Feb-2007, p102.
 		//scaled_arad_sq, fft_scaling := float64(0.0), float64(0.0)
 		if(scaled_arad>=0.0) {
+			scaled_arad_sq := scaled_arad*scaled_arad
+			fft_scaling := float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
+			Assert(scaled_arad_sq > 0.0 && fft_scaling > 0.0)
+
 			// Note that all distances here are in "reduced" units,
 			// scaled so that dx, dy, and dz are either small integers
 			// or else close to 1.0.
@@ -1811,10 +1815,219 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 			/// the output from the FFT + iFFT by -1 in GetEnergy() below.
 			xtest := float64(rdimx)*float64(cellsize[X])
 			xtest *= xtest
-			//Oxs_DemagNyyAsymptotic ANyy(dx,dy,dz);
-			//Oxs_DemagNyzAsymptotic ANyz(dx,dy,dz);
-			//Oxs_DemagNzzAsymptotic ANzz(dx,dy,dz);
+
+			ANyy := new(DemagNxxAsymptotic)
+			Default_Refine_Data := float64(1.5)
+			ANyy.refine_data.DemagAsymptoticRefineData(dy,dx,dz,Default_Refine_Data)
+			ANyy.Nxx.DemagNxxAsymptoticBaseF(&ANyy.refine_data)
+
+			ANyz := new(DemagNxyAsymptotic)
+			ANyz.refine_data.DemagAsymptoticRefineData(dy,dz,dx,Default_Refine_Data)
+			ANyz.Nxy.DemagNxyAsymptoticBaseF(&ANyz.refine_data)
+
+			ANzz := new(DemagNxxAsymptotic)
+			ANzz.refine_data.DemagAsymptoticRefineData(dz,dy,dx,Default_Refine_Data)
+			ANzz.Nxx.DemagNxxAsymptoticBaseF(&ANzz.refine_data)
+
+			for z:=0 ; z<rdimz ; z++ {
+				zw := z
+				R[Z] = float64(z)*cellsize[Z]
+				R2[Z] = R[Z]*R[Z]
+				for y:=0 ; y<rdimy ; y++ {
+					yw := y
+					R[Y] = float64(y)*cellsize[Y]
+					R2[Y] = R[Y]*R[Y]
+
+					xstart := 0
+					test := scaled_arad_sq - R2[Y] - R2[Z]
+					if (test>0.0) {
+						if (test>xtest) {
+							xstart = rdimx+1;
+						} else {
+							xstart = int(math.Ceil(math.Sqrt(test)/cellsize[X]));
+						}
+					}
+					for x:=xstart; x<rdimx ; x++ {
+						xw := x
+						R[X] = float64(x)*cellsize[X]
+
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][yw][zw] = float32(fft_scaling*ANyy.NyyAsymptotic(R[X],R[Y],R[Z]))
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][yw][zw] = float32(fft_scaling*ANyz.NyzAsymptotic(R[X],R[Y],R[Z]))
+						I = FullTensorIdx[2][2]
+						scratch[I][xw][yw][zw] = float32(fft_scaling*ANzz.NzzAsymptotic(R[X],R[Y],R[Z]))
+					}
+				}
+			}
+		}
+
+		// Step 3: Use symmetries to reflect into other octants.
+		//     Also, at each coordinate plane, set to 0.0 any term
+		//     which is odd across that boundary.  It should already
+		//     be close to 0, but will likely be slightly off due to
+		//     rounding errors.
+		// Symmetries: A00, A11, A22 are even in each coordinate
+		//             A01 is odd in x and y, even in z.
+		//             A02 is odd in x and z, even in y.
+		//             A12 is odd in y and z, even in x.
+		for z:=0 ; z<rdimz ; z++ {
+			zw := z
+			for y:=0 ; y<rdimy ; y++ {
+				yw := y
+				for x:=0 ; x<rdimx ; x++ {
+					xw := x
+					if (y==0 || z==0) {
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][yw][zw] = 0.0  // A12
+					}
+
+					I = FullTensorIdx[1][1]
+					tmpA11 := scratch[I][xw][yw][zw]
+					I = FullTensorIdx[1][2]
+					tmpA12 := scratch[I][xw][yw][zw]
+					I = FullTensorIdx[2][2]
+					tmpA22 := scratch[I][xw][yw][zw]
+					if (x>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][ldimx-xw][yw][zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][ldimx-xw][yw][zw] = tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][ldimx-xw][yw][zw] = tmpA22
+					}
+					if (y>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][ldimy-yw][zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][ldimy-yw][zw] = -1.0*tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][xw][ldimy-yw][zw] = tmpA22
+					}
+					if (z>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][yw][ldimz-zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][yw][ldimz-zw] = -1.0*tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][xw][yw][ldimz-zw] = tmpA22
+					}
+					if (x>0 && y>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][ldimx-xw][ldimy-yw][zw] = -1.0*tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA22
+					}
+					if(x>0 && z>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][ldimx-xw][yw][ldimz-zw] = -1.0*tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA22
+					}
+					if(y>0 && z>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA22
+					}
+					if(x>0 && y>0 && z>0) {
+						I = FullTensorIdx[1][1]
+						scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA11
+						I = FullTensorIdx[1][2]
+						scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA12
+						I = FullTensorIdx[2][2]
+						scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA22
+					}
+				}
+			}
+		}
+
+		// Step 3.5: Fill in zero-padded overhang
+		for z:=0 ; z<ldimz ; z++ {
+			zw := z
+			if (z<rdimz || z>ldimz-rdimz) { // Outer z
+				for y:=0 ; y<ldimy ; y++ {
+					yw := y
+					if (y<rdimy || y>ldimy-rdimy) { // Outer y
+						for x:=rdimx ; x<=ldimx-rdimx ; x++ {
+							xw := x
+							I = FullTensorIdx[1][1]
+							scratch[I][xw][yw][zw] = float32(0.0)
+							I = FullTensorIdx[1][2]
+							scratch[I][xw][yw][zw] = float32(0.0)
+							I = FullTensorIdx[2][2]
+							scratch[I][xw][yw][zw] = float32(0.0)
+						}
+					} else { // Inner y
+						for x:=0 ; x<ldimx ; x++ {
+							xw := x
+							I = FullTensorIdx[1][1]
+							scratch[I][xw][yw][zw] = float32(0.0)
+							I = FullTensorIdx[1][2]
+							scratch[I][xw][yw][zw] = float32(0.0)
+							I = FullTensorIdx[2][2]
+							scratch[I][xw][yw][zw] = float32(0.0)
+						}
+					}
+				}
+			} else { // Middle z
+				for y:=0 ; y<ldimy ; y++ {
+					yw := y
+					for x:=0 ; x<ldimx ; x++ {
+						xw := x
+						I = FullTensorIdx[1][1]
+						scratch[I][xw][yw][zw] = float32(0.0)
+						I = FullTensorIdx[1][2]
+						scratch[I][xw][yw][zw] = float32(0.0)
+						I = FullTensorIdx[2][2]
+						scratch[I][xw][yw][zw] = float32(0.0)
+					}
+				}
+			}
 		}
 	}
 
+	// Copy from scratch to kern
+	array := kern.Array
+	for z:=0 ; z<ldimz ; z++ {
+		zw := z
+		for y:=0 ; y<ldimy ; y++ {
+			yw := y
+			for x:=0 ; x<ldimx ; x++ {
+				xw := x
+				// Copy te diagonal elements
+				I = FullTensorIdx[0][0]
+				array[I][xw][yw][zw] = scratch[I][xw][yw][zw]
+				I = FullTensorIdx[1][1]
+				array[I][xw][yw][zw] = scratch[I][xw][yw][zw]
+				I = FullTensorIdx[2][2]
+				array[I][xw][yw][zw] = scratch[I][xw][yw][zw]
+				// Copy the upper triangle and also copy upper
+				// triangle to lower triangle to symmetrize kern
+				I = FullTensorIdx[0][1]
+				tmpA01 := scratch[I][xw][yw][zw]
+				array[I][xw][yw][zw] = tmpA01
+				I = FullTensorIdx[1][0]
+				array[I][xw][yw][zw] = tmpA01
+
+				I = FullTensorIdx[0][2]
+				tmpA02 := scratch[I][xw][yw][zw]
+				array[I][xw][yw][zw] = tmpA02
+				I = FullTensorIdx[2][0]
+				array[I][xw][yw][zw] = tmpA02
+
+				I = FullTensorIdx[1][2]
+				tmpA12 := scratch[I][xw][yw][zw]
+				array[I][xw][yw][zw] = tmpA12
+				I = FullTensorIdx[2][1]
+				array[I][xw][yw][zw] = tmpA12
+			}
+		}
+	}
 }
