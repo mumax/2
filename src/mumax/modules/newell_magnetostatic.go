@@ -729,6 +729,18 @@ func (s *DemagNxxAsymptotic) NxxAsymptotic(x, y, z float64) float64 { // Oxs_Dem
 	return s.NxxAsymptoticF(ptdata)
 }
 
+func (s *DemagNxxAsymptotic) NyyAsymptotic(y, x, z float64) float64 { // Oxs_DemagNxxAsymptotic::Oxs_DemagNxxAsymptotic
+	ptdata := new(DemagNabData)
+	ptdata.Set(x,y,z)
+	return s.NxxAsymptoticF(ptdata)
+}
+
+func (s *DemagNxxAsymptotic) NzzAsymptotic(z, y, x float64) float64 { // Oxs_DemagNxxAsymptotic::Oxs_DemagNxxAsymptotic
+	ptdata := new(DemagNabData)
+	ptdata.Set(x,y,z)
+	return s.NxxAsymptoticF(ptdata)
+}
+
 func (s *DemagNxxAsymptotic) NxxAsymptoticF(ptdata *DemagNabData) float64 { // Oxs_DemagNxxAsymptotic::NxxAsymptotic
 	xcount := s.refine_data.xcount
 	ycount := s.refine_data.ycount
@@ -949,6 +961,12 @@ func (s *DemagNxyAsymptoticBase) NxyAsymptoticPairXBase(ptdata *DemagNabPairData
 }
 
 func (s *DemagNxyAsymptotic) NxyAsymptotic(x, y, z float64) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptotic
+	ptdata := new(DemagNabData)
+	ptdata.Set(x,y,z)
+	return s.NxyAsymptoticF(ptdata)
+}
+
+func (s *DemagNxyAsymptotic) NyzAsymptotic(y, z, x float64) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptotic
 	ptdata := new(DemagNabData)
 	ptdata.Set(x,y,z)
 	return s.NxyAsymptoticF(ptdata)
