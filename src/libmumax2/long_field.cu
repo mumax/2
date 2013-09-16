@@ -3,11 +3,13 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
+//#include "common_func.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+// ========================================
 
 __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
                                 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
@@ -28,7 +30,7 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
 
     int I = threadindex;
 
-    if (I < NPart)
+    if (I < NPart)  // Thread configurations are usually too large...
     {
 
         float Ms0T0 = (msat0T0Msk != NULL ) ? msat0T0Msk[I] * msat0T0Mul : msat0T0Mul;
@@ -36,7 +38,9 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
         float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
         float Tc = (TcMsk != NULL) ? TcMsk[I] * TcMul : TcMul;
         float Ts = (TsMsk != NULL) ? TsMsk[I] * TsMul : TsMul;
-
+        // ~ if (I == 0) {
+        // ~ printf("Ms0T0: %f\tMs0: %f\tkappa: %f\n", Ms0T0, Ms0, kappa);
+        // ~ }
         if (Ms0T0 == 0.0f || kappa == 0.0f || Ts == Tc)
         {
             hx[I] = 0.0f;
@@ -54,7 +58,7 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
         float ratio = (Ts < Tc) ? Ms / Ms0 : Ms / Ms0T0;
 
         float mult = (Ts < Tc) ?          (1.0f - ratio * ratio)
-                     : - 2.0f * (1.0f - 0.6f * ratio * ratio * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
+                     : - 2.0f * (1.0f + 0.6f * ratio * ratio * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
 
         mult = (mult == 0.0f) ? 0.0f : kappa * Ms * mult;
 
