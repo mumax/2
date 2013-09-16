@@ -119,6 +119,17 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	runtime.GC()
 }
 
+// Enable Demagnetizing field (Newell's formulation)
+func (plan *MaxwellPlan) EnableNewellDemag(m, Msat *Quant) {
+	plan.init()
+	plan.loadNewellKernel()
+	plan.BInput[MX] = m.Array().Component(X)
+	plan.BInput[MY] = m.Array().Component(Y)
+	plan.BInput[MZ] = m.Array().Component(Z)
+	// multipliers set on the fly
+	runtime.GC()
+}
+
 func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
 	plan.init()
 	plan.loadRotorKernel()
@@ -187,6 +198,27 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	kern := quant.Buffer()
 	accuracy := 6
 	Kernel_Arne(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
+	plan.kern[DIPOLE] = kern
+	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
+}
+
+// Load dipole kernel (Newell's formulation) if not yet done so.
+// Required for field of electric/magnetic charge density.
+func (plan *MaxwellPlan) loadNewellKernel() {
+	if plan.kern[DIPOLE] != nil {
+		return
+	}
+	e := GetEngine()
+	// DEBUG: add the kernel as orphan quant, so we can output it.
+	quant := NewQuant("kern_dipole", TENS, plan.logicSize[:], FIELD, Unit(""), CPUONLY, "reduced dipole kernel")
+	if DEBUG {
+		e.AddQuant(quant)
+	}
+
+	kern := quant.Buffer()
+	asymptotic_radius := 32
+	zero_self_demag := 0
+	Kernel_Newell(plan.logicSize[:], e.CellSize(), e.Periodic(), asymptotic_radius, zero_self_demag, kern)
 	plan.kern[DIPOLE] = kern
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
 }

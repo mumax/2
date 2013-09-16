@@ -17,6 +17,7 @@ import (
 // Register this module
 func init() {
 	RegisterModule("demag", "Demagnetizing field", LoadDemag)
+	RegisterModule("newell_demag", "Demagnetizing field (Newell's formulation)", LoadNewellDemag)
 }
 
 // Load demag field
@@ -24,5 +25,13 @@ func LoadDemag(e *Engine) {
 	LoadMagnetization(e)
 	LoadBField(e)
 	maxwell.EnableDemag(e.Quant("m"), e.Quant("Msat"))
+	e.Depends("B", "m", "Msat")
+}
+
+// Load demag field (Newell's formulation)
+func LoadNewellDemag(e *Engine) {
+	LoadMagnetization(e)
+	LoadBField(e)
+	maxwell.EnableNewellDemag(e.Quant("m"), e.Quant("Msat"))
 	e.Depends("B", "m", "Msat")
 }
