@@ -24,7 +24,7 @@ setgridsize(Nx, Ny, Nz)
 setcellsize(csX, csY, csZ)
 # setperiodic(8,8,0)
 
-# LLB R
+# LLBar
 load('exchange6')
 load('demag')
 load('zeeman')
@@ -33,7 +33,7 @@ load('llbar')
 load('llbar/torque')
 load('llbar/damping/nonconservative/00/local')
 
-loadargs('dissipative-function',[], ["m:mf","R:llbar_local00nc"],["Qmag:Qnc"])
+loadargs('energy-density-dissipation-rate',[], ["m:mf","R:llbar_local00nc"],["Qmag:Qnc"])
 
 load('temperature/ETM')
 load('temperature/ETM/Qspatial')

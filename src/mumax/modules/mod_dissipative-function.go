@@ -32,7 +32,7 @@ var outDF = map[string]string{
 // Register this module
 func init() {
 	args := Arguments{inDF, depsDF, outDF}
-	RegisterModuleArgs("dissipative-function", "Signed Dissipative function", args, LoadDFArgs)
+	RegisterModuleArgs("energy-density-dissipation-rate", "Energy density dissipation rate", args, LoadDFArgs)
 }
 
 // There is a problem, since LLB torque is normalized by msat0T0 (zero-temperature value), while LLG torque is normalized by msat
@@ -53,7 +53,7 @@ func LoadDFArgs(e *Engine, args ...Arguments) {
 	// make sure the effective field is in place
 	LoadHField(e)
 
-	Qmagn := e.AddNewQuant(arg.Outs("Qmag"), SCALAR, FIELD, Unit("J/(s*m3)"), "The heat flux density from magnetic subsystem to thermal bath")
+	Qmagn := e.AddNewQuant(arg.Outs("Qmag"), SCALAR, FIELD, Unit("J/(s*m3)"), "The heat flux density of the relaxation")
 
 	if e.HasQuant(arg.Deps("m")) {
 		e.Depends(arg.Outs("Qmag"), arg.Deps("m"), arg.Deps("H_eff"), arg.Deps("msat"), arg.Deps("R"))
@@ -80,11 +80,11 @@ func (u *DFUpdater) Update() {
 
 	// Account for msat multiplier, because it is a mask
 	u.Qmagn.Multiplier()[0] = u.msat.Multiplier()[0]
-	// Account for -0.5 * mu0
-	u.Qmagn.Multiplier()[0] *= -0.5 * Mu0
+	// Account for - 2.0 * 0.5 * mu0
+	u.Qmagn.Multiplier()[0] *= -Mu0
 	// Account for multiplier in H_eff
 	u.Qmagn.Multiplier()[0] *= u.Heff.Multiplier()[0]
-	// From now Qmag = dot(H_eff, torque)
+	// Account for multiplier in R that should always be equal to the gyromagnetic ratio. Moreover the R is reduced to [1/s] units
 	u.Qmagn.Multiplier()[0] *= u.R.Multiplier()[0]
 
 	gpu.DotSign(u.Qmagn.Array(),
@@ -92,7 +92,7 @@ func (u *DFUpdater) Update() {
 		u.R.Array(),
 		u.m.Array())
 
-	// Finally. do Qmag = Qmag * msat(r) to account spatial properties of msat
+	// Finally. do Qmag = Qmag * msat(r) to account spatial properties of msat that are hidden in the definition of the relaxation constants
 	if !u.msat.Array().IsNil() {
 		gpu.Mul(u.Qmagn.Array(),
 			u.Qmagn.Array(),
