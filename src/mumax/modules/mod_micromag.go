@@ -22,7 +22,7 @@ func init() {
 func LoadMicromag(e *Engine) {
 	LoadHField(e)
 	LoadMagnetization(e)
-	e.LoadModule("demag")
+	e.LoadModule("newell_demag")
 	e.LoadModule("exchange6")
 	e.LoadModule("llg")
 	e.LoadModule("zeeman")

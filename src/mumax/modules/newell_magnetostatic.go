@@ -180,48 +180,48 @@ func Newell_f(x, y, z float64) float64 {
 	Rsq := xsq+ysq+zsq
 	if (Rsq <= 0.0) { return float64(0.0) }
 	R:= math.Sqrt(Rsq)
-	var piecePt *[]float64
-	piece := *piecePt
+
+	var piece []float64
 	piececount := int(0)
 	if (z>0.0) {
 	   var temp1 float64
 	   var temp2 float64
 	   var temp3 float64
-	   piece[piececount] = 2.0*(2.0*xsq-ysq-zsq)*R
+	   piece = append(piece, float64(2.0*(2.0*xsq-ysq-zsq)*R))
 	   piececount++
 	   temp1 = x*y*z
 	   if (temp1 > 0.0) {
-	      piece[piececount] = -12.0*temp1*math.Atan2(y*z,x*R)
+	      piece = append(piece, float64(-12.0*temp1*math.Atan2(y*z,x*R)))
 	      piececount++
 	   }
 	   temp2 = xsq+zsq
 	   if ((y > 0.0) && (temp2>0.0)) {
 	      dummy := math.Log(((y+R)*(y+R))/temp2)
-	      piece[piececount] = 3.0*y*(zsq-xsq)*dummy
+	      piece = append(piece, float64(3.0*y*(zsq-xsq)*dummy))
 	      piececount++
 	   }
 	   temp3 = xsq+ysq
 	   if (temp3 > 0.0) {
 	      dummy := math.Log(((z+R)*(z+R))/temp3)
-	      piece[piececount] = 3.0*z*(ysq-xsq)*dummy
+	      piece = append(piece, float64(3.0*z*(ysq-xsq)*dummy))
 	      piececount++
 	   }
 	} else {
 	  if (x==y) {
 	    K := 2.0*math.Sqrt(2.0)-6.0*math.Log(1.0+math.Sqrt(2.0))
-	    piece[piececount] = K*xsq*x
+	    piece = append(piece, float64(K*xsq*x))
 	    piececount++
 	  } else {
-	    piece[piececount] = 2.0*(2.0*xsq-ysq)*R
+	    piece = append(piece, float64(2.0*(2.0*xsq-ysq)*R))
 	    piececount++
 	    if ( (y > 0.0) && (x > 0.0)) {
-	       piece[piececount] = -6.0*y*xsq*math.Log((y+R)/x)
+	       piece = append(piece, float64(-6.0*y*xsq*math.Log((y+R)/x)))
 	       piececount++
 	    }
 	  }
 	}
 
-	return float64(accSum(piececount,piecePt)/12.0)
+	return float64(accSum(piececount,&piece)/12.0)
 }
 
 func CalculateSDA00(x, y, z, dx, dy, dz float64) float64 {
@@ -229,8 +229,8 @@ func CalculateSDA00(x, y, z, dx, dy, dz float64) float64 {
 	if ( (x == 0.0) && (y == 0.0) && (z == 0.0) ) {
 	   result = SelfDemagNx(dx,dy,dz)*(4.0*math.Pi*dx*dy*dz)
 	} else {
-	   var arrPt *[]float64
-	   arr := *arrPt
+	   arr := make([]float64, 27, 27)
+
 	   arr[0] = -1.0*Newell_f(x+dx,y+dy,z+dz)
 	   arr[1] = -1.0*Newell_f(x+dx,y-dy,z+dz)
 	   arr[2] = -1.0*Newell_f(x+dx,y-dy,z-dz)
@@ -262,7 +262,7 @@ func CalculateSDA00(x, y, z, dx, dy, dz float64) float64 {
 
 	   arr[26] = 8.0*Newell_f(x-dx,y+dy,z)
 
-	   result = 8.0*accSum(27,arrPt)
+	   result = 8.0*accSum(27,&arr)
 	}
 	return result
 }
@@ -290,18 +290,17 @@ func Newell_g(x, y, z float64) float64 {
 	if (Rsq <= 0.0) { return float64(0.0) }
 	R := math.Sqrt(Rsq)
 
-	var piecePt *[]float64
-	piece := *piecePt
+	var piece []float64
 	piececount := int(0)
-	piece[piececount] = -2.0*x*y*R
+	piece = append(piece, float64(-2.0*x*y*R))
 	piececount++
 
 	if (z > 0.0) {
-	   piece[piececount] = -z*zsq*math.Atan2(x*y,z*R)
+	   piece = append(piece, float64(-z*zsq*math.Atan2(x*y,z*R)))
 	   piececount++
-	   piece[piececount] = -3.0*z*ysq*math.Atan2(x*z,y*R)
+	   piece = append(piece, float64(-3.0*z*ysq*math.Atan2(x*z,y*R)))
 	   piececount++
-	   piece[piececount] = -3.0*z*xsq*math.Atan2(y*z,x*R)
+	   piece = append(piece, float64(-3.0*z*xsq*math.Atan2(y*z,x*R)))
 	   piececount++
 
 	   var temp1 float64
@@ -310,36 +309,35 @@ func Newell_g(x, y, z float64) float64 {
 
 	   temp1=xsq+ysq
 	   if (temp1>0.0) {
-	      piece[piececount] = 3.0*x*y*z*math.Log((z+R)*(z+R)/temp1)
+	      piece = append(piece, float64(3.0*x*y*z*math.Log((z+R)*(z+R)/temp1)))
 	      piececount++
 	   }
 	   temp2=ysq+zsq
 	   if (temp2>0.0) {
-	      piece[piececount] = 0.5*y*(3.0*zsq-ysq)*math.Log((x+R)*(x+R)/temp2)
+	      piece = append(piece, float64(0.5*y*(3.0*zsq-ysq)*math.Log((x+R)*(x+R)/temp2)))
 	      piececount++
 	   }
 	   temp3=xsq+zsq
 	   if (temp3>0.0) {
-	      piece[piececount] = 0.5*x*(3.0*zsq-xsq)*math.Log((y+R)*(y+R)/temp3)
+	      piece = append(piece, float64(0.5*x*(3.0*zsq-xsq)*math.Log((y+R)*(y+R)/temp3)))
 	      piececount++
 	   }
 	} else {
 	  if(y>0.0) {
-	  	    piece[piececount] = -y*ysq*math.Log((x+R)/y);
-		    piececount++
+	  	piece = append(piece, float64(-y*ysq*math.Log((x+R)/y)))
+		piececount++
 	  }
 	  if(x>0.0) {
-	  	    piece[piececount] = -x*xsq*math.Log((y+R)/x);
-		    piececount++
+	  	piece = append(piece, float64(-x*xsq*math.Log((y+R)/x)))
+		piececount++
 	  }
 	}
-	return float64(result_sign*accSum(piececount,piecePt)/6.0)
+	return float64(result_sign*accSum(piececount,&piece)/6.0)
 }
 
 func CalculateSDA01(x, y, z, l, h, e float64) float64 {
      if ((x == 0.0) || (y == 0.0)) { return float64(0.0) }
-     var arrPt *[]float64
-     arr := *arrPt
+     arr := make([]float64,27)
      arr[0] = -1.0*Newell_g(x-l,y-h,z-e)
      arr[1] = -1.0*Newell_g(x-l,y-h,z+e)
      arr[2] = -1.0*Newell_g(x+l,y-h,z+e)
@@ -371,7 +369,7 @@ func CalculateSDA01(x, y, z, l, h, e float64) float64 {
 
      arr[26] =  8.0*Newell_g(x,y,z)
 
-     return accSum(27,arrPt)
+     return accSum(27,&arr)
 
 }
 
@@ -1109,7 +1107,6 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	ffts := new(Newell3DFFT)
 
 	var (
-	    scratchPt *host.Array // Create some scratch space for doing computations
 	    p1, p2, q1, q2	float64
 	    R, R2	[3]float64
 	    rdimx, rdimy, rdimz, cdimx, cdimy, cdimz int
@@ -1149,7 +1146,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 //	adimy := (ldimy/2) + 1
 //	adimz := (ldimz/2) + 1
 
-	scratch := scratchPt.Array
+	scratch := kern.Array
 	dx, dy, dz := cellsize[X], cellsize[Y], cellsize[Z]
 
 	// Determine relative sizes of dx, dy and dz, since that is all that demag
@@ -1993,40 +1990,29 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		}
 	}
 
-	// Copy from scratch to kern
-	array := kern.Array
+	// Copy from upper triangle to lower triangle
 	for z:=0 ; z<ldimz ; z++ {
 		zw := z
 		for y:=0 ; y<ldimy ; y++ {
 			yw := y
 			for x:=0 ; x<ldimx ; x++ {
 				xw := x
-				// Copy te diagonal elements
-				I = FullTensorIdx[0][0]
-				array[I][xw][yw][zw] = scratch[I][xw][yw][zw]
-				I = FullTensorIdx[1][1]
-				array[I][xw][yw][zw] = scratch[I][xw][yw][zw]
-				I = FullTensorIdx[2][2]
-				array[I][xw][yw][zw] = scratch[I][xw][yw][zw]
 				// Copy the upper triangle and also copy upper
 				// triangle to lower triangle to symmetrize kern
 				I = FullTensorIdx[0][1]
 				tmpA01 := scratch[I][xw][yw][zw]
-				array[I][xw][yw][zw] = tmpA01
 				I = FullTensorIdx[1][0]
-				array[I][xw][yw][zw] = tmpA01
+				scratch[I][xw][yw][zw] = tmpA01
 
 				I = FullTensorIdx[0][2]
 				tmpA02 := scratch[I][xw][yw][zw]
-				array[I][xw][yw][zw] = tmpA02
 				I = FullTensorIdx[2][0]
-				array[I][xw][yw][zw] = tmpA02
+				scratch[I][xw][yw][zw] = tmpA02
 
 				I = FullTensorIdx[1][2]
 				tmpA12 := scratch[I][xw][yw][zw]
-				array[I][xw][yw][zw] = tmpA12
 				I = FullTensorIdx[2][1]
-				array[I][xw][yw][zw] = tmpA12
+				scratch[I][xw][yw][zw] = tmpA12
 			}
 		}
 	}
