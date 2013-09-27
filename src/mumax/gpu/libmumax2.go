@@ -285,6 +285,24 @@ func Torque(τ, m, h, αMap *Array, αMul float32) {
 
 }
 
+func WeightedAverage(dst, x0, x1, w0, w1, R *Array, w0Mul, w1Mul, RMul float64) {
+	CheckSize(dst.size4D, x0.size4D)
+	CheckSize(dst.size4D, x1.size4D)
+	C.wavgAsync(
+		(**C.float)(unsafe.Pointer(&(dst.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(x0.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(x1.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(w0.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(w1.pointer[0]))),
+		(**C.float)(unsafe.Pointer(&(R.pointer[0]))),
+		C.float(float32(w0Mul)),
+		C.float(float32(w1Mul)),
+		C.float(float32(RMul)),
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen4D))
+	dst.Stream.Sync()
+}
+
 // Normalize
 func Normalize(m, normMap *Array) {
 	C.normalizeAsync(

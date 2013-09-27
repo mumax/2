@@ -315,4 +315,11 @@ inline __device__ float avgGeomZero(float a, float b)
     float a_b = a + b;
     return (a_b == 0.0f) ? 0.0f : 2.0f * a * b / a_b;
 }
+
+inline __device__ float weightedAvgZero(float x0, float x1, float w0, float w1, float R)
+{
+    float denom = w0 + w1 + 2.0f * R * sqrtf(w0 * w1);
+    return (denom == 0.0f) ? 0.0f : (w0 * x0 + w1 * x1 + 2.0f * R * sqrtf(w0 * x0 * w1 * x1)) / denom;
+}
+
 #endif
