@@ -34,7 +34,8 @@ load('llbar/torque')
 load('llbar/damping/nonconservative/00/local')
 load('llbar/damping/nonconservative/02/local')
 
-loadargs('energy-density-dissipation-rate',[], ["m:mf","R:llbar_local00nc"],["Qmag:Qnc"])
+loadargs('energy-density-dissipation-rate',[], ["m:mf","R:llbar_local00nc", "msat:msat0T0"],["Qmag:Qnc00"])
+loadargs('energy-density-dissipation-rate',[], ["m:mf","R:llbar_local02nc", "msat:msat0T0"],["Qmag:Qnc02"])
 
 load('temperature/ETM')
 load('temperature/LTM')
@@ -42,13 +43,16 @@ load('temperature/E-L')
 
 load('temperature/sum')
 
-load('mfa/msat0')
-load('mfa/ϰ')
+loadargs('mfa/longfield', ["T:Te"],[],[])
+loadargs('mfa/msat0', ["T:Te"],[],[])
+loadargs('mfa/ϰ', ["T:Te"],[],[])
 
 add_to('llbar_RHS', 'llbar_torque')
 add_to('llbar_RHS', 'llbar_local00nc')
 
-add_to("Qe", "Qnc")
+add_to("Qe", "Qnc00")
+add_to("Qe", "Qnc02")
+
 add_to("Qe", "Qlaser")
 add_to_weighted("Qe", "Qel", 1.0)
 add_to_weighted("Ql", "Qel", -1.0)
@@ -104,7 +108,7 @@ setv('ϰ', 1e-4)
 # Heat bath parameters
 setv('Cp_e', 1070.0)
 setv('Cp_l', 4.14e6)
-setv('Gel', 3.6e18)
+setv('Gel', 1.6e18)
 setv('R', 0.5)
 
 lbd = 0.02
@@ -134,7 +138,9 @@ autotabulate(["t", "<Te>"], "Te.txt", tt)
 autotabulate(["t", "<Teff>"], "T.txt", tt)
 autotabulate(["t", "<msat0>"], "msat0.txt", tt)
 autotabulate(["t", "<mf>"], "mf.txt", tt)
-autotabulate(["t", "<Qnc>"], "Qnc.txt", tt)
+autotabulate(["t", "<Qnc00>"], "Qnc00.txt", tt)
+autotabulate(["t", "<Qnc02>"], "Qnc02.txt", tt)
+autotabulate(["t", "<Qe>"], "Qe.txt", tt)
 autotabulate(["t", "<Qlaser>"], "Qlaser.txt", tt)
 
 setv('maxdt', 1e-12)
