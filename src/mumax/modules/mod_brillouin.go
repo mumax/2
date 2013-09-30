@@ -31,7 +31,7 @@ var outBrillouin = map[string]string{
 
 // Register this module
 func init() {
-	args := Arguments{inKappa, depsKappa, outKappa}
+	args := Arguments{inBrillouin, depsBrillouin, outBrillouin}
 	RegisterModuleArgs("mfa/msat0", "Temperature dependence of equilibrium value of saturation magnetization for any finite J", args, LoadBrillouinArgs)
 }
 
