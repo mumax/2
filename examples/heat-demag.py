@@ -32,7 +32,7 @@ load('zeeman')
 load('llbar')
 load('llbar/torque')
 load('llbar/damping/nonconservative/00/local')
-load('llbar/damping/conservative/02/local')
+load('llbar/damping/nonconservative/02/local')
 
 loadargs('energy-density-dissipation-rate',[], ["m:mf","R:llbar_local00nc"],["Qmag:Qnc"])
 
@@ -59,8 +59,8 @@ setv('mf_maxrelerror', 1e-3)
 
 setv('Te_maxabserror', 1e-4)
 setv('Te_maxrelerror', 1e-3)
-setv('Tl_maxabserror', 1e-4)
-setv('Tl_maxrelerror', 1e-3)
+setv('Temp_maxabserror', 1e-4)
+setv('Temp_maxrelerror', 1e-3)
 
 savegraph("graph.png")
 
