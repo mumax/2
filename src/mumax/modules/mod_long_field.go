@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -15,25 +15,63 @@ import (
 	"mumax/gpu"
 )
 
-// Register this module
-func init() {
-	RegisterModule("longfield", "The effective field responsible for exchange longitudinal relaxation", LoadLongField)
+var inLongField = map[string]string{
+	"T": "Teff",
 }
 
-func LoadLongField(e *Engine) {
+var depsLongField = map[string]string{
+	"Tc":      "Tc",
+	"m":       "m",
+	"ϰ":       "ϰ",
+	"H_eff":   "H_eff",
+	"msat":    "msat",
+	"msat0":   "msat0",
+	"msat0T0": "msat0T0",
+}
+
+var outLongField = map[string]string{
+	"H_lf": "H_lf",
+}
+
+// Register this module
+func init() {
+	args := Arguments{inLongField, depsLongField, outLongField}
+	RegisterModuleArgs("mfa/longfield", "The effective field responsible for exchange longitudinal relaxation", args, LoadLongFieldArgs)
+}
+
+func LoadLongFieldArgs(e *Engine, args ...Arguments) {
+
+	// make it automatic !!!
+	var arg Arguments
+
+	if len(args) == 0 {
+		arg = Arguments{inBrillouin, depsBrillouin, outBrillouin}
+	} else {
+		arg = args[0]
+	}
+	//
 
 	LoadHField(e)
 	LoadMagnetization(e)
-	LoadTemp(e, "Te")
-	LoadKappa(e)
+	LoadTemp(e, arg.Ins("T"))
+	LoadKappa(e, arg.Deps("ϰ"))
 	LoadMFAParams(e)
 
-	Hlf := e.AddNewQuant("H_lf", VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
-	hfield := e.Quant("H_eff")
+	T := e.Quant(arg.Ins("T"))
+	Tc := e.Quant(arg.Deps("Tc"))
+	m := e.Quant(arg.Deps("m"))
+	kappa := e.Quant(arg.Deps("ϰ"))
+	msat := e.Quant(arg.Deps("msat"))
+	msat0 := e.Quant(arg.Deps("msat0"))
+	msat0T0 := e.Quant(arg.Deps("msat0T0"))
+	Hlf := e.AddNewQuant(arg.Outs("H_lf"), VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
+	e.Depends(arg.Outs("H_lf"), arg.Deps("ϰ"), arg.Deps("msat0"), arg.Deps("msat"), arg.Deps("m"), arg.Deps("Tc"), arg.Deps("msat0T0"), arg.Ins("T"))
+
+	hfield := e.Quant(arg.Deps("H_eff"))
 	sum := hfield.Updater().(*SumUpdater)
-	sum.AddParent("H_lf")
-	e.Depends("H_lf", "ϰ", "msat0", "msat", "m", "Tc", "Te", "msat0T0")
-	Hlf.SetUpdater(&LongFieldUpdater{m: e.Quant("m"), kappa: e.Quant("ϰ"), Hlf: Hlf, msat0: e.Quant("msat0"), msat0T0: e.Quant("msat0T0"), msat: e.Quant("msat"), Tc: e.Quant("Tc"), T: e.Quant("Te")})
+	sum.AddParent(arg.Outs("H_lf"))
+
+	Hlf.SetUpdater(&LongFieldUpdater{m: m, kappa: kappa, Hlf: Hlf, msat0: msat0, msat0T0: msat0T0, msat: msat, Tc: Tc, T: T})
 
 }
 
