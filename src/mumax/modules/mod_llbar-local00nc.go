@@ -26,7 +26,6 @@ func LoadLLBarLocal00NC(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
 	LoadGammaLL(e)
-	e.LoadModule("longfield")
 
 	// ============ New Quantities =============
 
