@@ -52,7 +52,7 @@ func LoadLongFieldArgs(e *Engine, args ...Arguments) {
 	//
 
 	LoadHField(e)
-	LoadMagnetization(e)
+	LoadFullMagnetization(e)
 	LoadTemp(e, arg.Ins("T"))
 	LoadKappa(e, arg.Deps("ϰ"))
 	LoadMFAParams(e)
