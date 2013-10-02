@@ -63,8 +63,8 @@ setv('mf_maxrelerror', 1e-3)
 
 setv('Te_maxabserror', 1e-4)
 setv('Te_maxrelerror', 1e-3)
-setv('Temp_maxabserror', 1e-4)
-setv('Temp_maxrelerror', 1e-3)
+setv('Tl_maxabserror', 1e-4)
+setv('Tl_maxrelerror', 1e-3)
 
 savegraph("graph.png")
 
@@ -72,7 +72,7 @@ Ms0 = 480e3
 
 T = [ [[[200.0]]] ]
 setarray('Te', T)
-setarray('Temp', T)
+setarray('Tl', T)
 
 setv('Tc', 631)
 setv('n', 9.14e28)
