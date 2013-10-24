@@ -57,7 +57,8 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
 
         float ratio = (Ts < Tc) ? Ms / Ms0 : Ms / Ms0T0;
 
-        float mult = (Ts < Tc) ? (1.0f - ratio * ratio) : - 2.0f; // 2.0 is to account kappa = 0.5 / kappa
+        float mult = (Ts < Tc) ?          (1.0f - ratio * ratio)
+                     : - 2.0f * (1.0f + 0.6f * ratio * ratio * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
 
         mult = (mult == 0.0f) ? 0.0f : kappa * Ms * mult;
 
