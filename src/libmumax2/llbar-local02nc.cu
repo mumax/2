@@ -45,7 +45,7 @@ extern "C" {
 
             float3 H = make_float3(hx[x0], hy[x0], hz[x0]);
 
-            float _mH = -dotf(m, H);
+            float _mH = dotf(m, H);
 
             float3 _mHm;
 
