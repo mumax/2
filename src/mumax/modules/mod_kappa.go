@@ -82,7 +82,7 @@ func (u *kappaUpdater) Update() {
 	J := u.J
 	n := u.n
 	stream := kappa.Array().Stream
-	kappa.Multiplier()[0] = Mu0 / (n.Multiplier()[0] * Kb)
+	kappa.Multiplier()[0] = msat0T0.Multiplier()[0] * msat0T0.Multiplier()[0] * Mu0 / (n.Multiplier()[0] * Kb)
 
 	gpu.KappaAsync(kappa.Array(), msat0.Array(), msat0T0.Array(), T.Array(), Tc.Array(), J.Array(), n.Array(), msat0.Multiplier()[0], msat0T0.Multiplier()[0], Tc.Multiplier()[0], J.Multiplier()[0], stream)
 	stream.Sync()

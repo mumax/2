@@ -31,7 +31,9 @@ __global__ void kappaKern(float* __restrict__ kappa,
 
     if (i < Npart)
     {
-        float msat0T0 = (msat0T0Msk == NULL) ? msat0T0Mul : msat0T0Mul * msat0T0Msk[i];
+        float msat0T0u = (msat0T0Msk == NULL) ? 1.0f : msat0T0Msk[i];
+        float msat0T0 = msat0T0Mul * msat0T0u;
+
         float Temp = T[i];
 
         if (msat0T0 == 0.0f || Temp == 0.0f)
@@ -47,12 +49,12 @@ __global__ void kappaKern(float* __restrict__ kappa,
         float J0  = 3.0f * Tc / (S * (S + 1.0f)); // in h^2 units
         float n = (nMsk == NULL) ? 1.0f : nMsk[i];
 
-        float mul = msat0T0 * msat0T0 / (S * S * J0 * n);
+        float mul = msat0T0u * msat0T0u / (S * S * J0 * n); // msat0T0 mul should be in the kappa multiplier
         float me = msat0 / msat0T0;
         float b = S * S * J0 / Temp;
         float meb = me * b;
         float f = b * dBjdxf(S, meb);
-        float k = mul * (f / (1.0f - f)); //kappa multiplier should store unit cell volume!!!!
+        float k = mul * (f / (1.0f - f));
         kappa[i] = k;
     }
 }
