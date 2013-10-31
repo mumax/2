@@ -1115,17 +1115,17 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	if (size[X] == 1) {
 		rdimx = 1
 	} else {
-		rdimx = 2*size[X]
+		rdimx = size[X]
 	}
 	if (size[Y] == 1) {
 		rdimy = 1
 	} else {
-		rdimy = 2*size[Y]
+		rdimy = size[Y]
 	}
 	if (size[Z] == 1) {
 		rdimz = 1
 	} else {
-		rdimz = 2*size[Z]
+		rdimz = size[Z]
 	}
 	
 	ffts.RecommendDimensions(rdimx, rdimy, rdimz, &cdimx, &cdimy, &cdimz)
