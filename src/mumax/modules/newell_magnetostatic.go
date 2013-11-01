@@ -121,43 +121,45 @@ func SelfDemagNx(x, y, z float64) float64 {
 	Rxz := math.Sqrt(xsq+zsq)
 	Ryz := math.Sqrt(ysq+zsq)
 
-	var arrPt *[]float64
-	arr := *arrPt
+//	var arrPt *[]float64
+	var arr []float64
 
-	arr[0] = 2.0 *x*y*z* ( (x/(x+Rxy)+(2*xsq+ysq+zsq)/(R*Rxy+x*Rxz))/(x+Rxz) + (x/(x+Rxz)+(2*xsq+ysq+zsq)/(R*Rxz+x*Rxy))/(x+Rxy) ) / ((x+R)*(Rxy+Rxz+R))
-	arr[1] = -1.0 *x*y*z* ( (y/(y+Rxy)+(2*ysq+xsq+zsq)/(R*Rxy+y*Ryz))/(y+Ryz) + (y/(y+Ryz)+(2*ysq+xsq+zsq)/(R*Ryz+y*Rxy))/(y+Rxy) ) / ((y+R)*(Rxy+Ryz+R))
-	arr[2] = -1.0 *x*y*z* ( (z/(z+Rxz)+(2*zsq+xsq+ysq)/(R*Rxz+z*Ryz))/(z+Ryz) + (z/(z+Ryz)+(2*zsq+xsq+ysq)/(R*Ryz+z*Rxz))/(z+Rxz) ) / ((z+R)*(Rxz+Ryz+R))
-	arr[3] = 6.0 * math.Atan(y*z/(x*R))
+	//arr := *arrPt
 
-	piece4 := -y*zsq*(1/(x+Rxz)+y/(Rxy*Rxz+x*R))/(Rxz*(y+Rxy))
+	arr = append(arr,float64(2.0 *x*y*z* ( (x/(x+Rxy)+(2*xsq+ysq+zsq)/(R*Rxy+x*Rxz))/(x+Rxz) + (x/(x+Rxz)+(2*xsq+ysq+zsq)/(R*Rxz+x*Rxy))/(x+Rxy) ) / ((x+R)*(Rxy+Rxz+R))))
+	arr = append(arr,float64(-1.0 *x*y*z* ( (y/(y+Rxy)+(2*ysq+xsq+zsq)/(R*Rxy+y*Ryz))/(y+Ryz) + (y/(y+Ryz)+(2*ysq+xsq+zsq)/(R*Ryz+y*Rxy))/(y+Rxy) ) / ((y+R)*(Rxy+Ryz+R))))
+	arr = append(arr,float64(-1.0 *x*y*z* ( (z/(z+Rxz)+(2*zsq+xsq+ysq)/(R*Rxz+z*Ryz))/(z+Ryz) + (z/(z+Ryz)+(2*zsq+xsq+ysq)/(R*Ryz+z*Rxz))/(z+Rxz) ) / ((z+R)*(Rxz+Ryz+R))))
+	arr = append(arr,float64(6.0 * math.Atan(y*z/(x*R))))
+
+	piece4 := float64(-y*zsq*(1/(x+Rxz)+y/(Rxy*Rxz+x*R))/(Rxz*(y+Rxy)))
 	if (piece4 > -0.5) {
-		arr[4] = 3.0 * x * math.Log1p(piece4)/z
+		arr = append(arr,float64(3.0 * x * math.Log1p(piece4)/z))
 	} else {
-		arr[4] = 3.0 * x * math.Log(x*(y+R)/(Rxz*(y+Rxy)))/z
+		arr = append(arr,float64(3.0 * x * math.Log(x*(y+R)/(Rxz*(y+Rxy)))/z))
 	}
 
-	piece5 := -z*ysq*(1/(x+Rxy)+z/(Rxy*Rxz+x*R))/(Rxy*(z+Rxz))
+	piece5 := float64(-z*ysq*(1/(x+Rxy)+z/(Rxy*Rxz+x*R))/(Rxy*(z+Rxz)))
 	if (piece5 > -0.5) {
-		arr[5] = 3.0 * x * math.Log1p(piece5)/y
+		arr = append(arr,float64(3.0 * x * math.Log1p(piece5)/y))
 	} else {
-		arr[5] = 3.0 * x * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y
+		arr = append(arr,float64(3.0 * x * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
 	}
 
-	piece6 := -z*xsq*(1/(y+Rxy)+z/(Rxy*Ryz+y*R))/(Rxy*(z+Ryz))
+	piece6 := float64(-z*xsq*(1/(y+Rxy)+z/(Rxy*Ryz+y*R))/(Rxy*(z+Ryz)))
 	if (piece6 > -0.5) {
-		arr[6] = -3.0 * y * math.Log1p(piece6)/x
+		arr = append(arr,float64(-3.0 * y * math.Log1p(piece6)/x))
 	} else {
-		arr[6] = -3.0 * y * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y
+		arr = append(arr,float64(-3.0 * y * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
 	}
 
-	piece7 := -y*xsq*(1/(z+Rxz)+y/(Rxz*Ryz+z*R))/(Rxz*(y+Ryz))
+	piece7 := float64(-y*xsq*(1/(z+Rxz)+y/(Rxz*Ryz+z*R))/(Rxz*(y+Ryz)))
 	if (piece7 > -0.5) {
-		arr[7] = -3.0 * z * math.Log1p(piece7)/x
+		arr = append(arr,float64(-3.0 * z * math.Log1p(piece7)/x))
 	} else {
-		arr[7] = -3.0 * z * math.Log(z*(y+R)/(Rxz*(y+Ryz)))/x
+		arr = append(arr,float64(-3.0 * z * math.Log(z*(y+R)/(Rxz*(y+Ryz)))/x))
 	}
 
-	Nxx := accSum(8,arrPt) / (3.0 * math.Pi)
+	Nxx := accSum(8,&arr) / (3.0 * math.Pi)
 	return Nxx
 }
 
@@ -1115,17 +1117,17 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	if (size[X] == 1) {
 		rdimx = 1
 	} else {
-		rdimx = size[X]
+		rdimx = size[X]/2-1
 	}
 	if (size[Y] == 1) {
 		rdimy = 1
 	} else {
-		rdimy = size[Y]
+		rdimy = size[Y]/2-1
 	}
 	if (size[Z] == 1) {
 		rdimz = 1
 	} else {
-		rdimz = size[Z]
+		rdimz = size[Z]/2-1
 	}
 	
 	ffts.RecommendDimensions(rdimx, rdimy, rdimz, &cdimx, &cdimy, &cdimz)
@@ -1421,7 +1423,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		if (scaled_arad >= 0.0) {
 			scaled_arad_sq = scaled_arad*scaled_arad
 			fft_scaling = float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-			Assert(scaled_arad_sq > 0.0 && fft_scaling > 0.0)
+			Assert(scaled_arad_sq > 0.0 && fft_scaling < 0.0)
 
 			// Since H = -N.M, and by convention with the rest of this code,
 			// we store "-N" instead of "N" so we don't have to multiply the
@@ -1800,7 +1802,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 		if(scaled_arad>=0.0) {
 			scaled_arad_sq := scaled_arad*scaled_arad
 			fft_scaling := float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-			Assert(scaled_arad_sq > 0.0 && fft_scaling > 0.0)
+			Assert(scaled_arad_sq > 0.0 && fft_scaling < 0.0)
 
 			// Note that all distances here are in "reduced" units,
 			// scaled so that dx, dy, and dz are either small integers
