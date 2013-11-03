@@ -25,9 +25,10 @@
 #define mu0         4.0f * 1e-7f * 3.14159265358979f    // vacuum permeability
 #define zero        1.0e-32f                            // the zero threshold
 #define eps         1.0e-8f                             // the target numerical accuracy of iterative methods
-#define linRange    2.0e-1f                             // Defines the region of linearity
+#define linRange    1.0e-1f                             // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
+typedef float (*funcTs)(float x, float prefix, float mult, float C);
 
 typedef double real;
 
