@@ -51,9 +51,13 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
 
         float mf2 = dotf(mf, mf);
 
-        float ratio = (Ts < Tc) ? Ms0T0 / Ms0 : 1.0f;
+        float Mf2 = Ms0T0 * Ms0T0 * mf2;
 
-        float mult = (Ts < Tc) ? (1.0f - ratio * ratio * mf2) : - 2.0f * (1.0f + 0.6f * ratio * ratio * mf2 * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
+        float Ms02 = Ms0 * Ms0;
+
+        float dM2 = (Ms02 - Mf2);
+
+        float mult = (Ts < Tc) ? dM2 / Ms02 : - 2.0f * (1.0f + 0.6f * mf2 * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
 
         mult = (mult == 0.0f) ? 0.0f : kappa * Ms0T0 * mult;
 
