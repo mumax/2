@@ -82,7 +82,8 @@ func (field *PointwiseUpdater) Update() {
 	v2 := field.points[i][1:]
 	dt := t2 - t1         //pt2[0] - pt1[0]
 	t := (time - t1) / dt // 0..1
-	Assert(time >= 0 && time <= 1)
+
+	Assert(t >= 0 && t <= 1)
 	for i := range value {
 		value[i] = v1[i] + t*(v2[i]-v1[i])
 	}
