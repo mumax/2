@@ -18,19 +18,19 @@ extern "C" {
 #endif
 
 DLLEXPORT void long_field_async(float** hx, float** hy, float** hz,
-                                float** mx, float** my, float** mz,
-                                float** msat0,
-                                float** msat0T0,
-                                float** kappa,
-                                float** Tc,
-                                float** Ts,
-                                float kappaMul,
-                                float msat0Mul,
-                                float msat0T0Mul,
-                                float TcMul,
-                                float TsMul,
-                                int NPart,
-                                CUstream* stream);
+                                 float** mx, float** my, float** mz,
+                                 float** msat0T0,
+                                 float** S,
+                                 float** kappa,
+                                 float** Tc,
+                                 float** Ts,
+                                 float msat0T0Mul,
+                                 float SMul,
+                                 float kappaMul,
+                                 float TcMul,
+                                 float TsMul,
+                                 int NPart,
+                                 CUstream* stream);
 
 #ifdef __cplusplus
 }

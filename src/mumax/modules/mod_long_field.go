@@ -22,9 +22,9 @@ var inLongField = map[string]string{
 var depsLongField = map[string]string{
 	"Tc":      "Tc",
 	"mf":      "mf",
-	"ϰ":       "ϰ",
 	"H_eff":   "H_eff",
-	"msat0":   "msat0",
+	"J":       "J",
+	"ϰ":       "ϰ",
 	"msat0T0": "msat0T0",
 }
 
@@ -59,35 +59,34 @@ func LoadLongFieldArgs(e *Engine, args ...Arguments) {
 	T := e.Quant(arg.Ins("T"))
 	Tc := e.Quant(arg.Deps("Tc"))
 	mf := e.Quant(arg.Deps("mf"))
+	J := e.Quant(arg.Deps("J"))
 	kappa := e.Quant(arg.Deps("ϰ"))
-	msat0 := e.Quant(arg.Deps("msat0"))
 	msat0T0 := e.Quant(arg.Deps("msat0T0"))
 	Hlf := e.AddNewQuant(arg.Outs("H_lf"), VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
-	e.Depends(arg.Outs("H_lf"), arg.Deps("ϰ"), arg.Deps("msat0"), arg.Deps("mf"), arg.Deps("Tc"), arg.Deps("msat0T0"), arg.Ins("T"))
+	e.Depends(arg.Outs("H_lf"), arg.Deps("J"), arg.Deps("ϰ"), arg.Deps("mf"), arg.Deps("Tc"), arg.Deps("msat0T0"), arg.Ins("T"))
 
 	hfield := e.Quant(arg.Deps("H_eff"))
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent(arg.Outs("H_lf"))
 
-	Hlf.SetUpdater(&LongFieldUpdater{mf: mf, kappa: kappa, Hlf: Hlf, msat0: msat0, msat0T0: msat0T0, Tc: Tc, T: T})
+	Hlf.SetUpdater(&LongFieldUpdater{mf: mf, J: J, Hlf: Hlf, msat0T0: msat0T0, kappa: kappa, Tc: Tc, T: T})
 
 }
 
 type LongFieldUpdater struct {
-	mf, kappa, Hlf, msat0, msat0T0, Tc, T *Quant
+	mf, J, Hlf, msat0T0, kappa, Tc, T *Quant
 }
 
 func (u *LongFieldUpdater) Update() {
 	mf := u.mf
+	J := u.J
 	kappa := u.kappa
 	Hlf := u.Hlf
-	msat0 := u.msat0
 	msat0T0 := u.msat0T0
 	Tc := u.Tc
 	T := u.T
 	stream := u.Hlf.Array().Stream
-	kappaMul := 2.0 * kappa.Multiplier()[0]
 
-	gpu.LongFieldAsync(Hlf.Array(), mf.Array(), msat0.Array(), msat0T0.Array(), kappa.Array(), Tc.Array(), T.Array(), kappaMul, msat0.Multiplier()[0], msat0T0.Multiplier()[0], Tc.Multiplier()[0], T.Multiplier()[0], stream)
+	gpu.LongFieldAsync(Hlf.Array(), mf.Array(), msat0T0.Array(), J.Array(), kappa.Array(), Tc.Array(), T.Array(), msat0T0.Multiplier()[0], J.Multiplier()[0], kappa.Multiplier()[0], Tc.Multiplier()[0], T.Multiplier()[0], stream)
 	stream.Sync()
 }

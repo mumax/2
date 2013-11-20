@@ -13,14 +13,14 @@ extern "C" {
 
 __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, float* __restrict__ hz,
                                 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
-                                float* __restrict__ msat0Msk,
                                 float* __restrict__ msat0T0Msk,
+                                float* __restrict__ SMsk,
                                 float* __restrict__ kappaMsk,
                                 float* __restrict__ TcMsk,
                                 float* __restrict__ TsMsk,
-                                float kappaMul,
-                                float msat0Mul,
                                 float msat0T0Mul,
+                                float SMul,
+                                float kappaMul,
                                 float TcMul,
                                 float TsMul,
                                 int NPart)
@@ -31,13 +31,13 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
     if (I < NPart)  // Thread configurations are usually too large...
     {
 
-        float Ms0T0 = (msat0T0Msk != NULL ) ? msat0T0Msk[I] * msat0T0Mul : msat0T0Mul;
-        float Ms0 = (msat0Msk != NULL ) ? msat0Msk[I] * msat0Mul : msat0Mul;
-        float kappa = (kappaMsk != NULL ) ? kappaMsk[I] * kappaMul : kappaMul;
-        float Tc = (TcMsk != NULL) ? TcMsk[I] * TcMul : TcMul;
-        float Ts = (TsMsk != NULL) ? TsMsk[I] * TsMul : TsMul;
+        float Ms0T0 = msat0T0Mul * getMaskUnity(msat0T0Msk, I);
+        float S = SMul * getMaskUnity(SMsk, I);
+        float kappa = kappaMul * getMaskUnity(kappaMsk, I);
+        float Tc = TcMul * getMaskUnity(TcMsk, I);
+        float Ts = TsMul * getMaskUnity(TsMsk, I);
 
-        if (Ms0T0 == 0.0f || kappa == 0.0f || Ts == Tc)
+        if (Ms0T0 == 0.0f || Ts == Tc || kappa == 0.0f)
         {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
@@ -45,25 +45,27 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
             return;
         }
 
-        kappa = 1.0f / kappa;
 
         float3 mf = make_float3(mx[I], my[I], mz[I]);
+        float3 s = normalize(mf);
 
-        float mf2 = dotf(mf, mf);
+        float abs_mf = len(mf);
 
-        float Mf2 = Ms0T0 * Ms0T0 * mf2;
+        float J0  = 3.0f * Tc / (S * (S + 1.0f));
 
-        float Ms02 = Ms0 * Ms0;
+        float b = S * S * J0 / Ts;
 
-        float dM2 = (Ms02 - Mf2);
+        float meb = abs_mf * b;
 
-        float mult = (Ts < Tc) ? dM2 / Ms02 : - 2.0f * (1.0f + 0.6f * mf2 * Tc / (Ts - Tc)); // 2.0 is to account kappa = 0.5 / kappa
+        float M = Ms0T0 * abs_mf;
 
-        mult = (mult == 0.0f) ? 0.0f : kappa * Ms0T0 * mult;
+        float M0 = Ms0T0 * Bj(S, meb);
 
-        hx[I] = mult * mf.x;
-        hy[I] = mult * mf.y;
-        hz[I] = mult * mf.z;
+        float mult = (M0 - M) / (b * kappa * dBjdxf(S, meb));
+
+        hx[I] = mult * s.x;
+        hy[I] = mult * s.y;
+        hz[I] = mult * s.z;
 
     }
 }
@@ -71,14 +73,14 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
 
 __export__ void long_field_async(float** hx, float** hy, float** hz,
                                  float** mx, float** my, float** mz,
-                                 float** msat0,
                                  float** msat0T0,
+                                 float** S,
                                  float** kappa,
                                  float** Tc,
                                  float** Ts,
-                                 float kappaMul,
-                                 float msat0Mul,
                                  float msat0T0Mul,
+                                 float SMul,
+                                 float kappaMul,
                                  float TcMul,
                                  float TsMul,
                                  int NPart,
@@ -90,14 +92,14 @@ __export__ void long_field_async(float** hx, float** hy, float** hz,
     gpu_safe(cudaSetDevice(deviceId(dev)));
     long_field_Kern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (hx[dev], hy[dev], hz[dev],
             mx[dev], my[dev], mz[dev],
-            msat0[dev],
             msat0T0[dev],
+            S[dev],
             kappa[dev],
             Tc[dev],
             Ts[dev],
-            kappaMul,
-            msat0Mul,
             msat0T0Mul,
+            SMul,
+            kappaMul,
             TcMul,
             TsMul,
             NPart);

@@ -18,7 +18,7 @@ import (
 	"unsafe"
 )
 
-func LongFieldAsync(hlf *Array, m *Array, msat0 *Array, msat0T0 *Array, kappa *Array, Tc *Array, Ts *Array, kappaMul float64, msat0Mul float64, msat0T0Mul float64, TcMul float64, TsMul float64, stream Stream) {
+func LongFieldAsync(hlf *Array, m *Array, msat0T0 *Array, J *Array, kappa *Array, Tc *Array, Ts *Array, msat0T0Mul float64, JMul float64, kappaMul float64, TcMul float64, TsMul float64, stream Stream) {
 
 	// Bookkeeping
 	CheckSize(hlf.Size3D(), m.Size3D())
@@ -37,16 +37,16 @@ func LongFieldAsync(hlf *Array, m *Array, msat0 *Array, msat0T0 *Array, kappa *A
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].Pointers()[0]))),
 
-		(**C.float)(unsafe.Pointer(&(msat0.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(msat0T0.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(J.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(kappa.Comp[X].Pointers()[0]))),
 
 		(**C.float)(unsafe.Pointer(&(Tc.Comp[X].Pointers()[0]))),
 		(**C.float)(unsafe.Pointer(&(Ts.Comp[X].Pointers()[0]))),
 
-		(C.float)(kappaMul),
-		(C.float)(msat0Mul),
 		(C.float)(msat0T0Mul),
+		(C.float)(JMul),
+		(C.float)(kappaMul),
 
 		(C.float)(TcMul),
 		(C.float)(TsMul),
