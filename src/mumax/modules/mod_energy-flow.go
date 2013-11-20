@@ -82,9 +82,8 @@ func (u *EFUpdater) Update() {
 	// Spin should be accounted in the kernel since it enters S(S+1) term
 	mult := 6.0 * Kb * Tc * n
 
-	// Account for msat multiplier, because it is a mask
+	// Account for the dissipation term multiplier, normally = gamma_LL
 	u.q_s.Multiplier()[0] = u.R.Multiplier()[0]
-	// Account for - 2.0 * 0.5 * mu0
 	u.q_s.Multiplier()[0] *= u.mf.Multiplier()[0]
 	u.q_s.Multiplier()[0] *= mult
 
