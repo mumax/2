@@ -37,7 +37,7 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
         double Tc = TcMul * getMaskUnity(TcMsk, I);
         double Ts = TsMul * getMaskUnity(TsMsk, I);
 
-        if (Ms0T0 == 0.0 || Ts == Tc || kappa == 0.0)
+        if (Ms0T0 == 0.0 || kappa == 0.0)
         {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
