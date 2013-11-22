@@ -11,44 +11,44 @@ extern "C" {
 #endif
 
 ///@internal
-__device__ float findroot_Ridders(func* f, float J, float mult, float xa, float xb)
+__device__ double findroot_Ridders(funcD* f, double J, double mult, double xa, double xb)
 {
 
-    float ya = f[0](xa, J, mult);
-    if (fabsf(ya) < zero) return xa;
-    float yb = f[0](xb, J, mult);
-    if (fabsf(yb) < zero) return xb;
+    double ya = f[0](xa, J, mult);
+    if (fabs(ya) < zero) return xa;
+    double yb = f[0](xb, J, mult);
+    if (fabs(yb) < zero) return xb;
 
-    float y1 = ya;
-    float x1 = xa;
-    float y2 = yb;
-    float x2 = xb;
+    double y1 = ya;
+    double x1 = xa;
+    double y2 = yb;
+    double x2 = xb;
 
-    float x = 1.0e10f;
-    float y = 1.0e10f;
-    float tx = x;
+    double x = 1.0e10;
+    double y = 1.0e10;
+    double tx = x;
 
-    float teps = x;
+    double teps = x;
 
-    float x3 = 0.0f;
-    float y3 = 0.0f;
-    float dx = 0.0f;
-    float dy = 0.0f;
+    double x3 = 0.0;
+    double y3 = 0.0;
+    double dx = 0.0;
+    double dy = 0.0;
     int iter = 0;
     while (teps > eps && iter < 1000)
     {
 
-        x3 = 0.5f * (x2 + x1);
+        x3 = 0.5 * (x2 + x1);
         y3 = f[0](x3, J, mult);
 
         dy = (y3 * y3 - y1 * y2);
-        if (dy == 0.0f)
+        if (dy == 0.0)
         {
             x = x3;
             break;
         }
 
-        dx = (x3 - x1) * signf(y1 - y2) * y3 / (sqrtf(dy));
+        dx = (x3 - x1) * sign(y1 - y2) * y3 / (sqrt(dy));
 
         x = x3 + dx;
         y = f[0](x, J, mult);
@@ -62,7 +62,7 @@ __device__ float findroot_Ridders(func* f, float J, float mult, float xa, float 
         y1 = y;
         x1 = x;
 
-        teps = fabsf((x - tx) / (tx + x));
+        teps = fabs((x - tx) / (tx + x));
 
         tx = x;
         iter++;
@@ -71,65 +71,20 @@ __device__ float findroot_Ridders(func* f, float J, float mult, float xa, float 
     return x;
 }
 
-///@internal
-__device__ float findroot_Secant(func* f, float J, float mult, float xa, float xb)
-{
-
-    float ya = f[0](xa, J, mult);
-    if (fabsf(ya) < zero) return xa;
-    float yb = f[0](xb, J, mult);
-    if (fabsf(yb) < zero) return xb;
-
-    float y1 = ya;
-    float x1 = xa;
-    float y2 = yb;
-    float x2 = xb;
-
-    float x = 1.0e10f;
-    float y = 1.0e10f;
-    float tx = x;
-
-    float teps = x;
-
-    int iter = 0;
-    //int i = threadindex;
-    while (teps > eps && iter < 100000)
-    {
-
-        float k = (x2 - x1) / (y2 - y1);
-        x = x1 - y1 * k;
-
-        y = f[0](x, J, mult);
-
-        y1 = (signbit(y) == signbit(y1)) ? y : y1;
-        x1 = (signbit(y) == signbit(y1)) ? x : x1;
-        y2 = (signbit(y) == signbit(y2) && x1 != x) ? y : y2;
-        x2 = (signbit(y) == signbit(y2) && x1 != x) ? x : x2;
-
-        teps = fabsf((x - tx) / (tx + x));
-
-        tx = x;
-        iter++;
-    }
-    // ~ if (i == 0) {
-    // ~ printf("Total number of iterations: %d\n", iter);
-    // ~ }
-    return x;
-}
 
 // here n = m / me
 // <Sz> = n * J
 // <Sz> = J * Bj(S*J0*<Sz>/(kT))
 
-__device__ float Model(float n, float J, float pre)
+__device__ double Model(double n, double J, double pre)
 {
-    float x = pre * n;
-    float val = Bj(J, x) - n;
+    double x = pre * n;
+    double val = Bj(J, x) - n;
     //printf("B(%g) - %g = %g\n", x, n, val);
     return val;
 }
 
-__device__ func pModel = Model;
+__device__ funcD pModel = Model;
 
 __global__ void brillouinKern(float* __restrict__ msat0Msk,
                               float* __restrict__ msat0T0Msk,
@@ -145,23 +100,23 @@ __global__ void brillouinKern(float* __restrict__ msat0Msk,
     int i = threadindex;
     if (i < Npart)
     {
-        float Temp = T[i];
+        double Temp = T[i];
 
-        float msat0T0 = (msat0T0Msk == NULL) ? msat0T0Mul : msat0T0Mul * msat0T0Msk[i];
+        double msat0T0 = (msat0T0Msk == NULL) ? msat0T0Mul : msat0T0Mul * msat0T0Msk[i];
 
-        if (msat0T0 == 0.0f)
+        if (msat0T0 == 0.0)
         {
             msat0Msk[i] = 0.0f;
             return;
         }
 
-        if (Temp == 0.0f)
+        if (Temp == 0.0)
         {
             msat0Msk[i] = msat0T0 / msat0Mul;
             return;
         }
 
-        float Tc = (TcMsk == NULL) ? TcMul : TcMul * TcMsk[i];
+        double Tc = (TcMsk == NULL) ? TcMul : TcMul * TcMsk[i];
 
         if (Temp > Tc)
         {
@@ -169,17 +124,17 @@ __global__ void brillouinKern(float* __restrict__ msat0Msk,
             return;
         }
 
-        float S  = (SMsk  == NULL) ? SMul  : SMul  * SMsk[i];
+        double S  = (SMsk  == NULL) ? SMul  : SMul  * SMsk[i];
 
-        float J0  = 3.0f * Tc / (S * (S + 1.0f));
-        float pre = S * S * J0 / (Temp);
+        double J0  = 3.0 * Tc / (S * (S + 1.0));
+        double pre = S * S * J0 / (Temp);
 
-        float dT = Tc - Temp;
-        float lowLimit = (dT < 0.25f) ? -0.1f : 0.1f;
-        float hiLimit  = (dT < 0.25f) ?  0.5f : 1.1f;
-        float msat0 = findroot_Ridders(&pModel, S, pre, lowLimit, hiLimit);
+        double dT = (Tc - Temp) / Tc;
+        double lowLimit = (dT < 0.001) ? -0.1 : 0.1;
+        double hiLimit  = (dT < 0.001) ?  0.1 : 1.1;
+        double msat0 = findroot_Ridders(&pModel, S, pre, lowLimit, hiLimit);
 
-        msat0Msk[i] = msat0T0 * fabsf(msat0) / (msat0Mul);
+        msat0Msk[i] = (float)(msat0T0 * fabs(msat0) / (msat0Mul));
     }
 }
 

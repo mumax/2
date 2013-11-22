@@ -31,13 +31,13 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
     if (I < NPart)  // Thread configurations are usually too large...
     {
 
-        float Ms0T0 = msat0T0Mul * getMaskUnity(msat0T0Msk, I);
-        float S = SMul * getMaskUnity(SMsk, I);
-        float kappa = kappaMul * getMaskUnity(kappaMsk, I);
-        float Tc = TcMul * getMaskUnity(TcMsk, I);
-        float Ts = TsMul * getMaskUnity(TsMsk, I);
+        double Ms0T0 = msat0T0Mul * getMaskUnity(msat0T0Msk, I);
+        double S = SMul * getMaskUnity(SMsk, I);
+        double kappa = kappaMul * getMaskUnity(kappaMsk, I);
+        double Tc = TcMul * getMaskUnity(TcMsk, I);
+        double Ts = TsMul * getMaskUnity(TsMsk, I);
 
-        if (Ms0T0 == 0.0f || Ts == Tc || kappa == 0.0f)
+        if (Ms0T0 == 0.0 || Ts == Tc || kappa == 0.0)
         {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
@@ -46,22 +46,22 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
         }
 
 
-        float3 mf = make_float3(mx[I], my[I], mz[I]);
-        float3 s = normalize(mf);
+        double3 mf = make_double3(mx[I], my[I], mz[I]);
+        double3 s = normalize(mf);
 
-        float abs_mf = len(mf);
+        double abs_mf = len(mf);
 
-        float J0  = 3.0f * Tc / (S * (S + 1.0f));
+        double J0  = 3.0 * Tc / (S * (S + 1.0));
 
-        float b = S * S * J0 / Ts;
+        double b = S * S * J0 / Ts;
 
-        float meb = abs_mf * b;
+        double meb = abs_mf * b;
 
-        float M = Ms0T0 * abs_mf;
+        double M = Ms0T0 * abs_mf;
 
-        float M0 = Ms0T0 * Bj(S, meb);
+        double M0 = Ms0T0 * Bj(S, meb);
 
-        float mult = (M0 - M) / (b * kappa * dBjdxf(S, meb));
+        double mult = (M0 - M) / (b * kappa * dBjdx(S, meb));
 
         hx[I] = mult * s.x;
         hy[I] = mult * s.y;

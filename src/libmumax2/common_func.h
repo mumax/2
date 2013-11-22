@@ -25,9 +25,11 @@
 #define mu0         4.0f * 1e-7f * 3.14159265358979f    // vacuum permeability
 #define zero        1.0e-32f                            // the zero threshold
 #define eps         1.0e-8f                             // the target numerical accuracy of iterative methods
-#define linRange    1.0e-1f                             // Defines the region of linearity
+#define linRange    1.0e-2f                             // Defines the region of linearity
+#define linRangeD   1.0e-2                             // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
+typedef double (*funcD)(double x, double prefix, double mult);
 typedef float (*funcTs)(float x, float prefix, float mult, float C);
 
 typedef double real;
@@ -189,7 +191,7 @@ inline __host__ __device__ float dotf(float3 a, float3 b)
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline __host__ __device__ float dot(real3 a, real3 b)
+inline __host__ __device__ double dot(double3 a, double3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -212,7 +214,7 @@ inline __host__ __device__ float len(float3 a)
     return sqrtf(dotf(a, a));
 }
 
-inline __host__ __device__ real len(real3 a)
+inline __host__ __device__ double len(double3 a)
 {
     return sqrt(dot(a, a));
 }
@@ -224,38 +226,49 @@ inline __host__ __device__ float3 normalize(float3 a)
     return make_float3(a.x * veclen, a.y * veclen, a.z * veclen);
 }
 
+inline __host__ __device__ double3 normalize(double3 a)
+{
+    real veclen = (len(a) != 0.0) ? 1.0 / len(a) : 0.0;
+    return make_double3(a.x * veclen, a.y * veclen, a.z * veclen);
+}
+
 inline __device__ float cothf(float x)
 {
     return 1.0f / tanhf(x);
-    //~ return (x > -linRange && x < linRange) ? (1.0f / x) + (x / 3.0f) - (powf(x, 3.0f)/45.0f) + (0.5f * powf(x, 5.0f)/945.0f)
-    //~ : 1.0f / tanhf(x);
-    //return coshf(x) / sinh(x);
 }
 
 inline __device__ double coth(double x)
 {
-    return (x > -linRange && x < linRange) ? (1.0 / x) + (x / 3.0) - (pow(x, 3.0) / 45.0) + (0.5f * pow(x, 5.0) / 945.0)
-           : 1.0 / tanh(x);
+    return 1.0 / tanh(x);
 }
 
-inline __device__ float dcothf(float x)
+inline __device__ double Bj(double J, double x)
 {
-    return 1.0f - cothf(x) * cothf(x);
+    double lpre = 1.0 / (2.0 * J);
+    double gpre = (2.0 * J + 1.0) * lpre;
+    double lim = linRangeD / gpre;
+    return (fabs(x) < lim) ? ((gpre * gpre - lpre * lpre) * x / 3.0) + ((pow(lpre, 4.0) - pow(gpre, 4.0)) * pow(x, 2.0) / 45.0) + (0.5 * (pow(gpre, 6.0) - pow(lpre, 6.0)) * pow(x, 5.0) / 945.0) + ((pow(gpre, 8.0) - pow(lpre, 8.0)) * pow(x, 7.0) / 4725.0)
+           : gpre * coth(gpre * x) - lpre * coth(lpre * x);
 }
 
-inline __host__ __device__ real3 normalize(real3 a)
-{
-    real veclen = (len(a) != 0.0) ? 1.0 / len(a) : 0.0;
-    return make_real3(a.x * veclen, a.y * veclen, a.z * veclen);
-}
-
-inline __device__ float Bj(float J, float x)
+inline __device__ float Bjf(float J, float x)
 {
     float lpre = 1.0f / (2.0f * J);
     float gpre = (2.0f * J + 1.0f) * lpre;
     float lim = linRange / gpre;
     return (fabsf(x) < lim) ? ((gpre * gpre - lpre * lpre) * x / 3.0f) + ((powf(lpre, 4.0f) - powf(gpre, 4.0f)) * x * x * x / 45.0f) + (0.5f * (powf(gpre, 6.0f) - powf(lpre, 6.0f)) * x * x * x * x * x / 945.0f) + ((powf(gpre, 8.0f) - powf(lpre, 8.0f)) * x * x * x * x * x  * x * x / 4725.0f)
            : gpre * cothf(gpre * x) - lpre * cothf(lpre * x);
+}
+
+inline __device__ double dBjdx(double J, double x)
+{
+    double lpre = 1.0 / (2.0 * J);
+    double gpre = (2.0 * J + 1.0) * lpre;
+    double gpre2 = gpre * gpre;
+    double lpre2 = lpre * lpre;
+    double lim = linRange / gpre;
+    return (fabs(x) < lim) ? (gpre2 - lpre2) / 3.0 + ((pow(lpre, 4.0) - pow(gpre, 4.0)) * pow(x, 2.0) / 15.0) + (0.5f * (pow(gpre, 6.0) - pow(lpre, 6.0)) * pow(x, 4.0) / 189.0) + ((pow(gpre, 8.0) - pow(lpre, 8.0)) * pow(x, 6.0) / 675.0)
+           : (gpre2 - lpre2) + lpre2 * coth(lpre * x) * coth(lpre * x) - gpre2 * coth(gpre * x) * coth(gpre * x);
 }
 
 inline __device__ float dBjdxf(float J, float x)
@@ -269,15 +282,6 @@ inline __device__ float dBjdxf(float J, float x)
            : (gpre2 - lpre2) + lpre2 * cothf(lpre * x) * cothf(lpre * x) - gpre2 * cothf(gpre * x) * cothf(gpre * x);
 }
 
-//~ inline __device__ double dBjdx(double J, double x) {
-//~ double lpre = 1.0 / (2.0 * J);
-//~ double gpre = (2.0 * J + 1.0) * lpre;
-//~
-//~ double gpre2 = gpre * gpre;
-//~ double lpre2 = lpre * lpre;
-//~ return (x > -(double)linRange && x < (double)linRange) ? (gpre2 - lpre2) / 3.0 + (pow(lpre,4.0) - pow(gpre,4.0)) * x * x / 15.0
-//~ : (gpre2 - lpre2) + lpre2*coth(lpre*x)*coth(lpre*x) - gpre2*coth(gpre*x)*coth(gpre*x);
-//~ }
 
 inline __device__ float L(float x)
 {
@@ -294,6 +298,12 @@ inline __device__ float signf(float x)
 {
     float val = (signbit(x) == 0.0f) ? 1.0f : -1.0f;
     return (x == 0.0f) ? 0.0f : val;
+}
+
+inline __device__ double sign(double x)
+{
+    double val = (signbit(x) == 0.0) ? 1.0 : -1.0;
+    return (x == 0.0) ? 0.0 : val;
 }
 
 inline __device__ float getMaskUnity(float *msk, int idx)

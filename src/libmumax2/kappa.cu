@@ -31,31 +31,31 @@ __global__ void kappaKern(float* __restrict__ kappa,
 
     if (i < Npart)
     {
-        float msat0T0u = (msat0T0Msk == NULL) ? 1.0f : msat0T0Msk[i];
-        float msat0T0 = msat0T0Mul * msat0T0u;
+        double msat0T0u = (msat0T0Msk == NULL) ? 1.0 : msat0T0Msk[i];
+        double msat0T0 = msat0T0Mul * msat0T0u;
 
-        float Temp = T[i];
+        double Temp = T[i];
 
-        if (msat0T0 == 0.0f || Temp == 0.0f)
+        if (msat0T0 == 0.0 || Temp == 0.0)
         {
             kappa[i] = 0.0f;
             return;
         }
 
 
-        float S = (SMsk == NULL) ? SMul : SMul * SMsk[i];
-        float Tc = (TcMsk == NULL) ? TcMul : TcMul * TcMsk[i];
-        float msat0 = (msat0Msk == NULL) ? msat0Mul : msat0Mul * msat0Msk[i];
-        float J0  = 3.0f * Tc / (S * (S + 1.0f)); // in h^2 units
-        float n = (nMsk == NULL) ? 1.0f : nMsk[i];
+        double S = (SMsk == NULL) ? SMul : SMul * SMsk[i];
+        double Tc = (TcMsk == NULL) ? TcMul : TcMul * TcMsk[i];
+        double msat0 = (msat0Msk == NULL) ? msat0Mul : msat0Mul * msat0Msk[i];
+        double J0  = 3.0 * Tc / (S * (S + 1.0)); // in h^2 units
+        double n = (nMsk == NULL) ? 1.0 : nMsk[i];
 
-        float mul = msat0T0u * msat0T0u / (S * S * J0 * n); // msat0T0 mul should be in the kappa multiplier
-        float me = msat0 / msat0T0;
-        float b = S * S * J0 / Temp;
-        float meb = me * b;
-        float f = b * dBjdxf(S, meb);
-        float k = mul * (f / (1.0f - f));
-        kappa[i] = k;
+        double mul = msat0T0u * msat0T0u / (S * S * J0 * n); // msat0T0 mul should be in the kappa multiplier
+        double me = msat0 / msat0T0;
+        double b = S * S * J0 / Temp;
+        double meb = me * b;
+        double f = b * dBjdx(S, meb);
+        double k = mul * (f / (1.0 - f));
+        kappa[i] = (float)k;
     }
 }
 
