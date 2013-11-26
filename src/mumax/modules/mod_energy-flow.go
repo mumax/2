@@ -80,7 +80,7 @@ func (u *EFUpdater) Update() {
 	n := u.n.Multiplier()[0]
 
 	// Spin should be accounted in the kernel since it enters S(S+1) term
-	mult := 6.0 * Kb * Tc * n
+	mult := 3.0 * Kb * Tc * n
 
 	// Account for the dissipation term multiplier, normally = gamma_LL
 	u.q_s.Multiplier()[0] = u.R.Multiplier()[0]
