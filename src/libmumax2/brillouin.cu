@@ -130,8 +130,8 @@ __global__ void brillouinKern(float* __restrict__ msat0Msk,
         double pre = S * S * J0 / (Temp);
 
         double dT = (Tc - Temp) / Tc;
-        double lowLimit = (dT < 0.001) ? -0.1 : 0.1;
-        double hiLimit  = (dT < 0.001) ?  0.1 : 1.1;
+        double lowLimit = (dT < 0.0004) ? -0.1 : 0.01;
+        double hiLimit  = (dT < 0.0004) ?  0.5 : 1.1;
         double msat0 = findroot_Ridders(&pModel, S, pre, lowLimit, hiLimit);
 
         msat0Msk[i] = (float)(msat0T0 * fabs(msat0) / (msat0Mul));
