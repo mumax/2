@@ -25,8 +25,8 @@
 #define mu0         4.0f * 1e-7f * 3.14159265358979f    // vacuum permeability
 #define zero        1.0e-32f                            // the zero threshold
 #define eps         1.0e-8f                             // the target numerical accuracy of iterative methods
-#define linRange    1.0e-2f                             // Defines the region of linearity
-#define linRangeD   1.0e-2                             // Defines the region of linearity
+#define linRange    1.0e-1f                             // Defines the region of linearity
+#define linRangeD   1.0e-1                             // Defines the region of linearity
 
 typedef float (*func)(float x, float prefix, float mult);
 typedef double (*funcD)(double x, double prefix, double mult);
@@ -242,13 +242,33 @@ inline __device__ double coth(double x)
     return 1.0 / tanh(x);
 }
 
-inline __device__ double Bj(double J, double x)
+/*inline __device__ double Bj(double J, double x)
 {
     double lpre = 1.0 / (2.0 * J);
     double gpre = (2.0 * J + 1.0) * lpre;
     double lim = linRangeD / gpre;
     return (fabs(x) < lim) ? ((gpre * gpre - lpre * lpre) * x / 3.0) + ((pow(lpre, 4.0) - pow(gpre, 4.0)) * pow(x, 2.0) / 45.0) + (0.5 * (pow(gpre, 6.0) - pow(lpre, 6.0)) * pow(x, 5.0) / 945.0) + ((pow(gpre, 8.0) - pow(lpre, 8.0)) * pow(x, 7.0) / 4725.0)
            : gpre * coth(gpre * x) - lpre * coth(lpre * x);
+}*/
+
+inline __device__ double Bj(double J, double x)
+{
+    double lpre = 1.0 / (2.0 * J);
+    double gpre = (2.0 * J + 1.0) * lpre;
+    double gpre2 = gpre * gpre;
+    double lpre2 = lpre * lpre;
+    double lpre4 = lpre2 * lpre2;
+    double gpre4 = gpre2 * gpre2;
+    double lpre6 = lpre4 * lpre2;
+    double gpre6 = gpre4 * gpre2;
+    double lpre8 = lpre4 * lpre4;
+    double gpre8 = gpre4 * gpre4;
+    double lim = linRangeD / gpre;
+    return (fabs(x) < lim)  ? ((gpre2 - lpre2) * x / 3.0) + 
+                              ((lpre4 - gpre4) * x * x * x / 45.0) + 
+                              ((gpre6 - lpre6) * x * x * x * x * x * 0.5 / 945.0) + 
+                              ((gpre8 - lpre8) * x * x * x * x * x  * x * x / 4725.0)
+                            : gpre * coth(gpre * x) - lpre * coth(lpre * x);
 }
 
 inline __device__ float Bjf(float J, float x)
@@ -256,7 +276,18 @@ inline __device__ float Bjf(float J, float x)
     float lpre = 1.0f / (2.0f * J);
     float gpre = (2.0f * J + 1.0f) * lpre;
     float lim = linRange / gpre;
-    return (fabsf(x) < lim) ? ((gpre * gpre - lpre * lpre) * x / 3.0f) + ((powf(lpre, 4.0f) - powf(gpre, 4.0f)) * x * x * x / 45.0f) + (0.5f * (powf(gpre, 6.0f) - powf(lpre, 6.0f)) * x * x * x * x * x / 945.0f) + ((powf(gpre, 8.0f) - powf(lpre, 8.0f)) * x * x * x * x * x  * x * x / 4725.0f)
+    float gpre2 = gpre * gpre;
+    float lpre2 = lpre * lpre;
+    float lpre4 = lpre2 * lpre2;
+    float gpre4 = gpre2 * gpre2;
+    float lpre6 = lpre4 * lpre2;
+    float gpre6 = gpre4 * gpre2;
+    float lpre8 = lpre4 * lpre4;
+    float gpre8 = gpre4 * gpre4;
+    return (fabsf(x) < lim) ? ((gpre2 - lpre2) * x / 3.0f) + 
+                              ((lpre4 - gpre4) * x * x * x / 45.0f) + 
+                              ((gpre6 - lpre6) * x * x * x * x * x * 0.5f / 945.0f) + 
+                              ((gpre8 - lpre8) * x * x * x * x * x  * x * x / 4725.0f)
            : gpre * cothf(gpre * x) - lpre * cothf(lpre * x);
 }
 
@@ -266,8 +297,17 @@ inline __device__ double dBjdx(double J, double x)
     double gpre = (2.0 * J + 1.0) * lpre;
     double gpre2 = gpre * gpre;
     double lpre2 = lpre * lpre;
+    double lpre4 = lpre2 * lpre2;
+    double gpre4 = gpre2 * gpre2;
+    double lpre6 = lpre4 * lpre2;
+    double gpre6 = gpre4 * gpre2;
+    double lpre8 = lpre4 * lpre4;
+    double gpre8 = gpre4 * gpre4;
     double lim = linRange / gpre;
-    return (fabs(x) < lim) ? (gpre2 - lpre2) / 3.0 + ((pow(lpre, 4.0) - pow(gpre, 4.0)) * pow(x, 2.0) / 15.0) + (0.5f * (pow(gpre, 6.0) - pow(lpre, 6.0)) * pow(x, 4.0) / 189.0) + ((pow(gpre, 8.0) - pow(lpre, 8.0)) * pow(x, 6.0) / 675.0)
+    return (fabs(x) < lim) ? ((gpre2 - lpre2) / 3.0) + 
+                             ((lpre4 - gpre4) * x * x / 15.0) + 
+                             ((gpre6 - lpre6) * x * x * x * x * 0.5 / 189.0) + 
+                             ((gpre8 - lpre8) * x * x * x * x  * x * x / 675.0)
            : (gpre2 - lpre2) + lpre2 * coth(lpre * x) * coth(lpre * x) - gpre2 * coth(gpre * x) * coth(gpre * x);
 }
 
@@ -277,8 +317,17 @@ inline __device__ float dBjdxf(float J, float x)
     float gpre = (2.0f * J + 1.0f) * lpre;
     float gpre2 = gpre * gpre;
     float lpre2 = lpre * lpre;
+    float lpre4 = lpre2 * lpre2;
+    float gpre4 = gpre2 * gpre2;
+    float lpre6 = lpre4 * lpre2;
+    float gpre6 = gpre4 * gpre2;
+    float lpre8 = lpre4 * lpre4;
+    float gpre8 = gpre4 * gpre4;
     float lim = linRange / gpre;
-    return (fabsf(x) < lim) ? (gpre2 - lpre2) / 3.0f + ((powf(lpre, 4.0f) - powf(gpre, 4.0f)) * x * x / 15.0f) + (0.5f * (powf(gpre, 6.0f) - powf(lpre, 6.0f)) * x * x * x * x / 189.0f) + ((powf(gpre, 8.0f) - powf(lpre, 8.0f)) * x * x * x * x  * x * x / 675.0f)
+    return (fabsf(x) < lim) ? ((gpre2 - lpre2) / 3.0f) + 
+                              ((lpre4 - gpre4) * x * x / 15.0f) + 
+                              ((gpre6 - lpre6) * x * x * x * x * 0.5f / 189.0f) + 
+                              ((gpre8 - lpre8) * x * x * x * x  * x * x / 675.0f)
            : (gpre2 - lpre2) + lpre2 * cothf(lpre * x) * cothf(lpre * x) - gpre2 * cothf(gpre * x) * cothf(gpre * x);
 }
 
