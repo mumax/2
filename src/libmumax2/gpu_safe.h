@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <cufft.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
