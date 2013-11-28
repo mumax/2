@@ -31,6 +31,7 @@
 typedef float (*func)(float x, float prefix, float mult);
 typedef double (*funcD)(double x, double prefix, double mult);
 typedef float (*funcTs)(float x, float prefix, float mult, float C);
+typedef double (*funcDTs)(double x, double prefix, double mult, double C);
 
 typedef double real;
 
