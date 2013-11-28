@@ -19,7 +19,7 @@ all:
 	cp src/libmumax2/$(LIBNAME) .
 	go run src/cuda/setup-cuda-paths.go -dir=src/cuda/
 	#go install -race -compiler=gccgo -gccgoflags='-static-libgcc -L /home/mykola/mumax2/pkg/gccgo -L /usr/local/cuda/lib64/ -Ofast -march=native' -v mumax2-bin
-	go install -v mumax2-bin
+	go install -v mumax2
 	go install -v apigen
 	go install -v texgen
 	go install -v template
