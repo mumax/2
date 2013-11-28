@@ -8,12 +8,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"mumax/frontend"
 	_ "mumax/modules" // register and link core modules
 	_ "mumax/ovf"     // register and link OOMMF output formats
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 )
@@ -21,15 +21,17 @@ import (
 const (
 	PYLIB            = "PYTHONPATH"
 	PYTHONMODULEPATH = "/../src/python"
+	MUMAX2NAME       = "mumax2"
 )
 
 func main() {
 
-	// setup enviroment
-	mumaxBinDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	mumaxBinDir, err := exec.LookPath(MUMAX2NAME)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(MUMAX2NAME + " is not in the $PATH variable")
 	}
+
+	mumaxBinDir = filepath.Dir(mumaxBinDir)
 
 	envValueSep := ":"
 	if runtime.GOOS == "windows" {
