@@ -26,10 +26,6 @@ all:
 	go install -v template
 	make -C src/python
 	cp -r src/python .
-ifndef SystemRoot	
-	make -C src/libomf
-	make -C src/muview
-endif
 
 .PHONY: clean
 clean:	
@@ -49,8 +45,6 @@ endif
 	rm -rf bin/$(LIBNAME)
 	make clean -C src/python
 	make clean -C src/libmumax2
-	make clean -C src/libomf
-	make clean -C src/muview
 .PHONY: test
 test:
 	echo todo
