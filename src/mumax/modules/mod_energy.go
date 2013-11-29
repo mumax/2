@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -13,7 +13,8 @@ package modules
 import (
 	. "mumax/common"
 	. "mumax/engine"
-	//"mumax/gpu"
+	"mumax/gpu"
+	"strings"
 )
 
 // Register this module
@@ -68,28 +69,52 @@ func LoadEnergy(e *Engine) {
 
 func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string) *Quant {
 	Energy := e.AddNewQuant(out, SCALAR, VALUE, Unit("J"), desc)
+	EnergyDensityName := strings.Replace(out, "E_", "w_", -1)
+	Debug(EnergyDensityName)
+	EnergyDensity := e.AddNewQuant(EnergyDensityName, SCALAR, FIELD, Unit("J/m3"), desc)
 	e.Depends(out, in1, in2)
+	e.Depends(EnergyDensityName, in1, in2)
 	m := e.Quant(in1)
 	H := e.Quant(in2)
-	Energy.SetUpdater(NewEnergyUpdater(Energy, m, H, e.Quant("msat"), weight))
+	Energy.SetUpdater(NewEnergyUpdater(Energy, EnergyDensity, m, H, e.Quant("msat"), weight))
 	return Energy
 }
 
 type EnergyUpdater struct {
-	*SDotUpdater
+	*SumReduceUpdater
 	energy *Quant
 	msat   *Quant
+	m      *Quant
+	H      *Quant
+	w      *Quant
+	weight float64
 }
 
-func NewEnergyUpdater(result, m, H, msat *Quant, weight float64) Updater {
+func NewEnergyUpdater(result, w, m, H, msat *Quant, weight float64) Updater {
 	u := new(EnergyUpdater)
-	u.SDotUpdater = NewSDotUpdater(result, m, H, weight).(*SDotUpdater)
+	u.SumReduceUpdater = NewSumReduceUpdater(w, result).(*SumReduceUpdater)
 	u.energy = result
+	u.w = w
+	u.m = m
+	u.H = H
 	u.msat = msat
+	u.weight = weight
 	return u
 }
 
 func (u *EnergyUpdater) Update() {
-	u.SDotUpdater.Update()
+
+	gpu.DotMask(u.w.Array(), u.m.Array(), u.H.Array(), u.m.Multiplier(), u.H.Multiplier())
+
+	if !u.msat.Array().IsNil() {
+		gpu.Mul(u.w.Array(), u.w.Array(), u.msat.Array())
+	}
+
+	u.SumReduceUpdater.Update()
+
 	u.energy.Multiplier()[0] *= u.msat.Multiplier()[0]
+	u.energy.Multiplier()[0] *= u.weight
+
+	u.energy.SetUpToDate(true)
+	u.w.SetUpToDate(true)
 }
