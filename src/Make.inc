@@ -15,19 +15,10 @@ NVCC+=\
   -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
   -gencode arch=compute_30,code=sm_30\
+  -gencode arch=compute_35,code=sm_35\
   -Xptxas\
   -v\
   
-NVCCWERRORLESS=nvcc
-NVCCWERRORLESS+=\
-  --compiler-options -fPIC\
-  --use_fast_math\
-  -gencode arch=compute_20,code=sm_20\
-  -gencode arch=compute_20,code=sm_21\
-  -gencode arch=compute_30,code=sm_30\
-  -Xptxas\
-  -v\
-
 # flags for the gcc compiler
 # As CUDA is delivered only in 32 bits on Os X, architecture is forced to i386 on Darwin platform
 
@@ -63,6 +54,7 @@ NVCC+=\
   -gencode arch=compute_20,code=sm_20\
   -gencode arch=compute_20,code=sm_21\
   -gencode arch=compute_30,code=sm_30\
+  -gencode arch=compute_35,code=sm_35\
   -Xptxas\
   -v\
   --use_fast_math\
@@ -76,24 +68,6 @@ NVCC+=\
   --compiler-options -DNDEBUG\
   --compiler-options -D_WINDOWS\
   
-NVCCWERRORLESS=nvcc --use-local-env --cl-version 2010
-NVCCWERRORLESS+=\
-  -gencode arch=compute_20,code=sm_20\
-  -gencode arch=compute_20,code=sm_21\
-  -gencode arch=compute_30,code=sm_30\
-  -Xptxas\
-  -v\
-  --use_fast_math\
-  --compiler-options -W4\
-  --compiler-options -Ox\
-  --compiler-options -Oi\
-  --compiler-options -EHsc\
-  --compiler-options -GS\
-  --compiler-options -fp:fast\
-  --compiler-options -DWIN32\
-  --compiler-options -DNDEBUG\
-  --compiler-options -D_WINDOWS\
-
 CC=cl.exe\
 
 CC+=\

@@ -1,12 +1,5 @@
 include ../Make.inc
 
-MY_CUFILES_WERRORLESS = random.cu				 		# my cuda files to be compiled without Werror flag
-ifndef SystemRoot
-CU_OFILES_WERRORLESS  = $(MY_CUFILES_WERRORLESS:.cu=.o) # my cuda object compiled without Werror flag
-else
-CU_OFILES_WERRORLESS  = $(MY_CUFILES_WERRORLESS:.cu=.obj)
-endif
-
 CUFILES   = $(filter-out $(wildcard $(MY_CUFILES_WERRORLESS)), $(wildcard *.cu))  # my cuda files
 CPPFILES     = $(wildcard *.cpp)                 # my c++ files
 CU_HFILES    = $(CUFILES:.cu=.h)                 # cuda only header files
@@ -32,9 +25,6 @@ all: libmumax2.so libmumax2.h
 $(CU_OFILES): %.o: %.cu %.h
 	$(NVCC) -dc -I. $(@:.o=.cu) -o $(@)
 
-$(CU_OFILES_WERRORLESS): %.o: %.cu %.h
-	$(NVCCWERRORLESS) -dc -I. $(@:.o=.cu) -o $(@)
-
 $(CPP_OFILES): %.o: %.cpp %.h
 	 $(CC) -fPIC -c $(@:.o=.cpp) -o $(@)
 
@@ -54,9 +44,6 @@ all: libmumax2.lib libmumax2.h
 
 $(CU_OFILES): %.obj: %.cu %.h
 	$(NVCC) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -dc -I. $(@:.obj=.cu) -o $(@)
-
-$(CU_OFILES_WERRORLESS): %.obj: %.cu %.h
-	$(NVCCWERRORLESS) --compiler-options -D_USRDLL --compiler-options -DDLL_EXPORTS -dc -I. $(@:.obj=.cu) -o $(@)
 
 $(CPP_OFILES): %.obj: %.cpp %.h
 	 $(CC) /D_USRDLL /DDLL_EXPORTS -c $(@:.obj=.cpp) -o $(@)
