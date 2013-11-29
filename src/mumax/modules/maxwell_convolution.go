@@ -99,15 +99,6 @@ func (plan *MaxwellPlan) init() {
 	plan.fftKernSize[2] = plan.fftKernSize[2] / 2 // store only non-redundant parts
 }
 
-// Enable Couloumb's law
-func (plan *MaxwellPlan) EnableCoulomb(rho *Quant) {
-	plan.init()
-	plan.loadChargeKernel()
-	plan.EInMul[RHO] = 1 / Epsilon0
-	plan.EInput[RHO] = rho.Array()
-	runtime.GC()
-}
-
 // Enable Demagnetizing field
 func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	plan.init()
@@ -119,57 +110,10 @@ func (plan *MaxwellPlan) EnableDemag(m, Msat *Quant) {
 	runtime.GC()
 }
 
-func (plan *MaxwellPlan) EnableFaraday(dBdt *Quant) {
-	plan.init()
-	plan.loadRotorKernel()
-	// curl(E) = - ∂B/∂t
-	plan.EInput[JX] = dBdt.Array().Component(X)
-	plan.EInput[JY] = dBdt.Array().Component(Y)
-	plan.EInput[JZ] = dBdt.Array().Component(Z)
-	plan.EInMul[JX] = -1
-	plan.EInMul[JY] = -1
-	plan.EInMul[JZ] = -1
-	runtime.GC()
-}
-
-func (plan *MaxwellPlan) EnableOersted(j *Quant) {
-	plan.init()
-	plan.loadRotorKernel()
-	// curl(B) = µ0*j
-	plan.BInput[JX] = j.Array().Component(X)
-	plan.BInput[JY] = j.Array().Component(Y)
-	plan.BInput[JZ] = j.Array().Component(Z)
-	plan.BInMul[JX] = Mu0
-	plan.BInMul[JY] = Mu0
-	plan.BInMul[JZ] = Mu0
-	runtime.GC()
-}
-
 const (
 	CPUONLY = true
 	GPU     = false
 )
-
-// Load charge kernel if not yet done so.
-// Required for field of electric/magnetic charge density.
-func (plan *MaxwellPlan) loadChargeKernel() {
-	if plan.kern[CHARGE] != nil {
-		return
-	}
-	e := GetEngine()
-	// DEBUG: add the kernel as orphan quant, so we can output it.
-	quant := NewQuant("kern_charge", VECTOR, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced electrostatic kernel")
-	if DEBUG {
-		e.AddQuant(quant)
-	}
-
-	kern := quant.Buffer()
-	//PointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-	gpu.InitPointKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), kern)
-	//   fmt.Println("kern: ", kern.Array[0])
-	plan.kern[CHARGE] = kern
-	plan.LoadKernel(kern, 0, DIAGONAL, PUREIMAG)
-}
 
 // Load dipole kernel if not yet done so.
 // Required for field of electric/magnetic charge density.
@@ -189,28 +133,6 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 	Kernel_Arne(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	plan.kern[DIPOLE] = kern
 	plan.LoadKernel(kern, 1, SYMMETRIC, PUREREAL)
-}
-
-// Load rotor kernel if not yet done so.
-// Required for faraday, ampere-maxwell
-func (plan *MaxwellPlan) loadRotorKernel() {
-	if plan.kern[ROTOR] != nil {
-		return
-	}
-	e := GetEngine()
-	// DEBUG: add the kernel as orphan quant, so we can output it.
-	quant := NewQuant("kern_rotor", TENS, plan.logicSize[:], FIELD, Unit("m"), CPUONLY, "reduced rotor kernel")
-	if DEBUG {
-		e.AddQuant(quant)
-	}
-
-	kern := quant.Buffer()
-	accuracy := 8
-	//RotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-	gpu.InitRotorKernel(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
-	//   fmt.Println("kern: ", kern.Array[3])
-	plan.kern[ROTOR] = kern
-	plan.LoadKernel(kern, 4, ANTISYMMETRIC, PUREIMAG)
 }
 
 // Calculate the electric field plan.E

@@ -11,13 +11,12 @@
 
 package gpu
 
-//#cgo LDFLAGS:-Wl,-rpath=\$ORIGIN/../bin/ -L. -lmumax2 -L/usr/local/cuda/lib64 -LC:/opt/cuda/v5.0/lib/x64 -LC:/opt/cuda/v4.2/lib/x64 -lcudart
-//#cgo CFLAGS:-IC:/opt/cuda/v4.2/include -I../../libmumax2
+//#cgo LDFLAGS:-Wl,-rpath=\$ORIGIN/../bin/ -L. -lmumax2 -L/usr/local/cuda/lib64 -LC:/opt/cuda/lib/x64 -LC:/opt/cuda/lib/x64 -lcudart
+//#cgo CFLAGS:-IC:/opt/cuda/include -I../../libmumax2 -I/usr/local/cuda/include
 //#include "libmumax2.h"
 import "C"
 
 import (
-	cu "cuda/driver"
 	. "mumax/common"
 	"unsafe"
 )
@@ -760,132 +759,6 @@ func TransposeComplexYZPart_inv(out, in *Array) {
 	out.Stream.Sync()
 }
 
-// Point-wise 3D micromagnetic kernel multiplication in Fourier space.
-// Overwrites M (in Fourier space, of course) with the result:
-//	|Mx|   |Kxx Kxy Kxz|   |Mx|
-//	|My| = |Kxy Kyy Kyz| * |My|
-//	|Mz|   |Kxz Kyz Kzz|   |Mz|
-// The kernel is symmetric.
-// partLen3D: number of reals per GPU for one component (e.g. fftMx).
-func KernelMulMicromag3DAsync(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy *Array, stream Stream) {
-	Assert(fftMx.size4D[0] == 1 &&
-		fftKxx.size4D[0] == 1 &&
-		fftMx.Len() == 2*fftKxx.Len())
-	// Other sizes hopefully OK.
-
-	C.kernelMulMicromag3DAsync(
-		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-		C.int(fftMx.partLen3D))
-}
-
-// Point-wise 3D micromagnetic kernel multiplication in Fourier space.
-// Output is saved in out (in Fourier space, of course) with the result, can be in-place or out-of-place:
-//  |outx|   |Kxx Kxy Kxz|   |Mx|
-//  |outy| = |Kxy Kyy Kyz| * |My|
-//  |outz|   |Kxz Kyz Kzz|   |Mz|
-// The kernel is symmetric.
-// partLen3D: number of reals per GPU for one component (e.g. fftMx).
-func KernelMulMicromag3D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, fftKxz, fftKxy, outx, outy, outz *Array, stream Stream) {
-	Assert(fftMx.size4D[0] == 1 &&
-		fftKxx.size4D[0] == 1)
-	// Other sizes hopefully OK.
-
-	C.kernelMulMicromag3D2Async(
-		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&outx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&outy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&outz.pointer[0])),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-		(*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
-}
-
-// Point-wise 2D micromagnetic kernel multiplication in Fourier space.
-// Output is saved in out (in Fourier space, of course) with the result, can be in-place or out-of-place:
-//  |outx|   |Kxx  0   0 |   |Mx|
-//  |outy| = | 0  Kyy Kyz| * |My|
-//  |outz|   | 0  Kyz Kzz|   |Mz|
-// The kernel is symmetric.
-// partLen3D: number of reals per GPU for one component (e.g. fftMx).
-func KernelMulMicromag2D2Async(fftMx, fftMy, fftMz, fftKxx, fftKyy, fftKzz, fftKyz, outx, outy, outz *Array, stream Stream) {
-	Assert(fftMx.size4D[0] == 1 &&
-		fftKxx.size4D[0] == 1 &&
-		fftKxx.size3D[0] == 1)
-	// Other sizes hopefully OK.
-
-	C.kernelMulMicromag2D2Async(
-		(**C.float)(unsafe.Pointer(&fftMx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftMy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftMz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKxx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKyy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKzz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&fftKyz.pointer[0])),
-		(**C.float)(unsafe.Pointer(&outx.pointer[0])),
-		(**C.float)(unsafe.Pointer(&outy.pointer[0])),
-		(**C.float)(unsafe.Pointer(&outz.pointer[0])),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))),
-		(*C.int)(unsafe.Pointer(&(fftMx.partSize[0]))))
-}
-
-func InitRotorKernelElement(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
-
-	C.initRotorKernelElementAsync(
-		(**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
-		C.int(comp),
-		C.int(gpuBuffer.size3D[0]),
-		C.int(gpuBuffer.size3D[1]),
-		C.int(gpuBuffer.size3D[2]),
-		C.int(gpuBuffer.partSize[1]),
-		C.int(periodic[0]),
-		C.int(periodic[1]),
-		C.int(periodic[2]),
-		C.float(cellSize[0]),
-		C.float(cellSize[1]),
-		C.float(cellSize[2]),
-		(**C.float)(unsafe.Pointer(&dev_qd_P_10[0])),
-		(**C.float)(unsafe.Pointer(&dev_qd_W_10[0])),
-		(*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
-	gpuBuffer.Stream.Sync()
-}
-
-func InitPointKernelElement(gpuBuffer *Array, comp int, periodic []int, cellSize []float64, dev_qd_P_10, dev_qd_W_10 []cu.DevicePtr) {
-
-	C.initPointKernelElementAsync(
-		(**C.float)(unsafe.Pointer(&gpuBuffer.pointer[0])),
-		C.int(comp),
-		C.int(gpuBuffer.size3D[0]),
-		C.int(gpuBuffer.size3D[1]),
-		C.int(gpuBuffer.size3D[2]),
-		C.int(gpuBuffer.partSize[1]),
-		C.int(periodic[0]),
-		C.int(periodic[1]),
-		C.int(periodic[2]),
-		C.float(cellSize[0]),
-		C.float(cellSize[1]),
-		C.float(cellSize[2]),
-		(**C.float)(unsafe.Pointer(&dev_qd_P_10[0])),
-		(**C.float)(unsafe.Pointer(&dev_qd_W_10[0])),
-		(*C.CUstream)(unsafe.Pointer(&(gpuBuffer.Stream[0]))))
-	gpuBuffer.Stream.Sync()
-}
-
 // Computes the uniaxial anisotropy field, stores in h.
 func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat float64, anisUMask *Array, anisUMul []float64, stream Stream) {
 	C.uniaxialAnisotropyAsync(
@@ -932,49 +805,6 @@ func Exchange6Async(h, m, msat, aex *Array, Aex2_mu0Msatmul float64, cellSize []
 		(C.float)(cellSize[X]),
 		(C.float)(cellSize[Y]),
 		(C.float)(cellSize[Z]),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
-}
-
-// Calculates the electrical current density j.
-// Efield: electrical field
-// r, rmul: electrical resistivity (scalar) and multiplier
-func CurrentDensityAsync(j, Efield, r *Array, rmul float64, periodic []int, stream Stream) {
-	CheckSize(j.Size3D(), Efield.Size3D())
-	CheckSize(j.Size3D(), r.Size3D())
-	C.currentDensityAsync(
-		(**C.float)(unsafe.Pointer(&(j.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Efield.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Efield.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(Efield.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(r.pointer[0]))),
-		(C.float)(rmul),
-		(C.int)(j.PartSize()[X]),
-		(C.int)(j.PartSize()[Y]),
-		(C.int)(j.PartSize()[Z]),
-		(C.int)(periodic[X]),
-		(C.int)(periodic[Y]),
-		(C.int)(periodic[Z]),
-		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
-}
-
-// Time derivative of electrical charge density.
-func DiffRhoAsync(drho, j *Array, cellsize []float64, periodic []int, stream Stream) {
-	C.diffRhoAsync(
-		(**C.float)(unsafe.Pointer(&(drho.pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[X].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[Y].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(j.Comp[Z].pointer[0]))),
-		(C.float)(cellsize[X]),
-		(C.float)(cellsize[Y]),
-		(C.float)(cellsize[Z]),
-		(C.int)(j.PartSize()[X]),
-		(C.int)(j.PartSize()[Y]),
-		(C.int)(j.PartSize()[Z]),
-		(C.int)(periodic[X]),
-		(C.int)(periodic[Y]),
-		(C.int)(periodic[Z]),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 
