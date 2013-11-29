@@ -3,9 +3,9 @@ all: manual.pdf
 
 .PHONY: manual.pdf
 manual.pdf: mumax2-api.tex flags.tex examples.tex *.tex
-	pdflatex --halt-on-error manual.tex
+	xelatex --output-driver="xdvipdfmx -vvv" -8bit --halt-on-error manual.tex
 	makeindex manual
-	pdflatex --halt-on-error manual.tex
+	xelatex --output-driver="xdvipdfmx -vvv" -8bit --halt-on-error manual.tex
 
 .PHONY: mumax2-api.tex
 mumax2-api.tex:
