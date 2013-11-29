@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package frontend
@@ -43,7 +43,6 @@ type Client struct {
 func (c *Client) Init(inputfile string, outputDir string) {
 	c.isServerAlive = 0
 	c.isWireAlive = 0
-	Debug("Trying to establish TCP server...")
 	m_s, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		Debug("[WARNING] MuMax has failed to start slave server")
@@ -52,7 +51,6 @@ func (c *Client) Init(inputfile string, outputDir string) {
 	c.server = m_s
 	c.commAddr = c.server.Addr().String()
 	Debug("The TCP connection is grangted to:", c.commAddr)
-	Debug("Done.")
 	c.isServerAlive = 1
 
 	c.inputFile = inputfile
@@ -79,7 +77,6 @@ func (c *Client) Run() {
 			err2 := c.server.Close()
 			CheckErr(err2, ERR_IO)
 		}
-		Debug("Done.")
 	}()
 
 	c.logWait = make(chan int)
@@ -162,7 +159,6 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	command, args = commandForFile(c.inputFile) // e.g.: "python"
 	Debug("Starting", command, "with following flags", args)
 	proc := exec.Command(command, args...) //:= subprocess(command, args)
-	Debug("Done.")
 	stderr, err4 := proc.StderrPipe()
 	CheckErr(err4, ERR_IO)
 	stdout, err5 := proc.StdoutPipe()
@@ -178,7 +174,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 	// use a channel to signal sub-command completion
 	waiter = make(chan (int))
 	go func() {
-		exitstat := 666 // dummy value 
+		exitstat := 666 // dummy value
 		err := proc.Wait()
 		if err != nil {
 			if msg, ok := err.(*exec.ExitError); ok {
@@ -195,7 +191,7 @@ func (c *Client) startSubcommand() (command string, waiter chan (int)) {
 		} else {
 			exitstat = 0
 		}
-		waiter <- exitstat // send exit status to signal completion 
+		waiter <- exitstat // send exit status to signal completion
 	}()
 
 	return

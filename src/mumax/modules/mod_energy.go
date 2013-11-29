@@ -67,7 +67,6 @@ func LoadEnergy(e *Engine) {
 func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string) *Quant {
 	Energy := e.AddNewQuant(out, SCALAR, VALUE, Unit("J"), desc)
 	EnergyDensityName := strings.Replace(out, "E_", "w_", -1)
-	Debug(EnergyDensityName)
 	EnergyDensity := e.AddNewQuant(EnergyDensityName, SCALAR, FIELD, Unit("J/m3"), desc)
 	e.Depends(out, in1, in2)
 	e.Depends(EnergyDensityName, in1, in2)

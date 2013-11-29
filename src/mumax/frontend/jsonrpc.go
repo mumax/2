@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package frontend
@@ -74,12 +74,11 @@ func (j *jsonRPC) Run() {
 			jsonc.Encode(ret)
 			j.flush.WriteString(wbuf.String() + "<<< End of mumax message >>>")
 			j.flush.Flush()
-			// 
+			//
 			// wbuf now has JSON cPRC call
 		} else {
 			panic(IOErr(fmt.Sprint("json: ", *v)))
 		}
-		Debug("Request processed.")
 	}
 }
 
@@ -104,16 +103,13 @@ func (j *jsonRPC) Call(funcName string, args []interface{}) []interface{} {
 	}
 
 	// call
-	// convert []interface{} to []reflect.Value  
-	Debug("Making call to MuMax backend")
+	// convert []interface{} to []reflect.Value
 
 	argvals := make([]reflect.Value, len(args))
 	for i := range argvals {
 		argvals[i] = convertArg(args[i], f.Type().In(i))
 	}
 	retVals := f.Call(argvals)
-
-	Debug("Successful call to MuMax backend")
 
 	// convert []reflect.Value to []interface{}
 	ret := make([]interface{}, len(retVals))
