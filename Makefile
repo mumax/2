@@ -17,6 +17,7 @@ all:
 	$(MAKE) --no-print-directory --directory=src/libmumax2 
 	cp src/libmumax2/$(LIBNAME) src/mumax/gpu/
 	cp src/libmumax2/$(LIBNAME) .
+	cp src/libmumax2/$(LIBNAME) bin/
 	go run src/cuda/setup-cuda-paths.go -dir=src/cuda/
 	#go install -race -compiler=gccgo -gccgoflags='-static-libgcc -L /home/mykola/mumax2/pkg/gccgo -L /usr/local/cuda/lib64/ -Ofast -march=native' -v mumax2-bin
 	go install -v mumax2
@@ -35,15 +36,17 @@ clean:
 	rm -rf src/mumax/gpu/$(LIBNAME)
 	rm $(LIBNAME)
 ifndef SystemRoot	
-	rm -rf bin/mumax2-bin
+	rm -rf bin/mumax2
 	rm -rf bin/apigen
 	rm -rf bin/texgen
+	rm -rf bin/muview
 else
-	rm -rf bin/mumax2-bin.exe
+	rm -rf bin/mumax2.exe
 	rm -rf bin/apigen.exe
 	rm -rf bin/texgen.exe
-	rm -rf bin/libmumax2.dll
+	rm -rf bin/muview.exe
 endif	
+	rm -rf bin/$(LIBNAME)
 	make clean -C src/python
 	make clean -C src/libmumax2
 	make clean -C src/libomf
