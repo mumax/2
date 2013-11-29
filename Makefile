@@ -25,6 +25,7 @@ all:
 	go install -v texgen
 	go install -v template
 	make -C src/python
+	cp -r src/python .
 ifndef SystemRoot	
 	make -C src/libomf
 	make -C src/muview
@@ -32,6 +33,7 @@ endif
 
 .PHONY: clean
 clean:	
+	rm -rf python/
 	rm -rf pkg/*
 	rm -rf src/mumax/gpu/$(LIBNAME)
 	rm $(LIBNAME)
@@ -39,12 +41,10 @@ ifndef SystemRoot
 	rm -rf bin/mumax2
 	rm -rf bin/apigen
 	rm -rf bin/texgen
-	rm -rf bin/muview
 else
 	rm -rf bin/mumax2.exe
 	rm -rf bin/apigen.exe
 	rm -rf bin/texgen.exe
-	rm -rf bin/muview.exe
 endif	
 	rm -rf bin/$(LIBNAME)
 	make clean -C src/python

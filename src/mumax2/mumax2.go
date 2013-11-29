@@ -20,7 +20,7 @@ import (
 
 const (
 	PYLIB            = "PYTHONPATH"
-	PYTHONMODULEPATH = "/../src/python"
+	PYTHONMODULEPATH = "/../python"
 	MUMAX2NAME       = "mumax2"
 )
 
