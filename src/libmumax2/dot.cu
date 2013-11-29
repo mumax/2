@@ -8,6 +8,23 @@ extern "C" {
 #endif
 
 ///@internal
+__global__ void dotMaskKern(float* __restrict__ dst,
+                            float* __restrict__ ax, float* __restrict__ ay, float* __restrict__ az,
+                            float* __restrict__ bx, float* __restrict__ by, float* __restrict__ bz,
+                            float axMul, float ayMul, float azMul,
+                            float bxMul, float byMul, float bzMul,
+                            int Npart)
+{
+    int i = threadindex;
+    if (i < Npart)
+    {
+        float3 a = make_float3(axMul * getMaskUnity(ax, i), ayMul * getMaskUnity(ay, i), azMul * getMaskUnity(az, i));
+        float3 b = make_float3(bxMul * getMaskUnity(bx, i), byMul * getMaskUnity(by, i), bzMul * getMaskUnity(bz, i));
+        dst[i] = dotf(a, b);
+    }
+}
+
+///@internal
 __global__ void dotKern(float* __restrict__ dst,
                         float* __restrict__ ax, float* __restrict__ ay, float* __restrict__ az,
                         float* __restrict__ bx, float* __restrict__ by, float* __restrict__ bz,
@@ -41,6 +58,29 @@ __global__ void dotSignKern(float* __restrict__ dst,
         float dotP = dotf(a, b);
         float sign = -dotf(b, c); // !!!
         dst[i] = copysign(dotP, sign);
+    }
+}
+
+
+__export__ void dotMaskAsync(float** dst, 
+                             float** ax, float** ay, float** az, 
+                             float** bx, float** by, float** bz, 
+                             float axMul, float ayMul, float azMul,
+                             float bxMul, float byMul, float bzMul,
+                             CUstream* stream, int Npart)
+{
+    dim3 gridSize, blockSize;
+    make1dconf(Npart, &gridSize, &blockSize);
+    for (int dev = 0; dev < nDevice(); dev++)
+    {
+        assert(dst[dev] != NULL);
+        gpu_safe(cudaSetDevice(deviceId(dev)));
+        dotMaskKern <<< gridSize, blockSize, 0, cudaStream_t(stream[dev])>>> (dst[dev], 
+                                                                          ax[dev], ay[dev], az[dev], 
+                                                                          bx[dev], by[dev], bz[dev], 
+                                                                          axMul, ayMul, azMul,
+                                                                          bxMul, byMul, bzMul,
+                                                                          Npart);
     }
 }
 

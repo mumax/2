@@ -73,7 +73,34 @@ func DivMulPow(dst, a, b, c *Array, p float64) {
 	dst.Stream.Sync()
 }
 
-// Synchronous Dot product: C = AiBi
+// Synchronous Dot product: C = AiBi, A and B could be masks
+func DotMask(dst, a, b *Array, aMul, bMul []float64) {
+	CheckSize(dst.size3D, a.size3D)
+	C.dotMaskAsync(
+		(**C.float)(unsafe.Pointer(&(dst.Comp[X].Pointers()[0]))),
+
+		(**C.float)(unsafe.Pointer(&(a.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(a.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(a.Comp[Z].Pointers()[0]))),
+
+		(**C.float)(unsafe.Pointer(&(b.Comp[X].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(b.Comp[Y].Pointers()[0]))),
+		(**C.float)(unsafe.Pointer(&(b.Comp[Z].Pointers()[0]))),
+
+		(C.float)(float32(aMul[X])),
+		(C.float)(float32(aMul[Y])),
+		(C.float)(float32(aMul[Z])),
+
+		(C.float)(float32(bMul[X])),
+		(C.float)(float32(bMul[Y])),
+		(C.float)(float32(bMul[Z])),
+
+		(*C.CUstream)(unsafe.Pointer(&(dst.Stream[0]))),
+		C.int(dst.partLen3D))
+	dst.Stream.Sync()
+}
+
+// Synchronous Dot product: C = AiBi, A and B should not be masks
 func Dot(dst, a, b *Array) {
 	CheckSize(dst.size3D, a.size3D)
 	C.dotAsync(
