@@ -15,12 +15,12 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
                                 float* __restrict__ mx, float* __restrict__ my, float* __restrict__ mz,
                                 float* __restrict__ msat0T0Msk,
                                 float* __restrict__ SMsk,
-                                float* __restrict__ kappaMsk,
+                                float* __restrict__ nMsk,
                                 float* __restrict__ TcMsk,
                                 float* __restrict__ TsMsk,
                                 float msat0T0Mul,
                                 float SMul,
-                                float kappaMul,
+                                float nMul,
                                 float TcMul,
                                 float TsMul,
                                 int NPart)
@@ -33,11 +33,11 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
 
         double Ms0T0 = msat0T0Mul * getMaskUnity(msat0T0Msk, I);
         double S = SMul * getMaskUnity(SMsk, I);
-        double kappa = kappaMul * getMaskUnity(kappaMsk, I);
+        double n = nMul * getMaskUnity(nMsk, I);
         double Tc = TcMul * getMaskUnity(TcMsk, I);
         double Ts = TsMul * getMaskUnity(TsMsk, I);
 
-        if (Ms0T0 == 0.0 || kappa == 0.0)
+        if (Ms0T0 == 0.0 || n == 0.0)
         {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
@@ -61,7 +61,7 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
 
         double M0 = Ms0T0 * Bj(S, meb);
 
-        double mult = (M0 - M) / (b * kappa * dBjdx(S, meb));
+        double mult = n * kB * Ts * (M0 - M) / (mu0 * Ms0T0 * Ms0T0 * dBjdx(S, meb));
 
         hx[I] = mult * s.x;
         hy[I] = mult * s.y;
@@ -75,12 +75,12 @@ __export__ void long_field_async(float** hx, float** hy, float** hz,
                                  float** mx, float** my, float** mz,
                                  float** msat0T0,
                                  float** S,
-                                 float** kappa,
+                                 float** n,
                                  float** Tc,
                                  float** Ts,
                                  float msat0T0Mul,
                                  float SMul,
-                                 float kappaMul,
+                                 float nMul,
                                  float TcMul,
                                  float TsMul,
                                  int NPart,
@@ -94,12 +94,12 @@ __export__ void long_field_async(float** hx, float** hy, float** hz,
             mx[dev], my[dev], mz[dev],
             msat0T0[dev],
             S[dev],
-            kappa[dev],
+            n[dev],
             Tc[dev],
             Ts[dev],
             msat0T0Mul,
             SMul,
-            kappaMul,
+            nMul,
             TcMul,
             TsMul,
             NPart);
