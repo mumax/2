@@ -2,7 +2,7 @@
 //  Copyright 2012  Arne Vansteenkiste, Ben Van de Wiele and Mykola Dvornik.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -43,11 +43,11 @@ func (f *FormatDump) Write(out io.Writer, q *Quant, options []string) {
 		panic(InputErr("dump output format does not take options"))
 	}
 
-	data := q.Buffer().Array
-	list := q.Buffer().List
+	data := q.Buffer(FIELD).Array
+	list := q.Buffer(FIELD).List
 
 	w := dump.NewWriter(out, dump.CRC_ENABLED)
-	w.Components = len(data) 
+	w.Components = len(data)
 	w.MeshSize = [3]int{len(data[0]), len(data[0][0]), len(data[0][0][0])}
 	w.TimeUnit = "s"
 	w.Time = GetEngine().Quant("t").Scalar()

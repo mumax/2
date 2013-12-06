@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package engine
@@ -39,10 +39,10 @@ func (f *FormatPNG) Write(out io.Writer, q *Quant, options []string) {
 	default:
 		panic(InputErrF("PNG cannot handle data with", q.NComp(), "components."))
 	case 1:
-		min, max := Extrema(q.Buffer().List)
-		image = DrawScalars(q.Buffer().Array[0], min, max)
+		min, max := Extrema(q.Buffer(FIELD).List)
+		image = DrawScalars(q.Buffer(FIELD).Array[0], min, max)
 	case 3:
-		image = DrawVectors(q.Buffer().Array)
+		image = DrawVectors(q.Buffer(FIELD).Array)
 	}
 
 	err := png.Encode(out, image)

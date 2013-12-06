@@ -56,6 +56,7 @@ type Quant struct {
 	buffer      *host.Array       // Host buffer for copying from/to the GPU array
 	bufUpToDate bool              // Flags if the buffer (in RAM) needs to be updated
 	bufXfers    int               // Number of times it has been copied from GPU
+	bufKind     QuantKind         // The format of the buffer
 	timer       Timer             // Debug/benchmarking
 	bufMutex    sync.RWMutex
 }
@@ -347,8 +348,8 @@ func (q *Quant) Kind() QuantKind {
 // is allocated when needed. The transfer is only done when needed, i.e.,
 // when bufferUpToDate == false. Multiplies by the multiplier and handles masks correctly.
 // Does not Update().
-func (q *Quant) Buffer() *host.Array {
-	if q.cpuOnly || q.bufUpToDate {
+func (q *Quant) Buffer(kind QuantKind) *host.Array {
+	if q.cpuOnly || (q.bufUpToDate && kind == q.bufKind) {
 		//Debug("buffer of", q.Name(), q.buffer.Array)
 		return q.buffer
 	}
@@ -369,22 +370,34 @@ func (q *Quant) Buffer() *host.Array {
 		for c := range buffer.Comp {
 			comp := buffer.Comp[c]
 			for i := range comp {
-				comp[i] = float32(q.multiplier[c])
+				switch kind {
+				case FIELD:
+					comp[i] = float32(q.multiplier[c])
+				case MASK:
+					comp[i] = float32(1.0)
+				}
 			}
 		}
 	} else {
 		q.array.CopyToHost(q.buffer)
 		q.bufXfers++
-		for c := range buffer.Comp {
-			if q.multiplier[c] != 1 {
-				comp := buffer.Comp[c]
-				for i := range comp {
-					comp[i] *= float32(q.multiplier[c]) // multiply by multiplier if not 1
+		switch kind {
+		case FIELD:
+			for c := range buffer.Comp {
+				if q.multiplier[c] != 1 {
+					comp := buffer.Comp[c]
+					for i := range comp {
+						comp[i] *= float32(q.multiplier[c]) // multiply by multiplier if not 1
+					}
 				}
 			}
+			Debug("syfg")
+		case MASK:
+			Debug("gfys")
 		}
 	}
 	q.bufUpToDate = true
+	q.bufKind = kind
 	q.bufMutex.Unlock()
 	return q.buffer
 }
@@ -446,6 +459,7 @@ func (q *Quant) Invalidate() {
 	}
 	q.upToDate = false
 	q.bufUpToDate = false
+	q.bufKind = FIELD
 	for _, c := range q.children {
 		c.Invalidate()
 	}
@@ -512,7 +526,7 @@ func checkComp(q *Quant, ncomp int) {
 }
 
 func (q *Quant) String() string {
-	return fmt.Sprint(q.Name(), q.Buffer().Array)
+	return fmt.Sprint(q.Name(), q.Buffer(FIELD).Array)
 }
 
 func (q *Quant) SetUpToDate(status bool) {

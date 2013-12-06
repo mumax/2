@@ -321,7 +321,16 @@ func (a API) GetArray(quantity string) *host.Array {
 	q := a.Engine.Quant(quantity)
 	checkKinds(q, MASK, FIELD)
 	q.Update() //!
-	return q.Buffer()
+	return q.Buffer(FIELD)
+}
+
+// Gets a space-dependent quantity. If the quantity uses a mask,
+// the result is equal to GetMask() * GetValue()
+func (a API) GetMask(quantity string) *host.Array {
+	q := a.Engine.Quant(quantity)
+	checkKinds(q, MASK, FIELD)
+	q.Update() //!
+	return q.Buffer(MASK)
 }
 
 // DEBUG: does not update
@@ -329,7 +338,7 @@ func (a API) DebugField(quantity string) *host.Array {
 	q := a.Engine.Quant(quantity)
 	checkKinds(q, MASK, FIELD)
 	//q.Update() //!
-	buffer := q.Buffer()
+	buffer := q.Buffer(FIELD)
 	return buffer
 }
 
@@ -339,7 +348,7 @@ func (a API) Debug_GetArray(quant string) *host.Array {
 	q := a.Engine.Quant(quant)
 	q.Update() //!
 	array := q.Array()
-	buffer := q.Buffer()
+	buffer := q.Buffer(FIELD)
 	array.CopyToHost(buffer)
 	return buffer
 }
@@ -735,10 +744,10 @@ func (a API) GetDispersion(fmin, fmax float64, steps, format int) {
 	//~ create two output quantities for real/img (amp/phase) parts
 
 	mFFTHostX := NewQuant("m-X", COMP, OutputSize, FIELD, Unit("A/m"), true, "FFT of M, real part")
-	mFFTHostXArray := mFFTHostX.Buffer()
+	mFFTHostXArray := mFFTHostX.Buffer(FIELD)
 
 	mFFTHostY := NewQuant("m-Y", COMP, OutputSize, FIELD, Unit("A/m"), true, "FFT of M, imaginary part")
-	mFFTHostYArray := mFFTHostY.Buffer()
+	mFFTHostYArray := mFFTHostY.Buffer(FIELD)
 
 	//~ Loop over the range of frequencies
 	for i := 0; i < steps; i++ {

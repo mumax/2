@@ -128,7 +128,7 @@ func (plan *MaxwellPlan) loadDipoleKernel() {
 		e.AddQuant(quant)
 	}
 
-	kern := quant.Buffer()
+	kern := quant.Buffer(FIELD)
 	accuracy := 6
 	Kernel_Arne(plan.logicSize[:], e.CellSize(), e.Periodic(), accuracy, kern)
 	plan.kern[DIPOLE] = kern
