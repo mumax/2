@@ -26,7 +26,8 @@
 #define zero        1.0e-32f                            // the zero threshold
 #define eps         1.0e-8f                             // the target numerical accuracy of iterative methods
 #define linRange    1.0e-1f                             // Defines the region of linearity
-#define linRangeD   1.0e-1                             // Defines the region of linearity
+#define linRangeD   1.0e-1                              // Defines the region of linearity
+#define INTMAXSTEPS 10000                               // Defines maximum amount of steps for numerical integration    
 
 typedef float (*func)(float x, float prefix, float mult);
 typedef double (*funcD)(double x, double prefix, double mult);
@@ -381,6 +382,13 @@ inline __device__ float weightedAvgZero(float x0, float x1, float w0, float w1, 
 {
     float denom = w0 + w1 + 2.0f * R * sqrtf(w0 * w1);
     return (denom == 0.0f) ? 0.0f : (w0 * x0 + w1 * x1 + 2.0f * R * sqrtf(w0 * x0 * w1 * x1)) / denom;
+}
+
+inline __device__ float Debye(float x) 
+{
+    float nom = x * x * x * x * expf(x);
+    float denom = (expf(x) - 1.0f) * (expf(x) - 1.0f);
+    return (x <= zero) ? 0.0f : nom / denom; 
 }
 
 #endif
