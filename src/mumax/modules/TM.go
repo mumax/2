@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -22,12 +22,18 @@ func LoadTM(e *Engine, tName string, fName string, rName string, cName string, p
 	LoadQ(e, fName)
 
 	dTds := e.AddNewQuant(rName, SCALAR, FIELD, Unit("K/s"), "The temperature change rate")
-	Cp := e.AddNewQuant(cName, SCALAR, MASK, Unit("J/(K*m3)"), "The volumetric heat capacity of the thermal bath")
+
+	if !e.HasQuant(cName) {
+		e.AddNewQuant(cName, SCALAR, MASK, Unit("J/(K*m3)"), "The volumetric heat capacity of the thermal bath")
+	}
+
 	Pow := e.AddNewQuant(pName, SCALAR, VALUE, Unit(""), "Slope of temperature dependence of specific heat capacity")
 	Pow.SetScalar(pDefVal)
 
 	Q := e.Quant(fName)
 	T := e.Quant(tName)
+	Cp := e.Quant(cName)
+
 	dTds.SetUpdater(&dTdsUpdater{dTds: dTds, Q: Q, Cp: Cp, T: T, Pow: Pow})
 	if pDefVal == 0.0 {
 		e.Depends(rName, fName, cName)
