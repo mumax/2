@@ -8,7 +8,6 @@
 package modules
 
 import (
-	"fmt"
 	. "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
@@ -21,7 +20,6 @@ var inDF = map[string]string{
 var depsDF = map[string]string{
 	"R":     "R",
 	"H_eff": "H_eff",
-	"m":     "m",
 	"msat":  "msat",
 }
 
@@ -53,25 +51,19 @@ func LoadDFArgs(e *Engine, args ...Arguments) {
 	// make sure the effective field is in place
 	LoadHField(e)
 
-	Qmagn := e.AddNewQuant(arg.Outs("Qmag"), SCALAR, FIELD, Unit("J/(s*m3)"), "The heat flux density of the relaxation")
+	Qmagn := e.AddNewQuant(arg.Outs("Qmag"), SCALAR, FIELD, Unit("J/(s*m3)"), "The dissipative function")
 
-	if e.HasQuant(arg.Deps("m")) {
-		e.Depends(arg.Outs("Qmag"), arg.Deps("m"), arg.Deps("H_eff"), arg.Deps("msat"), arg.Deps("R"))
-		Qmagn.SetUpdater(&DFUpdater{
-			Qmagn: Qmagn,
-			msat:  e.Quant(arg.Deps("msat")),
-			m:     e.Quant(arg.Deps("m")),
-			Heff:  e.Quant(arg.Deps("H_eff")),
-			R:     e.Quant(arg.Deps("R"))})
-	} else {
-		panic(InputErr(fmt.Sprint("This module is only meaningful for non-conservative dynamics. Please use appropriate model!")))
-	}
+	e.Depends(arg.Outs("Qmag"), arg.Deps("H_eff"), arg.Deps("msat"), arg.Deps("R"))
+	Qmagn.SetUpdater(&DFUpdater{
+		Qmagn: Qmagn,
+		msat:  e.Quant(arg.Deps("msat")),
+		Heff:  e.Quant(arg.Deps("H_eff")),
+		R:     e.Quant(arg.Deps("R"))})
 }
 
 type DFUpdater struct {
 	Qmagn *Quant
 	msat  *Quant
-	m     *Quant
 	Heff  *Quant
 	R     *Quant
 }
@@ -81,16 +73,15 @@ func (u *DFUpdater) Update() {
 	// Account for msat multiplier, because it is a mask
 	u.Qmagn.Multiplier()[0] = u.msat.Multiplier()[0]
 	// Account for - 2.0 * 0.5 * mu0
-	u.Qmagn.Multiplier()[0] *= -Mu0
+	u.Qmagn.Multiplier()[0] *= -0.5 * Mu0
 	// Account for multiplier in H_eff
 	u.Qmagn.Multiplier()[0] *= u.Heff.Multiplier()[0]
 	// Account for multiplier in R that should always be equal to the gyromagnetic ratio. Moreover the R is reduced to [1/s] units
 	u.Qmagn.Multiplier()[0] *= u.R.Multiplier()[0]
 
-	gpu.DotSign(u.Qmagn.Array(),
+	gpu.Dot(u.Qmagn.Array(),
 		u.Heff.Array(),
-		u.R.Array(),
-		u.m.Array())
+		u.R.Array())
 
 	// Finally. do Qmag = Qmag * msat(r) to account spatial properties of msat that are hidden in the definition of the relaxation constants
 	if !u.msat.Array().IsNil() {
