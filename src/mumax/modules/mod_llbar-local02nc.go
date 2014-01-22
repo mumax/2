@@ -53,8 +53,10 @@ func LoadLLBarLocal02NCArgs(e *Engine, args ...Arguments) {
 	LoadGammaLL(e)
 
 	// =========== Quantities =============
-
-	mu := e.AddNewQuant(arg.Ins("μ∥"), VECTOR, MASK, Unit(""), "LLBar second-order local nonconservative relaxation diagonal tensor")
+	if !e.HasQuant(arg.Ins("μ∥")) {
+		e.AddNewQuant(arg.Ins("μ∥"), VECTOR, MASK, Unit(""), "LLBar second-order local nonconservative relaxation diagonal tensor")
+	}
+	mu := e.Quant(arg.Ins("μ∥"))
 	msat0T0 := e.Quant(arg.Deps("msat0T0"))
 	mf := e.Quant(arg.Deps("mf"))
 	H := e.Quant(arg.Deps("H_eff"))
