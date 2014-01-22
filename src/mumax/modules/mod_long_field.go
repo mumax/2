@@ -22,7 +22,6 @@ var inLongField = map[string]string{
 var depsLongField = map[string]string{
 	"Tc":      "Tc",
 	"mf":      "mf",
-	"H_eff":   "H_eff",
 	"J":       "J",
 	"n":       "n",
 	"msat0T0": "msat0T0",
@@ -63,10 +62,6 @@ func LoadLongFieldArgs(e *Engine, args ...Arguments) {
 	msat0T0 := e.Quant(arg.Deps("msat0T0"))
 	Hlf := e.AddNewQuant(arg.Outs("H_lf"), VECTOR, FIELD, Unit("A/m"), "longitudinal exchange field")
 	e.Depends(arg.Outs("H_lf"), arg.Deps("J"), arg.Deps("n"), arg.Deps("mf"), arg.Deps("Tc"), arg.Deps("msat0T0"), arg.Ins("T"))
-
-	hfield := e.Quant(arg.Deps("H_eff"))
-	sum := hfield.Updater().(*SumUpdater)
-	sum.AddParent(arg.Outs("H_lf"))
 
 	Hlf.SetUpdater(&LongFieldUpdater{mf: mf, J: J, Hlf: Hlf, msat0T0: msat0T0, n: n, Tc: Tc, T: T})
 
