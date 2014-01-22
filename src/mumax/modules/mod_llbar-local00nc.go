@@ -53,8 +53,10 @@ func LoadLLBarLocal00NCArgs(e *Engine, args ...Arguments) {
 	LoadGammaLL(e)
 
 	// ============ Quantities =============
-
-	lambda := e.AddNewQuant(arg.Ins("λ∥"), VECTOR, MASK, Unit(""), "LLBar zero-order local relaxation diagonal tensor")
+	if !e.HasQuant(arg.Ins("λ∥")) {
+		e.AddNewQuant(arg.Ins("λ∥"), VECTOR, MASK, Unit(""), "LLBar zero-order local relaxation diagonal tensor")
+	}
+	lambda := e.Quant(arg.Ins("λ∥"))
 	msat0T0 := e.Quant(arg.Deps("msat0T0"))
 	H := e.Quant(arg.Deps("H_eff"))
 	gammaLL := e.Quant(arg.Deps("γ_LL"))
