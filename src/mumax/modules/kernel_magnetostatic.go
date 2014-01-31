@@ -28,7 +28,7 @@ import (
 // K[KernIdx[X][X]] returns K[XX]
 func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, kern *host.Array) {
 
-	Debug("Calculating demag kernel:", "size", size, "accuracy:", accuracy_)
+	Debug("Calculating demag kernel:", "size", size, "accuracy:", accuracy_,"cellsize:", cellsize)
 
 	// Sanity check
 	{
@@ -172,6 +172,26 @@ func Kernel_Arne(size []int, cellsize []float64, periodic []int, accuracy_ int, 
 		}
 	}
 	Debug("kernel used", points, "integration points")
+	for x := x1; x <= x2; x++ {
+		xw := Wrap(x,size[X])
+		for y := y1; y <= y2; y++ {
+			yw := Wrap(y,size[Y])
+			for z := z1; z <= z2; z++ {
+				zw := Wrap(z,size[Z])
+				Debug("kern at [X, Y, Z] = [", xw, ", ", yw, ", ", zw,"]")
+				for s := 0; s < 3; s++ {
+					var (
+						outVar	[3]float32
+					)
+					for d := 0; d < 3; d++ {
+						I := FullTensorIdx[s][d]
+						outVar[d] = array[I][xw][yw][zw]
+					}
+					Debug("    [ ", outVar," ]")
+				}
+			}
+		}
+	}
 }
 
 // closest distance between cells, given center distance d.

@@ -216,7 +216,7 @@ func (plan *MaxwellPlan) loadNewellKernel() {
 	}
 
 	kern := quant.Buffer()
-	asymptotic_radius := 32
+	asymptotic_radius := 128
 	zero_self_demag := 0
 	Kernel_Newell(plan.logicSize[:], e.CellSize(), e.Periodic(), asymptotic_radius, zero_self_demag, kern)
 	plan.kern[DIPOLE] = kern

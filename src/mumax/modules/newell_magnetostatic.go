@@ -7,91 +7,26 @@
 
 package modules
 
-// Magnetostatic kernel using Newell's formulation as implemented in OOMMF
-// Author: Kelvin Fong
+// Magnetostatic kernel
+// Author: Arne Vansteenkiste
 
 import (
 	"math"
-	"sort"
 	. "mumax/common"
 	"mumax/host"
+	"time"
 )
 
-// Define some required data types
-type Newell1DFFT struct {
-	fftsize int // 
-}
+////////////////// Subroutines ///////////////////////
 
-type Newell1DFFTS struct {
-	fftsize int // 
-}
-
-type Newell3DFFT struct {
-	fftx Newell1DFFT // 
-	ffty Newell1DFFTS // 
-	fftz Newell1DFFTS // 
-}
-
-type DemagNabData struct {
-	x, y, z float64
-	tx2, ty2, tz2 float64
-	R, iR float64
-	R2, iR2 float64
-}
-
-type DemagNabPairData struct {
-	ubase, uoff float64
-	ptp *DemagNabData // ubase + uoff
-	ptm *DemagNabData // ubase - uoff
-}
-
-type DemagAsymptoticRefineData struct {
-	rdx, rdy, rdz float64
-	result_scale float64
-	xcount, ycount, zcount int
-}
-
-type DemagNxxAsymptoticBase struct {
-	cubic_cell bool
-	self_demag, lead_weight float64
-	a1, a2, a3, a4, a5, a6 float64
-	b1, b2, b3, b4, b5, b6, b7, b8, b9, b10 float64
-	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15 float64
-}
-
-type DemagNxyAsymptoticBase struct {
-	cubic_cell bool
-	lead_weight float64
-	a1, a2, a3 float64
-	b1, b2, b3, b4, b5, b6 float64
-	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 float64
-}
-
-type DemagNxxAsymptotic struct {
-	refine_data DemagAsymptoticRefineData
-	Nxx DemagNxxAsymptoticBase
-}
-
-type DemagNxyAsymptotic struct {
-	refine_data DemagAsymptoticRefineData
-	Nxy DemagNxyAsymptoticBase
-}
-
-// Some subroutines required for other subroutines
-func asCompare(px *float64, py *float64) int {
-     x := *px
-     y := *py
-     if (x < y) { return 1 }
-     if (x > y) { return -1}
-     return 0
-}
-
+// For accurate summing
 func accSum(n int, arr *[]float64) float64 {
 	// Quick sort the values
 	tmp0 := *arr
-	sort.Float64s(tmp0)
+	qsort(n,arr)
 	sum,corr := tmp0[n-1], float64(0.0)
-	for i := n-1; i>=0; i-- {
+	for idx := 1; idx<n; idx++ {
+		i := n-1-idx
 		x:=tmp0[i]
 		y:=corr+x
 		tmp:=y-corr
@@ -107,70 +42,185 @@ func accSum(n int, arr *[]float64) float64 {
 	return sum
 }
 
-// Some subroutines required for computations
-func SelfDemagNx(x, y, z float64) float64 {
-	if ((x<=0.0) || (y<=0.0) || (z<=0.0)) {
-		return float64(0.0)
-	}
-	if ((x==y) && (y==z)) {
-		return (float64(1.0)/float64(3.0))
-	}
-	xsq,ysq,zsq := x*x,y*y,z*z
-	R := math.Sqrt(xsq+ysq+zsq)
-	Rxy := math.Sqrt(xsq+ysq)
-	Rxz := math.Sqrt(xsq+zsq)
-	Ryz := math.Sqrt(ysq+zsq)
+// Special qsort function to sort array by magnitude
+func qsort(n int, arr *[]float64) {
+	// n = number of elements to sort in arr (beginning from the front)
+	// arr = pointer to array to be sorted
 
-//	var arrPt *[]float64
-	var arr []float64
+	// Do quick check for sorting small arrays
+	if (n <= 1) { return } // Do nothing if n is <= 1
 
-	//arr := *arrPt
+	tmp0 := *arr
 
-	arr = append(arr,float64(2.0 *x*y*z* ( (x/(x+Rxy)+(2*xsq+ysq+zsq)/(R*Rxy+x*Rxz))/(x+Rxz) + (x/(x+Rxz)+(2*xsq+ysq+zsq)/(R*Rxz+x*Rxy))/(x+Rxy) ) / ((x+R)*(Rxy+Rxz+R))))
-	arr = append(arr,float64(-1.0 *x*y*z* ( (y/(y+Rxy)+(2*ysq+xsq+zsq)/(R*Rxy+y*Ryz))/(y+Ryz) + (y/(y+Ryz)+(2*ysq+xsq+zsq)/(R*Ryz+y*Rxy))/(y+Rxy) ) / ((y+R)*(Rxy+Ryz+R))))
-	arr = append(arr,float64(-1.0 *x*y*z* ( (z/(z+Rxz)+(2*zsq+xsq+ysq)/(R*Rxz+z*Ryz))/(z+Ryz) + (z/(z+Ryz)+(2*zsq+xsq+ysq)/(R*Ryz+z*Rxz))/(z+Rxz) ) / ((z+R)*(Rxz+Ryz+R))))
-	arr = append(arr,float64(6.0 * math.Atan(y*z/(x*R))))
-
-	piece4 := float64(-y*zsq*(1/(x+Rxz)+y/(Rxy*Rxz+x*R))/(Rxz*(y+Rxy)))
-	if (piece4 > -0.5) {
-		arr = append(arr,float64(3.0 * x * math.Log1p(piece4)/z))
-	} else {
-		arr = append(arr,float64(3.0 * x * math.Log(x*(y+R)/(Rxz*(y+Rxy)))/z))
+	if (n == 2) { // If there are only 2 items..
+		if (math.Abs(tmp0[1]) < math.Abs(tmp0[0])) { // Swap if magnitudes are not sorted
+			tmp1 := tmp0[1]
+			tmp0[1] = tmp0[0]
+			tmp0[0] = tmp1
+		} else {
+			return
+		}
 	}
 
-	piece5 := float64(-z*ysq*(1/(x+Rxy)+z/(Rxy*Rxz+x*R))/(Rxy*(z+Rxz)))
-	if (piece5 > -0.5) {
-		arr = append(arr,float64(3.0 * x * math.Log1p(piece5)/y))
-	} else {
-		arr = append(arr,float64(3.0 * x * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
+	// Set pivot
+	pvt := tmp0[n-1]
+	pvtAbs := math.Abs(pvt)
+
+	// Set up two bins for sorting
+	var (
+		botArr, topArr []float64
+		botCnt, topCnt int
+	)
+
+	botCnt = 0
+	topCnt = 0
+
+	// Go through the portion of array that needs to be sorted
+	for idx:= 0; idx < (n-1); idx++ {
+		if (pvtAbs > math.Abs(tmp0[idx])) {
+			botCnt++
+			botArr = append(botArr,tmp0[idx]);
+		} else {
+			topCnt++
+			topArr = append(topArr,tmp0[idx]);
+		}
 	}
 
-	piece6 := float64(-z*xsq*(1/(y+Rxy)+z/(Rxy*Ryz+y*R))/(Rxy*(z+Ryz)))
-	if (piece6 > -0.5) {
-		arr = append(arr,float64(-3.0 * y * math.Log1p(piece6)/x))
-	} else {
-		arr = append(arr,float64(-3.0 * y * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
+	// By now, the bottom bin contains elements smaller than pivot
+	// and the top bin contains elements larger than or equal to pivot.
+	// Recurse through the bins if they are not empty
+
+	if (botCnt > 1) { qsort(botCnt,&botArr) }
+	if (topCnt > 1) { qsort(topCnt,&topArr) }
+
+	// All bins are sorted by now. All we have to do is go through the array
+	// and place elements in there accordingly
+	idx := 0 // Setup index for filling array with sorted values (treat as stack)
+
+	// Fill array with elements from bottom bin if bottom bin is not empty
+	if (botCnt != 0) {
+		for idx0 := 0; idx0 < botCnt; idx0++ {
+			tmp0[idx] = botArr[idx0]
+			idx++
+		}
 	}
 
-	piece7 := float64(-y*xsq*(1/(z+Rxz)+y/(Rxz*Ryz+z*R))/(Rxz*(y+Ryz)))
-	if (piece7 > -0.5) {
-		arr = append(arr,float64(-3.0 * z * math.Log1p(piece7)/x))
-	} else {
-		arr = append(arr,float64(-3.0 * z * math.Log(z*(y+R)/(Rxz*(y+Ryz)))/x))
-	}
+	// Place pivot in proper place in array and update pointer to top of stack
+	tmp0[idx] = pvt
+	idx++
 
-	Nxx := accSum(8,&arr) / (3.0 * math.Pi)
-	return Nxx
+	// Fill array with elements from top bin if top bin is not empty
+	if (topCnt != 0) {
+		for idx0 := 0; idx0 < topCnt; idx0++ {
+			tmp0[idx] = topArr[idx0]
+			idx++
+		}
+	}
+	return
 }
 
-func SelfDemagNy(xsize, ysize, zsize float64) float64 {
-     return SelfDemagNx(ysize,zsize,xsize)
+// This is an upoptimized implementation where we will go through each and every cell to
+// calculate the tensor. Hence, we need some additional functions
+func Newell_Nxx(x, y, z, dx, dy, dz float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,float64(2.0)*Newell_FuncF(x, y, z, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_FuncF(x+dx, y, z, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_FuncF(x-dx, y, z, dx, dy, dz))
+
+	return accSum(3,&tmp0)/float64(-4.0*math.Pi*dx*dy*dz)
 }
 
-func SelfDemagNz(xsize, ysize, zsize float64) float64 {
-     return SelfDemagNx(zsize,xsize,ysize)
+func Newell_Nyy(x, y, z, dx, dy, dz float64) float64 {
+	return Newell_Nxx(y, x, z, dy, dx, dz)
 }
 
+func Newell_Nzz(x, y, z, dx, dy, dz float64) float64 {
+	return Newell_Nxx(z, y, x, dz, dy, dx)
+}
+
+func Newell_Nxy(x, y, z, dx, dy, dz float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,Newell_FuncG(x, y, z, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_FuncG(x-dx, y, z, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_FuncG(x, y+dy, z, dx, dy, dz))
+	tmp0 = append(tmp0,Newell_FuncG(x-dx, y+dy, z, dx, dy, dz))
+
+	return accSum(4,&tmp0)/float64(-4.0*math.Pi*dx*dy*dz)
+}
+
+func Newell_Nxz(x, y, z, dx, dy, dz float64) float64 {
+	return Newell_Nxy(x, z, y, dx, dz, dy)
+}
+
+func Newell_Nyz(x, y, z, dx, dy, dz float64) float64 {
+	return Newell_Nxy(y, z, x, dy, dz, dx)
+}
+
+func Newell_FuncF(x, y, z, dx, dy, dz float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,Newell_F1(x, y+dy, z+dz, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_F1(x, y, z+dz, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_F1(x, y+dy, z, dx, dy, dz))
+	tmp0 = append(tmp0,Newell_F1(x, y, z, dx, dy, dz))
+
+	return accSum(4,&tmp0)
+}
+
+func Newell_F1(x, y, z, dx, dy, dz float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,Newell_F2(x, y, z))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_F2(x, y-dy, z))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_F2(x, y, z-dz))
+	tmp0 = append(tmp0,Newell_F2(x, y-dy, z-dz))
+
+	return accSum(4,&tmp0)
+}
+
+func Newell_F2(x, y, z float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,Newell_f(x, y, z))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_f(x, 0, z))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_f(x, y, 0))
+	tmp0 = append(tmp0,Newell_f(x, 0, 0))
+
+	return accSum(4,&tmp0)
+}
+
+func Newell_FuncG(x, y, z, dx, dy, dz float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,Newell_G1(x, y, z, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_G1(x, y-dy, z, dx, dy, dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_G1(x, y, z-dz, dx, dy, dz))
+	tmp0 = append(tmp0,Newell_G1(x, y-dy, z-dz, dx, dy, dz))
+
+	return accSum(4,&tmp0)
+}
+
+func Newell_G1(x, y, z, dx, dy, dz float64) float64 {
+	var tmp0 []float64
+
+	tmp0 = append(tmp0,Newell_G2(x+dx, y, z+dz))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_G2(x+dx, y, z))
+	tmp0 = append(tmp0,float64(-1.0)*Newell_G2(x, y, z+dz))
+	tmp0 = append(tmp0,Newell_G2(x, y, z))
+
+	return accSum(4,&tmp0)
+}
+
+func Newell_G2(x, y, z float64) float64 {
+	tmp0 := Newell_g(x, y, z)
+	tmp1 := float64(-1.0)*Newell_g(x, y, 0)
+
+	return (tmp0 + tmp1)
+}
+
+// Newell's f(x, y, z) function
 func Newell_f(x, y, z float64) float64 {
 	x = math.Abs(x)
 	xsq := x*x
@@ -226,57 +276,7 @@ func Newell_f(x, y, z float64) float64 {
 	return float64(accSum(piececount,&piece)/12.0)
 }
 
-func CalculateSDA00(x, y, z, dx, dy, dz float64) float64 {
-	result := float64(0.0)
-	if ( (x == 0.0) && (y == 0.0) && (z == 0.0) ) {
-	   result = SelfDemagNx(dx,dy,dz)*(4.0*math.Pi*dx*dy*dz)
-	} else {
-	   arr := make([]float64, 27, 27)
-
-	   arr[0] = -1.0*Newell_f(x+dx,y+dy,z+dz)
-	   arr[1] = -1.0*Newell_f(x+dx,y-dy,z+dz)
-	   arr[2] = -1.0*Newell_f(x+dx,y-dy,z-dz)
-	   arr[3] = -1.0*Newell_f(x+dx,y+dy,z-dz)
-	   arr[4] = -1.0*Newell_f(x-dx,y+dy,z-dz)
-	   arr[5] = -1.0*Newell_f(x-dx,y+dy,z+dz)
-	   arr[6] = -1.0*Newell_f(x-dx,y-dy,z+dz)
-	   arr[7] = -1.0*Newell_f(x-dx,y-dy,z-dz)
-
-	   arr[8] = 2.0*Newell_f(x,y-dy,z-dz)
-	   arr[9] = 2.0*Newell_f(x,y-dy,z+dz)
-	   arr[10] = 2.0*Newell_f(x,y+dy,z+dz)
-	   arr[11] = 2.0*Newell_f(x,y+dy,z-dz)
-	   arr[12] = 2.0*Newell_f(x+dx,y+dy,z)
-	   arr[13] = 2.0*Newell_f(x+dx,y,z+dz)
-	   arr[14] = 2.0*Newell_f(x+dx,y,z-dz)
-	   arr[15] = 2.0*Newell_f(x+dx,y-dy,z)
-	   arr[16] = 2.0*Newell_f(x-dx,y-dy,z)
-	   arr[17] = 2.0*Newell_f(x-dx,y,z+dz)
-	   arr[18] = 2.0*Newell_f(x-dx,y,z-dz)
-	   arr[19] = 2.0*Newell_f(x-dx,y+dy,z)
-
-	   arr[20] = -4.0*Newell_f(x,y-dy,z)
-	   arr[21] = -4.0*Newell_f(x,y+dy,z)
-	   arr[22] = -4.0*Newell_f(x,y,z-dz)
-	   arr[23] = -4.0*Newell_f(x,y,z+dz)
-	   arr[24] = -4.0*Newell_f(x+dx,y,z)
-	   arr[25] = -4.0*Newell_f(x-dx,y,z)
-
-	   arr[26] = 8.0*Newell_f(x-dx,y+dy,z)
-
-	   result = 8.0*accSum(27,&arr)
-	}
-	return result
-}
-
-func CalculateSDA11(x, y, z, dx, dy, dz float64) float64 {
-	return CalculateSDA00(y,x,z,dy,dx,dz)
-}
-
-func CalculateSDA22(x, y, z, dx, dy, dz float64) float64 {
-	return CalculateSDA00(z,y,x,dz,dy,dx)
-}
-
+// Newell's g(x, y, z) function
 func Newell_g(x, y, z float64) float64 {
 	result_sign := float64(1.0)
 	if (x < 0.0) { result_sign *= -1.0 }
@@ -335,52 +335,6 @@ func Newell_g(x, y, z float64) float64 {
 	  }
 	}
 	return float64(result_sign*accSum(piececount,&piece)/6.0)
-}
-
-func CalculateSDA01(x, y, z, l, h, e float64) float64 {
-     if ((x == 0.0) || (y == 0.0)) { return float64(0.0) }
-     arr := make([]float64,27)
-     arr[0] = -1.0*Newell_g(x-l,y-h,z-e)
-     arr[1] = -1.0*Newell_g(x-l,y-h,z+e)
-     arr[2] = -1.0*Newell_g(x+l,y-h,z+e)
-     arr[3] = -1.0*Newell_g(x+l,y-h,z-e)
-     arr[4] = -1.0*Newell_g(x+l,y+h,z-e)
-     arr[5] = -1.0*Newell_g(x+l,y+h,z+e)
-     arr[6] = -1.0*Newell_g(x-l,y+h,z+e)
-     arr[7] = -1.0*Newell_g(x-l,y+h,z-e)
-
-     arr[8] =  2.0*Newell_g(x,y+h,z-e)
-     arr[9] =  2.0*Newell_g(x,y+h,z+e)
-     arr[10] =  2.0*Newell_g(x,y-h,z+e)
-     arr[11] =  2.0*Newell_g(x,y-h,z-e)
-     arr[12] =  2.0*Newell_g(x-l,y-h,z)
-     arr[13] =  2.0*Newell_g(x-l,y+h,z)
-     arr[14] =  2.0*Newell_g(x-l,y,z-e)
-     arr[15] =  2.0*Newell_g(x-l,y,z+e)
-     arr[16] =  2.0*Newell_g(x+l,y,z+e)
-     arr[17] =  2.0*Newell_g(x+l,y,z-e)
-     arr[18] =  2.0*Newell_g(x+l,y-h,z)
-     arr[19] =  2.0*Newell_g(x+l,y+h,z)
-
-     arr[20] = -4.0*Newell_g(x-l,y,z)
-     arr[21] = -4.0*Newell_g(x+l,y,z)
-     arr[22] = -4.0*Newell_g(x,y,z+e)
-     arr[23] = -4.0*Newell_g(x,y,z-e)
-     arr[24] = -4.0*Newell_g(x,y-h,z)
-     arr[25] = -4.0*Newell_g(x,y+h,z)
-
-     arr[26] =  8.0*Newell_g(x,y,z)
-
-     return accSum(27,&arr)
-
-}
-
-func CalculateSDA02(x, y, z, dx, dy, dz float64) float64 {
-	return CalculateSDA01(x,z,y,dx,dz,dy)
-}
-
-func CalculateSDA12(x, y, z, dx, dy, dz float64) float64 {
-	return CalculateSDA01(y,z,x,dy,dz,dx)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -479,598 +433,74 @@ func GetNextPowerOfTwo(n int) int {
      return m
 }
 
-func RecommendSize(sz int) int {
-     return GetNextPowerOfTwo(sz)
-}
-
-func (s *Newell1DFFT) SetDimensions(import_csize int) {
-	s.fftsize = import_csize/2
-}
-
-func (s *Newell1DFFTS) SetDimensions(import_csize int) {
-	s.fftsize = import_csize
-}
-
-func (s *Newell1DFFT) GetScaling() float64 {
-	if (s.fftsize > 0) {
-		return float64(1.0)/float64(s.fftsize)
+// Separate self-demag calculation code may be more accurate
+func SelfDemagNx(x, y, z float64) float64 {
+	if ((x<=0.0) || (y<=0.0) || (z<=0.0)) {
+		return float64(0.0)
 	}
-	return 1.0
-}
-
-func (s *Newell1DFFTS) GetScaling() float64 {
-	if (s.fftsize > 0) {
-		return float64(1.0)/float64(s.fftsize)
+	if ((x==y) && (y==z)) {
+		return (float64(1.0)/float64(3.0))
 	}
-	return 1.0
-}
+	xsq,ysq,zsq := x*x,y*y,z*z
+	R := math.Sqrt(xsq+ysq+zsq)
+	Rxy := math.Sqrt(xsq+ysq)
+	Rxz := math.Sqrt(xsq+zsq)
+	Ryz := math.Sqrt(ysq+zsq)
 
-func (s *Newell1DFFT) GetLogicalDimension() int {
-	if (s.fftsize > 0) {
-		return 2*s.fftsize
-	}
-	return 1
-}
+//	var arrPt *[]float64
+	var arr []float64
 
-func (s *Newell1DFFTS) GetLogicalDimension() int {
-	if (s.fftsize > 0) {
-		return s.fftsize
-	}
-	return 1
-}
+	//arr := *arrPt
 
-func (s *Newell3DFFT) RecommendDimensions(rdim1, rdim2, rdim3 int, cdim1, cdim2, cdim3 *int) {
-	csize1 := RecommendSize(rdim1)
-	csize2 := RecommendSize(rdim2)
-	csize3 := RecommendSize(rdim3)
-	*cdim1 = (csize1/2)+1
-	*cdim2 = csize2
-	*cdim3 = csize3
-}
+	arr = append(arr,float64(2.0 *x*y*z* ( (x/(x+Rxy)+(2*xsq+ysq+zsq)/(R*Rxy+x*Rxz))/(x+Rxz) + (x/(x+Rxz)+(2*xsq+ysq+zsq)/(R*Rxz+x*Rxy))/(x+Rxy) ) / ((x+R)*(Rxy+Rxz+R))))
+	arr = append(arr,float64(-1.0 *x*y*z* ( (y/(y+Rxy)+(2*ysq+xsq+zsq)/(R*Rxy+y*Ryz))/(y+Ryz) + (y/(y+Ryz)+(2*ysq+xsq+zsq)/(R*Ryz+y*Rxy))/(y+Rxy) ) / ((y+R)*(Rxy+Ryz+R))))
+	arr = append(arr,float64(-1.0 *x*y*z* ( (z/(z+Rxz)+(2*zsq+xsq+ysq)/(R*Rxz+z*Ryz))/(z+Ryz) + (z/(z+Ryz)+(2*zsq+xsq+ysq)/(R*Ryz+z*Rxz))/(z+Rxz) ) / ((z+R)*(Rxz+Ryz+R))))
+	arr = append(arr,float64(6.0 * math.Atan(y*z/(x*R))))
 
-func (s *Newell3DFFT) SetDimensions(in_cdim1, in_cdim2, in_cdim3 int) {
-	cdim1 := in_cdim1
-	cdim2 := in_cdim2
-	cdim3 := in_cdim3
-
-	if (cdim1 == 1) {
-		s.fftx.SetDimensions(1)
+	piece4 := float64(-y*zsq*(1/(x+Rxz)+y/(Rxy*Rxz+x*R))/(Rxz*(y+Rxy)))
+	if (piece4 > -0.5) {
+		arr = append(arr,float64(3.0 * x * math.Log1p(piece4)/z))
 	} else {
-		s.fftx.SetDimensions(2*(cdim1-1))
+		arr = append(arr,float64(3.0 * x * math.Log(x*(y+R)/(Rxz*(y+Rxy)))/z))
 	}
-	s.ffty.SetDimensions(cdim2)
-	s.fftz.SetDimensions(cdim3)
-}
 
-func (s *Newell3DFFT) GetLogicalDimension(ldim1, ldim2, ldim3 *int) {
-	*ldim1 = s.fftx.GetLogicalDimension()
-	*ldim2 = s.ffty.GetLogicalDimension()
-	*ldim3 = s.fftz.GetLogicalDimension()
-}
-
-func (s *DemagNabData) Set(import_x, import_y, import_z float64) { // OxsDemagNabData::Set
-	s.x, s.y, s.z = import_x, import_y, import_z
-	x2 := s.x*s.x
-	y2 := s.y*s.y
-	s.R2 = x2 + y2
-	z2 := s.z*s.z
-	s.R2 += z2
-	R4 := s.R2*s.R2
-	s.R = math.Sqrt(s.R2)
-	if (s.R2 != 0.0) {
-		s.tx2 = x2 / R4
-		s.ty2 = y2 / R4
-		s.tz2 = z2 / R4
-		s.iR2 = float64(1.0 / s.R2)
-		s.iR = float64(1.0 / s.R)
+	piece5 := float64(-z*ysq*(1/(x+Rxy)+z/(Rxy*Rxz+x*R))/(Rxy*(z+Rxz)))
+	if (piece5 > -0.5) {
+		arr = append(arr,float64(3.0 * x * math.Log1p(piece5)/y))
 	} else {
-		s.tx2, s.ty2, s.tz2 = 0.0, 0.0, 0.0
-		s.iR2, s.R, s.iR = 0.0, 0.0, 0.0
+		arr = append(arr,float64(3.0 * x * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
 	}
-}
 
-func DemagNabData_SetPair(ixa, iya, iza, ixb, iyb, izb float64, pta, ptb *DemagNabData) { // OxsDemagNabData::SetPair
-	pta.Set(ixa,iya,iza)
-	ptb.Set(ixb,iyb,izb)
-}
-
-func (s *DemagAsymptoticRefineData) DemagAsymptoticRefineData(dx, dy, dz, maxratio float64) { // OxsDemagAsymptoticRefineData::OxsDemagAsymptoticRefineData
-	s.rdx, s.rdy, s.rdz = 0.0, 0.0, 0.0
-	s.result_scale = 0.0
-	s.xcount, s.ycount, s.zcount = 0, 0, 0
-	if (dz <= dx && dz <= dy) {
-		xratio := math.Ceil(dx/(maxratio*dz))
-		s.xcount = int(xratio)
-		s.rdx = float64(dx/xratio)
-		yratio := math.Ceil(dy/(maxratio*dz))
-		s.ycount = int(yratio)
-		s.rdy = float64(dy/yratio)
-		s.zcount = 1
-		s.rdz = dz
-	} else if (dy <= dx && dy <= dz) {
-		xratio := math.Ceil(dx/(maxratio*dy))
-		s.xcount = int(xratio)
-		s.rdx = float64(dx/xratio)
-		zratio := math.Ceil(dz/(maxratio*dy))
-		s.zcount = int(zratio)
-		s.rdz = float64(dz/zratio)
-		s.ycount = 1
-		s.rdy = dy
+	piece6 := float64(-z*xsq*(1/(y+Rxy)+z/(Rxy*Ryz+y*R))/(Rxy*(z+Ryz)))
+	if (piece6 > -0.5) {
+		arr = append(arr,float64(-3.0 * y * math.Log1p(piece6)/x))
 	} else {
-		yratio := math.Ceil(dy/(maxratio*dx))
-		s.ycount = int(yratio)
-		s.rdy = float64(dy/yratio)
-		zratio := math.Ceil(dz/(maxratio*dx))
-		s.zcount = int(zratio)
-		s.rdz = float64(dz/zratio)
-		s.ycount = 1
-		s.rdx = dx
+		arr = append(arr,float64(-3.0 * y * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
 	}
-	s.result_scale = float64(1.0) / ( float64(s.xcount) * float64(s.ycount) * float64(s.zcount) )
-}
 
-func (s *DemagNxxAsymptoticBase) NxxAsymptoticPairBase(ptA, ptB *DemagNabData) float64 {  // Oxs_DemagNxxAsymptoticBase::NxxAsymptoticPair
-	return s.NxxAsymptoticBaseF(ptA) + s.NxxAsymptoticBaseF(ptB)
-}
-
-func (s *DemagNxxAsymptoticBase) NxxAsymptoticBaseF(ptdata *DemagNabData) float64{ // Oxs_DemagNxxAsymptoticBase::NxxAsymptotic
-	if (ptdata.iR2 <= 0.0) { return s.self_demag }
-
-	tx2, ty2, tz2 := ptdata.tx2, ptdata.ty2, ptdata.tz2
-	tz4 := tz2*tz2
-	tz6 := tz4*tz2
-	term3 := (2.0*tx2 - ty2 - tz2)*s.lead_weight
-	term5 := 0.0
-	term7 := 0.0
-
-	if(s.cubic_cell) {
-		ty4 := ty2*ty2
-		term7 = ((s.b1*tx2 + (s.b2*ty2 + s.b3*tz2))*tx2 + (s.b4*ty4 + s.b6*tz4))*tx2 + s.b7*ty4*ty2 + s.b10*tz6
+	piece7 := float64(-y*xsq*(1/(z+Rxz)+y/(Rxz*Ryz+z*R))/(Rxz*(y+Ryz)))
+	if (piece7 > -0.5) {
+		arr = append(arr,float64(-3.0 * z * math.Log1p(piece7)/x))
 	} else {
-		term5 = (s.a1*tx2 + (s.a2*ty2 + s.a3*tz2))*tx2 + (s.a4*ty2 + s.a5*tz2)*ty2 + s.a6*tz4
-		term7 = ((s.b1*tx2 + (s.b2*ty2 + s.b3*tz2))*tx2 + ((s.b4*ty2 + s.b5*tz2)*ty2 + s.b6*tz4))*tx2 + ((s.b7*ty2 + s.b8*tz2)*ty2 + s.b9*tz4)*ty2 + s.b10*tz6
+		arr = append(arr,float64(-3.0 * z * math.Log(z*(y+R)/(Rxz*(y+Ryz)))/x))
 	}
-	term9 :=  (((s.c1*tx2 + (s.c2*ty2 + s.c3*tz2))*tx2 + ((s.c4*ty2 + s.c5*tz2)*ty2 + s.c6*tz4))*tx2 + ( ((s.c7*ty2 + s.c8*tz2)*ty2 + s.c9*tz4)*ty2 + s.c10*tz6 ))*tx2 + (((s.c11*ty2 + s.c12*tz2)*ty2 + s.c13*tz4)*ty2 + s.c14*tz6)*ty2 + s.c15*tz4*tz4
 
-	Nxx := (term9 + term7 + term5 + term3)*ptdata.iR;
-	// Error should be of order 1/R^11
-
+	Nxx := accSum(8,&arr) / (3.0 * math.Pi)
 	return Nxx
 }
 
-func (s *DemagNxxAsymptoticBase) DemagNxxAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) { // Oxs_DemagNxxAsymptoticBase::Oxs_DemagNxxAsymptoticBase
-	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
-	s.self_demag = SelfDemagNx(dx,dy,dz)
-	dx2, dy2, dz2 := dx*dx, dy*dy, dz*dz
-	dx4, dy4, dz4 := dx2*dx2, dy2*dy2, dz2*dz2
-	dx6, dy6, dz6 := dx4*dx2, dy4*dy2, dz4*dz2
-	s.lead_weight = (-dx*dy*dz)/(4*math.Pi)
-	// Initialize coefficients for 1/R^5 term
-	if ( (dx2 != dy2) || (dx2 != dz2) || (dy2 != dz2) ) { // Non-cube case
-		s.cubic_cell = false
-		s.a1 = s.lead_weight / float64(4.0)
-		s.a2, s.a3, s.a4, s.a5, s.a6 = s.a1, s.a1, s.a1, s.a1, s.a1
-		s.a1 *=   8.0*dx2 -  4.0*dy2 -  4.0*dz2
-		s.a2 *= -24.0*dx2 + 27.0*dy2 -  3.0*dz2
-		s.a3 *= -24.0*dx2 -  3.0*dy2 + 27.0*dz2
-		s.a4 *=   3.0*dx2 -  4.0*dy2 +      dz2
-		s.a5 *=   6.0*dx2 -  3.0*dy2 -  3.0*dz2
-		s.a6 *=   3.0*dx2 +      dy2 -  4.0*dz2
-	} else { // Cube
-		s.cubic_cell = true
-		s.a1, s.a2, s.a3, s.a4, s.a5, s.a6 = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-	}
-
-	// Initialize coefficients for 1/R^7 term
-	s.b1, s.b2, s.b3, s.b4, s.b5, s.b6, s.b7, s.b8, s.b9, s.b10 = s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0), s.lead_weight/float64(16.0)
-	if (s.cubic_cell) {
-		s.b1  *=  -14.0*dx4
-		s.b2  *=  105.0*dx4
-		s.b3  *=  105.0*dx4
-		s.b4  *= -105.0*dx4
-		s.b6  *= -105.0*dx4
-		s.b7  *=    7.0*dx4
-		s.b10 *=    7.0*dx4
-		s.b5, s.b8, s.b9 = 0.0, 0.0, 0.0
-	} else {
-		s.b1  *=   32.0*dx4 -  40.0*dx2*dy2 -  40.0*dx2*dz2 +  12.0*dy4 +  10.0*dy2*dz2 +  12.0*dz4
-		s.b2  *= -240.0*dx4 + 580.0*dx2*dy2 +  20.0*dx2*dz2 - 202.0*dy4 -  75.0*dy2*dz2 +  22.0*dz4
-		s.b3  *= -240.0*dx4 +  20.0*dx2*dy2 + 580.0*dx2*dz2 +  22.0*dy4 -  75.0*dy2*dz2 - 202.0*dz4
-		s.b4  *=  180.0*dx4 - 505.0*dx2*dy2 +  55.0*dx2*dz2 + 232.0*dy4 -  75.0*dy2*dz2 +   8.0*dz4
-		s.b5  *=  360.0*dx4 - 450.0*dx2*dy2 - 450.0*dx2*dz2 - 180.0*dy4 + 900.0*dy2*dz2 - 180.0*dz4
-		s.b6  *=  180.0*dx4 +  55.0*dx2*dy2 - 505.0*dx2*dz2 +   8.0*dy4 -  75.0*dy2*dz2 + 232.0*dz4
-		s.b7  *=  -10.0*dx4 +  30.0*dx2*dy2 -   5.0*dx2*dz2 -  16.0*dy4 +  10.0*dy2*dz2 -   2.0*dz4
-		s.b8  *=  -30.0*dx4 +  55.0*dx2*dy2 +  20.0*dx2*dz2 +   8.0*dy4 -  75.0*dy2*dz2 +  22.0*dz4
-		s.b9  *=  -30.0*dx4 +  20.0*dx2*dy2 +  55.0*dx2*dz2 +  22.0*dy4 -  75.0*dy2*dz2 +   8.0*dz4
-		s.b10 *=  -10.0*dx4 -   5.0*dx2*dy2 +  30.0*dx2*dz2 -   2.0*dy4 +  10.0*dy2*dz2 -  16.0*dz4
-	}
-
-	// Initialize coefficients for 1/R^9 term
-	s.c1, s.c2, s.c3, s.c4, s.c5, s.c6, s.c7, s.c8 = s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0)
-	s.c9, s.c10, s.c11, s.c12, s.c13, s.c14, s.c15 = s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0), s.lead_weight/float64(192.0)
-	if(s.cubic_cell) {
-		s.c1  *=    32.0 * dx6
-		s.c2  *=  -448.0 * dx6
-		s.c3  *=  -448.0 * dx6
-		s.c4  *=  -150.0 * dx6
-		s.c5  *=  7620.0 * dx6
-		s.c6  *=  -150.0 * dx6
-		s.c7  *=   314.0 * dx6
-		s.c8  *= -3810.0 * dx6
-		s.c9  *= -3810.0 * dx6
-		s.c10 *=   314.0 * dx6
-		s.c11 *=   -16.0 * dx6
-		s.c12 *=   134.0 * dx6
-		s.c13 *=   300.0 * dx6
-		s.c14 *=   134.0 * dx6
-		s.c15 *=   -16.0 * dx6
-	} else {
-		s.c1  *=    384.0 *dx6 +   -896.0 *dx4*dy2 +   -896.0 *dx4*dz2 +    672.0 *dx2*dy4 +    560.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   -120.0 *dy6 +   -112.0 *dy4*dz2 +   -112.0 *dy2*dz4 +   -120.0 *dz6
-		s.c2  *=  -5376.0 *dx6 +  22624.0 *dx4*dy2 +   2464.0 *dx4*dz2 + -19488.0 *dx2*dy4 +  -7840.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   3705.0 *dy6 +   2198.0 *dy4*dz2 +    938.0 *dy2*dz4 +   -345.0 *dz6
-		s.c3  *=  -5376.0 *dx6 +   2464.0 *dx4*dy2 +  22624.0 *dx4*dz2 +    672.0 *dx2*dy4 +  -7840.0 *dx2*dy2*dz2 + -19488.0 *dx2*dz4 +   -345.0 *dy6 +    938.0 *dy4*dz2 +   2198.0 *dy2*dz4 +   3705.0 *dz6
-		s.c4  *=  10080.0 *dx6 + -48720.0 *dx4*dy2 +   1680.0 *dx4*dz2 +  49770.0 *dx2*dy4 +  -2625.0 *dx2*dy2*dz2 +   -630.0 *dx2*dz4 + -10440.0 *dy6 +  -1050.0 *dy4*dz2 +   2100.0 *dy2*dz4 +   -315.0 *dz6
-		s.c5  *=  20160.0 *dx6 + -47040.0 *dx4*dy2 + -47040.0 *dx4*dz2 +  -6300.0 *dx2*dy4 + 133350.0 *dx2*dy2*dz2 +  -6300.0 *dx2*dz4 +   7065.0 *dy6 + -26670.0 *dy4*dz2 + -26670.0 *dy2*dz4 +   7065.0 *dz6
-		s.c6  *=  10080.0 *dx6 +   1680.0 *dx4*dy2 + -48720.0 *dx4*dz2 +   -630.0 *dx2*dy4 +  -2625.0 *dx2*dy2*dz2 +  49770.0 *dx2*dz4 +   -315.0 *dy6 +   2100.0 *dy4*dz2 +  -1050.0 *dy2*dz4 + -10440.0 *dz6
-		s.c7  *=  -3360.0 *dx6 +  17290.0 *dx4*dy2 +  -1610.0 *dx4*dz2 + -19488.0 *dx2*dy4 +   5495.0 *dx2*dy2*dz2 +   -588.0 *dx2*dz4 +   4848.0 *dy6 +  -3136.0 *dy4*dz2 +    938.0 *dy2*dz4 +    -75.0 *dz6
-		s.c8  *= -10080.0 *dx6 +  32970.0 *dx4*dy2 +  14070.0 *dx4*dz2 +  -6300.0 *dx2*dy4 + -66675.0 *dx2*dy2*dz2 +  12600.0 *dx2*dz4 + -10080.0 *dy6 +  53340.0 *dy4*dz2 + -26670.0 *dy2*dz4 +   3015.0 *dz6
-		s.c9  *= -10080.0 *dx6 +  14070.0 *dx4*dy2 +  32970.0 *dx4*dz2 +  12600.0 *dx2*dy4 + -66675.0 *dx2*dy2*dz2 +  -6300.0 *dx2*dz4 +   3015.0 *dy6 + -26670.0 *dy4*dz2 +  53340.0 *dy2*dz4 + -10080.0 *dz6
-		s.c10 *=  -3360.0 *dx6 +  -1610.0 *dx4*dy2 +  17290.0 *dx4*dz2 +   -588.0 *dx2*dy4 +   5495.0 *dx2*dy2*dz2 + -19488.0 *dx2*dz4 +    -75.0 *dy6 +    938.0 *dy4*dz2 +  -3136.0 *dy2*dz4 +   4848.0 *dz6
-		s.c11 *=    105.0 *dx6 +   -560.0 *dx4*dy2 +     70.0 *dx4*dz2 +    672.0 *dx2*dy4 +   -280.0 *dx2*dy2*dz2 +     42.0 *dx2*dz4 +   -192.0 *dy6 +    224.0 *dy4*dz2 +   -112.0 *dy2*dz4 +     15.0 *dz6
-		s.c12 *=    420.0 *dx6 +  -1610.0 *dx4*dy2 +   -350.0 *dx4*dz2 +    672.0 *dx2*dy4 +   2345.0 *dx2*dy2*dz2 +   -588.0 *dx2*dz4 +    528.0 *dy6 +  -3136.0 *dy4*dz2 +   2198.0 *dy2*dz4 +   -345.0 *dz6
-		s.c13 *=    630.0 *dx6 +  -1470.0 *dx4*dy2 +  -1470.0 *dx4*dz2 +   -630.0 *dx2*dy4 +   5250.0 *dx2*dy2*dz2 +   -630.0 *dx2*dz4 +    360.0 *dy6 +  -1050.0 *dy4*dz2 +  -1050.0 *dy2*dz4 +    360.0 *dz6
-		s.c14 *=    420.0 *dx6 +   -350.0 *dx4*dy2 +  -1610.0 *dx4*dz2 +   -588.0 *dx2*dy4 +   2345.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   -345.0 *dy6 +   2198.0 *dy4*dz2 +  -3136.0 *dy2*dz4 +    528.0 *dz6
-		s.c15 *=    105.0 *dx6 +     70.0 *dx4*dy2 +   -560.0 *dx4*dz2 +     42.0 *dx2*dy4 +   -280.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +     15.0 *dy6 +   -112.0 *dy4*dz2 +    224.0 *dy2*dz4 +   -192.0 *dz6
-	}
+func SelfDemagNy(xsize, ysize, zsize float64) float64 {
+     return SelfDemagNx(ysize,zsize,xsize)
 }
 
-func (s *DemagNxxAsymptotic) NxxAsymptotic(x, y, z float64) float64 { // Oxs_DemagNxxAsymptotic::Oxs_DemagNxxAsymptotic
-	ptdata := new(DemagNabData)
-	ptdata.Set(x,y,z)
-	return s.NxxAsymptoticF(ptdata)
+func SelfDemagNz(xsize, ysize, zsize float64) float64 {
+     return SelfDemagNx(zsize,xsize,ysize)
 }
 
-func (s *DemagNxxAsymptotic) NyyAsymptotic(y, x, z float64) float64 { // Oxs_DemagNxxAsymptotic::Oxs_DemagNxxAsymptotic
-	ptdata := new(DemagNabData)
-	ptdata.Set(x,y,z)
-	return s.NxxAsymptoticF(ptdata)
-}
+/////////////////// Main Code ////////////////////////
 
-func (s *DemagNxxAsymptotic) NzzAsymptotic(z, y, x float64) float64 { // Oxs_DemagNxxAsymptotic::Oxs_DemagNxxAsymptotic
-	ptdata := new(DemagNabData)
-	ptdata.Set(x,y,z)
-	return s.NxxAsymptoticF(ptdata)
-}
-
-func (s *DemagNxxAsymptotic) NxxAsymptoticF(ptdata *DemagNabData) float64 { // Oxs_DemagNxxAsymptotic::NxxAsymptotic
-	xcount := s.refine_data.xcount
-	ycount := s.refine_data.ycount
-	zcount := s.refine_data.zcount
-	rdx := s.refine_data.rdx
-	rdy := s.refine_data.rdy
-	rdz := s.refine_data.rdz
-	result_scale := s.refine_data.result_scale
-
-	var (
-		rptdata, mrptdata DemagNabData
-	)
-	zsum := float64(0.0)
-	for k := 1-zcount; k<zcount; k++ {
-		zoff := ptdata.z + float64(k)*rdz
-		ysum := float64(0.0)
-		for j := 1-ycount; j < ycount; j++ {
-			// Compute interactions for x-strip
-			yoff := ptdata.y + float64(j)*rdy
-			rptdata.Set(ptdata.x,yoff,zoff)
-			xsum := float64(xcount) * s.Nxx.NxxAsymptoticBaseF(&rptdata);
-			for i := 1; i < xcount; i++ {
-				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff);
-				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff);
-				xsum += float64(xcount-i) * s.Nxx.NxxAsymptoticPairBase(&rptdata,&mrptdata);
-			}
-			// Weight x-strip interactions into xy-plate
-			ysum += (float64(ycount) - math.Abs(float64(j)))*xsum;
-		}
-		// Weight xy-plate interactions into total sum
-		zsum += (float64(zcount) - math.Abs(float64(k)))*ysum;
-	}
-	return zsum*result_scale
-}
-
-func (s *DemagNxyAsymptoticBase) NxyAsymptoticPairBase(ptA, ptB *DemagNabData) float64 { // Oxs_DemagNxyAsymptoticBase::NxyAsymptoticPair
-	return s.NxyAsymptoticBaseF(ptA) + s.NxyAsymptoticBaseF(ptB)
-}
-
-func (s *DemagNxyAsymptoticBase) NxyAsymptoticBaseF(ptdata *DemagNabData) float64{ // Oxs_DemagNxyAsymptoticBase::NxyAsymptotic
-	if (ptdata.iR2 <= 0.0) { return float64(0.0) }
-
-	tx2, ty2, tz2 := ptdata.tx2, ptdata.ty2, ptdata.tz2
-
-	term3 := 3.0*s.lead_weight
-
-	term5 := 0.0
-
-	if (!s.cubic_cell) {
-		term5 = s.a1*tx2 + s.a2*ty2 +s.a3*tz2
-	}
-
-	tz4 := tz2*tz2
-
-	term7 := (s.b1*tx2 + (s.b2*ty2 + s.b3*tz2))*tx2 + (s.b4*ty2 + s.b5*tz2)*ty2 + s.b6*tz4
-
-	term9 := ((s.c1*tx2 + (s.c2*ty2 + s.c3*tz2))*tx2 + ((s.c4*ty2 + s.c5*tz2)*ty2 + s.c6*tz4))*tx2 + ((s.c7*ty2 + s.c8*tz2)*ty2 + s.c9*tz4)*ty2 + s.c10*tz4*tz2
-
-	x := ptdata.x
-	y := ptdata.y
-	iR2 := ptdata.iR2
-	iR := ptdata.iR
-	iR5 := iR*iR2*iR2
-
-	Nxy := (term9 + term7 + term5 + term3)*iR5*x*y
-	// Error should be of order 1/R^11
-
-	return Nxy
-}
-
-func (s *DemagNxyAsymptoticBase) DemagNxyAsymptoticBaseF(refine_data *DemagAsymptoticRefineData) { // Oxs_DemagNxyAsymptoticBase::Oxs_DemagNxyAsymptoticBase
-	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
-
-	dx2 := dx*dx
-	dy2 := dy*dy
-	dz2 := dz*dz
-
-	dx4 := dx2*dx2
-	dy4 := dy2*dy2
-	dz4 := dz2*dz2
-
-	dx6 := dx4*dx2
-	dy6 := dy4*dy2
-	dz6 := dz4*dz2
-
-	s.lead_weight = (-dx*dy*dz/(4*math.Pi))
-
-	// Initialize coefficients for 1/R^5 term
-	if(dx2!=dy2 || dx2!=dz2 || dy2!=dz2) { // Non-cube case
-		s.cubic_cell = false
-		s.a1, s.a2, s.a3 = (s.lead_weight*5.0)/4.0, (s.lead_weight*5.0)/4.0, (s.lead_weight*5.0)/4.0
-		s.a1 *=  4*dx2  -  3*dy2  -  1*dz2
-		s.a2 *= -3*dx2  +  4*dy2  -  1*dz2
-		s.a3 *= -3*dx2  -  3*dy2  +  6*dz2
-	} else { // Cube
-		s.cubic_cell = true;
-		s.a1, s.a2, s.a3 = 0.0, 0.0, 0.0
-	}
-
-	// Initialize coefficients for 1/R^7 term
-	s.b1, s.b2, s.b3, s.b4, s.b5, s.b6 = (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0, (s.lead_weight*7.0)/16.0
-	if (s.cubic_cell) {
-		s.b1  *=  -7*dx4
-		s.b2  *=  19*dx4
-		s.b3  *=  13*dx4
-		s.b4  *=  -7*dx4
-		s.b5  *=  13*dx4
-		s.b6  *= -13*dx4
-	} else {
-		s.b1 *=  16*dx4 -  30*dx2*dy2 -  10*dx2*dz2 +  10*dy4 +   5*dy2*dz2 +  2*dz4
-		s.b2 *= -40*dx4 + 105*dx2*dy2 -   5*dx2*dz2 -  40*dy4 -   5*dy2*dz2 +  4*dz4
-		s.b3 *= -40*dx4 -  15*dx2*dy2 + 115*dx2*dz2 +  20*dy4 -  35*dy2*dz2 - 32*dz4
-		s.b4 *=  10*dx4 -  30*dx2*dy2 +   5*dx2*dz2 +  16*dy4 -  10*dy2*dz2 +  2*dz4
-		s.b5 *=  20*dx4 -  15*dx2*dy2 -  35*dx2*dz2 -  40*dy4 + 115*dy2*dz2 - 32*dz4
-		s.b6 *=  10*dx4 +  15*dx2*dy2 -  40*dx2*dz2 +  10*dy4 -  40*dy2*dz2 + 32*dz4
-	}
-
-	// Initialize coefficients for 1/R^9 term
-	s.c1, s.c2, s.c3, s.c4, s.c5, s.c6, s.c7, s.c8, s.c9, s.c10 = s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0, s.lead_weight/64.0
-	if (s.cubic_cell) {
-		s.c1  *=   48 *dx6
-		s.c2  *= -142 *dx6
-		s.c3  *= -582 *dx6
-		s.c4  *= -142 *dx6
-		s.c5  *= 2840 *dx6
-		s.c6  *= -450 *dx6
-		s.c7  *=   48 *dx6
-		s.c8  *= -582 *dx6
-		s.c9  *= -450 *dx6
-		s.c10 *=  180 *dx6
-	} else {
-		s.c1  *=   576 *dx6 +  -2016 *dx4*dy2 +   -672 *dx4*dz2 +   1680 *dx2*dy4 +    840 *dx2*dy2*dz2 +   336 *dx2*dz4 +  -315 *dy6 +   -210 *dy4*dz2 +  -126 *dy2*dz4 +   -45 *dz6
-		s.c2  *= -3024 *dx6 +  13664 *dx4*dy2 +    448 *dx4*dz2 + -12670 *dx2*dy4 +  -2485 *dx2*dy2*dz2 +   546 *dx2*dz4 +  2520 *dy6 +    910 *dy4*dz2 +    84 *dy2*dz4 +  -135 *dz6
-		s.c3  *= -3024 *dx6 +   1344 *dx4*dy2 +  12768 *dx4*dz2 +   2730 *dx2*dy4 + -10185 *dx2*dy2*dz2 + -8694 *dx2*dz4 +  -945 *dy6 +   1680 *dy4*dz2 +  2394 *dy2*dz4 +  1350 *dz6
-		s.c4  *=  2520 *dx6 + -12670 *dx4*dy2 +    910 *dx4*dz2 +  13664 *dx2*dy4 +  -2485 *dx2*dy2*dz2 +    84 *dx2*dz4 + -3024 *dy6 +    448 *dy4*dz2 +   546 *dy2*dz4 +  -135 *dz6
-		s.c5  *=  5040 *dx6 +  -9940 *dx4*dy2 + -13580 *dx4*dz2 +  -9940 *dx2*dy4 +  49700 *dx2*dy2*dz2 + -6300 *dx2*dz4 +  5040 *dy6 + -13580 *dy4*dz2 + -6300 *dy2*dz4 +  2700 *dz6
-		s.c6  *=  2520 *dx6 +   2730 *dx4*dy2 + -14490 *dx4*dz2 +    420 *dx2*dy4 +  -7875 *dx2*dy2*dz2 + 17640 *dx2*dz4 +  -945 *dy6 +   3990 *dy4*dz2 +  -840 *dy2*dz4 + -3600 *dz6
-		s.c7  *=  -315 *dx6 +   1680 *dx4*dy2 +   -210 *dx4*dz2 +  -2016 *dx2*dy4 +    840 *dx2*dy2*dz2 +  -126 *dx2*dz4 +   576 *dy6 +   -672 *dy4*dz2 +   336 *dy2*dz4 +   -45 *dz6
-		s.c8  *=  -945 *dx6 +   2730 *dx4*dy2 +   1680 *dx4*dz2 +   1344 *dx2*dy4 + -10185 *dx2*dy2*dz2 +  2394 *dx2*dz4 + -3024 *dy6 +  12768 *dy4*dz2 + -8694 *dy2*dz4 +  1350 *dz6
-		s.c9  *=  -945 *dx6 +    420 *dx4*dy2 +   3990 *dx4*dz2 +   2730 *dx2*dy4 +  -7875 *dx2*dy2*dz2 +  -840 *dx2*dz4 +  2520 *dy6 + -14490 *dy4*dz2 + 17640 *dy2*dz4 + -3600 *dz6
-		s.c10 *=  -315 *dx6 +   -630 *dx4*dy2 +   2100 *dx4*dz2 +   -630 *dx2*dy4 +   3150 *dx2*dy2*dz2 + -3360 *dx2*dz4 +  -315 *dy6 +   2100 *dy4*dz2 + -3360 *dy2*dz4 +  1440 *dz6
-	}
-}
-
-func (s *DemagNxyAsymptoticBase) NxyAsymptoticPairXBase(ptdata *DemagNabPairData) float64{ // Oxs_DemagNxyAsymptoticBase::NxyAsymptoticPairX
-	// Evaluates asymptotic approximation to
-	//    Nxy(x+xoff,y,z) + Nxy(x-xoff,y,z)
-	// on the assumption that |xoff| >> |x|.
-
-	Assert(ptdata.ptp.y == ptdata.ptm.y && ptdata.ptp.z == ptdata.ptm.z)
-
-	xp := ptdata.ptp.x
-	y := ptdata.ptp.y
-	z := ptdata.ptp.z
-	xm := ptdata.ptm.x
-
-	R2p := ptdata.ptp.R2
-	R2m := ptdata.ptm.R2
-
-	// Both R2p and R2m must be positive, since asymptotics
-	// don't apply for R==0.
-		if (R2p<=0.0) { return s.NxyAsymptoticBaseF(ptdata.ptm) }
-		if (R2m<=0.0) { return s.NxyAsymptoticBaseF(ptdata.ptp) }
-
-	// Cancellation primarily in 1/R^3 term.
-	xbase := ptdata.ubase
-	term3x := 3*s.lead_weight*xbase // Main non-canceling part
-	term3cancel := float64(0.0) // Main canceling part
-	{
-		xoff  := ptdata.uoff
-		A := xbase*xbase + xoff*xoff + y*y + z*z
-		B := 2*xbase*xoff
-		R5p := R2p*R2p*ptdata.ptp.R
-		R5m := R2m*R2m*ptdata.ptm.R
-		A2 := A*A
-		B2 := B*B
-		Rdiff := -2*B*(B2*B2 + 5*A2*(A2+2*B2)) / (R5p*R5m*(R5p+R5m))
-		term3cancel = 3*s.lead_weight*xoff*Rdiff
-	}
-
-	// 1/R^5 terms; Note these are zero if cells are cubes
-	tx2p := ptdata.ptp.tx2
-	ty2p := ptdata.ptp.ty2
-	tz2p := ptdata.ptp.tz2
-	tx2m := ptdata.ptm.tx2
-	ty2m := ptdata.ptm.ty2
-	tz2m := ptdata.ptm.tz2
-	term5p := 0.0
-	term5m := 0.0
-	if (!s.cubic_cell) {
-		term5p = s.a1*tx2p + s.a2*ty2p + s.a3*tz2p
-		term5m = s.a1*tx2m + s.a2*ty2m + s.a3*tz2m
-	}
-
-	// 1/R^7 terms
-	tz4p := tz2p*tz2p
-	tz4m := tz2m*tz2m
-	term7p := (s.b1*tx2p + (s.b2*ty2p + s.b3*tz2p))*tx2p + (s.b4*ty2p + s.b5*tz2p)*ty2p + s.b6*tz4p
-	term7m := (s.b1*tx2m + (s.b2*ty2m + s.b3*tz2m))*tx2m + (s.b4*ty2m + s.b5*tz2m)*ty2m + s.b6*tz4m
-
-	// 1/R^9 terms
-	term9p := ((s.c1*tx2p + (s.c2*ty2p + s.c3*tz2p))*tx2p + ((s.c4*ty2p + s.c5*tz2p)*ty2p + s.c6*tz4p))*tx2p + ((s.c7*ty2p + s.c8*tz2p)*ty2p + s.c9*tz4p)*ty2p + s.c10*tz4p*tz2p
-	term9m := ((s.c1*tx2m + (s.c2*ty2m + s.c3*tz2m))*tx2m + ((s.c4*ty2m + s.c5*tz2m)*ty2m + s.c6*tz4m))*tx2m + ((s.c7*ty2m + s.c8*tz2m)*ty2m + s.c9*tz4m)*ty2m + s.c10*tz4m*tz2m
-
-	// Totals
-	iRp := ptdata.ptp.iR
-	iR2p := ptdata.ptp.iR2
-	iR5p := iR2p*iR2p*iRp
-
-	iRm := ptdata.ptm.iR
-	iR2m := ptdata.ptm.iR2
-	iR5m := iR2m*iR2m*iRm
-
-	Nxy :=  y*(term3cancel + (xp*(term9p + term7p + term5p)+term3x)*iR5p + (xm*(term9m + term7m + term5m)+term3x)*iR5m)
-	// Error should be of order 1/R^11
-
-	return Nxy
-}
-
-func (s *DemagNxyAsymptotic) NxyAsymptotic(x, y, z float64) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptotic
-	ptdata := new(DemagNabData)
-	ptdata.Set(x,y,z)
-	return s.NxyAsymptoticF(ptdata)
-}
-
-func (s *DemagNxyAsymptotic) NyzAsymptotic(y, z, x float64) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptotic
-	ptdata := new(DemagNabData)
-	ptdata.Set(x,y,z)
-	return s.NxyAsymptoticF(ptdata)
-}
-
-func (s *DemagNxyAsymptotic) NxyAsymptoticF(ptdata *DemagNabData) float64{ // Oxs_DemagNxyAsymptotic::NxyAsymptotic
-	xcount := s.refine_data.xcount
-	ycount := s.refine_data.ycount
-	zcount := s.refine_data.zcount;
-	rdx := s.refine_data.rdx;
-	rdy := s.refine_data.rdy;
-	rdz := s.refine_data.rdz;
-	result_scale := s.refine_data.result_scale;
-
-	var (
-		rptdata, mrptdata DemagNabData
-	)
-
-	zsum := float64(0.0)
-
-	for k:=1-zcount; k<zcount; k++ {
-		zoff := ptdata.z + float64(k)*rdz
-		ysum := float64(0.0)
-		for j:=1-ycount; j<ycount; j++ {
-			// Compute interactions for x-strip
-			yoff := ptdata.y+float64(j)*rdy
-			rptdata.Set(ptdata.x,yoff,zoff)
-			xsum := float64(xcount) * s.Nxy.NxyAsymptoticBaseF(&rptdata)
-			for i:=1; i<xcount; i++ {
-				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff)
-				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff)
-				xsum += float64(xcount-i) * s.Nxy.NxyAsymptoticPairBase(&rptdata,&mrptdata)
-			}
-			// Weight x-strip interactions into xy-plate
-			ysum += (float64(ycount) - math.Abs(float64(j)))*xsum;
-		}
-		// Weight xy-plate interactions into total sum
-		zsum += (float64(zcount) - math.Abs(float64(k)))*ysum;
-	}
-	return zsum*result_scale;
-}
-
-func (s *DemagNxyAsymptotic) NxyAsymptoticPairX(ptdata *DemagNabPairData) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptoticPairX
-	// Evaluates asymptotic approximation to
-	//    Nxy(x+xoff,y,z) + Nxy(x-xoff,y,z)
-	// on the assumption that |xoff| >> |x|.
-
-	Assert(ptdata.ptp.y == ptdata.ptm.y && ptdata.ptp.z == ptdata.ptm.z)
-
-	// Presumably at least one of xcount, ycount, or zcount is 1, but this
-	// fact is not used in following code.
-
-	// Alias data from refine_data structure.
-	xcount := s.refine_data.xcount
-	ycount := s.refine_data.ycount
-	zcount := s.refine_data.zcount
-	rdx := s.refine_data.rdx
-	rdy := s.refine_data.rdy
-	rdz := s.refine_data.rdz
-	result_scale := s.refine_data.result_scale
-
-
-	work := new(DemagNabPairData)
-	work.ubase = ptdata.ubase
-	zsum := float64(0.0)
-	for k:=1-zcount; k<zcount; k++ {
-		zoff := ptdata.ptp.z+float64(k)*rdz // .ptm.z == .ptp.z
-		ysum := float64(0.0)
-		for j:=1-ycount; j<ycount; j++ {
-			// Compute interactions for x-strip
-			yoff := ptdata.ptp.y+float64(j)*rdy // .ptm.y == .ptp.y
-			work.uoff = ptdata.uoff
-			DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-			xsum := float64(xcount) * s.Nxy.NxyAsymptoticPairXBase(work)
-			for i:=1; i<xcount; i++ {
-				work.uoff = ptdata.uoff + float64(i)*rdx
-				DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-				tmpsum := s.Nxy.NxyAsymptoticPairXBase(work)
-				work.uoff = ptdata.uoff - float64(i)*rdx
-				DemagNabData_SetPair(work.ubase+work.uoff,yoff,zoff,work.ubase-work.uoff,yoff,zoff,work.ptp,work.ptm)
-				tmpsum += s.Nxy.NxyAsymptoticPairXBase(work)
-				xsum += float64(xcount-i) * tmpsum
-			}
-			// Weight x-strip interactions into xy-plate
-			ysum += (float64(ycount) - math.Abs(float64(j)))*xsum;
-		}
-		// Weight xy-plate interactions into total sum
-		zsum += (float64(zcount) - math.Abs(float64(k)))*ysum;
-	}
-	return zsum*result_scale;
-}
-
-func (s *DemagNxyAsymptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float64 { // Oxs_DemagNxyAsymptotic::NxyAsymptoticPairZ
-	return s.NxyAsymptoticF(ptdata.ptp) + s.NxyAsymptoticF(ptdata.ptm)
-}
-
-// To instantiate Nyy, do a call to instantiate Nxx but with x and y swapped
-// To instantiate Nxx, do a call to instantiate Nxx but with x and z swapped
-
-// To instantiate Nxz, do a call to instantiate Nxy but with y and z swapped
-// To instantiate Nyz, do a call to instantiate Nxy but with (x, y, z) = (y, z, x)
-
-
-// Calculates the magnetostatic kernel by Newell's formulation
+// Calculates the magnetostatic kernel by brute-force integration
+// of magnetic charges over the faces and averages over cell volumes.
 // 
 // size: size of the kernel, usually 2 x larger than the size of the magnetization due to zero padding
 // accuracy: use 2^accuracy integration points
@@ -1080,85 +510,54 @@ func (s *DemagNxyAsymptotic) NxyAsymptoticPairZ(ptdata *DemagNabPairData) float6
 // You can use the function KernIdx to convert from source-dest pairs like XX to 1D indices:
 // K[KernIdx[X][X]] returns K[XX]
 func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_radius, zero_self_demag int, kern *host.Array) {
+//func Kernel_Newell(size []int, cellsize []float64, periodic []int, accuracy_ int, kern *host.Array) {
 
 	Debug("Calculating demag kernel:", "size", size)
 
 	// Sanity check
 	{
-		Assert((size[0] > 0 && size[1] > 1 && size[2] > 1) || (size[0] > 1 && size[1] > 0 && size[2] > 1) || (size[0] > 1 && size[1] > 1 && size[2] > 0))
+		Assert(size[0] > 0 && size[1] > 1 && size[2] > 1)
 		Assert(cellsize[0] > 0 && cellsize[1] > 0 && cellsize[2] > 0)
-		Assert(periodic[0] >= 0 && periodic[1] >= 0 && periodic[2] >= 0)
-		// Ensure only 2D periodicity
-		Assert((periodic[0] + periodic[1] + periodic[2]) <= 2)
-		// Ensure only 1D periodicity
-		Assert((periodic[0] + periodic[1] + periodic[2]) <= 1)
-		// Ensure that number of cells along a dimension is a power-of-2
-		// for all dimensions having more than 1 cell
+		Assert(periodic[0] == 0 && periodic[1] == 0 && periodic[2] == 0)
+		// TODO: in case of PBC, this will not be met?
+		Assert(size[1]%2 == 0 && size[2]%2 == 0)
 		if size[0] > 1 {
 			Assert(size[0]%2 == 0)
 		}
-		if size[1] > 1 {
-			Assert(size[1]%2 == 0)
-		}
-		if size[2] > 1 {
-			Assert(size[2]%2 == 0)
-		}
 	}
 
-//	array := kern.Array
-	ffts := new(Newell3DFFT)
+	array := kern.Array
 
-	var (
-	    p1, p2, q1, q2	float64
-	    R, R2	[3]float64
-	    rdimx, rdimy, rdimz, cdimx, cdimy, cdimz int
-	)
-
-	if (size[X] == 1) {
-		rdimx = 1
-	} else {
-		rdimx = size[X]/2-1
+	// Field (destination) loop ranges
+	x1, x2 := -(size[X]-1)/2, size[X]/2-1
+	y1, y2 := -(size[Y]-1)/2, size[Y]/2-1
+	z1, z2 := -(size[Z]-1)/2, size[Z]/2-1
+	// support for 2D simulations (thickness 1)
+	if size[X] == 1 && periodic[X] == 0 {
+		x2 = 0
 	}
-	if (size[Y] == 1) {
-		rdimy = 1
-	} else {
-		rdimy = size[Y]/2-1
+	{ // Repeat for PBC:
+		x1 *= (periodic[X] + 1)
+		x2 *= (periodic[X] + 1)
+		y1 *= (periodic[Y] + 1)
+		y2 *= (periodic[Y] + 1)
+		z1 *= (periodic[Z] + 1)
+		z2 *= (periodic[Z] + 1)
 	}
-	if (size[Z] == 1) {
-		rdimz = 1
-	} else {
-		rdimz = size[Z]/2-1
-	}
-	
-	ffts.RecommendDimensions(rdimx, rdimy, rdimz, &cdimx, &cdimy, &cdimz)
 
-	if (cdimx == 1) {
-		ffts.fftx.SetDimensions(1)
-	} else {
-		ffts.fftx.SetDimensions(2*(cdimx-1))
-	}
-	ffts.ffty.SetDimensions(cdimy)
-	ffts.fftz.SetDimensions(cdimz)
-
-	ldimx := ffts.fftx.GetLogicalDimension()
-	ldimy := ffts.ffty.GetLogicalDimension()
-	ldimz := ffts.fftz.GetLogicalDimension()
-
-//	adimx := (ldimx/2) + 1
-//	adimy := (ldimy/2) + 1
-//	adimz := (ldimz/2) + 1
-
-	scratch := kern.Array
 	dx, dy, dz := cellsize[X], cellsize[Y], cellsize[Z]
-
 	// Determine relative sizes of dx, dy and dz, since that is all that demag
 	// calculation cares about
 	
+	var (
+		p1, p2, q1, q2 float64
+	)
+
 	if ( FindRatApprox(dx,dy,1e-12,1000,&p1,&q1) && FindRatApprox(dz,dy,1e-12,1000,&p2,&q2) ) {
 	   gcd := Gcd(q1,q2)
 	   dx = p1*q2/gcd
 	   dy = q1*q2/gcd
-	   dz = p2*p1/gcd
+	   dz = p2*q1/gcd
 	} else {
 	   maxedge := dx
 	   if (dy>maxedge) { maxedge = dy }
@@ -1168,854 +567,76 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	   dz /= maxedge
 	}
 
-	// Field (destination) loop ranges
-	// offset by -dx, -dy, and -dz so we can do d^2/dx^2, d^2/dy^2 and d^2/dz^2 in place
-	xstop := 1
-	ystop := 1
-	zstop := 1
-	// Handle PBC separately
-	// Need to error check for only 1D PBC
+	// Start brute integration
+	// 9 nested loops, does that stress you out?
+	// Fortunately, the 5 inner ones usually loop over just one element.
+	// It might be nice to get rid of that branching though.
+	var (
+		R  [3]float64     // cell center positions
+		points int        // counts used integration points
+	)
+	
+	t0 := time.Now()
+	
+	for x := x1; x <= x2; x++ { // in each dimension, go from -(size-1)/2 to size/2 -1, wrapped.
+		xw := Wrap(x, size[X])
+		R[X] = float64(x) * dx
 
-	// smallest cell dimension is our typical length scale
-	L := cellsize[X]
-	if cellsize[Y] < L {
-		L = cellsize[Y]
-	}
-	if cellsize[Z] < L {
-		L = cellsize[Z]
-	}
+		for y := y1; y <= y2; y++ {
+			yw := Wrap(y, size[Y])
+			R[Y] = float64(y) * dy
 
-	scale := 1 / (4 * math.Pi * dx * dy * dz)
-	scale *= ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling()
+			for z := z1; z <= z2; z++ {
+				zw := Wrap(z, size[Z])
+				R[Z] = float64(z) * dz
 
-	scaled_arad := float64(asymptotic_radius) * math.Pow(dx*dy*dz, float64(1.0/3.0))
+				var B float64
 
-	if (rdimz > 1) { zstop = rdimz+2 }
-	if (rdimy > 1) { ystop = rdimy+2 }
-	if (rdimx > 1) { xstop = rdimx+2 }
+				I := FullTensorIdx[0][0]
+				B = Newell_Nxx(R[X], R[Y], R[Z], dx, dy, dz)
+				array[I][xw][yw][zw] += float32(B)
 
-	I := FullTensorIdx[0][0]
+				I = FullTensorIdx[1][1]
+				B = Newell_Nyy(R[X], R[Y], R[Z], dx, dy, dz)
+				array[I][xw][yw][zw] += float32(B)
 
-	// Use far field approximation past the asymptotic radius
-	if (scaled_arad > 0.0) {
-		ztest := int(math.Ceil(scaled_arad/dz)) + 2
-		if (ztest < zstop) { zstop = ztest }
-		ytest := int(math.Ceil(scaled_arad/dy)) + 2
-		if (ytest < ystop) { ystop = ytest }
-		xtest := int(math.Ceil(scaled_arad/dx)) + 2
-		if (xtest < xstop) { xstop = xtest }
-	}
+				I = FullTensorIdx[2][2]
+				B = Newell_Nzz(R[X], R[Y], R[Z], dx, dy, dz)
+				array[I][xw][yw][zw] += float32(B)
 
-//	for s := 0; s < 3; s++ { // source index Ksdxyz
-//		u, v, w := s, (s+1)%3, (s+2)%3 // u = direction of source (s), v & w are the orthogonal directions
-// 	}
-	if (periodic[0]+periodic[1]+periodic[2] == 0) {
-		// Calculate Nxx, Nxy and Nxz in the first octant, non-periodic case.
-		// Step 1: Evaluate f & g at each cell site. Offset by (-dx, -dy, -dz)
-		// so that we can do 2nd derivative operations "in-place".
-   	   	for x := 0; x < xstop; x++ { // in each dimension, we stay in the region up to the asymptotic radius
-		      xw := x
-		      R[X] = float64(x-1) * cellsize[X]
-
-		      for y := 0; y < ystop; y++ {
-			    yw := y
-			    R[Y] = float64(y-1) * cellsize[Y]
-
-			    for z := 0; z < zstop; z++ {
-			    	  zw := z
-			    	  R[Z] = float64(z-1) * cellsize[Z]
-
-				  // For Nxx
-				  I = FullTensorIdx[0][0]
-				  scratch[I][xw][yw][zw] = float32(scale*Newell_f(R[X],R[Y],R[Z]))
-				  // For Nxy
-				  I = FullTensorIdx[0][1]
-				  scratch[I][xw][yw][zw] = float32(scale*Newell_g(R[X],R[Y],R[Z]))
-				  // For Nxz
-				  I = FullTensorIdx[0][2]
-				  scratch[I][xw][yw][zw] = float32(scale*Newell_g(R[X],R[Z],R[Y]))
-
-			    }
-		      }
-		}
-
-		// Step: 2a: Do d^2/dz^2
-		if (zstop == 1) {
-			// Only 1 layer in z-direction of f/g stored in scratch array.
-			zw := 0
-			for y := 0; y < ystop; y++ {
-				yw := y
-				R[Y] = float64(y-1) * cellsize[Y]
-
-				for x := 0; x < xstop; x++ {
-					xw := x
-					R[X] = float64(x-1) * cellsize[X]
-
-					// Function f is even in each variable, so for example
-					//	f(x, y, -dz) - 2f(x, y, 0) + f(x, y, dz)
-					//		= 2( f(x, y, -dz) - f(f, y, 0) )
-					// Function g is even in z, and odd in x and y, so for example
-					//	g(x, -dz, y) - 2g(x, 0, y) + g(x, dz, y)
-					//		= 2g(x, 0, y) = 0
-					// Nyy(x, y, z) = Nxx(y, x, z); Nzz(x, y, z) = Nxx(z, y, x);
-					// Nxz(x, y, z) = Nxy(x, z, y); Nyz(x, y, z) = Nxy(y, z, x);
-
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][zw] -= float32(scale*Newell_f(R[X],R[Y],0.0))
-					scratch[I][xw][yw][zw] *= float32(2.0)
-
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] -= float32(scale*Newell_g(R[X],R[Y],0.0))
-					scratch[I][xw][yw][zw] *= float32(2.0)
-
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw] = float32(0.0)
-
-				}
-			}
-		} else {
-			for z := 0; z < rdimz; z++ {
-				zw := z
-				for y := 0; y < ystop; y++ {
-					yw := y
-					for x := 0; x < xstop; x++ {
-						xw := x
-
-						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-					}
-				}
-			}
-		}
-
-		// Step 2b: Do d^2/dy^2
-		if (ystop == 1) {
-			yw := 0
-			for z := 0; z < zstop; z++ {
-				zw := z
-				R[Z] = float64(z) * cellsize[Z]
-
-				for x := 0; x < xstop; x++ {
-					xw := x
-					R[X] = float64(x-1) * cellsize[X]
-
-					// Function f is even in each variable, so for example
-					//	f(x, y, -dz) - 2f(x, y, 0) + f(x, y, dz)
-					//		= 2( f(x, y, -dz) - f(f, y, 0) )
-					// Function g is even in z, and odd in x and y, so for example
-					//	g(x, -dz, y) - 2g(x, 0, y) + g(x, dz, y)
-					//		= 2g(x, 0, y) = 0
-					// Nyy(x, y, z) = Nxx(y, x, z); Nzz(x, y, z) = Nxx(z, y, x);
-					// Nxz(x, y, z) = Nxy(x, z, y); Nyz(x, y, z) = Nxy(y, z, x);
-
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][zw] -= float32(scale*(Newell_f(R[X],0.0,R[Z]-cellsize[Z])+Newell_f(R[X],0.0,R[Z]+cellsize[Z])-2.0*Newell_f(R[X],0.0,R[Z])))
-					scratch[I][xw][yw][zw] *= float32(2.0)
-
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] = float32(0.0)
-
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw] -= float32(scale*(Newell_g(R[X],R[Z]-cellsize[Z],0.0)+Newell_g(R[X],R[Z]+cellsize[Z],0.0)-2.0*Newell_g(R[X],R[Z],0.0)))
-					scratch[I][xw][yw][zw] *= float32(2.0)
-
-				}
-			}
-		} else {
-			for z := 0; z < rdimz; z++ {
-				zw := z
-				for y := 0; y < ystop; y++ {
-					yw := y
-					for x := 0; x < xstop; x++ {
-						xw := x
-
-						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
-						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
-						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
-					}
-				}
-			}
-		}
-
-		// Step 2c: Do d^2/dx^2
-		if (xstop == 1) {
-			xw := 0
-			for z := 0; z < zstop; z++ {
-				zw := z
-				R[Z] = float64(z) * cellsize[Z]
-
-				for y := 0; y < ystop; y++ {
-					yw := y
-					R[Y] = float64(y) * cellsize[Y]
-
-					// Function f is even in each variable, so for example
-					//	f(x, y, -dz) - 2f(x, y, 0) + f(x, y, dz)
-					//		= 2( f(x, y, -dz) - f(f, y, 0) )
-					// Function g is even in z, and odd in x and y, so for example
-					//	g(x, -dz, y) - 2g(x, 0, y) + g(x, dz, y)
-					//		= 2g(x, 0, y) = 0
-					// Nyy(x, y, z) = Nxx(y, x, z); Nzz(x, y, z) = Nxx(z, y, x);
-					// Nxz(x, y, z) = Nxy(x, z, y); Nyz(x, y, z) = Nxy(y, z, x);
-
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][zw] -= float32(scale*((4.0*Newell_f(0.0,R[Y],R[Z])+Newell_f(0.0,R[Y]+cellsize[Y],R[Z]+cellsize[Z])+Newell_f(0.0,R[Y]-cellsize[Y],R[Z]+cellsize[Z])+Newell_f(0.0,R[Y]+cellsize[Y],R[Z]-cellsize[Z])+Newell_f(0.0,R[Y]-cellsize[Y],R[Z]-cellsize[Z]))-2.0*(Newell_f(0,R[Y]+cellsize[Y],R[Z])+Newell_f(0,R[Y]-cellsize[Y],R[Z])+Newell_f(0,R[Y],R[Z]+cellsize[Z])+Newell_f(0,R[Y],R[Z]-cellsize[Z]))))
-					scratch[I][xw][yw][zw] *= float32(2.0) // For Nxx
-
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] = float32(0.0) // For Nxy
-
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw] = float32(0.0) // For Nxz
-
-				}
-			}
-		} else {
-			for z := 0; z < rdimz; z++ {
-				zw := z
-				for y := 0; y < ystop; y++ {
-					yw := y
-					for x := 0; x < xstop; x++ {
-						xw := x
-
-						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw]
-						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw]
-						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw] += -2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw]
-					}
-				}
-			}
-		}
-
-		// Special "SelfDemag" code may be more accurate at index 0,0,0.
-		selfscale := float32(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-		I = FullTensorIdx[0][0]
-		scratch[I][0][0][0] = float32(SelfDemagNx(cellsize[X],cellsize[Y],cellsize[Z]))
-		if (zero_self_demag > 0) { scratch[I][0][0][0] -= float32(1.0/3.0) }
-		scratch[I][0][0][0] *= selfscale
-
-		I = FullTensorIdx[0][1]
-		scratch[I][0][0][0] = float32(0.0)  // Nxy[0] = 0
-
-		I = FullTensorIdx[0][2]
-		scratch[I][0][0][0] = float32(0.0) // Nxz[0] = 0
-
-		// Step 2.5: Use asymptotic (dipolar + higher) approximation for far field
-		// Dipole approximation:
-		//
-		//			 / 3x^2-R^2   3xy       3xz    \
-		//            dx.dy.dz   |			       |
-		// H_demag = ----------- |   3xy   3y^2-R^2     3yz    |
-		//            4.pi.R^5   |			       |
-		//			 \   3xz      3yz     3z^2-R^2 /
-		//
-
-		scaled_arad_sq, fft_scaling := float64(0.0), float64(0.0)
-
-		if (scaled_arad >= 0.0) {
-			scaled_arad_sq = scaled_arad*scaled_arad
-			fft_scaling = float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-			Assert(scaled_arad_sq > 0.0 && fft_scaling < 0.0)
-
-			// Since H = -N.M, and by convention with the rest of this code,
-			// we store "-N" instead of "N" so we don't have to multiply the
-			// output from the FFT + iFFT by -1 when calculating the energy
-
-			xtest := float64(rdimx)*float64(cellsize[X])
-			xtest *= xtest
-
-			ANxx := new(DemagNxxAsymptotic)
-			Default_Refine_Data := float64(1.5)
-			ANxx.refine_data.DemagAsymptoticRefineData(dx,dy,dz,Default_Refine_Data)
-			ANxx.Nxx.DemagNxxAsymptoticBaseF(&ANxx.refine_data)
-
-			ANxy := new(DemagNxyAsymptotic)
-			ANxy.refine_data.DemagAsymptoticRefineData(dx,dy,dz,Default_Refine_Data)
-			ANxy.Nxy.DemagNxyAsymptoticBaseF(&ANxy.refine_data)
-
-			ANxz := new(DemagNxyAsymptotic)
-			ANxz.refine_data.DemagAsymptoticRefineData(dx,dz,dy,Default_Refine_Data)
-			ANxz.Nxy.DemagNxyAsymptoticBaseF(&ANxy.refine_data)
-
-			for z := 0; z < rdimz; z++ {
-				zw := z
-				R[Z] = float64(zw) * cellsize[Z]
-				R2[Z] = R[Z] * R[Z]
-				for y := 0; y < rdimy; y++ {
-					yw := y
-					R[Y] = float64(yw) * cellsize[Y]
-					R2[Y] = R[Y]*R[Y]
-
-					xstart := 0
-					test := scaled_arad_sq - R2[Y] - R2[Z]
-					if (test>0.0) {
-						if (test>xtest) {
-							xstart = rdimx+1
-						} else {
-							xstart = int(math.Ceil(math.Sqrt(test)/cellsize[X]))
-						}
-					}
-					for x := xstart; x < rdimx; x++ {
-						xw := x
-						R[X] = float64(x) * cellsize[X]
-						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw] = float32(fft_scaling*ANxx.NxxAsymptotic(R[X],R[Y],R[Z]))
-						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw] = float32(fft_scaling*ANxy.NxyAsymptotic(R[X],R[Y],R[Z]))
-						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw] = float32(fft_scaling*ANxz.NxyAsymptotic(R[X],R[Z],R[Y]))
-					}
-				}
-			}
-		}
-	}
-
-	// Step 2.6: If periodic boundary conditions selected, compute periodic tensors
-
-	// Step 3: Use symmetries to reflect into other octants.
-	//     Also, at each coordinate plane, set to 0.0 any term
-	//     which is odd across that boundary.  It should already
-	//     be close to 0, but will likely be slightly off due to
-	//     rounding errors.
-	// Symmetries: A00, A11, A22 are even in each coordinate
-	//             A01 is odd in x and y, even in z.
-	//             A02 is odd in x and z, even in y.
-	//             A12 is odd in y and z, even in x.
-	for z:=0; z<rdimz; z++ {
-		zw := z
-		for y:=0; y<rdimy; y++ {
-			yw := y
-			for x:=0; x<rdimx; x++ {
-				xw := x
-				if ((x==0) || (y==0)) {
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] = float32(0.0)
-				}
-				if ((x==0) || (z==0)) {
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw] = float32(0.0)
-				}
-				I = FullTensorIdx[0][0]
-				tmpA00 := scratch[I][xw][yw][zw]
 				I = FullTensorIdx[0][1]
-				tmpA01 := scratch[I][xw][yw][zw]
-				I = FullTensorIdx[0][2]
-				tmpA02 := scratch[I][xw][yw][zw]
-
-				if (x>0) {
-					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][yw][zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][yw][zw] = -1.0*tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][yw][zw] = -1.0*tmpA02
-				}
-				if (y>0) {
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][ldimy-yw][zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][ldimy-yw][zw] = -1.0*tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][ldimy-yw][zw] = tmpA02
-				}
-				if (z>0) {
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][ldimz-zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][ldimz-zw] = tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][ldimz-zw] = -1.0*tmpA02
-				}
-				if ((x>0) && (y>0)) {
-					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][ldimy-yw][zw] = -1.0*tmpA02
-				}
-				if ((x>0) && (z>0)) {
-					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][yw][ldimz-zw] = -1.0*tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA02
-				}
-				if ((y>0) && (z>0)) {
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][ldimy-yw][ldimz-zw] = -1.0*tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][ldimy-yw][ldimz-zw] = -1.0*tmpA02
-				}
-				if ((x>0) && (y>0) && (z>0)) {
-					I = FullTensorIdx[0][0]
-					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA00
-					I = FullTensorIdx[0][1]
-					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA01
-					I = FullTensorIdx[0][2]
-					scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA02
-				}
-			}
-		}
-	}
-	// Step 3.5: Fill in zero-padded overhang
-	for z:=0; z<ldimz; z++ {
-		zw := z
-		if ((z<rdimz) || (z>ldimz-rdimz)) { // Outer z
-			for y:=0; y<ldimy; y++ {
-				yw := y
-				if ((y<rdimy) || (y>ldimy-rdimy)) { // Outer y
-					for x:=rdimx; x<=ldimx-rdimx; x++ {
-						xw := x
-						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw] = float32(0.0)
-						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw] = float32(0.0)
-						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw] = float32(0.0)
-					}
-				} else { // Inner y
-					for x:=0; x<ldimx; x++ {
-						xw := x
-						I = FullTensorIdx[0][0]
-						scratch[I][xw][yw][zw] = float32(0.0)
-						I = FullTensorIdx[0][1]
-						scratch[I][xw][yw][zw] = float32(0.0)
-						I = FullTensorIdx[0][2]
-						scratch[I][xw][yw][zw] = float32(0.0)
-					}
-				}
-			}
-		} else { // Middle z
-			for y:=0; y<ldimy; y++ {
-				yw := y
-				for x:=0; x<ldimx; x++ {
-					xw := x
-					I = FullTensorIdx[0][0]
-					scratch[I][xw][yw][zw] = float32(0.0)
-					I = FullTensorIdx[0][1]
-					scratch[I][xw][yw][zw] = float32(0.0)
-					I = FullTensorIdx[0][2]
-					scratch[I][xw][yw][zw] = float32(0.0)
-				}
-			}
-		}
-	}
-
-	// Repeat for Nyy, Nyz and Nzz.
-	if (periodic[0]+periodic[1]+periodic[2] == 0) {
-		// Step 1: Evaluate f & g at eac site. Offset by (-dx, -dy, -dz)
-		// so we can do 2nd derivative operations "in-place"
-		for z:=0 ; z<zstop ; z++ {
-			zw := z
-			R[Z] = float64(z-1)*cellsize[Z]
-			for y:=0 ; y<ystop ; y++ {
-				yw := y
-				R[Y] = float64(y-1)*cellsize[Y]
-				for x:=0 ; x<xstop ; x++ {
-					xw := x
-					R[X] = float64(x-1)*cellsize[X]
-					I = FullTensorIdx[1][1]
-					scratch[I][xw][yw][zw] = float32(scale*Newell_f(R[Y],R[X],R[Z])) // For Nyy
-					I = FullTensorIdx[1][2]
-					scratch[I][xw][yw][zw] = float32(scale*Newell_g(R[Y],R[Z],R[X])) // For Nyz
-					I = FullTensorIdx[2][2]
-					scratch[I][xw][yw][zw] = float32(scale*Newell_f(R[Z],R[Y],R[X])) // For Nzz
-				}
-			}
-		}
-		// Step 2a: Do d^2/dz^2
-		if (zstop==1) {
-			// Only 1 layer in z-direction of f/g stored in scratch array.
-			for y:=0 ; y<ystop ; y++ {
-				yw := y
-				R[Y] = float64(y-1)*cellsize[Y]
-				for x:=0 ; x<xstop ; x++ {
-					xw := x
-					R[X] = float64(x-1)*cellsize[X]
-					// Function f is even in each variable, so for example
-					// f(x,y,-dz) - 2f(x,y,0) + f(x,y,dz)
-					// = 2( f(x,y,-dz) - f(x,y,0) )
-					// Function g(x,y,z) is even in z and odd in x and y,
-					// so for example
-					// g(x,-dz,y) - 2g(x,0,y) + g(x,dz,y)
-					// = 2g(x,0,y) = 0.
-					// Nyy(x,y,z) = Nxx(y,x,z); Nzz(x,y,z) = Nxx(z,y,x);
-					// Nxz(x,y,z) = Nxy(x,z,y); Nyz(x,y,z) = Nxy(y,z,x);
-					I = FullTensorIdx[1][1]
-					scratch[I][xw][yw][0] -= float32(scale*Newell_f(R[Y],R[X],0)) // For Nyy
-					scratch[I][xw][yw][0] *= float32(2.0)
-					I = FullTensorIdx[1][2]
-					scratch[I][xw][yw][0] = 0.0 // For Nyz
-					I = FullTensorIdx[2][2]
-					scratch[I][xw][yw][0] -= float32(scale*Newell_f(0,R[Y],R[X])) // For Nzz
-					scratch[I][xw][yw][0] *= float32(2.0)
-				}
-			}
-		} else {
-			for z:=0 ; z<rdimz ; z++ {
-				zw := z
-				for y:=0 ; y<ystop ; y++ {
-					yw := y
-					for x:=0 ; x<xstop ; x++ {
-						xw := x
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw][zw+1] + scratch[I][xw][yw][zw+2]
-					}
-				}
-			}
-		}
-		// Step 2b: Do d^2/dy^2
-		if (ystop==1) {
-			// Only 1 layer in y-direction of f/g stored in scratch array.
-			for z:=0 ; z<rdimz ; z++ {
-				zw := z
-				R[Z]=float64(zw)*cellsize[Z]
-				for x:=0 ; x<xstop ; x++ {
-					xw := x
-					R[X] = float64(xw-1)*cellsize[X]
-					// Function f is even in each variable, so for example
-					// f(x,y,-dz) - 2f(x,y,0) + f(x,y,dz)
-					// = 2( f(x,y,-dz) - f(x,y,0) )
-					// Function g(x,y,z) is even in z and odd in x and y,
-					// so for example
-					// g(x,-dz,y) - 2g(x,0,y) + g(x,dz,y)
-					// = 2g(x,0,y) = 0.
-					// Nyy(x,y,z) = Nxx(y,x,z); Nzz(x,y,z) = Nxx(z,y,x);
-					// Nxz(x,y,z) = Nxy(x,z,y); Nyz(x,y,z) = Nxy(y,z,x);
-					I = FullTensorIdx[1][1]
-					scratch[I][xw][0][zw] -= float32(scale*((Newell_f(0,R[X],R[Z]-cellsize[Z]) + Newell_f(0,R[X],R[Z]+cellsize[Z])) - 2*Newell_f(0,R[X],R[Z])))
-					scratch[I][xw][0][zw] *= float32(2.0) // For Nyy
-					I = FullTensorIdx[1][2]
-					scratch[I][xw][0][zw] = 0.0; // For Nyz
-					I = FullTensorIdx[2][2]
-					scratch[I][xw][0][zw] -= float32(scale*((Newell_f(R[Z]-cellsize[Z],0,R[X]) + Newell_f(R[Z]+cellsize[Z],0,R[X])) - 2*Newell_f(R[Z],0,R[X])))
-					scratch[I][xw][0][zw] *= float32(2.0) // For Nzz
-				}
-			}
-		} else {
-			for z:=0 ; z<rdimz ; z++ {
-				zw := z
-				for y:=0 ; y<rdimy ; y++ {
-					yw := y
-					for x:=0 ; x<xstop ; x++ {
-						xw := x
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][yw][zw] += float32(-2.0)*scratch[I][xw][yw+1][zw] + scratch[I][xw][yw+2][zw]
-					}
-				}
-			}
-		}
-		// Step 2c: Do d^2/dx^2
-		if (xstop==1) {
-			// Only 1 layer in x-direction of f/g stored in scratch array.
-			for z:=0 ; z<rdimz ; z++ {
-				zw := z
-				R[Z] = float64(z)*cellsize[Z]
-				for y:=0 ; y<rdimy ; y++ {
-					yw := y
-					R[Y] = float64(y)*cellsize[Y]
-					// Function f is even in each variable, so for example
-					// f(x,y,-dz) - 2f(x,y,0) + f(x,y,dz)
-					// = 2( f(x,y,-dz) - f(x,y,0) )
-					// Function g(x,y,z) is even in z and odd in x and y,
-					// so for example
-					// g(x,-dz,y) - 2g(x,0,y) + g(x,dz,y)
-					// = 2g(x,0,y) = 0.
-					// Nyy(x,y,z) = Nxx(y,x,z); Nzz(x,y,z) = Nxx(z,y,x);
-					// Nxz(x,y,z) = Nxy(x,z,y); Nyz(x,y,z) = Nxy(y,z,x);
-					I = FullTensorIdx[1][1]
-					scratch[I][0][yw][zw] -= float32(scale*((float64(4.0)*Newell_f(R[Y],0,R[Z]) + Newell_f(R[Y]+cellsize[Y],0,R[Z]+cellsize[Z]) + Newell_f(R[Y]-cellsize[Y],0,R[Z]+cellsize[Z]) + Newell_f(R[Y]+cellsize[Y],0,R[Z]-cellsize[Z]) + Newell_f(R[Y]-cellsize[Y],0,R[Z]-cellsize[Z]))-float64(2.0)*(Newell_f(R[Y]+cellsize[Y],0,R[Z]) + Newell_f(R[Y]-cellsize[Y],0,R[Z]) + Newell_f(R[Y],0,R[Z]+cellsize[Z]) + Newell_f(R[Y],0,R[Z]-cellsize[Z]))))
-					scratch[I][0][yw][zw] *= float32(2.0) // For Nyy
-					I = FullTensorIdx[1][2]
-					scratch[I][0][yw][zw] -= float32(scale*((float64(4.0)*Newell_g(R[Y],R[Z],0) + Newell_g(R[Y]+cellsize[Y],R[Z]+cellsize[Z],0) + Newell_g(R[Y]-cellsize[Y],R[Z]+cellsize[Z],0) + Newell_g(R[Y]+cellsize[Y],R[Z]-cellsize[Z],0) + Newell_g(R[Y]-cellsize[Y],R[Z]-cellsize[Z],0)) - float64(2.0)*(Newell_g(R[Y]+cellsize[Y],R[Z],0) + Newell_g(R[Y]-cellsize[Y],R[Z],0) + Newell_g(R[Y],R[Z]+cellsize[Z],0) + Newell_g(R[Y],R[Z]-cellsize[Z],0))))
-					scratch[I][0][yw][zw] *= float32(2.0) // For Nyz
-					I = FullTensorIdx[2][2]
-					scratch[I][0][yw][zw] -= float32(scale*((float64(4.0)*Newell_f(R[Z],R[Y],0) + Newell_f(R[Z]+cellsize[Z],R[Y]+cellsize[Y],0) + Newell_f(R[Z]+cellsize[Z],R[Y]-cellsize[Y],0) + Newell_f(R[Z]-cellsize[Z],R[Y]+cellsize[Y],0) + Newell_f(R[Z]-cellsize[Z],R[Y]-cellsize[Y],0)) - float64(2.0)*(Newell_f(R[Z],R[Y]+cellsize[Y],0) + Newell_f(R[Z],R[Y]-cellsize[Y],0) + Newell_f(R[Z]+cellsize[Z],R[Y],0) + Newell_f(R[Z]-cellsize[Z],R[Y],0))))
-					scratch[I][0][yw][zw] *= float32(2.0) // For Nzz
-				}
-			}
-		} else {
-			for z:=0 ; z<rdimz ; z++ {
-				zw := z
-				for y:=0 ; y<rdimy ; y++ {
-					yw := y
-					for x:=0 ; x<rdimx ; x++ {
-						xw := x
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][yw][zw] += float32(-2.0*scratch[I][xw+1][yw][zw]	+ scratch[I][xw+2][yw][zw])
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][zw] += float32(-2.0*scratch[I][xw+1][yw][zw]	+ scratch[I][xw+2][yw][zw])
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][yw][zw] += float32(-2.0*scratch[I][xw+1][yw][zw] + scratch[I][xw+2][yw][zw])
-					}
-				}
-			}
-		}
-
-		// Special "SelfDemag" code may be more accurate at index 0,0,0.
-		selfscale := float32(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-		I = FullTensorIdx[1][1]
-		scratch[I][0][0][0] = float32(SelfDemagNy(cellsize[X],cellsize[Y],cellsize[Z]))
-		if (zero_self_demag > 0) {
-			scratch[I][0][0][0] -= float32(1.0/3.0) 
-		}
-		scratch[I][0][0][0] *= selfscale
-
-		I = FullTensorIdx[1][2]
-		scratch[I][0][0][0] = float32(0.0)  // Nyz[0] = 0.
-
-		I = FullTensorIdx[2][2]
-		scratch[I][0][0][0] = float32(SelfDemagNz(cellsize[X],cellsize[Y],cellsize[Z]))
-		scratch[I][0][0][0] *= selfscale
-
-		// Step 2.5: Use asymptotic (dipolar + higher) approximation for far field
-		/* Dipole approximation:
-		 *
-		 * / 3x^2-R^2 3xy 3xz \
-		 * dx.dy.dz | |
-		 * H_demag = ----------- | 3xy 3y^2-R^2 3yz |
-		 * 4.pi.R^5 | |
-		 * \ 3xz 3yz 3z^2-R^2 /
-		 */
-		// See Notes IV, 26-Feb-2007, p102.
-		//scaled_arad_sq, fft_scaling := float64(0.0), float64(0.0)
-		if(scaled_arad>=0.0) {
-			scaled_arad_sq := scaled_arad*scaled_arad
-			fft_scaling := float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-			Assert(scaled_arad_sq > 0.0 && fft_scaling < 0.0)
-
-			// Note that all distances here are in "reduced" units,
-			// scaled so that dx, dy, and dz are either small integers
-			// or else close to 1.0.
-			//scaled_arad_sq = scaled_arad*scaled_arad
-			//fft_scaling = float64(-1.0 * ffts.fftx.GetScaling() * ffts.ffty.GetScaling() * ffts.fftz.GetScaling())
-			/// Note: Since H = -N*M, and by convention with the rest of this
-			/// code, we store "-N" instead of "N" so we don't have to multiply
-			/// the output from the FFT + iFFT by -1 in GetEnergy() below.
-			xtest := float64(rdimx)*float64(cellsize[X])
-			xtest *= xtest
-
-			ANyy := new(DemagNxxAsymptotic)
-			Default_Refine_Data := float64(1.5)
-			ANyy.refine_data.DemagAsymptoticRefineData(dy,dx,dz,Default_Refine_Data)
-			ANyy.Nxx.DemagNxxAsymptoticBaseF(&ANyy.refine_data)
-
-			ANyz := new(DemagNxyAsymptotic)
-			ANyz.refine_data.DemagAsymptoticRefineData(dy,dz,dx,Default_Refine_Data)
-			ANyz.Nxy.DemagNxyAsymptoticBaseF(&ANyz.refine_data)
-
-			ANzz := new(DemagNxxAsymptotic)
-			ANzz.refine_data.DemagAsymptoticRefineData(dz,dy,dx,Default_Refine_Data)
-			ANzz.Nxx.DemagNxxAsymptoticBaseF(&ANzz.refine_data)
-
-			for z:=0 ; z<rdimz ; z++ {
-				zw := z
-				R[Z] = float64(z)*cellsize[Z]
-				R2[Z] = R[Z]*R[Z]
-				for y:=0 ; y<rdimy ; y++ {
-					yw := y
-					R[Y] = float64(y)*cellsize[Y]
-					R2[Y] = R[Y]*R[Y]
-
-					xstart := 0
-					test := scaled_arad_sq - R2[Y] - R2[Z]
-					if (test>0.0) {
-						if (test>xtest) {
-							xstart = rdimx+1;
-						} else {
-							xstart = int(math.Ceil(math.Sqrt(test)/cellsize[X]));
-						}
-					}
-					for x:=xstart; x<rdimx ; x++ {
-						xw := x
-						R[X] = float64(x)*cellsize[X]
-
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][yw][zw] = float32(fft_scaling*ANyy.NyyAsymptotic(R[X],R[Y],R[Z]))
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][zw] = float32(fft_scaling*ANyz.NyzAsymptotic(R[X],R[Y],R[Z]))
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][yw][zw] = float32(fft_scaling*ANzz.NzzAsymptotic(R[X],R[Y],R[Z]))
-					}
-				}
-			}
-		}
-
-		// Step 3: Use symmetries to reflect into other octants.
-		//     Also, at each coordinate plane, set to 0.0 any term
-		//     which is odd across that boundary.  It should already
-		//     be close to 0, but will likely be slightly off due to
-		//     rounding errors.
-		// Symmetries: A00, A11, A22 are even in each coordinate
-		//             A01 is odd in x and y, even in z.
-		//             A02 is odd in x and z, even in y.
-		//             A12 is odd in y and z, even in x.
-		for z:=0 ; z<rdimz ; z++ {
-			zw := z
-			for y:=0 ; y<rdimy ; y++ {
-				yw := y
-				for x:=0 ; x<rdimx ; x++ {
-					xw := x
-					if (y==0 || z==0) {
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][zw] = 0.0  // A12
-					}
-
-					I = FullTensorIdx[1][1]
-					tmpA11 := scratch[I][xw][yw][zw]
-					I = FullTensorIdx[1][2]
-					tmpA12 := scratch[I][xw][yw][zw]
-					I = FullTensorIdx[2][2]
-					tmpA22 := scratch[I][xw][yw][zw]
-					if (x>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][ldimx-xw][yw][zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][ldimx-xw][yw][zw] = tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][ldimx-xw][yw][zw] = tmpA22
-					}
-					if (y>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][ldimy-yw][zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][ldimy-yw][zw] = -1.0*tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][ldimy-yw][zw] = tmpA22
-					}
-					if (z>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][yw][ldimz-zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][ldimz-zw] = -1.0*tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][yw][ldimz-zw] = tmpA22
-					}
-					if (x>0 && y>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][ldimx-xw][ldimy-yw][zw] = -1.0*tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][ldimx-xw][ldimy-yw][zw] = tmpA22
-					}
-					if(x>0 && z>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][ldimx-xw][yw][ldimz-zw] = -1.0*tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][ldimx-xw][yw][ldimz-zw] = tmpA22
-					}
-					if(y>0 && z>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][ldimy-yw][ldimz-zw] = tmpA22
-					}
-					if(x>0 && y>0 && z>0) {
-						I = FullTensorIdx[1][1]
-						scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA11
-						I = FullTensorIdx[1][2]
-						scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA12
-						I = FullTensorIdx[2][2]
-						scratch[I][ldimx-xw][ldimy-yw][ldimz-zw] = tmpA22
-					}
-				}
-			}
-		}
-
-		// Step 3.5: Fill in zero-padded overhang
-		for z:=0 ; z<ldimz ; z++ {
-			zw := z
-			if (z<rdimz || z>ldimz-rdimz) { // Outer z
-				for y:=0 ; y<ldimy ; y++ {
-					yw := y
-					if (y<rdimy || y>ldimy-rdimy) { // Outer y
-						for x:=rdimx ; x<=ldimx-rdimx ; x++ {
-							xw := x
-							I = FullTensorIdx[1][1]
-							scratch[I][xw][yw][zw] = float32(0.0)
-							I = FullTensorIdx[1][2]
-							scratch[I][xw][yw][zw] = float32(0.0)
-							I = FullTensorIdx[2][2]
-							scratch[I][xw][yw][zw] = float32(0.0)
-						}
-					} else { // Inner y
-						for x:=0 ; x<ldimx ; x++ {
-							xw := x
-							I = FullTensorIdx[1][1]
-							scratch[I][xw][yw][zw] = float32(0.0)
-							I = FullTensorIdx[1][2]
-							scratch[I][xw][yw][zw] = float32(0.0)
-							I = FullTensorIdx[2][2]
-							scratch[I][xw][yw][zw] = float32(0.0)
-						}
-					}
-				}
-			} else { // Middle z
-				for y:=0 ; y<ldimy ; y++ {
-					yw := y
-					for x:=0 ; x<ldimx ; x++ {
-						xw := x
-						I = FullTensorIdx[1][1]
-						scratch[I][xw][yw][zw] = float32(0.0)
-						I = FullTensorIdx[1][2]
-						scratch[I][xw][yw][zw] = float32(0.0)
-						I = FullTensorIdx[2][2]
-						scratch[I][xw][yw][zw] = float32(0.0)
-					}
-				}
-			}
-		}
-	}
-
-	// Copy from upper triangle to lower triangle
-	for z:=0 ; z<ldimz ; z++ {
-		zw := z
-		for y:=0 ; y<ldimy ; y++ {
-			yw := y
-			for x:=0 ; x<ldimx ; x++ {
-				xw := x
-				// Copy the upper triangle and also copy upper
-				// triangle to lower triangle to symmetrize kern
-				I = FullTensorIdx[0][1]
-				tmpA01 := scratch[I][xw][yw][zw]
+				B = Newell_Nxy(R[X], R[Y], R[Z], dx, dy, dz)
+				array[I][xw][yw][zw] += float32(B)
 				I = FullTensorIdx[1][0]
-				scratch[I][xw][yw][zw] = tmpA01
+				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[0][2]
-				tmpA02 := scratch[I][xw][yw][zw]
+				B = Newell_Nxz(R[X], R[Y], R[Z], dx, dy, dz)
+				array[I][xw][yw][zw] += float32(B)
 				I = FullTensorIdx[2][0]
-				scratch[I][xw][yw][zw] = tmpA02
+				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[1][2]
-				tmpA12 := scratch[I][xw][yw][zw]
+				B = Newell_Nyz(R[X], R[Y], R[Z], dx, dy, dz)
+				array[I][xw][yw][zw] += float32(B)
 				I = FullTensorIdx[2][1]
-				scratch[I][xw][yw][zw] = tmpA12
+				array[I][xw][yw][zw] += float32(B)
+
+				Debug("kern at [X, Y, Z] = [", xw, ", ", yw, ", ", zw,"]")
+				for s := 0; s < 3; s++ {
+					var (
+						outVar	[3]float32
+					)
+					for d := 0; d < 3; d++ {
+						I := FullTensorIdx[s][d]
+						outVar[d] = array[I][xw][yw][zw]
+					}
+					Debug("    [ ", outVar," ]")
+				}
 			}
 		}
 	}
+	t1 := time.Now()
+	Debug("kernel used", points, "integration points")
+	Debug("kernel calculation took", t1.Sub(t0))
 }
