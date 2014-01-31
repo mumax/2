@@ -121,6 +121,103 @@ func qsort(n int, arr *[]float64) {
 
 // This is an upoptimized implementation where we will go through each and every cell to
 // calculate the tensor. Hence, we need some additional functions
+func CalculateSDA00(x, y, z, dx, dy, dz float64) float64 {
+	result := float64(0.0)
+	if ( (x == 0.0) && (y == 0.0) && (z == 0.0) ) {
+		result = SelfDemagNx(dx,dy,dz)*(4.0*math.Pi*dx*dy*dz)
+	} else {
+		var arr []float64
+
+		arr = append(arr,-1.0*Newell_f(x+dx,y+dy,z+dz))
+		arr = append(arr,-1.0*Newell_f(x+dx,y-dy,z+dz))
+		arr = append(arr,-1.0*Newell_f(x+dx,y-dy,z-dz))
+		arr = append(arr,-1.0*Newell_f(x+dx,y+dy,z-dz))
+		arr = append(arr,-1.0*Newell_f(x-dx,y+dy,z-dz))
+		arr = append(arr,-1.0*Newell_f(x-dx,y+dy,z+dz))
+		arr = append(arr,-1.0*Newell_f(x-dx,y-dy,z+dz))
+		arr = append(arr,-1.0*Newell_f(x-dx,y-dy,z-dz))
+
+		arr = append(arr,2.0*Newell_f(x,y-dy,z-dz))
+		arr = append(arr,2.0*Newell_f(x,y-dy,z+dz))
+		arr = append(arr,2.0*Newell_f(x,y+dy,z+dz))
+		arr = append(arr,2.0*Newell_f(x,y+dy,z-dz))
+		arr = append(arr,2.0*Newell_f(x+dx,y+dy,z))
+		arr = append(arr,2.0*Newell_f(x+dx,y,z+dz))
+		arr = append(arr,2.0*Newell_f(x+dx,y,z-dz))
+		arr = append(arr,2.0*Newell_f(x+dx,y-dy,z))
+		arr = append(arr,2.0*Newell_f(x-dx,y-dy,z))
+		arr = append(arr,2.0*Newell_f(x-dx,y,z+dz))
+		arr = append(arr,2.0*Newell_f(x-dx,y,z-dz))
+		arr = append(arr,2.0*Newell_f(x-dx,y+dy,z))
+
+		arr = append(arr,-4.0*Newell_f(x,y-dy,z))
+		arr = append(arr,-4.0*Newell_f(x,y+dy,z))
+		arr = append(arr,-4.0*Newell_f(x,y,z-dz))
+		arr = append(arr,-4.0*Newell_f(x,y,z+dz))
+		arr = append(arr,-4.0*Newell_f(x+dx,y,z))
+		arr = append(arr,-4.0*Newell_f(x-dx,y,z))
+
+		arr = append(arr,8.0*Newell_f(x,y,z))
+		result = accSum(27,&arr)
+	}
+	return result
+}
+
+func CalculateSDA11(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA00(y,x,z,dy,dx,dz)
+}
+
+func CalculateSDA22(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA00(z,y,x,dz,dy,dx)
+}
+
+func CalculateSDA01(x, y, z, l, h, e float64) float64 {
+	if ((x == 0.0) || (y == 0.0)) { return float64(0.0) }
+
+	var arr []float64
+
+	arr = append(arr,-1.0*Newell_g(x-l,y-h,z-e))
+	arr = append(arr,-1.0*Newell_g(x-l,y-h,z+e))
+	arr = append(arr,-1.0*Newell_g(x+l,y-h,z+e))
+	arr = append(arr,-1.0*Newell_g(x+l,y-h,z-e))
+	arr = append(arr,-1.0*Newell_g(x+l,y+h,z-e))
+	arr = append(arr,-1.0*Newell_g(x+l,y+h,z+e))
+	arr = append(arr,-1.0*Newell_g(x-l,y+h,z+e))
+	arr = append(arr,-1.0*Newell_g(x-l,y+h,z-e))
+
+	arr = append(arr,2.0*Newell_g(x,y+h,z-e))
+	arr = append(arr,2.0*Newell_g(x,y+h,z+e))
+	arr = append(arr,2.0*Newell_g(x,y-h,z+e))
+	arr = append(arr,2.0*Newell_g(x,y-h,z-e))
+	arr = append(arr,2.0*Newell_g(x-l,y-h,z))
+	arr = append(arr,2.0*Newell_g(x-l,y+h,z))
+	arr = append(arr,2.0*Newell_g(x-l,y,z-e))
+	arr = append(arr,2.0*Newell_g(x-l,y,z+e))
+	arr = append(arr,2.0*Newell_g(x+l,y,z+e))
+	arr = append(arr,2.0*Newell_g(x+l,y,z-e))
+	arr = append(arr,2.0*Newell_g(x+l,y-h,z))
+	arr = append(arr,2.0*Newell_g(x+l,y+h,z))
+
+	arr = append(arr,-4.0*Newell_g(x-l,y,z))
+	arr = append(arr,-4.0*Newell_g(x+l,y,z))
+	arr = append(arr,-4.0*Newell_g(x,y,z+e))
+	arr = append(arr,-4.0*Newell_g(x,y,z-e))
+	arr = append(arr,-4.0*Newell_g(x,y-h,z))
+	arr = append(arr,-4.0*Newell_g(x,y+h,z))
+
+	arr = append(arr,8.0*Newell_g(x,y,z))
+
+	return accSum(27,&arr)
+}
+
+func CalculateSDA02(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA01(x,z,y,dx,dz,dy)
+}
+
+func CalculateSDA12(x, y, z, dx, dy, dz float64) float64 {
+	return CalculateSDA01(y,z,x,dy,dz,dx)
+}
+
 func Newell_Nxx(x, y, z, dx, dy, dz float64) float64 {
 	var tmp0 []float64
 
@@ -337,6 +434,73 @@ func Newell_g(x, y, z float64) float64 {
 	return float64(result_sign*accSum(piececount,&piece)/6.0)
 }
 
+// Some subroutines for accurate self-demag computations
+func SelfDemagNx(x, y, z float64) float64 {
+	if ((x<=0.0) || (y<=0.0) || (z<=0.0)) {
+		return float64(0.0)
+	}
+	if ((x==y) && (y==z)) {
+		return (float64(1.0)/float64(3.0))
+	}
+	xsq,ysq,zsq := x*x,y*y,z*z
+	R := math.Sqrt(xsq+ysq+zsq)
+	Rxy := math.Sqrt(xsq+ysq)
+	Rxz := math.Sqrt(xsq+zsq)
+	Ryz := math.Sqrt(ysq+zsq)
+
+	var arr []float64
+
+	tmp := float64(2.0*x*y*z * ( (x/(x+Rxy)+(2*xsq+ysq+zsq)/(R*Rxy+x*Rxz))/(x+Rxz) + (x/(x+Rxz)+(2*xsq+ysq+zsq)/(R*Rxz+x*Rxy))/(x+Rxy) ) / ((x+R)*(Rxy+Rxz+R)))
+	arr = append(arr,tmp)
+
+	tmp = float64(-1.0*x*y*z * ( (y/(y+Rxy)+(2*ysq+xsq+zsq)/(R*Rxy+y*Ryz))/(y+Ryz) + (y/(y+Ryz)+(2*ysq+xsq+zsq)/(R*Ryz+y*Rxy))/(y+Rxy)) / ((y+R)*(Rxy+Ryz+R)))
+	arr = append(arr,tmp)
+
+	tmp = float64(-1.0*x*y*z * ( (z/(z+Rxz)+(2*zsq+xsq+ysq)/(R*Rxz+z*Ryz))/(z+Ryz) + (z/(z+Ryz)+(2*zsq+xsq+ysq)/(R*Ryz+z*Rxz))/(z+Rxz)) / ((z+R)*(Rxz+Ryz+R)))
+	arr = append(arr,tmp)
+
+	tmp = float64(6.0*math.Atan(y*z/(x*R)))
+	arr = append(arr,tmp)
+
+	piece4 := float64(-1.0*y*z*z*(1.0/(x+Rxz)+y/(Rxy*Rxz+x*R))/(Rxz*(y+Rxy)))
+	if (piece4 > -0.5) {
+		arr = append(arr,float64(3.0 * x * math.Log1p(piece4) / z))
+	} else {
+		arr = append(arr,float64(3.0 * x * math.Log(x*(y+R)/(Rxz*(y+Rxy))) / z))
+	}
+
+	piece5 := float64(-1.0*y*y*z*(1.0/(x+Rxy)+z/(Rxy*Rxz+x*R))/(Rxy*(z+Rxz)))
+	if (piece5 > -0.5) {
+		arr = append(arr,float64(3.0 * x * math.Log1p(piece5) / y))
+	} else {
+		arr = append(arr,float64(3.0 * x * math.Log(x*(z+R)/(Rxy*(z+Rxz))) / y))
+	}
+
+	piece6 := float64(-1.0 * xsq * z *(1/(y+Rxy) + z/(Rxy*Ryz+y*R)) / (Rxy*(z+Ryz)))
+	if (piece6 > -0.5) {
+		arr = append(arr,float64(-3.0 * y *math.Log1p(piece6) / x))
+	} else {
+		arr = append(arr,float64(-3.0 * y * math.Log(y*(z+R)/(Rxy*(z+Ryz))) / x))
+	}
+
+	piece7 := float64(-1.0 * xsq * y * (1/(z+Rxz) + y/(Rxz*Ryz+z*R)) / (Rxz*(y+Ryz)))
+	if (piece7 > -0.5) {
+		arr = append(arr,float64(-3.0 * z * math.Log1p(piece7) / x))
+	} else {
+		arr = append(arr,float64(-3.0 * z * math.Log(z*(y+R)/(Rxz*(y+Ryz))) / x))
+	}
+
+	return accSum(8,&arr) / (3.0 * math.Pi)
+}
+
+func SelfDemagNy(xsize, ysize, zsize float64) float64 {
+     return SelfDemagNx(ysize,zsize,xsize)
+}
+
+func SelfDemagNz(xsize, ysize, zsize float64) float64 {
+     return SelfDemagNx(zsize,xsize,ysize)
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Greatest common divisor via Euclid's algorithm
 func Gcd(m, n float64) float64 {
@@ -431,70 +595,6 @@ func GetNextPowerOfTwo(n int) int {
 	 Assert(m>0)
      }
      return m
-}
-
-// Separate self-demag calculation code may be more accurate
-func SelfDemagNx(x, y, z float64) float64 {
-	if ((x<=0.0) || (y<=0.0) || (z<=0.0)) {
-		return float64(0.0)
-	}
-	if ((x==y) && (y==z)) {
-		return (float64(1.0)/float64(3.0))
-	}
-	xsq,ysq,zsq := x*x,y*y,z*z
-	R := math.Sqrt(xsq+ysq+zsq)
-	Rxy := math.Sqrt(xsq+ysq)
-	Rxz := math.Sqrt(xsq+zsq)
-	Ryz := math.Sqrt(ysq+zsq)
-
-//	var arrPt *[]float64
-	var arr []float64
-
-	//arr := *arrPt
-
-	arr = append(arr,float64(2.0 *x*y*z* ( (x/(x+Rxy)+(2*xsq+ysq+zsq)/(R*Rxy+x*Rxz))/(x+Rxz) + (x/(x+Rxz)+(2*xsq+ysq+zsq)/(R*Rxz+x*Rxy))/(x+Rxy) ) / ((x+R)*(Rxy+Rxz+R))))
-	arr = append(arr,float64(-1.0 *x*y*z* ( (y/(y+Rxy)+(2*ysq+xsq+zsq)/(R*Rxy+y*Ryz))/(y+Ryz) + (y/(y+Ryz)+(2*ysq+xsq+zsq)/(R*Ryz+y*Rxy))/(y+Rxy) ) / ((y+R)*(Rxy+Ryz+R))))
-	arr = append(arr,float64(-1.0 *x*y*z* ( (z/(z+Rxz)+(2*zsq+xsq+ysq)/(R*Rxz+z*Ryz))/(z+Ryz) + (z/(z+Ryz)+(2*zsq+xsq+ysq)/(R*Ryz+z*Rxz))/(z+Rxz) ) / ((z+R)*(Rxz+Ryz+R))))
-	arr = append(arr,float64(6.0 * math.Atan(y*z/(x*R))))
-
-	piece4 := float64(-y*zsq*(1/(x+Rxz)+y/(Rxy*Rxz+x*R))/(Rxz*(y+Rxy)))
-	if (piece4 > -0.5) {
-		arr = append(arr,float64(3.0 * x * math.Log1p(piece4)/z))
-	} else {
-		arr = append(arr,float64(3.0 * x * math.Log(x*(y+R)/(Rxz*(y+Rxy)))/z))
-	}
-
-	piece5 := float64(-z*ysq*(1/(x+Rxy)+z/(Rxy*Rxz+x*R))/(Rxy*(z+Rxz)))
-	if (piece5 > -0.5) {
-		arr = append(arr,float64(3.0 * x * math.Log1p(piece5)/y))
-	} else {
-		arr = append(arr,float64(3.0 * x * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
-	}
-
-	piece6 := float64(-z*xsq*(1/(y+Rxy)+z/(Rxy*Ryz+y*R))/(Rxy*(z+Ryz)))
-	if (piece6 > -0.5) {
-		arr = append(arr,float64(-3.0 * y * math.Log1p(piece6)/x))
-	} else {
-		arr = append(arr,float64(-3.0 * y * math.Log(x*(z+R)/(Rxy*(z+Rxz)))/y))
-	}
-
-	piece7 := float64(-y*xsq*(1/(z+Rxz)+y/(Rxz*Ryz+z*R))/(Rxz*(y+Ryz)))
-	if (piece7 > -0.5) {
-		arr = append(arr,float64(-3.0 * z * math.Log1p(piece7)/x))
-	} else {
-		arr = append(arr,float64(-3.0 * z * math.Log(z*(y+R)/(Rxz*(y+Ryz)))/x))
-	}
-
-	Nxx := accSum(8,&arr) / (3.0 * math.Pi)
-	return Nxx
-}
-
-func SelfDemagNy(xsize, ysize, zsize float64) float64 {
-     return SelfDemagNx(ysize,zsize,xsize)
-}
-
-func SelfDemagNz(xsize, ysize, zsize float64) float64 {
-     return SelfDemagNx(zsize,xsize,ysize)
 }
 
 /////////////////// Main Code ////////////////////////
@@ -593,31 +693,31 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 				var B float64
 
 				I := FullTensorIdx[0][0]
-				B = Newell_Nxx(R[X], R[Y], R[Z], dx, dy, dz)
+				B = CalculateSDA00(R[X], R[Y], R[Z], dx, dy, dz)/(-4.0*math.Pi*dx*dy*dz)
 				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[1][1]
-				B = Newell_Nyy(R[X], R[Y], R[Z], dx, dy, dz)
+				B = CalculateSDA11(R[X], R[Y], R[Z], dx, dy, dz)/(-4.0*math.Pi*dx*dy*dz)
 				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[2][2]
-				B = Newell_Nzz(R[X], R[Y], R[Z], dx, dy, dz)
+				B = CalculateSDA22(R[X], R[Y], R[Z], dx, dy, dz)/(-4.0*math.Pi*dx*dy*dz)
 				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[0][1]
-				B = Newell_Nxy(R[X], R[Y], R[Z], dx, dy, dz)
+				B = CalculateSDA01(R[X], R[Y], R[Z], dx, dy, dz)/(-4.0*math.Pi*dx*dy*dz)
 				array[I][xw][yw][zw] += float32(B)
 				I = FullTensorIdx[1][0]
 				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[0][2]
-				B = Newell_Nxz(R[X], R[Y], R[Z], dx, dy, dz)
+				B = CalculateSDA02(R[X], R[Y], R[Z], dx, dy, dz)/(-4.0*math.Pi*dx*dy*dz)
 				array[I][xw][yw][zw] += float32(B)
 				I = FullTensorIdx[2][0]
 				array[I][xw][yw][zw] += float32(B)
 
 				I = FullTensorIdx[1][2]
-				B = Newell_Nyz(R[X], R[Y], R[Z], dx, dy, dz)
+				B = CalculateSDA12(R[X], R[Y], R[Z], dx, dy, dz)/(-4.0*math.Pi*dx*dy*dz)
 				array[I][xw][yw][zw] += float32(B)
 				I = FullTensorIdx[2][1]
 				array[I][xw][yw][zw] += float32(B)
