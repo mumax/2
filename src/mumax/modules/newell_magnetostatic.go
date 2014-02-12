@@ -17,7 +17,492 @@ import (
 	"time"
 )
 
+/////////// Additional data structures ////////////////
+const DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO float64 = 1.5
+
+type DemagAsymptoticRefineData struct {
+	rdx, rdy, rdz, result_scale	float64
+	xcount, ycount, zcount		int
+}
+
+type DemagNxxAsymptoticBase struct {
+	cubic_cell								bool
+	self_demag, lead_weight							float64
+	a1, a2, a3, a4, a5, a6							float64
+	b1, b2, b3, b4, b5, b6, b7, b8, b9, b10					float64
+	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15	float64
+}
+
+type DemagNxxAsymptotic struct {
+	refine_data		DemagAsymptoticRefineData
+	Nxx			DemagNxxAsymptoticBase
+}
+
+type DemagNxyAsymptoticBase struct {
+	cubic_cell				bool
+	lead_weight				float64
+	a1, a2, a3				float64
+	b1, b2, b3, b4, b5, b6			float64
+	c1, c2, c3, c4, c5, c6, c7, c8, c9, c10	float64
+}
+
+type DemagNxyAsymptotic struct {
+	refine_data		DemagAsymptoticRefineData
+	Nxy			DemagNxyAsymptoticBase
+}
+
+type DemagNxzAsymptotic struct {
+	Nxy			DemagNxyAsymptotic
+}
+
+type DemagNyzAsymptotic struct {
+	Nxy			DemagNxyAsymptotic
+}
+
+type DemagNyyAsymptotic struct {
+	Nxx DemagNxxAsymptotic
+}
+
+type DemagNzzAsymptotic struct {
+	Nxx DemagNxxAsymptotic
+}
+
+type DemagNabData struct {
+	x, y, z		float64
+	tx2, ty2, tz2	float64
+	R, iR		float64
+	R2, iR2		float64
+}
+
 ////////////////// Subroutines ///////////////////////
+
+///////// For working on new data structures /////////
+func (s *DemagNabData) Set(import_x, import_y, import_z float64) { //OxsDemagNabData::Set
+	s.x, s.y, s.z = import_x, import_y, import_z
+	x2 := s.x*s.x
+	y2 := s.y*s.y
+	s.R2 = x2 + y2
+	z2 := s.z*s.z
+	s.R2 += z2
+	R4 := s.R2*s.R2
+	s.R = math.Sqrt(s.R2)
+	if (s.R2 != 0.0) {
+		s.tx2 = x2 / R4
+		s.ty2 = y2 / R4
+		s.tz2 = z2 / R4
+		s.iR2 = float64(1.0 / s.R2)
+		s.iR = float64(1.0 / s.R)
+	} else { // Should never enter this if used correctly
+		s.tx2, s.ty2, s.tz2 = 0.0, 0.0, 0.0
+		s.iR2, s.R, s.iR = 0.0, 0.0, 0.0
+	}
+}
+
+func DemagNabDataSetPair(ixa, iya, iza, ixb, iyb, izb float64, pta, ptb *DemagNabData) { //OxsDemagNabData::SetPair
+	pta.Set(ixa, iya, iza)
+	ptb.Set(ixb, iyb, izb)
+}
+
+// Need to call this to initialize the refine_data variables
+func (s *DemagAsymptoticRefineData) Init(dx, dy, dz, maxratio float64) { // OxsDemagAsymptoticRefineData::OxsDemagAsymptoticRefineData
+	s.rdx, s.rdy, s.rdz = 0.0, 0.0, 0.0
+	s.result_scale = 0.0
+	s.xcount, s.ycount, s.zcount = 0, 0, 0
+	if (dz <= dx && dz <= dy) {
+		xratio := math.Ceil(dx/(maxratio*dz))
+		s.xcount = int(xratio)
+		s.rdx = float64(dx/xratio)
+		yratio := math.Ceil(dy/(maxratio*dz))
+		s.ycount = int(yratio)
+		s.rdy = float64(dy/yratio)
+		s.zcount = 1
+		s.rdz = dz
+	} else if (dy <= dx && dy <= dz) {
+		xratio := math.Ceil(dx/(maxratio*dy))
+		s.xcount = int(xratio)
+		s.rdx = float64(dx/xratio)
+		zratio := math.Ceil(dz/(maxratio*dy))
+		s.zcount = int(zratio)
+		s.rdz = float64(dz/zratio)
+		s.ycount = 1
+		s.rdy = dy
+	} else {
+		yratio := math.Ceil(dy/(maxratio*dx))
+		s.ycount = int(yratio)
+		s.rdy = float64(dy/yratio)
+		zratio := math.Ceil(dz/(maxratio*dx))
+		s.zcount = int(zratio)
+		s.rdz = float64(dz/zratio)
+		s.xcount = 1
+		s.rdx = dx
+	}
+	s.result_scale = float64(1.0) / ( float64(s.xcount) * float64(s.ycount) * float64(s.zcount) )
+}
+
+// Need to call this to initialize the Nxx, Nyy and Nzz variables
+func (s *DemagNxxAsymptoticBase) Init(refine_data *DemagAsymptoticRefineData) { // Oxs_DemagNxxAsymptoticBase::Oxs_DemagNxxAsymptoticBase
+	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
+	s.self_demag = SelfDemagNx(dx,dy,dz)
+	dx2, dy2, dz2 := dx*dx, dy*dy, dz*dz
+	dx4, dy4, dz4 := dx2*dx2, dy2*dy2, dz2*dz2
+	dx6, dy6, dz6 := dx4*dx2, dy4*dy2, dz4*dz2
+	s.lead_weight = (float64(-1.0)*dx*dy*dz)/(float64(4.0)*math.Pi)
+	// Initialize coefficients for 1/R^5 term
+	if ( (dx2 != dy2) || (dx2 != dz2) || (dy2 != dz2) ) { // Non-cube case
+		s.cubic_cell = false
+		s.a1 = s.lead_weight / float64(4.0)
+		s.a2, s.a3, s.a4, s.a5, s.a6 = s.a1, s.a1, s.a1, s.a1, s.a1
+		s.a1 *=   8.0*dx2 -  4.0*dy2 -  4.0*dz2
+		s.a2 *= -24.0*dx2 + 27.0*dy2 -  3.0*dz2
+		s.a3 *= -24.0*dx2 -  3.0*dy2 + 27.0*dz2
+		s.a4 *=   3.0*dx2 -  4.0*dy2 +      dz2
+		s.a5 *=   6.0*dx2 -  3.0*dy2 -  3.0*dz2
+		s.a6 *=   3.0*dx2 +      dy2 -  4.0*dz2
+	} else { // Cube
+		s.cubic_cell = true
+		s.a1, s.a2, s.a3, s.a4, s.a5, s.a6 = float64(0.0), float64(0.0), float64(0.0), float64(0.0), float64(0.0), float64(0.0)
+	}
+
+	// Initialize coefficients for 1/R^7 term
+	bInit := s.lead_weight / float64(16.0)
+	s.b1, s.b2, s.b3, s.b4, s.b5, s.b6, s.b7, s.b8, s.b9, s.b10 = bInit, bInit, bInit, bInit, bInit, bInit, bInit, bInit, bInit, bInit
+	if (s.cubic_cell) {
+		s.b1  *=  -14.0*dx4
+		s.b2  *=  105.0*dx4
+		s.b3  *=  105.0*dx4
+		s.b4  *= -105.0*dx4
+		s.b6  *= -105.0*dx4
+		s.b7  *=    7.0*dx4
+		s.b10 *=    7.0*dx4
+		s.b5, s.b8, s.b9 = float64(0.0), float64(0.0), float64(0.0)
+	} else {
+		s.b1  *=   32.0*dx4 -  40.0*dx2*dy2 -  40.0*dx2*dz2 +  12.0*dy4 +  10.0*dy2*dz2 +  12.0*dz4
+		s.b2  *= -240.0*dx4 + 580.0*dx2*dy2 +  20.0*dx2*dz2 - 202.0*dy4 -  75.0*dy2*dz2 +  22.0*dz4
+		s.b3  *= -240.0*dx4 +  20.0*dx2*dy2 + 580.0*dx2*dz2 +  22.0*dy4 -  75.0*dy2*dz2 - 202.0*dz4
+		s.b4  *=  180.0*dx4 - 505.0*dx2*dy2 +  55.0*dx2*dz2 + 232.0*dy4 -  75.0*dy2*dz2 +   8.0*dz4
+		s.b5  *=  360.0*dx4 - 450.0*dx2*dy2 - 450.0*dx2*dz2 - 180.0*dy4 + 900.0*dy2*dz2 - 180.0*dz4
+		s.b6  *=  180.0*dx4 +  55.0*dx2*dy2 - 505.0*dx2*dz2 +   8.0*dy4 -  75.0*dy2*dz2 + 232.0*dz4
+		s.b7  *=  -10.0*dx4 +  30.0*dx2*dy2 -   5.0*dx2*dz2 -  16.0*dy4 +  10.0*dy2*dz2 -   2.0*dz4
+		s.b8  *=  -30.0*dx4 +  55.0*dx2*dy2 +  20.0*dx2*dz2 +   8.0*dy4 -  75.0*dy2*dz2 +  22.0*dz4
+		s.b9  *=  -30.0*dx4 +  20.0*dx2*dy2 +  55.0*dx2*dz2 +  22.0*dy4 -  75.0*dy2*dz2 +   8.0*dz4
+		s.b10 *=  -10.0*dx4 -   5.0*dx2*dy2 +  30.0*dx2*dz2 -   2.0*dy4 +  10.0*dy2*dz2 -  16.0*dz4
+	}
+
+	// Initialize coefficients for 1/R^9 term
+	cInit := s.lead_weight/float64(192.0)
+	s.c1, s.c2, s.c3, s.c4, s.c5, s.c6, s.c7, s.c8 = cInit, cInit, cInit, cInit, cInit, cInit, cInit, cInit
+	s.c9, s.c10, s.c11, s.c12, s.c13, s.c14, s.c15 = cInit, cInit, cInit, cInit, cInit, cInit, cInit
+	if(s.cubic_cell) {
+		s.c1  *=    32.0 * dx6
+		s.c2  *=  -448.0 * dx6
+		s.c3  *=  -448.0 * dx6
+		s.c4  *=  -150.0 * dx6
+		s.c5  *=  7620.0 * dx6
+		s.c6  *=  -150.0 * dx6
+		s.c7  *=   314.0 * dx6
+		s.c8  *= -3810.0 * dx6
+		s.c9  *= -3810.0 * dx6
+		s.c10 *=   314.0 * dx6
+		s.c11 *=   -16.0 * dx6
+		s.c12 *=   134.0 * dx6
+		s.c13 *=   300.0 * dx6
+		s.c14 *=   134.0 * dx6
+		s.c15 *=   -16.0 * dx6
+	} else {
+		s.c1  *=    384.0 *dx6 +   -896.0 *dx4*dy2 +   -896.0 *dx4*dz2 +    672.0 *dx2*dy4 +    560.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   -120.0 *dy6 +   -112.0 *dy4*dz2 +   -112.0 *dy2*dz4 +   -120.0 *dz6
+		s.c2  *=  -5376.0 *dx6 +  22624.0 *dx4*dy2 +   2464.0 *dx4*dz2 + -19488.0 *dx2*dy4 +  -7840.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   3705.0 *dy6 +   2198.0 *dy4*dz2 +    938.0 *dy2*dz4 +   -345.0 *dz6
+		s.c3  *=  -5376.0 *dx6 +   2464.0 *dx4*dy2 +  22624.0 *dx4*dz2 +    672.0 *dx2*dy4 +  -7840.0 *dx2*dy2*dz2 + -19488.0 *dx2*dz4 +   -345.0 *dy6 +    938.0 *dy4*dz2 +   2198.0 *dy2*dz4 +   3705.0 *dz6
+		s.c4  *=  10080.0 *dx6 + -48720.0 *dx4*dy2 +   1680.0 *dx4*dz2 +  49770.0 *dx2*dy4 +  -2625.0 *dx2*dy2*dz2 +   -630.0 *dx2*dz4 + -10440.0 *dy6 +  -1050.0 *dy4*dz2 +   2100.0 *dy2*dz4 +   -315.0 *dz6
+		s.c5  *=  20160.0 *dx6 + -47040.0 *dx4*dy2 + -47040.0 *dx4*dz2 +  -6300.0 *dx2*dy4 + 133350.0 *dx2*dy2*dz2 +  -6300.0 *dx2*dz4 +   7065.0 *dy6 + -26670.0 *dy4*dz2 + -26670.0 *dy2*dz4 +   7065.0 *dz6
+		s.c6  *=  10080.0 *dx6 +   1680.0 *dx4*dy2 + -48720.0 *dx4*dz2 +   -630.0 *dx2*dy4 +  -2625.0 *dx2*dy2*dz2 +  49770.0 *dx2*dz4 +   -315.0 *dy6 +   2100.0 *dy4*dz2 +  -1050.0 *dy2*dz4 + -10440.0 *dz6
+		s.c7  *=  -3360.0 *dx6 +  17290.0 *dx4*dy2 +  -1610.0 *dx4*dz2 + -19488.0 *dx2*dy4 +   5495.0 *dx2*dy2*dz2 +   -588.0 *dx2*dz4 +   4848.0 *dy6 +  -3136.0 *dy4*dz2 +    938.0 *dy2*dz4 +    -75.0 *dz6
+		s.c8  *= -10080.0 *dx6 +  32970.0 *dx4*dy2 +  14070.0 *dx4*dz2 +  -6300.0 *dx2*dy4 + -66675.0 *dx2*dy2*dz2 +  12600.0 *dx2*dz4 + -10080.0 *dy6 +  53340.0 *dy4*dz2 + -26670.0 *dy2*dz4 +   3015.0 *dz6
+		s.c9  *= -10080.0 *dx6 +  14070.0 *dx4*dy2 +  32970.0 *dx4*dz2 +  12600.0 *dx2*dy4 + -66675.0 *dx2*dy2*dz2 +  -6300.0 *dx2*dz4 +   3015.0 *dy6 + -26670.0 *dy4*dz2 +  53340.0 *dy2*dz4 + -10080.0 *dz6
+		s.c10 *=  -3360.0 *dx6 +  -1610.0 *dx4*dy2 +  17290.0 *dx4*dz2 +   -588.0 *dx2*dy4 +   5495.0 *dx2*dy2*dz2 + -19488.0 *dx2*dz4 +    -75.0 *dy6 +    938.0 *dy4*dz2 +  -3136.0 *dy2*dz4 +   4848.0 *dz6
+		s.c11 *=    105.0 *dx6 +   -560.0 *dx4*dy2 +     70.0 *dx4*dz2 +    672.0 *dx2*dy4 +   -280.0 *dx2*dy2*dz2 +     42.0 *dx2*dz4 +   -192.0 *dy6 +    224.0 *dy4*dz2 +   -112.0 *dy2*dz4 +     15.0 *dz6
+		s.c12 *=    420.0 *dx6 +  -1610.0 *dx4*dy2 +   -350.0 *dx4*dz2 +    672.0 *dx2*dy4 +   2345.0 *dx2*dy2*dz2 +   -588.0 *dx2*dz4 +    528.0 *dy6 +  -3136.0 *dy4*dz2 +   2198.0 *dy2*dz4 +   -345.0 *dz6
+		s.c13 *=    630.0 *dx6 +  -1470.0 *dx4*dy2 +  -1470.0 *dx4*dz2 +   -630.0 *dx2*dy4 +   5250.0 *dx2*dy2*dz2 +   -630.0 *dx2*dz4 +    360.0 *dy6 +  -1050.0 *dy4*dz2 +  -1050.0 *dy2*dz4 +    360.0 *dz6
+		s.c14 *=    420.0 *dx6 +   -350.0 *dx4*dy2 +  -1610.0 *dx4*dz2 +   -588.0 *dx2*dy4 +   2345.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +   -345.0 *dy6 +   2198.0 *dy4*dz2 +  -3136.0 *dy2*dz4 +    528.0 *dz6
+		s.c15 *=    105.0 *dx6 +     70.0 *dx4*dy2 +   -560.0 *dx4*dz2 +     42.0 *dx2*dy4 +   -280.0 *dx2*dy2*dz2 +    672.0 *dx2*dz4 +     15.0 *dy6 +   -112.0 *dy4*dz2 +    224.0 *dy2*dz4 +   -192.0 *dz6
+	}
+}
+
+func (s *DemagNxxAsymptoticBase) NxxAsymptotic(ptdata *DemagNabData) float64 { // First of two functions to compute far field approx. to Nxx
+	// Asymptotic approximation to Nxx term.
+	if (ptdata.iR2 <= 0.0) { return s.self_demag } // Asymptotic expansion doesn't apply for R==0. Fall back to self-demag calculation.
+	
+	tx2 := ptdata.tx2
+	ty2 := ptdata.ty2
+	tz2 := ptdata.tz2
+
+	tz4 := tz2*tz2
+	tz6 := tz4*tz2
+	term3 := (2*tx2 - ty2 -tz2) * s.lead_weight
+	term5 := float64(0.0)
+	term7 := float64(0.0)
+
+	if (s.cubic_cell) {
+		ty4 := ty2*ty2
+		term7 = ((s.b1*tx2 + (s.b2*ty2 + s.b3*tz2))*tx2 + (s.b4*ty4 + s.b6*tz4))*tx2 + s.b7*ty4*ty2 + s.b10*tz6
+	} else {
+		term5 = (s.a1*tx2 + (s.a2*ty2 + s.a3*tz2))*tx2 + (s.a4*ty2 + s.a5*tz2)*ty2 + s.a6*tz4
+		term7 = ((s.b1*tx2 + (s.b2*ty2 + s.b3*tz2))*tx2 + ((s.b4*ty2 + s.b5*tz2)*ty2 + s.b6*tz4))*tx2 + ((s.b7*ty2 + s.b8*tz2)*ty2 + s.b9*tz4)*ty2 + s.b10*tz6
+	}
+
+	term9 := (((s.c1*tx2  +  (s.c2*ty2 +  s.c3*tz2))*tx2  +  ((s.c4*ty2 + s.c5*tz2)*ty2 + s.c6*tz4))*tx2  +  (  ((s.c7*ty2 + s.c8*tz2)*ty2 + s.c9*tz4)*ty2 + s.c10*tz6  ))*tx2  +  (((s.c11*ty2 + s.c12*tz2)*ty2 + s.c13*tz4)*ty2 + s.c14*tz6)*ty2 + s.c15*tz4*tz4
+
+	Nxx := (term9 + term7 + term5 + term3)*ptdata.iR
+
+	return Nxx
+}
+
+func (s *DemagNxxAsymptoticBase) NxxAsymptoticPair(ptA, ptB *DemagNabData) float64 { // Second of two functions to compute far field approx. to Nxx
+	valA := s.NxxAsymptotic(ptA)
+	valB := s.NxxAsymptotic(ptB)
+	return valA + valB
+}
+
+func (s *DemagNxxAsymptotic) NxxAsymptotic(ptdata *DemagNabData) float64 { // Wrapper function to compute far field approx. to Nxx
+	xcount := s.refine_data.xcount
+	ycount := s.refine_data.ycount
+	zcount := s.refine_data.zcount
+
+	rdx := s.refine_data.rdx
+	rdy := s.refine_data.rdy
+	rdz := s.refine_data.rdz
+
+	result_scale := s.refine_data.result_scale
+
+	var rptdata,mrptdata DemagNabData
+	zsum := float64(0.0)
+	for k:=1-zcount; k<zcount; k++ {
+		zoff := ptdata.z + float64(k)*rdz
+		ysum := float64(0.0)
+		for j := 1-ycount; j<ycount; j++ {
+			// Compute interactions for x-strip
+			yoff := ptdata.y + float64(j)*rdy
+			rptdata.Set(ptdata.x,yoff,zoff)
+			xsum := float64(xcount) * s.Nxx.NxxAsymptotic(&rptdata)
+			for i:=1; i<xcount; i++ {
+				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff)
+				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff)
+				xsum += float64(xcount-i) * s.Nxx.NxxAsymptoticPair(&rptdata,&mrptdata);
+			}
+			// Weight x-strip interactions into xy-plate
+			ysum += float64(ycount - int(math.Abs(float64(j))))*xsum;
+		}
+		// Weight xy-plate interactions into total sum
+		zsum += float64(zcount - int(math.Abs(float64(k))))*ysum;
+	}
+	return zsum*result_scale
+}
+
+// Need to call this to initialize the Nxy, Nxz, and Nyz variables
+func (s *DemagNxyAsymptoticBase) Init(refine_data *DemagAsymptoticRefineData) { // Oxs_DemagNxyAsymptoticBase::Oxs_DemagNxyAsymptoticBase
+	dx, dy, dz := refine_data.rdx, refine_data.rdy, refine_data.rdz
+
+	dx2 := dx*dx
+	dy2 := dy*dy
+	dz2 := dz*dz
+
+	dx4 := dx2*dx2
+	dy4 := dy2*dy2
+	dz4 := dz2*dz2
+
+	dx6 := dx4*dx2
+	dy6 := dy4*dy2
+	dz6 := dz4*dz2
+
+	s.lead_weight = (-dx*dy*dz/(4*math.Pi))
+
+	// Initialize coefficients for 1/R^5 term
+	if(dx2!=dy2 || dx2!=dz2 || dy2!=dz2) { // Non-cube case
+		s.cubic_cell = false
+		aInit := (s.lead_weight*float64(5.0))/float64(4.0)
+		s.a1, s.a2, s.a3 = aInit, aInit, aInit
+		s.a1 *=  4.0*dx2  -  3.0*dy2  -      dz2
+		s.a2 *= -3.0*dx2  +  4.0*dy2  -      dz2
+		s.a3 *= -3.0*dx2  -  3.0*dy2  +  6.0*dz2
+	} else { // Cube
+		s.cubic_cell = true;
+		s.a1, s.a2, s.a3 = float64(0.0), float64(0.0), float64(0.0)
+	}
+
+	// Initialize coefficients for 1/R^7 term
+	bInit := (s.lead_weight*float64(7.0))/float64(16.0)
+	s.b1, s.b2, s.b3, s.b4, s.b5, s.b6 = bInit, bInit, bInit, bInit, bInit, bInit
+	if (s.cubic_cell) {
+		s.b1  *=  -7.0*dx4
+		s.b2  *=  19.0*dx4
+		s.b3  *=  13.0*dx4
+		s.b4  *=  -7.0*dx4
+		s.b5  *=  13.0*dx4
+		s.b6  *= -13.0*dx4
+	} else {
+		s.b1 *=  16.0*dx4 -  30.0*dx2*dy2 -  10.0*dx2*dz2 +  10.0*dy4 +   5.0*dy2*dz2 +  2.0*dz4
+		s.b2 *= -40.0*dx4 + 105.0*dx2*dy2 -   5.0*dx2*dz2 -  40.0*dy4 -   5.0*dy2*dz2 +  4.0*dz4
+		s.b3 *= -40.0*dx4 -  15.0*dx2*dy2 + 115.0*dx2*dz2 +  20.0*dy4 -  35.0*dy2*dz2 - 32.0*dz4
+		s.b4 *=  10.0*dx4 -  30.0*dx2*dy2 +   5.0*dx2*dz2 +  16.0*dy4 -  10.0*dy2*dz2 +  2.0*dz4
+		s.b5 *=  20.0*dx4 -  15.0*dx2*dy2 -  35.0*dx2*dz2 -  40.0*dy4 + 115.0*dy2*dz2 - 32.0*dz4
+		s.b6 *=  10.0*dx4 +  15.0*dx2*dy2 -  40.0*dx2*dz2 +  10.0*dy4 -  40.0*dy2*dz2 + 32.0*dz4
+	}
+
+	// Initialize coefficients for 1/R^9 term
+	cInit := s.lead_weight/float64(64.0)
+	s.c1, s.c2, s.c3, s.c4, s.c5, s.c6, s.c7, s.c8, s.c9, s.c10 = cInit, cInit, cInit, cInit, cInit, cInit, cInit, cInit, cInit, cInit
+	if (s.cubic_cell) {
+		s.c1  *=   48.0 *dx6
+		s.c2  *= -142.0 *dx6
+		s.c3  *= -582.0 *dx6
+		s.c4  *= -142.0 *dx6
+		s.c5  *= 2840.0 *dx6
+		s.c6  *= -450.0 *dx6
+		s.c7  *=   48.0 *dx6
+		s.c8  *= -582.0 *dx6
+		s.c9  *= -450.0 *dx6
+		s.c10 *=  180.0 *dx6
+	} else {
+		s.c1  *=   576.0 *dx6 +  -2016.0 *dx4*dy2 +   -672.0 *dx4*dz2 +   1680.0 *dx2*dy4 +    840.0 *dx2*dy2*dz2 +   336.0 *dx2*dz4 +  -315.0 *dy6 +   -210.0 *dy4*dz2 +  -126.0 *dy2*dz4 +   -45.0 *dz6
+		s.c2  *= -3024.0 *dx6 +  13664.0 *dx4*dy2 +    448.0 *dx4*dz2 + -12670.0 *dx2*dy4 +  -2485.0 *dx2*dy2*dz2 +   546.0 *dx2*dz4 +  2520.0 *dy6 +    910.0 *dy4*dz2 +    84.0 *dy2*dz4 +  -135.0 *dz6
+		s.c3  *= -3024.0 *dx6 +   1344.0 *dx4*dy2 +  12768.0 *dx4*dz2 +   2730.0 *dx2*dy4 + -10185.0 *dx2*dy2*dz2 + -8694.0 *dx2*dz4 +  -945.0 *dy6 +   1680.0 *dy4*dz2 +  2394.0 *dy2*dz4 +  1350.0 *dz6
+		s.c4  *=  2520.0 *dx6 + -12670.0 *dx4*dy2 +    910.0 *dx4*dz2 +  13664.0 *dx2*dy4 +  -2485.0 *dx2*dy2*dz2 +    84.0 *dx2*dz4 + -3024.0 *dy6 +    448.0 *dy4*dz2 +   546.0 *dy2*dz4 +  -135.0 *dz6
+		s.c5  *=  5040.0 *dx6 +  -9940.0 *dx4*dy2 + -13580.0 *dx4*dz2 +  -9940.0 *dx2*dy4 +  49700.0 *dx2*dy2*dz2 + -6300.0 *dx2*dz4 +  5040.0 *dy6 + -13580.0 *dy4*dz2 + -6300.0 *dy2*dz4 +  2700.0 *dz6
+		s.c6  *=  2520.0 *dx6 +   2730.0 *dx4*dy2 + -14490.0 *dx4*dz2 +    420.0 *dx2*dy4 +  -7875.0 *dx2*dy2*dz2 + 17640.0 *dx2*dz4 +  -945.0 *dy6 +   3990.0 *dy4*dz2 +  -840.0 *dy2*dz4 + -3600.0 *dz6
+		s.c7  *=  -315.0 *dx6 +   1680.0 *dx4*dy2 +   -210.0 *dx4*dz2 +  -2016.0 *dx2*dy4 +    840.0 *dx2*dy2*dz2 +  -126.0 *dx2*dz4 +   576.0 *dy6 +   -672.0 *dy4*dz2 +   336.0 *dy2*dz4 +   -45.0 *dz6
+		s.c8  *=  -945.0 *dx6 +   2730.0 *dx4*dy2 +   1680.0 *dx4*dz2 +   1344.0 *dx2*dy4 + -10185.0 *dx2*dy2*dz2 +  2394.0 *dx2*dz4 + -3024.0 *dy6 +  12768.0 *dy4*dz2 + -8694.0 *dy2*dz4 +  1350.0 *dz6
+		s.c9  *=  -945.0 *dx6 +    420.0 *dx4*dy2 +   3990.0 *dx4*dz2 +   2730.0 *dx2*dy4 +  -7875.0 *dx2*dy2*dz2 +  -840.0 *dx2*dz4 +  2520.0 *dy6 + -14490.0 *dy4*dz2 + 17640.0 *dy2*dz4 + -3600.0 *dz6
+		s.c10 *=  -315.0 *dx6 +   -630.0 *dx4*dy2 +   2100.0 *dx4*dz2 +   -630.0 *dx2*dy4 +   3150.0 *dx2*dy2*dz2 + -3360.0 *dx2*dz4 +  -315.0 *dy6 +   2100.0 *dy4*dz2 + -3360.0 *dy2*dz4 +  1440.0 *dz6
+	}
+}
+
+func (s *DemagNxyAsymptoticBase) NxyAsymptotic(ptdata *DemagNabData) float64 {
+	// Asymptotic approximation to Nxy term.
+
+	if (ptdata.R2 <= 0.0) {
+		// Asymptotic expansion doesn't apply for R == 0. Fall back
+		// to self-demag calculation.
+		return float64(0.0)
+	}
+
+	tx2 := ptdata.tx2
+	ty2 := ptdata.ty2
+	tz2 := ptdata.tz2
+
+	term3 := float64(3.0)*s.lead_weight
+
+	term5 := float64(0.0)
+
+	if (!s.cubic_cell) { term5 = s.a1*tx2 + s.a2*ty2 + s.a3*tz2 }
+
+	tz4 := tz2*tz2
+	term7 := (s.b1*tx2 + (s.b2*ty2 + s.b3*tz2))*tx2 + (s.b4*ty2 + s.b5*tz2)*ty2 + s.b6*tz4
+
+	term9 := ((s.c1*tx2 + (s.c2*ty2 + s.c3*tz2))*tx2 + ((s.c4*ty2 + s.c5*tz2)*ty2 + s.c6*tz4))*tx2 + ((s.c7*ty2 + s.c8*tz2)*ty2 + s.c9*tz4)*ty2 + s.c10*tz4*tz2
+
+	x := ptdata.x
+	y := ptdata.y
+	iR2 := ptdata.iR2
+	iR := ptdata.iR
+	iR5 := iR2*iR2*iR
+	Nxy := (term9 + term7 + term5 + term3)*iR5*x*y
+
+	// Error should be of order 1/R^11
+
+	return Nxy
+}
+
+func (s *DemagNxyAsymptoticBase) NxyAsymptoticPair(ptA, ptB *DemagNabData) float64 {
+	valA := s.NxyAsymptotic(ptA)
+	valB := s.NxyAsymptotic(ptB)
+	return valA + valB
+}
+
+func (s *DemagNxyAsymptotic) NxyAsymptotic(ptdata *DemagNabData) float64 {
+	// Presumably at least one of xcount, ycount, or zcount is 1, but this
+	// fact is not used in the following code.
+
+	// Alias data from refine_data structure
+	xcount := s.refine_data.xcount
+	ycount := s.refine_data.ycount
+	zcount := s.refine_data.zcount
+
+	rdx := s.refine_data.rdx
+	rdy := s.refine_data.rdy
+	rdz := s.refine_data.rdz
+
+	result_scale := s.refine_data.result_scale
+
+	var (
+		rptdata, mrptdata DemagNabData
+	)
+
+	zsum := float64(0.0)
+	for k := 1-zcount; k<zcount; k++ {
+		zoff := ptdata.z + float64(k)*rdz
+		ysum := float64(0.0)
+		for j := 1-ycount; j<ycount; j++ {
+			// Compute interactions for x-strip
+			yoff := ptdata.y + float64(j)*rdy
+			rptdata.Set(ptdata.x,yoff,zoff)
+			xsum := float64(xcount) * s.Nxy.NxyAsymptotic(&rptdata)
+			for i := 1; i < xcount; i++ {
+				rptdata.Set(ptdata.x+float64(i)*rdx,yoff,zoff)
+				mrptdata.Set(ptdata.x-float64(i)*rdx,yoff,zoff)
+				xsum += float64(xcount-i) * s.Nxy.NxyAsymptoticPair(&rptdata,&mrptdata)
+			}
+			// Weight x-strip interactions into xy-plate
+			ysum += float64(ycount - int(math.Abs(float64(j))))*xsum
+		}
+		// Weight xy-plate interactions into total sum
+		zsum += float64(zcount - int(math.Abs(float64(k))))*ysum
+	}
+
+	return zsum*result_scale
+}
+
+func (s *DemagNxzAsymptotic) Init(dx, dy, dz, maxratio float64) {
+	s.Nxy.refine_data.Init(dx, dz, dy, maxratio)
+	s.Nxy.Nxy.Init(&s.Nxy.refine_data)
+}
+
+func (s *DemagNxzAsymptotic) NxzAsymptotic(x, y, z float64) float64 {
+	var ptdata DemagNabData
+	ptdata.Set(x, z, y)
+	return s.Nxy.NxyAsymptotic(&ptdata)
+}
+
+func (s *DemagNyzAsymptotic) Init(dx, dy, dz, maxratio float64) {
+	s.Nxy.refine_data.Init(dy, dz, dx, maxratio)
+	s.Nxy.Nxy.Init(&s.Nxy.refine_data)
+}
+
+func (s *DemagNyzAsymptotic) NyzAsymptotic(x, y, z float64) float64 {
+	var ptdata DemagNabData
+	ptdata.Set(y, z, x)
+	return s.Nxy.NxyAsymptotic(&ptdata)
+}
+
+func (s *DemagNyyAsymptotic) Init(dx, dy, dz, maxratio float64) {
+	s.Nxx.refine_data.Init(dy, dx, dz, maxratio)
+	s.Nxx.Nxx.Init(&s.Nxx.refine_data)
+}
+
+func (s *DemagNyyAsymptotic) NyyAsymptotic(x, y, z float64) float64 {
+	var ptdata DemagNabData
+	ptdata.Set(y, x, z)
+	return s.Nxx.NxxAsymptotic(&ptdata)
+}
+
+func (s *DemagNzzAsymptotic) Init(dx, dy, dz, maxratio float64) {
+	s.Nxx.refine_data.Init(dz, dy, dx, maxratio)
+	s.Nxx.Nxx.Init(&s.Nxx.refine_data)
+}
+
+func (s *DemagNzzAsymptotic) NzzAsymptotic(x, y, z float64) float64 {
+	var ptdata DemagNabData
+	ptdata.Set(z, y, x)
+	return s.Nxx.NxxAsymptotic(&ptdata)
+}
 
 // For accurate summing
 func accSum(n int, arr *[]float64) float64 {
@@ -718,7 +1203,7 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
 	t0 := time.Now()
 
 	scale := float64(1.0/(4.0*math.Pi*dx*dy*dz)) // The subroutines return -N instead but N is expected in mumax
-	asymptotic_radius = 10240
+	asymptotic_radius = 32
 	scaled_arad := float64(asymptotic_radius) * math.Pow(float64(dx*dy*dz),float64(1.0/3.0))
 
 	Debug("kernel asymptotic radius = ",scaled_arad)
@@ -899,8 +1384,54 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
         //             4.pi.R^5   |                             |
         //                        \   3xz      3yz     3z^2-R^2 /
         //
-	//if (scaled_arad >= 0.0) {
-	//}
+	var scaled_arad_sq float64
+	if (scaled_arad >= 0.0) {
+		scaled_arad_sq = scaled_arad*scaled_arad
+		Assert(scaled_arad_sq > 0.0)
+		xtest := float64(rdimx)*float64(cellsize[X])
+		xtest *= xtest
+
+		ANxx := new(DemagNxxAsymptotic)
+		ANxx.refine_data.Init(dx,dy,dz,DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO)
+		ANxx.Nxx.Init(&ANxx.refine_data)
+
+		ANxy := new(DemagNxyAsymptotic)
+		ANxy.refine_data.Init(dx,dy,dz,DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO)
+		ANxy.Nxy.Init(&ANxy.refine_data)
+
+		ANxz := new(DemagNxzAsymptotic)
+		ANxz.Init(dx,dy,dz,DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO)
+
+		for k := 0; k<rdimz; k++ {
+			z = dz*float64(k)
+			zsq := z*z
+			for j := 0; j<rdimy; j++ {
+				y = dy*float64(j)
+				ysq := y*y
+
+				istart := 0
+				test := scaled_arad_sq - ysq - zsq
+				if (test > 0) {
+					if (test >xtest) {
+						istart = rdimx+1
+					} else {
+						istart = int(math.Ceil(math.Sqrt(test)/dx))
+					}
+				}
+				for i := istart; i<rdimx; i++ {
+					x = dx*float64(i)
+					var ptdata DemagNabData
+					ptdata.Set(x, y, z)
+					I = FullTensorIdx[0][0]
+					array[I][i][j][k] = -1.0*ANxx.NxxAsymptotic(&ptdata)
+					I = FullTensorIdx[0][1]
+					array[I][i][j][k] = -1.0*ANxy.NxyAsymptotic(&ptdata)
+					I = FullTensorIdx[0][2]
+					array[I][i][j][k] = -1.0*ANxz.NxzAsymptotic(x, y, z)
+				}
+			}
+		}
+	}
 
 	// Step 3: Use symmetries to reflect into other octants.
 	//     Also, at each coordinate plane, set to 0.0 any term
@@ -1239,8 +1770,48 @@ func Kernel_Newell(size []int, cellsize []float64, periodic []int, asymptotic_ra
         //             4.pi.R^5   |                             |
         //                        \   3xz      3yz     3z^2-R^2 /
         //
-	//if (scaled_arad >= 0.0) {
-	//}
+	if (scaled_arad >= 0.0) {
+		// Note that all distances here are in "reduced" units,
+		// scaled so that dx, dy, and dz are either small integers
+		// or else close to 1.0.
+		scaled_arad_sq := scaled_arad*scaled_arad
+		xtest := float64(rdimx)*dx
+		xtest *= xtest
+
+		ANyy := new(DemagNyyAsymptotic)
+		ANyy.Init(dx,dy,dz,DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO)
+		ANyz := new(DemagNyzAsymptotic)
+		ANyz.Init(dx,dy,dz,DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO)
+		ANzz := new(DemagNzzAsymptotic)
+		ANzz.Init(dx,dy,dz,DEMAG_ASYMPTOTIC_DEFAULT_REFINE_RATIO)
+
+		for k := 0; k<rdimz; k++ {
+			z = dz*float64(k)
+			zsq := z*z
+			for j := 0; j<rdimy; j++ {
+				y = dy*float64(j)
+				ysq := y*y
+				istart := 0
+				test := scaled_arad_sq - ysq - zsq
+				if (test > 0) {
+					if (test > xtest) {
+						istart = rdimx+1
+					} else {
+						istart = int(math.Ceil(math.Sqrt(test)/dx))
+					}
+				}
+				for i := istart; i<rdimx; i++ {
+					x = dx*float64(i)
+					I = FullTensorIdx[1][1]
+					array[I][i][j][k] = -1.0*ANyy.NyyAsymptotic(x, y, z)
+					I = FullTensorIdx[1][2]
+					array[I][i][j][k] = -1.0*ANyz.NyzAsymptotic(x, y, z)
+					I = FullTensorIdx[2][2]
+					array[I][i][j][k] = -1.0*ANzz.NzzAsymptotic(x, y, z)
+				}
+			}
+		}
+	}
 
 	// Step 3: Use symmetries to reflect into other octants.
 	//     Also, at each coordinate plane, set to 0.0 any term
