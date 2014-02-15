@@ -18,9 +18,9 @@ var inDF = map[string]string{
 }
 
 var depsDF = map[string]string{
-	"R":     "R",
-	"H_eff": "H_eff",
-	"msat":  "msat",
+	"R":       "R",
+	"H_eff":   "H_eff",
+	"msat0T0": "msat0T0",
 }
 
 var outDF = map[string]string{
@@ -53,25 +53,25 @@ func LoadDFArgs(e *Engine, args ...Arguments) {
 
 	Qmagn := e.AddNewQuant(arg.Outs("Qmag"), SCALAR, FIELD, Unit("J/(s*m3)"), "The dissipative function")
 
-	e.Depends(arg.Outs("Qmag"), arg.Deps("H_eff"), arg.Deps("msat"), arg.Deps("R"))
+	e.Depends(arg.Outs("Qmag"), arg.Deps("H_eff"), arg.Deps("msat0T0"), arg.Deps("R"))
 	Qmagn.SetUpdater(&DFUpdater{
-		Qmagn: Qmagn,
-		msat:  e.Quant(arg.Deps("msat")),
-		Heff:  e.Quant(arg.Deps("H_eff")),
-		R:     e.Quant(arg.Deps("R"))})
+		Qmagn:   Qmagn,
+		msat0T0: e.Quant(arg.Deps("msat0T0")),
+		Heff:    e.Quant(arg.Deps("H_eff")),
+		R:       e.Quant(arg.Deps("R"))})
 }
 
 type DFUpdater struct {
-	Qmagn *Quant
-	msat  *Quant
-	Heff  *Quant
-	R     *Quant
+	Qmagn   *Quant
+	msat0T0 *Quant
+	Heff    *Quant
+	R       *Quant
 }
 
 func (u *DFUpdater) Update() {
 
-	// Account for msat multiplier, because it is a mask
-	u.Qmagn.Multiplier()[0] = u.msat.Multiplier()[0]
+	// Account for msat0T0 multiplier, because it is a mask
+	u.Qmagn.Multiplier()[0] = u.msat0T0.Multiplier()[0]
 	// Account for - 2.0 * 0.5 * mu0
 	u.Qmagn.Multiplier()[0] *= -0.5 * Mu0
 	// Account for multiplier in H_eff
@@ -83,10 +83,10 @@ func (u *DFUpdater) Update() {
 		u.Heff.Array(),
 		u.R.Array())
 
-	// Finally. do Qmag = Qmag * msat(r) to account spatial properties of msat that are hidden in the definition of the relaxation constants
-	if !u.msat.Array().IsNil() {
+	// Finally. do Qmag = Qmag * msat0T0(r) to account spatial properties of msat0T0 that are hidden in the definition of the relaxation constants
+	if !u.msat0T0.Array().IsNil() {
 		gpu.Mul(u.Qmagn.Array(),
 			u.Qmagn.Array(),
-			u.msat.Array())
+			u.msat0T0.Array())
 	}
 }
