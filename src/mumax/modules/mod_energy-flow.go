@@ -32,7 +32,7 @@ var outEF = map[string]string{
 // Register this module
 func init() {
 	args := Arguments{inEF, depsEF, outEF}
-	RegisterModuleArgs("mfa/energy-density-dissipation-rate", "Energy density dissipation rate", args, LoadEFArgs)
+	RegisterModuleArgs("mfa/molecular-energy-density-rate", "Molecular energy density rate", args, LoadEFArgs)
 }
 
 // There is a problem, since LLB torque is normalized by msat0T0 (zero-temperature value), while LLG torque is normalized by msat
