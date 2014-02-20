@@ -73,7 +73,7 @@ func (u *DFUpdater) Update() {
 	// Account for msat0T0 multiplier, because it is a mask
 	u.Qmagn.Multiplier()[0] = u.msat0T0.Multiplier()[0]
 	// Account for - 2.0 * 0.5 * mu0
-	u.Qmagn.Multiplier()[0] *= -0.5 * Mu0
+	u.Qmagn.Multiplier()[0] *= -Mu0
 	// Account for multiplier in H_eff
 	u.Qmagn.Multiplier()[0] *= u.Heff.Multiplier()[0]
 	// Account for multiplier in R that should always be equal to the gyromagnetic ratio. Moreover the R is reduced to [1/s] units
