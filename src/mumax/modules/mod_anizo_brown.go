@@ -126,6 +126,7 @@ func (u *AnizBrownUpdater) Update() {
 	if dt < cutoff_dt {
 		dt = cutoff_dt
 		if u.last_time != 0 && t < u.last_time+dt {
+			u.htherm.Array().Zero()
 			return
 		}
 	}
