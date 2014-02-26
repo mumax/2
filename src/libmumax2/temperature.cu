@@ -111,7 +111,7 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
     if (i < Npart)
     {
 
-        float msat0T0 = (msat0T0Mask != NULL) ? msat0T0Mask[i] : 1.0;
+        float msat0T0 = getMaskUnity(msat0T0Mask, i);
         if (msat0T0 == 0.0f)
         {
             hx[i] = 0.0f;
@@ -124,23 +124,20 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
 
         float3 mu_H;
 
-        float m_xx = (mu_xx != NULL) ? mu_xx[i] * muMul_xx : muMul_xx;
+        float m_xx = muMul_xx * getMaskUnity(mu_xx, i);
         m_xx = sqrtf(m_xx);
-        mu_H.x = m_xx;
+        mu_H.x = m_xx * H.x;
 
-        float m_yy = (mu_yy != NULL) ? mu_yy[i] * muMul_yy : muMul_yy;
-
+        float m_yy = muMul_yy * getMaskUnity(mu_yy, i);
         m_yy = sqrtf(m_yy);
-
         mu_H.y = m_yy * H.y;
 
-        float m_zz = (mu_zz != NULL) ? mu_zz[i] * muMul_zz : muMul_zz;
+        float m_zz = muMul_zz * getMaskUnity(mu_zz, i);
         m_zz = sqrtf(m_zz);
-
         mu_H.z = m_zz * H.z;
 
         float msat = (msatMask != NULL) ? msatMask[i] : 1.0;
-        float T = (tempMask != NULL) ? tempMask[i] : 1.0;
+        float T = getMaskUnity(tempMask, i);
         float pre = sqrtf((T * KB2tempMul_mu0VgammaDtMSatMul) / msat);
 
         hx[i] = pre * mu_H.x;
