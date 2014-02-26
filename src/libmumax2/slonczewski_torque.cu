@@ -68,14 +68,14 @@ __global__ void slonczewski_deltaMKern(float* __restrict__ sttx, float* __restri
 
         float3 p = make_float3(p_x, p_y, p_z);
 
-        p = normalize(p);
+        p = normalizef(p);
 
         float3 pxm = crossf(p, m); // plus
         float3 mxpxm = crossf(m, pxm); // plus
 
         float  pdotm = dotf(p, m);
 
-        J = normalize(J);
+        J = normalizef(J);
         float Jdir = dotf(make_float3(1.0f, 1.0f, 1.0f), J);
         float Jsign = Jdir / fabsf(Jdir);
         nJn *= Jsign;

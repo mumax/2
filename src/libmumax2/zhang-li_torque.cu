@@ -283,7 +283,7 @@ __global__ void zhangli_deltaMKernMGPU(float* __restrict__ sttx, float* __restri
                                     mstep.y * (MM.x - 8.0f * MM.y + 8.0f * MM.z - MM.w),
                                     mstep.z * (mz[zn.x] - 8.0f * mz[zn.y] + 8.0f * mz[zn.z] - mz[zn.w]));
 
-        float3 nj0 = normalize(j0);
+        float3 nj0 = normalizef(j0);
 
         float3 dmdj = make_float3(dotf(dmdx, nj0),
                                   dotf(dmdy, nj0),
