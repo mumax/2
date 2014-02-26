@@ -25,7 +25,6 @@ var inBA = map[string]string{
 var depsBA = map[string]string{
 	"T":       LtempName,
 	"mu":      "mu",
-	"msat":    "msat",
 	"msat0T0": "msat0T0",
 }
 
@@ -66,11 +65,10 @@ func LoadAnizBrown(e *Engine, args ...Arguments) {
 
 	T := e.Quant(arg.Deps("T"))
 	mu := e.Quant(arg.Deps("mu"))
-	msat := e.Quant(arg.Deps("msat"))
 	msat0T0 := e.Quant(arg.Deps("msat0T0"))
 
-	e.Depends(arg.Outs("H_therm"), arg.Deps("T"), arg.Deps("mu"), arg.Deps("msat"), arg.Deps("msat0T0"), arg.Ins("Therm_seed"), arg.Ins("cutoff_dt"), "Step", "dt", "γ_LL")
-	Htherm.SetUpdater(NewAnizBrownUpdater(Htherm, Therm_seed, cutoff_dt, T, mu, msat, msat0T0))
+	e.Depends(arg.Outs("H_therm"), arg.Deps("T"), arg.Deps("mu"), arg.Deps("msat0T0"), arg.Ins("Therm_seed"), arg.Ins("cutoff_dt"), "Step", "dt", "γ_LL")
+	Htherm.SetUpdater(NewAnizBrownUpdater(Htherm, Therm_seed, cutoff_dt, T, mu, msat0T0))
 
 }
 
@@ -80,7 +78,6 @@ type AnizBrownUpdater struct {
 	htherm           *Quant           // The quantity I will update
 	therm_seed       *Quant
 	mu               *Quant
-	msat             *Quant
 	msat0T0          *Quant
 	T                *Quant
 	cutoff_dt        *Quant
@@ -88,14 +85,13 @@ type AnizBrownUpdater struct {
 	last_time        float64 // time of last htherm update
 }
 
-func NewAnizBrownUpdater(htherm, therm_seed, cutoff_dt, T, mu, msat, msat0T0 *Quant) Updater {
+func NewAnizBrownUpdater(htherm, therm_seed, cutoff_dt, T, mu, msat0T0 *Quant) Updater {
 	u := new(AnizBrownUpdater)
 	u.therm_seed = therm_seed
 	u.therm_seed_cache = -1e10
 	u.htherm = htherm
 	u.cutoff_dt = cutoff_dt
 	u.mu = mu
-	u.msat = msat
 	u.msat0T0 = msat0T0
 	u.T = T
 	gpu.SetDeviceForIndex(0)
@@ -149,19 +145,16 @@ func (u *AnizBrownUpdater) Update() {
 	mu := u.mu
 
 	gamma := e.Quant("γ_LL").Scalar()
-	mSat := u.msat
 	msat0T0 := u.msat0T0
-	msatMask := mSat.Array()
-	mSatMul := mSat.Multiplier()[0]
+	mSat0T0Mul := msat0T0.Multiplier()[0]
 	tempMask := temp.Array()
 	KB2tempMul := Kb * 2.0 * tempMul
-	mu0VgammaDtMsatMul := Mu0 * V * gamma * dt * mSatMul
+	mu0VgammaDtMsatMul := Mu0 * V * gamma * dt * mSat0T0Mul
 	KB2tempMul_mu0VgammaDtMsatMul := KB2tempMul / mu0VgammaDtMsatMul
 
 	gpu.ScaleNoiseAniz(noise,
 		mu.Array(),
 		tempMask,
-		msatMask,
 		msat0T0.Array(),
 		mu.Multiplier(),
 		KB2tempMul_mu0VgammaDtMsatMul)

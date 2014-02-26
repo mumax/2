@@ -34,7 +34,6 @@ DLLEXPORT void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
         float** mu_yy,
         float** mu_zz,
         float** tempMask,
-        float** msatMask,
         float** msat0T0Mask,
 
         float muMul_xx,

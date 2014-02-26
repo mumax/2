@@ -5,6 +5,7 @@
 #include <cuda.h>
 #include "gpu_conf.h"
 #include "gpu_safe.h"
+#include "common_func.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,7 +94,6 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
         float* __restrict__ mu_zz,
 
         float* __restrict__ tempMask,
-        float* __restrict__ msatMask,
         float* __restrict__ msat0T0Mask,
 
         const float muMul_xx,
@@ -136,9 +136,8 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
         m_zz = sqrtf(m_zz);
         mu_H.z = m_zz * H.z;
 
-        float msat = (msatMask != NULL) ? msatMask[i] : 1.0;
         float T = getMaskUnity(tempMask, i);
-        float pre = sqrtf((T * KB2tempMul_mu0VgammaDtMSatMul) / msat);
+        float pre = sqrtf((T * KB2tempMul_mu0VgammaDtMSatMul) / msat0T0);
 
         hx[i] = pre * mu_H.x;
         hy[i] = pre * mu_H.y;
@@ -153,7 +152,6 @@ __export__ void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
         float** mu_yy,
         float** mu_zz,
         float** tempMask,
-        float** msatMask,
         float** msat0T0Mask,
 
         float muMul_xx,
@@ -176,7 +174,6 @@ __export__ void temperature_scaleAnizNoise(float** hx, float** hy, float** hz,
             mu_yy[dev],
             mu_zz[dev],
             tempMask[dev],
-            msatMask[dev],
             msat0T0Mask[dev],
             muMul_xx,
             muMul_yy,
