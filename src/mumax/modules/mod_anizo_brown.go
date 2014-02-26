@@ -72,10 +72,6 @@ func LoadAnizBrown(e *Engine, args ...Arguments) {
 	e.Depends(arg.Outs("H_therm"), arg.Deps("T"), arg.Deps("mu"), arg.Deps("msat"), arg.Deps("msat0T0"), arg.Ins("Therm_seed"), arg.Ins("cutoff_dt"), "Step", "dt", "γ_LL")
 	Htherm.SetUpdater(NewAnizBrownUpdater(Htherm, Therm_seed, cutoff_dt, T, mu, msat, msat0T0))
 
-	// Add thermal field to total field
-	hfield := e.Quant("H_eff")
-	sum := hfield.GetUpdater().(*SumUpdater)
-	sum.AddParent(arg.Outs("H_therm"))
 }
 
 // Updates the thermal field
