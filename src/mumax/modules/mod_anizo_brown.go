@@ -80,8 +80,8 @@ func LoadAnizBrown(e *Engine, args ...Arguments) {
 
 // Updates the thermal field
 type AnizBrownUpdater struct {
-	rng              []curand.Generator // Random number generator for each GPU
-	htherm           *Quant             // The quantity I will update
+	rng              curand.Generator // Random number generator for each GPU
+	htherm           *Quant           // The quantity I will update
 	therm_seed       *Quant
 	mu               *Quant
 	msat             *Quant
@@ -102,11 +102,8 @@ func NewAnizBrownUpdater(htherm, therm_seed, cutoff_dt, T, mu, msat, msat0T0 *Qu
 	u.msat = msat
 	u.msat0T0 = msat0T0
 	u.T = T
-	u.rng = make([]curand.Generator, gpu.NDevice())
-	for dev := range u.rng {
-		gpu.SetDeviceForIndex(dev)
-		u.rng[dev] = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
-	}
+	gpu.SetDeviceForIndex(0)
+	u.rng = curand.CreateGenerator(curand.PSEUDO_DEFAULT)
 	return u
 }
 
@@ -117,10 +114,7 @@ func (u *AnizBrownUpdater) Update() {
 	therm_seed := int64(u.therm_seed.Scalar())
 
 	if therm_seed != u.therm_seed_cache {
-		for dev := range u.rng {
-			seed := therm_seed + int64(dev)
-			u.rng[dev].SetSeed(seed)
-		}
+		u.rng.SetSeed(therm_seed)
 	}
 
 	u.therm_seed_cache = therm_seed
@@ -150,10 +144,8 @@ func (u *AnizBrownUpdater) Update() {
 	N := int64(noise.PartLen4D())
 	// Fills H_therm with gaussian noise.
 	// CURAND does not provide an out-of-the-box way to do this in parallel over the GPUs
-	for dev := range u.rng {
-		gpu.SetDeviceForIndex(dev)
-		u.rng[dev].GenerateNormal(uintptr(devPointers[dev]), N, 0, 1)
-	}
+	gpu.SetDeviceForIndex(0)
+	u.rng.GenerateNormal(uintptr(devPointers[0]), N, 0, 1)
 
 	// Scale the noise according to local parameters
 	cellSize := e.CellSize()
