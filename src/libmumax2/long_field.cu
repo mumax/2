@@ -36,20 +36,18 @@ __global__ void long_field_Kern(float* __restrict__ hx, float* __restrict__ hy, 
         double n = nMul * getMaskUnity(nMsk, I);
         double Tc = TcMul * getMaskUnity(TcMsk, I);
         double Ts = TsMul * getMaskUnity(TsMsk, I);
+        double3 mf = make_double3(mx[I], my[I], mz[I]);
+        double abs_mf = len(mf);
 
-        if (Ms0T0 == 0.0 || n == 0.0)
+        if (Ms0T0 == 0.0 || n == 0.0 || abs_mf <= zero)
         {
             hx[I] = 0.0f;
             hy[I] = 0.0f;
             hz[I] = 0.0f;
             return;
         }
-
-
-        double3 mf = make_double3(mx[I], my[I], mz[I]);
+        
         double3 s = normalize(mf);
-
-        double abs_mf = len(mf);
 
         double J0  = 3.0 * Tc / (S * (S + 1.0));
 
