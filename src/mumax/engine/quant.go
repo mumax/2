@@ -391,9 +391,7 @@ func (q *Quant) Buffer(kind QuantKind) *host.Array {
 					}
 				}
 			}
-			Debug("syfg")
 		case MASK:
-			Debug("gfys")
 		}
 	}
 	q.bufUpToDate = true
