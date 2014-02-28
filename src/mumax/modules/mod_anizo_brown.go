@@ -111,24 +111,14 @@ func (u *AnizBrownUpdater) Update() {
 
 	u.therm_seed_cache = therm_seed
 
-	// Nothing to do for zero temperature
-	temp := u.T
-	tempMul := temp.Multiplier()[0]
-	if tempMul == 0 {
-		u.htherm.Array().Zero()
-		return
-	}
-
 	// Update only if we went past the dt cutoff
 	t := e.Quant("t").Scalar()
-	dt := e.Quant("dt").Scalar()
 	cutoff_dt := u.cutoff_dt.Scalar()
-	if dt < cutoff_dt {
-		dt = cutoff_dt
-		if u.last_time != 0 && t < u.last_time+dt {
-			u.htherm.Array().Zero()
-			return
-		}
+	next_update := u.last_time + cutoff_dt
+
+	if t < next_update {
+		u.htherm.Array().Zero()
+		return
 	}
 
 	// Make standard normal noise
@@ -141,16 +131,17 @@ func (u *AnizBrownUpdater) Update() {
 	u.rng.GenerateNormal(uintptr(devPointers[0]), N, 0, 1)
 
 	// Scale the noise according to local parameters
+	temp := u.T
+	tempMul := temp.Multiplier()[0]
 	cellSize := e.CellSize()
 	V := cellSize[X] * cellSize[Y] * cellSize[Z]
 	mu := u.mu
-
 	gamma := e.Quant("γ_LL").Scalar()
 	msat0T0 := u.msat0T0
 	mSat0T0Mul := msat0T0.Multiplier()[0]
 	tempMask := temp.Array()
 	KB2tempMul := Kb * 2.0 * tempMul
-	mu0VgammaDtMsatMul := Mu0 * V * gamma * dt * mSat0T0Mul
+	mu0VgammaDtMsatMul := Mu0 * V * gamma * cutoff_dt * mSat0T0Mul
 	KB2tempMul_mu0VgammaDtMsatMul := KB2tempMul / mu0VgammaDtMsatMul
 
 	gpu.ScaleNoiseAniz(noise,

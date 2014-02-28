@@ -138,7 +138,7 @@ __global__ void temperature_scaleAnisKern(float* __restrict__ hx, float* __restr
 
         float T = getMaskUnity(tempMask, i);
         float pre = sqrtf((T * KB2tempMul_mu0VgammaDtMSatMul) / msat0T0);
-
+        
         hx[i] = pre * mu_H.x;
         hy[i] = pre * mu_H.y;
         hz[i] = pre * mu_H.z;
