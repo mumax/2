@@ -23,11 +23,11 @@ __global__ void decomposeKern(float* __restrict__ Mx, float* __restrict__ My, fl
 
         // reconstruct norm from map
 
-        float3 M = make_float3(Mx[i], My[i], Mz[i]);
+        double3 M = make_double3(Mx[i], My[i], Mz[i]);
 
-        float Ms = len(M);
+        double Ms = len(M);
 
-        if (Ms == 0.0f)
+        if (Ms <= zero)
         {
             mx[i] = 0.0f;
             my[i] = 0.0f;
@@ -36,11 +36,11 @@ __global__ void decomposeKern(float* __restrict__ Mx, float* __restrict__ My, fl
             return;
         }
 
-        mx[i] = M.x / Ms;
-        my[i] = M.y / Ms;
-        mz[i] = M.z / Ms;
+        mx[i] = (float)(M.x / Ms);
+        my[i] = (float)(M.y / Ms);
+        mz[i] = (float)(M.z / Ms);
 
-        msat[i] = Ms;
+        msat[i] = (float)Ms;
     }
 }
 
