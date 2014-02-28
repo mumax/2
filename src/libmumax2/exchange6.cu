@@ -9,10 +9,11 @@
 extern "C" {
 #endif
 // full 3D blocks
-__global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, float* __restrict__  hz,
+__global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, float* __restrict__  hz, 
                               float* __restrict__  mx, float* __restrict__  my, float* __restrict__  mz,
-                              float* __restrict__  mSat_map, float* __restrict__  Aex_map,
-                              const float pre,
+                              float* __restrict__  lexMsk,
+                              const float lex2Mul,
+                              const float msat0T0Mul,
                               const int N0, const int N1, const int N2,
                               const int wrap0, const int wrap1, const int wrap2,
                               const float cellx_2, const float celly_2, const float cellz_2)
@@ -27,21 +28,17 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
 
         int I = i * N1 * N2 + j * N2 + k;
 
-        float mSat0 = getMaskUnity(mSat_map, I);
-        float Aex0 = getMaskUnity(Aex_map, I);
-        float lex0Mul = fdivZero(Aex0, mSat0);
-        float lexMul, lex1Mul, lex2Mul;
+        float lex02 = getMaskUnity(lexMsk, I) * getMaskUnity(lexMsk, I);
+        float lex2, pre1, pre2;
 
-        float mx0 = mx[I]; // mag component of central cell
-        float mx1, mx2;
-
-        float my0 = my[I]; // mag component of central cell
-        float my1, my2;
-
-        float mz0 = mz[I]; // mag component of central cell
-        float mz1, mz2;
+        float3 m0 = make_float3(mx[I], my[I], mz[I]);
+        float ms0 = msat0T0Mul * len(m0);
+        float3 s0 = normalizef(m0);
 
         float Hx, Hy, Hz;
+        float ms2, ms1;
+        float3 s1, s2;
+        float3 m1, m2;
 
         int linAddr;
 
@@ -50,58 +47,58 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         idx = (idx < 0 && wrap0) ? N0 + idx : idx;
         idx = max(idx, 0);
         linAddr = idx * N1 * N2 + j * N2 + k;
+    
+        m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
+        ms1 = msat0T0Mul * len(m1);
+        s1 = normalizef(m1);
 
-        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
-        lex1Mul = avgGeomZero(lex0Mul, lexMul);
-
-        mx1 = mx[linAddr];
-        my1 = my[linAddr];
-        mz1 = mz[linAddr];
+        lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
+        pre1 = avgGeomZero(lex02 * ms0, lex2 * ms1);
 
         idx = i + 1;
         idx = (idx == N0 && wrap0) ? idx - N0 : idx;
         idx = min(idx, N0 - 1);
         linAddr = idx * N1 * N2 + j * N2 + k;
 
-        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
-        lex2Mul = avgGeomZero(lex0Mul, lexMul);
+        m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
+        ms2 = msat0T0Mul * len(m2);
+        s2 = normalizef(m2);
 
-        mx2 = mx[linAddr];
-        my2 = my[linAddr];
-        mz2 = mz[linAddr];
+        lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
+        pre2 = avgGeomZero(lex02 * ms0, lex2 * ms2);
 
-        Hx = pre * cellx_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 -  mx0));
-        Hy = pre * cellx_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 -  my0));
-        Hz = pre * cellx_2 * (lex1Mul * (mz1 - mz0) + lex2Mul * (mz2 -  mz0));
+        Hx = lex2Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
+        Hy = lex2Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
+        Hz = lex2Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
 
         // neighbors in Z direction
         idx = k - 1;
         idx = (idx < 0 && wrap2) ? N2 + idx : idx;
         idx = max(idx, 0);
         linAddr = i * N1 * N2 + j * N2 + idx;
+    
+        m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
+        ms1 = msat0T0Mul * len(m1);
+        s1 = normalizef(m1);
 
-        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
-        lex1Mul = avgGeomZero(lex0Mul, lexMul);
-
-        mx1 = mx[linAddr];
-        my1 = my[linAddr];
-        mz1 = mz[linAddr];
+        lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
+        pre1 = avgGeomZero(lex02 * ms0, lex2 * ms1);
 
         idx = k + 1;
         idx = (idx == N2 && wrap2) ? idx - N2 : idx;
         idx = min(idx, N2 - 1);
         linAddr = i * N1 * N2 + j * N2 + idx;
 
-        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
-        lex2Mul = avgGeomZero(lex0Mul, lexMul);
+        m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
+        ms2 = msat0T0Mul * len(m2);
+        s2 = normalizef(m2);
 
-        mx2 = mx[linAddr];
-        my2 = my[linAddr];
-        mz2 = mz[linAddr];
+        lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
+        pre2 = avgGeomZero(lex02 * ms0, lex2 * ms2);
 
-        Hx += pre * cellz_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 -  mx0));
-        Hy += pre * cellz_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 -  my0));
-        Hz += pre * cellz_2 * (lex1Mul * (mz1 - mz0) + lex2Mul * (mz2 -  mz0));
+        Hx += lex2Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
+        Hy += lex2Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
+        Hz += lex2Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
 
         // neighbors in Y direction
         idx = j - 1;
@@ -109,28 +106,28 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         idx = max(idx, 0);
         linAddr = i * N1 * N2 + idx * N2 + k;
 
-        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
-        lex1Mul = avgGeomZero(lex0Mul, lexMul);
+        m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
+        ms1 = msat0T0Mul * len(m1);
+        s1 = normalizef(m1);
 
-        mx1 = mx[linAddr];
-        my1 = my[linAddr];
-        mz1 = mz[linAddr];
+        lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
+        pre1 = avgGeomZero(lex02 * ms0, lex2 * ms1);
 
         idx = j + 1;
         idx = (idx == N1 && wrap1) ? idx - N1 : idx;
         idx = min(idx, N1 - 1);
         linAddr = i * N1 * N2 + idx * N2 + k;
 
-        lexMul = fdivZero(getMaskUnity(Aex_map, linAddr), getMaskUnity(mSat_map, linAddr));
-        lex2Mul = avgGeomZero(lex0Mul, lexMul);
+        m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
+        ms2 = msat0T0Mul * len(m2);
+        s2 = normalizef(m2);
 
-        mx2 = mx[linAddr];
-        my2 = my[linAddr];
-        mz2 = mz[linAddr];
+        lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
+        pre2 = avgGeomZero(lex02 * ms0, lex2 * ms2);
 
-        Hx += pre * celly_2 * (lex1Mul * (mx1 - mx0) + lex2Mul * (mx2 -  mx0));
-        Hy += pre * celly_2 * (lex1Mul * (my1 - my0) + lex2Mul * (my2 -  my0));
-        Hz += pre * celly_2 * (lex1Mul * (mz1 - mz0) + lex2Mul * (mz2 -  mz0));
+        Hx += lex2Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
+        Hy += lex2Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
+        Hz += lex2Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
 
         // Write back to global memory
         hx[I] = Hx;
@@ -142,7 +139,15 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
 }
 
 
-__export__ void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float** msat, float** aex, float Aex2_mu0MsatMul, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams)
+__export__ void exchange6Async(float** hx, float** hy, float** hz, 
+                              float** mx, float** my, float** mz, 
+                              float** lex, 
+                              float lex2Mul, 
+                              float msat0T0Mul,
+                              int N0, int N1Part, int N2, 
+                              int periodic0, int periodic1, int periodic2, 
+                              float cellSizeX, float cellSizeY, float cellSizeZ, 
+                              CUstream* streams)
 {
 
     dim3 gridsize, blocksize;
@@ -153,13 +158,17 @@ __export__ void exchange6Async(float** hx, float** hy, float** hz, float** mx, f
     float celly_2 = (float)(1.0 / ((double)cellSizeY * (double)cellSizeY));
     float cellz_2 = (float)(1.0 / ((double)cellSizeZ * (double)cellSizeZ));
 
-    int nDev = nDevice();
+    int dev = 0;
 
-    for (int dev = 0; dev < nDev; dev++)
-    {
-        gpu_safe(cudaSetDevice(deviceId(dev)));
-        exchange6Kern <<< gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(hx[dev], hy[dev], hz[dev], mx[dev], my[dev], mz[dev], msat[dev], aex[dev], Aex2_mu0MsatMul, N0, N1Part, N2, periodic0, periodic1, periodic2, cellx_2, celly_2, cellz_2);
-    }
+    gpu_safe(cudaSetDevice(deviceId(dev)));
+    exchange6Kern <<< gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(hx[dev], hy[dev], hz[dev],
+                                                                            mx[dev], my[dev], mz[dev], 
+                                                                            lex[dev], 
+                                                                            lex2Mul,
+                                                                            msat0T0Mul, 
+                                                                            N0, N1Part, N2, 
+                                                                            periodic0, periodic1, periodic2, 
+                                                                            cellx_2, celly_2, cellz_2);
 }
 
 
