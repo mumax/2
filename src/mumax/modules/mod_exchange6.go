@@ -11,7 +11,6 @@ package modules
 // Author: Arne Vansteenkiste
 
 import (
-	// . "mumax/common"
 	. "mumax/engine"
 	"mumax/gpu"
 )
@@ -24,12 +23,12 @@ func init() {
 func LoadExch6(e *Engine) {
 	LoadHField(e)
 	LoadFullMagnetization(e)
-	lex := e.AddNewQuant("lex", SCALAR, MASK, Unit("J/m"), "Exchange length") // TODO: mask
+	lex := e.AddNewQuant("lex", SCALAR, MASK, Unit("m"), "Exchange length") // TODO: mask
 	Hex := e.AddNewQuant("H_ex", VECTOR, FIELD, Unit("A/m"), "Exchange field")
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_ex")
-	e.Depends("H_ex", "Aex", "Msat0T0", "mf")
+	e.Depends("H_ex", "lex", "Msat0T0", "mf")
 	Hex.SetUpdater(&exch6Updater{mf: e.Quant("mf"), lex: lex, Hex: Hex, Msat: e.Quant("Msat0T0")})
 }
 

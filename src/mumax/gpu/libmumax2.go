@@ -783,9 +783,10 @@ func UniaxialAnisotropyAsync(h, m *Array, KuMask, MsatMask *Array, Ku2_Mu0MSat f
 
 // 6-neighbor exchange field.
 // Aex2_mu0Msatmul: 2 * Aex / Mu0 * Msat.multiplier
-func Exchange6Async(h, mf, lex *Array, lex2Mul, msat0T0Mul float64, cellSize []float64, periodic []int, stream Stream) {
+func Exchange6Async(h, mf, lex *Array, lex2Mul float64, msat0T0Mul float64, cellSize []float64, periodic []int, stream Stream) {
 	//void exchange6Async(float** hx, float** hy, float** hz, float** mx, float** my, float** mz, float Aex, int N0, int N1Part, int N2, int periodic0, int periodic1, int periodic2, float cellSizeX, float cellSizeY, float cellSizeZ, CUstream* streams);
 	CheckSize(h.Size3D(), mf.Size3D())
+	Debug("Lex2(wrap):", float32(lex2Mul))
 	C.exchange6Async(
 		(**C.float)(unsafe.Pointer(&(h.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(h.Comp[Y].pointer[0]))),
@@ -793,18 +794,18 @@ func Exchange6Async(h, mf, lex *Array, lex2Mul, msat0T0Mul float64, cellSize []f
 		(**C.float)(unsafe.Pointer(&(mf.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(mf.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(mf.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(lex.pointer[0]))),
-		(C.float)(lex2Mul),
-		(C.float)(msat0T0Mul),
+		(**C.float)(unsafe.Pointer(&(lex.Comp[X].Pointers()[0]))),
+		(C.float)(float32(lex2Mul)),
+		(C.float)(float32(msat0T0Mul)),
 		(C.int)(h.PartSize()[X]),
 		(C.int)(h.PartSize()[Y]),
 		(C.int)(h.PartSize()[Z]),
 		(C.int)(periodic[X]),
 		(C.int)(periodic[Y]),
 		(C.int)(periodic[Z]),
-		(C.float)(cellSize[X]),
-		(C.float)(cellSize[Y]),
-		(C.float)(cellSize[Z]),
+		(C.float)(float32(cellSize[X])),
+		(C.float)(float32(cellSize[Y])),
+		(C.float)(float32(cellSize[Z])),
 		(*C.CUstream)(unsafe.Pointer(&(stream[0]))))
 }
 

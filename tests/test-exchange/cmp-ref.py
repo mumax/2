@@ -2,6 +2,7 @@
 
 from mumax2 import *
 from random import *
+from math import *
 # Standard Problem 4
 
 # define geometry
@@ -26,6 +27,13 @@ seed(0)
 
 load('exchange6')
 
+Aex = 1.3e-11
+Msat = 800e3
+lex0 = sqrt(2*Aex/(mu0*Msat*Msat))
+setv('lex', lex0)
+setv('Msat', Msat)
+setv('Msat0T0', Msat)
+
 # set parameters
 msk=makearray(1, Nx, Ny, Nz)
 for k in range(Nz):
@@ -33,23 +41,27 @@ for k in range(Nz):
         for i in range(Nx):
             msk[0][i][j][k] = random() 
 setmask('Msat', msk)
-setv('Msat', 800e3)
 
+lex = makearray(1, Nx, Ny, Nz)
 for k in range(Nz):
     for j in range(Ny):
         for i in range(Nx):
-            msk[0][i][j][k] = random() 
-setv('Aex', 1.3e-11)
+            lex[0][i][j][k] = random() / (msk[0][i][j][k]**2.0)
+setmask('lex', lex)
 
 # set magnetization
 m=makearray(3, Nx, Ny, Nz)
 for k in range(Nz):
     for j in range(Ny):
         for i in range(Nx):
-            m[0][i][j][k] = random() 
-            m[1][i][j][k] = random()
-            m[2][i][j][k] = random()
-setarray('m', m)
+            mx = float(random()) 
+            my = float(random())
+            mz = float(random())
+            l = sqrt(mx**2.0 + my**2.0 + mz**2.0)
+            m[0][i][j][k] = mx / l * msk[0][i][j][k]
+            m[1][i][j][k] = my / l * msk[0][i][j][k]
+            m[2][i][j][k] = mz / l * msk[0][i][j][k]
+setarray('mf', m)
 
 saveas('H_ex', "omf", ["Text"], "hex_new.omf")
 ref = readfile(outputdirectory()+"/../hex_ref.omf")
@@ -64,7 +76,8 @@ for k in range(Nz):
                diff = abs(new[c][i][j][k] - ref[c][i][j][k])
                if diff > eps:
                    dirty = dirty + 1
-                   #~ print('The difference excited epsilon at:', c, i, j, k)
+                   print new[c][i][j][k], "!=", ref[c][i][j][k]
+                   print diff, ">", eps
 
 if dirty > 0:
     print "\033[31m" + "✘ FAILED" + "\033[0m"

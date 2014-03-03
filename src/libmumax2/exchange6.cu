@@ -22,7 +22,6 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     int j = blockIdx.y * blockDim.y + threadIdx.y;
     int k = blockIdx.z * blockDim.z + threadIdx.z;
-
     if (i < N0 && j < N1 && k < N2)
     {
 
@@ -32,7 +31,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         float lex2, pre1, pre2;
 
         float3 m0 = make_float3(mx[I], my[I], mz[I]);
-        float ms0 = msat0T0Mul * len(m0);
+        float ms0 = len(m0);
         float3 s0 = normalizef(m0);
 
         float Hx, Hy, Hz;
@@ -49,7 +48,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = idx * N1 * N2 + j * N2 + k;
     
         m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms1 = msat0T0Mul * len(m1);
+        ms1 = len(m1);
         s1 = normalizef(m1);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -61,15 +60,15 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = idx * N1 * N2 + j * N2 + k;
 
         m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms2 = msat0T0Mul * len(m2);
+        ms2 = len(m2);
         s2 = normalizef(m2);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
         pre2 = avgGeomZero(lex02 * ms0, lex2 * ms2);
 
-        Hx = lex2Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
-        Hy = lex2Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
-        Hz = lex2Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
+        Hx = lex2Mul * msat0T0Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
+        Hy = lex2Mul * msat0T0Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
+        Hz = lex2Mul * msat0T0Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
 
         // neighbors in Z direction
         idx = k - 1;
@@ -78,7 +77,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + j * N2 + idx;
     
         m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms1 = msat0T0Mul * len(m1);
+        ms1 = len(m1);
         s1 = normalizef(m1);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -90,15 +89,15 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + j * N2 + idx;
 
         m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms2 = msat0T0Mul * len(m2);
+        ms2 = len(m2);
         s2 = normalizef(m2);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
         pre2 = avgGeomZero(lex02 * ms0, lex2 * ms2);
 
-        Hx += lex2Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
-        Hy += lex2Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
-        Hz += lex2Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
+        Hx += lex2Mul * msat0T0Mul * cellz_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
+        Hy += lex2Mul * msat0T0Mul * cellz_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
+        Hz += lex2Mul * msat0T0Mul * cellz_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
 
         // neighbors in Y direction
         idx = j - 1;
@@ -107,7 +106,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + idx * N2 + k;
 
         m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms1 = msat0T0Mul * len(m1);
+        ms1 = len(m1);
         s1 = normalizef(m1);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -119,15 +118,15 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + idx * N2 + k;
 
         m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms2 = msat0T0Mul * len(m2);
+        ms2 = len(m2);
         s2 = normalizef(m2);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
         pre2 = avgGeomZero(lex02 * ms0, lex2 * ms2);
-
-        Hx += lex2Mul * cellx_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
-        Hy += lex2Mul * cellx_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
-        Hz += lex2Mul * cellx_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
+        
+        Hx += lex2Mul * msat0T0Mul * celly_2 * (pre1 * (s1.x - s0.x) + pre2 * (s2.x - s0.x));
+        Hy += lex2Mul * msat0T0Mul * celly_2 * (pre1 * (s1.y - s0.y) + pre2 * (s2.y - s0.y));
+        Hz += lex2Mul * msat0T0Mul * celly_2 * (pre1 * (s1.z - s0.z) + pre2 * (s2.z - s0.z));
 
         // Write back to global memory
         hx[I] = Hx;
@@ -149,7 +148,6 @@ __export__ void exchange6Async(float** hx, float** hy, float** hz,
                               float cellSizeX, float cellSizeY, float cellSizeZ, 
                               CUstream* streams)
 {
-
     dim3 gridsize, blocksize;
 
     make3dconf(N0, N1Part, N2, &gridsize, &blocksize);
