@@ -26,7 +26,7 @@ load('llbar/damping/nonconservative/00/local')
 add_to('llbar_RHS', 'llbar_torque')
 add_to('llbar_RHS', 'llbar_local00nc')
 
-loadargs('mfa/longfield', ["T:Te"],[],[])
+# load('normalizer')
 
 loadargs('maxtorque', [],["torque:llbar_torque"],[])
 load('solver/rk12')
@@ -38,21 +38,6 @@ setv('maxdt', 1e-12)
 # set parameters
 # Py
 
-m=[ [[[1]]], [[[1]]], [[[0]]] ]
-setarray('m', m)
-
-T=[[[[273]]]]
-setarray('Te',T)
-setv('Tc', 820)
-
-msat = makearray(1,Nx,Ny,Nz)            
-for kk in range(Nz):
-    for jj in range(Ny):
-        for ii in range(Nx):
-            msat[0][ii][jj][kk] = 1.0
-
-setmask('msat', msat)   
-setv('Msat', 800e3) 
 
 Mf = makearray(3,Nx,Ny,Nz)            
 for kk in range(Nz):
@@ -73,15 +58,15 @@ for kk in range(Nz):
 setmask('msat0', msat0) 
  
 Ms0 = 800e3
+Aex = 1.3e-11
+lex = sqrt(2*Aex/(mu0*Ms0*Ms0))
 setv('msat0', Ms0)
 setv('msat0T0', Ms0)
-Aex = 1.3e-11
+setv('lex', lex)
 
 alpha=1.0
 setv('λ∥', [alpha, alpha, alpha])
 
-setv('ϰ', 1e-3)
-setv('Aex', 1.3e-11)
 gamma=2.211e5
 gammall = gamma / (1.0+alpha**2)
 setv('γ_ll',gammall)
@@ -96,14 +81,13 @@ run_until_smaller('maxtorque', 1e-3 * gammall * Ms0)
 alpha=0.02
 gammall = gamma / (1.0+alpha**2)
 setv('γ_ll',gammall)
-setv('ϰ', 1e-4)
 setv('λ∥', [alpha, alpha, alpha])
 setv('t', 0)        # re-set time to 0 so output starts at 0
-save("m","vtk",[])
-save("m","ovf",[])
+save("mf","vtk",[])
+save("mf","ovf",[])
 
-autotabulate(["t", "<m>"], "m.txt", 1e-15)
-
+autotabulate(["t", "<mf>"], "m.txt", 1e-15)
+autotabulate(["t", "<msat0>"], "msat0.txt", 1e-15)
 
 # run with field
 
