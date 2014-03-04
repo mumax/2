@@ -46,7 +46,8 @@ lex = makearray(1, Nx, Ny, Nz)
 for k in range(Nz):
     for j in range(Ny):
         for i in range(Nx):
-            lex[0][i][j][k] = random() / (msk[0][i][j][k]**2.0)
+            rnd = random()
+            lex[0][i][j][k] = sqrt(1.0 / (msk[0][i][j][k]**2.0))
 setmask('lex', lex)
 
 # set magnetization
@@ -68,19 +69,20 @@ ref = readfile(outputdirectory()+"/../hex_ref.omf")
 new = getarray('H_ex')
 
 dirty = 0
+error = 0.0
 
 for k in range(Nz):
     for j in range(Ny):
         for i in range(Nx):
             for c in range(3):
-               diff = abs(new[c][i][j][k] - ref[c][i][j][k])
-               if diff > eps:
-                   dirty = dirty + 1
-                   print new[c][i][j][k], "!=", ref[c][i][j][k]
-                   print diff, ">", eps
+               error += abs(new[c][i][j][k] - ref[c][i][j][k])
+verror =  error / (Nx * Ny * Nz)  
 
-if dirty > 0:
+print "Absolute error per cell:", verror
+
+if verror > eps:
     print "\033[31m" + "✘ FAILED" + "\033[0m"
+    
     sys.exit(1)
 else:
     print "\033[32m" + "✔ PASSED" + "\033[0m"

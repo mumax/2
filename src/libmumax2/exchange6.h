@@ -20,11 +20,9 @@ extern "C" {
 DLLEXPORT void exchange6Async(float** hx, float** hy, float** hz, 
                               float** mx, float** my, float** mz, 
                               float** lex, 
-                              float lex2Mul, 
-                              float msat0T0Mul,
                               int N0, int N1Part, int N2, 
                               int periodic0, int periodic1, int periodic2, 
-                              float cellSizeX, float cellSizeY, float cellSizeZ, 
+                              float lex2Mulmsat0T0Mul_cellSizeX2, float lex2Mulmsat0T0Mul_cellSizeY2, float lex2Mulmsat0T0Mul_cellSizeZ2, 
                               CUstream* streams);
 
 
