@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -21,8 +21,7 @@ func init() {
 
 // Load demag field
 func LoadDemag(e *Engine) {
-	LoadMagnetization(e)
 	LoadBField(e)
-	maxwell.EnableDemag(e.Quant("m"), e.Quant("Msat"))
-	e.Depends("B", "m", "Msat")
+	maxwell.EnableDemag(e.Quant("mf"), e.Quant("Msat0T0"))
+	e.Depends("B", "mf", "Msat0T0")
 }
