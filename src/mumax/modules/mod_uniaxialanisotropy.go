@@ -2,7 +2,7 @@
 //  Copyright 2011  Arne Vansteenkiste and Ben Van de Wiele.
 //  Use of this source code is governed by the GNU General Public License version 3
 //  (as published by the Free Software Foundation) that can be found in the license.txt file.
-//  Note that you are welcome to modify this code under the condition that you do not remove any 
+//  Note that you are welcome to modify this code under the condition that you do not remove any
 //  copyright notices and prominently state that you modified it, giving a relevant date.
 
 package modules
@@ -23,7 +23,7 @@ func init() {
 
 func LoadAnisUniaxial(e *Engine) {
 	LoadHField(e)
-	LoadMagnetization(e)
+	LoadFullMagnetization(e)
 
 	Hanis := e.AddNewQuant("H_anis", VECTOR, FIELD, Unit("A/m"), "uniaxial anisotropy field")
 	ku := e.AddNewQuant("Ku", SCALAR, MASK, Unit("J/m3"), "uniaxial anisotropy constant K")
@@ -32,9 +32,9 @@ func LoadAnisUniaxial(e *Engine) {
 	hfield := e.Quant("H_eff")
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_anis")
-	e.Depends("H_anis", "Ku", "anisU", "MSat", "m")
+	e.Depends("H_anis", "Ku", "anisU", "msat0T0", "mf")
 
-	Hanis.SetUpdater(&UniaxialAnisUpdater{e.Quant("m"), Hanis, ku, e.Quant("msat"), anisU})
+	Hanis.SetUpdater(&UniaxialAnisUpdater{e.Quant("mf"), Hanis, ku, e.Quant("msat0T0"), anisU})
 }
 
 type UniaxialAnisUpdater struct {
