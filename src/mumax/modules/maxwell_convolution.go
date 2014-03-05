@@ -103,15 +103,6 @@ func (plan *MaxwellPlan) init() {
 func (plan *MaxwellPlan) EnableDemag(mf, msat0T0 *Quant) {
 	plan.init()
 	plan.loadDipoleKernel()
-
-	plan.BInMul[MX] = msat0T0.Multiplier()[0] * Mu0
-	plan.BInMul[MY] = msat0T0.Multiplier()[0] * Mu0
-	plan.BInMul[MZ] = msat0T0.Multiplier()[0] * Mu0
-
-	plan.BInput[MX] = mf.Array().Component(X)
-	plan.BInput[MY] = mf.Array().Component(Y)
-	plan.BInput[MZ] = mf.Array().Component(Z)
-	// multipliers set on the fly
 	runtime.GC()
 }
 
@@ -147,7 +138,42 @@ func (plan *MaxwellPlan) UpdateE() {
 
 // Calculate the magnetic field plan.B
 func (plan *MaxwellPlan) UpdateB() {
-	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), nil) //plan.BExt)
+	var normM *gpu.Array
+	hasMsat := 0
+
+	msat0T0 := GetEngine().Quant("Msat0T0")
+	mf := GetEngine().Quant("mf")
+
+	if !msat0T0.Array().IsNil() {
+		hasMsat = 1
+
+		sx := mf.Array().Size3D()[X]
+		sy := mf.Array().Size3D()[Y]
+		sz := mf.Array().Size3D()[Z]
+
+		normM = gpu.NewArray(3, []int{sx, sy, sz})
+
+		gpu.Mul(normM.Component(X), mf.Array().Component(X), msat0T0.Array())
+		gpu.Mul(normM.Component(Y), mf.Array().Component(Y), msat0T0.Array())
+		gpu.Mul(normM.Component(Z), mf.Array().Component(Z), msat0T0.Array())
+
+		plan.BInput[MX] = normM.Component(X)
+		plan.BInput[MY] = normM.Component(Y)
+		plan.BInput[MZ] = normM.Component(Z)
+	} else {
+		plan.BInput[MX] = mf.Array().Component(X)
+		plan.BInput[MY] = mf.Array().Component(Y)
+		plan.BInput[MZ] = mf.Array().Component(Z)
+	}
+
+	plan.BInMul[MX] = msat0T0.Multiplier()[0] * Mu0
+	plan.BInMul[MY] = msat0T0.Multiplier()[0] * Mu0
+	plan.BInMul[MZ] = msat0T0.Multiplier()[0] * Mu0
+
+	plan.update(&plan.BInput, &plan.BInMul, plan.B.Array(), nil)
+	if hasMsat == 1 {
+		normM.Free()
+	}
 }
 
 // calculate E or B
