@@ -24,9 +24,9 @@ func init() {
 
 func LoadEnergy(e *Engine) {
 	LoadHField(e)
-	LoadMagnetization(e)
+	LoadFullMagnetization(e)
 
-	M := "m"
+	M := "mf"
 
 	total := e.AddNewQuant("E", SCALAR, VALUE, Unit("J"), "Sum of all calculated energy terms (this is the total energy only if all relevant energy terms are loaded")
 	sumUpd := NewSumUpdater(total).(*SumUpdater)
@@ -72,7 +72,7 @@ func LoadEnergyTerm(e *Engine, out, in1, in2 string, weight float64, desc string
 	e.Depends(EnergyDensityName, in1, in2)
 	m := e.Quant(in1)
 	H := e.Quant(in2)
-	Energy.SetUpdater(NewEnergyUpdater(Energy, EnergyDensity, m, H, e.Quant("msat"), weight))
+	Energy.SetUpdater(NewEnergyUpdater(Energy, EnergyDensity, m, H, e.Quant("msat0T0"), weight))
 	return Energy
 }
 
