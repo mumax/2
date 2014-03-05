@@ -31,7 +31,6 @@ Aex = 1.3e-11
 Msat = 800e3
 lex0 = sqrt(2*Aex/(mu0*Msat*Msat))
 setv('lex', lex0)
-setv('Msat', Msat)
 setv('Msat0T0', Msat)
 
 # set parameters
@@ -40,7 +39,7 @@ for k in range(Nz):
     for j in range(Ny):
         for i in range(Nx):
             msk[0][i][j][k] = random() 
-setmask('Msat', msk)
+setmask('Msat0T0', msk)
 
 lex = makearray(1, Nx, Ny, Nz)
 for k in range(Nz):
@@ -59,9 +58,9 @@ for k in range(Nz):
             my = float(random())
             mz = float(random())
             l = sqrt(mx**2.0 + my**2.0 + mz**2.0)
-            m[0][i][j][k] = mx / l * msk[0][i][j][k]
-            m[1][i][j][k] = my / l * msk[0][i][j][k]
-            m[2][i][j][k] = mz / l * msk[0][i][j][k]
+            m[0][i][j][k] = mx / l
+            m[1][i][j][k] = my / l
+            m[2][i][j][k] = mz / l
 setarray('mf', m)
 
 saveas('H_ex', "omf", ["Text"], "hex_new.omf")
