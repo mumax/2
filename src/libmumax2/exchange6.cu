@@ -11,6 +11,7 @@ extern "C" {
 // full 3D blocks
 __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, float* __restrict__  hz, 
                               float* __restrict__  mx, float* __restrict__  my, float* __restrict__  mz,
+                              float* __restrict__  msat0T0Msk,
                               float* __restrict__  lexMsk,
                               const int N0, const int N1, const int N2,
                               const int wrap0, const int wrap1, const int wrap2,
@@ -29,7 +30,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         float lex2, pre1, pre2;
 
         float3 m0 = make_float3(mx[I], my[I], mz[I]);
-        float ms0 = len(m0);
+        float ms0 = len(m0) * getMaskUnity(msat0T0Msk, I);
         float3 s0 = normalizef(m0);
 
         float Hx, Hy, Hz;
@@ -46,7 +47,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = idx * N1 * N2 + j * N2 + k;
     
         m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms1 = len(m1);
+        ms1 = len(m1) * getMaskUnity(msat0T0Msk, linAddr);
         s1 = normalizef(m1);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -58,7 +59,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = idx * N1 * N2 + j * N2 + k;
 
         m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms2 = len(m2);
+        ms2 = len(m2) * getMaskUnity(msat0T0Msk, linAddr);;
         s2 = normalizef(m2);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -75,7 +76,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + j * N2 + idx;
     
         m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms1 = len(m1);
+        ms1 = len(m1) * getMaskUnity(msat0T0Msk, linAddr);
         s1 = normalizef(m1);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -87,7 +88,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + j * N2 + idx;
 
         m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms2 = len(m2);
+        ms2 = len(m2) * getMaskUnity(msat0T0Msk, linAddr);
         s2 = normalizef(m2);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -104,7 +105,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + idx * N2 + k;
 
         m1 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms1 = len(m1);
+        ms1 = len(m1) * getMaskUnity(msat0T0Msk, linAddr);
         s1 = normalizef(m1);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -116,7 +117,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
         linAddr = i * N1 * N2 + idx * N2 + k;
 
         m2 = make_float3(mx[linAddr], my[linAddr], mz[linAddr]);
-        ms2 = len(m2);
+        ms2 = len(m2) * getMaskUnity(msat0T0Msk, linAddr);
         s2 = normalizef(m2);
 
         lex2 = getMaskUnity(lexMsk, linAddr) * getMaskUnity(lexMsk, linAddr);
@@ -138,6 +139,7 @@ __global__ void exchange6Kern(float* __restrict__ hx, float* __restrict__  hy, f
 
 __export__ void exchange6Async(float** hx, float** hy, float** hz, 
                               float** mx, float** my, float** mz, 
+                              float** msat0T0, 
                               float** lex, 
                               int N0, int N1Part, int N2, 
                               int periodic0, int periodic1, int periodic2, 
@@ -152,6 +154,7 @@ __export__ void exchange6Async(float** hx, float** hy, float** hz,
     gpu_safe(cudaSetDevice(deviceId(dev)));
     exchange6Kern <<< gridsize, blocksize, 0, cudaStream_t(streams[dev])>>>(hx[dev], hy[dev], hz[dev],
                                                                             mx[dev], my[dev], mz[dev], 
+                                                                            msat0T0[dev], 
                                                                             lex[dev], 
                                                                             N0, N1Part, N2, 
                                                                             periodic0, periodic1, periodic2, 

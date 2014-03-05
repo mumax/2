@@ -30,11 +30,11 @@ func LoadExch6(e *Engine) {
 	sum := hfield.Updater().(*SumUpdater)
 	sum.AddParent("H_ex")
 	e.Depends("H_ex", "lex", "Msat0T0", "mf")
-	Hex.SetUpdater(&exch6Updater{mf: e.Quant("mf"), lex: lex, Hex: Hex, Msat: e.Quant("Msat0T0")})
+	Hex.SetUpdater(&exch6Updater{mf: e.Quant("mf"), lex: lex, Hex: Hex, Msat0T0: e.Quant("Msat0T0")})
 }
 
 type exch6Updater struct {
-	mf, lex, Hex, Msat *Quant
+	mf, lex, Hex, Msat0T0 *Quant
 }
 
 func (u *exch6Updater) Update() {
@@ -42,10 +42,10 @@ func (u *exch6Updater) Update() {
 	mf := u.mf
 	lex := u.lex
 	Hex := u.Hex
-	Msat := u.Msat
+	Msat0T0 := u.Msat0T0
 
 	lexMul2 := lex.Multiplier()[0] * lex.Multiplier()[0]
-	lexMul2Msat0T0Mul := lexMul2 * Msat.Multiplier()[0]
+	lexMul2Msat0T0Mul := lexMul2 * Msat0T0.Multiplier()[0]
 
 	lexMul2Msat0T0Mul_cellSizeX2 := lexMul2Msat0T0Mul / (e.CellSize()[X] * e.CellSize()[X])
 	lexMul2Msat0T0Mul_cellSizeY2 := lexMul2Msat0T0Mul / (e.CellSize()[Y] * e.CellSize()[Y])
@@ -57,6 +57,6 @@ func (u *exch6Updater) Update() {
 	lexMul2Msat0T0Mul_cellSize2[Z] = lexMul2Msat0T0Mul_cellSizeZ2
 
 	stream := u.Hex.Array().Stream
-	gpu.Exchange6Async(Hex.Array(), mf.Array(), lex.Array(), lexMul2Msat0T0Mul_cellSize2, e.Periodic(), stream)
+	gpu.Exchange6Async(Hex.Array(), mf.Array(), Msat0T0.Array(), lex.Array(), lexMul2Msat0T0Mul_cellSize2, e.Periodic(), stream)
 	stream.Sync()
 }
