@@ -330,12 +330,11 @@ func WeightedAverage(dst, x0, x1, w0, w1, R *Array, w0Mul, w1Mul, RMul float64) 
 }
 
 // Normalize
-func Normalize(m, normMap *Array) {
+func Normalize(m *Array) {
 	C.normalizeAsync(
 		(**C.float)(unsafe.Pointer(&(m.Comp[X].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Y].pointer[0]))),
 		(**C.float)(unsafe.Pointer(&(m.Comp[Z].pointer[0]))),
-		(**C.float)(unsafe.Pointer(&(normMap.pointer[0]))),
 		(*C.CUstream)(unsafe.Pointer(&(m.Stream[0]))),
 		C.int(m.partLen3D))
 	m.Stream.Sync()

@@ -19,7 +19,8 @@ extern "C" {
 /// Normalizes a vector array.
 /// @param mx, my, mz: Components of vector array to normalize
 /// @param norm_map: desired norm, may contain NULL pointers
-DLLEXPORT void normalizeAsync(float** mx, float** my, float** mz, float** norm_map, CUstream* stream, int Npart);
+DLLEXPORT void normalizeAsync(float** mx, float** my, float** mz, 
+							  CUstream* stream, int Npart);
 
 
 #ifdef __cplusplus
